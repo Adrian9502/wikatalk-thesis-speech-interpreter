@@ -1,145 +1,111 @@
-import { SafeAreaView } from "react-native";
+import {
+  SafeAreaView,
+  View,
+  Text,
+  Image,
+  Dimensions,
+  StyleSheet,
+  TextInput,
+} from "react-native";
 import React, { useState } from "react";
-import { View, StyleSheet } from "react-native";
-import { Button, TextInput, Card, Text } from "react-native-paper";
-import MaterialCommunityIcons from "react-native-vector-icons/MaterialCommunityIcons";
+import { StatusBar } from "expo-status-bar";
+import FontAwesome5 from "react-native-vector-icons/FontAwesome5";
+import MaterialIcons from "react-native-vector-icons/MaterialIcons";
+
 const Translate = () => {
   const [tagalogText, setTagalogText] = useState("");
   const [bisayaText, setBisayaText] = useState("");
 
   return (
-    <SafeAreaView style={styles.container}>
-      {/* Header Section */}
-      <Text style={styles.header}>WikaTalk</Text>
-      <Text style={styles.subHeader}>WikaTranslate</Text>
+    <SafeAreaView className="flex-1 bg-emerald-500">
+      <StatusBar style="dark" />
 
-      {/* Language Selection and TextInput Section */}
-      <Card style={styles.card}>
-        <View style={styles.inputContainer}>
-          {/* Tagalog Input */}
+      {/* Logo Section */}
+      <View style={styles.curvedTopContainer}>
+        <Image
+          className="w-full"
+          source={require("../../assets/images/WikaTalk-small.png")}
+          resizeMode="contain"
+        />
+        <View className="w-full items-center justify-center">
+          <Text className="font-pbold z-50 text-[2rem] -mb-6 text-emerald-500 text-center">
+            WikaTalk
+          </Text>
+        </View>
+      </View>
+      {/* WikaTranslate text */}
+      <Text className="text-center font-psemibold text-[2rem] text-white">
+        WikaTranslate
+      </Text>
+      {/* Translation container */}
+      <View className="flex-1 relative mx-4 my-4 mb-10 gap-4">
+        {/* Top section */}
+        <View className="flex-1 items-start justify-center bg-white p-3 rounded-xl">
+          {/* Change this to dropdown */}
+          <Text className="font-pmedium mb-2 text-xl bg-emerald-500 px-4 py-1 rounded-lg text-white">
+            Tagalog
+          </Text>
           <TextInput
-            label="Tagalog"
+            placeholder="Type here..."
             value={tagalogText}
             onChangeText={setTagalogText}
-            style={styles.input}
+            multiline
+            textAlignVertical="top"
+            className="flex-1  text-emerald-500 font-pregular text-lg w-full"
           />
-          <Button
-            icon="trash-can"
-            mode="contained"
-            onPress={() => setTagalogText("")}
-            style={styles.trashButton}
-          />
+          {/* make these work */}
+          <View className="flex-row gap-4">
+            <MaterialIcons name="delete" size={28} color="#10B981" />
+            <FontAwesome5 name="volume-up" size={25} color="#10B981" />
+          </View>
+        </View>
+        {/* Mic */}
+        <View className="absolute left-1/2 top-1/2 -translate-x-8 -translate-y-8 w-16 h-16 rounded-full border-4 border-emerald-500 bg-white items-center justify-center z-50">
+          <View className="p-3 border-4 bg-emerald-500 border-white rounded-full">
+            <Image
+              source={require("@/assets/images/mic-white.png")}
+              className="w-12 h-12"
+            />
+          </View>
         </View>
 
-        {/* Translate Button */}
-        <MaterialCommunityIcons
-          name="microphone"
-          size={40}
-          color="white"
-          style={styles.icon}
-        />
-
-        {/* Bisaya Input */}
-        <View style={styles.inputContainer}>
+        {/* Bottom section */}
+        <View className="flex-1 items-end justify-center bg-white p-3 rounded-xl">
+          {/* change this to dropdown */}
+          <Text className="font-pmedium text-xl mb-2 bg-emerald-500 px-4 py-1 rounded-lg text-white">
+            Bisakol
+          </Text>
           <TextInput
-            label="Bisaya"
-            value={bisayaText}
-            onChangeText={setBisayaText}
-            style={styles.input}
+            placeholder="Type here..."
+            value={tagalogText}
+            onChangeText={setTagalogText}
+            multiline
+            textAlignVertical="top"
+            className="flex-1  text-emerald-500 font-pregular text-lg w-full"
           />
-          <Button
-            icon="language-c"
-            mode="contained"
-            onPress={() => setBisayaText("")}
-            style={styles.languageButton}
-          />
+          {/* make these work */}
+          <View className="flex-row w-full gap-4">
+            <FontAwesome5 name="copy" size={28} color="#10B981" />
+            <FontAwesome5 name="volume-up" size={25} color="#10B981" />
+          </View>
         </View>
-      </Card>
-
-      {/* Footer Section */}
-      <View style={styles.footer}>
-        <MaterialCommunityIcons
-          name="volume-high"
-          size={30}
-          color="white"
-          style={styles.footerIcon}
-        />
-        <Button
-          icon="file-document"
-          mode="contained"
-          onPress={() => {}}
-          style={styles.footerButton}
-        >
-          Save
-        </Button>
       </View>
     </SafeAreaView>
   );
 };
 
-export default Translate;
+// We keep this style since borderBottomRadius with percentage isn't supported in Tailwind
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "#00BFAE",
-    justifyContent: "flex-start",
-    paddingTop: 40,
-    paddingHorizontal: 16,
-  },
-  header: {
-    fontSize: 24,
-    color: "white",
-    fontWeight: "bold",
-    textAlign: "center",
-  },
-  subHeader: {
-    fontSize: 18,
-    color: "white",
-    textAlign: "center",
-    marginBottom: 20,
-  },
-  card: {
-    backgroundColor: "white",
-    marginVertical: 20,
-    paddingVertical: 16,
-    paddingHorizontal: 12,
-    borderRadius: 12,
-  },
-  inputContainer: {
-    flexDirection: "row",
+  curvedTopContainer: {
+    width: Dimensions.get("window").width,
+    height: 180,
+    flexDirection: "column",
+    justifyContent: "center",
     alignItems: "center",
-    justifyContent: "space-between",
-  },
-  input: {
-    width: "70%",
-    backgroundColor: "transparent",
-  },
-  trashButton: {
-    backgroundColor: "#FF2D00",
-  },
-  languageButton: {
-    backgroundColor: "#4CAF50",
-  },
-  icon: {
-    alignSelf: "center",
-    marginVertical: 20,
-    backgroundColor: "#1E5E65",
-    borderRadius: 50,
-    padding: 10,
-  },
-  footer: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    marginTop: 40,
-  },
-  footerIcon: {
-    backgroundColor: "#1E5E65",
-    borderRadius: 50,
-    padding: 10,
-  },
-  footerButton: {
-    backgroundColor: "#FFB800",
-    borderRadius: 10,
+    backgroundColor: "#fff",
+    borderBottomLeftRadius: "100%",
+    borderBottomRightRadius: "100%",
   },
 });
+
+export default Translate;

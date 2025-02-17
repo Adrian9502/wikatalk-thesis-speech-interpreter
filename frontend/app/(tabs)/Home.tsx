@@ -18,7 +18,7 @@ const Home = () => {
               className="w-12 h-12 rotate-180"
             />
           </View>
-          <Text className="text-emerald-500 rotate-180 text-2xl p-5">
+          <Text className="text-emerald-500 font-pregular rotate-180 text-2xl p-5">
             Lorem ipsum dolor sit amet consectetur, adipisicing elit. Porro
             placeat id asperiores excepturi sapiente quod nihil facilis tenetur
             odio nobis, aut voluptate, totam reiciendis repellat ad ipsam
@@ -42,7 +42,7 @@ const Home = () => {
         </View>
         {/* bottom section */}
         <View className="w-full relative h-1/2 bg-emerald-500 pb-6 flex items-center justify-start p-3">
-          <Text className="text-white p-5 lin text-2xl">
+          <Text className="text-white p-5 text-2xl font-pregular">
             Lorem ipsum dolor sit amet consectetur adipisicing elit. Assumenda
             repellat dolor nisi ad libero, dignissimos error amet est ut
             obcaecati doloribus asperiores sit, facere reiciendis nemo
