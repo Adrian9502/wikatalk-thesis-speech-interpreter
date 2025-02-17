@@ -3,7 +3,7 @@ import { useFonts } from "expo-font";
 import "react-native-url-polyfill/auto";
 import { SplashScreen, Stack } from "expo-router";
 import "../global.css";
-// import GlobalProvider from "../context/GlobalProvider";
+import { ValidationProvider } from "@/context/ValidationContext";
 
 // Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync();
@@ -38,17 +38,23 @@ const RootLayout = () => {
   }
 
   return (
-    // <GlobalProvider>
-    <Stack>
-      <Stack.Screen
-        name="index"
-        options={{
-          headerShown: false,
-        }}
-      />
-      <Stack.Screen name="(auth)" options={{ headerShown: false }} />
-    </Stack>
-    //  </GlobalProvider>
+    <ValidationProvider>
+      <Stack>
+        <Stack.Screen name="index" options={{ headerShown: false }} />
+        <Stack.Screen
+          name="(auth)/SignIn"
+          options={{
+            headerShown: false,
+          }}
+        />
+        <Stack.Screen
+          name="(auth)/SignUp"
+          options={{
+            headerShown: false,
+          }}
+        />
+      </Stack>
+    </ValidationProvider>
   );
 };
 

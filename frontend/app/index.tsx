@@ -1,4 +1,4 @@
-import { Text, View, Pressable, Image, TouchableOpacity } from "react-native";
+import { Text, View, Image, TouchableOpacity } from "react-native";
 import { StatusBar } from "expo-status-bar";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { router } from "expo-router";
@@ -6,7 +6,7 @@ export default function Index() {
   return (
     <SafeAreaView className="bg-emerald-500 h-screen relative flex items-center justify-around flex-1">
       <StatusBar style="dark" />
-      <View className="absolute -top-[50vh] w-[140vw] rounded-full h-[100vh] bg-white"></View>
+      <View className="absolute -top-[50vh] w-[140vw] rounded-full h-[100vh] bg-white" />
       <View className=" w-full flex items-center justify-center">
         <Image
           className="w-full"
