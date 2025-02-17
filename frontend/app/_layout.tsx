@@ -4,6 +4,7 @@ import "react-native-url-polyfill/auto";
 import { SplashScreen, Stack } from "expo-router";
 import "../global.css";
 import { ValidationProvider } from "@/context/ValidationContext";
+import { PaperProvider } from "react-native-paper";
 
 // Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync();
@@ -38,25 +39,27 @@ const RootLayout = () => {
   }
 
   return (
-    <ValidationProvider>
-      <Stack>
-        <Stack.Screen name="index" options={{ headerShown: false }} />
-        <Stack.Screen
-          name="(auth)/SignIn"
-          options={{
-            headerShown: false,
-          }}
-        />
-        <Stack.Screen
-          name="(auth)/SignUp"
-          options={{
-            headerShown: false,
-          }}
-        />
+    <PaperProvider>
+      <ValidationProvider>
+        <Stack>
+          <Stack.Screen name="index" options={{ headerShown: false }} />
+          <Stack.Screen
+            name="(auth)/SignIn"
+            options={{
+              headerShown: false,
+            }}
+          />
+          <Stack.Screen
+            name="(auth)/SignUp"
+            options={{
+              headerShown: false,
+            }}
+          />
 
-        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-      </Stack>
-    </ValidationProvider>
+          <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+        </Stack>
+      </ValidationProvider>
+    </PaperProvider>
   );
 };
 
