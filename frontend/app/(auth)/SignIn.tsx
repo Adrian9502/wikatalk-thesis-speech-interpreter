@@ -42,7 +42,14 @@ const SignIn = () => {
   const handleLogin = (data: LoginFormData) => {
     console.log("Login data:", data);
     // Here you would typically make an API call to validate the credentials
-    Alert.alert("Success", `Welcome back!`);
+    Alert.alert("Success", "Welcome back!", [
+      {
+        text: "OK",
+        onPress: () => {
+          router.replace("/Home");
+        },
+      },
+    ]);
   };
 
   return (
