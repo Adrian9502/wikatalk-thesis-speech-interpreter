@@ -1,38 +1,15 @@
-import React, { useState } from "react";
+import React from "react";
 import { StatusBar } from "expo-status-bar";
-import {
-  StyleSheet,
-  Text,
-  View,
-  SafeAreaView,
-  Image,
-  Dimensions,
-  ScrollView,
-} from "react-native";
+import { Text, View, SafeAreaView, ScrollView } from "react-native";
 import FontAwesome5 from "react-native-vector-icons/FontAwesome5";
+import Logo from "@/components/Logo";
 const Recent = () => {
   return (
     <SafeAreaView className="flex-1 bg-emerald-500">
       <StatusBar style="dark" />
-      {/* Logo Section */}
-      <View style={styles.curvedTopContainer}>
-        <Image
-          className="w-full"
-          source={require("../../assets/images/WikaTalk-small.png")}
-          resizeMode="contain"
-        />
-        <View className="w-full items-center justify-center">
-          <Text className="font-pbold z-50 text-[2rem] -mb-6 text-emerald-500 text-center">
-            WikaTalk
-          </Text>
-        </View>
-      </View>
-      {/* WikaBalikan text */}
-      <Text className="text-center font-psemibold text-[2rem] text-white">
-        WikaBalikan
-      </Text>
+      {/* Logo */}
+      <Logo title="WikaBalikan" />
       {/* History container */}
-
       <View className="mx-4 p-1 gap-1">
         {/* Date of translated text */}
         <View className=" items-end  justify-center">
@@ -84,16 +61,3 @@ const Recent = () => {
 };
 
 export default Recent;
-
-const styles = StyleSheet.create({
-  curvedTopContainer: {
-    width: Dimensions.get("window").width,
-    height: 150,
-    flexDirection: "column",
-    justifyContent: "center",
-    alignItems: "center",
-    backgroundColor: "#fff",
-    borderBottomLeftRadius: "100%",
-    borderBottomRightRadius: "100%",
-  },
-});

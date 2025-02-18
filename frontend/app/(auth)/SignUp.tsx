@@ -27,6 +27,7 @@ const SignUp = () => {
   const [formData, setFormData] = useState({
     fullName: "",
     email: "",
+    username: "",
     password: "",
     confirmPassword: "",
   });
@@ -47,7 +48,7 @@ const SignUp = () => {
   };
 
   const handleSignUp = (data: any) => {
-    const { fullName, email, password, confirmPassword } = data;
+    const { fullName, username, email, password, confirmPassword } = data;
 
     if (password !== confirmPassword) {
       Alert.alert("Error", "Passwords do not match");
@@ -101,7 +102,16 @@ const SignUp = () => {
                 IconComponent={User}
                 control={control}
                 name="fullName"
-                error={errors.fullName?.message}
+                error={errors.fullName}
+              />
+              <FormInput
+                placeholder="Username"
+                value={formData.username}
+                onChangeText={(text) => handleChange("username", text)}
+                IconComponent={User}
+                control={control}
+                name="username"
+                error={errors.username}
               />
               <FormInput
                 placeholder="Email"
@@ -111,7 +121,7 @@ const SignUp = () => {
                 IconComponent={Mail}
                 control={control}
                 name="email"
-                error={errors.email?.message}
+                error={errors.email}
               />
               <FormInput
                 placeholder="Password"
@@ -121,7 +131,7 @@ const SignUp = () => {
                 IconComponent={Lock}
                 control={control}
                 name="password"
-                error={errors.password?.message}
+                error={errors.password}
               />
               <FormInput
                 placeholder="Confirm Password"
@@ -131,7 +141,7 @@ const SignUp = () => {
                 IconComponent={Lock}
                 control={control}
                 name="confirmPassword"
-                error={errors.confirmPassword?.message}
+                error={errors.confirmPassword}
               />
 
               <TouchableOpacity
@@ -182,7 +192,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     backgroundColor: "#fff",
-    borderBottomLeftRadius: "100%", // Curved top left corner
-    borderBottomRightRadius: "100%", // Curved top right corner
+    borderBottomLeftRadius: "100%",
+    borderBottomRightRadius: "100%",
   },
 });

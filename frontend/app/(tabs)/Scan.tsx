@@ -14,6 +14,7 @@ import {
 } from "react-native";
 import DropDownPicker from "react-native-dropdown-picker";
 import DIALECTS from "@/constant/dialects";
+import Logo from "@/components/Logo";
 const Scan = () => {
   const [permission, requestPermission] = useCameraPermissions();
   const [selectedLanguage, setSelectedLanguage] = useState("Tagalog");
@@ -30,24 +31,8 @@ const Scan = () => {
     return (
       <SafeAreaView className="flex-1 bg-emerald-500">
         <StatusBar style="dark" />
-        {/* Logo Section */}
-        <View style={styles.curvedTopContainer}>
-          <Image
-            className="w-full"
-            source={require("../../assets/images/WikaTalk-small.png")}
-            resizeMode="contain"
-          />
-          <View className="w-full items-center justify-center">
-            <Text className="font-pbold z-50 text-[2rem] -mb-6 text-emerald-500 text-center">
-              WikaTalk
-            </Text>
-          </View>
-        </View>
+        <Logo title="WikaScan" />
         <View className="items-center justify-center h-1/2">
-          {/* WikaScan text */}
-          <Text className="text-center font-psemibold text-[2rem] text-white">
-            WikaScan
-          </Text>
           <Text className="text-center font-pmedium text-white pb-2">
             We need your permission to show the camera
           </Text>
@@ -68,23 +53,7 @@ const Scan = () => {
   return (
     <SafeAreaView className="flex-1 bg-emerald-500">
       <StatusBar style="dark" />
-      {/* Logo Section */}
-      <View style={styles.curvedTopContainer}>
-        <Image
-          className="w-full"
-          source={require("../../assets/images/WikaTalk-small.png")}
-          resizeMode="contain"
-        />
-        <View className="w-full items-center justify-center">
-          <Text className="font-pbold z-50 text-[2rem] -mb-6 text-emerald-500 text-center">
-            WikaTalk
-          </Text>
-        </View>
-      </View>
-      {/* WikaScan text */}
-      <Text className="text-center font-psemibold text-[2rem] text-white">
-        WikaScan
-      </Text>
+      <Logo title="WikaScan" />
       {/* Camera container */}
       <View className="h-[40%] mx-4 rounded-2xl overflow-hidden border-2 border-white">
         <CameraView style={styles.camera} facing="back"></CameraView>
@@ -155,16 +124,6 @@ const Scan = () => {
 export default Scan;
 
 const styles = StyleSheet.create({
-  curvedTopContainer: {
-    width: Dimensions.get("window").width,
-    height: 150,
-    flexDirection: "column",
-    justifyContent: "center",
-    alignItems: "center",
-    backgroundColor: "#fff",
-    borderBottomLeftRadius: "100%",
-    borderBottomRightRadius: "100%",
-  },
   camera: {
     flex: 1,
   },

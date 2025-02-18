@@ -96,7 +96,7 @@ const SignIn = () => {
                 IconComponent={User}
                 control={control}
                 name="usernameOrEmail"
-                error={errors.usernameOrEmail?.message}
+                error={errors.usernameOrEmail}
               />
 
               <FormInput
@@ -109,7 +109,7 @@ const SignIn = () => {
                 IconComponent={Lock}
                 control={control}
                 name="password"
-                error={errors.password?.message}
+                error={errors.password}
               />
 
               <TouchableOpacity
@@ -160,7 +160,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     backgroundColor: "#fff",
-    borderBottomLeftRadius: "100%", // Curved top left corner
-    borderBottomRightRadius: "100%", // Curved top right corner
+    borderBottomLeftRadius: "100%",
+    borderBottomRightRadius: "100%",
   },
 });

@@ -4,14 +4,14 @@ import * as yup from "yup";
 // Define form data types
 export interface SignUpFormData {
   fullName: string;
-  userName: string;
+  username: string;
   email: string;
   password: string;
   confirmPassword: string;
 }
 
 export interface LoginFormData {
-  usernameOrEmail: string; // Changed to match the form field
+  usernameOrEmail: string;
   password: string;
 }
 
@@ -40,7 +40,7 @@ const signUpSchema = yup.object().shape({
     .min(2, "Name must be at least 2 characters")
     .matches(/^[a-zA-Z\s]*$/, "Name can only contain letters and spaces"),
 
-  userName: yup
+  username: yup
     .string()
     .required("Username is required")
     .min(3, "Username must be at least 3 characters")

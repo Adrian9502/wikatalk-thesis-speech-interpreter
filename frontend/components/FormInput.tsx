@@ -1,7 +1,7 @@
 import { TextInput, View, TouchableOpacity, Text } from "react-native";
 import { LucideIcon, Eye, EyeOff } from "lucide-react-native";
 import { useState } from "react";
-import { Control, Controller } from "react-hook-form";
+import { Control, Controller, FieldError } from "react-hook-form";
 
 interface InputFieldProps {
   placeholder: string;
@@ -12,7 +12,7 @@ interface InputFieldProps {
   IconComponent?: LucideIcon;
   control: Control<any>;
   name: string;
-  error?: string;
+  error?: FieldError;
 }
 
 const FormInput = ({

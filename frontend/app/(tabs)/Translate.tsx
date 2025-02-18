@@ -11,47 +11,80 @@ import React, { useState } from "react";
 import { StatusBar } from "expo-status-bar";
 import FontAwesome5 from "react-native-vector-icons/FontAwesome5";
 import MaterialIcons from "react-native-vector-icons/MaterialIcons";
-
+import DropDownPicker from "react-native-dropdown-picker";
+import DIALECTS from "@/constant/dialects";
+import Logo from "@/components/Logo";
 const Translate = () => {
   const [tagalogText, setTagalogText] = useState("");
   const [bisayaText, setBisayaText] = useState("");
+  const [selectedLanguage, setSelectedLanguage] = useState("Tagalog");
+  const [translatedText, setTranslatedText] = useState("");
+  const [open, setOpen] = useState<boolean>(false);
 
   return (
     <SafeAreaView className="flex-1 bg-emerald-500">
       <StatusBar style="dark" />
 
-      {/* Logo Section */}
-      <View style={styles.curvedTopContainer}>
-        <Image
-          className="w-full"
-          source={require("../../assets/images/WikaTalk-small.png")}
-          resizeMode="contain"
-        />
-        <View className="w-full items-center justify-center">
-          <Text className="font-pbold z-50 text-[2rem] -mb-6 text-emerald-500 text-center">
-            WikaTalk
-          </Text>
-        </View>
-      </View>
-      {/* WikaTranslate text */}
-      <Text className="text-center font-psemibold text-[2rem] text-white">
-        WikaTranslate
-      </Text>
+      {/* Logo */}
+      <Logo title="WikaTranslate" />
+
       {/* Translation container */}
       <View className="flex-1 relative mx-4 my-4 mb-10 gap-4">
         {/* Top section */}
         <View className="flex-1 items-start justify-center bg-white p-3 rounded-xl">
           {/* Change this to dropdown */}
-          <Text className="font-pmedium mb-2 text-xl bg-emerald-500 px-4 py-1 rounded-lg text-white">
-            Tagalog
-          </Text>
+          <View>
+            <DropDownPicker
+              open={open}
+              value={selectedLanguage}
+              items={DIALECTS}
+              setOpen={setOpen}
+              setValue={setSelectedLanguage}
+              placeholder="Select a language"
+              style={{
+                width: 150,
+                backgroundColor: "#10b981",
+                borderWidth: 2,
+                borderColor: "#10b981",
+              }}
+              dropDownContainerStyle={{
+                backgroundColor: "#ffffff",
+                width: 150,
+                borderColor: "#10b981",
+              }}
+              labelStyle={{
+                fontSize: 16,
+                color: "#fff",
+                fontWeight: "600",
+              }}
+              textStyle={{
+                fontSize: 16,
+                color: "#10b981",
+              }}
+              listItemContainerStyle={{
+                height: 35,
+                justifyContent: "center",
+                paddingVertical: 0,
+              }}
+              listItemLabelStyle={{
+                fontSize: 16,
+                color: "#10b981",
+              }}
+              itemSeparator={true} // Optional: shows separators between items
+              itemSeparatorStyle={{
+                backgroundColor: "#10b981", // Optional separator color
+                height: 1,
+              }}
+              dropDownDirection="BOTTOM" // Optional: makes dropdown open downwards
+            />
+          </View>
           <TextInput
             placeholder="Type here..."
             value={tagalogText}
             onChangeText={setTagalogText}
             multiline
             textAlignVertical="top"
-            className="flex-1  text-emerald-500 font-pregular text-lg w-full"
+            className="flex-1 text-emerald-500 font-pregular text-lg w-full"
           />
           {/* make these work */}
           <View className="flex-row gap-4">
@@ -72,9 +105,51 @@ const Translate = () => {
         {/* Bottom section */}
         <View className="flex-1 items-end justify-center bg-white p-3 rounded-xl">
           {/* change this to dropdown */}
-          <Text className="font-pmedium text-xl mb-2 bg-emerald-500 px-4 py-1 rounded-lg text-white">
-            Bisakol
-          </Text>
+          <View>
+            <DropDownPicker
+              open={open}
+              value={selectedLanguage}
+              items={DIALECTS}
+              setOpen={setOpen}
+              setValue={setSelectedLanguage}
+              placeholder="Select a language"
+              style={{
+                width: 150,
+                backgroundColor: "#10b981",
+                borderWidth: 2,
+                borderColor: "#fff",
+              }}
+              dropDownContainerStyle={{
+                backgroundColor: "#ffffff",
+                width: 150,
+                borderColor: "#10b981",
+              }}
+              labelStyle={{
+                fontSize: 16,
+                color: "#fff",
+                fontWeight: "600",
+              }}
+              textStyle={{
+                fontSize: 16,
+                color: "#10b981",
+              }}
+              listItemContainerStyle={{
+                height: 35,
+                justifyContent: "center",
+                paddingVertical: 0,
+              }}
+              listItemLabelStyle={{
+                fontSize: 16,
+                color: "#10b981",
+              }}
+              itemSeparator={true} // Optional: shows separators between items
+              itemSeparatorStyle={{
+                backgroundColor: "#10b981", // Optional separator color
+                height: 1,
+              }}
+              dropDownDirection="BOTTOM" // Optional: makes dropdown open downwards
+            />
+          </View>
           <TextInput
             placeholder="Type here..."
             value={tagalogText}
@@ -94,7 +169,6 @@ const Translate = () => {
   );
 };
 
-// We keep this style since borderBottomRadius with percentage isn't supported in Tailwind
 const styles = StyleSheet.create({
   curvedTopContainer: {
     width: Dimensions.get("window").width,
