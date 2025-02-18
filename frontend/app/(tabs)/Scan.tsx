@@ -5,11 +5,12 @@ import {
   Button,
   StyleSheet,
   Text,
-  TouchableOpacity,
+  Pressable,
   View,
   SafeAreaView,
   Image,
   Dimensions,
+  TouchableOpacity,
 } from "react-native";
 import DropDownPicker from "react-native-dropdown-picker";
 import DIALECTS from "@/constant/dialects";
@@ -27,12 +28,40 @@ const Scan = () => {
   if (!permission.granted) {
     // Camera permissions are not granted yet.
     return (
-      <View className="flex-1 bg-emerald-500">
-        <Text className="text-center pb-2">
-          We need your permission to show the camera
-        </Text>
-        <Button onPress={requestPermission} title="grant permission" />
-      </View>
+      <SafeAreaView className="flex-1 bg-emerald-500">
+        <StatusBar style="dark" />
+        {/* Logo Section */}
+        <View style={styles.curvedTopContainer}>
+          <Image
+            className="w-full"
+            source={require("../../assets/images/WikaTalk-small.png")}
+            resizeMode="contain"
+          />
+          <View className="w-full items-center justify-center">
+            <Text className="font-pbold z-50 text-[2rem] -mb-6 text-emerald-500 text-center">
+              WikaTalk
+            </Text>
+          </View>
+        </View>
+        <View className="items-center justify-center h-1/2">
+          {/* WikaScan text */}
+          <Text className="text-center font-psemibold text-[2rem] text-white">
+            WikaScan
+          </Text>
+          <Text className="text-center font-pmedium text-white pb-2">
+            We need your permission to show the camera
+          </Text>
+          <TouchableOpacity
+            activeOpacity={0.9}
+            onPress={requestPermission}
+            className="p-3 bg-white rounded-xl"
+          >
+            <Text className="text-emerald-500 font-psemibold">
+              Grant Permission
+            </Text>
+          </TouchableOpacity>
+        </View>
+      </SafeAreaView>
     );
   }
 
