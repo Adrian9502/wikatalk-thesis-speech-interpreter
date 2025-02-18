@@ -40,6 +40,14 @@
           "resizeMode": "contain",
           "backgroundColor": "#ffffff"
         }
+      ],
+      [
+        "expo-camera",
+        {
+          "cameraPermission": "Allow WikaTalk to access your camera",
+          "microphonePermission": "Allow WikaTalk to access your microphone",
+          "recordAudioAndroid": true
+        }
       ]
     ],
     "experiments": {
