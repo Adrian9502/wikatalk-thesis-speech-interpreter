@@ -9,7 +9,11 @@
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "infoPlist": {
+        "NSSpeechRecognitionUsageDescription": "This app needs access to speech recognition to function properly",
+        "NSSpeechSynthesisUsageDescription": "This app needs access to speech synthesis to read text aloud"
+      }
     },
     "android": {
       "adaptiveIcon": {
@@ -47,6 +51,12 @@
           "cameraPermission": "Allow WikaTalk to access your camera",
           "microphonePermission": "Allow WikaTalk to access your microphone",
           "recordAudioAndroid": true
+        }
+      ],
+      [
+        "expo-av",
+        {
+          "microphonePermission": "This app needs access to the microphone to function properly"
         }
       ]
     ],
