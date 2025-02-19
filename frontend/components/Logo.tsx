@@ -2,7 +2,7 @@ import { StyleSheet, Text, View, Image, Dimensions } from "react-native";
 import React from "react";
 
 interface LogoProps {
-  title: string;
+  title?: string;
 }
 const Logo: React.FC<LogoProps> = ({ title }) => {
   return (
@@ -23,13 +23,14 @@ const Logo: React.FC<LogoProps> = ({ title }) => {
           </Text>
         </View>
       </View>
-      {/* WikaScan text */}
-      <Text
-        style={styles.text}
-        className="text-center font-psemibold text-white"
-      >
-        {title}
-      </Text>
+      {title && (
+        <Text
+          style={styles.text}
+          className="text-center font-psemibold text-white"
+        >
+          {title}
+        </Text>
+      )}
     </>
   );
 };

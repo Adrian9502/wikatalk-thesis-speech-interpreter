@@ -78,8 +78,8 @@ const Settings = () => {
     <SafeAreaView className="flex-1 bg-white">
       <StatusBar style={darkMode ? "light" : "dark"} />
 
-      <View className="bg-emerald-500 pt-4 pb-8 px-6 rounded-b-3xl">
-        <Logo size={28} color="white" />
+      <View className="bg-emerald-500 pb-10">
+        <Logo title="" />
         <View className="items-center mt-4">
           <View className="w-24 h-24 rounded-full bg-emerald-300 items-center justify-center mb-2 border-4 border-white">
             {userInfo.profilePicture ? (
@@ -103,9 +103,6 @@ const Settings = () => {
 
       <ScrollView className="flex-1 px-6 mt-6">
         <View className="mb-6">
-          <Text className="text-lg font-semibold text-gray-800 mb-2">
-            App Preferences
-          </Text>
           <View className="bg-gray-50 rounded-xl p-2">
             <SettingItem
               icon="moon"
@@ -118,12 +115,6 @@ const Settings = () => {
               label="Notifications"
               value={notifications}
               toggleSwitch={() => setNotifications(!notifications)}
-            />
-            <SettingItem
-              icon="microphone"
-              label="Auto Transcribe"
-              value={autoTranscribe}
-              toggleSwitch={() => setAutoTranscribe(!autoTranscribe)}
             />
             <SettingItem
               icon="history"
@@ -143,12 +134,6 @@ const Settings = () => {
               icon="user-cog"
               label="Account Details"
               onPress={() => console.log("Account details pressed")}
-            />
-            <SettingItem
-              icon="credit-card"
-              label="Subscription"
-              value="Free"
-              onPress={() => console.log("Subscription pressed")}
             />
             <SettingItem
               icon="lock"
@@ -172,11 +157,6 @@ const Settings = () => {
               icon="comment-alt"
               label="Contact Support"
               onPress={() => console.log("Contact support pressed")}
-            />
-            <SettingItem
-              icon="star"
-              label="Rate App"
-              onPress={() => console.log("Rate app pressed")}
             />
           </View>
         </View>
