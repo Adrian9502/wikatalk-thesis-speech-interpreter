@@ -15,13 +15,19 @@ const Logo: React.FC<LogoProps> = ({ title }) => {
           resizeMode="contain"
         />
         <View className="w-full items-center justify-center">
-          <Text className="font-pbold z-50 text-[2rem] -mb-6 text-emerald-500 text-center">
+          <Text
+            style={styles.text}
+            className="font-pbold z-50  -mb-6 text-emerald-500 text-center"
+          >
             WikaTalk
           </Text>
         </View>
       </View>
       {/* WikaScan text */}
-      <Text className="text-center font-psemibold text-[2rem] text-white">
+      <Text
+        style={styles.text}
+        className="text-center font-psemibold text-white"
+      >
         {title}
       </Text>
     </>
@@ -40,5 +46,8 @@ const styles = StyleSheet.create({
     backgroundColor: "#fff",
     borderBottomLeftRadius: "100%",
     borderBottomRightRadius: "100%",
+  },
+  text: {
+    fontSize: 32,
   },
 });
