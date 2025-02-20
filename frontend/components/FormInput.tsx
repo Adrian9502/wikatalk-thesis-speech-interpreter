@@ -12,7 +12,7 @@ interface InputFieldProps {
   IconComponent?: LucideIcon;
   control: Control<any>;
   name: string;
-  error?: FieldError;
+  error?: string;
 }
 
 const FormInput = ({
