@@ -1,5 +1,4 @@
 import {
-  SafeAreaView,
   View,
   Text,
   TextInput,
@@ -17,28 +16,41 @@ import MaterialIcons from "react-native-vector-icons/MaterialIcons";
 import DropDownPicker from "react-native-dropdown-picker";
 import DIALECTS from "@/constant/dialects";
 import Logo from "@/components/Logo";
-import { set } from "lodash";
+
+// Define types for language options
+type LanguageOption =
+  | "Tagalog"
+  | "Cebuano"
+  | "Hiligaynon"
+  | "Ilocano"
+  | "Bikol"
+  | "Waray"
+  | "Pangasinan"
+  | "Kapampangan"
+  | "English";
+
+// Define interface for language code mapping
+interface LanguageCodeMap {
+  [key: string]: string;
+}
 
 const Translate = () => {
-  const [sourceText, setSourceText] = useState("");
-  const [translatedText, setTranslatedText] = useState("");
-  const [sourceLanguage, setSourceLanguage] = useState("Tagalog");
-  const [targetLanguage, setTargetLanguage] = useState("Cebuano");
-  const [openSource, setOpenSource] = useState(false);
-  const [openTarget, setOpenTarget] = useState(false);
-  const [isTranslating, setIsTranslating] = useState(false);
-  const [error, setError] = useState("");
-  const [isSpeaking, setIsSpeaking] = useState(false);
-  // Google Apps Script Web App URL
-  // const GOOGLE_SCRIPT_URL =
-  //   "https://script.google.com/macros/s/AKfycbyn1sGehIcxIksVkShKoEbSE8tpQj_ECs3udWEs6UfUJHOQi94QqoRJBxES6MQZmuha/exec";
-
-  const api_key = "AIzaSyBpJlR45qVLWTHE5EVr5xAJ2oAHB-qFpMc";
-
+  // State with typed values
+  const [sourceText, setSourceText] = useState<string>("");
+  const [translatedText, setTranslatedText] = useState<string>("");
+  const [sourceLanguage, setSourceLanguage] =
+    useState<LanguageOption>("Tagalog");
+  const [targetLanguage, setTargetLanguage] =
+    useState<LanguageOption>("Cebuano");
+  const [openSource, setOpenSource] = useState<boolean>(false);
+  const [openTarget, setOpenTarget] = useState<boolean>(false);
+  const [isTranslating, setIsTranslating] = useState<boolean>(false);
+  const [error, setError] = useState<string>("");
+  const [isSpeaking, setIsSpeaking] = useState<boolean>(false);
+  // API KEY FOR TRANSLATION
+  const api_key = process.env.EXPO_PUBLIC_TRANSLATE_API_KEY;
   const { GoogleGenerativeAI } = require("@google/generative-ai");
-
   const sys_instruct = "You are a translator. Translate the phrases only.";
-
   const genAI = new GoogleGenerativeAI(api_key);
   const model = genAI.getGenerativeModel({
     model: "gemini-2.0-flash",
@@ -46,8 +58,8 @@ const Translate = () => {
   });
 
   // Map language codes for Speech
-  const getLanguageCodeForSpeech = (language) => {
-    const languageMap = {
+  const getLanguageCodeForSpeech = (language: LanguageOption): string => {
+    const languageMap: LanguageCodeMap = {
       Tagalog: "fil",
       Cebuano: "fil",
       Hiligaynon: "fil",
@@ -62,18 +74,19 @@ const Translate = () => {
     return languageMap[language] || "en-US";
   };
 
-  const handleSpeech = async (text, language) => {
+  const handleSpeech = async (
+    text: string,
+    language: LanguageOption
+  ): Promise<void> => {
     if (!text.trim()) return;
 
     try {
-      // Stop any ongoing speech
       const isSpeakingNow = await Speech.isSpeakingAsync();
       if (isSpeakingNow) {
         await Speech.stop();
         setIsSpeaking(false);
       }
 
-      // Start new speech
       setIsSpeaking(true);
       const langCode = getLanguageCodeForSpeech(language);
 
@@ -82,7 +95,7 @@ const Translate = () => {
         rate: 0.8,
         pitch: 1.0,
         onDone: () => setIsSpeaking(false),
-        onError: (error) => {
+        onError: (error: Error) => {
           console.error("Speech error:", error);
           setIsSpeaking(false);
           Alert.alert(
@@ -98,18 +111,17 @@ const Translate = () => {
     }
   };
   // Handle source speech
-  const handleSourceSpeech = useCallback(() => {
+  const handleSourceSpeech = useCallback((): void => {
     handleSpeech(sourceText, sourceLanguage);
   }, [sourceText, sourceLanguage]);
-
-  // Handle translated speech
-  const handleTranslatedSpeech = useCallback(() => {
+  //  Handle translated speech
+  const handleTranslatedSpeech = useCallback((): void => {
     handleSpeech(translatedText, targetLanguage);
   }, [translatedText, targetLanguage]);
 
   // Stop speech when changing languages
   useEffect(() => {
-    const stopSpeech = async () => {
+    const stopSpeech = async (): Promise<void> => {
       const isSpeakingNow = await Speech.isSpeakingAsync();
       if (isSpeakingNow) {
         await Speech.stop();
@@ -121,7 +133,7 @@ const Translate = () => {
   }, [sourceLanguage, targetLanguage]);
 
   // Handle translation
-  const handleTranslation = async () => {
+  const handleTranslation = async (): Promise<void> => {
     if (!sourceText.trim()) {
       setTranslatedText("");
       setError("");
@@ -149,15 +161,13 @@ const Translate = () => {
       const translated = result.response.text().replace(prompt, "").trim();
 
       setTranslatedText(translated);
-      
     } catch (error) {
       setError(
         typeof error === "string"
           ? error
-          : error.message || "Translation failed"
+          : (error as Error).message || "Translation failed"
       );
-    } 
-    finally {
+    } finally {
       setIsTranslating(false);
     }
   };
@@ -186,7 +196,7 @@ const Translate = () => {
   }, [sourceText, sourceLanguage, targetLanguage, debouncedTranslate]);
 
   // Handle language swap
-  const handleSwapLanguages = () => {
+  const handleSwapLanguages = (): void => {
     const tempLang = sourceLanguage;
     setSourceLanguage(targetLanguage);
     setTargetLanguage(tempLang);
@@ -195,7 +205,7 @@ const Translate = () => {
   };
 
   // Handle copy to clipboard
-  const copyToClipboard = async (text) => {
+  const copyToClipboard = async (text: string): Promise<void> => {
     try {
       await Clipboard.setString(text);
       Alert.alert("Copied!", "Text copied to clipboard.");
@@ -204,11 +214,12 @@ const Translate = () => {
     }
   };
   return (
-    <SafeAreaView className="flex-1 bg-emerald-500">
+    <View className="h-screen bg-emerald-500">
       <StatusBar style="dark" />
       <Logo title="WikaTranslate" />
 
-      <View className="flex-1 relative mx-4 my-4 mb-10 gap-4">
+      {/* Translation container */}
+      <View className="flex-1 relative mx-4 mb-10 gap-4">
         {/* Source language section */}
         <View className="flex-1 items-start justify-start bg-white p-3 rounded-xl">
           <DropDownPicker
@@ -273,10 +284,10 @@ const Translate = () => {
         </View>
         {/* Language swap button */}
         <TouchableOpacity
-          className="absolute top-1/2 right-1/2 z-10 bg-emerald-600 p-2 rounded-full transform translate-x-4 -translate-y-4"
+          className="absolute top-1/2 right-1/2 z-10 bg-emerald-500 border-4 border-white p-3 rounded-full transform translate-x-8 -translate-y-8"
           onPress={handleSwapLanguages}
         >
-          <MaterialIcons name="swap-vert" size={24} color="white" />
+          <MaterialIcons name="swap-vert" size={32} color="white" />
         </TouchableOpacity>
         {/* Target language section */}
         <View className="flex-1 items-end justify-start bg-white p-3 rounded-xl">
@@ -291,11 +302,13 @@ const Translate = () => {
               width: 150,
               backgroundColor: "#10b981",
               borderWidth: 2,
+              alignSelf: "flex-end",
               borderColor: "#10b981",
             }}
             dropDownContainerStyle={{
               backgroundColor: "#ffffff",
               width: 150,
+              alignSelf: "flex-end",
               borderColor: "#10b981",
             }}
             labelStyle={{
@@ -364,10 +377,7 @@ const Translate = () => {
           </View>
         </View>
       </View>
-    </SafeAreaView>
+    </View>
   );
 };
-
 export default Translate;
-
-// ! FIX ERROR - 2 LANGUAGES ONLY CAN BE TRANSLATED
