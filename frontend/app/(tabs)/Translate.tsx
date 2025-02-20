@@ -17,6 +17,7 @@ import MaterialIcons from "react-native-vector-icons/MaterialIcons";
 import DropDownPicker from "react-native-dropdown-picker";
 import DIALECTS from "@/constant/dialects";
 import Logo from "@/components/Logo";
+import { set } from "lodash";
 
 const Translate = () => {
   const [sourceText, setSourceText] = useState("");
@@ -29,8 +30,20 @@ const Translate = () => {
   const [error, setError] = useState("");
   const [isSpeaking, setIsSpeaking] = useState(false);
   // Google Apps Script Web App URL
-  const GOOGLE_SCRIPT_URL =
-    "https://script.google.com/macros/s/AKfycbyn1sGehIcxIksVkShKoEbSE8tpQj_ECs3udWEs6UfUJHOQi94QqoRJBxES6MQZmuha/exec";
+  // const GOOGLE_SCRIPT_URL =
+  //   "https://script.google.com/macros/s/AKfycbyn1sGehIcxIksVkShKoEbSE8tpQj_ECs3udWEs6UfUJHOQi94QqoRJBxES6MQZmuha/exec";
+
+  const api_key = "AIzaSyBpJlR45qVLWTHE5EVr5xAJ2oAHB-qFpMc";
+
+  const { GoogleGenerativeAI } = require("@google/generative-ai");
+
+  const sys_instruct = "You are a translator. Translate the phrases only.";
+
+  const genAI = new GoogleGenerativeAI(api_key);
+  const model = genAI.getGenerativeModel({
+    model: "gemini-2.0-flash",
+    systemInstruction: sys_instruct,
+  });
 
   // Map language codes for Speech
   const getLanguageCodeForSpeech = (language) => {
@@ -128,44 +141,23 @@ const Translate = () => {
         `Translating from ${sourceLanguage} to ${targetLanguage}: "${sourceText}"`
       );
 
-      const response = await fetch(GOOGLE_SCRIPT_URL, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          text: sourceText.trim(),
-          sourceLang: sourceLanguage,
-          targetLang: targetLanguage,
-        }),
-      });
+      const prompt = `"Translate the phrase from ${sourceLanguage} to ${targetLanguage}: ${sourceText}"`;
 
-      const responseText = await response.text();
-      console.log("Raw response:", responseText);
+      const result = await model.generateContent(prompt);
+      console.log("Raw response:", result.response.text());
 
-      try {
-        const data = JSON.parse(responseText);
+      const translated = result.response.text().replace(prompt, "").trim();
 
-        if (data.translatedText) {
-          setTranslatedText(data.translatedText);
-          setError("");
-        } else if (data.error) {
-          setError(
-            typeof data.error === "string" ? data.error : "Translation failed"
-          );
-        } else {
-          setError("Received empty translation response");
-        }
-      } catch (parseError) {
-        setError("Invalid response format from translation server");
-      }
+      setTranslatedText(translated);
+      
     } catch (error) {
       setError(
         typeof error === "string"
           ? error
           : error.message || "Translation failed"
       );
-    } finally {
+    } 
+    finally {
       setIsTranslating(false);
     }
   };

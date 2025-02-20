@@ -39,27 +39,27 @@ const RootLayout = () => {
   }
 
   return (
-    <PaperProvider>
-      <ValidationProvider>
-        <Stack>
-          <Stack.Screen name="index" options={{ headerShown: false }} />
-          <Stack.Screen
-            name="(auth)/SignIn"
-            options={{
-              headerShown: false,
-            }}
-          />
-          <Stack.Screen
-            name="(auth)/SignUp"
-            options={{
-              headerShown: false,
-            }}
-          />
+  <PaperProvider>
+    <ValidationProvider>
+      <Stack>
+        <Stack.Screen name="index" options={{ headerShown: false }} />
+        <Stack.Screen
+          name="(auth)/SignIn"
+          options={{
+            headerShown: false,
+          }}
+        />
+        <Stack.Screen
+          name="(auth)/SignUp"
+          options={{
+            headerShown: false,
+          }}
+        />
 
-          <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-        </Stack>
-      </ValidationProvider>
-    </PaperProvider>
+        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+      </Stack>
+    </ValidationProvider>
+  </PaperProvider>
   );
 };
 

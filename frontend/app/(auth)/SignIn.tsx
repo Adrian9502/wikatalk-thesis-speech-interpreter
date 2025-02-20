@@ -96,7 +96,7 @@ const SignIn = () => {
                 IconComponent={User}
                 control={control}
                 name="usernameOrEmail"
-                error={errors.usernameOrEmail}
+                error={errors.usernameOrEmail?.message}
               />
 
               <FormInput
@@ -109,7 +109,7 @@ const SignIn = () => {
                 IconComponent={Lock}
                 control={control}
                 name="password"
-                error={errors.password}
+                error={errors.password?.message}
               />
 
               <TouchableOpacity
