@@ -14,10 +14,42 @@ app.use(bodyParser.urlencoded({ extended: true }));
 // Connect to MongoDB
 connectDB();
 
+// Base route
+app.get("/", (req, res) => {
+  res.send("WikaTalk API is running");
+});
+
 // Routes
 app.use("/api/users", require("./routes/user.routes"));
+app.get("/api/users/test", (req, res) => {
+  res.send("WikaTalk API is running");
+});
+
+// Error handling middleware
+app.use((err, req, res, next) => {
+  console.error(err.stack);
+  res.status(500).json({
+    success: false,
+    message: "Something went wrong on the server",
+    error: process.env.NODE_ENV === "development" ? err.message : undefined,
+  });
+});
+
+// Handle undefined routes
+app.use("*", (req, res) => {
+  res.status(404).json({
+    success: false,
+    message: "API endpoint not found",
+  });
+});
 
 const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => {
+
+const server = app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
+});
+
+process.on("unhandledRejection", (err) => {
+  console.log(`Error: ${err.message}`);
+  server.close(() => process.exit(1));
 });

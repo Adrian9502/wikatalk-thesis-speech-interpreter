@@ -2,16 +2,14 @@ import {
   SafeAreaView,
   Text,
   View,
+  ActivityIndicator,
   TouchableOpacity,
-  Image,
   Alert,
   KeyboardAvoidingView,
   ScrollView,
   Platform,
   Keyboard,
   TouchableWithoutFeedback,
-  StyleSheet,
-  Dimensions,
 } from "react-native";
 import React, { useState } from "react";
 import { StatusBar } from "expo-status-bar";
@@ -21,42 +19,39 @@ import FormInput from "@/components/FormInput";
 import { User, Mail, Lock } from "lucide-react-native";
 import { useValidation } from "@/context/ValidationContext";
 import { router } from "expo-router";
+import { useAuth } from "@/context/AuthContext";
+import AuthLogo from "@/components/AuthLogo";
+import styles from "@/utils/AuthStyles";
+// Define interfaces
+interface SignUpFormData {
+  fullName: string;
+  email: string;
+  username: string;
+  password: string;
+  confirmPassword: string;
+}
 
-const SignUp = () => {
+const SignUp: React.FC = () => {
   const { signUpSchema } = useValidation();
-  const [formData, setFormData] = useState({
-    fullName: "",
-    email: "",
-    username: "",
-    password: "",
-    confirmPassword: "",
-  });
+  const [activeInput, setActiveInput] = useState("");
+  const { register, isLoading } = useAuth();
 
   const {
     control,
     handleSubmit,
+    setValue,
+    watch,
     formState: { errors },
-  } = useForm({
+  } = useForm<SignUpFormData>({
     resolver: yupResolver(signUpSchema),
   });
 
-  const handleChange = (name: keyof typeof formData, value: string) => {
-    setFormData((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
-  };
-
-  const handleSignUp = (data: any) => {
+  const handleSignUp = async (data: SignUpFormData): Promise<void> => {
     const { fullName, username, email, password, confirmPassword } = data;
 
-    if (password !== confirmPassword) {
-      Alert.alert("Error", "Passwords do not match");
-      return;
-    }
+    await register(fullName, username, email, password, confirmPassword);
 
-    // Proceed with signup logic (e.g., API call, navigation, etc.)
-    Alert.alert("Success", `Welcome, ${fullName}!`);
+    // Successful and Error registration will be handled by the AuthContext
   };
 
   return (
@@ -73,88 +68,100 @@ const SignUp = () => {
             contentContainerStyle={{ flexGrow: 1 }}
           >
             {/* Logo Section */}
-            <View style={styles.curvedTopContainer}>
-              <Image
-                className="w-full"
-                source={require("../../assets/images/WikaTalk-logo.png")}
-                resizeMode="contain"
-              />
-              <View className="w-full items-center justify-center">
-                <Text className="font-pbold z-50 text-[3rem] -mb-6 text-emerald-500 text-center">
-                  WikaTalk
-                </Text>
-                <Text className="font-pregular text-xl text-emerald-500">
-                  Lorem ipsum dolor amet
-                </Text>
-              </View>
-            </View>
+            <AuthLogo />
 
             {/* Form Section */}
-            <View className="py-5 px-16 w-full gap-4 mt-8">
-              <Text className="text-4xl mb-12 text-center font-pbold text-white">
+            <View className="py-5 px-16 w-full gap-4 mt-6">
+              <Text className="text-4xl mb-6 text-center font-pbold text-white">
                 Sign Up
               </Text>
 
+              {/* Full name */}
               <FormInput
                 placeholder="Full Name"
-                value={formData.fullName}
-                onChangeText={(text) => handleChange("fullName", text)}
+                value={watch("fullName")}
+                onChangeText={(text) => setValue("fullName", text)}
                 IconComponent={User}
                 control={control}
                 name="fullName"
-                error={errors.fullName}
+                error={errors.fullName?.message}
+                activeInput={activeInput}
+                setActiveInput={setActiveInput}
               />
+
+              {/* Username */}
               <FormInput
                 placeholder="Username"
-                value={formData.username}
-                onChangeText={(text) => handleChange("username", text)}
+                value={watch("username")}
+                onChangeText={(text) => setValue("username", text)}
                 IconComponent={User}
                 control={control}
                 name="username"
-                error={errors.username}
+                error={errors.username?.message}
+                activeInput={activeInput}
+                setActiveInput={setActiveInput}
               />
+
+              {/* Email */}
               <FormInput
                 placeholder="Email"
-                value={formData.email}
-                onChangeText={(text) => handleChange("email", text)}
+                value={watch("email")}
+                onChangeText={(text) => setValue("email", text)}
                 keyboardType="email-address"
                 IconComponent={Mail}
                 control={control}
                 name="email"
-                error={errors.email}
+                error={errors.email?.message}
+                activeInput={activeInput}
+                setActiveInput={setActiveInput}
               />
+
+              {/* Password */}
               <FormInput
                 placeholder="Password"
                 secureTextEntry
-                value={formData.password}
-                onChangeText={(text) => handleChange("password", text)}
+                value={watch("password")}
+                onChangeText={(text) => setValue("password", text)}
                 IconComponent={Lock}
                 control={control}
                 name="password"
-                error={errors.password}
+                error={errors.password?.message}
+                activeInput={activeInput}
+                setActiveInput={setActiveInput}
               />
+
+              {/* Confirm password */}
               <FormInput
                 placeholder="Confirm Password"
                 secureTextEntry
-                value={formData.confirmPassword}
-                onChangeText={(text) => handleChange("confirmPassword", text)}
+                value={watch("confirmPassword")}
+                onChangeText={(text) => setValue("confirmPassword", text)}
                 IconComponent={Lock}
                 control={control}
                 name="confirmPassword"
-                error={errors.confirmPassword}
+                error={errors.confirmPassword?.message}
+                activeInput={activeInput}
+                setActiveInput={setActiveInput}
               />
 
+              {/* Sign up button */}
               <TouchableOpacity
                 activeOpacity={0.9}
                 className="bg-white p-3 mt-5 rounded-xl"
                 onPress={handleSubmit(handleSignUp)}
+                disabled={isLoading}
               >
-                <Text className="text-emerald-500 font-pmedium text-lg uppercase text-center">
-                  Sign Up
-                </Text>
+                {isLoading ? (
+                  <ActivityIndicator size="small" color="#10b981" />
+                ) : (
+                  <Text className="text-emerald-500 font-pmedium text-lg uppercase text-center">
+                    Sign Up
+                  </Text>
+                )}
               </TouchableOpacity>
 
-              <View className="flex-row justify-center items-center mt-4 mb-6">
+              {/* Sign in and Home link */}
+              <View className="flex-row justify-center items-center mt-4">
                 <Text className="text-white font-pregular">
                   Already have an account?
                 </Text>
@@ -162,7 +169,7 @@ const SignUp = () => {
                   <Text className="text-white font-pbold ml-2">Sign In</Text>
                 </TouchableOpacity>
               </View>
-              <View className="flex-row justify-center items-center mt-4 mb-6">
+              <View className="flex-row justify-center items-center mt-2 mb-6">
                 <Text
                   onPress={() => router.push("/")}
                   className="text-white font-pregular"
@@ -179,20 +186,3 @@ const SignUp = () => {
 };
 
 export default SignUp;
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "#10B981",
-  },
-  curvedTopContainer: {
-    width: Dimensions.get("window").width,
-    height: 350,
-    display: "flex",
-    justifyContent: "center",
-    alignItems: "center",
-    backgroundColor: "#fff",
-    borderBottomLeftRadius: "100%",
-    borderBottomRightRadius: "100%",
-  },
-});

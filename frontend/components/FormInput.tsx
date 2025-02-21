@@ -1,38 +1,51 @@
-import { TextInput, View, TouchableOpacity, Text } from "react-native";
-import { LucideIcon, Eye, EyeOff } from "lucide-react-native";
+import {
+  TextInput,
+  View,
+  TouchableOpacity,
+  Text,
+  KeyboardTypeOptions,
+  StyleSheet,
+} from "react-native";
+import { LucideIcon, Eye, EyeOff, X } from "lucide-react-native";
 import { useState } from "react";
-import { Control, Controller, FieldError } from "react-hook-form";
+import { Control, Controller, FieldValues } from "react-hook-form";
 
-interface InputFieldProps {
+interface FormInputProps<T extends FieldValues> {
   placeholder: string;
   value: string;
-  onChangeText: (value: string) => void;
-  secureTextEntry?: boolean;
-  keyboardType?: "default" | "email-address" | "numeric" | "phone-pad";
-  IconComponent?: LucideIcon;
-  control: Control<any>;
-  name: string;
+  onChangeText: (text: string) => void;
+  IconComponent: LucideIcon;
+  control: Control<T>;
+  name: keyof T;
   error?: string;
+  secureTextEntry?: boolean;
+  activeInput: string;
+  setActiveInput: (name: string) => void;
+  keyboardType?: KeyboardTypeOptions;
 }
 
-const FormInput = ({
+const FormInput = <T extends FieldValues>({
   placeholder,
-  value,
   onChangeText,
+  value,
   secureTextEntry = false,
   keyboardType = "default",
   IconComponent,
   control,
   name,
   error,
-}: InputFieldProps) => {
+}: FormInputProps<T>) => {
   const [isPasswordVisible, setIsPasswordVisible] = useState(!secureTextEntry);
 
+  // clear input value on X button press
+  const handleClearInput = () => {
+    onChangeText(""); // Clear the input value
+  };
   return (
-    <View className="mb-4">
+    <View style={styles.container}>
       <Controller
         control={control}
-        name={name}
+        name={name as any}
         render={({ field: { onChange, value } }) => (
           <View>
             <View
@@ -45,9 +58,10 @@ const FormInput = ({
             >
               {IconComponent && (
                 <IconComponent
-                  style={{ marginRight: 8 }}
+                  {...(IconComponent as any).defaultProps}
                   size={21}
                   color="white"
+                  style={{ marginRight: 8 }}
                 />
               )}
 
@@ -64,8 +78,21 @@ const FormInput = ({
                 placeholderTextColor="rgba(255, 255, 255, 0.8)"
               />
 
+              {/* Clear Icon (X) */}
+              {value && ( // Only show the clear icon if there is text
+                <TouchableOpacity
+                  onPress={handleClearInput}
+                  style={styles.iconOpacity}
+                >
+                  <X size={14} color="white" />
+                </TouchableOpacity>
+              )}
+
+              {/* Toggle Password Visibility Icon */}
               {secureTextEntry && (
                 <TouchableOpacity
+                  style={styles.iconOpacity}
+                  className="ml-2"
                   onPress={() => setIsPasswordVisible(!isPasswordVisible)}
                 >
                   {isPasswordVisible ? (
@@ -99,4 +126,12 @@ const FormInput = ({
   );
 };
 
+const styles = StyleSheet.create({
+  container: {
+    marginBottom: -4,
+  },
+  iconOpacity: {
+    opacity: 0.8,
+  },
+});
 export default FormInput;
