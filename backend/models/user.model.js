@@ -1,5 +1,6 @@
 const mongoose = require("mongoose");
 const bcrypt = require("bcryptjs");
+const crypto = require("crypto");
 
 const userSchema = new mongoose.Schema(
   {
@@ -36,9 +37,40 @@ const userSchema = new mongoose.Schema(
       type: Date,
       default: Date.now,
     },
+    verificationToken: String,
+    verificationTokenExpires: Date,
+    resetPasswordToken: String,
+    resetPasswordExpires: Date,
+    verificationCode: {
+      type: String,
+      length: 6,
+    },
+    verificationCodeExpires: {
+      type: Date,
+    },
+    isVerified: {
+      type: Boolean,
+      default: false,
+    },
   },
   { timestamps: true }
 );
+
+// Add method to generate verification token
+userSchema.methods.generateVerificationToken = function () {
+  const token = crypto.randomBytes(32).toString("hex");
+  this.verificationToken = token;
+  this.verificationTokenExpires = Date.now() + 24 * 60 * 60 * 1000; // 24 hours
+  return token;
+};
+
+// Add method to generate password reset token
+userSchema.methods.generatePasswordResetToken = function () {
+  const token = crypto.randomBytes(32).toString("hex");
+  this.resetPasswordToken = token;
+  this.resetPasswordExpires = Date.now() + 1 * 60 * 60 * 1000; // 1 hour
+  return token;
+};
 
 // Hash password before saving
 userSchema.pre("save", async function (next) {

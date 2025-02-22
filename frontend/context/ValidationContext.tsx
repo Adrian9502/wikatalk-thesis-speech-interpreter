@@ -14,13 +14,26 @@ export interface LoginFormData {
   usernameOrEmail: string;
   password: string;
 }
+interface ForgotPasswordFormData {
+  email: string;
+}
+
+interface ResetPasswordFormData {
+  password: string;
+  confirmPassword: string;
+}
 
 // Define the context type
 interface ValidationContextType {
   signUpSchema: yup.ObjectSchema<SignUpFormData>;
   loginSchema: yup.ObjectSchema<LoginFormData>;
+  forgotPasswordSchema: yup.ObjectSchema<ForgotPasswordFormData>;
+  resetPasswordSchema: yup.ObjectSchema<ResetPasswordFormData>;
 }
 
+interface ValidationProviderProps {
+  children: ReactNode;
+}
 // Create the context
 const ValidationContext = createContext<ValidationContextType | undefined>(
   undefined
@@ -85,9 +98,20 @@ const loginSchema = yup.object().shape({
     .min(8, "Password must be at least 8 characters"),
 });
 
-interface ValidationProviderProps {
-  children: ReactNode;
-}
+const forgotPasswordSchema = yup.object().shape({
+  email: yup.string().email("Invalid email").required("Email is required"),
+});
+
+const resetPasswordSchema = yup.object().shape({
+  password: yup
+    .string()
+    .min(6, "Password must be at least 6 characters")
+    .required("Password is required"),
+  confirmPassword: yup
+    .string()
+    .oneOf([yup.ref("password")], "Passwords must match")
+    .required("Confirm password is required"),
+});
 
 export const ValidationProvider: React.FC<ValidationProviderProps> = ({
   children,
@@ -97,6 +121,8 @@ export const ValidationProvider: React.FC<ValidationProviderProps> = ({
       value={{
         signUpSchema,
         loginSchema,
+        forgotPasswordSchema,
+        resetPasswordSchema,
       }}
     >
       {children}

@@ -43,11 +43,8 @@ const SignIn: React.FC = () => {
   });
 
   const handleLogin = async (data: LoginFormData): Promise<void> => {
-    const result = await login(data.usernameOrEmail, data.password);
-
-    if (result.success) {
-      router.replace("/Home");
-    }
+    await login(data.usernameOrEmail, data.password);
+    // the redirect will be handled by the AuthContext
   };
 
   return (
@@ -70,7 +67,6 @@ const SignIn: React.FC = () => {
               <Text className="text-4xl mb-6 text-center font-pbold text-white">
                 Sign In
               </Text>
-
               {/* Username or email */}
               <FormInput<LoginFormData>
                 placeholder="Username or Email"
@@ -83,7 +79,6 @@ const SignIn: React.FC = () => {
                 activeInput={activeInput}
                 setActiveInput={setActiveInput}
               />
-
               {/* Password */}
               <FormInput<LoginFormData>
                 placeholder="Password"
@@ -97,6 +92,15 @@ const SignIn: React.FC = () => {
                 activeInput={activeInput}
                 setActiveInput={setActiveInput}
               />
+              {/* // In your SignIn.tsx, add this after the password input */}
+              <TouchableOpacity
+                onPress={() => router.push("/(auth)/ForgotPassword")}
+                className="self-end"
+              >
+                <Text className="text-white font-pregular">
+                  Forgot Password?
+                </Text>
+              </TouchableOpacity>
               {/* Signin Button */}
               <TouchableOpacity
                 activeOpacity={0.9}

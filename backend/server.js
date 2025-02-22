@@ -19,8 +19,13 @@ app.get("/", (req, res) => {
   res.send("WikaTalk API is running");
 });
 
-// Routes
-app.use("/api/users", require("./routes/user.routes"));
+// Import routes
+const userRoutes = require("./routes/user.routes");
+
+// Mount routes - simplify route mounting to avoid duplication
+app.use("/api/users", userRoutes);
+
+// Test route
 app.get("/api/users/test", (req, res) => {
   res.send("WikaTalk API is running");
 });

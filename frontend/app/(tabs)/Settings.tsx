@@ -30,9 +30,8 @@ const Settings = () => {
         onPress: async () => {
           try {
             await logout();
-            // The navigation will be handled by the AuthContext
           } catch (error) {
-            Alert.alert("Error", "Failed to logout. Please try again.");
+            console.error("Logout error:", error);
           }
         },
       },

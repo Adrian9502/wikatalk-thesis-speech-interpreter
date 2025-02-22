@@ -13,8 +13,8 @@ const AuthLogo = () => {
         <Text className="font-pbold z-50 text-[3rem] -mb-6 text-emerald-500 text-center">
           WikaTalk
         </Text>
-        <Text className="font-pregular text-xl text-emerald-500">
-          Lorem ipsum dolor amet
+        <Text className="font-psemibold text-xl text-emerald-500">
+          Speak Freely, Understand Instantly.
         </Text>
       </View>
     </View>

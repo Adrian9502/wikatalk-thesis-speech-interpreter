@@ -1,33 +1,93 @@
-import React, { useEffect, ReactNode } from "react";
+import React, { useEffect, useState } from "react";
 import { useFonts } from "expo-font";
-import { useRouter, useSegments } from "expo-router";
+import { useRouter, useSegments, Stack } from "expo-router";
 import "react-native-url-polyfill/auto";
-import { SplashScreen, Stack } from "expo-router";
+import { SplashScreen } from "expo-router";
 import "../global.css";
 import { ValidationProvider } from "@/context/ValidationContext";
 import { PaperProvider } from "react-native-paper";
 import { AuthProvider, useAuth } from "@/context/AuthContext";
 import { View, ActivityIndicator, SafeAreaView, Text } from "react-native";
-import Logo from "@/components/Logo";
 import { StatusBar } from "expo-status-bar";
+import AuthLogo from "@/components/AuthLogo";
 
 SplashScreen.preventAutoHideAsync();
-
-interface AuthGuardProps {
-  children: ReactNode;
-}
 
 const LoadingScreen = ({ message }: { message: string }) => (
   <SafeAreaView className="bg-emerald-500 h-screen relative flex items-center justify-around flex-1">
     <StatusBar style="dark" />
     <View className="absolute -top-[50vh] w-[140vw] rounded-full h-[100vh] bg-white" />
-    <Logo title="" />
+    <AuthLogo />
     <View className="flex-1 items-center justify-center">
       <ActivityIndicator size="large" color="#fff" />
       <Text className="font-pregular text-white mt-4 text-lg">{message}</Text>
     </View>
   </SafeAreaView>
 );
+
+const AuthGuard = ({ children }: { children: React.ReactNode }) => {
+  const { isLoggedIn, isLoading, isAppReady, userData } = useAuth();
+  const segments = useSegments() as String[];
+  const router = useRouter();
+  const [isNavigating, setIsNavigating] = useState(false);
+
+  useEffect(() => {
+    if (!isAppReady) return;
+
+    const checkAuth = async () => {
+      const inAuthGroup = segments[0] === "(auth)";
+      const isIndexPage = segments.length === 0 || segments[0] === "index";
+      const isVerifyPage = segments[1] === "VerifyEmail";
+      const isSignUpPage = segments[1] === "SignUp";
+      const hasPartialRegistration = userData && !userData.isVerified;
+
+      // Don't redirect if already navigating
+      if (isNavigating) return;
+
+      try {
+        setIsNavigating(true);
+
+        // Allow access to signup and signin pages without redirection
+        if (isSignUpPage || segments[1] === "SignIn") {
+          setIsNavigating(false);
+          return;
+        }
+
+        // Handle verified users
+        if (isLoggedIn && userData?.isVerified) {
+          if (inAuthGroup || isIndexPage) {
+            await router.replace("/(tabs)/Home");
+          }
+          return;
+        }
+
+        // Handle unverified users
+        if (hasPartialRegistration && !isVerifyPage) {
+          await router.replace("/(auth)/VerifyEmail");
+          return;
+        }
+
+        // Protect private routes
+        if (!isLoggedIn && !inAuthGroup && !isIndexPage) {
+          await router.replace("/(auth)/SignIn");
+          return;
+        }
+      } catch (error) {
+        console.error("Navigation error:", error);
+      } finally {
+        setIsNavigating(false);
+      }
+    };
+
+    checkAuth();
+  }, [isLoggedIn, segments, isAppReady, userData]);
+
+  if (!isAppReady || isLoading) {
+    return <LoadingScreen message="Loading..." />;
+  }
+
+  return <>{children}</>;
+};
 
 const RootLayout = () => {
   const [fontsLoaded, error] = useFonts({
@@ -49,49 +109,27 @@ const RootLayout = () => {
     }
   }, [fontsLoaded, error]);
 
-  const AuthGuard = ({ children }: AuthGuardProps) => {
-    const { isLoggedIn, isLoading, isAppReady } = useAuth();
-    const segments = useSegments() as string[];
-    const router = useRouter();
-
-    useEffect(() => {
-      if (!isAppReady || isLoading) return; // Wait for app to be ready
-
-      const inAuthGroup = segments[0] === "(auth)";
-      const isIndexPage = segments[0] === "index" || segments.length === 0;
-
-      if (!isLoggedIn && !inAuthGroup && !isIndexPage) {
-        router.replace("/(auth)/SignIn");
-      } else if (isLoggedIn && inAuthGroup) {
-        router.replace("/(tabs)/Home");
-      }
-    }, [isLoggedIn, segments, isLoading, isAppReady]); // Add isAppReady to dependencies
-
-    return <>{children}</>;
-  };
+  if (!fontsLoaded) {
+    return <LoadingScreen message="Loading fonts..." />;
+  }
 
   return (
     <AuthProvider>
-      <AuthGuard>
-        <PaperProvider>
-          <ValidationProvider>
-            <Stack>
+      <PaperProvider>
+        <ValidationProvider>
+          <AuthGuard>
+            <Stack screenOptions={{ headerShown: false }}>
               <Stack.Screen name="index" options={{ headerShown: false }} />
-              <Stack.Screen
-                name="(auth)/SignIn"
-                options={{ headerShown: false }}
-              />
-              <Stack.Screen
-                name="(auth)/SignUp"
-                options={{ headerShown: false }}
-              />
+              <Stack.Screen name="(auth)" options={{ headerShown: false }} />
               <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
             </Stack>
-          </ValidationProvider>
-        </PaperProvider>
-      </AuthGuard>
+          </AuthGuard>
+        </ValidationProvider>
+      </PaperProvider>
     </AuthProvider>
   );
 };
 
-export default RootLayout;
+export default function App() {
+  return <RootLayout />;
+}

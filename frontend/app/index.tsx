@@ -15,27 +15,51 @@ import Logo from "@/components/Logo";
 export default function Index() {
   const { isLoggedIn, isAppReady } = useAuth();
   const [isAuthChecking, setIsAuthChecking] = useState(true);
-  // Check if user is logged in
-  useEffect(() => {
-    if (isAppReady) {
-      if (isLoggedIn) {
-        // Small delay to ensure smooth transition
-        const timer = setTimeout(() => {
-          router.replace("/Home");
-        }, 500);
-        return () => clearTimeout(timer);
-      } else {
-        setIsAuthChecking(false);
-      }
-    }
-  }, [isLoggedIn, isAppReady]);
+  const [isNavigating, setIsNavigating] = useState(false);
 
-  // Show a loading indicator until the app is ready
+  useEffect(() => {
+    let mounted = true;
+
+    const initializeApp = async () => {
+      if (isAppReady && mounted) {
+        // Add small delay to ensure layout is mounted
+        await new Promise((resolve) => setTimeout(resolve, 100));
+
+        if (isLoggedIn) {
+          router.replace("/(tabs)/Home");
+        } else {
+          setIsAuthChecking(false);
+        }
+      }
+    };
+
+    initializeApp();
+
+    return () => {
+      mounted = false;
+    };
+  }, [isAppReady, isLoggedIn]);
+
+  const handleNavigation = async (route: string) => {
+    if (isNavigating) return;
+
+    setIsNavigating(true);
+    try {
+      // Add small delay before navigation
+      await new Promise((resolve) => setTimeout(resolve, 100));
+      await router.push(route as any);
+    } catch (error) {
+      console.error("Navigation error:", error);
+    } finally {
+      setIsNavigating(false);
+    }
+  };
+
+  // Show loading screen while app is initializing
   if (!isAppReady) {
     return (
       <SafeAreaView className="flex-1 items-center justify-center bg-emerald-500">
         <StatusBar style="dark" />
-        {/* Logo */}
         <Logo />
         <ActivityIndicator size="large" color="#ffffff" />
       </SafeAreaView>
@@ -56,20 +80,21 @@ export default function Index() {
           <Text className="font-pbold z-50 text-[3rem] text-emerald-500 text-center">
             WikaTalk
           </Text>
-          <Text className="font-pregular text-xl text-emerald-500">
-            Lorem ipsum dolor amet
+          <Text className="font-psemibold text-xl text-emerald-500">
+            Speak Freely, Understand Instantly.
           </Text>
         </View>
       </View>
       <View className="py-5 px-16 w-full flex gap-4">
-        {isAuthChecking ? (
+        {isAuthChecking || isNavigating ? (
           <ActivityIndicator size="large" color="#fff" />
         ) : (
           <>
             <TouchableOpacity
               activeOpacity={0.9}
               className="bg-white p-3 rounded-xl"
-              onPress={() => router.push("/(auth)/SignIn")}
+              onPress={() => handleNavigation("/(auth)/SignIn")}
+              disabled={isNavigating}
             >
               <Text className="text-emerald-700 font-pregular text-lg uppercase text-center">
                 sign in
@@ -79,7 +104,8 @@ export default function Index() {
             <TouchableOpacity
               activeOpacity={0.9}
               className="bg-white p-3 rounded-xl"
-              onPress={() => router.push("/(auth)/SignUp")}
+              onPress={() => handleNavigation("/(auth)/SignUp")}
+              disabled={isNavigating}
             >
               <Text className="text-emerald-700 font-pregular text-lg uppercase text-center">
                 sign up
