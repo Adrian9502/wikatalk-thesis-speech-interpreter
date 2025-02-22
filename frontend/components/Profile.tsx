@@ -17,6 +17,7 @@ interface UserData {
   username: string;
   email: string;
   profilePicture?: string;
+  isVerified: boolean;
 }
 
 const Profile: React.FC = () => {

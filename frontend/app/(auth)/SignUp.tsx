@@ -4,7 +4,6 @@ import {
   View,
   ActivityIndicator,
   TouchableOpacity,
-  Alert,
   KeyboardAvoidingView,
   ScrollView,
   Platform,
@@ -49,9 +48,20 @@ const SignUp: React.FC = () => {
   const handleSignUp = async (data: SignUpFormData): Promise<void> => {
     const { fullName, username, email, password, confirmPassword } = data;
 
-    await register(fullName, username, email, password, confirmPassword);
+    const result = await register(
+      fullName,
+      username,
+      email,
+      password,
+      confirmPassword
+    );
 
-    // Successful and Error registration will be handled by the AuthContext
+    if (result.success) {
+      // Use setTimeout to ensure state updates are complete
+      setTimeout(() => {
+        router.push("/(auth)/VerifyEmail");
+      }, 200);
+    }
   };
 
   return (
@@ -72,7 +82,7 @@ const SignUp: React.FC = () => {
 
             {/* Form Section */}
             <View className="py-5 px-16 w-full gap-4 mt-6">
-              <Text className="text-4xl mb-6 text-center font-pbold text-white">
+              <Text className="text-4xl -mb-4 text-center font-pbold text-white">
                 Sign Up
               </Text>
 
@@ -102,6 +112,14 @@ const SignUp: React.FC = () => {
                 setActiveInput={setActiveInput}
               />
 
+              <Text className="text-emerald-500 p-2 font-pmedium bg-white border rounded-lg border-emerald-500 text-sm">
+                Note: Enter a{" "}
+                <Text className="font-psemibold text-emerald-500">
+                  valid email
+                </Text>{" "}
+                to receive a 6-digit verification code. Check spam/junk if you
+                don’t see it.
+              </Text>
               {/* Email */}
               <FormInput
                 placeholder="Email"
@@ -147,7 +165,7 @@ const SignUp: React.FC = () => {
               {/* Sign up button */}
               <TouchableOpacity
                 activeOpacity={0.9}
-                className="bg-white p-3 mt-5 rounded-xl"
+                className="bg-white p-3 mt-2 rounded-xl"
                 onPress={handleSubmit(handleSignUp)}
                 disabled={isLoading}
               >
@@ -161,7 +179,7 @@ const SignUp: React.FC = () => {
               </TouchableOpacity>
 
               {/* Sign in and Home link */}
-              <View className="flex-row justify-center items-center mt-4">
+              <View className="flex-row justify-center items-center mt-2">
                 <Text className="text-white font-pregular">
                   Already have an account?
                 </Text>
@@ -169,7 +187,7 @@ const SignUp: React.FC = () => {
                   <Text className="text-white font-pbold ml-2">Sign In</Text>
                 </TouchableOpacity>
               </View>
-              <View className="flex-row justify-center items-center mt-2 mb-6">
+              <View className="flex-row justify-center items-center ">
                 <Text
                   onPress={() => router.push("/")}
                   className="text-white font-pregular"

@@ -22,25 +22,33 @@ interface FormInputProps<T extends FieldValues> {
   activeInput: string;
   setActiveInput: (name: string) => void;
   keyboardType?: KeyboardTypeOptions;
+  maxLength?: number;
+  autoComplete?: string;
+  className?: string;
 }
 
 const FormInput = <T extends FieldValues>({
   placeholder,
   onChangeText,
-  value,
+  value: externalValue, // Rename to avoid confusion
   secureTextEntry = false,
   keyboardType = "default",
   IconComponent,
   control,
   name,
   error,
+  maxLength,
+  autoComplete,
+  className,
 }: FormInputProps<T>) => {
   const [isPasswordVisible, setIsPasswordVisible] = useState(!secureTextEntry);
 
   // clear input value on X button press
-  const handleClearInput = () => {
-    onChangeText(""); // Clear the input value
+  const handleClearInput = (onChange: (value: string) => void) => {
+    onChange(""); // Clear the form control value
+    onChangeText(""); // Clear the external value
   };
+
   return (
     <View style={styles.container}>
       <Controller
@@ -58,7 +66,6 @@ const FormInput = <T extends FieldValues>({
             >
               {IconComponent && (
                 <IconComponent
-                  {...(IconComponent as any).defaultProps}
                   size={21}
                   color="white"
                   style={{ marginRight: 8 }}
@@ -74,14 +81,16 @@ const FormInput = <T extends FieldValues>({
                 }}
                 secureTextEntry={!isPasswordVisible && secureTextEntry}
                 keyboardType={keyboardType}
-                className="flex-1 text-white font-pregular text-lg"
+                className={`flex-1 text-white font-pregular text-lg ${className}`}
                 placeholderTextColor="rgba(255, 255, 255, 0.8)"
+                maxLength={maxLength}
+                autoComplete={autoComplete as any}
               />
 
               {/* Clear Icon (X) */}
-              {value && ( // Only show the clear icon if there is text
+              {value && (
                 <TouchableOpacity
-                  onPress={handleClearInput}
+                  onPress={() => handleClearInput(onChange)}
                   style={styles.iconOpacity}
                 >
                   <X size={14} color="white" />
