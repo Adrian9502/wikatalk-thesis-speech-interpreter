@@ -8,6 +8,7 @@ import {
   KeyboardAvoidingView,
   Platform,
   ScrollView,
+  InteractionManager,
 } from "react-native";
 import { StatusBar } from "expo-status-bar";
 import { router } from "expo-router";
@@ -22,7 +23,6 @@ const VerifyEmail: React.FC = () => {
     verifyEmail,
     isLoading,
     showSnackbar,
-
     resendVerificationEmail,
     userData,
   } = useAuth();
@@ -86,9 +86,7 @@ const VerifyEmail: React.FC = () => {
 
   const handleBacktoHome = async () => {
     try {
-      console.log("Starting cleanup...");
-
-      // Clear storage
+      // Clear all storage data
       await AsyncStorage.multiRemove([
         "userToken",
         "userData",
@@ -96,17 +94,15 @@ const VerifyEmail: React.FC = () => {
         "tempToken",
       ]);
 
-      // Verify storage is cleared
-      const keys = await AsyncStorage.getAllKeys();
-      console.log("Remaining storage keys:", keys);
+      console.log("Storage cleared successfully");
 
-      // Add a small delay to ensure state updates
-      await new Promise((resolve) => setTimeout(resolve, 100));
-
-      // Navigate using replace
-      await router.replace("/");
+      // Use InteractionManager to ensure UI is ready
+      InteractionManager.runAfterInteractions(() => {
+        // Navigate to index screen
+        router.push("/(auth)/SignIn");
+      });
     } catch (error) {
-      console.error("Error during navigation:", error);
+      console.error("Error returning to home:", error);
       showSnackbar("Error returning to home", "error");
     }
   };
