@@ -7,7 +7,7 @@ import {
   ActivityIndicator,
   KeyboardAvoidingView,
   Platform,
-  ScrollView, // Add this import
+  ScrollView,
 } from "react-native";
 import { StatusBar } from "expo-status-bar";
 import { router } from "expo-router";
@@ -16,12 +16,13 @@ import AuthLogo from "@/components/AuthLogo";
 import FormInput from "@/components/FormInput";
 import { CheckCircle } from "lucide-react-native";
 import { useForm } from "react-hook-form";
-
+import AsyncStorage from "@react-native-async-storage/async-storage";
 const VerifyEmail: React.FC = () => {
   const {
     verifyEmail,
     isLoading,
     showSnackbar,
+
     resendVerificationEmail,
     userData,
   } = useAuth();
@@ -60,18 +61,53 @@ const VerifyEmail: React.FC = () => {
   const handleVerification = async () => {
     if (isLoading) return;
 
+    // Add validation
+    if (!verificationCode || verificationCode.length !== 6) {
+      showSnackbar("Please enter a valid 6-digit code", "error");
+      return;
+    }
+
     try {
+      console.log("Attempting verification with:", verificationCode);
       const result = await verifyEmail(verificationCode);
 
       if (result.success) {
         showSnackbar("Email verified successfully!", "success");
-        // Add delay before navigation
-        await new Promise((resolve) => setTimeout(resolve, 500));
-        await router.push("/(tabs)/Home");
+        // Use replace instead of push to prevent going back
+        setTimeout(() => {
+          router.replace("/(tabs)/Home");
+        }, 1000);
       }
     } catch (error) {
       console.error("Verification error:", error);
       showSnackbar("Failed to verify email. Please try again.", "error");
+    }
+  };
+
+  const handleBacktoHome = async () => {
+    try {
+      console.log("Starting cleanup...");
+
+      // Clear storage
+      await AsyncStorage.multiRemove([
+        "userToken",
+        "userData",
+        "tempUserData",
+        "tempToken",
+      ]);
+
+      // Verify storage is cleared
+      const keys = await AsyncStorage.getAllKeys();
+      console.log("Remaining storage keys:", keys);
+
+      // Add a small delay to ensure state updates
+      await new Promise((resolve) => setTimeout(resolve, 100));
+
+      // Navigate using replace
+      await router.replace("/");
+    } catch (error) {
+      console.error("Error during navigation:", error);
+      showSnackbar("Error returning to home", "error");
     }
   };
 
@@ -154,9 +190,9 @@ const VerifyEmail: React.FC = () => {
                 )}
               </TouchableOpacity>
 
-              <TouchableOpacity onPress={() => router.back()} className="mt-4">
+              <TouchableOpacity onPress={handleBacktoHome} className="mt-4">
                 <Text className="text-white text-center font-pregular">
-                  Back to previous screen
+                  Back to Home
                 </Text>
               </TouchableOpacity>
             </View>

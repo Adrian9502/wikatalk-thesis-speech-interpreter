@@ -165,17 +165,28 @@ exports.verifyEmail = async (req, res) => {
   try {
     const { email, verificationCode, tempToken } = req.body;
 
+    console.log("Verification attempt:", {
+      email,
+      verificationCode,
+      tempTokenExists: !!tempToken,
+    });
+
     // Verify temp token and extract user data
     let tempUserData;
     try {
       tempUserData = jwt.verify(tempToken, process.env.JWT_SECRET);
+      console.log("Decoded temp user data:", {
+        storedCode: tempUserData.verificationCode,
+        receivedCode: verificationCode,
+        codeMatches: tempUserData.verificationCode === verificationCode,
+      });
     } catch (error) {
+      console.error("Token verification failed:", error);
       return res.status(400).json({
         success: false,
         message: "Registration session expired. Please register again.",
       });
     }
-
     // Verify the code
     if (verificationCode !== tempUserData.verificationCode) {
       return res.status(400).json({
@@ -226,9 +237,10 @@ exports.verifyEmail = async (req, res) => {
       },
     });
   } catch (error) {
+    console.error("Verification error:", error);
     res.status(500).json({
       success: false,
-      message: error.message,
+      message: error.message || "Verification failed",
     });
   }
 };
