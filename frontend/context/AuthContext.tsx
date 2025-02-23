@@ -114,6 +114,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [snackbarType, setSnackbarType] = useState<
     "success" | "error" | "neutral"
   >("neutral");
+  const [appInactiveTime, setAppInactiveTime] = useState<number | null>(null);
+  const INACTIVE_TIMEOUT = 5 * 60 * 1000; // 5 minutes in milliseconds
   const [isAppReady, setIsAppReady] = useState(false);
 
   // Test API connection on startup
@@ -151,10 +153,21 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         await logStorageData();
 
         // Get all stored data
-        const [storedToken, storedUserData] = await Promise.all([
+        const [storedToken, storedUserData, tempUserData] = await Promise.all([
           AsyncStorage.getItem("userToken"),
           AsyncStorage.getItem("userData"),
+          AsyncStorage.getItem("tempUserData"),
         ]);
+
+        // Check for temporary verification data first
+        if (tempUserData) {
+          const parsedTempData = JSON.parse(tempUserData);
+          if (parsedTempData.tempToken) {
+            setUserData(parsedTempData);
+            console.log("Restored verification session");
+            return;
+          }
+        }
 
         if (storedToken && storedUserData) {
           const userData = JSON.parse(storedUserData);
@@ -201,27 +214,56 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     loadStorageData();
   }, []);
 
+  useEffect(() => {
+    const persistVerificationData = async () => {
+      if (userData?.tempToken && !userData?.isVerified) {
+        await AsyncStorage.setItem("tempUserData", JSON.stringify(userData));
+      }
+    };
+
+    persistVerificationData();
+  }, [userData]);
+
+  useEffect(() => {
+    const subscription = AppState.addEventListener(
+      "change",
+      handleAppStateChange
+    );
+
+    return () => {
+      subscription.remove();
+    };
+  }, [appInactiveTime, userData]);
+
+  // Check if Verification is in process
+  const isInVerificationProcess = (userData: UserData | null): boolean => {
+    return !!(userData?.tempToken && !userData?.isVerified);
+  };
+
   // Handle app state
   const handleAppStateChange = async (nextAppState: AppStateStatus) => {
-    if (nextAppState === "background" || nextAppState === "inactive") {
-      try {
-        // Clear all auth data when app goes to background
-        await AsyncStorage.multiRemove([
-          "userToken",
-          "userData",
-          "tempUserData",
-          "tempToken",
-        ]);
+    const currentTime = Date.now();
 
-        // Clear state
-        setUserToken(null);
-        setUserData(null);
-        delete axios.defaults.headers.common["Authorization"];
-
-        console.log("Cleared auth data on app close");
-      } catch (error) {
-        console.error("Error clearing auth data:", error);
+    if (nextAppState === "active") {
+      // App came back to foreground
+      if (appInactiveTime && currentTime - appInactiveTime > INACTIVE_TIMEOUT) {
+        // Only clear if app was inactive for more than INACTIVE_TIMEOUT
+        try {
+          if (!isInVerificationProcess(userData)) {
+            await AsyncStorage.multiRemove(["userToken", "userData"]);
+            setUserToken(null);
+            setUserData(null);
+            delete axios.defaults.headers.common["Authorization"];
+            console.log("Cleared auth data due to long inactivity");
+          }
+        } catch (error) {
+          console.error("Error clearing auth data:", error);
+        }
       }
+      setAppInactiveTime(null);
+    } else if (nextAppState === "background") {
+      // App went to background
+      setAppInactiveTime(currentTime);
     }
   };
 
@@ -441,14 +483,12 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   ): Promise<AuthResponse> => {
     setIsLoading(true);
     try {
-      // Clear existing tokens first
-      await Promise.all([
-        AsyncStorage.removeItem("userToken"),
-        AsyncStorage.removeItem("userData"),
-      ]);
-      // Get temp token from state
       const tempToken = userData?.tempToken;
-
+      console.log("Verification attempt with:", {
+        email: userData?.email,
+        codeLength: verificationCode.length,
+        hasTempToken: !!tempToken,
+      });
       if (!tempToken) {
         showSnackbar("Invalid session. Please register again.", "error");
         router.replace("/(auth)/SignUp");
@@ -460,39 +500,30 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         verificationCode,
         tempToken,
       });
+      console.log("Verification response:", response.data);
 
       if (response.data.success) {
-        // !GET USER DATA
-        console.log("AFTER VERIFIED ON VERIFY EMAIL DATA:");
         const { token, user } = response.data;
 
-        // First update the state
-        setUserToken(token);
-        setUserData(user);
-        axios.defaults.headers.common["Authorization"] = `Bearer ${token}`;
-
-        // Then update storage
+        // Clear old data and set new data only after successful verification
         await Promise.all([
           AsyncStorage.removeItem("tempUserData"),
           AsyncStorage.removeItem("tempToken"),
           AsyncStorage.setItem("userToken", token),
           AsyncStorage.setItem("userData", JSON.stringify(user)),
         ]);
-        console.log("temp data shouldbe remove :");
-        await logStorageData();
 
-        showSnackbar("Email verified successfully!", "success");
+        setUserToken(token);
+        setUserData(user);
+        axios.defaults.headers.common["Authorization"] = `Bearer ${token}`;
 
-        // Return success and let the component handle navigation
         return { success: true };
       }
 
-      showSnackbar(
-        response.data.message || "Invalid verification code",
-        "error"
-      );
       return { success: false, message: response.data.message };
     } catch (error: any) {
+      console.error("Full error:", error);
+      console.error("Error response:", error.response?.data);
       const message = error.response?.data?.message || "Verification failed";
       showSnackbar(message, "error");
       return { success: false, message };

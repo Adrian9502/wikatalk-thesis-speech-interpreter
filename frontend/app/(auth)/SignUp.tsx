@@ -48,6 +48,8 @@ const SignUp: React.FC = () => {
   const handleSignUp = async (data: SignUpFormData): Promise<void> => {
     const { fullName, username, email, password, confirmPassword } = data;
 
+    console.log("handleSignUp DATA: ", data);
+
     const result = await register(
       fullName,
       username,
