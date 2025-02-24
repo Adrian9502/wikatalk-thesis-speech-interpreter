@@ -30,32 +30,59 @@ const AuthGuard = ({ children }: { children: React.ReactNode }) => {
   const segments = useSegments() as String[];
   const router = useRouter();
   const [isNavigating, setIsNavigating] = useState(false);
+  const [lastLocation, setLastLocation] = useState<string | null>(null); // Add this
 
   useEffect(() => {
     if (!isAppReady) return;
 
     const checkAuth = async () => {
+      console.log("🔒 AuthGuard Check:", {
+        segments,
+        isLoggedIn,
+        isNavigating,
+        userData,
+        lastLocation,
+      });
+
       const inAuthGroup = segments[0] === "(auth)";
       const isIndexPage = segments.length === 0 || segments[0] === "index";
       const isVerifyPage = segments[1] === "VerifyEmail";
-      const isSignUpPage = segments[1] === "SignUp";
+      const isAuthPage = segments[1] === "SignIn" || segments[1] === "SignUp";
       const hasPartialRegistration = userData && !userData.isVerified;
 
+      // Store current location if it's a valid path
+      if (segments.length > 0 && !isNavigating) {
+        setLastLocation(segments.join("/"));
+      }
+
       // Don't redirect if already navigating
-      if (isNavigating) return;
+      if (isNavigating) {
+        console.log("⏳ Navigation already in progress, skipping check");
+        return;
+      }
 
       try {
         setIsNavigating(true);
 
-        // Allow access to signup and signin pages without redirection
-        if (isSignUpPage || segments[1] === "SignIn") {
+        // If we're on index page but came from SignIn, go back to SignIn
+        if (isIndexPage && lastLocation?.includes("SignIn")) {
+          console.log("↩️ Returning to SignIn from index");
+          await router.replace("/(auth)/SignIn");
+          return;
+        }
+
+        // Allow access to auth pages without redirection
+        if (isAuthPage) {
+          console.log("🔑 On auth page, allowing access");
           setIsNavigating(false);
           return;
         }
 
         // Handle verified users
         if (isLoggedIn && userData?.isVerified) {
+          console.log("✅ Logged in and verified user");
           if (inAuthGroup || isIndexPage) {
+            console.log("🔄 Redirecting to home");
             await router.replace("/(tabs)/Home");
           }
           return;
@@ -63,17 +90,19 @@ const AuthGuard = ({ children }: { children: React.ReactNode }) => {
 
         // Handle unverified users
         if (hasPartialRegistration && !isVerifyPage) {
+          console.log("📧 Unverified user, redirecting to verification");
           await router.replace("/(auth)/VerifyEmail");
           return;
         }
 
-        // Protect private routes
-        if (!isLoggedIn && !inAuthGroup && !isIndexPage) {
+        // Protect private routes, but don't redirect if we're already on SignIn
+        if (!isLoggedIn && !inAuthGroup && !isIndexPage && !isAuthPage) {
+          console.log("🚫 Unauthorized access attempt, redirecting to login");
           await router.replace("/(auth)/SignIn");
           return;
         }
       } catch (error) {
-        console.error("Navigation error:", error);
+        console.error("❌ Navigation error:", error);
       } finally {
         setIsNavigating(false);
       }

@@ -353,23 +353,26 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   ): Promise<AuthResponse> => {
     setIsLoading(true);
     setError(null);
+    console.log("🚀 Login attempt started");
 
     try {
       // Clear any existing tokens first
       await AsyncStorage.multiRemove(["userToken", "userData"]);
+      console.log("🔄 Cleared existing tokens");
 
       const response = await axios.post(`${API_URL}/api/users/login`, {
         usernameOrEmail,
         password,
       });
 
-      console.log("Login response:", response.data);
+      console.log("📥 Login response:", response.data);
 
       const { token, ...user } = response.data.data;
-      console.log("User verification status:", user.isVerified);
+      console.log("👤 User verification status:", user.isVerified);
 
       // Handle unverified user
       if (user.isVerified === false) {
+        console.log("❌ User not verified - handling unverified flow");
         const tempUserData = {
           email: user.email,
           fullName: user.fullName,
@@ -388,38 +391,36 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       }
 
       // Handle successful login for verified users
-      // Update storage and state
-      await Promise.all([
-        AsyncStorage.setItem("userToken", token),
-        AsyncStorage.setItem("userData", JSON.stringify(user)),
-      ]);
+      if (response.data.success) {
+        console.log("✅ Login successful - setting up session");
+        await Promise.all([
+          AsyncStorage.setItem("userToken", token),
+          AsyncStorage.setItem("userData", JSON.stringify(user)),
+        ]);
 
-      setUserToken(token);
-      setUserData(user);
-      axios.defaults.headers.common["Authorization"] = `Bearer ${token}`;
+        setUserToken(token);
+        setUserData(user);
+        axios.defaults.headers.common["Authorization"] = `Bearer ${token}`;
+        showSnackbar("Login successful!", "success");
 
-      // Add delay before navigation
-      await new Promise((resolve) => setTimeout(resolve, 100));
-
-      showSnackbar("Login successful!", "success");
-
-      // Use requestAnimationFrame for navigation
-      requestAnimationFrame(async () => {
-        try {
+        // Use InteractionManager for navigation
+        InteractionManager.runAfterInteractions(async () => {
           await router.replace("/(tabs)/Home");
-        } catch (navError) {
-          console.error("Navigation error:", navError);
-        }
-      });
+        });
 
-      return { success: true };
+        return { success: true };
+      }
+
+      throw new Error(response.data.message || "Login failed");
     } catch (error: any) {
+      console.log("❌ Login failed:", error.response?.data || error.message);
       const message = error.response?.data?.message || "Login failed";
       setError(message);
       showSnackbar(message, "error");
       return { success: false, message };
     } finally {
       setIsLoading(false);
+      console.log("🏁 Login attempt finished");
     }
   };
 

@@ -85,20 +85,12 @@ const VerifyEmail: React.FC = () => {
   };
 
   const handleBacktoHome = async () => {
+    const { logout } = useAuth(); // Add this to your existing destructuring
     try {
-      // Clear all storage data
-      await AsyncStorage.multiRemove([
-        "userToken",
-        "userData",
-        "tempUserData",
-        "tempToken",
-      ]);
-
-      console.log("Storage cleared successfully");
+      await logout(); // This will properly clear both storage and state
 
       // Use InteractionManager to ensure UI is ready
       InteractionManager.runAfterInteractions(() => {
-        // Navigate to index screen
         router.push("/(auth)/SignIn");
       });
     } catch (error) {

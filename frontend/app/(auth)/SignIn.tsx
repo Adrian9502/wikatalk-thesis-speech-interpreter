@@ -43,7 +43,9 @@ const SignIn: React.FC = () => {
   });
 
   const handleLogin = async (data: LoginFormData): Promise<void> => {
-    await login(data.usernameOrEmail, data.password);
+    console.log("🔑 Login attempt from SignIn component");
+    const result = await login(data.usernameOrEmail, data.password);
+    console.log("📝 Login result:", result);
     // the redirect will be handled by the AuthContext
   };
 
