@@ -247,31 +247,13 @@ exports.verifyEmail = async (req, res) => {
 
 exports.resendVerificationCode = async (req, res) => {
   try {
-    const { email } = req.body;
-    const user = await User.findOne({ email });
-
-    if (!user) {
-      return res.status(404).json({
-        success: false,
-        message: "User not found",
-      });
-    }
-
-    if (user.isVerified) {
-      return res.status(400).json({
-        success: false,
-        message: "Email is already verified",
-      });
-    }
+    const { fullName, email } = req.body;
 
     // Generate new verification code
     const verificationCode = generateVerificationCode();
-    user.verificationCode = verificationCode;
-    user.verificationCodeExpires = new Date(Date.now() + 30 * 60000); // 30 minutes
-    await user.save();
 
     // Send verification email
-    await sendVerificationEmail(user);
+    await sendVerificationEmail({ email, fullName, verificationCode });
 
     res.json({
       success: true,

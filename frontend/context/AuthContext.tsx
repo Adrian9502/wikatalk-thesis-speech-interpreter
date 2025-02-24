@@ -522,8 +522,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
       return { success: false, message: response.data.message };
     } catch (error: any) {
-      console.error("Full error:", error);
-      console.error("Error response:", error.response?.data);
       const message = error.response?.data?.message || "Verification failed";
       showSnackbar(message, "error");
       return { success: false, message };
