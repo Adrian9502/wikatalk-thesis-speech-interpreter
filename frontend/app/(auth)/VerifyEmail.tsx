@@ -131,7 +131,7 @@ const VerifyEmail: React.FC = () => {
                   We've sent a verification code token to
                 </Text>
                 <Text className="my-2 text-white text-center font-psemibold">
-                  {userData?.email}.
+                  {userData?.email}
                 </Text>
                 <Text className="text-white text-center font-pregular">
                   Please enter the 6-digit code below.
