@@ -4,6 +4,7 @@ const {
   sendVerificationEmail,
   sendWelcomeEmail,
   sendPasswordResetEmail,
+  sendPasswordChangedEmail,
 } = require("../services/email.service");
 
 // Generate JWT Token
@@ -267,6 +268,9 @@ exports.resendVerificationCode = async (req, res) => {
   }
 };
 
+// @desc    Send reset password code (OTP)
+// @route   POST /api/users/forgot-password
+// @access  Public
 exports.forgotPassword = async (req, res) => {
   try {
     const { email } = req.body;
@@ -275,56 +279,196 @@ exports.forgotPassword = async (req, res) => {
     if (!user) {
       return res.status(404).json({
         success: false,
-        message: "User not found",
+        message: "User not found with that email. Please try again.",
       });
     }
 
-    const resetToken = user.generatePasswordResetToken();
+    // Generate 6-digit verification code
+    const resetCode = generateVerificationCode();
+
+    // Store reset code and expiry in user document
+    user.resetPasswordCode = resetCode;
+    user.resetPasswordCodeExpires = Date.now() + 30 * 60000; // 30 minutes
     await user.save();
 
-    await sendPasswordResetEmail(user);
+    // Send reset email with the code
+    await sendPasswordResetEmail({
+      email: user.email,
+      fullName: user.fullName,
+      resetCode,
+    });
 
     res.json({
       success: true,
-      message: "Password reset email sent",
+      message: "Password reset code sent successfully",
     });
   } catch (error) {
+    console.error("Forgot password error:", error);
     res.status(500).json({
       success: false,
-      message: error.message,
+      message: error.message || "Failed to send reset code",
     });
   }
 };
 
-exports.resetPassword = async (req, res) => {
+// @desc    Verify reset code (OTP)
+// @route   POST /api/users/verify-reset-code
+// @access  Public
+exports.verifyResetCode = async (req, res) => {
   try {
-    const { token, newPassword } = req.body;
-
-    const user = await User.findOne({
-      resetPasswordToken: token,
-      resetPasswordExpires: { $gt: Date.now() },
+    const { email, verificationCode } = req.body;
+    console.log("Received verification request:", {
+      email,
+      verificationCode,
     });
 
+    // First find the user by email only
+    const user = await User.findOne({ email });
+
     if (!user) {
+      console.log("User not found with email:", email);
       return res.status(400).json({
         success: false,
-        message: "Invalid or expired reset token",
+        message: "Invalid or expired reset code",
       });
     }
 
-    user.password = newPassword;
-    user.resetPasswordToken = undefined;
-    user.resetPasswordExpires = undefined;
-    await user.save();
+    // Log detailed information about the code comparison
+    console.log("Detailed code comparison:", {
+      storedCode: user.resetPasswordCode,
+      storedCodeLength: user.resetPasswordCode
+        ? user.resetPasswordCode.length
+        : 0,
+      storedCodeType: typeof user.resetPasswordCode,
+      receivedCode: verificationCode,
+      receivedCodeLength: verificationCode ? verificationCode.length : 0,
+      receivedCodeType: typeof verificationCode,
+      codesEqual: user.resetPasswordCode === verificationCode,
+      codesEqualTrimmed:
+        user.resetPasswordCode?.trim() === verificationCode?.trim(),
+      codeExpires: user.resetPasswordCodeExpires,
+      isExpired: user.resetPasswordCodeExpires < Date.now(),
+      currentTime: new Date(),
+    });
 
-    res.json({
+    // Now proceed with verification checks
+    if (!user.resetPasswordCode) {
+      console.log("Reset password code is not set for this user");
+      return res.status(400).json({
+        success: false,
+        message: "No reset code found. Please request a new one",
+      });
+    }
+
+    if (user.resetPasswordCodeExpires < Date.now()) {
+      console.log("Reset code has expired");
+      return res.status(400).json({
+        success: false,
+        message: "Code has expired. Please request a new one",
+      });
+    }
+
+    // If the codes don't match
+    if (user.resetPasswordCode !== verificationCode) {
+      console.log(
+        `Code mismatch. Expected: ${user.resetPasswordCode}, Received: ${verificationCode}`
+      );
+      return res.status(400).json({
+        success: false,
+        message: "Invalid verification code",
+      });
+    }
+
+    // Code is valid, generate a reset token
+    console.log("Verification successful, generating reset token");
+    const resetToken = jwt.sign(
+      { id: user._id, email: user.email },
+      process.env.JWT_SECRET,
+      { expiresIn: "30m" }
+    );
+
+    console.log("Reset token generated, sending success response");
+    return res.json({
       success: true,
-      message: "Password reset successfully",
+      message: "Code verified successfully",
+      resetToken,
     });
   } catch (error) {
-    res.status(500).json({
+    console.error("Error in verifyResetCode:", error);
+    return res.status(500).json({
       success: false,
-      message: error.message,
+      message: error.message || "Code verification failed",
+    });
+  }
+};
+
+// @desc    Reset password with token
+// @route   POST /api/users/reset-password
+// @access  Public
+exports.resetPassword = async (req, res) => {
+  try {
+    const { token, newPassword } = req.body;
+    console.log(
+      "Reset password received with token:",
+      token.substring(0, 20) + "..."
+    );
+
+    // Explicitly handle the jwt verification
+    try {
+      console.log("Verifying JWT token");
+      const decoded = jwt.verify(token, process.env.JWT_SECRET);
+      console.log("Token verified successfully, user ID:", decoded.id);
+
+      const user = await User.findById(decoded.id);
+      if (!user) {
+        console.log("User not found with ID:", decoded.id);
+        return res.status(404).json({
+          success: false,
+          message: "User not found",
+        });
+      }
+      console.log("Found user:", user.email);
+
+      // Update password and record the timestamp
+      user.password = newPassword;
+      user.resetPasswordCode = undefined;
+      user.resetPasswordCodeExpires = undefined;
+      user.passwordLastChangedAt = new Date(); // Add this line to record timestamp
+      await user.save();
+      console.log("Password updated successfully for user:", user.email);
+
+      await sendPasswordChangedEmail(user);
+
+      return res.json({
+        success: true,
+        message: "Password reset successfully",
+        passwordChangedAt: user.passwordLastChangedAt, // Return the timestamp to frontend
+      });
+    } catch (jwtError) {
+      // Error handling remains the same
+      console.error("JWT verification error:", jwtError.name, jwtError.message);
+
+      let message = "Reset session expired, please try again";
+      if (jwtError.name === "JsonWebTokenError") {
+        message = "Invalid reset token. Please request a new code.";
+      } else if (jwtError.name === "TokenExpiredError") {
+        message = "Reset session expired. Please request a new code.";
+      }
+
+      return res.status(401).json({
+        success: false,
+        message: message,
+        errorDetails: {
+          name: jwtError.name,
+          message: jwtError.message,
+        },
+      });
+    }
+  } catch (error) {
+    console.error("General reset password error:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Password reset failed due to server error",
     });
   }
 };

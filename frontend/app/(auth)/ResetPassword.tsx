@@ -26,10 +26,10 @@ interface ForgotPasswordFormData {
   email: string;
 }
 
-const ForgotPassword: React.FC = () => {
+const ResetPassword: React.FC = () => {
   const { forgotPasswordSchema } = useValidation();
   const [activeInput, setActiveInput] = useState("");
-  const { forgotPassword, isLoading } = useAuth();
+  const { sendPasswordResetCode, isLoading, clearStorage } = useAuth();
 
   const {
     control,
@@ -42,10 +42,22 @@ const ForgotPassword: React.FC = () => {
   });
 
   const handleForgotPassword = async (data: ForgotPasswordFormData) => {
-    const result = await forgotPassword(data.email);
+    console.log("Sending reset code to:", data.email);
+
+    const result = await sendPasswordResetCode(data.email);
+    console.log("Password reset API response:", result);
+
     if (result.success) {
-      router.push("/CheckEmail");
+      console.log("✅ Success! Email verification sent");
+      // Don't navigate here - let the AuthGuard handle it
+      // The crucial part is that sendPasswordResetCode has already
+      // saved the email to AsyncStorage, which is what you need
     }
+  };
+
+  const handleBackToSignIn = async () => {
+    await clearStorage();
+    router.replace("/(auth)/SignIn");
   };
 
   return (
@@ -64,10 +76,10 @@ const ForgotPassword: React.FC = () => {
             <AuthLogo />
             <View className="py-5 px-16 w-full gap-4 mt-6">
               <Text className="text-4xl mb-6 text-center font-pbold text-white">
-                Forgot Password
+                Reset Your Password
               </Text>
               <Text className="text-white text-center mb-4 font-pregular">
-                Enter your email address and we'll send you a link to reset your
+                Enter your email address and we'll send you a code to reset your
                 password
               </Text>
 
@@ -83,6 +95,7 @@ const ForgotPassword: React.FC = () => {
                 setActiveInput={setActiveInput}
               />
 
+              {/* Submit Button */}
               <TouchableOpacity
                 activeOpacity={0.9}
                 className="bg-white p-3 mt-5 rounded-xl"
@@ -99,8 +112,10 @@ const ForgotPassword: React.FC = () => {
               </TouchableOpacity>
 
               <View className="flex-row justify-center items-center mt-4">
-                <TouchableOpacity onPress={() => router.push("/SignIn")}>
-                  <Text className="text-white font-pbold">Back to Sign In</Text>
+                <TouchableOpacity onPress={handleBackToSignIn}>
+                  <Text className="text-white font-pregular">
+                    Back to Sign In
+                  </Text>
                 </TouchableOpacity>
               </View>
             </View>
@@ -111,4 +126,4 @@ const ForgotPassword: React.FC = () => {
   );
 };
 
-export default ForgotPassword;
+export default ResetPassword;

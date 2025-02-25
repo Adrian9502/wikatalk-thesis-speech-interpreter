@@ -10,6 +10,7 @@ import { AuthProvider, useAuth } from "@/context/AuthContext";
 import { View, ActivityIndicator, SafeAreaView, Text } from "react-native";
 import { StatusBar } from "expo-status-bar";
 import AuthLogo from "@/components/AuthLogo";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 SplashScreen.preventAutoHideAsync();
 
@@ -30,25 +31,45 @@ const AuthGuard = ({ children }: { children: React.ReactNode }) => {
   const segments = useSegments() as String[];
   const router = useRouter();
   const [isNavigating, setIsNavigating] = useState(false);
-  const [lastLocation, setLastLocation] = useState<string | null>(null); // Add this
+  const [lastLocation, setLastLocation] = useState<string | null>(null);
+  const [isResetFlow, setIsResetFlow] = useState(false);
+
+  // Check if we're in the reset password flow
+  useEffect(() => {
+    const checkResetFlow = async () => {
+      try {
+        const resetFlowFlag = await AsyncStorage.getItem("isResetPasswordFlow");
+        setIsResetFlow(resetFlowFlag === "true");
+      } catch (error) {
+        console.error("Error checking reset flow state:", error);
+      }
+    };
+
+    checkResetFlow();
+  }, [segments]);
 
   useEffect(() => {
     if (!isAppReady) return;
 
     const checkAuth = async () => {
-      console.log("🔒 AuthGuard Check:", {
-        segments,
-        isLoggedIn,
-        isNavigating,
-        userData,
-        lastLocation,
-      });
+      // console.log("🔒 AuthGuard Check:", {
+      //   segments,
+      //   isLoggedIn,
+      //   isNavigating,
+      //   userData,
+      //   lastLocation,
+      //   isResetFlow,
+      // });
 
       const inAuthGroup = segments[0] === "(auth)";
       const isIndexPage = segments.length === 0 || segments[0] === "index";
       const isVerifyPage = segments[1] === "VerifyEmail";
       const isAuthPage = segments[1] === "SignIn" || segments[1] === "SignUp";
       const hasPartialRegistration = userData && !userData.isVerified;
+      const isPasswordResetFlow =
+        segments[1] === "ResetPassword" ||
+        segments[1] === "VerifyResetPassword" ||
+        segments[1] === "SetNewPassword";
 
       // Store current location if it's a valid path
       if (segments.length > 0 && !isNavigating) {
@@ -57,30 +78,43 @@ const AuthGuard = ({ children }: { children: React.ReactNode }) => {
 
       // Don't redirect if already navigating
       if (isNavigating) {
-        console.log("⏳ Navigation already in progress, skipping check");
+        // console.log("⏳ Navigation already in progress, skipping check");
         return;
       }
 
       try {
         setIsNavigating(true);
 
-        // If we're on index page but came from SignIn, go back to SignIn
-        if (isIndexPage && lastLocation?.includes("SignIn")) {
-          console.log("↩️ Returning to SignIn from index");
-          await router.replace("/(auth)/SignIn");
+        // Handle password reset flow with priority
+        if (isResetFlow) {
+          // console.log("🔑 In password reset flow");
+
+          // Only redirect within the reset flow if needed
+          if (isPasswordResetFlow) {
+            // console.log(
+            //   "✅ Already on a reset password screen, allowing access"
+            // );
+          } else if (segments[1] !== "SetNewPassword") {
+            // console.log(
+            //   "🔄 In reset flow but on wrong screen, redirecting to SetNewPassword"
+            // );
+            await router.replace("/(auth)/SetNewPassword");
+          }
+
+          setIsNavigating(false);
           return;
         }
 
-        // Allow access to auth pages without redirection
-        if (isAuthPage) {
-          console.log("🔑 On auth page, allowing access");
+        // Allow access to auth pages and password reset flow without redirection
+        if (isAuthPage || isPasswordResetFlow) {
+          // console.log("🔑 On auth/reset page, allowing access");
           setIsNavigating(false);
           return;
         }
 
         // Handle verified users
         if (isLoggedIn && userData?.isVerified) {
-          console.log("✅ Logged in and verified user");
+          // console.log("✅ Logged in and verified user");
           if (inAuthGroup || isIndexPage) {
             console.log("🔄 Redirecting to home");
             await router.replace("/(tabs)/Home");
@@ -90,14 +124,14 @@ const AuthGuard = ({ children }: { children: React.ReactNode }) => {
 
         // Handle unverified users
         if (hasPartialRegistration && !isVerifyPage) {
-          console.log("📧 Unverified user, redirecting to verification");
+          // console.log("📧 Unverified user, redirecting to verification");
           await router.replace("/(auth)/VerifyEmail");
           return;
         }
 
-        // Protect private routes, but don't redirect if we're already on SignIn
-        if (!isLoggedIn && !inAuthGroup && !isIndexPage && !isAuthPage) {
-          console.log("🚫 Unauthorized access attempt, redirecting to login");
+        // Protect private routes
+        if (!isLoggedIn && !inAuthGroup && !isIndexPage) {
+          // console.log("🚫 Unauthorized access attempt, redirecting to login");
           await router.replace("/(auth)/SignIn");
           return;
         }
@@ -109,7 +143,7 @@ const AuthGuard = ({ children }: { children: React.ReactNode }) => {
     };
 
     checkAuth();
-  }, [isLoggedIn, segments, isAppReady, userData]);
+  }, [isLoggedIn, segments, isAppReady, userData, isResetFlow]);
 
   if (!isAppReady || isLoading) {
     return <LoadingScreen message="Loading..." />;

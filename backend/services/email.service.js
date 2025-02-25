@@ -57,7 +57,7 @@ let transporter;
 
 const sendVerificationEmail = async (user) => {
   try {
-    console.log("Attempting to send verification email to:", user.email);
+    console.log("Attempting to send VERIFICATION EMAIL to:", user.email);
 
     const { subject, html } = emailTemplates.verification(
       user.fullName,
@@ -84,10 +84,14 @@ const sendVerificationEmail = async (user) => {
 
 const sendPasswordResetEmail = async (user) => {
   try {
-    const resetUrl = `${process.env.FRONTEND_URL}/reset-password?token=${user.resetPasswordToken}`;
-    const { subject, html } = emailTemplates.passwordReset(resetUrl);
+    console.log("Attempting to send PASSWORD RESET EMAIL to:", user.email);
 
-    await transporter.sendMail({
+    const { subject, html } = emailTemplates.passwordReset(
+      user.fullName,
+      user.resetCode
+    );
+
+    const info = await transporter.sendMail({
       from: {
         name: "WikaTalk",
         address: "noreply@wikatalk.com",
@@ -96,9 +100,56 @@ const sendPasswordResetEmail = async (user) => {
       subject,
       html,
     });
+
+    return true;
   } catch (error) {
     console.error("Failed to send password reset email:", error);
-    throw new Error("Email sending failed");
+    throw error;
+  }
+};
+
+const sendPasswordChangedEmail = async (user) => {
+  try {
+    const passwordChangedAt = user.passwordLastChangedAt || new Date();
+    // Format the date to be human-readable
+    const formattedDate = new Intl.DateTimeFormat("en-US", {
+      weekday: "long",
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+    }).format(passwordChangedAt);
+
+    // Format time separately if needed
+    const formattedTime = new Intl.DateTimeFormat("en-US", {
+      hour: "2-digit",
+      minute: "2-digit",
+      second: "2-digit",
+      hour12: true,
+      timeZoneName: "short",
+    }).format(passwordChangedAt);
+
+    console.log("Attempting to send PASSWORD CHANGED EMAIL to:", user.email);
+
+    const { subject, html } = emailTemplates.passwordChanged(
+      user.fullName,
+      formattedDate,
+      formattedTime
+    );
+
+    const info = await transporter.sendMail({
+      from: {
+        name: "WikaTalk",
+        address: "noreply@wikatalk.com",
+      },
+      to: user.email,
+      subject,
+      html,
+    });
+
+    return true;
+  } catch (error) {
+    console.error("Failed to send password reset email:", error);
+    throw error;
   }
 };
 
@@ -129,6 +180,7 @@ const sendWelcomeEmail = async (user) => {
 
 module.exports = {
   sendVerificationEmail,
+  sendPasswordChangedEmail,
   sendPasswordResetEmail,
   sendWelcomeEmail,
 };

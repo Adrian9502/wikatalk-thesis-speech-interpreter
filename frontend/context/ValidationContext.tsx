@@ -98,19 +98,26 @@ const loginSchema = yup.object().shape({
     .min(8, "Password must be at least 8 characters"),
 });
 
-const forgotPasswordSchema = yup.object().shape({
-  email: yup.string().email("Invalid email").required("Email is required"),
-});
-
-const resetPasswordSchema = yup.object().shape({
+const resetPasswordSchema = yup.object({
   password: yup
     .string()
-    .min(6, "Password must be at least 6 characters")
-    .required("Password is required"),
+    .required("Password is required")
+    .min(8, "Password must be at least 8 characters")
+    .matches(
+      /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/,
+      "Password must contain at least one uppercase letter, one lowercase letter, and one number"
+    ),
   confirmPassword: yup
     .string()
-    .oneOf([yup.ref("password")], "Passwords must match")
-    .required("Confirm password is required"),
+    .required("Please confirm your password")
+    .oneOf([yup.ref("password")], "Passwords must match"),
+});
+
+const forgotPasswordSchema = yup.object().shape({
+  email: yup
+    .string()
+    .required("Email is required")
+    .email("Please enter a valid email"),
 });
 
 export const ValidationProvider: React.FC<ValidationProviderProps> = ({
