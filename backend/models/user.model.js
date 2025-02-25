@@ -37,10 +37,22 @@ const userSchema = new mongoose.Schema(
       type: Date,
       default: Date.now,
     },
+    // Password reset fields
+    resetPasswordCode: {
+      type: String,
+      length: 6,
+    },
+    resetPasswordCodeExpires: {
+      type: Date,
+    },
+    passwordLastChangedAt: {
+      type: Date,
+      default: Date.now,
+    },
+
+    // Verification fields (keep these for email verification)
     verificationToken: String,
     verificationTokenExpires: Date,
-    resetPasswordToken: String,
-    resetPasswordExpires: Date,
     verificationCode: {
       type: String,
       length: 6,

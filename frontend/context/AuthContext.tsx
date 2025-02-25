@@ -25,12 +25,10 @@ interface UserData {
   updatedAt?: string;
   tempToken?: string;
 }
-
 interface AuthResponse {
   success: boolean;
   message?: string;
 }
-
 interface AuthContextType {
   isLoading: boolean;
   isAppReady: boolean;
@@ -54,11 +52,15 @@ interface AuthContextType {
   isLoggedIn: boolean;
   isVerified: boolean;
   verifyEmail: (token: string) => Promise<AuthResponse>;
-  forgotPassword: (email: string) => Promise<AuthResponse>;
-  resetPassword: (token: string, newPassword: string) => Promise<AuthResponse>;
   resendVerificationEmail: () => Promise<AuthResponse>;
+  sendPasswordResetCode: (email: string) => Promise<AuthResponse>;
+  verifyPasswordResetCode: (
+    email: string,
+    verificationCode: string
+  ) => Promise<AuthResponse & { token?: string }>;
+  resetPassword: (token: string, newPassword: string) => Promise<AuthResponse>;
+  clearStorage: () => Promise<void>;
 }
-
 interface AuthProviderProps {
   children: ReactNode;
 }
@@ -67,7 +69,6 @@ interface ApiResponse {
   message?: string;
   data?: unknown;
 }
-
 interface ApiError {
   message: string;
   config?: {
@@ -75,11 +76,9 @@ interface ApiError {
     method?: string;
   };
 }
-
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 // helper function to check if user loggedin
-
 const logStorageData = async () => {
   try {
     const keys = await AsyncStorage.getAllKeys();
@@ -478,7 +477,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     return undefined;
   };
 
-  // Verify Email
+  // ? -- EMAIL VERIFICATION SECTION --
   const verifyEmail = async (
     verificationCode: string
   ): Promise<AuthResponse> => {
@@ -530,54 +529,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       setIsLoading(false);
     }
   };
-
-  // Forgot password
-  const forgotPassword = async (email: string): Promise<AuthResponse> => {
-    try {
-      const response = await axios.post(
-        `${API_URL}/api/users/forgot-password`,
-        { email }
-      );
-
-      if (response.data.success) {
-        showSnackbar("Password reset email sent!", "success");
-        return { success: true };
-      } else {
-        showSnackbar(response.data.message, "error");
-        return { success: false, message: response.data.message };
-      }
-    } catch (error: any) {
-      const message =
-        error.response?.data?.message || "Failed to send reset email";
-      showSnackbar(message, "error");
-      return { success: false, message };
-    }
-  };
-  // Reset password
-  const resetPassword = async (
-    token: string,
-    newPassword: string
-  ): Promise<AuthResponse> => {
-    try {
-      const response = await axios.post(`${API_URL}/api/users/reset-password`, {
-        token,
-        newPassword,
-      });
-
-      if (response.data.success) {
-        showSnackbar("Password reset successfully!", "success");
-        return { success: true };
-      } else {
-        showSnackbar(response.data.message, "error");
-        return { success: false, message: response.data.message };
-      }
-    } catch (error: any) {
-      const message = error.response?.data?.message || "Password reset failed";
-      showSnackbar(message, "error");
-      return { success: false, message };
-    }
-  };
-
   const resendVerificationEmail = async (): Promise<AuthResponse> => {
     try {
       const response = await axios.post(
@@ -601,6 +552,171 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       return { success: false, message };
     }
   };
+  // ? -- PASSWORD RESET SECTION --
+  // Forgot password (send reset code)
+  const sendPasswordResetCode = async (
+    email: string
+  ): Promise<AuthResponse> => {
+    setIsLoading(true);
+    try {
+      const response = await axios.post(
+        `${API_URL}/api/users/forgot-password`,
+        {
+          email,
+        }
+      );
+      console.log("forgot password data: ", response.data);
+
+      if (response.data.success) {
+        showSnackbar(response.data.message, "success");
+
+        // Store the email AND the reset password flow flag
+        await Promise.all([
+          AsyncStorage.setItem("resetEmailAddress", email),
+          AsyncStorage.setItem("isResetPasswordFlow", "true"),
+        ]);
+
+        // Use setTimeout to ensure AsyncStorage writes complete before navigation
+        setTimeout(() => {
+          router.replace("/(auth)/VerifyResetPassword");
+        }, 100);
+
+        return { success: true };
+      } else {
+        showSnackbar(response.data.message, "error");
+        return { success: false, message: response.data.message };
+      }
+    } catch (error: any) {
+      const message =
+        error.response?.data?.message || "Failed to send reset code";
+      showSnackbar(message, "error");
+      return { success: false, message };
+    } finally {
+      setIsLoading(false);
+    }
+  };
+  // Verify the reset code ( check if code is valid)
+  const verifyPasswordResetCode = async (
+    email: string,
+    verificationCode: string
+  ): Promise<AuthResponse & { token?: string }> => {
+    setIsLoading(true);
+    try {
+      console.log("Verifying reset code with data:", {
+        email,
+        verificationCode,
+      });
+
+      const response = await axios.post(
+        `${API_URL}/api/users/verify-reset-code`,
+        {
+          email,
+          verificationCode,
+        }
+      );
+
+      console.log("Verification API response:", response.data);
+
+      // Check if the response indicates success
+      if (response.data && response.data.success === true) {
+        console.log(
+          "Verification successful, resetToken:",
+          response.data.resetToken
+        );
+
+        // Store both the reset token and a flag indicating we're in the password reset flow
+        await Promise.all([
+          AsyncStorage.setItem("resetToken", response.data.resetToken),
+          AsyncStorage.setItem("isResetPasswordFlow", "true"),
+        ]);
+
+        showSnackbar("Code verified successfully!", "success");
+        console.log("Setting reset flow flag and navigating to SetNewPassword");
+
+        // Set a specific timeout to ensure state updates before navigation
+        setTimeout(() => {
+          router.replace("/(auth)/SetNewPassword");
+        }, 100);
+
+        return {
+          success: true,
+          token: response.data.resetToken,
+        };
+      } else {
+        // Handle when the API returns success: false
+        const errorMessage = response.data.message || "Verification failed";
+        showSnackbar(errorMessage, "error");
+        console.log("Verification failed:", errorMessage);
+
+        return { success: false, message: errorMessage };
+      }
+    } catch (error: any) {
+      // Log the full error for debugging
+      console.error("Verification request error:", error);
+
+      const message = error.response?.data?.message || "Verification failed";
+      showSnackbar(message, "error");
+
+      return { success: false, message };
+    } finally {
+      setIsLoading(false);
+    }
+  };
+  // Reset password ( set new password)
+  const resetPassword = async (token: string, newPassword: string) => {
+    setIsLoading(true);
+    try {
+      console.log("Sending password reset request to backend");
+      const response = await axios.post(`${API_URL}/api/users/reset-password`, {
+        token,
+        newPassword,
+      });
+
+      console.log("Password reset response:", response.data);
+
+      if (response.data.success) {
+        console.log("Password reset successful");
+        showSnackbar("Password reset successfully!", "success");
+
+        // First return success, THEN clear storage and navigate
+        setTimeout(async () => {
+          try {
+            await Promise.all([
+              AsyncStorage.removeItem("resetToken"),
+              AsyncStorage.removeItem("resetEmailAddress"),
+              AsyncStorage.removeItem("isResetPasswordFlow"),
+            ]);
+            console.log("Reset data cleared from storage");
+            router.replace("/(auth)/SignIn");
+          } catch (clearError) {
+            console.error("Error clearing storage:", clearError);
+          }
+        }, 1000);
+
+        return { success: true };
+      } else {
+        console.log("Password reset failed:", response.data.message);
+        showSnackbar(response.data.message, "error");
+        return { success: false, message: response.data.message };
+      }
+    } catch (error: any) {
+      console.error("Password reset error:", error);
+      const message = error.response?.data?.message || "Password reset failed";
+      showSnackbar(message, "error");
+      return { success: false, message };
+    } finally {
+      setIsLoading(false);
+    }
+  };
+  // ? -- Remove all async storage data --
+  const clearStorage = async () => {
+    try {
+      await AsyncStorage.clear();
+      console.log("✅ AsyncStorage cleared successfully!");
+    } catch (error) {
+      console.error("❌ Error clearing AsyncStorage:", error);
+    }
+  };
 
   return (
     <AuthContext.Provider
@@ -611,6 +727,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         userData,
         error,
         register,
+        sendPasswordResetCode,
         login,
         logout,
         getUserProfile,
@@ -618,9 +735,10 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         isVerified: userData?.isVerified ?? false,
         showSnackbar,
         verifyEmail,
-        forgotPassword,
+        verifyPasswordResetCode,
         resetPassword,
         resendVerificationEmail,
+        clearStorage,
       }}
     >
       {children}

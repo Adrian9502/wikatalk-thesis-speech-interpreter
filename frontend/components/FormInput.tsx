@@ -15,16 +15,17 @@ interface FormInputProps<T extends FieldValues> {
   value: string;
   onChangeText: (text: string) => void;
   IconComponent: LucideIcon;
-  control: Control<T>;
-  name: keyof T;
+  control?: Control<T>;
+  name?: keyof T;
   error?: string;
   secureTextEntry?: boolean;
-  activeInput: string;
-  setActiveInput: (name: string) => void;
+  activeInput?: string;
+  setActiveInput?: (name: string) => void;
   keyboardType?: KeyboardTypeOptions;
   maxLength?: number;
   autoComplete?: string;
   className?: string;
+  editable?: boolean;
 }
 
 const FormInput = <T extends FieldValues>({
@@ -40,6 +41,7 @@ const FormInput = <T extends FieldValues>({
   maxLength,
   autoComplete,
   className,
+  editable,
 }: FormInputProps<T>) => {
   const [isPasswordVisible, setIsPasswordVisible] = useState(!secureTextEntry);
 
@@ -76,8 +78,11 @@ const FormInput = <T extends FieldValues>({
                 placeholder={placeholder}
                 value={value}
                 onChangeText={(text) => {
-                  onChange(text);
-                  onChangeText(text);
+                  if (editable !== false) {
+                    // Prevent updates if not editable
+                    onChange(text);
+                    onChangeText(text);
+                  }
                 }}
                 secureTextEntry={!isPasswordVisible && secureTextEntry}
                 keyboardType={keyboardType}
@@ -85,6 +90,8 @@ const FormInput = <T extends FieldValues>({
                 placeholderTextColor="rgba(255, 255, 255, 0.8)"
                 maxLength={maxLength}
                 autoComplete={autoComplete as any}
+                editable={editable} // Allow setting as non-editable
+                selectTextOnFocus={editable} // Prevent selection when disabled
               />
 
               {/* Clear Icon (X) */}

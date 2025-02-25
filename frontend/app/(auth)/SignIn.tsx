@@ -10,9 +10,10 @@ import {
   Keyboard,
   TouchableWithoutFeedback,
 } from "react-native";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { StatusBar } from "expo-status-bar";
-import { useForm, Controller } from "react-hook-form";
+import { useForm } from "react-hook-form";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { yupResolver } from "@hookform/resolvers/yup";
 import FormInput from "@/components/FormInput";
 import { User, Lock } from "lucide-react-native";
@@ -21,6 +22,7 @@ import { router } from "expo-router";
 import { useAuth } from "@/context/AuthContext";
 import AuthLogo from "@/components/AuthLogo";
 import styles from "@/utils/AuthStyles";
+
 // Define interfaces
 export interface LoginFormData {
   usernameOrEmail: string;
@@ -94,9 +96,9 @@ const SignIn: React.FC = () => {
                 activeInput={activeInput}
                 setActiveInput={setActiveInput}
               />
-              {/* // In your SignIn.tsx, add this after the password input */}
+
               <TouchableOpacity
-                onPress={() => router.push("/(auth)/ForgotPassword")}
+                onPress={() => router.push("/(auth)/ResetPassword")}
                 className="self-end"
               >
                 <Text className="text-white font-pregular">

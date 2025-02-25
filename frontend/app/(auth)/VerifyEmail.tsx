@@ -17,7 +17,6 @@ import AuthLogo from "@/components/AuthLogo";
 import FormInput from "@/components/FormInput";
 import { CheckCircle } from "lucide-react-native";
 import { useForm } from "react-hook-form";
-import AsyncStorage from "@react-native-async-storage/async-storage";
 const VerifyEmail: React.FC = () => {
   const {
     verifyEmail,
@@ -25,6 +24,7 @@ const VerifyEmail: React.FC = () => {
     showSnackbar,
     resendVerificationEmail,
     userData,
+    clearStorage,
   } = useAuth();
   const [verificationCode, setVerificationCode] = useState("");
   const [activeInput, setActiveInput] = useState("");
@@ -85,9 +85,8 @@ const VerifyEmail: React.FC = () => {
   };
 
   const handleBacktoHome = async () => {
-    const { logout } = useAuth(); // Add this to your existing destructuring
     try {
-      await logout(); // This will properly clear both storage and state
+      await clearStorage(); // This will properly clear both storage and state
 
       // Use InteractionManager to ensure UI is ready
       InteractionManager.runAfterInteractions(() => {
