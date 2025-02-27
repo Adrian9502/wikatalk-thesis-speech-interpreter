@@ -11,12 +11,15 @@ import { router } from "expo-router";
 import { useAuth } from "@/context/AuthContext";
 import React, { useEffect, useState } from "react";
 import Logo from "@/components/Logo";
+import LandingScreen from "./Test";
 
 export default function Index() {
   const { isLoggedIn, isAppReady } = useAuth();
   const [isAuthChecking, setIsAuthChecking] = useState(true);
   const [isNavigating, setIsNavigating] = useState(false);
+  const [loading, setloading] = useState(true);
 
+  if (loading) return <LandingScreen />;
   useEffect(() => {
     let mounted = true;
 
