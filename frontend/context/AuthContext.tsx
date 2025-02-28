@@ -9,7 +9,8 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import axios from "axios";
 import { AppState, AppStateStatus, InteractionManager } from "react-native";
 import { router } from "expo-router";
-import CustomSnackbar from "@/lib/CustomSnackbar";
+import { showToast } from "@/lib/showToast";
+
 // get the api url from the .env file
 const API_URL = `${process.env.EXPO_PUBLIC_BACKEND_URL}`;
 
@@ -25,6 +26,11 @@ interface UserData {
   updatedAt?: string;
   tempToken?: string;
 }
+interface ShowToastData {
+  type: "success" | "error" | "info";
+  title: string;
+  description: string;
+}
 interface AuthResponse {
   success: boolean;
   message?: string;
@@ -34,10 +40,7 @@ interface AuthContextType {
   isAppReady: boolean;
   userToken: string | null;
   userData: UserData | null;
-  showSnackbar: (
-    message: string,
-    type?: "success" | "error" | "neutral"
-  ) => void;
+  showToast: (data: ShowToastData) => void;
   error: string | null;
   register: (
     fullName: string,
@@ -93,11 +96,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [userToken, setUserToken] = useState<string | null>(null);
   const [userData, setUserData] = useState<UserData | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [snackbarVisible, setSnackbarVisible] = useState(false);
-  const [snackbarMessage, setSnackbarMessage] = useState("");
-  const [snackbarType, setSnackbarType] = useState<
-    "success" | "error" | "neutral"
-  >("neutral");
   const [appInactiveTime, setAppInactiveTime] = useState<number | null>(null);
   const [formMessage, setFormMessageState] = useState<FormMessage | null>(null);
   const INACTIVE_TIMEOUT = 5 * 60 * 1000; // 5 minutes in milliseconds
@@ -274,16 +272,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     };
   }, []);
 
-  // Snackbar helper function to show popup messages
-  const showSnackbar = (
-    message: string,
-    type: "success" | "error" | "neutral" = "neutral"
-  ) => {
-    setSnackbarMessage(message);
-    setSnackbarType(type);
-    setSnackbarVisible(true);
-  };
-
   // Register user
   const register = async (
     fullName: string,
@@ -319,10 +307,17 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
           JSON.stringify(tempUserData)
         );
 
-        showSnackbar(
-          "Please verify your email to complete registration",
-          "success"
-        );
+        showToast({
+          type: "success",
+          title: "Verify your email",
+          description: response.data.message,
+        });
+
+        showToast({
+          type: "error",
+          title: "Error sending email",
+          description: response.data.message,
+        });
         console.log("AFTER REGISTER LOG DATA:");
 
         return { success: true };
@@ -333,7 +328,13 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       const message =
         error.response?.data?.message || error.message || "Registration failed";
       setError(message);
-      showSnackbar(message, "error");
+
+      showToast({
+        type: "error",
+        title: "Registration failed",
+        description: message,
+      });
+
       return { success: false, message };
     } finally {
       setIsLoading(false);
@@ -439,13 +440,20 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       setUserData(null);
       delete axios.defaults.headers.common["Authorization"];
 
-      showSnackbar("Logged out successfully!", "success");
-
+      showToast({
+        type: "success",
+        title: "Logged out",
+        description: "Logged out successfully!",
+      });
       // Let the AuthGuard handle navigation
       // Remove direct navigation call here
     } catch (error) {
       console.error("Error during logout:", error);
-      showSnackbar("Error logging out", "error");
+      showToast({
+        type: "error",
+        title: "Error logging out",
+        description: "Error during logout",
+      });
     } finally {
       setIsLoading(false);
       console.log("AFTER LOGOUT LOG DATA:");
@@ -464,7 +472,11 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     } catch (error: any) {
       console.error("Error fetching user profile:", error);
       if (error.response?.status === 401) {
-        showSnackbar("Session expired. Please login again.", "error");
+        showToast({
+          type: "error",
+          title: "Error, Session expired",
+          description: "Session expired. Please login again.",
+        });
         logout();
       }
     }
@@ -484,8 +496,13 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         hasTempToken: !!tempToken,
       });
       if (!tempToken) {
-        showSnackbar("Invalid session. Please register again.", "error");
-        router.replace("/(auth)/SignUp");
+        showToast({
+          type: "error",
+          title: "Invalid Session",
+          description: "Invalid session. Please register again.",
+        });
+
+        router.replace("/");
         return { success: false, message: "Invalid session" };
       }
 
@@ -517,7 +534,12 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       return { success: false, message: response.data.message };
     } catch (error: any) {
       const message = error.response?.data?.message || "Verification failed";
-      showSnackbar(message, "error");
+      showToast({
+        type: "error",
+        title: "Error",
+        description: message,
+      });
+
       return { success: false, message };
     } finally {
       setIsLoading(false);
@@ -533,16 +555,29 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       );
 
       if (response.data.success) {
-        showSnackbar("Verification email sent!", "success");
+        showToast({
+          type: "success",
+          title: "Verification Email Sent!",
+          description: response.data.message,
+        });
         return { success: true };
       } else {
-        showSnackbar(response.data.message, "error");
+        showToast({
+          type: "error",
+          title: "Verification Send Error",
+          description: response.data.message,
+        });
+
         return { success: false, message: response.data.message };
       }
     } catch (error: any) {
       const message =
         error.response?.data?.message || "Failed to send verification email";
-      showSnackbar(message, "error");
+      showToast({
+        type: "error",
+        title: "Error",
+        description: message,
+      });
       return { success: false, message };
     }
   };
@@ -559,11 +594,14 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
           email,
         }
       );
-      console.log("forgot password data: ", response.data);
+      console.log("forgot password response: ", response.data);
 
       if (response.data.success) {
-        showSnackbar(response.data.message, "success");
-
+        showToast({
+          type: "success",
+          title: "Email sent!",
+          description: response.data.message,
+        });
         // Store the email AND the reset password flow flag
         await Promise.all([
           AsyncStorage.setItem("resetEmailAddress", email),
@@ -571,19 +609,27 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         ]);
 
         // Use setTimeout to ensure AsyncStorage writes complete before navigation
-        setTimeout(() => {
-          router.replace("/(auth)/VerifyResetPassword");
-        }, 100);
+        // setTimeout(() => {
+        //   router.replace("/(auth)/VerifyResetPassword");
+        // }, 100);
 
         return { success: true };
       } else {
-        showSnackbar(response.data.message, "error");
+        showToast({
+          type: "error",
+          title: "Error sending email",
+          description: response.data.message,
+        });
         return { success: false, message: response.data.message };
       }
     } catch (error: any) {
       const message =
-        error.response?.data?.message || "Failed to send reset code";
-      showSnackbar(message, "error");
+        error.response?.data?.message || "Failed to process your request";
+      showToast({
+        type: "error",
+        title: "Error sending email",
+        description: message,
+      });
       return { success: false, message };
     } finally {
       setIsLoading(false);
@@ -624,7 +670,11 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
           AsyncStorage.setItem("isResetPasswordFlow", "true"),
         ]);
 
-        showSnackbar("Code verified successfully!", "success");
+        showToast({
+          type: "success",
+          title: "Code Verified successfully!",
+          description: response.data.message,
+        });
         console.log("Setting reset flow flag and navigating to SetNewPassword");
 
         // Set a specific timeout to ensure state updates before navigation
@@ -639,7 +689,13 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       } else {
         // Handle when the API returns success: false
         const errorMessage = response.data.message || "Verification failed";
-        showSnackbar(errorMessage, "error");
+
+        showToast({
+          type: "error",
+          title: "Verification Error",
+          description: errorMessage,
+        });
+
         console.log("Verification failed:", errorMessage);
 
         return { success: false, message: errorMessage };
@@ -649,8 +705,12 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       console.error("Verification request error:", error);
 
       const message = error.response?.data?.message || "Verification failed";
-      showSnackbar(message, "error");
 
+      showToast({
+        type: "error",
+        title: "Verification Error",
+        description: message,
+      });
       return { success: false, message };
     } finally {
       setIsLoading(false);
@@ -670,8 +730,11 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
       if (response.data.success) {
         console.log("Password reset successful");
-        showSnackbar("Password reset successfully!", "success");
-
+        showToast({
+          type: "success",
+          title: "Password reset successfully!",
+          description: response.data.message,
+        });
         // First return success, THEN clear storage and navigate
         setTimeout(async () => {
           try {
@@ -681,7 +744,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
               AsyncStorage.removeItem("isResetPasswordFlow"),
             ]);
             console.log("Reset data cleared from storage");
-            router.replace("/(auth)/SignIn");
+            router.replace("/");
           } catch (clearError) {
             console.error("Error clearing storage:", clearError);
           }
@@ -690,13 +753,25 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         return { success: true };
       } else {
         console.log("Password reset failed:", response.data.message);
-        showSnackbar(response.data.message, "error");
+
+        showToast({
+          type: "error",
+          title: "Password reset failed!",
+          description: response.data.message,
+        });
+
         return { success: false, message: response.data.message };
       }
     } catch (error: any) {
       console.error("Password reset error:", error);
       const message = error.response?.data?.message || "Password reset failed";
-      showSnackbar(message, "error");
+
+      showToast({
+        type: "error",
+        title: "Password reset error",
+        description: message,
+      });
+
       return { success: false, message };
     } finally {
       setIsLoading(false);
@@ -730,7 +805,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         getUserProfile,
         isLoggedIn: !!userToken,
         isVerified: userData?.isVerified ?? false,
-        showSnackbar,
+        showToast,
         verifyEmail,
         verifyPasswordResetCode,
         resetPassword,
@@ -739,12 +814,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       }}
     >
       {children}
-      <CustomSnackbar
-        visible={snackbarVisible}
-        message={snackbarMessage}
-        type={snackbarType}
-        onDismiss={() => setSnackbarVisible(false)}
-      />
     </AuthContext.Provider>
   );
 };

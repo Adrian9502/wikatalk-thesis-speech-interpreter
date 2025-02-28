@@ -43,9 +43,7 @@ export default function Index() {
   const [activeTab, setActiveTab] = useState("signin");
   const [buttonScale] = useState(new Animated.Value(1));
   const tabIndicatorPosition = useRef(new Animated.Value(0)).current;
-  useEffect(() => {
-    console.log("Form re-rendered");
-  }, [formMessage, isLoading]);
+
   const [fontsLoaded] = useFonts({
     Baybayin: require("../assets/fonts/Baybayin-Regular.ttf"),
   });
@@ -238,7 +236,6 @@ export default function Index() {
                     IconComponent={User}
                     error={signInErrors.usernameOrEmail?.message as string}
                     keyboardType="email-address"
-                    autoCapitalize="none"
                   />
                   <FormInput
                     control={signInControl}
@@ -247,9 +244,11 @@ export default function Index() {
                     secureTextEntry
                     IconComponent={Lock}
                     error={signInErrors.password?.message as string}
-                    autoCapitalize="none"
                   />
-                  <TouchableOpacity style={styles.forgotPassword}>
+                  <TouchableOpacity
+                    onPress={() => router.push("/(auth)/ForgotPassword")}
+                    style={styles.forgotPassword}
+                  >
                     <Text style={styles.forgotPasswordText}>
                       Forgot Password?
                     </Text>
@@ -274,7 +273,6 @@ export default function Index() {
                     placeholder="Username"
                     IconComponent={User}
                     error={signUpErrors.username?.message as string}
-                    autoCapitalize="none"
                   />
                   <Text style={styles.noteContainer}>
                     Provide a <Text style={styles.boldText}>valid email</Text>{" "}
@@ -296,7 +294,6 @@ export default function Index() {
                     secureTextEntry
                     IconComponent={Lock}
                     error={signUpErrors.password?.message as string}
-                    autoCapitalize="none"
                   />
                   <FormInput
                     control={signUpControl}
@@ -305,7 +302,6 @@ export default function Index() {
                     secureTextEntry
                     IconComponent={Lock}
                     error={signUpErrors.confirmPassword?.message as string}
-                    autoCapitalize="none"
                   />
                 </>
               )}
@@ -477,9 +473,9 @@ const styles = StyleSheet.create({
     bottom: 0,
     width: "50%",
     height: "100%",
-    backgroundColor: "#FDB913",
+    backgroundColor: "#0038A8",
     borderRadius: 10,
-    opacity: 0.2,
+    opacity: 0.9,
     zIndex: 0,
   },
   tabText: {
@@ -489,7 +485,7 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
   },
   activeTabText: {
-    color: "#0038A8",
+    color: "#FDB913",
   },
   formContainer: {
     minHeight: 350,
@@ -551,7 +547,6 @@ const styles = StyleSheet.create({
     borderRadius: 10,
   },
   buttonText: {
-    fontFamily: "Roboto",
     color: "#FFFFFF",
     fontSize: 16,
     fontWeight: "bold",
@@ -597,12 +592,10 @@ const styles = StyleSheet.create({
     marginTop: 10,
   },
   switchText: {
-    fontFamily: "Roboto",
     color: "#666",
     fontSize: 12,
   },
   switchActionText: {
-    fontFamily: "Roboto",
     color: "#CE1126",
     fontWeight: "bold",
     fontSize: 12,
