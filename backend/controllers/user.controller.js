@@ -274,39 +274,61 @@ exports.resendVerificationCode = async (req, res) => {
 exports.forgotPassword = async (req, res) => {
   try {
     const { email } = req.body;
+
+    // Always return a success message with the same timing
+    // regardless of whether the email exists
+    const startTime = Date.now();
+
+    // Find the user
     const user = await User.findOne({ email });
 
-    if (!user) {
-      return res.status(404).json({
-        success: false,
-        message: "User not found with that email. Please try again.",
+    if (user) {
+      // Only send email and save reset code if user exists
+      const resetCode = generateVerificationCode();
+
+      // Store reset code and expiry in user document
+      user.resetPasswordCode = resetCode;
+      user.resetPasswordCodeExpires = Date.now() + 30 * 60000; // 30 minutes
+      await user.save();
+
+      // Send reset email with the code
+      await sendPasswordResetEmail({
+        email: user.email,
+        fullName: user.fullName,
+        resetCode,
       });
+
+      console.log(`Reset code sent to existing user: ${email}`);
+    } else {
+      // Log the attempt but don't expose this to the client
+      console.log(`Password reset attempted for non-existent email: ${email}`);
+
+      // Optional: You can simulate the processing time here
+      // to make timing attacks more difficult
+      await new Promise((resolve) => setTimeout(resolve, 200));
     }
 
-    // Generate 6-digit verification code
-    const resetCode = generateVerificationCode();
+    // Ensure consistent response time
+    const processingTime = Date.now() - startTime;
+    const minResponseTime = 500; // minimum milliseconds to respond
 
-    // Store reset code and expiry in user document
-    user.resetPasswordCode = resetCode;
-    user.resetPasswordCodeExpires = Date.now() + 30 * 60000; // 30 minutes
-    await user.save();
+    if (processingTime < minResponseTime) {
+      await new Promise((resolve) =>
+        setTimeout(resolve, minResponseTime - processingTime)
+      );
+    }
 
-    // Send reset email with the code
-    await sendPasswordResetEmail({
-      email: user.email,
-      fullName: user.fullName,
-      resetCode,
-    });
-
+    // Return the same success message regardless of whether user exists
     res.json({
       success: true,
-      message: "Password reset code sent successfully",
+      message:
+        "If an account exists for this email, a password reset code has been sent",
     });
   } catch (error) {
     console.error("Forgot password error:", error);
     res.status(500).json({
       success: false,
-      message: error.message || "Failed to send reset code",
+      message: "Failed to process your request",
     });
   }
 };

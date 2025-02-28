@@ -11,11 +11,11 @@ import { View, ActivityIndicator, SafeAreaView, Text } from "react-native";
 import { StatusBar } from "expo-status-bar";
 import AuthLogo from "@/components/AuthLogo";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-
+import Toast from "react-native-toast-message";
 SplashScreen.preventAutoHideAsync();
 
 const LoadingScreen = ({ message }: { message: string }) => (
-  <SafeAreaView className="bg-emerald-500 h-screen relative flex items-center justify-around flex-1">
+  <SafeAreaView className="bg-red-500 h-screen relative flex items-center justify-around flex-1">
     <StatusBar style="dark" />
     <View className="absolute -top-[50vh] w-[140vw] rounded-full h-[100vh] bg-white" />
     <AuthLogo />
@@ -48,112 +48,104 @@ const AuthGuard = ({ children }: { children: React.ReactNode }) => {
     checkResetFlow();
   }, [segments]);
 
-  useEffect(() => {
-    if (!isAppReady) return;
+  // useEffect(() => {
+  //   if (!isAppReady) return;
 
-    const checkAuth = async () => {
-      // console.log("🔒 AuthGuard Check:", {
-      //   segments,
-      //   isLoggedIn,
-      //   isNavigating,
-      //   userData,
-      //   lastLocation,
-      //   isResetFlow,
-      // });
+  //   const checkAuth = async () => {
+  //     const inAuthGroup = segments[0] === "(auth)";
+  //     const isIndexPage = segments.length === 0 || segments[0] === "index";
+  //     const isVerifyPage = segments[1] === "VerifyEmail";
+  //     const isAuthPage = segments[1] === "SignIn" || segments[1] === "SignUp";
+  //     const hasPartialRegistration = userData && !userData.isVerified;
+  //     const isPasswordResetFlow =
+  //       segments[1] === "ResetPassword" ||
+  //       segments[1] === "VerifyResetPassword" ||
+  //       segments[1] === "SetNewPassword";
 
-      const inAuthGroup = segments[0] === "(auth)";
-      const isIndexPage = segments.length === 0 || segments[0] === "index";
-      const isVerifyPage = segments[1] === "VerifyEmail";
-      const isAuthPage = segments[1] === "SignIn" || segments[1] === "SignUp";
-      const hasPartialRegistration = userData && !userData.isVerified;
-      const isPasswordResetFlow =
-        segments[1] === "ResetPassword" ||
-        segments[1] === "VerifyResetPassword" ||
-        segments[1] === "SetNewPassword";
+  //     // Store current location if it's a valid path
+  //     if (segments.length > 0 && !isNavigating) {
+  //       setLastLocation(segments.join("/"));
+  //     }
 
-      // Store current location if it's a valid path
-      if (segments.length > 0 && !isNavigating) {
-        setLastLocation(segments.join("/"));
-      }
+  //     // Don't redirect if already navigating
+  //     if (isNavigating) {
+  //       // console.log("⏳ Navigation already in progress, skipping check");
+  //       return;
+  //     }
 
-      // Don't redirect if already navigating
-      if (isNavigating) {
-        // console.log("⏳ Navigation already in progress, skipping check");
-        return;
-      }
+  //     try {
+  //       setIsNavigating(true);
 
-      try {
-        setIsNavigating(true);
+  //       // Handle password reset flow with priority
+  //       if (isResetFlow) {
+  //         // console.log("🔑 In password reset flow");
 
-        // Handle password reset flow with priority
-        if (isResetFlow) {
-          // console.log("🔑 In password reset flow");
+  //         // Only redirect within the reset flow if needed
+  //         if (isPasswordResetFlow) {
+  //           // console.log(
+  //           //   "✅ Already on a reset password screen, allowing access"
+  //           // );
+  //         } else if (segments[1] !== "SetNewPassword") {
+  //           // console.log(
+  //           //   "🔄 In reset flow but on wrong screen, redirecting to SetNewPassword"
+  //           // );
+  //           await router.replace("/(auth)/SetNewPassword");
+  //         }
 
-          // Only redirect within the reset flow if needed
-          if (isPasswordResetFlow) {
-            // console.log(
-            //   "✅ Already on a reset password screen, allowing access"
-            // );
-          } else if (segments[1] !== "SetNewPassword") {
-            // console.log(
-            //   "🔄 In reset flow but on wrong screen, redirecting to SetNewPassword"
-            // );
-            await router.replace("/(auth)/SetNewPassword");
-          }
+  //         setIsNavigating(false);
+  //         return;
+  //       }
 
-          setIsNavigating(false);
-          return;
-        }
+  //       // Allow access to auth pages and password reset flow without redirection
+  //       if (isAuthPage || isPasswordResetFlow) {
+  //         // console.log("🔑 On auth/reset page, allowing access");
+  //         setIsNavigating(false);
+  //         return;
+  //       }
 
-        // Allow access to auth pages and password reset flow without redirection
-        if (isAuthPage || isPasswordResetFlow) {
-          // console.log("🔑 On auth/reset page, allowing access");
-          setIsNavigating(false);
-          return;
-        }
+  //       // Handle verified users
+  //       if (isLoggedIn && userData?.isVerified) {
+  //         // console.log("✅ Logged in and verified user");
+  //         if (inAuthGroup || isIndexPage) {
+  //           console.log("🔄 Redirecting to home");
+  //           await router.replace("/(tabs)/Home");
+  //         }
+  //         return;
+  //       }
 
-        // Handle verified users
-        if (isLoggedIn && userData?.isVerified) {
-          // console.log("✅ Logged in and verified user");
-          if (inAuthGroup || isIndexPage) {
-            console.log("🔄 Redirecting to home");
-            await router.replace("/(tabs)/Home");
-          }
-          return;
-        }
+  //       // Handle unverified users
+  //       if (hasPartialRegistration && !isVerifyPage) {
+  //         // console.log("📧 Unverified user, redirecting to verification");
+  //         await router.replace("/(auth)/VerifyEmail");
+  //         return;
+  //       }
 
-        // Handle unverified users
-        if (hasPartialRegistration && !isVerifyPage) {
-          // console.log("📧 Unverified user, redirecting to verification");
-          await router.replace("/(auth)/VerifyEmail");
-          return;
-        }
+  //       // Protect private routes
+  //       if (!isLoggedIn && !inAuthGroup && !isIndexPage) {
+  //         // console.log("🚫 Unauthorized access attempt, redirecting to login");
+  //         await router.replace("/(auth)/SignIn");
+  //         return;
+  //       }
+  //     } catch (error) {
+  //       console.error("❌ Navigation error:", error);
+  //     } finally {
+  //       setIsNavigating(false);
+  //     }
+  //   };
 
-        // Protect private routes
-        if (!isLoggedIn && !inAuthGroup && !isIndexPage) {
-          // console.log("🚫 Unauthorized access attempt, redirecting to login");
-          await router.replace("/(auth)/SignIn");
-          return;
-        }
-      } catch (error) {
-        console.error("❌ Navigation error:", error);
-      } finally {
-        setIsNavigating(false);
-      }
-    };
+  //   checkAuth();
+  // }, [isLoggedIn, segments, isAppReady, userData, isResetFlow]);
 
-    checkAuth();
-  }, [isLoggedIn, segments, isAppReady, userData, isResetFlow]);
-
-  if (!isAppReady || isLoading) {
-    return <LoadingScreen message="Loading..." />;
-  }
+  // if (!isAppReady || isLoading) {
+  //   return <LoadingScreen message="Loading..." />;
+  // }
 
   return <>{children}</>;
 };
 
 const RootLayout = () => {
   const [fontsLoaded, error] = useFonts({
+    "EagleLake-Regular": require("../assets/fonts/EagleLake-Regular.ttf"),
     "Poppins-Black": require("../assets/fonts/Poppins-Black.ttf"),
     "Poppins-Bold": require("../assets/fonts/Poppins-Bold.ttf"),
     "Poppins-ExtraBold": require("../assets/fonts/Poppins-ExtraBold.ttf"),
@@ -186,6 +178,7 @@ const RootLayout = () => {
               <Stack.Screen name="(auth)" options={{ headerShown: false }} />
               <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
             </Stack>
+            <Toast />
           </AuthGuard>
         </ValidationProvider>
       </PaperProvider>

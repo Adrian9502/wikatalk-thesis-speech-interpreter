@@ -1,6 +1,5 @@
 import React, { createContext, useContext, ReactNode } from "react";
 import * as yup from "yup";
-
 // Define form data types
 export interface SignUpFormData {
   fullName: string;
@@ -10,7 +9,7 @@ export interface SignUpFormData {
   confirmPassword: string;
 }
 
-export interface LoginFormData {
+export interface SignInFormData {
   usernameOrEmail: string;
   password: string;
 }
@@ -23,12 +22,17 @@ interface ResetPasswordFormData {
   confirmPassword: string;
 }
 
+interface passwordVerificationCodeData {
+  verificationCode: string;
+}
+
 // Define the context type
 interface ValidationContextType {
   signUpSchema: yup.ObjectSchema<SignUpFormData>;
-  loginSchema: yup.ObjectSchema<LoginFormData>;
+  signInSchema: yup.ObjectSchema<SignInFormData>;
   forgotPasswordSchema: yup.ObjectSchema<ForgotPasswordFormData>;
   resetPasswordSchema: yup.ObjectSchema<ResetPasswordFormData>;
+  passwordVerificationCodeSchema: yup.ObjectSchema<passwordVerificationCodeData>;
 }
 
 interface ValidationProviderProps {
@@ -82,7 +86,7 @@ const signUpSchema = yup.object().shape({
     .oneOf([yup.ref("password")], "Passwords must match"),
 });
 
-const loginSchema = yup.object().shape({
+const signInSchema = yup.object().shape({
   usernameOrEmail: yup
     .string()
     .required("Username or email is required")
@@ -120,6 +124,12 @@ const forgotPasswordSchema = yup.object().shape({
     .email("Please enter a valid email"),
 });
 
+const passwordVerificationCodeSchema = yup.object().shape({
+  verificationCode: yup
+    .string()
+    .matches(/^\d{6}$/, "Code must be exactly 6 digits")
+    .required("Verification code is required"),
+});
 export const ValidationProvider: React.FC<ValidationProviderProps> = ({
   children,
 }) => {
@@ -127,9 +137,10 @@ export const ValidationProvider: React.FC<ValidationProviderProps> = ({
     <ValidationContext.Provider
       value={{
         signUpSchema,
-        loginSchema,
+        signInSchema,
         forgotPasswordSchema,
         resetPasswordSchema,
+        passwordVerificationCodeSchema,
       }}
     >
       {children}
