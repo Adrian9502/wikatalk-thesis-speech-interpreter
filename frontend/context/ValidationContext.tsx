@@ -10,7 +10,7 @@ export interface SignUpFormData {
   confirmPassword: string;
 }
 
-export interface LoginFormData {
+export interface SignInFormData {
   usernameOrEmail: string;
   password: string;
 }
@@ -26,7 +26,7 @@ interface ResetPasswordFormData {
 // Define the context type
 interface ValidationContextType {
   signUpSchema: yup.ObjectSchema<SignUpFormData>;
-  loginSchema: yup.ObjectSchema<LoginFormData>;
+  signInSchema: yup.ObjectSchema<SignInFormData>;
   forgotPasswordSchema: yup.ObjectSchema<ForgotPasswordFormData>;
   resetPasswordSchema: yup.ObjectSchema<ResetPasswordFormData>;
 }
@@ -82,7 +82,7 @@ const signUpSchema = yup.object().shape({
     .oneOf([yup.ref("password")], "Passwords must match"),
 });
 
-const loginSchema = yup.object().shape({
+const signInSchema = yup.object().shape({
   usernameOrEmail: yup
     .string()
     .required("Username or email is required")
@@ -127,7 +127,7 @@ export const ValidationProvider: React.FC<ValidationProviderProps> = ({
     <ValidationContext.Provider
       value={{
         signUpSchema,
-        loginSchema,
+        signInSchema,
         forgotPasswordSchema,
         resetPasswordSchema,
       }}

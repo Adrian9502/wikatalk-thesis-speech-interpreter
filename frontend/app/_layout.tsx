@@ -15,7 +15,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 SplashScreen.preventAutoHideAsync();
 
 const LoadingScreen = ({ message }: { message: string }) => (
-  <SafeAreaView className="bg-emerald-500 h-screen relative flex items-center justify-around flex-1">
+  <SafeAreaView className="bg-red-500 h-screen relative flex items-center justify-around flex-1">
     <StatusBar style="dark" />
     <View className="absolute -top-[50vh] w-[140vw] rounded-full h-[100vh] bg-white" />
     <AuthLogo />
@@ -52,15 +52,6 @@ const AuthGuard = ({ children }: { children: React.ReactNode }) => {
     if (!isAppReady) return;
 
     const checkAuth = async () => {
-      // console.log("🔒 AuthGuard Check:", {
-      //   segments,
-      //   isLoggedIn,
-      //   isNavigating,
-      //   userData,
-      //   lastLocation,
-      //   isResetFlow,
-      // });
-
       const inAuthGroup = segments[0] === "(auth)";
       const isIndexPage = segments.length === 0 || segments[0] === "index";
       const isVerifyPage = segments[1] === "VerifyEmail";
@@ -145,15 +136,16 @@ const AuthGuard = ({ children }: { children: React.ReactNode }) => {
     checkAuth();
   }, [isLoggedIn, segments, isAppReady, userData, isResetFlow]);
 
-  if (!isAppReady || isLoading) {
-    return <LoadingScreen message="Loading..." />;
-  }
+  // if (!isAppReady || isLoading) {
+  //   return <LoadingScreen message="Loading..." />;
+  // }
 
   return <>{children}</>;
 };
 
 const RootLayout = () => {
   const [fontsLoaded, error] = useFonts({
+    "EagleLake-Regular": require("../assets/fonts/EagleLake-Regular.ttf"),
     "Poppins-Black": require("../assets/fonts/Poppins-Black.ttf"),
     "Poppins-Bold": require("../assets/fonts/Poppins-Bold.ttf"),
     "Poppins-ExtraBold": require("../assets/fonts/Poppins-ExtraBold.ttf"),

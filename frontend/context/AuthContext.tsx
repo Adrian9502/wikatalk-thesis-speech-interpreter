@@ -48,6 +48,12 @@ interface AuthContextType {
   ) => Promise<AuthResponse>;
   login: (usernameOrEmail: string, password: string) => Promise<AuthResponse>;
   logout: () => Promise<void>;
+  formMessage: FormMessage | null;
+  setFormMessage: (
+    message: string,
+    type: "success" | "error" | "neutral"
+  ) => void;
+  clearFormMessage: () => void;
   getUserProfile: () => Promise<UserData | undefined>;
   isLoggedIn: boolean;
   isVerified: boolean;
@@ -76,32 +82,11 @@ interface ApiError {
     method?: string;
   };
 }
+interface FormMessage {
+  text: string;
+  type: "success" | "error" | "neutral";
+}
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
-
-// helper function to check if user loggedin
-const logStorageData = async () => {
-  try {
-    const keys = await AsyncStorage.getAllKeys();
-    console.log("\n=== AsyncStorage Data ===");
-    console.log("Storage Keys:", keys);
-
-    for (const key of keys) {
-      const value = await AsyncStorage.getItem(key);
-
-      let parsedValue;
-      try {
-        parsedValue = JSON.parse(value!);
-      } catch (e) {
-        parsedValue = value; // Fallback to raw string if not JSON
-      }
-
-      console.log(`\n${key}:`, parsedValue);
-    }
-    console.log("========================\n");
-  } catch (error) {
-    console.error("Error logging storage:", error);
-  }
-};
 
 export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [isLoading, setIsLoading] = useState<boolean>(true);
@@ -114,6 +99,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     "success" | "error" | "neutral"
   >("neutral");
   const [appInactiveTime, setAppInactiveTime] = useState<number | null>(null);
+  const [formMessage, setFormMessageState] = useState<FormMessage | null>(null);
   const INACTIVE_TIMEOUT = 5 * 60 * 1000; // 5 minutes in milliseconds
   const [isAppReady, setIsAppReady] = useState(false);
 
@@ -149,7 +135,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     const loadStorageData = async (): Promise<void> => {
       try {
         console.log("ON COMPONENT RENDER LOG DATA:");
-        await logStorageData();
 
         // Get all stored data
         const [storedToken, storedUserData, tempUserData] = await Promise.all([
@@ -204,7 +189,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         setUserToken(null);
       } finally {
         console.log("FINAL LOG DATA ON USEEFFECT:");
-        await logStorageData();
+
         setIsLoading(false);
         setIsAppReady(true);
       }
@@ -233,6 +218,17 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       subscription.remove();
     };
   }, [appInactiveTime, userData]);
+  // Set form message response
+  const setFormMessage = (
+    text: string,
+    type: "success" | "error" | "neutral" = "neutral"
+  ) => {
+    setFormMessageState({ text, type });
+  };
+
+  const clearFormMessage = () => {
+    setFormMessageState(null);
+  };
 
   // Check if Verification is in process
   const isInVerificationProcess = (userData: UserData | null): boolean => {
@@ -328,7 +324,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
           "success"
         );
         console.log("AFTER REGISTER LOG DATA:");
-        await logStorageData(); // Log initial state
 
         return { success: true };
       }
@@ -352,6 +347,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   ): Promise<AuthResponse> => {
     setIsLoading(true);
     setError(null);
+    clearFormMessage(); // Clear any existing messages
     console.log("🚀 Login attempt started");
 
     try {
@@ -384,7 +380,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
           "tempUserData",
           JSON.stringify(tempUserData)
         );
-        showSnackbar("Please verify your email to continue", "neutral");
+        setFormMessage("Please verify your email to continue", "neutral");
         await router.replace("/(auth)/VerifyEmail");
         return { success: true };
       }
@@ -400,7 +396,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         setUserToken(token);
         setUserData(user);
         axios.defaults.headers.common["Authorization"] = `Bearer ${token}`;
-        showSnackbar("Login successful!", "success");
+        setFormMessage("Login successful!", "success");
 
         // Use InteractionManager for navigation
         InteractionManager.runAfterInteractions(async () => {
@@ -415,7 +411,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       console.log("❌ Login failed:", error.response?.data || error.message);
       const message = error.response?.data?.message || "Login failed";
       setError(message);
-      showSnackbar(message, "error");
+      setFormMessage(message, "error");
       return { success: false, message };
     } finally {
       setIsLoading(false);
@@ -429,7 +425,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
     try {
       console.log("BEFORE LOG OUT DATA:");
-      await logStorageData();
 
       // Clear storage first
       await Promise.all([
@@ -454,7 +449,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     } finally {
       setIsLoading(false);
       console.log("AFTER LOGOUT LOG DATA:");
-      await logStorageData();
     }
   };
 
@@ -727,6 +721,9 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         userData,
         error,
         register,
+        formMessage,
+        setFormMessage,
+        clearFormMessage,
         sendPasswordResetCode,
         login,
         logout,
