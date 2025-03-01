@@ -75,6 +75,8 @@ export default function Index() {
 
   // redirect to home if user is already logged in
   useEffect(() => {
+    clearFormMessage();
+
     let mounted = true;
 
     const initializeApp = async () => {
@@ -139,20 +141,7 @@ export default function Index() {
   const handleSignUp = async (data: SignUpFormData): Promise<void> => {
     clearFormMessage();
     const { fullName, username, email, password, confirmPassword } = data;
-    const result = await register(
-      fullName,
-      username,
-      email,
-      password,
-      confirmPassword
-    );
-
-    if (result.success) {
-      // Use setTimeout to ensure state updates are complete
-      setTimeout(() => {
-        router.push("/(auth)/VerifyEmail");
-      }, 200);
-    }
+    await register(fullName, username, email, password, confirmPassword);
   };
 
   return (

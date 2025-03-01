@@ -315,8 +315,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
           description: response.data.message,
         });
 
-        console.log("AFTER REGISTER LOG DATA:");
-
+        // redirect to verify email after successful registration
+        router.push("/(auth)/VerifyEmail");
         return { success: true };
       }
       clearFormMessage();
@@ -348,9 +348,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   ): Promise<AuthResponse> => {
     setIsLoading(true);
     setError(null);
-    clearFormMessage(); // Clear any existing messages
-    console.log("🚀 Login attempt started");
-
+    clearFormMessage();
     try {
       // Clear any existing tokens first
       await AsyncStorage.multiRemove(["userToken", "userData"]);
@@ -364,7 +362,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       console.log("📥 Login response:", response.data);
 
       const { token, ...user } = response.data.data;
-      console.log("👤 User verification status:", user.isVerified);
 
       // Handle unverified user
       if (user.isVerified === false) {
@@ -382,7 +379,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
           JSON.stringify(tempUserData)
         );
         setFormMessage("Please verify your email to continue", "neutral");
-        await router.replace("/(auth)/VerifyEmail");
+        router.replace("/(auth)/VerifyEmail");
         return { success: true };
       }
 
@@ -399,9 +396,15 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         axios.defaults.headers.common["Authorization"] = `Bearer ${token}`;
         setFormMessage("Login successful!", "success");
 
+        showToast({
+          type: "success",
+          title: "Login Successful!",
+          description: response.data.message,
+        });
+
         // Use InteractionManager for navigation
         InteractionManager.runAfterInteractions(async () => {
-          await router.replace("/(tabs)/Home");
+          router.replace("/(tabs)/Home");
         });
 
         return { success: true };
@@ -492,12 +495,9 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   ): Promise<AuthResponse> => {
     setIsLoading(true);
     try {
+      clearFormMessage();
       const tempToken = userData?.tempToken;
-      console.log("Verification attempt with:", {
-        email: userData?.email,
-        codeLength: verificationCode.length,
-        hasTempToken: !!tempToken,
-      });
+
       if (!tempToken) {
         showToast({
           type: "error",
@@ -505,6 +505,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
           description: "Invalid session. Please register again.",
         });
 
+        await AsyncStorage.clear();
         router.replace("/");
         return { success: false, message: "Invalid session" };
       }
@@ -514,9 +515,9 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         verificationCode,
         tempToken,
       });
-      console.log("Verification response:", response.data);
 
       if (response.data.success) {
+        clearFormMessage();
         const { token, user } = response.data;
 
         // Clear old data and set new data only after successful verification
@@ -530,18 +531,23 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         setUserToken(token);
         setUserData(user);
         axios.defaults.headers.common["Authorization"] = `Bearer ${token}`;
-
+        // Show toast message to inform user
+        showToast({
+          type: "success",
+          title: "Verification Success!",
+          description: response.data.message,
+        });
+        // after successful verification. redirect to Main screen
+        setTimeout(() => {
+          router.replace("/(tabs)/Home");
+        }, 1000);
         return { success: true };
       }
 
       return { success: false, message: response.data.message };
     } catch (error: any) {
       const message = error.response?.data?.message || "Verification failed";
-      showToast({
-        type: "error",
-        title: "Error",
-        description: message,
-      });
+      setFormMessage(message);
 
       return { success: false, message };
     } finally {

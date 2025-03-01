@@ -33,6 +33,7 @@ interface ValidationContextType {
   forgotPasswordSchema: yup.ObjectSchema<ForgotPasswordFormData>;
   resetPasswordSchema: yup.ObjectSchema<ResetPasswordFormData>;
   passwordVerificationCodeSchema: yup.ObjectSchema<passwordVerificationCodeData>;
+  emailVerificationCodeSchema: yup.ObjectSchema<passwordVerificationCodeData>;
 }
 
 interface ValidationProviderProps {
@@ -124,6 +125,13 @@ const forgotPasswordSchema = yup.object().shape({
     .email("Please enter a valid email"),
 });
 
+const emailVerificationCodeSchema = yup.object().shape({
+  verificationCode: yup
+    .string()
+    .matches(/^\d{6}$/, "Code must be exactly 6 digits")
+    .required("Verification code is required"),
+});
+
 const passwordVerificationCodeSchema = yup.object().shape({
   verificationCode: yup
     .string()
@@ -138,6 +146,7 @@ export const ValidationProvider: React.FC<ValidationProviderProps> = ({
       value={{
         signUpSchema,
         signInSchema,
+        emailVerificationCodeSchema,
         forgotPasswordSchema,
         resetPasswordSchema,
         passwordVerificationCodeSchema,

@@ -1,193 +1,368 @@
 import React, { useState, useEffect } from "react";
 import {
-  SafeAreaView,
+  StyleSheet,
+  Pressable,
   Text,
   View,
-  TouchableOpacity,
-  ActivityIndicator,
+  ImageBackground,
   KeyboardAvoidingView,
-  Platform,
-  ScrollView,
+  Dimensions,
+  ActivityIndicator,
   InteractionManager,
+  Platform,
 } from "react-native";
+import { LinearGradient } from "expo-linear-gradient";
 import { StatusBar } from "expo-status-bar";
-import { router } from "expo-router";
-import { useAuth } from "@/context/AuthContext";
-import AuthLogo from "@/components/AuthLogo";
-import FormInput from "@/components/FormInput";
-import { CheckCircle } from "lucide-react-native";
 import { useForm } from "react-hook-form";
+import { yupResolver } from "@hookform/resolvers/yup";
+import FormInput from "@/components/FormInput";
+import { Mail, CheckCircle } from "lucide-react-native";
+import { useAuth } from "@/context/AuthContext";
+import FormMessage from "@/components/FormMessage";
+import { router } from "expo-router";
+import { useValidation } from "@/context/ValidationContext";
+const { width } = Dimensions.get("window");
+
+interface VerificationFormData {
+  verificationCode: string;
+}
+
 const VerifyEmail: React.FC = () => {
+  const [countdown, setCountdown] = useState<number>(30);
+  const [resendDisabled, setResendDisabled] = useState<boolean>(true);
   const {
     verifyEmail,
     isLoading,
-    showSnackbar,
     resendVerificationEmail,
     userData,
     clearStorage,
+    formMessage,
+    setFormMessage,
+    clearFormMessage,
   } = useAuth();
-  const [verificationCode, setVerificationCode] = useState("");
-  const [activeInput, setActiveInput] = useState("");
-  const [resendTimer, setResendTimer] = useState(30);
+  const { emailVerificationCodeSchema } = useValidation();
 
-  const { control } = useForm({
-    defaultValues: {
-      verificationCode: "",
-    },
+  // Form for verification code
+  const {
+    control,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<VerificationFormData>({
+    resolver: yupResolver(emailVerificationCodeSchema),
   });
 
-  // Check if verification email was sent and start timer
+  // Timer for resend code
   useEffect(() => {
     let timer: NodeJS.Timeout;
-    if (resendTimer > 0) {
-      timer = setInterval(() => {
-        setResendTimer((prev) => prev - 1);
-      }, 1000);
+
+    if (countdown > 0) {
+      timer = setTimeout(() => setCountdown(countdown - 1), 1000);
+      setResendDisabled(true);
+    } else {
+      setResendDisabled(false);
     }
+
     return () => {
-      if (timer) clearInterval(timer);
+      if (timer) clearTimeout(timer);
     };
-  }, [resendTimer]);
+  }, [countdown]);
 
   const handleResendCode = async () => {
-    if (resendTimer > 0) return;
-
-    const result = await resendVerificationEmail();
-    if (result.success) {
-      setResendTimer(30);
-    }
-  };
-
-  const handleVerification = async () => {
-    if (isLoading) return;
-
-    // Add validation
-    if (!verificationCode || verificationCode.length !== 6) {
-      showSnackbar("Please enter a valid 6-digit code", "error");
-      return;
-    }
+    if (resendDisabled) return;
 
     try {
-      console.log("Attempting verification with:", verificationCode);
-      const result = await verifyEmail(verificationCode);
-
+      clearFormMessage(); // Clear any existing message
+      const result = await resendVerificationEmail();
       if (result.success) {
-        showSnackbar("Email verified successfully!", "success");
-        // Use replace instead of push to prevent going back
-        setTimeout(() => {
-          router.replace("/(tabs)/Home");
-        }, 1000);
+        console.log("✅ Success! Verification email resent");
+        setFormMessage("Verification code resent successfully", "success");
+        // Start the countdown timer
+        setCountdown(30);
       }
     } catch (error) {
-      console.error("Verification error:", error);
-      showSnackbar("Failed to verify email. Please try again.", "error");
+      console.error("Failed to resend verification code:", error);
+      setFormMessage(
+        "Failed to resend verification code. Please try again.",
+        "error"
+      );
     }
   };
 
-  const handleBacktoHome = async () => {
+  const handleVerification = async (data: VerificationFormData) => {
+    console.log("Verifying code:", data.verificationCode);
+    clearFormMessage();
     try {
-      await clearStorage(); // This will properly clear both storage and state
+      const result = await verifyEmail(data.verificationCode);
 
-      // Use InteractionManager to ensure UI is ready
+      if (result.success) {
+        console.log("✅ Verification successful!");
+        setFormMessage("Email verified successfully!", "success");
+
+        // Use InteractionManager to ensure UI is ready
+        InteractionManager.runAfterInteractions(() => {
+          // Use replace instead of push to prevent going back
+          router.replace("/(tabs)/Home");
+        });
+      }
+    } catch (error: any) {
+      console.error("Failed to verify code:", error);
+      const message =
+        error.response?.data?.message ||
+        "Invalid verification code. Please try again.";
+      setFormMessage(message, "error");
+    }
+  };
+
+  const handleGoBack = async () => {
+    try {
+      // clear both storage and state
+      await clearStorage();
+
       InteractionManager.runAfterInteractions(() => {
-        router.push("/(auth)/SignIn");
+        router.replace("/");
       });
     } catch (error) {
       console.error("Error returning to home:", error);
-      showSnackbar("Error returning to home", "error");
+      setFormMessage("Error returning to home", "error");
     }
   };
 
   return (
-    <SafeAreaView className="min-h-screen bg-emerald-500 flex-1">
-      <StatusBar style="dark" />
-      <KeyboardAvoidingView
-        behavior={Platform.OS === "ios" ? "padding" : "height"}
-        className="flex-1"
-        keyboardVerticalOffset={Platform.OS === "ios" ? 0 : 20}
+    <ImageBackground
+      source={require("../../assets/images/philippines-tapestry.jpg")}
+      style={styles.background}
+    >
+      <StatusBar style="light" />
+      <LinearGradient
+        colors={["rgba(0, 56, 168, 0.8)", "rgba(206, 17, 38, 0.8)"]}
+        style={styles.overlay}
       >
-        <ScrollView
-          contentContainerStyle={{ flexGrow: 1 }}
-          keyboardShouldPersistTaps="handled"
-          showsVerticalScrollIndicator={false}
+        <KeyboardAvoidingView
+          behavior={Platform.OS === "ios" ? "padding" : "height"}
+          style={styles.container}
+          keyboardVerticalOffset={Platform.OS === "ios" ? 40 : 0}
         >
-          <View className="flex-1 items-center px-8">
-            <AuthLogo />
-            <View className="py-5 px-8 w-full gap-4 mt-2">
-              <Text className="text-3xl mb-2 text-center font-pbold text-white">
-                Verify Your Email
-              </Text>
-              <View className="mb-2">
-                <Text className="text-white text-center font-pregular">
-                  We've sent a verification code token to
-                </Text>
-                <Text className="my-2 text-white text-center font-psemibold">
-                  {userData?.email}
-                </Text>
-                <Text className="text-white text-center font-pregular">
-                  Please enter the 6-digit code below.
-                </Text>
+          {/* Form container */}
+          <View style={styles.card}>
+            <Text style={styles.title}>Verify Your Email</Text>
+            <Text style={styles.subtitle}>
+              We've sent a verification code to your email
+            </Text>
 
-                <View className="border p-2 border-white rounded-lg mt-4">
-                  <Text className="text-white text-center font-pregular">
-                    Note: If you don't see the email, check your spam or junk
-                    folder.
-                  </Text>
-                </View>
+            {/* Form container */}
+            <View style={styles.formContainer}>
+              {/* Display sent email */}
+              <View style={styles.emailSentContainer}>
+                <Mail size={20} color="#0038A8" />
+                <Text style={styles.emailSentText}>{userData?.email}</Text>
               </View>
 
+              <View style={styles.noteContainer}>
+                <Text style={styles.noteText}>
+                  Note: If you don't see the email, check your spam or junk
+                  folder.
+                </Text>
+              </View>
+
+              {formMessage && (
+                <FormMessage
+                  message={formMessage.text}
+                  type={"error"}
+                  onDismiss={clearFormMessage}
+                />
+              )}
+
+              {/* Verification Code Input */}
               <FormInput
-                placeholder="Enter 6-digit code"
-                value={verificationCode}
-                onChangeText={setVerificationCode}
-                keyboardType="number-pad"
-                maxLength={6}
-                IconComponent={CheckCircle}
-                autoComplete="off"
                 control={control}
                 name="verificationCode"
-                activeInput={activeInput}
-                setActiveInput={setActiveInput}
+                placeholder="Enter 6-digit verification code"
+                IconComponent={CheckCircle}
+                error={errors.verificationCode?.message}
+                keyboardType="number-pad"
+                maxLength={6}
               />
 
-              <TouchableOpacity
+              {/* Verify Button */}
+              <View style={styles.buttonContainer}>
+                <Pressable
+                  style={styles.button}
+                  disabled={isLoading}
+                  onPress={handleSubmit(handleVerification)}
+                >
+                  <View style={styles.buttonContent}>
+                    {isLoading && (
+                      <ActivityIndicator
+                        size="small"
+                        color="#FFFFFF"
+                        style={styles.buttonLoader}
+                      />
+                    )}
+                    <Text style={styles.buttonText}>Verify Email</Text>
+                  </View>
+                </Pressable>
+              </View>
+
+              {/* Resend Code Button */}
+              <Pressable
+                style={[
+                  styles.resendButton,
+                  resendDisabled && styles.resendButtonDisabled,
+                ]}
                 onPress={handleResendCode}
-                disabled={resendTimer > 0}
-                className="mt-4"
+                disabled={resendDisabled}
               >
-                <Text className="text-white text-center font-pregular">
-                  {resendTimer > 0
-                    ? `Resend code in ${resendTimer}s`
-                    : "Resend verification code"}
+                <Text
+                  style={[
+                    styles.resendText,
+                    resendDisabled && styles.resendTextDisabled,
+                  ]}
+                >
+                  {resendDisabled
+                    ? `Resend Code (${countdown}s)`
+                    : "Resend Code"}
                 </Text>
-              </TouchableOpacity>
+              </Pressable>
 
-              <TouchableOpacity
-                activeOpacity={0.9}
-                className="bg-white p-3 mt-5 rounded-xl"
-                onPress={handleVerification}
-                disabled={isLoading}
-              >
-                {isLoading ? (
-                  <ActivityIndicator size="small" color="#10b981" />
-                ) : (
-                  <Text className="text-emerald-500 font-pmedium text-lg uppercase text-center">
-                    Verify Email
-                  </Text>
-                )}
-              </TouchableOpacity>
-
-              <TouchableOpacity onPress={handleBacktoHome} className="mt-4">
-                <Text className="text-white text-center font-pregular">
-                  Back to Home
-                </Text>
-              </TouchableOpacity>
+              <Pressable onPress={handleGoBack}>
+                <Text style={styles.goBackText}>Go back</Text>
+              </Pressable>
             </View>
           </View>
-        </ScrollView>
-      </KeyboardAvoidingView>
-    </SafeAreaView>
+        </KeyboardAvoidingView>
+      </LinearGradient>
+    </ImageBackground>
   );
 };
+
+const styles = StyleSheet.create({
+  background: {
+    flex: 1,
+    width: "100%",
+    height: "100%",
+  },
+  overlay: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  container: {
+    width: width * 0.85,
+    maxWidth: 350,
+    alignItems: "center",
+  },
+  card: {
+    backgroundColor: "rgba(255, 255, 255, 0.95)",
+    borderRadius: 20,
+    padding: 20,
+    width: "100%",
+    alignItems: "center",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.25,
+    shadowRadius: 6,
+    elevation: 8,
+  },
+  formContainer: {
+    width: "100%",
+    marginTop: 20,
+  },
+  formMessageContainer: {
+    marginBottom: 16,
+    width: "100%",
+  },
+  title: {
+    fontSize: 28,
+    fontWeight: "bold",
+    color: "#0038A8",
+    marginBottom: 10,
+  },
+  subtitle: {
+    textAlign: "center",
+    fontSize: 14,
+    color: "#555",
+    marginBottom: 10,
+    paddingHorizontal: 10,
+  },
+  noteContainer: {
+    backgroundColor: "#F0F8FF",
+    borderRadius: 10,
+    padding: 12,
+    marginBottom: 16,
+    borderWidth: 1,
+    borderColor: "#0038A8",
+  },
+  noteText: {
+    color: "#555",
+    textAlign: "center",
+    fontSize: 13,
+  },
+  goBackText: {
+    fontSize: 13,
+    color: "#999",
+    marginTop: 15,
+  },
+  buttonContainer: {
+    width: "100%",
+    borderRadius: 10,
+    overflow: "hidden",
+    marginVertical: 16,
+    elevation: 2,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.2,
+    shadowRadius: 3,
+  },
+  buttonContent: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  buttonLoader: {
+    marginRight: 8,
+  },
+  button: {
+    backgroundColor: "#CE1126", // Red
+    paddingVertical: 14,
+    alignItems: "center",
+    justifyContent: "center",
+    borderRadius: 10,
+  },
+  buttonText: {
+    color: "#FFFFFF",
+    fontSize: 16,
+    fontWeight: "bold",
+  },
+  emailSentContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#F0F8FF",
+    borderRadius: 10,
+    padding: 12,
+    marginBottom: 16,
+    borderWidth: 1,
+    borderColor: "#0038A8",
+  },
+  emailSentText: {
+    marginLeft: 10,
+    color: "#0038A8",
+    fontWeight: "500",
+  },
+  resendButton: {
+    marginTop: 5,
+    alignSelf: "center",
+  },
+  resendButtonDisabled: {
+    opacity: 0.5,
+  },
+  resendText: {
+    color: "#0038A8",
+    fontSize: 14,
+    fontWeight: "600",
+  },
+  resendTextDisabled: {
+    color: "#666",
+  },
+});
 
 export default VerifyEmail;
