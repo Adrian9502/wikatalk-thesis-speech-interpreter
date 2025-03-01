@@ -1,6 +1,5 @@
 "use client";
 import {
-  StyleSheet,
   View,
   Text,
   TouchableOpacity,
@@ -11,6 +10,8 @@ import {
   LayoutAnimation,
   Platform,
   UIManager,
+  Keyboard,
+  TouchableWithoutFeedback,
   ActivityIndicator,
   Pressable,
 } from "react-native";
@@ -67,7 +68,6 @@ export default function Index() {
   const {
     control: signUpControl,
     handleSubmit: handleSignUpSubmit,
-
     formState: { errors: signUpErrors },
   } = useForm<SignUpFormData>({
     resolver: yupResolver(signUpSchema),
@@ -108,7 +108,7 @@ export default function Index() {
     return (
       <ImageBackground
         source={require("../assets/images/philippines-tapestry.jpg")}
-        style={styles.background}
+        className="flex-1 w-full h-full"
       ></ImageBackground>
     );
   }
@@ -145,450 +145,257 @@ export default function Index() {
   };
 
   return (
-    <ImageBackground
-      source={require("../assets/images/philippines-tapestry.jpg")}
-      style={styles.background}
-    >
-      <StatusBar style="light" />
-      <LinearGradient
-        colors={["rgba(0, 56, 168, 0.8)", "rgba(206, 17, 38, 0.8)"]}
-        style={styles.overlay}
-      >
-        <KeyboardAvoidingView
-          behavior={Platform.OS === "ios" ? "padding" : "height"}
-          style={styles.container}
-          keyboardVerticalOffset={Platform.OS === "ios" ? 40 : 0} // Adjust as needed
+    <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
+      <View className="flex-1">
+        <ImageBackground
+          source={require("../assets/images/philippines-tapestry.jpg")}
+          className="flex-1 w-full h-full"
         >
-          {/* Logo */}
-          <View style={styles.logoContainer}>
-            <WikaTalkLogo />
-          </View>
+          <StatusBar style="light" />
+          <LinearGradient
+            colors={["rgba(0, 56, 168, 0.8)", "rgba(206, 17, 38, 0.8)"]}
+            className="flex-1 justify-center items-center"
+          >
+            <KeyboardAvoidingView
+              behavior={Platform.OS === "ios" ? "padding" : "height"}
+              className="w-[85%] max-w-[350px] items-center"
+              keyboardVerticalOffset={Platform.OS === "ios" ? 40 : 0}
+            >
+              {/* Logo */}
+              <View className="items-center mb-5">
+                <WikaTalkLogo />
+              </View>
 
-          {/* Form container */}
-          <View style={styles.card}>
-            {/* Compact tab navigation */}
-            <View style={styles.tabContainer}>
-              <TouchableOpacity
-                style={styles.tab}
-                onPress={() => switchTab("signin")}
-              >
-                <Text
-                  style={[
-                    styles.tabText,
-                    activeTab === "signin" && styles.activeTabText,
-                  ]}
-                >
-                  Sign In
-                </Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                style={styles.tab}
-                onPress={() => switchTab("signup")}
-              >
-                <Text
-                  style={[
-                    styles.tabText,
-                    activeTab === "signup" && styles.activeTabText,
-                  ]}
-                >
-                  Sign Up
-                </Text>
-              </TouchableOpacity>
-              {/* Animated tab indicator */}
-              <Animated.View
-                style={[
-                  styles.tabIndicator,
-                  {
-                    left: tabIndicatorLeft,
-                  },
-                ]}
-              />
-            </View>
-
-            {/* Form container */}
-            <View style={styles.formContainer}>
-              {formMessage && (
-                <FormMessage
-                  message={formMessage.text}
-                  type={formMessage.type}
-                  onDismiss={clearFormMessage}
-                />
-              )}
-
-              {/* Sign In Form */}
-              {activeTab === "signin" && (
-                <>
-                  <FormInput
-                    control={signInControl}
-                    name="usernameOrEmail"
-                    placeholder="Username or Email"
-                    IconComponent={User}
-                    error={signInErrors.usernameOrEmail?.message as string}
-                    keyboardType="email-address"
-                    autoCapitalize="sentences"
-                  />
-                  <FormInput
-                    control={signInControl}
-                    name="password"
-                    placeholder="Password"
-                    secureTextEntry
-                    IconComponent={Lock}
-                    error={signInErrors.password?.message as string}
-                  />
+              {/* Form container */}
+              <View className="bg-white/95 rounded-2xl p-4 w-full items-center shadow-md min-h-[400px]">
+                {/* Compact tab navigation */}
+                <View className="flex-row w-full relative mb-4 rounded-lg bg-gray-100 overflow-hidden">
                   <TouchableOpacity
-                    onPress={() => router.push("/(auth)/ForgotPassword")}
-                    style={styles.forgotPassword}
+                    className="flex-1 py-3 items-center z-10"
+                    onPress={() => switchTab("signin")}
                   >
-                    <Text style={styles.forgotPasswordText}>
-                      Forgot Password?
+                    <Text
+                      className={`font-bold text-sm ${
+                        activeTab === "signin"
+                          ? "text-amber-400"
+                          : "text-gray-600"
+                      }`}
+                    >
+                      Sign In
                     </Text>
                   </TouchableOpacity>
-                </>
-              )}
-
-              {/* Sign Up Form */}
-              {activeTab === "signup" && (
-                <>
-                  <FormInput
-                    control={signUpControl}
-                    name="fullName"
-                    placeholder="Full Name"
-                    IconComponent={User}
-                    error={signUpErrors.fullName?.message as string}
-                    autoCapitalize="words"
-                  />
-                  <FormInput
-                    control={signUpControl}
-                    name="username"
-                    placeholder="Username"
-                    IconComponent={User}
-                    error={signUpErrors.username?.message as string}
-                  />
-                  <Text style={styles.noteContainer}>
-                    Provide a <Text style={styles.boldText}>valid email</Text>{" "}
-                    to receive a 6-digit code. Check spam/junk if not received.
-                  </Text>
-                  <FormInput
-                    control={signUpControl}
-                    name="email"
-                    placeholder="Email"
-                    keyboardType="email-address"
-                    IconComponent={Mail}
-                    error={signUpErrors.email?.message as string}
-                    autoCapitalize="none"
-                  />
-                  <FormInput
-                    control={signUpControl}
-                    name="password"
-                    placeholder="Password"
-                    secureTextEntry
-                    IconComponent={Lock}
-                    error={signUpErrors.password?.message as string}
-                  />
-                  <FormInput
-                    control={signUpControl}
-                    name="confirmPassword"
-                    placeholder="Confirm Password"
-                    secureTextEntry
-                    IconComponent={Lock}
-                    error={signUpErrors.confirmPassword?.message as string}
-                  />
-                </>
-              )}
-
-              {/* Submit Button */}
-              <Animated.View
-                style={[
-                  styles.buttonContainer,
-                  { transform: [{ scale: buttonScale }] },
-                ]}
-              >
-                <Pressable
-                  style={styles.button}
-                  disabled={isLoading}
-                  onPress={() => {
-                    if (activeTab === "signin") {
-                      handleSignInSubmit(handleSignIn)();
-                    } else {
-                      handleSignUpSubmit(handleSignUp)();
-                    }
-                  }}
-                >
-                  <View style={styles.buttonContent}>
-                    {isLoading && (
-                      <ActivityIndicator
-                        size="small"
-                        color="#FFFFFF"
-                        style={styles.buttonLoader}
-                      />
-                    )}
-                    <Text style={styles.buttonText}>
-                      {activeTab === "signin" ? "Sign In" : "Sign Up"}
+                  <TouchableOpacity
+                    className="flex-1 py-3 items-center z-10"
+                    onPress={() => switchTab("signup")}
+                  >
+                    <Text
+                      className={`font-bold text-sm ${
+                        activeTab === "signup"
+                          ? "text-amber-400"
+                          : "text-gray-600"
+                      }`}
+                    >
+                      Sign Up
                     </Text>
-                  </View>
-                </Pressable>
-              </Animated.View>
+                  </TouchableOpacity>
+                  {/* Animated tab indicator */}
+                  <Animated.View
+                    style={[
+                      {
+                        position: "absolute",
+                        bottom: 0,
+                        width: "50%",
+                        height: "100%",
+                        backgroundColor: "#0038A8",
+                        borderRadius: 10,
+                        opacity: 0.9,
+                        zIndex: 0,
+                        left: tabIndicatorLeft,
+                      },
+                    ]}
+                  />
+                </View>
 
-              {/* Social login options */}
-              {activeTab === "signin" && (
-                <>
-                  <View style={styles.orContainer}>
-                    <View style={styles.orLine} />
-                    <Text style={styles.orText}>OR</Text>
-                    <View style={styles.orLine} />
-                  </View>
+                {/* Form container */}
+                <View className="min-h-[350px] w-full">
+                  {formMessage && (
+                    <FormMessage
+                      message={formMessage.text}
+                      type={formMessage.type}
+                      onDismiss={clearFormMessage}
+                    />
+                  )}
 
-                  <View style={styles.socialContainer}>
-                    <TouchableOpacity style={styles.socialButton}>
-                      <Ionicons name="logo-google" size={20} color="#DB4437" />
-                    </TouchableOpacity>
-                    <TouchableOpacity style={styles.socialButton}>
-                      <Ionicons
-                        name="logo-facebook"
-                        size={20}
-                        color="#4267B2"
+                  {/* Sign In Form */}
+                  {activeTab === "signin" && (
+                    <>
+                      <FormInput
+                        control={signInControl}
+                        name="usernameOrEmail"
+                        placeholder="Username or Email"
+                        IconComponent={User}
+                        error={signInErrors.usernameOrEmail?.message as string}
+                        keyboardType="email-address"
+                        autoCapitalize="sentences"
                       />
-                    </TouchableOpacity>
-                    <TouchableOpacity style={styles.socialButton}>
-                      <Ionicons name="mail" size={20} color="#333333" />
+                      <FormInput
+                        control={signInControl}
+                        name="password"
+                        placeholder="Password"
+                        secureTextEntry
+                        IconComponent={Lock}
+                        error={signInErrors.password?.message as string}
+                      />
+                      <TouchableOpacity
+                        onPress={() => router.push("/(auth)/ForgotPassword")}
+                        className="self-end mb-3"
+                      >
+                        <Text className="text-blue-800 text-sm">
+                          Forgot Password?
+                        </Text>
+                      </TouchableOpacity>
+                    </>
+                  )}
+
+                  {/* Sign Up Form */}
+                  {activeTab === "signup" && (
+                    <>
+                      <FormInput
+                        control={signUpControl}
+                        name="fullName"
+                        placeholder="Full Name"
+                        IconComponent={User}
+                        error={signUpErrors.fullName?.message as string}
+                        autoCapitalize="words"
+                      />
+                      <FormInput
+                        control={signUpControl}
+                        name="username"
+                        placeholder="Username"
+                        IconComponent={User}
+                        error={signUpErrors.username?.message as string}
+                      />
+                      <Text className="text-gray-500 p-1 text-sm">
+                        Provide a{" "}
+                        <Text className="font-semibold text-gray-700">
+                          valid email
+                        </Text>{" "}
+                        to receive a 6-digit code. Check spam/junk if not
+                        received.
+                      </Text>
+                      <FormInput
+                        control={signUpControl}
+                        name="email"
+                        placeholder="Email"
+                        keyboardType="email-address"
+                        IconComponent={Mail}
+                        error={signUpErrors.email?.message as string}
+                        autoCapitalize="none"
+                      />
+                      <FormInput
+                        control={signUpControl}
+                        name="password"
+                        placeholder="Password"
+                        secureTextEntry
+                        IconComponent={Lock}
+                        error={signUpErrors.password?.message as string}
+                      />
+                      <FormInput
+                        control={signUpControl}
+                        name="confirmPassword"
+                        placeholder="Confirm Password"
+                        secureTextEntry
+                        IconComponent={Lock}
+                        error={signUpErrors.confirmPassword?.message as string}
+                      />
+                    </>
+                  )}
+
+                  {/* Submit Button */}
+                  <Animated.View
+                    style={[{ transform: [{ scale: buttonScale }] }]}
+                    className="w-full rounded-lg overflow-hidden my-2 shadow"
+                  >
+                    <Pressable
+                      className="bg-red-600 py-3 items-center justify-center rounded-lg"
+                      disabled={isLoading}
+                      onPress={() => {
+                        if (activeTab === "signin") {
+                          handleSignInSubmit(handleSignIn)();
+                        } else {
+                          handleSignUpSubmit(handleSignUp)();
+                        }
+                      }}
+                    >
+                      <View className="flex-row items-center justify-center">
+                        {isLoading && (
+                          <ActivityIndicator
+                            size="small"
+                            color="#FFFFFF"
+                            className="mr-2"
+                          />
+                        )}
+                        <Text className="text-white text-base font-bold">
+                          {activeTab === "signin" ? "Sign In" : "Sign Up"}
+                        </Text>
+                      </View>
+                    </Pressable>
+                  </Animated.View>
+
+                  {/* Social login options */}
+                  {activeTab === "signin" && (
+                    <>
+                      <View className="flex-row items-center my-3">
+                        <View className="flex-1 h-px bg-gray-200" />
+                        <Text className="text-gray-500 px-2 text-sm">OR</Text>
+                        <View className="flex-1 h-px bg-gray-200" />
+                      </View>
+
+                      <View className="flex-row justify-center mb-3">
+                        <TouchableOpacity className="w-10 h-10 rounded-full bg-white justify-center items-center mx-2 shadow-sm">
+                          <Ionicons
+                            name="logo-google"
+                            size={20}
+                            color="#DB4437"
+                          />
+                        </TouchableOpacity>
+                        <TouchableOpacity className="w-10 h-10 rounded-full bg-white justify-center items-center mx-2 shadow-sm">
+                          <Ionicons
+                            name="logo-facebook"
+                            size={20}
+                            color="#4267B2"
+                          />
+                        </TouchableOpacity>
+                        <TouchableOpacity className="w-10 h-10 rounded-full bg-white justify-center items-center mx-2 shadow-sm">
+                          <Ionicons name="mail" size={20} color="#333333" />
+                        </TouchableOpacity>
+                      </View>
+                    </>
+                  )}
+
+                  {/* Switch between sign in and sign up */}
+                  <View className="flex-row justify-center mt-3">
+                    <Text className="text-gray-600 text-sm">
+                      {activeTab === "signin"
+                        ? "Don't have an account?"
+                        : "Already have an account?"}
+                    </Text>
+                    <TouchableOpacity
+                      onPress={() =>
+                        switchTab(activeTab === "signin" ? "signup" : "signin")
+                      }
+                    >
+                      <Text className="text-red-600 font-bold text-sm ml-1">
+                        {activeTab === "signin" ? "Sign Up" : "Sign In"}
+                      </Text>
                     </TouchableOpacity>
                   </View>
-                </>
-              )}
-
-              {/* Switch between sign in and sign up */}
-              <View style={styles.switchContainer}>
-                <Text style={styles.switchText}>
-                  {activeTab === "signin"
-                    ? "Don't have an account?"
-                    : "Already have an account?"}
-                </Text>
-                <TouchableOpacity
-                  onPress={() =>
-                    switchTab(activeTab === "signin" ? "signup" : "signin")
-                  }
-                >
-                  <Text style={styles.switchActionText}>
-                    {activeTab === "signin" ? "Sign Up" : "Sign In"}
-                  </Text>
-                </TouchableOpacity>
+                </View>
               </View>
-            </View>
-          </View>
-        </KeyboardAvoidingView>
-      </LinearGradient>
-    </ImageBackground>
+            </KeyboardAvoidingView>
+          </LinearGradient>
+        </ImageBackground>
+      </View>
+    </TouchableWithoutFeedback>
   );
 }
-
-const styles = StyleSheet.create({
-  background: {
-    flex: 1,
-    width: "100%",
-    height: "100%",
-  },
-  overlay: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  container: {
-    width: width * 0.85,
-    maxWidth: 350,
-    alignItems: "center",
-  },
-  logoContainer: {
-    alignItems: "center",
-    marginBottom: 20,
-  },
-  logo: {
-    fontFamily: "Baybayin",
-    fontSize: 42,
-    color: "#FDB913",
-    marginBottom: 6,
-    textShadowColor: "rgba(0, 0, 0, 0.75)",
-    textShadowOffset: { width: -1, height: 1 },
-    textShadowRadius: 10,
-  },
-  tagline: {
-    fontFamily: "Roboto",
-    fontSize: 16,
-    color: "#FFFFFF",
-    textAlign: "center",
-    textShadowColor: "rgba(0, 0, 0, 0.75)",
-    textShadowOffset: { width: -1, height: 1 },
-    textShadowRadius: 10,
-  },
-  card: {
-    backgroundColor: "rgba(255, 255, 255, 0.95)",
-    borderRadius: 20,
-    padding: 16,
-    width: "100%",
-    alignItems: "center",
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 3 },
-    shadowOpacity: 0.25,
-    shadowRadius: 6,
-    elevation: 8,
-    minHeight: 400,
-  },
-  noteContainer: {
-    color: "#777", //
-    padding: 5,
-    fontFamily: "Poppins-Regular",
-    borderColor: "#059669",
-    fontSize: 12,
-  },
-  boldText: {
-    fontFamily: "Poppins-SemiBold",
-    color: "#555",
-  },
-  tabContainer: {
-    flexDirection: "row",
-    width: "100%",
-    position: "relative",
-    marginBottom: 16,
-    borderRadius: 10,
-    backgroundColor: "#f0f0f0",
-    overflow: "hidden",
-  },
-  tab: {
-    flex: 1,
-    paddingVertical: 12,
-    alignItems: "center",
-    zIndex: 1,
-  },
-  tabIndicator: {
-    position: "absolute",
-    bottom: 0,
-    width: "50%",
-    height: "100%",
-    backgroundColor: "#0038A8",
-    borderRadius: 10,
-    opacity: 0.9,
-    zIndex: 0,
-  },
-  tabText: {
-    fontFamily: "Roboto",
-    color: "#555",
-    fontSize: 14,
-    fontWeight: "bold",
-  },
-  activeTabText: {
-    color: "#FDB913",
-  },
-  formContainer: {
-    minHeight: 350,
-    width: "100%",
-  },
-  inputContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-    backgroundColor: "#f7f7f7",
-    borderRadius: 10,
-    marginBottom: 12,
-    paddingHorizontal: 12,
-    borderWidth: 1,
-    borderColor: "#e0e0e0",
-  },
-  inputIcon: {
-    marginRight: 10,
-  },
-  input: {
-    fontFamily: "Roboto",
-    flex: 1,
-    paddingVertical: 10,
-    fontSize: 14,
-    color: "#333",
-  },
-  forgotPassword: {
-    alignSelf: "flex-end",
-    marginBottom: 12,
-  },
-  forgotPasswordText: {
-    fontFamily: "Roboto",
-    color: "#0038A8",
-    fontSize: 12,
-  },
-  buttonContainer: {
-    width: "100%",
-    borderRadius: 10,
-    overflow: "hidden",
-    marginVertical: 8,
-    elevation: 2,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.2,
-    shadowRadius: 3,
-  },
-  buttonContent: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  buttonLoader: {
-    marginRight: 8,
-  },
-  button: {
-    backgroundColor: "#CE1126",
-    paddingVertical: 12,
-    alignItems: "center",
-    justifyContent: "center",
-    borderRadius: 10,
-  },
-  buttonText: {
-    color: "#FFFFFF",
-    fontSize: 16,
-    fontWeight: "bold",
-  },
-  orContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginVertical: 12,
-  },
-  orLine: {
-    flex: 1,
-    height: 1,
-    backgroundColor: "#ddd",
-  },
-  orText: {
-    fontFamily: "Roboto",
-    color: "#888",
-    paddingHorizontal: 8,
-    fontSize: 12,
-  },
-  socialContainer: {
-    flexDirection: "row",
-    justifyContent: "center",
-    marginBottom: 12,
-  },
-  socialButton: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: "#fff",
-    justifyContent: "center",
-    alignItems: "center",
-    marginHorizontal: 8,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.15,
-    shadowRadius: 2,
-    elevation: 1,
-  },
-  switchContainer: {
-    flexDirection: "row",
-    justifyContent: "center",
-    marginTop: 10,
-  },
-  switchText: {
-    color: "#666",
-    fontSize: 12,
-  },
-  switchActionText: {
-    color: "#CE1126",
-    fontWeight: "bold",
-    fontSize: 12,
-    marginLeft: 4,
-  },
-});
