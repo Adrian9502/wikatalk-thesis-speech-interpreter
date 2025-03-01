@@ -77,7 +77,7 @@ const signUpSchema = yup.object().shape({
     .required("Password is required")
     .matches(
       passwordPattern,
-      "Password must contain at least 8 characters, one uppercase, one lowercase, one number and one special character"
+      "Password must be at least 8 characters long and include an uppercase letter, a lowercase letter, a number, and a special character."
     ),
 
   confirmPassword: yup

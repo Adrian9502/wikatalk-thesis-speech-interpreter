@@ -293,11 +293,13 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       });
 
       if (response.data.success) {
+        // clear form message after register
+        clearFormMessage();
         const tempUserData = {
           email: response.data.data.email,
           fullName: response.data.data.fullName,
           tempToken: response.data.data.tempToken,
-          isVerified: false, // Add this explicitly
+          isVerified: false,
         };
 
         // Set data in state and storage
@@ -313,18 +315,16 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
           description: response.data.message,
         });
 
-        showToast({
-          type: "error",
-          title: "Error sending email",
-          description: response.data.message,
-        });
         console.log("AFTER REGISTER LOG DATA:");
 
         return { success: true };
       }
+      clearFormMessage();
 
       throw new Error(response.data.message || "Registration failed");
     } catch (error: any) {
+      clearFormMessage();
+
       const message =
         error.response?.data?.message || error.message || "Registration failed";
       setError(message);
@@ -406,6 +406,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
         return { success: true };
       }
+      // clear form message after login
+      clearFormMessage();
 
       throw new Error(response.data.message || "Login failed");
     } catch (error: any) {
@@ -447,6 +449,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       });
       // Let the AuthGuard handle navigation
       // Remove direct navigation call here
+      router.replace("/");
     } catch (error) {
       console.error("Error during logout:", error);
       showToast({

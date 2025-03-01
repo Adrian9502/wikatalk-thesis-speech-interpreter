@@ -65,7 +65,7 @@ const FormInput = <T extends FieldValues>({
                 style={styles.input}
                 placeholder={placeholder}
                 placeholderTextColor="#888"
-                value={value}
+                value={value ?? ""}
                 onChangeText={(text) => {
                   onChange(text);
                   if (onChangeText) onChangeText(text);
@@ -75,7 +75,6 @@ const FormInput = <T extends FieldValues>({
                 maxLength={maxLength}
                 autoCapitalize={autoCapitalize}
                 editable={editable}
-                selectTextOnFocus={editable}
               />
 
               {/* Clear Icon (X) */}
@@ -107,7 +106,7 @@ const FormInput = <T extends FieldValues>({
             </View>
 
             {error && (
-              <View style={{ height: 20, marginBottom: 4 }}>
+              <View style={{ marginBottom: 4 }}>
                 {error ? <Text style={styles.errorText}>{error}</Text> : null}
               </View>
             )}

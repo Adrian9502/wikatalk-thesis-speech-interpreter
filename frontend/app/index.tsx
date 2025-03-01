@@ -236,6 +236,7 @@ export default function Index() {
                     IconComponent={User}
                     error={signInErrors.usernameOrEmail?.message as string}
                     keyboardType="email-address"
+                    autoCapitalize="sentences"
                   />
                   <FormInput
                     control={signInControl}
