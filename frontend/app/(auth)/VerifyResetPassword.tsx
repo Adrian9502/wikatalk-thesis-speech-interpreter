@@ -49,14 +49,14 @@ const VerifyResetPassword: React.FC = () => {
           console.log(storedEmail);
 
           showSnackbar("Reset session expired. Please try again.", "error");
-          router.replace("/(auth)/ResetPassword");
+          router.replace("/(auth)/ForgotPassword");
           return;
         }
 
         setEmail(storedEmail);
       } catch (error) {
         console.error("Failed to load reset email:", error);
-        router.replace("/(auth)/ResetPassword");
+        router.replace("/(auth)/ForgotPassword");
       }
     };
 
