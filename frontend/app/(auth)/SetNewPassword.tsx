@@ -1,42 +1,46 @@
 import React, { useState, useEffect } from "react";
 import {
-  SafeAreaView,
+  Pressable,
   Text,
   View,
-  TouchableOpacity,
+  ImageBackground,
   KeyboardAvoidingView,
-  ScrollView,
   ActivityIndicator,
   Platform,
+  Alert,
 } from "react-native";
-import { Mail } from "lucide-react-native";
-import styles from "@/utils/AuthStyles";
+import { LinearGradient } from "expo-linear-gradient";
 import { StatusBar } from "expo-status-bar";
-import FormInput from "@/components/FormInput";
-import { router } from "expo-router";
-import { useAuth } from "@/context/AuthContext";
-import AuthLogo from "@/components/AuthLogo";
 import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
+import FormInput from "@/components/FormInput";
+import { Mail, Lock } from "lucide-react-native";
 import { useValidation } from "@/context/ValidationContext";
-import { Lock } from "lucide-react-native";
+import { useAuth } from "@/context/AuthContext";
+import FormMessage from "@/components/FormMessage";
+import { router } from "expo-router";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { showToast } from "@/lib/showToast";
 interface ResetPasswordFormData {
   password: string;
   confirmPassword: string;
 }
 
 const SetNewPassword: React.FC = () => {
-  const { resetPassword, isLoading, showSnackbar } = useAuth();
+  const {
+    resetPassword,
+    clearResetData,
+    isLoading,
+    formMessage,
+    clearFormMessage,
+  } = useAuth();
   const { resetPasswordSchema } = useValidation();
-  const [activeInput, setActiveInput] = useState<string>("");
   const [resetToken, setResetToken] = useState<string | null>(null);
   const [email, setEmail] = useState<string | null>(null);
+
   const {
     control,
     handleSubmit,
-    setValue,
-    watch,
     formState: { errors },
   } = useForm<ResetPasswordFormData>({
     resolver: yupResolver(resetPasswordSchema),
@@ -44,158 +48,161 @@ const SetNewPassword: React.FC = () => {
 
   // Load reset token
   useEffect(() => {
-    const loadResetToken = async () => {
+    (async () => {
       try {
-        console.log("Loading reset token from storage");
+        // Load reset token
         const token = await AsyncStorage.getItem("resetToken");
-        console.log("Token loaded:", !!token);
-
         if (!token) {
-          console.log("No token found in storage");
-          showSnackbar("Reset session expired. Please try again.", "error");
-          router.replace("/(auth)/ResetPassword");
+          router.replace("/(auth)/ForgotPassword");
           return;
         }
-
         setResetToken(token);
+
+        // Load email
+        const storedEmail = await AsyncStorage.getItem("resetEmailAddress");
+        setEmail(storedEmail);
       } catch (error) {
-        console.error("Failed to load reset token:", error);
-        router.replace("/(auth)/ResetPassword");
+        console.error("Error loading data from storage:", error);
+        router.replace("/(auth)/ForgotPassword");
       }
-    };
-
-    loadResetToken();
-  }, []);
-
-  useEffect(() => {
-    const fetchEmail = async () => {
-      const storedEmail = await AsyncStorage.getItem("resetEmailAddress");
-      setEmail(storedEmail); // Set email in state
-    };
-
-    fetchEmail();
+    })();
   }, []);
 
   const handleResetPassword = async (data: ResetPasswordFormData) => {
-    console.log("Starting reset password process");
-    console.log("Token available:", !!resetToken);
-
     if (!resetToken) {
-      showSnackbar("Reset session expired. Please try again.", "error");
-      router.replace("/(auth)/ResetPassword");
+      showToast({
+        type: "error",
+        title: "Session Expired",
+        description: "Reset session expired. Please try again.",
+      });
+      router.replace("/(auth)/ForgotPassword");
       return;
     }
 
     try {
-      console.log("Sending reset request with token");
       const result = await resetPassword(resetToken, data.password);
-      console.log("Reset result:", result);
 
       if (result.success) {
-        console.log("Reset successful, clearing storage");
-        // Storage clearing is now handled in the resetPassword function
+        // Navigation is now handled within the resetPassword function
+        // No need for additional Alert here as we're already showing a toast
       }
     } catch (error) {
-      console.error("Reset error in component:", error);
-      showSnackbar("Failed to reset password. Please try again.", "error");
+      // This catch block will rarely be hit as errors are handled in resetPassword
+      console.error("Unexpected error during password reset:", error);
     }
   };
 
   if (!resetToken) {
     return (
-      <SafeAreaView className="bg-emerald-500 flex-1 justify-center items-center">
-        <ActivityIndicator size="large" color="#ffffff" />
-      </SafeAreaView>
+      <ImageBackground
+        source={require("../../assets/images/philippines-tapestry.jpg")}
+        className="flex-1 w-full h-full"
+      >
+        <LinearGradient
+          colors={["rgba(0, 56, 168, 0.8)", "rgba(206, 17, 38, 0.8)"]}
+          className="flex-1 justify-center items-center"
+        >
+          <ActivityIndicator size="large" color="#ffffff" />
+        </LinearGradient>
+      </ImageBackground>
     );
   }
 
+  const handleGoBack = async () => {
+    await clearResetData();
+    router.replace("/");
+  };
+
   return (
-    <SafeAreaView className="min-h-screen bg-emerald-500 flex-1">
-      <StatusBar style="dark" />
-      <KeyboardAvoidingView
-        behavior={Platform.OS === "ios" ? "padding" : "height"}
-        className="flex-1"
-        keyboardVerticalOffset={Platform.OS === "ios" ? 0 : 20}
+    <ImageBackground
+      source={require("../../assets/images/philippines-tapestry.jpg")}
+      className="flex-1 w-full h-full"
+    >
+      <StatusBar style="light" />
+      <LinearGradient
+        colors={["rgba(0, 56, 168, 0.8)", "rgba(206, 17, 38, 0.8)"]}
+        className="flex-1 justify-center items-center"
       >
-        <ScrollView
-          contentContainerStyle={{ flexGrow: 1 }}
-          keyboardShouldPersistTaps="handled"
-          showsVerticalScrollIndicator={false}
+        <KeyboardAvoidingView
+          behavior={Platform.OS === "ios" ? "padding" : "height"}
+          className="w-[85%] max-w-[350px] items-center"
+          keyboardVerticalOffset={Platform.OS === "ios" ? 40 : 0}
         >
-          <View className="flex-1 items-center px-8">
-            <AuthLogo />
-            <View className="py-5 px-8 w-full gap-4 mt-2">
-              <Text className="text-3xl mb-2 text-center font-pbold text-white">
-                Set New Password
-              </Text>
-              <Text className="text-white text-center font-pregular mb-4">
-                Create a new password for your account
-              </Text>
+          {/* Form container */}
+          <View className="bg-white/95 rounded-2xl p-5 w-full items-center shadow-md">
+            <Text className="text-3xl font-bold text-customBlue mb-2">
+              Set New Password
+            </Text>
+            <Text className="text-center text-sm text-gray-600 mb-2 px-2">
+              Create a new password for your account
+            </Text>
 
-              <View style={styles.container}>
-                <View
-                  className="flex-row items-center"
-                  style={{
-                    borderBottomWidth: 1,
-                    paddingBottom: 6,
-                    borderColor: "white",
-                    marginBottom: 6,
-                  }}
-                >
-                  {/* Email Icon */}
-                  <Mail size={21} color="white" style={{ marginRight: 8 }} />
+            {/* Form container */}
+            <View className="w-full mt-5">
+              {formMessage && (
+                <FormMessage
+                  message={formMessage.text}
+                  type={formMessage.type}
+                  onDismiss={clearFormMessage}
+                />
+              )}
 
-                  {/* Uneditable Email Text */}
-                  <Text className="flex-1 text-white font-pregular text-lg">
-                    {email ?? "Loading..."}
-                  </Text>
-                </View>
+              {/* Display email */}
+              <View className="flex-row items-center bg-[#F0F8FF] rounded-lg p-3 mb-4 border border-customBlue">
+                <Mail size={20} color="#0038A8" />
+                <Text className="ml-2 text-customBlue font-medium">
+                  {email ?? "Loading..."}
+                </Text>
               </View>
 
-              <FormInput<ResetPasswordFormData>
-                placeholder="New Password"
-                value={watch("password")}
-                onChangeText={(text) => setValue("password", text)}
-                IconComponent={Lock}
-                secureTextEntry
+              <FormInput
                 control={control}
                 name="password"
+                placeholder="New Password"
+                IconComponent={Lock}
                 error={errors.password?.message}
-                activeInput={activeInput}
-                setActiveInput={setActiveInput}
+                secureTextEntry
               />
 
-              <FormInput<ResetPasswordFormData>
-                placeholder="Confirm New Password"
-                value={watch("confirmPassword")}
-                onChangeText={(text) => setValue("confirmPassword", text)}
-                IconComponent={Lock}
-                secureTextEntry
+              <FormInput
                 control={control}
                 name="confirmPassword"
+                placeholder="Confirm New Password"
+                IconComponent={Lock}
                 error={errors.confirmPassword?.message}
-                activeInput={activeInput}
-                setActiveInput={setActiveInput}
+                secureTextEntry
               />
-              <TouchableOpacity
-                activeOpacity={0.9}
-                className="bg-white p-3 mt-5 rounded-xl"
-                onPress={handleSubmit(handleResetPassword)}
-                disabled={isLoading}
-              >
-                {isLoading ? (
-                  <ActivityIndicator size="small" color="#10b981" />
-                ) : (
-                  <Text className="text-emerald-500 font-pmedium text-lg uppercase text-center">
-                    Reset Password
-                  </Text>
-                )}
-              </TouchableOpacity>
+
+              {/* Reset Password Button */}
+              <View className="w-full rounded-lg overflow-hidden my-4 shadow">
+                <Pressable
+                  className="bg-customRed py-3.5 items-center justify-center rounded-lg"
+                  disabled={isLoading}
+                  onPress={handleSubmit(handleResetPassword)}
+                >
+                  <View className="flex-row items-center justify-center">
+                    {isLoading && (
+                      <ActivityIndicator
+                        size="small"
+                        color="#FFFFFF"
+                        className="mr-2"
+                      />
+                    )}
+                    <Text className="text-white text-base font-bold">
+                      Reset Password
+                    </Text>
+                  </View>
+                </Pressable>
+              </View>
+
+              <Pressable onPress={handleGoBack}>
+                <Text className=" text-sm text-gray-400 mb-2">Go back</Text>
+              </Pressable>
             </View>
           </View>
-        </ScrollView>
-      </KeyboardAvoidingView>
-    </SafeAreaView>
+        </KeyboardAvoidingView>
+      </LinearGradient>
+    </ImageBackground>
   );
 };
 

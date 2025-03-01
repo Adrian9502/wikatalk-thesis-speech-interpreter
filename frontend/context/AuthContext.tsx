@@ -69,6 +69,7 @@ interface AuthContextType {
   ) => Promise<AuthResponse & { token?: string }>;
   resetPassword: (token: string, newPassword: string) => Promise<AuthResponse>;
   clearStorage: () => Promise<void>;
+  clearResetData: () => Promise<void>;
 }
 interface AuthProviderProps {
   children: ReactNode;
@@ -725,54 +726,34 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       setIsLoading(false);
     }
   };
-  // Reset password ( set new password)
+  // Reset password (set new password)
   const resetPassword = async (token: string, newPassword: string) => {
     setIsLoading(true);
+
     try {
-      console.log("Sending password reset request to backend");
       const response = await axios.post(`${API_URL}/api/users/reset-password`, {
         token,
         newPassword,
       });
 
-      console.log("Password reset response:", response.data);
+      const { success, message } = response.data;
 
-      if (response.data.success) {
-        console.log("Password reset successful");
-        showToast({
-          type: "success",
-          title: "Password reset successfully!",
-          description: response.data.message,
-        });
-        // First return success, THEN clear storage and navigate
-        setTimeout(async () => {
-          try {
-            await Promise.all([
-              AsyncStorage.removeItem("resetToken"),
-              AsyncStorage.removeItem("resetEmailAddress"),
-              AsyncStorage.removeItem("isResetPasswordFlow"),
-            ]);
-            console.log("Reset data cleared from storage");
-            router.replace("/");
-          } catch (clearError) {
-            console.error("Error clearing storage:", clearError);
-          }
-        }, 1000);
+      showToast({
+        type: success ? "success" : "error",
+        title: success
+          ? "Password reset successfully!"
+          : "Password reset failed!",
+        description: message,
+      });
 
+      if (success) {
+        // Clear storage items after successful reset
+        await clearResetData();
         return { success: true };
-      } else {
-        console.log("Password reset failed:", response.data.message);
-
-        showToast({
-          type: "error",
-          title: "Password reset failed!",
-          description: response.data.message,
-        });
-
-        return { success: false, message: response.data.message };
       }
+
+      return { success: false, message };
     } catch (error: any) {
-      console.error("Password reset error:", error);
       const message = error.response?.data?.message || "Password reset failed";
 
       showToast({
@@ -784,6 +765,24 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       return { success: false, message };
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  // Helper function to clear reset password data
+  const clearResetData = async () => {
+    try {
+      await Promise.all([
+        AsyncStorage.removeItem("resetToken"),
+        AsyncStorage.removeItem("resetEmailAddress"),
+        AsyncStorage.removeItem("isResetPasswordFlow"),
+      ]);
+
+      // Wait a bit before navigation to ensure toast is visible
+      setTimeout(() => {
+        router.replace("/");
+      }, 1000);
+    } catch (error) {
+      console.error("Error clearing storage:", error);
     }
   };
   // ? -- Remove all async storage data --
@@ -820,6 +819,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         resetPassword,
         resendVerificationEmail,
         clearStorage,
+        clearResetData,
       }}
     >
       {children}
