@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from "react";
 import {
-  StyleSheet,
   Pressable,
   Text,
   View,
@@ -106,6 +105,7 @@ const ForgotPassword: React.FC = () => {
       );
     }
   };
+
   // resend code after countdown
   const handleResendCode = async () => {
     if (resendDisabled) return;
@@ -150,29 +150,31 @@ const ForgotPassword: React.FC = () => {
   return (
     <ImageBackground
       source={require("../../assets/images/philippines-tapestry.jpg")}
-      style={styles.background}
+      className="flex-1 w-full h-full"
     >
       <StatusBar style="light" />
       <LinearGradient
         colors={["rgba(0, 56, 168, 0.8)", "rgba(206, 17, 38, 0.8)"]}
-        style={styles.overlay}
+        className="flex-1 justify-center items-center"
       >
         <KeyboardAvoidingView
           behavior={Platform.OS === "ios" ? "padding" : "height"}
-          style={styles.container}
+          className="w-[85%] max-w-[350px] items-center"
           keyboardVerticalOffset={Platform.OS === "ios" ? 40 : 0}
         >
           {/* Form container */}
-          <View style={styles.card}>
-            <Text style={styles.title}>Forgot Password</Text>
-            <Text style={styles.subtitle}>
+          <View className="bg-white/95 rounded-2xl p-5 w-full items-center shadow-md">
+            <Text className="text-3xl font-bold text-customBlue mb-2">
+              Forgot Password
+            </Text>
+            <Text className="text-center text-sm text-gray-600 mb-2 px-2">
               {codeSent
                 ? "Enter the verification code sent to your email"
                 : "Enter your email address and we'll send you a code to reset your password"}
             </Text>
 
             {/* Form container */}
-            <View style={styles.formContainer}>
+            <View className="w-full mt-5">
               {formMessage && (
                 <FormMessage
                   message={formMessage.text}
@@ -193,21 +195,21 @@ const ForgotPassword: React.FC = () => {
                   />
 
                   {/* Submit Button */}
-                  <View style={styles.buttonContainer}>
+                  <View className="w-full rounded-lg overflow-hidden my-4 shadow">
                     <Pressable
-                      style={styles.button}
+                      className="bg-customRed py-3.5 items-center justify-center rounded-lg"
                       disabled={isLoading}
                       onPress={handleEmailSubmit(handleSendCode)}
                     >
-                      <View style={styles.buttonContent}>
+                      <View className="flex-row items-center justify-center">
                         {isLoading && (
                           <ActivityIndicator
                             size="small"
                             color="#FFFFFF"
-                            style={styles.buttonLoader}
+                            className="mr-2"
                           />
                         )}
-                        <Text style={styles.buttonText}>
+                        <Text className="text-white text-base font-bold">
                           Send Recovery Code
                         </Text>
                       </View>
@@ -217,9 +219,11 @@ const ForgotPassword: React.FC = () => {
               ) : (
                 <>
                   {/* Display sent email */}
-                  <View style={styles.emailSentContainer}>
+                  <View className="flex-row items-center bg-[#F0F8FF] rounded-lg p-3 mb-4 border border-customBlue">
                     <Mail size={20} color="#0038A8" />
-                    <Text style={styles.emailSentText}>{email}</Text>
+                    <Text className="ml-2 text-customBlue font-medium">
+                      {email}
+                    </Text>
                   </View>
 
                   {/* Verification Code Input */}
@@ -234,39 +238,39 @@ const ForgotPassword: React.FC = () => {
                   />
 
                   {/* Verify Button */}
-                  <View style={styles.buttonContainer}>
+                  <View className="w-full rounded-lg overflow-hidden my-4 shadow">
                     <Pressable
-                      style={styles.button}
+                      className="bg-customRed py-3.5 items-center justify-center rounded-lg"
                       disabled={isLoading}
                       onPress={handleVerificationSubmit(handleVerifyCode)}
                     >
-                      <View style={styles.buttonContent}>
+                      <View className="flex-row items-center justify-center">
                         {isLoading && (
                           <ActivityIndicator
                             size="small"
                             color="#FFFFFF"
-                            style={styles.buttonLoader}
+                            className="mr-2"
                           />
                         )}
-                        <Text style={styles.buttonText}>Verify Code</Text>
+                        <Text className="text-white text-base font-bold">
+                          Verify Code
+                        </Text>
                       </View>
                     </Pressable>
                   </View>
 
                   {/* Resend Code Button */}
                   <Pressable
-                    style={[
-                      styles.resendButton,
-                      resendDisabled && styles.resendButtonDisabled,
-                    ]}
+                    className={`mt-4 self-center ${
+                      resendDisabled ? "opacity-50" : ""
+                    }`}
                     onPress={handleResendCode}
                     disabled={resendDisabled}
                   >
                     <Text
-                      style={[
-                        styles.resendText,
-                        resendDisabled && styles.resendTextDisabled,
-                      ]}
+                      className={`text-customBlue text-sm font-semibold ${
+                        resendDisabled ? "text-gray-500" : ""
+                      }`}
                     >
                       {resendDisabled
                         ? `Resend Code (${countdown}s)`
@@ -276,7 +280,7 @@ const ForgotPassword: React.FC = () => {
                 </>
               )}
               <Pressable onPress={() => router.back()}>
-                <Text style={styles.goBackText}>Go back</Text>
+                <Text className="text-sm text-gray-400 mb-2 px-2">Go back</Text>
               </Pressable>
             </View>
           </View>
@@ -285,120 +289,5 @@ const ForgotPassword: React.FC = () => {
     </ImageBackground>
   );
 };
-
-const styles = StyleSheet.create({
-  background: {
-    flex: 1,
-    width: "100%",
-    height: "100%",
-  },
-  overlay: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  container: {
-    width: width * 0.85,
-    maxWidth: 350,
-    alignItems: "center",
-  },
-  card: {
-    backgroundColor: "rgba(255, 255, 255, 0.95)",
-    borderRadius: 20,
-    padding: 20,
-    width: "100%",
-    alignItems: "center",
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 3 },
-    shadowOpacity: 0.25,
-    shadowRadius: 6,
-    elevation: 8,
-  },
-  formContainer: {
-    width: "100%",
-    marginTop: 20,
-  },
-  title: {
-    fontSize: 28,
-    fontWeight: "bold",
-    color: "#0038A8",
-    marginBottom: 10,
-  },
-  subtitle: {
-    textAlign: "center",
-    fontSize: 14,
-    color: "#555",
-    marginBottom: 10,
-    paddingHorizontal: 10,
-  },
-  goBackText: {
-    fontSize: 12,
-    color: "#999",
-    marginBottom: 10,
-    paddingHorizontal: 10,
-  },
-  buttonContainer: {
-    width: "100%",
-    borderRadius: 10,
-    overflow: "hidden",
-    marginVertical: 16,
-    elevation: 2,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.2,
-    shadowRadius: 3,
-  },
-  buttonContent: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  buttonLoader: {
-    marginRight: 8,
-  },
-  button: {
-    backgroundColor: "#CE1126", // Red
-    paddingVertical: 14,
-    alignItems: "center",
-    justifyContent: "center",
-    borderRadius: 10,
-  },
-  buttonText: {
-    color: "#FFFFFF",
-    fontSize: 16,
-    fontWeight: "bold",
-  },
-
-  emailSentContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-    backgroundColor: "#F0F8FF",
-    borderRadius: 10,
-    padding: 12,
-    marginBottom: 16,
-    borderWidth: 1,
-    borderColor: "#0038A8",
-  },
-  emailSentText: {
-    marginLeft: 10,
-    color: "#0038A8",
-    fontWeight: "500",
-  },
-  resendButton: {
-    marginTop: 15,
-    alignSelf: "center",
-  },
-  resendButtonDisabled: {
-    opacity: 0.5,
-  },
-  resendText: {
-    color: "#0038A8",
-    fontSize: 14,
-    fontWeight: "600",
-  },
-  resendTextDisabled: {
-    color: "#666",
-  },
-});
 
 export default ForgotPassword;
