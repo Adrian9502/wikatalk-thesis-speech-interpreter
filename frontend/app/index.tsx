@@ -5,7 +5,6 @@ import {
   TouchableOpacity,
   ImageBackground,
   Animated,
-  Dimensions,
   KeyboardAvoidingView,
   LayoutAnimation,
   Platform,
@@ -30,8 +29,6 @@ import { User, Lock, Mail } from "lucide-react-native";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { useValidation } from "@/context/ValidationContext";
 import { SignUpFormData, SignInFormData } from "@/context/ValidationContext";
-
-const { width } = Dimensions.get("window");
 
 export default function Index() {
   // Validation context
@@ -76,6 +73,10 @@ export default function Index() {
   // redirect to home if user is already logged in
   useEffect(() => {
     clearFormMessage();
+
+    setTimeout(() => {
+      router.push("/(tabs)/Home");
+    }, 2000);
 
     let mounted = true;
 

@@ -13,7 +13,7 @@ import {
   TouchableOpacity,
 } from "react-native";
 import DropDownPicker from "react-native-dropdown-picker";
-import DIALECTS from "@/constant/dialects";
+import DIALECTS from "@/constant/languages";
 import Logo from "@/components/Logo";
 const Scan = () => {
   const [permission, requestPermission] = useCameraPermissions();

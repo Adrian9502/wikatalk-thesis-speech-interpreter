@@ -14,7 +14,7 @@ import { StatusBar } from "expo-status-bar";
 import FontAwesome5 from "react-native-vector-icons/FontAwesome5";
 import MaterialIcons from "react-native-vector-icons/MaterialIcons";
 import DropDownPicker from "react-native-dropdown-picker";
-import DIALECTS from "@/constant/dialects";
+import DIALECTS from "@/constant/languages";
 import Logo from "@/components/Logo";
 
 // Define types for language options
