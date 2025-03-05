@@ -54,7 +54,10 @@ const TranslateTop: React.FC<TranslateTopProps> = ({
       className="flex-1 rounded-2xl overflow-hidden shadow-lg"
       resizeMode="cover"
     >
-      <View className="flex-1 items-start justify-start bg-white/90 p-4">
+      <View
+        style={{ backgroundColor: "rgba(255,255,255,0.9)" }}
+        className="flex-1 items-start justify-start p-4"
+      >
         <DropDownPicker
           open={openSource}
           value={sourceLanguage}
@@ -114,7 +117,12 @@ const TranslateTop: React.FC<TranslateTopProps> = ({
           multiline
           scrollEnabled
           textAlignVertical="top"
-          className="flex-1 text-customBlue border border-gray-200 rounded-xl font-pregular text-lg w-full mt-3 p-3 bg-blue-50/50 max-h-52"
+          style={{
+            backgroundColor: "rgba(254,242,242,0.5)",
+            borderWidth: 1,
+            borderColor: "#999",
+          }}
+          className="flex-1 text-customBlue rounded-xl font-pregular text-lg w-full mt-3 p-3 max-h-52"
         />
 
         {/* delete, copy and speaker icon */}
