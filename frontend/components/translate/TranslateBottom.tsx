@@ -50,6 +50,7 @@ const TranslateBottom: React.FC<TranslateBottomProps> = ({
         style={{ backgroundColor: "rgba(255,255,255,0.9)" }}
         className="flex-1 items-end justify-start p-4"
       >
+
         <DropDownPicker
           open={openTarget}
           value={targetLanguage}
@@ -121,6 +122,7 @@ const TranslateBottom: React.FC<TranslateBottomProps> = ({
                 borderColor: "#999",
               }}
               className="flex-1 text-customRed min-h-full  rounded-xl font-pregular text-lg w-full mt-3 p-3 "
+
             />
           )}
         </View>

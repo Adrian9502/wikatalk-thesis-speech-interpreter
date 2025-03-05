@@ -1,6 +1,5 @@
 import React, { createContext, useContext, ReactNode } from "react";
 import * as yup from "yup";
-
 // Define form data types
 export interface SignUpFormData {
   fullName: string;
@@ -10,17 +9,36 @@ export interface SignUpFormData {
   confirmPassword: string;
 }
 
-export interface LoginFormData {
+export interface SignInFormData {
   usernameOrEmail: string;
   password: string;
+}
+interface ForgotPasswordFormData {
+  email: string;
+}
+
+interface ResetPasswordFormData {
+  password: string;
+  confirmPassword: string;
+}
+
+interface passwordVerificationCodeData {
+  verificationCode: string;
 }
 
 // Define the context type
 interface ValidationContextType {
   signUpSchema: yup.ObjectSchema<SignUpFormData>;
-  loginSchema: yup.ObjectSchema<LoginFormData>;
+  signInSchema: yup.ObjectSchema<SignInFormData>;
+  forgotPasswordSchema: yup.ObjectSchema<ForgotPasswordFormData>;
+  resetPasswordSchema: yup.ObjectSchema<ResetPasswordFormData>;
+  passwordVerificationCodeSchema: yup.ObjectSchema<passwordVerificationCodeData>;
+  emailVerificationCodeSchema: yup.ObjectSchema<passwordVerificationCodeData>;
 }
 
+interface ValidationProviderProps {
+  children: ReactNode;
+}
 // Create the context
 const ValidationContext = createContext<ValidationContextType | undefined>(
   undefined
@@ -60,7 +78,7 @@ const signUpSchema = yup.object().shape({
     .required("Password is required")
     .matches(
       passwordPattern,
-      "Password must contain at least 8 characters, one uppercase, one lowercase, one number and one special character"
+      "Password must be at least 8 characters long and include an uppercase letter, a lowercase letter, a number, and a special character."
     ),
 
   confirmPassword: yup
@@ -69,7 +87,7 @@ const signUpSchema = yup.object().shape({
     .oneOf([yup.ref("password")], "Passwords must match"),
 });
 
-const loginSchema = yup.object().shape({
+const signInSchema = yup.object().shape({
   usernameOrEmail: yup
     .string()
     .required("Username or email is required")
@@ -85,10 +103,41 @@ const loginSchema = yup.object().shape({
     .min(8, "Password must be at least 8 characters"),
 });
 
-interface ValidationProviderProps {
-  children: ReactNode;
-}
+const resetPasswordSchema = yup.object({
+  password: yup
+    .string()
+    .required("Password is required")
+    .min(8, "Password must be at least 8 characters")
+    .matches(
+      /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/,
+      "Password must contain at least one uppercase letter, one lowercase letter, and one number"
+    ),
+  confirmPassword: yup
+    .string()
+    .required("Please confirm your password")
+    .oneOf([yup.ref("password")], "Passwords must match"),
+});
 
+const forgotPasswordSchema = yup.object().shape({
+  email: yup
+    .string()
+    .required("Email is required")
+    .email("Please enter a valid email"),
+});
+
+const emailVerificationCodeSchema = yup.object().shape({
+  verificationCode: yup
+    .string()
+    .matches(/^\d{6}$/, "Code must be exactly 6 digits")
+    .required("Verification code is required"),
+});
+
+const passwordVerificationCodeSchema = yup.object().shape({
+  verificationCode: yup
+    .string()
+    .matches(/^\d{6}$/, "Code must be exactly 6 digits")
+    .required("Verification code is required"),
+});
 export const ValidationProvider: React.FC<ValidationProviderProps> = ({
   children,
 }) => {
@@ -96,7 +145,11 @@ export const ValidationProvider: React.FC<ValidationProviderProps> = ({
     <ValidationContext.Provider
       value={{
         signUpSchema,
-        loginSchema,
+        signInSchema,
+        emailVerificationCodeSchema,
+        forgotPasswordSchema,
+        resetPasswordSchema,
+        passwordVerificationCodeSchema,
       }}
     >
       {children}

@@ -2,24 +2,29 @@ import { CameraView, CameraType, useCameraPermissions } from "expo-camera";
 import React, { useState } from "react";
 import { StatusBar } from "expo-status-bar";
 import {
-  Button,
+  ImageBackground,
   StyleSheet,
   Text,
-  Pressable,
   View,
   SafeAreaView,
-  Image,
-  Dimensions,
   TouchableOpacity,
 } from "react-native";
+import { LinearGradient } from "expo-linear-gradient";
 import DropDownPicker from "react-native-dropdown-picker";
-import DIALECTS from "@/constant/dialects";
+import { DIALECTS, LANGUAGE_BACKGROUND } from "@/constant/languages";
 import Logo from "@/components/Logo";
 const Scan = () => {
   const [permission, requestPermission] = useCameraPermissions();
   const [selectedLanguage, setSelectedLanguage] = useState("Tagalog");
   const [translatedText, setTranslatedText] = useState("");
   const [open, setOpen] = useState<boolean>(false);
+
+  const getLanguageBackground = (language: string) => {
+    return (
+      LANGUAGE_BACKGROUND[language] ||
+      require("@/assets/images/languages/tagalog-bg.jpg")
+    );
+  };
 
   if (!permission) {
     // Camera permissions are still loading.
@@ -41,7 +46,7 @@ const Scan = () => {
             onPress={requestPermission}
             className="p-3 bg-white rounded-xl"
           >
-            <Text className="text-emerald-500 font-psemibold">
+            <Text className="text-customBlue font-psemibold">
               Grant Permission
             </Text>
           </TouchableOpacity>
@@ -51,73 +56,83 @@ const Scan = () => {
   }
 
   return (
-    <SafeAreaView className="flex-1 bg-emerald-500">
-      <StatusBar style="dark" />
-      <Logo title="WikaScan" />
-      {/* Camera container */}
-      <View className="h-[40%] mx-4 rounded-2xl overflow-hidden border-2 border-white">
-        <CameraView style={styles.camera} facing="back"></CameraView>
-      </View>
-
-      {/* Results and language selection */}
-      <View className="flex-1 mx-4 my-2 bg-white rounded-xl p-2 elevation">
-        <View className="flex-row items-center justify-between mb-2">
-          <View className="px-2 py-1 bg-emerald-500 rounded-xl items-center justify-center">
-            <Text className="font-pmedium text-lg text-white">Result</Text>
+    <ImageBackground
+      source={getLanguageBackground(selectedLanguage)}
+      className="flex-1 w-full h-full"
+      resizeMode="cover"
+    >
+      <StatusBar style="light" />
+      <LinearGradient
+        colors={[
+          "rgba(0, 56, 168, 0.85)",
+          "rgba(0, 0, 0, 0.6)",
+          "rgba(206, 17, 38, 0.85)",
+        ]}
+        className="flex-1"
+      >
+        <SafeAreaView className="flex-1 pt-12">
+          {/* Camera container */}
+          <View className="flex-1 ">
+            <View className="h-1/2 mx-4 mt-2 rounded-2xl overflow-hidden border-2 border-white">
+              <CameraView style={styles.camera} facing="back"></CameraView>
+            </View>
+            {/* Results and language selection */}
+            <View className="flex-1 mx-4 my-2 bg-white/80 rounded-xl p-4 elevation">
+              <View className="flex-row items-center justify-between mb-2">
+                <DropDownPicker
+                  open={open}
+                  value={selectedLanguage}
+                  items={DIALECTS}
+                  setOpen={setOpen}
+                  setValue={setSelectedLanguage}
+                  placeholder="Select a language"
+                  style={{
+                    width: 150,
+                    backgroundColor: "#fff",
+                    borderWidth: 2,
+                    borderColor: "#0038A8",
+                  }}
+                  dropDownContainerStyle={{
+                    backgroundColor: "#ffffff",
+                    borderColor: "#0038A8",
+                  }}
+                  labelStyle={{
+                    fontSize: 16,
+                    color: "#0038A8",
+                    fontWeight: "600",
+                  }}
+                  textStyle={{
+                    fontSize: 16,
+                    color: "#0038A8",
+                  }}
+                  listItemContainerStyle={{
+                    height: 35,
+                    justifyContent: "center",
+                    paddingVertical: 0,
+                  }}
+                  listItemLabelStyle={{
+                    fontSize: 16,
+                    color: "#0038A8",
+                  }}
+                  itemSeparator={true}
+                  itemSeparatorStyle={{
+                    backgroundColor: "#0038A8",
+                    height: 1,
+                  }}
+                  dropDownDirection="BOTTOM"
+                />
+              </View>
+              {/* result text container */}
+              <View className="flex-1 p-2">
+                <Text className="text-xl font-pmedium text-customBlue">
+                  {translatedText || "No translation yet"}
+                </Text>
+              </View>
+            </View>
           </View>
-          <View>
-            <DropDownPicker
-              open={open}
-              value={selectedLanguage}
-              items={DIALECTS}
-              setOpen={setOpen}
-              setValue={setSelectedLanguage}
-              placeholder="Select a language"
-              style={{
-                width: 150,
-                backgroundColor: "#fff",
-                borderWidth: 2,
-                borderColor: "#10b981",
-              }}
-              dropDownContainerStyle={{
-                backgroundColor: "#ffffff",
-                borderColor: "#10b981",
-              }}
-              labelStyle={{
-                fontSize: 16,
-                color: "#10b981",
-                fontWeight: "600",
-              }}
-              textStyle={{
-                fontSize: 16,
-                color: "#10b981",
-              }}
-              listItemContainerStyle={{
-                height: 35,
-                justifyContent: "center",
-                paddingVertical: 0,
-              }}
-              listItemLabelStyle={{
-                fontSize: 16,
-                color: "#10b981",
-              }}
-              itemSeparator={true} // Optional: shows separators between items
-              itemSeparatorStyle={{
-                backgroundColor: "#10b981", // Optional separator color
-                height: 1,
-              }}
-              dropDownDirection="BOTTOM" // Optional: makes dropdown open downwards
-            />
-          </View>
-        </View>
-        {/* result text container */}
-        <View className="flex-1 p-2">
-          <Text className="text-xl font-pmedium text-emerald-600">
-            {translatedText || "No translation yet"}
-          </Text>
-        </View>
-      </View>
-    </SafeAreaView>
+        </SafeAreaView>
+      </LinearGradient>
+    </ImageBackground>
   );
 };
 
@@ -130,7 +145,7 @@ const styles = StyleSheet.create({
   picker: {
     flex: 1,
     alignItems: "center",
-    color: "#10b981",
+    color: "#CE1126",
     fontWeight: 600,
     borderWidth: 2,
     height: 50,

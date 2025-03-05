@@ -1,102 +1,162 @@
-import { TextInput, View, TouchableOpacity, Text } from "react-native";
-import { LucideIcon, Eye, EyeOff } from "lucide-react-native";
+import {
+  TextInput,
+  View,
+  TouchableOpacity,
+  Text,
+  KeyboardTypeOptions,
+  StyleSheet,
+} from "react-native";
+import { LucideIcon, Eye, EyeOff, X } from "lucide-react-native";
 import { useState } from "react";
-import { Control, Controller, FieldError } from "react-hook-form";
+import { Control, Controller, FieldValues, Path } from "react-hook-form";
 
-interface InputFieldProps {
+// Generic FormInput component that works with any form type
+interface FormInputProps<T extends FieldValues> {
   placeholder: string;
-  value: string;
-  onChangeText: (value: string) => void;
+  control: Control<T>;
+  name: Path<T>;
+  IconComponent: LucideIcon;
+  error?: string;
   secureTextEntry?: boolean;
-  keyboardType?: "default" | "email-address" | "numeric" | "phone-pad";
-  IconComponent?: LucideIcon;
-  control: Control<any>;
-  name: string;
-  error?: FieldError;
+  keyboardType?: KeyboardTypeOptions;
+  maxLength?: number;
+  autoCapitalize?: "none" | "sentences" | "words" | "characters";
+  onChangeText?: (text: string) => void;
+  editable?: boolean;
 }
 
-const FormInput = ({
+const FormInput = <T extends FieldValues>({
   placeholder,
-  value,
-  onChangeText,
-  secureTextEntry = false,
-  keyboardType = "default",
-  IconComponent,
   control,
   name,
+  IconComponent,
   error,
-}: InputFieldProps) => {
+  secureTextEntry = false,
+  keyboardType = "default",
+  maxLength,
+  autoCapitalize = "none",
+  onChangeText,
+  editable = true,
+}: FormInputProps<T>) => {
   const [isPasswordVisible, setIsPasswordVisible] = useState(!secureTextEntry);
 
   return (
-    <View className="mb-4">
+    <View style={styles.container}>
       <Controller
         control={control}
         name={name}
         render={({ field: { onChange, value } }) => (
-          <View>
+          <>
             <View
-              className="flex-row items-center"
-              style={{
-                borderBottomWidth: 1,
-                borderColor: error ? "#EF4444" : "white",
-                marginBottom: 6,
-              }}
+              style={[
+                styles.inputContainer,
+                error ? styles.inputContainerError : null,
+              ]}
             >
               {IconComponent && (
                 <IconComponent
-                  style={{ marginRight: 8 }}
-                  size={21}
-                  color="white"
+                  size={18}
+                  color="#0038A8"
+                  style={styles.inputIcon}
                 />
               )}
 
               <TextInput
+                style={styles.input}
                 placeholder={placeholder}
-                value={value}
+                placeholderTextColor="#888"
+                value={value ?? ""}
                 onChangeText={(text) => {
                   onChange(text);
-                  onChangeText(text);
+                  if (onChangeText) onChangeText(text);
                 }}
                 secureTextEntry={!isPasswordVisible && secureTextEntry}
                 keyboardType={keyboardType}
-                className="flex-1 text-white font-pregular text-lg"
-                placeholderTextColor="rgba(255, 255, 255, 0.8)"
+                maxLength={maxLength}
+                autoCapitalize={autoCapitalize}
+                editable={editable}
               />
 
+              {/* Clear Icon (X) */}
+              {value && (
+                <TouchableOpacity
+                  onPress={() => {
+                    onChange("");
+                    if (onChangeText) onChangeText("");
+                  }}
+                  style={styles.actionIcon}
+                >
+                  <X size={14} color="#888" />
+                </TouchableOpacity>
+              )}
+
+              {/* Toggle Password Visibility Icon */}
               {secureTextEntry && (
                 <TouchableOpacity
+                  style={styles.actionIcon}
                   onPress={() => setIsPasswordVisible(!isPasswordVisible)}
                 >
                   {isPasswordVisible ? (
-                    <Eye size={19} color="white" />
+                    <Eye size={18} color="#888" />
                   ) : (
-                    <EyeOff size={19} color="white" />
+                    <EyeOff size={18} color="#888" />
                   )}
                 </TouchableOpacity>
               )}
             </View>
+
             {error && (
-              <View
-                style={{
-                  paddingTop: 2,
-                  paddingBottom: 1,
-                  paddingLeft: 10,
-                  paddingRight: 10,
-                  borderRadius: 5,
-                }}
-                className="bg-white"
-              >
-                <Text style={{ color: "#EF4444" }} className="font-pregular">
-                  {error}
-                </Text>
+              <View style={{ marginBottom: 4 }}>
+                {error ? <Text style={styles.errorText}>{error}</Text> : null}
               </View>
             )}
-          </View>
+          </>
         )}
       />
     </View>
   );
 };
+
+const styles = StyleSheet.create({
+  container: {
+    marginBottom: 12,
+  },
+  inputContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#f7f7f7",
+    borderRadius: 10,
+    paddingHorizontal: 12,
+    borderWidth: 1,
+    borderColor: "#e0e0e0",
+  },
+  inputContainerError: {
+    borderColor: "#EF4444",
+  },
+  inputIcon: {
+    marginRight: 10,
+  },
+  input: {
+    fontFamily: "Roboto",
+    flex: 1,
+    paddingVertical: 10,
+    fontSize: 14,
+    color: "#333",
+  },
+  actionIcon: {
+    marginLeft: 5,
+    opacity: 0.8,
+  },
+  errorContainer: {
+    marginTop: 4,
+    paddingHorizontal: 8,
+    paddingVertical: 2,
+  },
+  errorText: {
+    color: "#EF4444",
+    fontSize: 12,
+    fontFamily: "Roboto",
+  },
+});
 
 export default FormInput;
