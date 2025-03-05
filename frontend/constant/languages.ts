@@ -1,15 +1,10 @@
-export type Dialect = {
-  label: string;
-  value: string;
-};
-
 export type LanguageInfo = {
   region: string;
   symbol: string;
   fact: string;
 };
 
-export const DIALECTS: Dialect[] = [
+export const DIALECTS: { label: string; value: string }[] = [
   { label: "Tagalog", value: "Tagalog" },
   { label: "Cebuano", value: "Cebuano" },
   { label: "Hiligaynon", value: "Hiligaynon" },

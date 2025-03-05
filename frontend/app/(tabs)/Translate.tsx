@@ -1,123 +1,30 @@
 import {
   View,
-  Text,
-  TextInput,
   TouchableOpacity,
-  Alert,
-  ActivityIndicator,
+  KeyboardAvoidingView,
+  Platform,
+  ImageBackground,
 } from "react-native";
-import * as Clipboard from "expo-clipboard";
+import { LinearGradient } from "expo-linear-gradient";
 import * as Speech from "expo-speech";
-import React, { useState, useEffect, useCallback } from "react";
-import debounce from "lodash/debounce";
+import React, { useEffect } from "react";
 import { StatusBar } from "expo-status-bar";
-import FontAwesome5 from "react-native-vector-icons/FontAwesome5";
-import MaterialIcons from "react-native-vector-icons/MaterialIcons";
-import DropDownPicker from "react-native-dropdown-picker";
-import DIALECTS from "@/constant/languages";
-import Logo from "@/components/Logo";
+import { SafeAreaView } from "react-native-safe-area-context";
+import MaterialCommunityIcons from "react-native-vector-icons/MaterialCommunityIcons";
 
-// Define types for language options
-type LanguageOption =
-  | "Tagalog"
-  | "Cebuano"
-  | "Hiligaynon"
-  | "Ilocano"
-  | "Bikol"
-  | "Waray"
-  | "Pangasinan"
-  | "Kapampangan"
-  | "English";
-
-// Define interface for language code mapping
-interface LanguageCodeMap {
-  [key: string]: string;
-}
+import TranslateBottom from "@/components/translate/TranslateBottom";
+import TranslateTop from "@/components/translate/TranslateTop";
+import { useTranslation } from "@/hooks/useTranslation";
 
 const Translate = () => {
-  // State with typed values
-  const [sourceText, setSourceText] = useState<string>("");
-  const [translatedText, setTranslatedText] = useState<string>("");
-  const [sourceLanguage, setSourceLanguage] =
-    useState<LanguageOption>("Tagalog");
-  const [targetLanguage, setTargetLanguage] =
-    useState<LanguageOption>("Cebuano");
-  const [openSource, setOpenSource] = useState<boolean>(false);
-  const [openTarget, setOpenTarget] = useState<boolean>(false);
-  const [isTranslating, setIsTranslating] = useState<boolean>(false);
-  const [error, setError] = useState<string>("");
-  const [isSpeaking, setIsSpeaking] = useState<boolean>(false);
-  // API KEY FOR TRANSLATION
-  const api_key = process.env.EXPO_PUBLIC_TRANSLATE_API_KEY;
-  const { GoogleGenerativeAI } = require("@google/generative-ai");
-  const sys_instruct = "You are a translator. Translate the phrases only.";
-  const genAI = new GoogleGenerativeAI(api_key);
-  const model = genAI.getGenerativeModel({
-    model: "gemini-2.0-flash",
-    systemInstruction: sys_instruct,
-  });
-
-  // Map language codes for Speech
-  const getLanguageCodeForSpeech = (language: LanguageOption): string => {
-    const languageMap: LanguageCodeMap = {
-      Tagalog: "fil",
-      Cebuano: "fil",
-      Hiligaynon: "fil",
-      Ilocano: "fil",
-      Bikol: "fil",
-      Waray: "fil",
-      Pangasinan: "fil",
-      Kapampangan: "fil",
-      English: "en-US",
-    };
-
-    return languageMap[language] || "en-US";
-  };
-
-  const handleSpeech = async (
-    text: string,
-    language: LanguageOption
-  ): Promise<void> => {
-    if (!text.trim()) return;
-
-    try {
-      const isSpeakingNow = await Speech.isSpeakingAsync();
-      if (isSpeakingNow) {
-        await Speech.stop();
-        setIsSpeaking(false);
-      }
-
-      setIsSpeaking(true);
-      const langCode = getLanguageCodeForSpeech(language);
-
-      await Speech.speak(text, {
-        language: langCode,
-        rate: 0.8,
-        pitch: 1.0,
-        onDone: () => setIsSpeaking(false),
-        onError: (error: Error) => {
-          console.error("Speech error:", error);
-          setIsSpeaking(false);
-          Alert.alert(
-            "Speech Error",
-            "Unable to speak the text. Please try again."
-          );
-        },
-      });
-    } catch (error) {
-      console.error("Speech error:", error);
-      setIsSpeaking(false);
-      Alert.alert("Error", "Failed to speak the text. Please try again.");
-    }
-  };
-  // Handle source speech
-  const handleSourceSpeech = useCallback((): void => {
-    handleSpeech(sourceText, sourceLanguage);
-  }, [sourceText, sourceLanguage]);
-  //  Handle translated speech
-  const handleTranslatedSpeech = useCallback((): void => {
-    handleSpeech(translatedText, targetLanguage);
-  }, [translatedText, targetLanguage]);
+  const {
+    state,
+    updateState,
+    handleSpeech,
+    debouncedTranslate,
+    handleSwapLanguages,
+    copyToClipboard,
+  } = useTranslation();
 
   // Stop speech when changing languages
   useEffect(() => {
@@ -125,259 +32,111 @@ const Translate = () => {
       const isSpeakingNow = await Speech.isSpeakingAsync();
       if (isSpeakingNow) {
         await Speech.stop();
-        setIsSpeaking(false);
+        updateState({ isSpeaking: false });
       }
     };
 
     stopSpeech();
-  }, [sourceLanguage, targetLanguage]);
-
-  // Handle translation
-  const handleTranslation = async (): Promise<void> => {
-    if (!sourceText.trim()) {
-      setTranslatedText("");
-      setError("");
-      return;
-    }
-
-    if (sourceLanguage === targetLanguage) {
-      setTranslatedText(sourceText);
-      return;
-    }
-
-    setIsTranslating(true);
-    setError("");
-
-    try {
-      console.log(
-        `Translating from ${sourceLanguage} to ${targetLanguage}: "${sourceText}"`
-      );
-
-      const prompt = `"Translate the phrase from ${sourceLanguage} to ${targetLanguage}: ${sourceText}"`;
-
-      const result = await model.generateContent(prompt);
-      console.log("Raw response:", result.response.text());
-
-      const translated = result.response.text().replace(prompt, "").trim();
-
-      setTranslatedText(translated);
-    } catch (error) {
-      setError(
-        typeof error === "string"
-          ? error
-          : (error as Error).message || "Translation failed"
-      );
-    } finally {
-      setIsTranslating(false);
-    }
-  };
-
-  // Create a debounced version of handleTranslation
-  const debouncedTranslate = useCallback(
-    debounce(() => {
-      if (sourceText.trim()) {
-        handleTranslation();
-      }
-    }, 1000),
-    [sourceText, sourceLanguage, targetLanguage]
-  );
+  }, [state.sourceLanguage, state.targetLanguage]);
 
   // Trigger translation when inputs change
   useEffect(() => {
-    if (sourceText.trim()) {
+    if (state.sourceText.trim()) {
       debouncedTranslate();
     } else {
-      setTranslatedText("");
+      updateState({ translatedText: "" });
     }
 
     return () => {
       debouncedTranslate.cancel();
     };
-  }, [sourceText, sourceLanguage, targetLanguage, debouncedTranslate]);
+  }, [
+    state.sourceText,
+    state.sourceLanguage,
+    state.targetLanguage,
+    debouncedTranslate,
+  ]);
 
-  // Handle language swap
-  const handleSwapLanguages = (): void => {
-    const tempLang = sourceLanguage;
-    setSourceLanguage(targetLanguage);
-    setTargetLanguage(tempLang);
-    setSourceText(translatedText);
-    setTranslatedText(sourceText);
-  };
-
-  // Handle copy to clipboard
-  const copyToClipboard = async (text: string): Promise<void> => {
-    try {
-      await Clipboard.setString(text);
-      Alert.alert("Copied!", "Text copied to clipboard.");
-    } catch (error) {
-      Alert.alert("Error", "Failed to copy text.");
-    }
-  };
   return (
-    <View className="h-screen bg-emerald-500">
-      <StatusBar style="dark" />
-      <Logo title="WikaTranslate" />
-
-      {/* Translation container */}
-      <View className="flex-1 relative mx-4 mb-10 gap-4">
-        {/* Source language section */}
-        <View className="flex-1 items-start justify-start bg-white p-3 rounded-xl">
-          <DropDownPicker
-            open={openSource}
-            value={sourceLanguage}
-            items={DIALECTS}
-            setOpen={setOpenSource}
-            setValue={setSourceLanguage}
-            placeholder="Select source language"
-            style={{
-              width: 150,
-              backgroundColor: "#10b981",
-              borderWidth: 2,
-              borderColor: "#10b981",
-            }}
-            dropDownContainerStyle={{
-              backgroundColor: "#ffffff",
-              width: 150,
-              borderColor: "#10b981",
-            }}
-            labelStyle={{
-              fontSize: 16,
-              color: "#fff",
-              fontWeight: "600",
-            }}
-            textStyle={{
-              fontSize: 16,
-              color: "#10b981",
-            }}
-            zIndex={3000}
-            zIndexInverse={1000}
-            onClose={() => setOpenSource(false)}
-            disableBorderRadius={false}
-            maxHeight={200}
-          />
-
-          <TextInput
-            placeholder="Enter text to translate..."
-            value={sourceText}
-            onChangeText={setSourceText}
-            multiline
-            textAlignVertical="top"
-            className="flex-1 text-emerald-500 font-pregular text-lg w-full mt-2 p-2"
-          />
-
-          <View className="flex-row gap-4 items-center">
-            <TouchableOpacity onPress={() => setSourceText("")}>
-              <MaterialIcons name="delete" size={28} color="#10B981" />
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              onPress={handleSourceSpeech}
-              disabled={!sourceText.trim() || isSpeaking}
-            >
-              <FontAwesome5
-                name="volume-up"
-                size={25}
-                color={sourceText.trim() && !isSpeaking ? "#10B981" : "#ccc"}
-              />
-            </TouchableOpacity>
-          </View>
-        </View>
-        {/* Language swap button */}
-        <TouchableOpacity
-          className="absolute top-1/2 right-1/2 z-10 bg-emerald-500 border-4 border-white p-3 rounded-full transform translate-x-8 -translate-y-8"
-          onPress={handleSwapLanguages}
+    <KeyboardAvoidingView
+      behavior={Platform.OS === "ios" ? "padding" : "height"}
+      style={{ flex: 1 }}
+      keyboardVerticalOffset={Platform.OS === "ios" ? 0 : -100}
+    >
+      <ImageBackground
+        source={require("@/assets/images/ph-flag-2.jpg")}
+        style={{ width: "100%", height: "100%" }}
+        resizeMode="cover"
+      >
+        <LinearGradient
+          colors={[
+            "rgba(0, 56, 168, 0.9)",
+            "rgba(0, 0, 0, 0.7)",
+            "rgba(206, 17, 38, 0.9)",
+          ]}
+          className="flex-1"
         >
-          <MaterialIcons name="swap-vert" size={32} color="white" />
-        </TouchableOpacity>
-        {/* Target language section */}
-        <View className="flex-1 items-end justify-start bg-white p-3 rounded-xl">
-          <DropDownPicker
-            open={openTarget}
-            value={targetLanguage}
-            items={DIALECTS}
-            setOpen={setOpenTarget}
-            setValue={setTargetLanguage}
-            placeholder="Select target language"
-            style={{
-              width: 150,
-              backgroundColor: "#10b981",
-              borderWidth: 2,
-              alignSelf: "flex-end",
-              borderColor: "#10b981",
-            }}
-            dropDownContainerStyle={{
-              backgroundColor: "#ffffff",
-              width: 150,
-              alignSelf: "flex-end",
-              borderColor: "#10b981",
-            }}
-            labelStyle={{
-              fontSize: 16,
-              color: "#fff",
-              fontWeight: "600",
-            }}
-            textStyle={{
-              fontSize: 16,
-              color: "#10b981",
-            }}
-            zIndex={2000}
-            zIndexInverse={2000}
-            onClose={() => setOpenTarget(false)}
-            disableBorderRadius={false}
-            maxHeight={200}
-          />
+          <SafeAreaView className="flex-1">
+            <StatusBar style="light" />
 
-          <View className="flex-1 w-full mt-2 justify-center p-2">
-            {isTranslating ? (
-              <ActivityIndicator size="large" color="#10B981" />
-            ) : error ? (
-              <Text className="text-red-500 font-psemibold">
-                {typeof error === "string"
-                  ? error
-                  : error || "An unknown error occurred"}
-              </Text>
-            ) : (
-              <TextInput
-                placeholder="Translation will appear here..."
-                value={translatedText}
-                editable={false}
-                multiline
-                textAlignVertical="top"
-                className="flex-1 text-emerald-500 font-pregular text-lg w-full"
-              />
-            )}
-          </View>
-
-          <View className="flex-row w-full gap-4 items-center">
-            <TouchableOpacity
-              onPress={() => {
-                if (translatedText) {
-                  copyToClipboard(translatedText);
+            <View className="flex-1 relative mx-4 my-6 gap-4">
+              <TranslateTop
+                sourceLanguage={state.sourceLanguage}
+                sourceText={state.sourceText}
+                openSource={state.openSource}
+                copiedSource={state.copiedSource}
+                isSpeaking={state.isSpeaking}
+                updateState={updateState}
+                handleSourceSpeech={() =>
+                  handleSpeech(state.sourceText, state.sourceLanguage)
                 }
-              }}
-              disabled={!translatedText}
-            >
-              <FontAwesome5
-                name="copy"
-                size={28}
-                color={translatedText ? "#10B981" : "#ccc"}
+                copyToClipboard={copyToClipboard}
               />
-            </TouchableOpacity>
 
-            <TouchableOpacity
-              disabled={!translatedText || isSpeaking}
-              onPress={handleTranslatedSpeech}
-            >
-              <FontAwesome5
-                name="volume-up"
-                size={25}
-                color={translatedText && !isSpeaking ? "#10B981" : "#ccc"}
+              {/* Language swap button */}
+              <TouchableOpacity
+                className="w-16 h-16 rounded-full transform translate-x-8 -translate-y-8 absolute top-1/2 right-1/2 z-10 shadow-xl border-2 border-white/90 items-center justify-center"
+                onPress={handleSwapLanguages}
+              >
+                <LinearGradient
+                  colors={["#0038A8", "#CE1126"]}
+                  start={{ x: 0, y: 0 }}
+                  end={{ x: 0, y: 1 }}
+                  style={{
+                    width: "100%",
+                    height: "100%",
+                    borderRadius: 999,
+                    alignItems: "center",
+                    justifyContent: "center",
+                  }}
+                >
+                  <MaterialCommunityIcons
+                    name="swap-vertical"
+                    size={32}
+                    color="#FFF"
+                  />
+                </LinearGradient>
+              </TouchableOpacity>
+
+              <TranslateBottom
+                targetLanguage={state.targetLanguage}
+                translatedText={state.translatedText}
+                openTarget={state.openTarget}
+                copiedTarget={state.copiedTarget}
+                isTranslating={state.isTranslating}
+                error={state.error}
+                isSpeaking={state.isSpeaking}
+                updateState={updateState}
+                handleTranslatedSpeech={() =>
+                  handleSpeech(state.translatedText, state.targetLanguage)
+                }
+                copyToClipboard={copyToClipboard}
               />
-            </TouchableOpacity>
-          </View>
-        </View>
-      </View>
-    </View>
+            </View>
+          </SafeAreaView>
+        </LinearGradient>
+      </ImageBackground>
+    </KeyboardAvoidingView>
   );
 };
 export default Translate;

@@ -8,6 +8,7 @@ import {
   Image,
   ImageBackground,
 } from "react-native";
+import MaterialIcons from "react-native-vector-icons/MaterialIcons";
 import * as Clipboard from "expo-clipboard";
 import { LinearGradient } from "expo-linear-gradient";
 import React, { useEffect, useState } from "react";
@@ -19,19 +20,16 @@ import axios from "axios";
 import FormData from "form-data";
 import * as Speech from "expo-speech";
 import DropDownPicker from "react-native-dropdown-picker";
-import {
-  DIALECTS,
-  LANGUAGE_BACKGROUND,
-  LANGUAGE_INFO,
-} from "@/constant/languages";
+import { showToast } from "@/lib/showToast";
+import { DIALECTS, LANGUAGE_INFO } from "@/constant/languages";
+import getLanguageBackground from "@/utils/getLanguageBackground";
 
 const Home = () => {
-  const [upperTextfield, setUpperTextfield] = useState<string>(
-    "Tap the mic to start translating your speech."
-  );
-  const [bottomTextfield, setBottomTextfield] = useState<string>(
-    "Tap the mic to start translating your speech."
-  );
+  const initialText =
+    "Lorem ipsum, dolor sit amet consectetur adipisicing elit. Modi deserunt voluptatem dolores expedita, distinctio vero nihil libero excepturi... Lorem ipsum, dolor sit amet consectetur adipisicing elit. Modi deserunt voluptatem dolores expedita, distinctio vero nihil libero excepturi...Lorem ipsum, dolor sit amet consectetur adipisicing elit. Modi deserunt voluptatem dolores expedita, distinctio vero nihil libero excepturi...Lorem ipsum, dolor sit amet consectetur adipisicing elit. Modi deserunt voluptatem dolores expedita, distinctio vero nihil libero excepturi...Lorem ipsum, dolor sit amet consectetur adipisicing elit. Modi deserunt voluptatem dolores expedita, distinctio vero nihil libero excepturi...Lorem ipsum, dolor sit amet consectetur adipisicing elit. Modi deserunt voluptatem dolores expedita, distinctio vero nihil libero excepturi...";
+
+  const [upperTextfield, setUpperTextfield] = useState<string>(initialText);
+  const [bottomTextfield, setBottomTextfield] = useState<string>(initialText);
   const [language1, setLanguage1] = useState<string>("Tagalog");
   const [language2, setLanguage2] = useState<string>("Cebuano");
   const [recording, setRecording] = useState<Audio.Recording | undefined>(
@@ -194,23 +192,26 @@ const Home = () => {
     setShowLanguageInfo(true);
   };
 
-  // Default fallback image if language not found in mapping
-  const getLanguageBackground = (language: string) => {
-    return (
-      LANGUAGE_BACKGROUND[language] ||
-      require("@/assets/images/languages/tagalog-bg.jpg")
-    );
-  };
-
-  // copy to clipboard
-  //  TO BE CONTINUE
+  // Copy to clipboard function
   const copyToClipboard = async (text: string) => {
     try {
       await Clipboard.setStringAsync(text);
-      // You could add a brief notification here if you want
-      console.log("Copied to clipboard");
+      showToast({
+        type: "success",
+        title: "Copied!",
+        description: "Copied to clipboard!",
+      });
     } catch (error) {
       console.error("Failed to copy text: ", error);
+    }
+  };
+
+  // Clear text function
+  const clearText = (section: "top" | "bottom") => {
+    if (section === "top") {
+      setUpperTextfield("");
+    } else {
+      setBottomTextfield("");
     }
   };
 
@@ -220,6 +221,7 @@ const Home = () => {
       className="flex-1 w-full h-full"
       resizeMode="cover"
     >
+      <StatusBar style="light" />
       <LinearGradient
         colors={[
           "rgba(0, 56, 168, 0.85)",
@@ -228,9 +230,7 @@ const Home = () => {
         ]}
         className="flex-1"
       >
-        <SafeAreaView className="flex-1">
-          <StatusBar style="light" />
-
+        <SafeAreaView className="h-full py-5">
           <TouchableOpacity
             activeOpacity={1}
             onPress={closeDropdowns}
@@ -249,92 +249,126 @@ const Home = () => {
                   className="w-full h-full"
                 >
                   <View className="w-full flex-1 rounded-2xl p-5 relative shadow-lg border border-red-900/30">
-                    {/* Language info button */}
-                    <TouchableOpacity
-                      onPress={() => showInfo(language2, "top")}
-                      className="absolute bottom-2 left-2 z-30 bg-yellow-400/20 p-2 rounded-full"
-                    >
-                      <MaterialCommunityIcons
-                        name="information-outline"
-                        size={20}
-                        color="#FFD700"
-                      />
-                    </TouchableOpacity>
-
                     <ScrollView
-                      className="flex-1 w-full rotate-180 mt-14 mb-12 rounded-lg bg-black/50 p-3"
-                      showsVerticalScrollIndicator={false}
+                      // Remove rotate-180 classes
+                      className="flex-1 rotate-180 w-full mb-4 rounded-lg bg-black/50 border border-customRed p-3"
+                      // Ensure these properties are set correctly
+                      scrollEnabled={true}
                       nestedScrollEnabled={true}
+                      showsVerticalScrollIndicator={true}
+                      // Adjust content container style
                       contentContainerStyle={{
-                        paddingBottom: openTopDropdown ? 220 : 0,
+                        flexGrow: 1,
+                        minHeight: "100%",
+                        // Remove overly restrictive padding
+                        paddingBottom: 20, // Or remove this entirely
                       }}
                     >
-                      <Text className="text-yellow-400 font-medium text-xl">
-                        {upperTextfield}
-                      </Text>
+                      <View className="flex-1 ">
+                        <Text
+                          numberOfLines={0}
+                          className="text-yellow-400 font-medium text-xl"
+                        >
+                          {upperTextfield}
+                        </Text>
+                      </View>
                     </ScrollView>
-
-                    {/* Dropdown for top section */}
-                    <View
-                      className="absolute bottom-2 right-2 rotate-180"
-                      style={{ zIndex: openTopDropdown ? 9999 : 20 }}
-                    >
-                      <DropDownPicker
-                        open={openTopDropdown}
-                        value={language2}
-                        items={DIALECTS}
-                        setOpen={setOpenTopDropdown}
-                        setValue={setLanguage2}
-                        placeholder="Select language"
-                        onOpen={() => setOpenBottomDropdown(false)}
-                        listMode="SCROLLVIEW"
-                        scrollViewProps={{
-                          nestedScrollEnabled: true,
-                        }}
-                        style={{
-                          width: 140,
-                          backgroundColor: "#CE1126",
-                          borderWidth: 1,
-                          borderColor: "#FFD700",
-                        }}
-                        dropDownContainerStyle={{
-                          backgroundColor: "#CE1126",
-                          width: 120,
-                          borderColor: "#FFD700",
-                          position: "relative",
-                          top: 0,
-                        }}
-                        labelStyle={{
-                          fontSize: 14,
-                          color: "#FFD700",
-                          fontWeight: "600",
-                        }}
-                        textStyle={{
-                          fontSize: 14,
-                          color: "#FFD700",
-                        }}
-                        zIndex={5000}
-                        zIndexInverse={1000}
-                        disableBorderRadius={false}
-                        maxHeight={200}
-                      />
-                    </View>
-
-                    {/* Mic icon */}
-                    <View className="absolute top-0 rotate-180 left-0 right-0 flex-row justify-center pb-2">
-                      <TouchableOpacity
-                        className="w-16 h-16 rounded-full bg-white/20 shadow-md flex items-center justify-center"
-                        onPress={() => handlePress(1)}
-                      >
-                        <FontAwesome5
-                          name="microphone"
-                          size={32}
-                          color="#FFD700"
+                    <View className="flex-row items-center justify-between w-full rotate-180">
+                      {/* Language Dropdown */}
+                      <View className="flex-1 mr-4">
+                        <DropDownPicker
+                          open={openTopDropdown}
+                          value={language2}
+                          items={DIALECTS}
+                          setOpen={setOpenTopDropdown}
+                          setValue={setLanguage2}
+                          placeholder="Select language"
+                          onOpen={() => setOpenBottomDropdown(false)}
+                          listMode="SCROLLVIEW"
+                          scrollViewProps={{
+                            nestedScrollEnabled: true,
+                          }}
+                          style={{
+                            backgroundColor: "#CE1126",
+                            borderWidth: 1,
+                            borderColor: "#FFD700",
+                            borderRadius: 10,
+                          }}
+                          dropDownContainerStyle={{
+                            backgroundColor: "#CE1126",
+                            borderColor: "#FFD700",
+                            borderRadius: 20,
+                          }}
+                          labelStyle={{
+                            fontSize: 16,
+                            color: "#FFD700",
+                            fontWeight: "700",
+                          }}
+                          textStyle={{
+                            fontSize: 16,
+                            color: "#FFD700",
+                          }}
+                          maxHeight={200}
                         />
-                        {recording && user === 1 && (
-                          <View className="absolute w-full h-full rounded-full border-2 border-red-500 animate-pulse" />
-                        )}
-                      </TouchableOpacity>
+                      </View>
+
+                      {/* Info and Mic Container */}
+                      <View className="flex-row items-center">
+                        {/* Language info button */}
+                        <TouchableOpacity
+                          onPress={() => showInfo(language2, "top")}
+                          className="bg-yellow-400/20 p-2 rounded-full mr-3"
+                        >
+                          <MaterialCommunityIcons
+                            name="information-outline"
+                            size={20}
+                            color="#FFD700"
+                          />
+                        </TouchableOpacity>
+
+                        {/* Copy Icon */}
+                        <TouchableOpacity
+                          onPress={() => copyToClipboard(upperTextfield)}
+                          className="bg-yellow-400/20 p-2 rounded-full mr-2"
+                        >
+                          <MaterialIcons
+                            name="content-copy"
+                            size={20}
+                            color="#FFD700"
+                          />
+                        </TouchableOpacity>
+
+                        {/* Delete Icon */}
+                        <TouchableOpacity
+                          onPress={() => clearText("top")}
+                          className="bg-yellow-400/20 p-2 rounded-full mr-3"
+                        >
+                          <MaterialIcons
+                            name="delete-outline"
+                            size={20}
+                            color="#FFD700"
+                          />
+                        </TouchableOpacity>
+
+                        {/* Mic icon */}
+                        <TouchableOpacity
+                          className="w-16 h-16 rounded-full bg-white/20 shadow-md flex items-center justify-center"
+                          onPress={() => handlePress(1)}
+                        >
+                          {/* Animated Pulse Background */}
+                          {recording && user === 1 && (
+                            <View className="absolute w-full h-full rounded-full bg-emerald-500 animate-pulse" />
+                          )}
+
+                          {/* Icon - Ensuring it's on top */}
+                          <FontAwesome5
+                            name="microphone"
+                            size={32}
+                            color="#FFD700"
+                            style={{ zIndex: 10 }} // Ensures it's on top
+                          />
+                        </TouchableOpacity>
+                      </View>
                     </View>
                   </View>
                 </LinearGradient>
@@ -407,92 +441,115 @@ const Home = () => {
                   className="w-full h-full"
                 >
                   <View className="w-full flex-1 rounded-2xl p-5 relative shadow-lg border border-blue-900/30">
-                    {/* Language info button */}
-                    <TouchableOpacity
-                      onPress={() => showInfo(language1, "bottom")}
-                      className="absolute top-2 right-2 z-30 bg-yellow-400/20 p-2 rounded-full"
-                    >
-                      <MaterialCommunityIcons
-                        name="information-outline"
-                        size={20}
-                        color="#FFD700"
-                      />
-                    </TouchableOpacity>
+                    <View className="flex-row items-center justify-between w-full">
+                      {/* Language Dropdown */}
+                      <View className="flex-1 mr-4">
+                        <DropDownPicker
+                          open={openBottomDropdown}
+                          value={language1}
+                          items={DIALECTS}
+                          setOpen={setOpenBottomDropdown}
+                          setValue={setLanguage1}
+                          placeholder="Select language"
+                          onOpen={() => setOpenTopDropdown(false)}
+                          listMode="SCROLLVIEW"
+                          scrollViewProps={{
+                            nestedScrollEnabled: true,
+                          }}
+                          style={{
+                            backgroundColor: "#0038A8",
+                            borderWidth: 1,
+                            borderColor: "#FFD700",
+                            borderRadius: 10,
+                          }}
+                          dropDownContainerStyle={{
+                            backgroundColor: "#0038A8",
+                            borderColor: "#FFD700",
+                            borderRadius: 20,
+                          }}
+                          labelStyle={{
+                            fontSize: 16,
+                            color: "#FFD700",
+                            fontWeight: "700",
+                          }}
+                          textStyle={{
+                            fontSize: 16,
+                            color: "#FFD700",
+                          }}
+                          maxHeight={200}
+                        />
+                      </View>
 
-                    {/* Dropdown for bottom section - positioned at top left, not rotated */}
-                    <View
-                      className="absolute top-2 left-2"
-                      style={{ zIndex: openBottomDropdown ? 9999 : 20 }}
-                    >
-                      <DropDownPicker
-                        open={openBottomDropdown}
-                        value={language1}
-                        items={DIALECTS}
-                        setOpen={setOpenBottomDropdown}
-                        setValue={setLanguage1}
-                        placeholder="Select language"
-                        onOpen={() => setOpenTopDropdown(false)}
-                        listMode="SCROLLVIEW"
-                        scrollViewProps={{
-                          nestedScrollEnabled: true,
-                        }}
-                        style={{
-                          width: 140,
-                          backgroundColor: "#0038A8",
-                          borderWidth: 1,
-                          borderColor: "#FFD700",
-                        }}
-                        dropDownContainerStyle={{
-                          backgroundColor: "#0038A8",
-                          width: 120,
-                          borderColor: "#FFD700",
-                          position: "relative",
-                          top: 0,
-                        }}
-                        labelStyle={{
-                          fontSize: 14,
-                          color: "#FFD700",
-                          fontWeight: "600",
-                        }}
-                        textStyle={{
-                          fontSize: 14,
-                          color: "#FFD700",
-                        }}
-                        zIndex={4000}
-                        zIndexInverse={2000}
-                        disableBorderRadius={false}
-                        maxHeight={200}
-                      />
+                      {/* Info and Mic Container */}
+                      <View className="flex-row items-center">
+                        {/* Copy Icon */}
+                        <TouchableOpacity
+                          onPress={() => copyToClipboard(bottomTextfield)}
+                          className="bg-yellow-400/20 p-2 rounded-full mr-2"
+                        >
+                          <MaterialIcons
+                            name="content-copy"
+                            size={20}
+                            color="#FFD700"
+                          />
+                        </TouchableOpacity>
+
+                        {/* Delete Icon */}
+                        <TouchableOpacity
+                          onPress={() => clearText("bottom")}
+                          className="bg-yellow-400/20 p-2 rounded-full mr-3"
+                        >
+                          <MaterialIcons
+                            name="delete-outline"
+                            size={20}
+                            color="#FFD700"
+                          />
+                        </TouchableOpacity>
+                        {/* Language info button */}
+                        <TouchableOpacity
+                          onPress={() => showInfo(language1, "bottom")}
+                          className="bg-yellow-400/20 p-2 rounded-full mr-3"
+                        >
+                          <MaterialCommunityIcons
+                            name="information-outline"
+                            size={20}
+                            color="#FFD700"
+                          />
+                        </TouchableOpacity>
+
+                        {/* Mic icon */}
+                        <TouchableOpacity
+                          className="w-16 h-16 rounded-full bg-white/20 shadow-md flex items-center justify-center"
+                          onPress={() => handlePress(2)}
+                        >
+                          {recording && user === 2 && (
+                            <View className="absolute w-full h-full rounded-full bg-emerald-500 animate-pulse" />
+                          )}
+                          <FontAwesome5
+                            name="microphone"
+                            size={32}
+                            color="#FFD700"
+                          />
+                        </TouchableOpacity>
+                      </View>
                     </View>
 
                     <ScrollView
-                      className="flex-1 w-full mb-14 rounded-lg mt-12 bg-black/50 p-3"
-                      showsVerticalScrollIndicator={false}
-                      nestedScrollEnabled={true}
                       contentContainerStyle={{
-                        paddingBottom: openBottomDropdown ? 220 : 0,
+                        flexGrow: 1,
                       }}
+                      style={{ maxHeight: "100%" }}
+                      className="w-full mt-4 rounded-lg bg-black/50 border border-customBlue p-3"
+                      showsVerticalScrollIndicator={true}
+                      nestedScrollEnabled={true}
+                      scrollEnabled={true}
                     >
-                      <Text className="text-yellow-400 font-medium text-xl">
-                        {bottomTextfield}
-                      </Text>
+                      <View className="flex-1">
+                        <Text className="text-yellow-400 font-medium text-xl">
+                          {upperTextfield}
+                        </Text>
+                      </View>
                     </ScrollView>
-                    {/* Mic icon */}
-                    <View className="absolute bottom-0 left-0 right-0 flex-row justify-center pb-2">
-                      <TouchableOpacity
-                        className="w-16 h-16 rounded-full bg-white/20 shadow-md flex items-center justify-center"
-                        onPress={() => handlePress(2)}
-                      >
-                        <FontAwesome5
-                          name="microphone"
-                          size={32}
-                          color="#FFD700"
-                        />
-                        {recording && user === 2 && (
-                          <View className="absolute w-full h-full rounded-full border-2 border-red-500 animate-pulse" />
-                        )}
-                      </TouchableOpacity>
-                    </View>
                   </View>
                 </LinearGradient>
               </ImageBackground>

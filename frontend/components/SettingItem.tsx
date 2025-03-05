@@ -17,6 +17,7 @@ interface SettingItemProps {
   onPress?: (event: GestureResponderEvent) => void;
   toggleSwitch?: () => void;
 }
+
 const SettingItem: React.FC<SettingItemProps> = ({
   icon,
   label,
@@ -26,31 +27,27 @@ const SettingItem: React.FC<SettingItemProps> = ({
 }) => {
   return (
     <TouchableOpacity
-      className="flex-row items-center justify-between py-4 border-b border-gray-200"
+      className="flex-row items-center justify-between py-4 px-4 bg-white rounded-lg mb-2 shadow-sm"
       onPress={onPress}
     >
+      {/* Left Side: Icon and Label */}
       <View className="flex-row items-center">
-        <FontAwesome5 name={icon} size={22} color="#10b981" />
-        <Text className="ml-4 text-base font-medium text-gray-800">
+        <FontAwesome5 name={icon} size={20} color="#0038A8" />
+        <Text className="ml-3 text-base font-medium text-gray-800">
           {label}
         </Text>
       </View>
+
+      {/* Right Side: Toggle or Arrow */}
       {typeof value === "boolean" ? (
         <Switch
           value={value}
           onValueChange={toggleSwitch}
-          trackColor={{ false: "#d1d5db", true: "#10b981" }}
+          trackColor={{ false: "#d1d5db", true: "#FACC15" }}
           thumbColor={Platform.OS === "ios" ? undefined : "#fff"}
         />
       ) : (
-        <View className="flex-row items-center">
-          {value && <Text className="mr-2 text-gray-600">{value}</Text>}
-          <MaterialIcons
-            name="keyboard-arrow-right"
-            size={24}
-            color="#9ca3af"
-          />
-        </View>
+        <MaterialIcons name="keyboard-arrow-right" size={24} color="#9ca3af" />
       )}
     </TouchableOpacity>
   );

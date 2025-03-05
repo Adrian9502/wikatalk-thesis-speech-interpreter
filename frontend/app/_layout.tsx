@@ -7,11 +7,13 @@ import "../global.css";
 import { ValidationProvider } from "@/context/ValidationContext";
 import { PaperProvider } from "react-native-paper";
 import { AuthProvider, useAuth } from "@/context/AuthContext";
-import { View, ActivityIndicator, SafeAreaView, Text } from "react-native";
+import { View, ActivityIndicator, Text } from "react-native";
 import { StatusBar } from "expo-status-bar";
 import AuthLogo from "@/components/AuthLogo";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import Toast from "react-native-toast-message";
+import { SafeAreaView, SafeAreaProvider } from "react-native-safe-area-context";
+
 SplashScreen.preventAutoHideAsync();
 
 const LoadingScreen = ({ message }: { message: string }) => (
@@ -173,12 +175,14 @@ const RootLayout = () => {
       <PaperProvider>
         <ValidationProvider>
           <AuthGuard>
-            <Stack screenOptions={{ headerShown: false }}>
-              <Stack.Screen name="index" options={{ headerShown: false }} />
-              <Stack.Screen name="(auth)" options={{ headerShown: false }} />
-              <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-            </Stack>
-            <Toast />
+            <SafeAreaProvider>
+              <Stack screenOptions={{ headerShown: false }}>
+                <Stack.Screen name="index" options={{ headerShown: false }} />
+                <Stack.Screen name="(auth)" options={{ headerShown: false }} />
+                <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+              </Stack>
+              <Toast />
+            </SafeAreaProvider>
           </AuthGuard>
         </ValidationProvider>
       </PaperProvider>
