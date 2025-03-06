@@ -1,25 +1,14 @@
-import { useState, useCallback, useEffect } from "react";
+import { useState, useCallback } from "react";
 import { translateText } from "@/lib/translationService";
 import * as Speech from "expo-speech";
 import * as Clipboard from "expo-clipboard";
 import debounce from "lodash/debounce";
 import { Alert } from "react-native";
+import { LanguageOption } from "@/types/types";
 
 interface LanguageCodeMap {
   [key: string]: string;
 }
-
-type LanguageOption =
-  | "Tagalog"
-  | "Cebuano"
-  | "Hiligaynon"
-  | "Ilocano"
-  | "Bicol"
-  | "Waray"
-  | "Pangasinan"
-  | "Maguindanao"
-  | "Kapampangan"
-  | "Bisaya";
 
 export const useTranslation = (
   initialSourceLanguage: LanguageOption = "Tagalog",

@@ -1,18 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { View, Text, TouchableOpacity, ScrollView } from "react-native";
 import QUICK_PHRASES from "@/constant/quickPhrases";
-
-type LanguageOption =
-  | "Tagalog"
-  | "Cebuano"
-  | "Hiligaynon"
-  | "Ilocano"
-  | "Bicol"
-  | "Waray"
-  | "Pangasinan"
-  | "Maguindanao"
-  | "Kapampangan"
-  | "Bisaya";
+import { LanguageOption } from "@/types/types";
 
 const QuickPhrases = ({
   onSelectPhrase,

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React from "react";
 import {
   View,
   TextInput,
@@ -10,22 +10,10 @@ import MaterialIcons from "react-native-vector-icons/MaterialIcons";
 import FontAwesome5 from "react-native-vector-icons/FontAwesome5";
 import Entypo from "react-native-vector-icons/Entypo";
 import Animated, { FadeIn, FadeOut } from "react-native-reanimated";
-
+import { LanguageOption } from "@/types/types";
 import { DIALECTS } from "@/constant/languages";
 import getLanguageBackground from "@/utils/getLanguageBackground";
 import QuickPhrases from "@/components/QuickPhrases";
-
-type LanguageOption =
-  | "Tagalog"
-  | "Cebuano"
-  | "Hiligaynon"
-  | "Ilocano"
-  | "Bicol"
-  | "Waray"
-  | "Pangasinan"
-  | "Maguindanao"
-  | "Kapampangan"
-  | "Bisaya";
 
 interface TranslateTopProps {
   sourceLanguage: string;
