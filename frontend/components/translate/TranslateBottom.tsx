@@ -14,6 +14,7 @@ import Animated, { ZoomIn, ZoomOut } from "react-native-reanimated";
 
 import { DIALECTS } from "@/constant/languages";
 import getLanguageBackground from "@/utils/getLanguageBackground";
+import ActionIcons from "./ActionIcons";
 
 interface TranslateBottomProps {
   targetLanguage: string;
@@ -48,9 +49,8 @@ const TranslateBottom: React.FC<TranslateBottomProps> = ({
     >
       <View
         style={{ backgroundColor: "rgba(255,255,255,0.9)" }}
-        className="flex-1 items-end justify-start p-4"
+        className="flex-1 p-4"
       >
-
         <DropDownPicker
           open={openTarget}
           value={targetLanguage}
@@ -122,43 +122,21 @@ const TranslateBottom: React.FC<TranslateBottomProps> = ({
                 borderColor: "#999",
               }}
               className="flex-1 text-customRed min-h-full  rounded-xl font-pregular text-lg w-full mt-3 p-3 "
-
             />
           )}
         </View>
 
-        <View className="flex-row w-full gap-6 items-center mt-1">
-          <TouchableOpacity
-            onPress={() => copyToClipboard(translatedText, "copiedTarget")}
-            disabled={!translatedText}
-            className="bg-red-100 p-2 rounded-full"
-          >
-            <Animated.View entering={ZoomIn} exiting={ZoomOut}>
-              {copiedTarget ? (
-                <Entypo name="check" size={24} color="#28A745" />
-              ) : (
-                <FontAwesome5
-                  name="copy"
-                  size={24}
-                  color={translatedText ? "#CE1126" : "#666"}
-                />
-              )}
-            </Animated.View>
-          </TouchableOpacity>
-
-          {/* Show text */}
-          <TouchableOpacity
-            disabled={!translatedText || isSpeaking}
-            onPress={handleTranslatedSpeech}
-            className="bg-red-100 p-2 rounded-full"
-          >
-            <FontAwesome5
-              name="volume-up"
-              size={22}
-              color={translatedText && !isSpeaking ? "#CE1126" : "#666"}
-            />
-          </TouchableOpacity>
-        </View>
+        <ActionIcons
+          text={translatedText}
+          copyToClipboard={copyToClipboard}
+          handleSpeech={handleTranslatedSpeech}
+          copied={copiedTarget}
+          isSpeaking={isSpeaking}
+          showDelete={false}
+          copyKey="copiedTarget"
+          animationType="zoom"
+          primaryColor="#CE1126"
+        />
       </View>
     </ImageBackground>
   );
