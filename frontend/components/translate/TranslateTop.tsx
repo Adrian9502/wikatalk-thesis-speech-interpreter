@@ -1,19 +1,11 @@
 import React from "react";
-import {
-  View,
-  TextInput,
-  TouchableOpacity,
-  ImageBackground,
-} from "react-native";
+import { View, TextInput, ImageBackground } from "react-native";
 import DropDownPicker from "react-native-dropdown-picker";
-import MaterialIcons from "react-native-vector-icons/MaterialIcons";
-import FontAwesome5 from "react-native-vector-icons/FontAwesome5";
-import Entypo from "react-native-vector-icons/Entypo";
-import Animated, { FadeIn, FadeOut } from "react-native-reanimated";
 import { LanguageOption } from "@/types/types";
 import { DIALECTS } from "@/constant/languages";
 import getLanguageBackground from "@/utils/getLanguageBackground";
-import QuickPhrases from "@/components/QuickPhrases";
+import QuickPhrases from "@/components/translate/QuickPhrases";
+import ActionIcons from "./ActionIcons";
 
 interface TranslateTopProps {
   sourceLanguage: string;
@@ -36,6 +28,11 @@ const TranslateTop: React.FC<TranslateTopProps> = ({
   handleSourceSpeech,
   copyToClipboard,
 }) => {
+  // clear input
+  const handleClearSourceText = () => {
+    updateState({ sourceText: "" });
+  };
+
   return (
     <ImageBackground
       source={getLanguageBackground(sourceLanguage)}
@@ -44,7 +41,7 @@ const TranslateTop: React.FC<TranslateTopProps> = ({
     >
       <View
         style={{ backgroundColor: "rgba(255,255,255,0.9)" }}
-        className="flex-1 items-start justify-start p-4"
+        className="flex-1 p-4"
       >
         <DropDownPicker
           open={openSource}
@@ -114,49 +111,18 @@ const TranslateTop: React.FC<TranslateTopProps> = ({
         />
 
         {/* delete, copy and speaker icon */}
-        <View className="flex-row gap-6 items-center mt-2">
-          <TouchableOpacity
-            onPress={() => updateState({ sourceText: "" })}
-            disabled={!sourceText}
-            className="bg-blue-100 p-2 rounded-full"
-          >
-            <MaterialIcons
-              name="delete"
-              size={24}
-              color={sourceText ? "#0038A8" : "#666"}
-            />
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            onPress={() => copyToClipboard(sourceText, "copiedSource")}
-            disabled={!sourceText}
-            className="bg-blue-100 p-2 rounded-full"
-          >
-            <Animated.View entering={FadeIn} exiting={FadeOut}>
-              {copiedSource ? (
-                <Entypo name="check" size={24} color="#28A745" />
-              ) : (
-                <FontAwesome5
-                  name="copy"
-                  size={24}
-                  color={sourceText ? "#0038A8" : "#666"}
-                />
-              )}
-            </Animated.View>
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            onPress={handleSourceSpeech}
-            disabled={!sourceText.trim() || isSpeaking}
-            className="bg-blue-100 p-2 rounded-full"
-          >
-            <FontAwesome5
-              name="volume-up"
-              size={22}
-              color={sourceText.trim() && !isSpeaking ? "#0038A8" : "#666"}
-            />
-          </TouchableOpacity>
-        </View>
+        <ActionIcons
+          text={sourceText}
+          handleClearText={handleClearSourceText}
+          copyToClipboard={copyToClipboard}
+          handleSpeech={handleSourceSpeech}
+          copied={copiedSource}
+          isSpeaking={isSpeaking}
+          showDelete={true}
+          copyKey="copiedSource"
+          animationType="fade"
+          primaryColor="#0038A8"
+        />
       </View>
     </ImageBackground>
   );

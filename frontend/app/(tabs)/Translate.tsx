@@ -15,6 +15,7 @@ import MaterialCommunityIcons from "react-native-vector-icons/MaterialCommunityI
 import TranslateBottom from "@/components/translate/TranslateBottom";
 import TranslateTop from "@/components/translate/TranslateTop";
 import { useTranslation } from "@/hooks/useTranslation";
+import SwapButton from "@/components/SwapButton";
 
 const Translate = () => {
   const {
@@ -93,30 +94,8 @@ const Translate = () => {
                 copyToClipboard={copyToClipboard}
               />
 
-              {/* Language swap button */}
-              <TouchableOpacity
-                className="w-16 h-16 rounded-full transform translate-x-8 -translate-y-8 absolute top-1/2 right-1/2 z-10 shadow-xl border-2 border-white/90 items-center justify-center"
-                onPress={handleSwapLanguages}
-              >
-                <LinearGradient
-                  colors={["#0038A8", "#CE1126"]}
-                  start={{ x: 0, y: 0 }}
-                  end={{ x: 0, y: 1 }}
-                  style={{
-                    width: "100%",
-                    height: "100%",
-                    borderRadius: 999,
-                    alignItems: "center",
-                    justifyContent: "center",
-                  }}
-                >
-                  <MaterialCommunityIcons
-                    name="swap-vertical"
-                    size={32}
-                    color="#FFF"
-                  />
-                </LinearGradient>
-              </TouchableOpacity>
+              {/* Language swap */}
+              <SwapButton onPress={handleSwapLanguages} />
 
               <TranslateBottom
                 targetLanguage={state.targetLanguage}
