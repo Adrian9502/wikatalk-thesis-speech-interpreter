@@ -22,6 +22,8 @@ interface ActionIconsProps {
   copyKey?: "copiedSource" | "copiedTarget";
   animationType?: "fade" | "zoom";
   primaryColor?: string;
+  buttonBackground?: string;
+  borderStyle?: boolean;
 }
 
 const ActionIcons: React.FC<ActionIconsProps> = ({
@@ -35,6 +37,8 @@ const ActionIcons: React.FC<ActionIconsProps> = ({
   copyKey = "copiedSource",
   animationType = "fade",
   primaryColor = "#0038A8",
+  buttonBackground,
+  borderStyle = true,
 }) => {
   // Base button style function that returns different styles based on active state
   const getButtonStyle = (isActive: boolean) => ({
@@ -43,7 +47,8 @@ const ActionIcons: React.FC<ActionIconsProps> = ({
       ? primaryColor === "#0038A8"
         ? "#E6F0FF"
         : "#FEE2E2"
-      : "#F3F4F6",
+      : buttonBackground || "#F3F4F6", //  custom background or default
+    borderWidth: borderStyle ? 1 : 0, // Toggle border visibility
   });
 
   // Icon color based on active state
