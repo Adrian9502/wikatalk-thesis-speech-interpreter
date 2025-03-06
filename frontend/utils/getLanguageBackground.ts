@@ -1,6 +1,7 @@
 import { LANGUAGE_BACKGROUND } from "@/constant/languages";
+import { ImageSourcePropType } from "react-native";
 
-const getLanguageBackground = (language: string) => {
+const getLanguageBackground = (language: string): ImageSourcePropType => {
   return (
     LANGUAGE_BACKGROUND[language] ||
     require("@/assets/images/languages/tagalog-bg.jpg")
