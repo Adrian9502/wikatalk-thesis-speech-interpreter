@@ -13,12 +13,19 @@ const LogoHome: React.FC<WikaTalkLogoProps> = ({ rotate = false }) => {
     >
       <Image
         source={require("@/assets/images/wikatalk-logo-main.png")}
-        className="h-14 w-14"
+        style={{ width: 56, height: 56 }}
         resizeMode="contain"
       />
-      <Text className="text-yellow-400 font-eagleLake text-2xl">WikaTalk</Text>
+      <Text
+        style={{
+          fontFamily: "EagleLake",
+          color: "#facc15",
+          fontSize: 18,
+        }}
+      >
+        WikaTalk
+      </Text>
     </View>
   );
 };
-
 export default LogoHome;

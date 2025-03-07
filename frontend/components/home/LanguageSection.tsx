@@ -137,30 +137,44 @@ const LanguageSection: React.FC<LanguageSectionProps> = ({
   );
 
   // Function to render text area
-  const renderTextArea = () => (
-    <ScrollView
-      className={`flex-1 w-full rounded-lg bg-black/50 p-3 ${
-        controlsPosition === "top" ? "mt-9" : "mb-9"
-      }`}
-      scrollEnabled={true}
-      nestedScrollEnabled={true}
-      showsVerticalScrollIndicator={true}
-      contentContainerStyle={{
-        flexGrow: 1,
-        ...(position === "top" ? { minHeight: "100%" } : {}),
-      }}
-      style={position === "top" ? { transform: [{ rotate: "180deg" }] } : {}}
-    >
-      <View className="flex-1">
-        <Text numberOfLines={0} className="text-yellow-400 font-medium text-xl">
-          {textField}
-        </Text>
-      </View>
-    </ScrollView>
-  );
+  const renderTextArea = () => {
+    const marginStyle =
+      controlsPosition === "top" ? { marginTop: 36 } : { marginBottom: 36 };
+    return (
+      <ScrollView
+        style={{
+          flex: 1,
+          width: "100%",
+          borderRadius: 8,
+          backgroundColor: "rgba(0, 0, 0, 0.5)",
+          padding: 12,
+          ...marginStyle,
+          ...(position === "top" ? { transform: [{ rotate: "180deg" }] } : {}),
+        }}
+        scrollEnabled={true}
+        nestedScrollEnabled={true}
+        showsVerticalScrollIndicator={true}
+        contentContainerStyle={{
+          flexGrow: 1,
+          ...(position === "top" ? { minHeight: "100%" } : {}),
+        }}
+      >
+        <View className="flex-1">
+          <Text
+            numberOfLines={0}
+            className="text-yellow-400 font-medium text-xl"
+          >
+            {textField}
+          </Text>
+        </View>
+      </ScrollView>
+    );
+  };
 
   return (
-    <View className="w-full h-[45%]">
+    <View
+      style={{ width: "100%", height: "45%", paddingTop: 5, paddingBottom: 5 }}
+    >
       <ImageBackground
         source={
           typeof getLanguageBackground(language) === "string"

@@ -1,5 +1,10 @@
 import React from "react";
-import { TouchableOpacity, StyleProp, ViewStyle } from "react-native";
+import {
+  TouchableOpacity,
+  StyleProp,
+  ViewStyle,
+  StyleSheet,
+} from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 
@@ -20,9 +25,27 @@ const SwapButton: React.FC<SwapButtonProps> = ({
 }) => {
   return (
     <TouchableOpacity
-      className="w-16 h-16 rounded-full transform translate-x-8 -translate-y-8 absolute top-1/2 right-1/2 z-10 shadow-xl border-2 border-white/90 items-center justify-center"
+      style={{
+        width: 64,
+        height: 64,
+        borderRadius: 32,
+        transform: [{ translateX: 32 }, { translateY: -32 }],
+        position: "absolute",
+        top: "50%",
+        right: "50%",
+        zIndex: 10,
+        shadowColor: "#000",
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.3,
+        shadowRadius: 6,
+        borderWidth: 2,
+        borderColor: "rgba(255, 255, 255, 0.9)", // border-white/90
+        alignItems: "center",
+        justifyContent: "center",
+        backgroundColor: "#fff", // Optional if needed
+        ...(borderStyle ? StyleSheet.flatten(borderStyle) : {}),
+      }}
       onPress={onPress}
-      style={borderStyle}
     >
       <LinearGradient
         colors={colors}

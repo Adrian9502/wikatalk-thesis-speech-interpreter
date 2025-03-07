@@ -14,12 +14,12 @@ import {
   ActivityIndicator,
   Pressable,
 } from "react-native";
+
 import { LinearGradient } from "expo-linear-gradient";
 import { StatusBar } from "expo-status-bar";
 import { router } from "expo-router";
 import { useAuth } from "@/context/AuthContext";
 import React, { useEffect, useState, useRef } from "react";
-import { useFonts } from "expo-font";
 import { Ionicons } from "@expo/vector-icons";
 import WikaTalkLogo from "@/components/WikaTalkLogo";
 import FormInput from "@/components/FormInput";
@@ -29,6 +29,9 @@ import { User, Lock, Mail } from "lucide-react-native";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { useValidation } from "@/context/ValidationContext";
 import { SignUpFormData, SignInFormData } from "@/context/ValidationContext";
+import { verifyInstallation } from "nativewind";
+// check nativewind installation
+verifyInstallation();
 
 export default function Index() {
   // Validation context
@@ -41,10 +44,6 @@ export default function Index() {
   const [activeTab, setActiveTab] = useState("signin");
   const [buttonScale] = useState(new Animated.Value(1));
   const tabIndicatorPosition = useRef(new Animated.Value(0)).current;
-
-  const [fontsLoaded] = useFonts({
-    Baybayin: require("../assets/fonts/Baybayin-Regular.ttf"),
-  });
 
   if (Platform.OS === "android") {
     if (UIManager.setLayoutAnimationEnabledExperimental) {
@@ -99,10 +98,6 @@ export default function Index() {
       mounted = false;
     };
   }, [isAppReady, isLoggedIn]);
-
-  if (!fontsLoaded) {
-    return null;
-  }
 
   // Show loading screen while app is initializing
   if (!isAppReady) {

@@ -131,11 +131,11 @@ const Home = () => {
         ]}
         className="flex-1"
       >
-        <SafeAreaView className="flex-1 " edges={["top", "left", "right"]}>
+        <SafeAreaView style={{ flex: 1 }} edges={["top", "left", "right"]}>
           <TouchableOpacity
             activeOpacity={1}
             onPress={closeDropdowns}
-            className="flex-1 items-center justify-center w-full px-5"
+            className="flex-1 items-center justify-center w-full px-5 "
           >
             {/* Top section  */}
             <LanguageSection
