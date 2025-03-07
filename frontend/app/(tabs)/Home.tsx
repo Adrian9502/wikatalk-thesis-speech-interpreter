@@ -19,6 +19,8 @@ import LogoHome from "@/components/home/LogoHome";
 import { useRecordingTranslation } from "@/hooks/useRecordingTranslation";
 import { useRecording } from "@/hooks/useRecording";
 import LanguageSection from "@/components/home/LanguageSection";
+import LanguageInfoModal from "@/components/home/LanguageInfoModal";
+import LoadingTranslate from "@/components/home/LoadingTranslate";
 const Home = () => {
   // Constants
   const initialText = "Press the mic icon to start recording. Press again to";
@@ -158,7 +160,7 @@ const Home = () => {
             />
 
             {/* Middle Section - Exchange icon  */}
-            <View className="flex-row items-center justify-between w-full my-4 z-10">
+            <View className="flex-row items-center justify-between w-full my-2 z-10">
               {/* WikaTalk Logo */}
               <LogoHome />
               {/* Switch icon */}
@@ -196,81 +198,23 @@ const Home = () => {
             />
           </TouchableOpacity>
 
-          {/* //! WILL BE REPLACE WITH LanguageInfoModal.TSX */}
-
           {/* Language Information Modal */}
           {showLanguageInfo &&
             activeLanguageInfo &&
             LANGUAGE_INFO[activeLanguageInfo] && (
-              <View className="absolute inset-0 flex-1 items-center justify-center bg-black/70">
-                <View
-                  className={`bg-gray-900 w-4/5 rounded-xl p-5 border border-yellow-400 ${
-                    infoSection === "top" ? "rotate-180" : ""
-                  }`}
-                >
-                  <View className="flex-row justify-between items-center mb-3">
-                    <Text className="text-yellow-400 text-xl font-bold">
-                      {activeLanguageInfo} Language
-                    </Text>
-                    <TouchableOpacity
-                      onPress={() => {
-                        setShowLanguageInfo(false);
-                        setInfoSection(null);
-                      }}
-                    >
-                      <MaterialCommunityIcons
-                        name="close"
-                        size={18}
-                        color="#FFD700"
-                      />
-                    </TouchableOpacity>
-                  </View>
-                  <Image
-                    source={getLanguageBackground(activeLanguageInfo)}
-                    className="w-full h-40 rounded-lg mb-3"
-                    resizeMode="cover"
-                  />
-                  <View className="space-y-4 p-4 bg-gray-800 rounded-lg shadow-md">
-                    {[
-                      {
-                        label: "Region",
-                        value: LANGUAGE_INFO[activeLanguageInfo].region,
-                      },
-                      {
-                        label: "Symbol",
-                        value: LANGUAGE_INFO[activeLanguageInfo].symbol,
-                      },
-                      {
-                        label: "Fun Fact",
-                        value: LANGUAGE_INFO[activeLanguageInfo].fact,
-                      },
-                    ].map((item, index) => (
-                      <View
-                        key={index}
-                        className="flex-row flex-wrap items-start"
-                      >
-                        <Text className="text-yellow-400 font-semibold w-24">
-                          {item.label}:
-                        </Text>
-                        <Text className="text-white flex-1">{item.value}</Text>
-                      </View>
-                    ))}
-                  </View>
-                </View>
-              </View>
+              <LanguageInfoModal
+                visible={showLanguageInfo}
+                languageName={activeLanguageInfo}
+                infoSection={infoSection}
+                onClose={() => {
+                  setShowLanguageInfo(false);
+                  setInfoSection(null);
+                }}
+              />
             )}
 
           {/* Loading Indicator */}
-          {loading && (
-            <View className="absolute inset-0 flex-1 items-center justify-center bg-black/50">
-              <View className="bg-gray-900 w-1/2 items-center justify-center p-5 rounded-xl shadow-lg">
-                <Text className="text-yellow-400 text-center text-lg mb-3">
-                  Translating...
-                </Text>
-                <ActivityIndicator size="large" color="#FFD700" />
-              </View>
-            </View>
-          )}
+          {loading && <LoadingTranslate />}
         </SafeAreaView>
       </LinearGradient>
     </ImageBackground>
