@@ -29,7 +29,7 @@ const styles = StyleSheet.create({
     marginTop: 16,
     fontSize: 40,
     color: "white",
-    fontFamily: "EagleLake-Regular",
+    fontFamily: "EagleLake",
     textShadowColor: "rgba(0, 0, 0, 0.75)",
     textShadowOffset: { width: 1, height: 1 },
     textShadowRadius: 4,
