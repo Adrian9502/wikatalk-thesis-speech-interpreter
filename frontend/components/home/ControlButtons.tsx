@@ -187,7 +187,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "flex-end",
-    paddingHorizontal: 12,
+    paddingHorizontal: 5,
   },
   iconButton: {
     padding: 8,
