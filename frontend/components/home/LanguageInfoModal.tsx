@@ -1,5 +1,12 @@
 import React from "react";
-import { View, Text, TouchableOpacity, Image, ScrollView } from "react-native";
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  Image,
+  ScrollView,
+  StyleSheet,
+} from "react-native";
 import { MapPin, MessageCircle, X, Info } from "react-native-feather";
 import getLanguageBackground from "@/utils/getLanguageBackground";
 import { LANGUAGE_INFO } from "@/constant/languages";
@@ -34,31 +41,28 @@ const LanguageInfoModal: React.FC<LanguageInfoModalProps> = ({
   };
 
   return (
-    <View className="absolute inset-0 flex-1 items-center justify-center bg-black/70">
+    <View style={styles.modalOverlay}>
       <View
-        className={`w-11/12 max-w-md rounded-2xl p-5 border ${
-          infoSection === "top" ? "rotate-180" : ""
-        }`}
-        style={{
-          backgroundColor: colors.darkBlue,
-          borderColor: colors.yellow,
-          borderWidth: 2,
-        }}
+        style={[
+          styles.modalContainer,
+          {
+            backgroundColor: colors.darkBlue,
+            borderColor: colors.yellow,
+            borderWidth: 2,
+          },
+          infoSection === "top" && styles.rotated180,
+        ]}
       >
         {/* Header with close button */}
-        <View className="flex-row justify-between items-center mb-4">
-          <View className="flex-row items-center justify-center flex-1">
-            <Text
-              className="text-2xl text-center font-bold"
-              style={{ color: colors.yellow }}
-            >
-              {languageName} Language
+        <View style={styles.header}>
+          <View style={styles.titleContainer}>
+            <Text style={[styles.titleText, { color: colors.yellow }]}>
+              {languageName} Dialect
             </Text>
           </View>
           <TouchableOpacity
             onPress={onClose}
-            className="rounded-full p-2"
-            style={{ backgroundColor: colors.blue }}
+            style={[styles.closeButton, { backgroundColor: colors.blue }]}
           >
             <X width={18} height={18} strokeWidth={2} stroke={colors.white} />
           </TouchableOpacity>
@@ -66,8 +70,10 @@ const LanguageInfoModal: React.FC<LanguageInfoModalProps> = ({
 
         {/* Image Banner */}
         <View
-          className="mb-4 rounded-lg overflow-hidden"
-          style={{ borderColor: colors.blue, borderWidth: 1 }}
+          style={[
+            styles.imageBanner,
+            { borderColor: colors.blue, borderWidth: 1 },
+          ]}
         >
           <Image
             source={getLanguageBackground(languageName)}
@@ -76,29 +82,28 @@ const LanguageInfoModal: React.FC<LanguageInfoModalProps> = ({
           />
         </View>
 
-        <ScrollView className="max-h-96" showsVerticalScrollIndicator={false}>
+        <ScrollView
+          style={styles.scrollView}
+          showsVerticalScrollIndicator={false}
+        >
           {/* Major Cities */}
-          <View className="mb-4">
-            <View className="flex-row items-center mb-3">
+          <View style={styles.sectionContainer}>
+            <View style={styles.sectionHeader}>
               <MapPin
                 width={18}
                 height={18}
                 strokeWidth={2}
                 stroke={colors.yellow}
               />
-              <Text
-                className="font-bold text-lg ml-2"
-                style={{ color: colors.white }}
-              >
+              <Text style={[styles.sectionTitle, { color: colors.white }]}>
                 Major Cities
               </Text>
             </View>
-            <View className="flex-row flex-wrap">
+            <View style={styles.tagsContainer}>
               {languageInfo.majorCities.map((city, index) => (
                 <View
                   key={index}
-                  className="rounded-full px-3 py-1 mr-2 mb-2"
-                  style={{ backgroundColor: colors.blue }}
+                  style={[styles.tag, { backgroundColor: colors.blue }]}
                 >
                   <Text style={{ color: colors.white }}>{city}</Text>
                 </View>
@@ -107,27 +112,26 @@ const LanguageInfoModal: React.FC<LanguageInfoModalProps> = ({
           </View>
 
           {/* Region */}
-          <View className="mb-4">
-            <View className="flex-row items-center mb-3">
+          <View style={styles.sectionContainer}>
+            <View style={styles.sectionHeader}>
               <MapPin
                 width={18}
                 height={18}
                 strokeWidth={2}
                 stroke={colors.yellow}
               />
-              <Text
-                className="font-bold text-lg ml-2"
-                style={{ color: colors.white }}
-              >
+              <Text style={[styles.sectionTitle, { color: colors.white }]}>
                 Region
               </Text>
             </View>
-            <View className="flex-row flex-wrap">
+            <View style={styles.tagsContainer}>
               <View
-                className="rounded-full px-3 py-1 mr-2 mb-2"
-                style={{ backgroundColor: colors.red, opacity: 0.9 }}
+                style={[
+                  styles.tag,
+                  { backgroundColor: colors.red, opacity: 0.9 },
+                ]}
               >
-                <Text className="font-bold" style={{ color: colors.white }}>
+                <Text style={[styles.boldText, { color: colors.white }]}>
                   {languageInfo.region}
                 </Text>
               </View>
@@ -135,53 +139,36 @@ const LanguageInfoModal: React.FC<LanguageInfoModalProps> = ({
           </View>
 
           {/* Common Phrases */}
-          <View className="mb-4">
-            <View className="flex-row items-center mb-3">
+          <View style={styles.sectionContainer}>
+            <View style={styles.sectionHeader}>
               <MessageCircle
                 width={18}
                 height={18}
                 strokeWidth={2}
                 stroke={colors.yellow}
               />
-              <Text
-                className="font-bold text-lg ml-2"
-                style={{ color: colors.white }}
-              >
+              <Text style={[styles.sectionTitle, { color: colors.white }]}>
                 Phrases
               </Text>
             </View>
-            <View style={{ flexDirection: "row", gap: 8 }}>
+            <View style={styles.phrasesContainer}>
               <View
-                className="flex-1 rounded-xl p-3"
-                style={{ backgroundColor: colors.blue }}
+                style={[styles.phraseBox, { backgroundColor: colors.blue }]}
               >
-                <Text
-                  className="text-center font-semibold mb-1.5"
-                  style={{ color: colors.yellow }}
-                >
+                <Text style={[styles.phraseLabel, { color: colors.yellow }]}>
                   Hello
                 </Text>
-                <Text
-                  className="font-semibold text-center"
-                  style={{ color: colors.white }}
-                >
+                <Text style={[styles.phraseText, { color: colors.white }]}>
                   {languageInfo.commonGreetings.hello}
                 </Text>
               </View>
               <View
-                className="flex-1 rounded-xl p-3"
-                style={{ backgroundColor: colors.blue }}
+                style={[styles.phraseBox, { backgroundColor: colors.blue }]}
               >
-                <Text
-                  className="mb-1.5 font-semibold text-center"
-                  style={{ color: colors.yellow }}
-                >
+                <Text style={[styles.phraseLabel, { color: colors.yellow }]}>
                   Thank You
                 </Text>
-                <Text
-                  className="font-semibold text-center"
-                  style={{ color: colors.white }}
-                >
+                <Text style={[styles.phraseText, { color: colors.white }]}>
                   {languageInfo.commonGreetings.thankYou}
                 </Text>
               </View>
@@ -189,39 +176,27 @@ const LanguageInfoModal: React.FC<LanguageInfoModalProps> = ({
           </View>
 
           {/* Cultural Info */}
-          <View className="flex-row items-center mb-3">
+          <View style={styles.sectionHeader}>
             <Info
               width={18}
               height={18}
               strokeWidth={2}
               stroke={colors.yellow}
             />
-            <Text
-              className="font-bold text-lg ml-2"
-              style={{ color: colors.white }}
-            >
+            <Text style={[styles.sectionTitle, { color: colors.white }]}>
               Cultural Notes
             </Text>
           </View>
-          <View
-            className="rounded-xl p-4 mb-4"
-            style={{ backgroundColor: colors.blue }}
-          >
-            <View className="mb-3">
-              <Text
-                className="font-semibold mb-2"
-                style={{ color: colors.yellow }}
-              >
+          <View style={[styles.culturalBox, { backgroundColor: colors.blue }]}>
+            <View style={styles.culturalItem}>
+              <Text style={[styles.culturalLabel, { color: colors.yellow }]}>
                 Symbol
               </Text>
               <Text style={{ color: colors.white }}>{languageInfo.symbol}</Text>
             </View>
 
             <View>
-              <Text
-                className="font-semibold mb-2"
-                style={{ color: colors.yellow }}
-              >
+              <Text style={[styles.culturalLabel, { color: colors.yellow }]}>
                 Fun Fact
               </Text>
               <Text style={{ color: colors.white }}>{languageInfo.fact}</Text>
@@ -234,3 +209,113 @@ const LanguageInfoModal: React.FC<LanguageInfoModalProps> = ({
 };
 
 export default LanguageInfoModal;
+
+const styles = StyleSheet.create({
+  modalOverlay: {
+    position: "absolute",
+    top: 0,
+    bottom: 0,
+    left: 0,
+    right: 0,
+    flex: 1,
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "rgba(0, 0, 0, 0.7)",
+  },
+  modalContainer: {
+    width: "91.666667%", // w-11/12
+    maxWidth: 448, // max-w-md
+    borderRadius: 16, // rounded-2xl
+    padding: 20, // p-5
+    borderWidth: 2,
+  },
+  rotated180: {
+    transform: [{ rotate: "180deg" }],
+  },
+  header: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 16, // mb-4
+  },
+  titleContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    flex: 1,
+  },
+  titleText: {
+    fontSize: 24, // text-2xl
+    textAlign: "center",
+    fontWeight: "bold",
+  },
+  closeButton: {
+    borderRadius: 9999, // rounded-full
+    padding: 8, // p-2
+  },
+  imageBanner: {
+    marginBottom: 16, // mb-4
+    borderRadius: 8, // rounded-lg
+    overflow: "hidden",
+  },
+  scrollView: {
+    maxHeight: 384, // max-h-96
+  },
+  sectionContainer: {
+    marginBottom: 16, // mb-4
+  },
+  sectionHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 12, // mb-3
+  },
+  sectionTitle: {
+    fontWeight: "bold",
+    fontSize: 18, // text-lg
+    marginLeft: 8, // ml-2
+  },
+  tagsContainer: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+  },
+  tag: {
+    borderRadius: 9999, // rounded-full
+    paddingHorizontal: 12, // px-3
+    paddingVertical: 4, // py-1
+    marginRight: 8, // mr-2
+    marginBottom: 8, // mb-2
+  },
+  phrasesContainer: {
+    flexDirection: "row",
+    gap: 8,
+  },
+  phraseBox: {
+    flex: 1,
+    borderRadius: 12, // rounded-xl
+    padding: 12, // p-3
+  },
+  phraseLabel: {
+    textAlign: "center",
+    fontWeight: "600", // font-semibold
+    marginBottom: 6, // mb-1.5
+  },
+  phraseText: {
+    fontWeight: "600", // font-semibold
+    textAlign: "center",
+  },
+  culturalBox: {
+    borderRadius: 12, // rounded-xl
+    padding: 16, // p-4
+    marginBottom: 16, // mb-4
+  },
+  culturalItem: {
+    marginBottom: 12, // mb-3
+  },
+  culturalLabel: {
+    fontWeight: "600", // font-semibold
+    marginBottom: 8, // mb-2
+  },
+  boldText: {
+    fontWeight: "bold",
+  },
+});

@@ -4,6 +4,7 @@ import {
   Text,
   ScrollView,
   ImageBackground,
+  StyleSheet,
   ImageSourcePropType,
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
@@ -78,12 +79,13 @@ const LanguageSection: React.FC<LanguageSectionProps> = ({
   // Function to render controls (dropdown and buttons)
   const renderControls = () => (
     <View
-      className={`flex-row items-center justify-between w-full ${
-        positionConfig.contentRotate ? "rotate-180" : ""
-      }`}
+      style={[
+        styles.controlsContainer,
+        positionConfig.contentRotate && styles.rotated180,
+      ]}
     >
       {/* Language Dropdown */}
-      <View className="flex-1 mr-4">
+      <View style={styles.dropdownWrapper}>
         <DropDownPicker
           open={dropdownOpen}
           value={language}
@@ -159,11 +161,8 @@ const LanguageSection: React.FC<LanguageSectionProps> = ({
           ...(position === "top" ? { minHeight: "100%" } : {}),
         }}
       >
-        <View className="flex-1">
-          <Text
-            numberOfLines={0}
-            className="text-yellow-400 font-medium text-xl"
-          >
+        <View style={styles.textAreaContent}>
+          <Text numberOfLines={0} style={styles.textFieldStyle}>
             {textField}
           </Text>
         </View>
@@ -172,16 +171,14 @@ const LanguageSection: React.FC<LanguageSectionProps> = ({
   };
 
   return (
-    <View
-      style={{ width: "100%", height: "45%", paddingTop: 5, paddingBottom: 5 }}
-    >
+    <View style={styles.languageSectionContainer}>
       <ImageBackground
         source={
           typeof getLanguageBackground(language) === "string"
             ? { uri: getLanguageBackground(language) as string } // Convert string to `{ uri }`
             : (getLanguageBackground(language) as ImageSourcePropType) // Use local image directly
         }
-        className="w-full h-full rounded-2xl overflow-hidden"
+        style={styles.backgroundImage}
         resizeMode="cover"
         imageStyle={
           positionConfig.imageRotate
@@ -191,9 +188,9 @@ const LanguageSection: React.FC<LanguageSectionProps> = ({
       >
         <LinearGradient
           colors={positionConfig.gradientColors}
-          className="w-full h-full"
+          style={styles.gradient}
         >
-          <View className="w-full flex-1 rounded-2xl p-4 relative">
+          <View style={styles.contentContainer}>
             {/* Render controls first if controlsPosition is 'top' */}
             {controlsPosition === "top" && renderControls()}
 
@@ -210,3 +207,50 @@ const LanguageSection: React.FC<LanguageSectionProps> = ({
 };
 
 export default LanguageSection;
+
+const styles = StyleSheet.create({
+  languageSectionContainer: {
+    width: "100%",
+    height: "45%",
+    paddingTop: 5,
+    paddingBottom: 5,
+  },
+  backgroundImage: {
+    width: "100%",
+    height: "100%",
+    borderRadius: 16,
+    overflow: "hidden",
+  },
+  gradient: {
+    width: "100%",
+    height: "100%",
+  },
+  contentContainer: {
+    width: "100%",
+    flex: 1,
+    borderRadius: 16,
+    padding: 16,
+    position: "relative",
+  },
+  controlsContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    width: "100%",
+  },
+  dropdownWrapper: {
+    flex: 1,
+    marginRight: 16,
+  },
+  textAreaContent: {
+    flex: 1,
+  },
+  textFieldStyle: {
+    color: "#FACC15",
+    fontWeight: "500",
+    fontSize: 20,
+  },
+  rotated180: {
+    transform: [{ rotate: "180deg" }],
+  },
+});
