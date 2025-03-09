@@ -1,9 +1,7 @@
 import {
-  Text,
   View,
-  ActivityIndicator,
+  StyleSheet,
   TouchableOpacity,
-  Image,
   ImageBackground,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -11,7 +9,6 @@ import * as Clipboard from "expo-clipboard";
 import { LinearGradient } from "expo-linear-gradient";
 import React, { useEffect, useState } from "react";
 import { StatusBar } from "expo-status-bar";
-import MaterialCommunityIcons from "react-native-vector-icons/MaterialCommunityIcons";
 import { LANGUAGE_INFO } from "@/constant/languages";
 import getLanguageBackground from "@/utils/getLanguageBackground";
 import SwapButton from "@/components/SwapButton";
@@ -120,7 +117,7 @@ const Home = () => {
   return (
     <ImageBackground
       source={require("@/assets/images/ph-flag.jpg")}
-      className="flex-1 w-full h-full"
+      style={styles.imageBackground}
       resizeMode="cover"
     >
       <StatusBar style="light" />
@@ -131,13 +128,16 @@ const Home = () => {
           "rgba(0, 0, 0, 0.6)",
           "rgba(206, 17, 38, 0.85)",
         ]}
-        className="flex-1"
+        style={styles.gradientContainer}
       >
-        <SafeAreaView style={{ flex: 1 }} edges={["top", "left", "right"]}>
+        <SafeAreaView
+          style={styles.safeAreaView}
+          edges={["top", "left", "right"]}
+        >
           <TouchableOpacity
             activeOpacity={1}
             onPress={closeDropdowns}
-            className="flex-1 items-center justify-center w-full px-5 "
+            style={styles.mainContainer}
           >
             {/* Top section  */}
             <LanguageSection
@@ -160,17 +160,14 @@ const Home = () => {
             />
 
             {/* Middle Section - Exchange icon  */}
-            <View className="flex-row items-center justify-between w-full my-2 z-10">
+            <View style={styles.middleSection}>
               {/* WikaTalk Logo */}
               <LogoHome />
               {/* Switch icon */}
               <SwapButton
                 onPress={handleSwapLanguage}
                 colors={["#0038A8", "#CE1126"]}
-                borderStyle={{
-                  borderWidth: 2,
-                  borderColor: "#FACC15",
-                }}
+                borderStyle={styles.swapButtonBorder}
                 iconColor={"#FFD700"}
               />
               {/* WikaTalk Logo */}
@@ -222,3 +219,36 @@ const Home = () => {
 };
 
 export default Home;
+
+const styles = StyleSheet.create({
+  imageBackground: {
+    flex: 1,
+    width: "100%",
+    height: "100%",
+  },
+  gradientContainer: {
+    flex: 1,
+  },
+  safeAreaView: {
+    flex: 1,
+  },
+  mainContainer: {
+    flex: 1,
+    alignItems: "center",
+    justifyContent: "center",
+    width: "100%",
+    paddingHorizontal: 20,
+  },
+  middleSection: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    width: "100%",
+    marginVertical: 8,
+    zIndex: 10,
+  },
+  swapButtonBorder: {
+    borderWidth: 2,
+    borderColor: "#FACC15",
+  },
+});
