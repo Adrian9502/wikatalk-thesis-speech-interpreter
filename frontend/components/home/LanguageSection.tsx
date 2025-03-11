@@ -48,7 +48,6 @@ const LanguageSection: React.FC<LanguageSectionProps> = ({
   recording,
   user,
   userId,
-  controlsPosition = "bottom", // 'top' or 'bottom'
 }) => {
   // Configuration based on position (top or bottom)
   const config: Record<
@@ -57,20 +56,17 @@ const LanguageSection: React.FC<LanguageSectionProps> = ({
       gradientColors: [string, string];
       backgroundColor: string;
       imageRotate: boolean;
-      contentRotate: boolean;
     }
   > = {
     top: {
       gradientColors: ["rgba(206, 17, 38, 0.8)", "rgba(206, 17, 38, 0.6)"],
       backgroundColor: "#CE1126",
       imageRotate: true,
-      contentRotate: true, // Always rotate content for top section
     },
     bottom: {
       gradientColors: ["rgba(0, 56, 168, 0.8)", "rgba(0, 56, 168, 0.6)"],
       backgroundColor: "#0038A8",
       imageRotate: false,
-      contentRotate: false,
     },
   };
 
@@ -78,12 +74,7 @@ const LanguageSection: React.FC<LanguageSectionProps> = ({
 
   // Function to render controls (dropdown and buttons)
   const renderControls = () => (
-    <View
-      style={[
-        styles.controlsContainer,
-        positionConfig.contentRotate && styles.rotated180,
-      ]}
-    >
+    <View style={[styles.controlsContainer]}>
       {/* Language Dropdown */}
       <View style={styles.dropdownWrapper}>
         <DropDownPicker
@@ -140,8 +131,6 @@ const LanguageSection: React.FC<LanguageSectionProps> = ({
 
   // Function to render text area
   const renderTextArea = () => {
-    const marginStyle =
-      controlsPosition === "top" ? { marginTop: 36 } : { marginBottom: 36 };
     return (
       <ScrollView
         style={{
@@ -150,16 +139,11 @@ const LanguageSection: React.FC<LanguageSectionProps> = ({
           borderRadius: 8,
           backgroundColor: "rgba(0, 0, 0, 0.5)",
           padding: 12,
-          ...marginStyle,
-          ...(position === "top" ? { transform: [{ rotate: "180deg" }] } : {}),
+          marginTop: 36,
         }}
         scrollEnabled={true}
         nestedScrollEnabled={true}
         showsVerticalScrollIndicator={true}
-        contentContainerStyle={{
-          flexGrow: 1,
-          ...(position === "top" ? { minHeight: "100%" } : {}),
-        }}
       >
         <View style={styles.textAreaContent}>
           <Text numberOfLines={0} style={styles.textFieldStyle}>
@@ -180,11 +164,6 @@ const LanguageSection: React.FC<LanguageSectionProps> = ({
         }
         style={styles.backgroundImage}
         resizeMode="cover"
-        imageStyle={
-          positionConfig.imageRotate
-            ? { transform: [{ rotate: "180deg" }] }
-            : {}
-        }
       >
         <LinearGradient
           colors={positionConfig.gradientColors}
@@ -192,13 +171,9 @@ const LanguageSection: React.FC<LanguageSectionProps> = ({
         >
           <View style={styles.contentContainer}>
             {/* Render controls first if controlsPosition is 'top' */}
-            {controlsPosition === "top" && renderControls()}
-
+            {renderControls()}
             {/* Text area */}
             {renderTextArea()}
-
-            {/* Render controls last if controlsPosition is 'bottom' */}
-            {controlsPosition === "bottom" && renderControls()}
           </View>
         </LinearGradient>
       </ImageBackground>
@@ -249,8 +224,5 @@ const styles = StyleSheet.create({
     color: "#FACC15",
     fontWeight: "500",
     fontSize: 20,
-  },
-  rotated180: {
-    transform: [{ rotate: "180deg" }],
   },
 });
