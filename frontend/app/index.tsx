@@ -91,6 +91,7 @@ const Index = () => {
           setIsAuthChecking(false);
         }
       }
+      router.navigate('/(tabs)/Home');
     };
 
     initializeApp();

@@ -155,7 +155,7 @@ const Home = () => {
               handlePress={handlePress}
               recording={recording}
               user={user}
-              userId={1}
+              userId={2}
               controlsPosition="bottom"
             />
 
@@ -190,7 +190,7 @@ const Home = () => {
               handlePress={handlePress}
               recording={recording}
               user={user}
-              userId={2}
+              userId={1}
               controlsPosition="top"
             />
           </TouchableOpacity>
