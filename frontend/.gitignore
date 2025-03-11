@@ -2,6 +2,8 @@
 
 # dependencies
 node_modules/
+npm-debug.log
+yarn-error.log
 
 # local env files
 .env*.local
@@ -24,6 +26,9 @@ expo-env.d.ts
 # Metro
 .metro-health-check*
 
+# Metro bundler cache
+metro-cache/
+
 # debug
 npm-debug.*
 yarn-debug.*
@@ -40,3 +45,27 @@ yarn-error.*
 *.tsbuildinfo
 
 app-example
+
+# Expo build output
+android/.gradle
+android/app/build
+android/build
+android/.idea
+android/app/.cxx
+android/.settings
+android/local.properties
+android/app/debug.keystore
+
+# iOS build output
+ios/Pods
+ios/build
+ios/.DS_Store
+ios/*.xcodeproj/project.xcworkspace
+ios/*.xcodeproj/xcuserdata
+ios/*.xcodeproj/xcshareddata
+ios/*.xcworkspace
+ios/.idea
+ios/.vscode
+ios/.expo
+ios/*.pbxproj
+ios/*.xcuserstate
