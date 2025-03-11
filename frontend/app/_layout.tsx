@@ -13,6 +13,7 @@ import AuthLogo from "@/components/AuthLogo";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import Toast from "react-native-toast-message";
 import { SafeAreaView, SafeAreaProvider } from "react-native-safe-area-context";
+import "react-native-reanimated";
 
 SplashScreen.preventAutoHideAsync();
 
