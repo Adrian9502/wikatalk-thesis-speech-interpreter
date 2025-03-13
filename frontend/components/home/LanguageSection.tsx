@@ -3,6 +3,7 @@ import {
   View,
   ScrollView,
   StyleSheet,
+  Pressable,
   ImageSourcePropType,
   TextInput,
   Image,
@@ -10,7 +11,7 @@ import {
   Text,
   TouchableOpacity,
 } from "react-native";
-import DropDownPicker from "react-native-dropdown-picker";
+import { Dropdown } from "react-native-element-dropdown";
 import { LinearGradient } from "expo-linear-gradient";
 import { MaterialCommunityIcons, Ionicons } from "@expo/vector-icons";
 import { DIALECTS } from "@/constant/languages";
@@ -35,6 +36,7 @@ const LanguageSection: React.FC<LanguageSectionProps> = ({
   // Animation for microphone button
   const [micAnimation] = useState(new Animated.Value(1));
   const [copySuccess, setCopySuccess] = useState(false);
+  const [isFocus, setIsFocus] = useState(false);
 
   // Colors based on position
   const COLORS = {
@@ -92,30 +94,44 @@ const LanguageSection: React.FC<LanguageSectionProps> = ({
       {/* Header Section */}
       <View style={styles.header}>
         <View style={styles.dropdownContainer}>
-          <DropDownPicker
-            open={dropdownOpen}
-            value={language}
-            items={DIALECTS}
-            setOpen={setDropdownOpen}
-            setValue={setLanguage}
-            onOpen={closeOtherDropdown}
-            listMode="SCROLLVIEW"
-            scrollViewProps={{ nestedScrollEnabled: true }}
-            style={[styles.dropdown, { borderColor: COLORS.border }]}
-            dropDownContainerStyle={[
-              styles.dropdownList,
+          <Dropdown
+            style={[
+              styles.dropdown,
               { borderColor: COLORS.border },
+              isFocus && { borderColor: COLORS.primary },
             ]}
-            textStyle={[styles.dropdownText, { color: COLORS.text }]}
-            placeholderStyle={{ color: COLORS.placeholder }}
-            placeholder="Select language"
-            maxHeight={240}
-            ArrowDownIconComponent={() => (
-              <Ionicons name="chevron-down" size={18} color={COLORS.primary} />
+            placeholderStyle={[
+              styles.dropdownText,
+              { color: COLORS.placeholder },
+            ]}
+            selectedTextStyle={[
+              styles.dropdownText,
+              { color: COLORS.text, borderRadius: 8 },
+            ]}
+            data={DIALECTS}
+            maxHeight={250}
+            labelField="label"
+            valueField="value"
+            placeholder="Tagalog"
+            value={language}
+            onFocus={() => {
+              setIsFocus(true);
+              closeOtherDropdown();
+            }}
+            onBlur={() => setIsFocus(false)}
+            onChange={(item) => {
+              setLanguage(item.value);
+              setIsFocus(false);
+            }}
+            renderRightIcon={() => (
+              <Ionicons
+                name={isFocus ? "chevron-up" : "chevron-down"}
+                size={18}
+                color={COLORS.primary}
+              />
             )}
-            ArrowUpIconComponent={() => (
-              <Ionicons name="chevron-up" size={18} color={COLORS.primary} />
-            )}
+            activeColor={COLORS.secondary}
+            containerStyle={styles.dropdownList}
           />
         </View>
 
@@ -191,7 +207,10 @@ const LanguageSection: React.FC<LanguageSectionProps> = ({
           </Animated.View>
         </TouchableOpacity>
 
-        <View style={styles.imageContainer}>
+        <Pressable
+          onPress={() => showInfo(language, position)}
+          style={styles.imageContainer}
+        >
           <Image
             source={
               typeof getLanguageBackground(language) === "string"
@@ -210,7 +229,7 @@ const LanguageSection: React.FC<LanguageSectionProps> = ({
           <View style={styles.languageLabel}>
             <Text style={styles.languageName}>{language}</Text>
           </View>
-        </View>
+        </Pressable>
       </View>
     </View>
   );
@@ -246,7 +265,7 @@ const styles = StyleSheet.create({
     zIndex: 1000,
   },
   dropdownContainer: {
-    zIndex: 1000,
+    zIndex: 2000,
     flex: 1,
     maxWidth: 160,
   },
@@ -255,6 +274,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     height: 46,
     backgroundColor: "#FFFFFF",
+    paddingHorizontal: 12,
   },
   dropdownList: {
     borderRadius: 12,
@@ -265,6 +285,7 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.1,
     shadowRadius: 8,
     elevation: 6,
+    borderColor: "#E8E8ED",
   },
   dropdownText: {
     fontSize: 16,
@@ -298,6 +319,7 @@ const styles = StyleSheet.create({
   textField: {
     fontSize: 17,
     fontWeight: "400",
+    flex: 1,
     lineHeight: 24,
     textAlignVertical: "top",
   },

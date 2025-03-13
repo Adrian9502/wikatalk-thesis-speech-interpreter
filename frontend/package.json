@@ -52,6 +52,7 @@
     "react-hook-form": "^7.54.2",
     "react-native": "0.76.7",
     "react-native-dropdown-picker": "^5.4.6",
+    "react-native-element-dropdown": "^2.12.4",
     "react-native-feather": "^1.1.2",
     "react-native-gesture-handler": "~2.20.2",
     "react-native-paper": "^5.13.1",

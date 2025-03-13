@@ -119,7 +119,7 @@ const Home = () => {
         edges={["top", "left", "right"]}
       >
         <TouchableOpacity
-          activeOpacity={2}
+          activeOpacity={1}
           onPress={closeDropdowns}
           style={styles.mainContainer}
         >
