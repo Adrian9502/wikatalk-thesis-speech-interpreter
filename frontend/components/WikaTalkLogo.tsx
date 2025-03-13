@@ -1,8 +1,7 @@
 import React from "react";
 import { View, Text, StyleSheet, Platform } from "react-native";
-import { COLORS } from "@/theme/colors";
+import { TITLE_COLORS } from "@/theme/colors";
 import { useFonts } from "expo-font";
-import { LinearGradient } from "expo-linear-gradient";
 
 type WikaTalkLogoProps = {
   title: string;
@@ -22,12 +21,20 @@ const WikaTalkLogo = ({ title }: WikaTalkLogoProps) => {
     <View style={styles.container}>
       <View style={styles.brandContainer}>
         <View style={styles.wikaContainer}>
-          <Text style={[styles.letter, { color: COLORS.customYellow }]}>W</Text>
-          <Text style={[styles.letter, { color: COLORS.customBlueLight }]}>
+          <Text style={[styles.letter, { color: TITLE_COLORS.customYellow }]}>
+            W
+          </Text>
+          <Text
+            style={[styles.letter, { color: TITLE_COLORS.customBlueLight }]}
+          >
             i
           </Text>
-          <Text style={[styles.letter, { color: COLORS.customRed }]}>k</Text>
-          <Text style={[styles.letter, { color: COLORS.customYellow }]}>a</Text>
+          <Text style={[styles.letter, { color: TITLE_COLORS.customRed }]}>
+            k
+          </Text>
+          <Text style={[styles.letter, { color: TITLE_COLORS.customYellow }]}>
+            a
+          </Text>
         </View>
 
         {/* Title text with gradient background */}
@@ -72,7 +79,7 @@ const styles = StyleSheet.create({
     letterSpacing: 0.5,
     fontSize: 28,
     fontFamily: "Poppins-SemiBold",
-    color: COLORS.customWhite,
+    color: TITLE_COLORS.customWhite,
     textShadowColor: "rgba(0, 0, 0, 0.4)",
     textShadowOffset: { width: 1, height: 1 },
     textShadowRadius: 3,
