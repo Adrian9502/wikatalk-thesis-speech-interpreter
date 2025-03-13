@@ -1,61 +1,73 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState } from "react";
 import {
   View,
   TouchableOpacity,
-  Animated,
   StyleSheet,
+  Animated,
   Text,
 } from "react-native";
-import { Trash, Copy, Check, Info, Mic, MicOff } from "react-native-feather";
-import { ControlButtonsProps } from "@/types/types";
+import { Trash2, Copy, Check, Info } from "react-native-feather";
+interface ControlButtonsProps {
+  // Basic properties
+  showInfoHandler: (language: string, section: "top" | "bottom") => void;
+  copyHandler: (text: string) => Promise<void>;
+  clearTextHandler: (section: "top" | "bottom") => void;
+
+  // Data needed for handlers
+  languageValue: string;
+  textValue: string;
+  position: "top" | "bottom";
+
+  // Optional props with default values
+  buttonBgColor?: string;
+  iconColor?: string;
+  successColor?: string;
+}
 
 const ControlButtons: React.FC<ControlButtonsProps> = ({
   // Basic properties
   showInfoHandler,
   copyHandler,
   clearTextHandler,
-  micPressHandler,
 
   // Data needed for handlers
   languageValue,
   textValue,
   position,
 
-  // Recording state
-  isRecording,
-  activeUser,
-  userId,
-
   // Optional props with default values
-  buttonBgColor = "rgba(255, 215, 0, 0.2)",
+  buttonBgColor = "rgba(56, 128, 255, 0.08)",
+  iconColor = "#3880ff",
   successColor = "#28A745",
 }) => {
   // State to track if content was just copied
   const [copied, setCopied] = useState(false);
+  const [showTooltip, setShowTooltip] = useState<string | null>(null);
 
-  // Timer state for recording duration
-  const [recordingTime, setRecordingTime] = useState(0);
-  const timerRef = useRef<NodeJS.Timeout | null>(null);
+  // Animation values
+  const scaleAnim = useState(new Animated.Value(1))[0];
+  const tooltipOpacity = useState(new Animated.Value(0))[0];
 
-  // Blinking animation for REC indicator
-  const blinkAnim = useRef(new Animated.Value(1)).current;
+  // Handle copy with animation feedback
+  const handleCopy = async () => {
+    if (textValue.trim().length === 0) return;
 
-  // Current recording state
-  const isCurrentlyRecording = isRecording && activeUser === userId;
-
-  // Format seconds into MM:SS
-  const formatTime = (timeInSeconds: number) => {
-    const minutes = Math.floor(timeInSeconds / 60);
-    const seconds = timeInSeconds % 60;
-    return `${minutes.toString().padStart(2, "0")}:${seconds
-      .toString()
-      .padStart(2, "0")}`;
-  };
-
-  // Handle copy with feedback
-  const handleCopy = () => {
-    copyHandler(textValue);
+    await copyHandler(textValue);
     setCopied(true);
+
+    // Animate button when copied
+    Animated.sequence([
+      Animated.timing(scaleAnim, {
+        toValue: 1.2,
+        duration: 150,
+        useNativeDriver: true,
+      }),
+      Animated.timing(scaleAnim, {
+        toValue: 1,
+        duration: 150,
+        useNativeDriver: true,
+      }),
+    ]).start();
 
     // Reset after 2 seconds
     setTimeout(() => {
@@ -63,121 +75,108 @@ const ControlButtons: React.FC<ControlButtonsProps> = ({
     }, 2000);
   };
 
-  // Start/stop recording timer
-  useEffect(() => {
-    if (isCurrentlyRecording) {
-      // Start timer
-      setRecordingTime(0);
-      timerRef.current = setInterval(() => {
-        setRecordingTime((prev) => prev + 1);
-      }, 1000);
+  // Handle tooltip display
+  const showButtonTooltip = (tooltipType: string) => {
+    setShowTooltip(tooltipType);
+    Animated.timing(tooltipOpacity, {
+      toValue: 1,
+      duration: 200,
+      useNativeDriver: true,
+    }).start();
 
-      // Start blinking animation
-      Animated.loop(
-        Animated.sequence([
-          Animated.timing(blinkAnim, {
-            toValue: 0.3,
-            duration: 800,
-            useNativeDriver: true,
-          }),
-          Animated.timing(blinkAnim, {
-            toValue: 1,
-            duration: 800,
-            useNativeDriver: true,
-          }),
-        ])
-      ).start();
-    } else {
-      // Stop timer
-      if (timerRef.current) {
-        clearInterval(timerRef.current);
-        timerRef.current = null;
-      }
-      setRecordingTime(0);
+    // Auto hide after 1.5 seconds
+    setTimeout(() => {
+      hideButtonTooltip();
+    }, 1500);
+  };
 
-      // Stop blinking animation
-      blinkAnim.stopAnimation();
-      blinkAnim.setValue(1);
+  const hideButtonTooltip = () => {
+    Animated.timing(tooltipOpacity, {
+      toValue: 0,
+      duration: 200,
+      useNativeDriver: true,
+    }).start(() => setShowTooltip(null));
+  };
+
+  // Get tooltip text based on type
+  const getTooltipText = () => {
+    switch (showTooltip) {
+      case "info":
+        return "Language info";
+      case "copy":
+        return copied ? "Copied!" : "Copy text";
+      case "clear":
+        return "Clear text";
+      default:
+        return "";
     }
+  };
 
-    // Clean up
-    return () => {
-      if (timerRef.current) {
-        clearInterval(timerRef.current);
-      }
-      blinkAnim.stopAnimation();
-    };
-  }, [isCurrentlyRecording]);
+  const isTextEmpty = textValue.trim().length === 0;
 
   return (
     <View style={styles.container}>
+      {/* Tooltip */}
+      {showTooltip && (
+        <Animated.View style={[styles.tooltip, { opacity: tooltipOpacity }]}>
+          <Text style={styles.tooltipText}>{getTooltipText()}</Text>
+        </Animated.View>
+      )}
+
       {/* Language info button */}
       <TouchableOpacity
         onPress={() => showInfoHandler(languageValue, position)}
+        onLongPress={() => showButtonTooltip("info")}
+        activeOpacity={0.7}
         style={[styles.iconButton, { backgroundColor: buttonBgColor }]}
       >
-        <Info width={22} height={22} strokeWidth={2} stroke="#FFD700" />
+        <Info width={20} height={20} strokeWidth={2.2} stroke={iconColor} />
       </TouchableOpacity>
 
       {/* Copy Icon with success feedback */}
-      <TouchableOpacity
-        onPress={handleCopy}
-        style={[styles.iconButton, { backgroundColor: buttonBgColor }]}
-      >
-        {copied ? (
-          <Check
-            width={20}
-            height={20}
-            strokeWidth={2.5}
-            stroke={successColor}
-          />
-        ) : (
-          <Copy width={22} height={22} strokeWidth={2} stroke="#FFD700" />
-        )}
-      </TouchableOpacity>
+      <Animated.View style={{ transform: [{ scale: scaleAnim }] }}>
+        <TouchableOpacity
+          onPress={handleCopy}
+          onLongPress={() => showButtonTooltip("copy")}
+          activeOpacity={0.7}
+          disabled={isTextEmpty}
+          style={[
+            styles.iconButton,
+            {
+              backgroundColor: copied ? `${successColor}20` : buttonBgColor,
+              opacity: isTextEmpty ? 0.5 : 1,
+            },
+          ]}
+        >
+          {copied ? (
+            <Check
+              width={20}
+              height={20}
+              strokeWidth={2.5}
+              stroke={successColor}
+            />
+          ) : (
+            <Copy width={20} height={20} strokeWidth={2.2} stroke={iconColor} />
+          )}
+        </TouchableOpacity>
+      </Animated.View>
 
       {/* Delete Icon */}
       <TouchableOpacity
         onPress={() => clearTextHandler(position)}
-        style={[styles.iconButton, { backgroundColor: buttonBgColor }]}
+        onLongPress={() => showButtonTooltip("clear")}
+        activeOpacity={0.7}
+        disabled={isTextEmpty}
+        style={[
+          styles.iconButton,
+          {
+            backgroundColor: buttonBgColor,
+            opacity: isTextEmpty ? 0.5 : 1,
+          },
+        ]}
       >
-        <Trash width={22} height={22} strokeWidth={2} stroke="#FFD700" />
+        <Trash2 width={20} height={20} strokeWidth={2.2} stroke={iconColor} />
       </TouchableOpacity>
-
-      {/* Recording Button with Status */}
-      <View style={styles.recordingContainer}>
-        {/* Main Button */}
-        <TouchableOpacity
-          style={[
-            styles.micButton,
-            isCurrentlyRecording
-              ? styles.recordingActive
-              : styles.recordingInactive,
-          ]}
-          onPress={() => micPressHandler(Number(userId))}
-          activeOpacity={0.7}
-        >
-          {/* Mic Icon - changes based on recording state */}
-          {isCurrentlyRecording ? (
-            <Mic width={32} height={32} strokeWidth={2} stroke="#FFF" />
-          ) : (
-            <MicOff width={32} height={32} strokeWidth={2} stroke="#FFD700" />
-          )}
-        </TouchableOpacity>
-
-        {/* Recording indicator with timer (only shown when recording) */}
-        {isCurrentlyRecording && (
-          <View style={styles.recordingInfo}>
-            <View style={styles.recIndicator}>
-              <Animated.View style={[styles.recDot, { opacity: blinkAnim }]} />
-              <Animated.Text style={[styles.recText, { opacity: blinkAnim }]}>
-                REC
-              </Animated.Text>
-            </View>
-            <Text style={styles.timerText}>{formatTime(recordingTime)}</Text>
-          </View>
-        )}
-      </View>
     </View>
   );
 };
@@ -188,64 +187,36 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "flex-end",
     paddingHorizontal: 5,
+    position: "relative",
   },
   iconButton: {
-    padding: 8,
-    borderRadius: 999,
-    marginRight: 12,
-  },
-  recordingContainer: {
-    alignItems: "center",
+    padding: 12,
+    borderRadius: 14,
+    marginLeft: 10,
     justifyContent: "center",
-  },
-  micButton: {
-    width: 54,
-    height: 54,
-    borderRadius: 32,
     alignItems: "center",
-    justifyContent: "center",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.1,
+    shadowRadius: 2,
+    elevation: 2,
+    width: 44,
+    height: 44,
   },
-  recordingActive: {
-    backgroundColor: "#EF4444",
-    borderWidth: 2,
-    borderColor: "#facc15",
-  },
-  recordingInactive: {
-    backgroundColor: "rgba(255, 255, 255, 0.2)",
-  },
-  recordingInfo: {
+  tooltip: {
     position: "absolute",
-    bottom: -27,
-    backgroundColor: "rgba(0, 0, 0, 0.7)",
-    paddingHorizontal: 10,
-    paddingVertical: 4,
-    borderRadius: 12,
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    minWidth: 80,
+    backgroundColor: "rgba(0,0,0,0.75)",
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 8,
+    top: -40,
+    right: 10,
+    zIndex: 1000,
   },
-  recIndicator: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginRight: 8,
-  },
-  recDot: {
-    width: 8,
-    height: 8,
-    borderRadius: 4,
-    backgroundColor: "#EF4444",
-    marginRight: 4,
-  },
-  recText: {
-    color: "#EF4444",
+  tooltipText: {
+    color: "#fff",
     fontSize: 12,
-    fontWeight: "bold",
-  },
-  timerText: {
-    color: "#FFFFFF",
-    fontSize: 12,
-    fontWeight: "bold",
+    fontWeight: "500",
   },
 });
 

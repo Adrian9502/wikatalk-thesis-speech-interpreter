@@ -1,36 +1,20 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import {
   View,
-  Text,
   ScrollView,
-  ImageBackground,
   StyleSheet,
   ImageSourcePropType,
+  TextInput,
+  Image,
+  Animated,
+  Text,
+  TouchableOpacity,
 } from "react-native";
-import { LinearGradient } from "expo-linear-gradient";
 import DropDownPicker from "react-native-dropdown-picker";
-import ControlButtons from "./ControlButtons";
+import { LinearGradient } from "expo-linear-gradient";
+import { MaterialCommunityIcons, Ionicons } from "@expo/vector-icons";
 import { DIALECTS } from "@/constant/languages";
-import { Audio } from "expo-av";
-
-interface LanguageSectionProps {
-  position: "top" | "bottom";
-  language: string;
-  textField: string;
-  dropdownOpen: boolean;
-  setDropdownOpen: React.Dispatch<React.SetStateAction<boolean>>;
-  setLanguage: React.Dispatch<React.SetStateAction<string>>;
-  closeOtherDropdown: () => void;
-  getLanguageBackground: (language: string) => string | ImageSourcePropType;
-  showInfo: (language: string, section: "top" | "bottom") => void;
-  copyToClipboard: (text: string) => Promise<void>;
-  clearText: (section: "top" | "bottom") => void;
-  handlePress: (userNum: number) => Promise<void>;
-  recording: Audio.Recording | undefined;
-  user: any;
-  userId: string | number;
-  controlsPosition?: "top" | "bottom";
-}
+import { LanguageSectionProps } from "@/types/types";
 
 const LanguageSection: React.FC<LanguageSectionProps> = ({
   position,
@@ -46,183 +30,330 @@ const LanguageSection: React.FC<LanguageSectionProps> = ({
   clearText,
   handlePress,
   recording,
-  user,
   userId,
 }) => {
-  // Configuration based on position (top or bottom)
-  const config: Record<
-    string,
-    {
-      gradientColors: [string, string];
-      backgroundColor: string;
-      imageRotate: boolean;
-    }
-  > = {
-    top: {
-      gradientColors: ["rgba(206, 17, 38, 0.8)", "rgba(206, 17, 38, 0.6)"],
-      backgroundColor: "#CE1126",
-      imageRotate: true,
-    },
-    bottom: {
-      gradientColors: ["rgba(0, 56, 168, 0.8)", "rgba(0, 56, 168, 0.6)"],
-      backgroundColor: "#0038A8",
-      imageRotate: false,
-    },
+  // Animation for microphone button
+  const [micAnimation] = useState(new Animated.Value(1));
+  const [copySuccess, setCopySuccess] = useState(false);
+
+  // Colors based on position
+  const COLORS = {
+    primary: position === "top" ? "#4A6FFF" : "#FF6F4A",
+    secondary: position === "top" ? "#E2EAFF" : "#F3E2FF",
+    background: "#FFFFFF",
+    text: "#212132",
+    placeholder: "#9E9EA7",
+    border: "#E8E8ED",
+    success: "#10B981",
   };
 
-  const positionConfig = config[position];
+  // Animation for recording
+  useEffect(() => {
+    if (recording) {
+      Animated.loop(
+        Animated.sequence([
+          Animated.timing(micAnimation, {
+            toValue: 1.2,
+            duration: 500,
+            useNativeDriver: true,
+          }),
+          Animated.timing(micAnimation, {
+            toValue: 1,
+            duration: 500,
+            useNativeDriver: true,
+          }),
+        ])
+      ).start();
+    } else {
+      Animated.timing(micAnimation, {
+        toValue: 1,
+        duration: 200,
+        useNativeDriver: true,
+      }).start();
+    }
+  }, [recording]);
 
-  // Function to render controls (dropdown and buttons)
-  const renderControls = () => (
-    <View style={[styles.controlsContainer]}>
-      {/* Language Dropdown */}
-      <View style={styles.dropdownWrapper}>
-        <DropDownPicker
-          open={dropdownOpen}
-          value={language}
-          items={DIALECTS}
-          setOpen={setDropdownOpen}
-          setValue={setLanguage}
-          placeholder="Select language"
-          onOpen={closeOtherDropdown}
-          listMode="SCROLLVIEW"
-          scrollViewProps={{
-            nestedScrollEnabled: true,
-          }}
-          style={{
-            backgroundColor: positionConfig.backgroundColor,
-            borderWidth: 1,
-            borderColor: "#FFD700",
-            borderRadius: 10,
-          }}
-          dropDownContainerStyle={{
-            backgroundColor: positionConfig.backgroundColor,
-            borderColor: "#FFD700",
-            borderRadius: 20,
-          }}
-          labelStyle={{
-            fontSize: 16,
-            color: "#FFD700",
-            fontWeight: "700",
-          }}
-          textStyle={{
-            fontSize: 16,
-            color: "#FFD700",
-          }}
-          maxHeight={200}
-        />
-      </View>
-
-      {/* Info, Copy, Delete and Mic */}
-      <ControlButtons
-        showInfoHandler={showInfo}
-        copyHandler={copyToClipboard}
-        clearTextHandler={clearText}
-        micPressHandler={handlePress}
-        languageValue={language}
-        textValue={textField}
-        position={position}
-        isRecording={recording}
-        activeUser={user}
-        userId={userId}
-      />
-    </View>
-  );
-
-  // Function to render text area
-  const renderTextArea = () => {
-    return (
-      <ScrollView
-        style={{
-          flex: 1,
-          width: "100%",
-          borderRadius: 8,
-          backgroundColor: "rgba(0, 0, 0, 0.5)",
-          padding: 12,
-          marginTop: 36,
-        }}
-        scrollEnabled={true}
-        nestedScrollEnabled={true}
-        showsVerticalScrollIndicator={true}
-      >
-        <View style={styles.textAreaContent}>
-          <Text numberOfLines={0} style={styles.textFieldStyle}>
-            {textField}
-          </Text>
-        </View>
-      </ScrollView>
-    );
+  // Handle copy with animation
+  const handleCopy = async () => {
+    await copyToClipboard(textField);
+    setCopySuccess(true);
+    setTimeout(() => setCopySuccess(false), 2000);
   };
 
   return (
-    <View style={styles.languageSectionContainer}>
-      <ImageBackground
-        source={
-          typeof getLanguageBackground(language) === "string"
-            ? { uri: getLanguageBackground(language) as string } // Convert string to `{ uri }`
-            : (getLanguageBackground(language) as ImageSourcePropType) // Use local image directly
-        }
-        style={styles.backgroundImage}
-        resizeMode="cover"
-      >
-        <LinearGradient
-          colors={positionConfig.gradientColors}
-          style={styles.gradient}
+    <View style={styles.container}>
+      <LinearGradient
+        colors={[COLORS.secondary, COLORS.background]}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 1, y: 1 }}
+        style={styles.gradient}
+      />
+
+      {/* Header Section */}
+      <View style={styles.header}>
+        <View style={styles.dropdownContainer}>
+          <DropDownPicker
+            open={dropdownOpen}
+            value={language}
+            items={DIALECTS}
+            setOpen={setDropdownOpen}
+            setValue={setLanguage}
+            onOpen={closeOtherDropdown}
+            listMode="SCROLLVIEW"
+            scrollViewProps={{ nestedScrollEnabled: true }}
+            style={[styles.dropdown, { borderColor: COLORS.border }]}
+            dropDownContainerStyle={[
+              styles.dropdownList,
+              { borderColor: COLORS.border },
+            ]}
+            textStyle={[styles.dropdownText, { color: COLORS.text }]}
+            placeholderStyle={{ color: COLORS.placeholder }}
+            placeholder="Select language"
+            maxHeight={240}
+            ArrowDownIconComponent={() => (
+              <Ionicons name="chevron-down" size={18} color={COLORS.primary} />
+            )}
+            ArrowUpIconComponent={() => (
+              <Ionicons name="chevron-up" size={18} color={COLORS.primary} />
+            )}
+          />
+        </View>
+
+        <View style={styles.controls}>
+          <TouchableOpacity
+            style={styles.controlButton}
+            onPress={() => showInfo(language, position)}
+          >
+            <Ionicons
+              name="information-circle-outline"
+              size={22}
+              color={COLORS.primary}
+            />
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={styles.controlButton}
+            onPress={handleCopy}
+            disabled={!textField}
+          >
+            <Ionicons
+              name={copySuccess ? "checkmark-circle" : "copy-outline"}
+              size={22}
+              color={copySuccess ? COLORS.success : COLORS.primary}
+            />
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={styles.controlButton}
+            onPress={() => clearText(position)}
+            disabled={!textField}
+          >
+            <Ionicons name="trash-outline" size={22} color={COLORS.primary} />
+          </TouchableOpacity>
+        </View>
+      </View>
+
+      {/* Text Area */}
+      <View style={styles.textAreaWrapper}>
+        <ScrollView
+          style={[styles.textArea, { borderColor: COLORS.border }]}
+          scrollEnabled={true}
+          nestedScrollEnabled={true}
+          showsVerticalScrollIndicator={false}
+          contentContainerStyle={styles.scrollContent}
         >
-          <View style={styles.contentContainer}>
-            {/* Render controls first if controlsPosition is 'top' */}
-            {renderControls()}
-            {/* Text area */}
-            {renderTextArea()}
+          <TextInput
+            value={textField}
+            multiline={true}
+            editable={false}
+            style={[styles.textField, { color: COLORS.text }]}
+            placeholder={
+              position === "top"
+                ? "Enter your text here..."
+                : "Translation will appear here..."
+            }
+            placeholderTextColor={COLORS.placeholder}
+          />
+        </ScrollView>
+      </View>
+
+      {/* Bottom Section */}
+      <View style={styles.bottomSection}>
+        <TouchableOpacity
+          activeOpacity={0.8}
+          onPress={() => handlePress(userId as number)}
+          style={[styles.micButton, { backgroundColor: COLORS.primary }]}
+        >
+          <Animated.View style={{ transform: [{ scale: micAnimation }] }}>
+            <MaterialCommunityIcons
+              name={recording ? "microphone" : "microphone-outline"}
+              size={28}
+              color="#FFFFFF"
+            />
+          </Animated.View>
+        </TouchableOpacity>
+
+        <View style={styles.imageContainer}>
+          <Image
+            source={
+              typeof getLanguageBackground(language) === "string"
+                ? { uri: getLanguageBackground(language) as string }
+                : (getLanguageBackground(language) as ImageSourcePropType)
+            }
+            style={styles.backgroundImage}
+            resizeMode="cover"
+          />
+          <LinearGradient
+            colors={["rgba(0,0,0,0.12)", "rgba(0,0,0,0)"]}
+            style={styles.imageOverlay}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 1 }}
+          />
+          <View style={styles.languageLabel}>
+            <Text style={styles.languageName}>{language}</Text>
           </View>
-        </LinearGradient>
-      </ImageBackground>
+        </View>
+      </View>
     </View>
   );
 };
 
-export default LanguageSection;
-
 const styles = StyleSheet.create({
-  languageSectionContainer: {
+  container: {
     width: "100%",
     height: "45%",
-    paddingTop: 5,
-    paddingBottom: 5,
+    borderRadius: 24,
+    overflow: "hidden",
+    backgroundColor: "#FFFFFF",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 10 },
+    shadowOpacity: 0.1,
+    shadowRadius: 15,
+    elevation: 8,
+    position: "relative",
+    padding: 20,
+  },
+  gradient: {
+    position: "absolute",
+    left: 0,
+    right: 0,
+    top: 0,
+    bottom: 0,
+  },
+  header: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 16,
+    zIndex: 1000,
+  },
+  dropdownContainer: {
+    zIndex: 1000,
+    flex: 1,
+    maxWidth: 160,
+  },
+  dropdown: {
+    borderRadius: 12,
+    borderWidth: 1,
+    height: 46,
+    backgroundColor: "#FFFFFF",
+  },
+  dropdownList: {
+    borderRadius: 12,
+    borderWidth: 1,
+    backgroundColor: "#FFFFFF",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 6,
+  },
+  dropdownText: {
+    fontSize: 16,
+    fontWeight: "500",
+  },
+  controls: {
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  controlButton: {
+    width: 40,
+    height: 40,
+    justifyContent: "center",
+    alignItems: "center",
+    borderRadius: 12,
+    marginLeft: 8,
+  },
+  textAreaWrapper: {
+    flex: 1,
+    marginVertical: 8,
+  },
+  textArea: {
+    backgroundColor: "#FFFFFF",
+    borderRadius: 16,
+    borderWidth: 1,
+    padding: 16,
+  },
+  scrollContent: {
+    flexGrow: 1,
+  },
+  textField: {
+    fontSize: 17,
+    fontWeight: "400",
+    lineHeight: 24,
+    textAlignVertical: "top",
+  },
+  bottomSection: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginTop: 8,
+    height: 90,
+  },
+  micButton: {
+    width: 60,
+    height: 60,
+    borderRadius: 30,
+    justifyContent: "center",
+    alignItems: "center",
+    marginRight: 16,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.2,
+    shadowRadius: 6,
+    elevation: 4,
+  },
+  imageContainer: {
+    flex: 1,
+    height: 90,
+    borderRadius: 16,
+    overflow: "hidden",
+    position: "relative",
   },
   backgroundImage: {
     width: "100%",
     height: "100%",
-    borderRadius: 16,
-    overflow: "hidden",
   },
-  gradient: {
-    width: "100%",
-    height: "100%",
+  imageOverlay: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
   },
-  contentContainer: {
-    width: "100%",
-    flex: 1,
-    borderRadius: 16,
-    padding: 16,
-    position: "relative",
+  languageLabel: {
+    position: "absolute",
+    bottom: 10,
+    left: 10,
+    backgroundColor: "rgba(0,0,0,0.4)",
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 12,
   },
-  controlsContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    width: "100%",
-  },
-  dropdownWrapper: {
-    flex: 1,
-    marginRight: 16,
-  },
-  textAreaContent: {
-    flex: 1,
-  },
-  textFieldStyle: {
-    color: "#FACC15",
-    fontWeight: "500",
-    fontSize: 20,
+  languageName: {
+    color: "#FFFFFF",
+    fontSize: 14,
+    fontWeight: "600",
   },
 });
+
+export default LanguageSection;

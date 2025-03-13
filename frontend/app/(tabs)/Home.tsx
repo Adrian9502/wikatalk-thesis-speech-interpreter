@@ -3,6 +3,7 @@ import {
   StyleSheet,
   TouchableOpacity,
   ImageBackground,
+  Text,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import * as Clipboard from "expo-clipboard";
@@ -12,15 +13,17 @@ import { StatusBar } from "expo-status-bar";
 import { LANGUAGE_INFO } from "@/constant/languages";
 import getLanguageBackground from "@/utils/getLanguageBackground";
 import SwapButton from "@/components/SwapButton";
-import LogoHome from "@/components/home/LogoHome";
 import { useRecordingTranslation } from "@/hooks/useRecordingTranslation";
 import { useRecording } from "@/hooks/useRecording";
 import LanguageSection from "@/components/home/LanguageSection";
 import LanguageInfoModal from "@/components/home/LanguageInfoModal";
 import LoadingTranslate from "@/components/home/LoadingTranslate";
+import { TITLE_COLORS } from "@/theme/colors";
+import WikaTalkLogo from "@/components/WikaTalkLogo";
 const Home = () => {
   // Constants
-  const initialText = "Press the mic icon to start recording. Press again to";
+  const initialText =
+    "Press the mic icon to start recording. Press again to stop.";
 
   // Custom hooks
   const { recording, startRecording, stopRecording } = useRecording();
@@ -115,140 +118,115 @@ const Home = () => {
   };
 
   return (
-    <ImageBackground
-      source={require("@/assets/images/ph-flag.jpg")}
-      style={styles.imageBackground}
-      resizeMode="cover"
-    >
+    <View style={styles.container}>
       <StatusBar style="light" />
 
-      <LinearGradient
-        colors={[
-          "rgba(0, 56, 168, 0.85)",
-          "rgba(0, 0, 0, 0.6)",
-          "rgba(206, 17, 38, 0.85)",
-        ]}
-        style={styles.gradientContainer}
+      <SafeAreaView
+        style={styles.safeAreaView}
+        edges={["top", "left", "right"]}
       >
-        <SafeAreaView
-          style={styles.safeAreaView}
-          edges={["top", "left", "right"]}
+        <TouchableOpacity
+          activeOpacity={2}
+          onPress={closeDropdowns}
+          style={styles.mainContainer}
         >
-          <TouchableOpacity
-            activeOpacity={1}
-            onPress={closeDropdowns}
-            style={styles.mainContainer}
-          >
-            {/* Top section  */}
-            <LanguageSection
-              position="top"
-              language={language2}
-              setLanguage={setLanguage2}
-              textField={upperTextfield}
-              dropdownOpen={openTopDropdown}
-              setDropdownOpen={setOpenTopDropdown}
-              closeOtherDropdown={() => setOpenBottomDropdown(false)}
-              getLanguageBackground={getLanguageBackground}
-              showInfo={showInfo}
-              copyToClipboard={copyToClipboard}
-              clearText={clearText}
-              handlePress={handlePress}
-              recording={recording}
-              user={user}
-              userId={2}
-              controlsPosition="bottom"
+          <WikaTalkLogo title={"Speak"} />
+
+          {/* Top section  */}
+          <LanguageSection
+            position="top"
+            language={language2}
+            setLanguage={setLanguage2}
+            textField={upperTextfield}
+            dropdownOpen={openTopDropdown}
+            setDropdownOpen={setOpenTopDropdown}
+            closeOtherDropdown={() => setOpenBottomDropdown(false)}
+            getLanguageBackground={getLanguageBackground}
+            showInfo={showInfo}
+            copyToClipboard={copyToClipboard}
+            clearText={clearText}
+            handlePress={handlePress}
+            recording={recording}
+            userId={2}
+          />
+
+          {/* Middle Section - Exchange icon  */}
+          <View style={styles.middleSection}>
+            {/* Switch icon */}
+            <SwapButton
+              onPress={handleSwapLanguage}
+              colors={["#0a0f28", "#0a0f28"]}
+              borderStyle={styles.swapButtonBorder}
+              iconColor={"#FFD700"}
             />
+          </View>
 
-            {/* Middle Section - Exchange icon  */}
-            <View style={styles.middleSection}>
-              {/* WikaTalk Logo */}
-              <LogoHome />
-              {/* Switch icon */}
-              <SwapButton
-                onPress={handleSwapLanguage}
-                colors={["#0038A8", "#CE1126"]}
-                borderStyle={styles.swapButtonBorder}
-                iconColor={"#FFD700"}
-              />
-              {/* WikaTalk Logo */}
-              <LogoHome rotate={true} />
-            </View>
+          {/* Bottom section */}
+          <LanguageSection
+            position="bottom"
+            language={language1}
+            setLanguage={setLanguage1}
+            textField={bottomTextfield}
+            dropdownOpen={openBottomDropdown}
+            setDropdownOpen={setOpenBottomDropdown}
+            closeOtherDropdown={() => setOpenTopDropdown(false)}
+            getLanguageBackground={getLanguageBackground}
+            showInfo={showInfo}
+            copyToClipboard={copyToClipboard}
+            clearText={clearText}
+            handlePress={handlePress}
+            recording={recording}
+            userId={1}
+          />
+        </TouchableOpacity>
 
-            {/* Bottom section */}
-            <LanguageSection
-              position="bottom"
-              language={language1}
-              setLanguage={setLanguage1}
-              textField={bottomTextfield}
-              dropdownOpen={openBottomDropdown}
-              setDropdownOpen={setOpenBottomDropdown}
-              closeOtherDropdown={() => setOpenTopDropdown(false)}
-              getLanguageBackground={getLanguageBackground}
-              showInfo={showInfo}
-              copyToClipboard={copyToClipboard}
-              clearText={clearText}
-              handlePress={handlePress}
-              recording={recording}
-              user={user}
-              userId={1}
-              controlsPosition="top"
+        {/* Language Information Modal */}
+        {showLanguageInfo &&
+          activeLanguageInfo &&
+          LANGUAGE_INFO[activeLanguageInfo] && (
+            <LanguageInfoModal
+              visible={showLanguageInfo}
+              languageName={activeLanguageInfo}
+              infoSection={infoSection}
+              onClose={() => {
+                setShowLanguageInfo(false);
+                setInfoSection(null);
+              }}
             />
-          </TouchableOpacity>
+          )}
 
-          {/* Language Information Modal */}
-          {showLanguageInfo &&
-            activeLanguageInfo &&
-            LANGUAGE_INFO[activeLanguageInfo] && (
-              <LanguageInfoModal
-                visible={showLanguageInfo}
-                languageName={activeLanguageInfo}
-                infoSection={infoSection}
-                onClose={() => {
-                  setShowLanguageInfo(false);
-                  setInfoSection(null);
-                }}
-              />
-            )}
-
-          {/* Loading Indicator */}
-          {loading && <LoadingTranslate />}
-        </SafeAreaView>
-      </LinearGradient>
-    </ImageBackground>
+        {/* Loading Indicator */}
+        {loading && <LoadingTranslate />}
+      </SafeAreaView>
+    </View>
   );
 };
 
 export default Home;
 
 const styles = StyleSheet.create({
-  imageBackground: {
+  container: {
     flex: 1,
-    width: "100%",
-    height: "100%",
-  },
-  gradientContainer: {
-    flex: 1,
+    backgroundColor: TITLE_COLORS.customNavyBlue,
   },
   safeAreaView: {
     flex: 1,
   },
   mainContainer: {
     flex: 1,
-    alignItems: "center",
     justifyContent: "center",
     width: "100%",
     paddingHorizontal: 20,
   },
   middleSection: {
-    flexDirection: "row",
     alignItems: "center",
-    justifyContent: "space-between",
+    justifyContent: "center",
     width: "100%",
     marginVertical: 8,
     zIndex: 10,
   },
   swapButtonBorder: {
     borderWidth: 2,
-    borderColor: "#FACC15",
+    borderColor: "#F6F6F6",
   },
 });

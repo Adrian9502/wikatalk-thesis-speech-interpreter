@@ -1,5 +1,5 @@
 import { Audio } from "expo-av";
-
+import { ImageSourcePropType } from "react-native";
 export type LanguageOption =
   | "Tagalog"
   | "Cebuano"
@@ -28,27 +28,41 @@ export interface HomeSectionProps {
   activeUser: number;
   userId: number;
 }
-
-export type ControlButtonsProps = {
-  // Handler functions with original parameter names
+export interface ControlButtonsProps {
+  // Basic properties
   showInfoHandler: (language: string, section: "top" | "bottom") => void;
-  copyHandler: (text: string) => void;
+  copyHandler: (text: string) => Promise<void>;
   clearTextHandler: (section: "top" | "bottom") => void;
-  micPressHandler: (userId: number) => void;
 
   // Data needed for handlers
   languageValue: string;
   textValue: string;
   position: "top" | "bottom";
 
-  // Recording state
-  isRecording: Audio.Recording | undefined;
-  activeUser: number | undefined;
-  userId: string | number;
-
-  // Optional props for customization
-  iconColor?: string;
+  // Optional props with default values
   buttonBgColor?: string;
-  recordingColor?: string;
   successColor?: string;
-};
+}
+export interface LanguageSectionProps {
+  position: "top" | "bottom";
+  language: string;
+  textField: string;
+  dropdownOpen: boolean;
+  setDropdownOpen: React.Dispatch<React.SetStateAction<boolean>>;
+  setLanguage: React.Dispatch<React.SetStateAction<string>>;
+  closeOtherDropdown: () => void;
+  getLanguageBackground: (language: string) => string | ImageSourcePropType;
+  showInfo: (language: string, section: "top" | "bottom") => void;
+  copyToClipboard: (text: string) => Promise<void>;
+  clearText: (section: "top" | "bottom") => void;
+  handlePress: (userNum: number) => Promise<void>;
+  recording: Audio.Recording | undefined;
+  userId: string | number;
+}
+export interface MicButtonProps {
+  micPressHandler: (userNum: number) => Promise<void>;
+  position: "top" | "bottom";
+  isRecording: Audio.Recording | undefined;
+  activeUser: any;
+  userId: string | number;
+}

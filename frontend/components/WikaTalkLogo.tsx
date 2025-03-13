@@ -1,38 +1,81 @@
-import { View, Image, Text, StyleSheet } from "react-native";
+import React from "react";
+import { View, Text, StyleSheet, Platform } from "react-native";
+import { COLORS } from "@/theme/colors";
+import { useFonts } from "expo-font";
+import { LinearGradient } from "expo-linear-gradient";
 
-const WikaTalkLogo = () => {
+type WikaTalkLogoProps = {
+  title: string;
+};
+
+const WikaTalkLogo = ({ title }: WikaTalkLogoProps) => {
+  const [fontsLoaded] = useFonts({
+    "Poppins-Bold": require("../assets/fonts/Poppins-Bold.ttf"),
+    "Poppins-SemiBold": require("../assets/fonts/Poppins-SemiBold.ttf"),
+  });
+
+  if (!fontsLoaded) {
+    return null;
+  }
+
   return (
     <View style={styles.container}>
-      {/* Logo Image */}
-      <Image
-        source={require("@/assets/images/wikatalk-logo-main.png")}
-        style={styles.logo}
-        resizeMode="contain"
-      />
+      <View style={styles.brandContainer}>
+        <View style={styles.wikaContainer}>
+          <Text style={[styles.letter, { color: COLORS.customYellow }]}>W</Text>
+          <Text style={[styles.letter, { color: COLORS.customBlueLight }]}>
+            i
+          </Text>
+          <Text style={[styles.letter, { color: COLORS.customRed }]}>k</Text>
+          <Text style={[styles.letter, { color: COLORS.customYellow }]}>a</Text>
+        </View>
 
-      {/* App Name */}
-      <Text style={styles.text}>WikaTalk</Text>
+        {/* Title text with gradient background */}
+        <View style={styles.titleWrapper}>
+          <Text style={styles.titleText}>{title}</Text>
+        </View>
+      </View>
     </View>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
-    justifyContent: "center",
+    width: "100%",
+    marginTop: 5,
+    marginBottom: 5,
+    borderRadius: 16,
+    overflow: "hidden",
+  },
+
+  brandContainer: {
+    flexDirection: "row",
     alignItems: "center",
   },
-  logo: {
-    width: 146,
-    height: 146,
+  wikaContainer: {
+    flexDirection: "row",
+    alignItems: "baseline",
   },
-  text: {
-    marginTop: 16,
-    fontSize: 40,
-    color: "white",
-    fontFamily: "EagleLake",
-    textShadowColor: "rgba(0, 0, 0, 0.75)",
+  letter: {
+    letterSpacing: 0.5,
+    fontSize: 28,
+    fontFamily: "Poppins-Bold",
+    textShadowColor: "rgba(0, 0, 0, 0.6)",
     textShadowOffset: { width: 1, height: 1 },
     textShadowRadius: 4,
+  },
+  titleWrapper: {
+    borderRadius: 12,
+    overflow: "hidden",
+  },
+  titleText: {
+    letterSpacing: 0.5,
+    fontSize: 28,
+    fontFamily: "Poppins-SemiBold",
+    color: COLORS.customWhite,
+    textShadowColor: "rgba(0, 0, 0, 0.4)",
+    textShadowOffset: { width: 1, height: 1 },
+    textShadowRadius: 3,
   },
 });
 
