@@ -168,9 +168,7 @@ const LanguageSection: React.FC<LanguageSectionProps> = ({
             editable={false}
             style={[styles.textField, { color: COLORS.text }]}
             placeholder={
-              position === "top"
-                ? "Enter your text here..."
-                : "Translation will appear here..."
+              "Tap the microphone icon to begin recording. Tap again to stop."
             }
             placeholderTextColor={COLORS.placeholder}
           />

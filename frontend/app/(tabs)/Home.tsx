@@ -1,13 +1,6 @@
-import {
-  View,
-  StyleSheet,
-  TouchableOpacity,
-  ImageBackground,
-  Text,
-} from "react-native";
+import { View, StyleSheet, TouchableOpacity } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import * as Clipboard from "expo-clipboard";
-import { LinearGradient } from "expo-linear-gradient";
 import React, { useEffect, useState } from "react";
 import { StatusBar } from "expo-status-bar";
 import { LANGUAGE_INFO } from "@/constant/languages";
@@ -23,7 +16,7 @@ import WikaTalkLogo from "@/components/WikaTalkLogo";
 const Home = () => {
   // Constants
   const initialText =
-    "Press the mic icon to start recording. Press again to stop.";
+    "Tap the microphone icon to begin recording. Tap again to stop.";
 
   // Custom hooks
   const { recording, startRecording, stopRecording } = useRecording();
