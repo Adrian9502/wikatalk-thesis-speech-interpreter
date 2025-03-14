@@ -1,7 +1,8 @@
-import React from "react";
-import { View, Text, StyleSheet, Platform } from "react-native";
+import React, { useRef, useCallback } from "react";
+import { View, Text, StyleSheet, Animated } from "react-native";
 import { TITLE_COLORS } from "@/theme/colors";
 import { useFonts } from "expo-font";
+import { useFocusEffect } from "@react-navigation/native";
 
 type WikaTalkLogoProps = {
   title: string;
@@ -13,12 +14,25 @@ const WikaTalkLogo = ({ title }: WikaTalkLogoProps) => {
     "Poppins-SemiBold": require("../assets/fonts/Poppins-SemiBold.ttf"),
   });
 
+  const fadeAnim = useRef(new Animated.Value(0)).current; // Initial opacity 0
+
+  useFocusEffect(
+    useCallback(() => {
+      fadeAnim.setValue(0); // Reset opacity
+      Animated.timing(fadeAnim, {
+        toValue: 1, // Fully visible
+        duration: 1000, // 1 second fade-in
+        useNativeDriver: true,
+      }).start();
+    }, [])
+  );
+
   if (!fontsLoaded) {
     return null;
   }
 
   return (
-    <View style={styles.container}>
+    <Animated.View style={[styles.container, { opacity: fadeAnim }]}>
       <View style={styles.brandContainer}>
         <View style={styles.wikaContainer}>
           <Text style={[styles.letter, { color: TITLE_COLORS.customYellow }]}>
@@ -37,12 +51,12 @@ const WikaTalkLogo = ({ title }: WikaTalkLogoProps) => {
           </Text>
         </View>
 
-        {/* Title text with gradient background */}
+        {/* Title text */}
         <View style={styles.titleWrapper}>
           <Text style={styles.titleText}>{title}</Text>
         </View>
       </View>
-    </View>
+    </Animated.View>
   );
 };
 
@@ -54,7 +68,6 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     overflow: "hidden",
   },
-
   brandContainer: {
     flexDirection: "row",
     alignItems: "center",
