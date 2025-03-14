@@ -22,8 +22,6 @@ const LanguageSection: React.FC<LanguageSectionProps> = ({
   language,
   setLanguage,
   textField,
-  dropdownOpen,
-  setDropdownOpen,
   closeOtherDropdown,
   getLanguageBackground,
   showInfo,
