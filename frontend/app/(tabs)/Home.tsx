@@ -180,7 +180,6 @@ const Home = () => {
             <LanguageInfoModal
               visible={showLanguageInfo}
               languageName={activeLanguageInfo}
-              infoSection={infoSection}
               onClose={() => {
                 setShowLanguageInfo(false);
                 setInfoSection(null);

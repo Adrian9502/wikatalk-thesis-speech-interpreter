@@ -10,18 +10,17 @@ import {
 import { MapPin, MessageCircle, X, Info } from "react-native-feather";
 import getLanguageBackground from "@/utils/getLanguageBackground";
 import { LANGUAGE_INFO } from "@/constant/languages";
+import { LinearGradient } from "expo-linear-gradient";
 
 interface LanguageInfoModalProps {
   visible: boolean;
   languageName: string;
-  infoSection: "top" | "bottom" | null;
   onClose: () => void;
 }
 
 const LanguageInfoModal: React.FC<LanguageInfoModalProps> = ({
   visible,
   languageName,
-  infoSection,
   onClose,
 }) => {
   if (!visible || !languageName || !LANGUAGE_INFO[languageName]) {
@@ -30,61 +29,68 @@ const LanguageInfoModal: React.FC<LanguageInfoModalProps> = ({
 
   const languageInfo = LANGUAGE_INFO[languageName];
 
-  // Softer Philippines-inspired colors
+  // Modern color scheme
   const colors = {
-    darkBlue: "#1A365D", // Darker blue for background
-    blue: "#2C5282", // Softer blue for sections
-    red: "#9B2C2C", // Softer red
-    yellow: "#ECC94B", // Softer yellow
-    white: "#FFFFFF", // White
-    lightGray: "#F7FAFC", // Light gray for subtle contrast
+    primary: "#4A6FFF", // Primary blue
+    secondary: "#FF6F4A", // Secondary accent
+    background: "#FFFFFF",
+    cardBg: "#F9FAFF", // Light blue tint for cards
+    text: "#212132",
+    textLight: "#9E9EA7",
+    accent: "#10B981", // Success/accent color
+    border: "#E8E8ED",
+    overlay: "rgba(33, 33, 50, 0.75)",
   };
 
   return (
     <View style={styles.modalOverlay}>
       <View
-        style={[
-          styles.modalContainer,
-          {
-            backgroundColor: colors.darkBlue,
-            borderColor: colors.yellow,
-            borderWidth: 2,
-          },
-          infoSection === "top" && styles.rotated180,
-        ]}
+        style={[styles.modalContainer, { backgroundColor: colors.background }]}
       >
         {/* Header with close button */}
-        <View style={styles.header}>
+        <LinearGradient
+          colors={[colors.primary, "#6A8AFF"]}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 0 }}
+          style={styles.header}
+        >
           <View style={styles.titleContainer}>
-            <Text style={[styles.titleText, { color: colors.yellow }]}>
+            <Text style={[styles.titleText, { color: colors.background }]}>
               {languageName} Dialect
             </Text>
           </View>
-          <TouchableOpacity
-            onPress={onClose}
-            style={[styles.closeButton, { backgroundColor: colors.blue }]}
-          >
-            <X width={18} height={18} strokeWidth={2} stroke={colors.white} />
+          <TouchableOpacity onPress={onClose} style={styles.closeButton}>
+            <X
+              width={18}
+              height={18}
+              strokeWidth={2}
+              stroke={colors.background}
+            />
           </TouchableOpacity>
-        </View>
+        </LinearGradient>
 
         {/* Image Banner */}
-        <View
-          style={[
-            styles.imageBanner,
-            { borderColor: colors.blue, borderWidth: 1 },
-          ]}
-        >
+        <View style={styles.imageBanner}>
           <Image
             source={getLanguageBackground(languageName)}
-            style={{ width: "100%", height: 160 }}
+            style={styles.bannerImage}
             resizeMode="cover"
           />
+          <LinearGradient
+            colors={["rgba(0,0,0,0.4)", "transparent"]}
+            style={styles.imageOverlay}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 0, y: 1 }}
+          />
+          <View style={styles.regionBadge}>
+            <Text style={styles.regionText}>{languageInfo.region}</Text>
+          </View>
         </View>
 
         <ScrollView
           style={styles.scrollView}
           showsVerticalScrollIndicator={false}
+          contentContainerStyle={styles.scrollContent}
         >
           {/* Major Cities */}
           <View style={styles.sectionContainer}>
@@ -93,9 +99,9 @@ const LanguageInfoModal: React.FC<LanguageInfoModalProps> = ({
                 width={18}
                 height={18}
                 strokeWidth={2}
-                stroke={colors.yellow}
+                stroke={colors.primary}
               />
-              <Text style={[styles.sectionTitle, { color: colors.white }]}>
+              <Text style={[styles.sectionTitle, { color: colors.text }]}>
                 Major Cities
               </Text>
             </View>
@@ -103,38 +109,17 @@ const LanguageInfoModal: React.FC<LanguageInfoModalProps> = ({
               {languageInfo.majorCities.map((city, index) => (
                 <View
                   key={index}
-                  style={[styles.tag, { backgroundColor: colors.blue }]}
+                  style={[
+                    styles.tag,
+                    {
+                      backgroundColor: colors.cardBg,
+                      borderColor: colors.border,
+                    },
+                  ]}
                 >
-                  <Text style={{ color: colors.white }}>{city}</Text>
+                  <Text style={{ color: colors.text }}>{city}</Text>
                 </View>
               ))}
-            </View>
-          </View>
-
-          {/* Region */}
-          <View style={styles.sectionContainer}>
-            <View style={styles.sectionHeader}>
-              <MapPin
-                width={18}
-                height={18}
-                strokeWidth={2}
-                stroke={colors.yellow}
-              />
-              <Text style={[styles.sectionTitle, { color: colors.white }]}>
-                Region
-              </Text>
-            </View>
-            <View style={styles.tagsContainer}>
-              <View
-                style={[
-                  styles.tag,
-                  { backgroundColor: colors.red, opacity: 0.9 },
-                ]}
-              >
-                <Text style={[styles.boldText, { color: colors.white }]}>
-                  {languageInfo.region}
-                </Text>
-              </View>
             </View>
           </View>
 
@@ -145,30 +130,30 @@ const LanguageInfoModal: React.FC<LanguageInfoModalProps> = ({
                 width={18}
                 height={18}
                 strokeWidth={2}
-                stroke={colors.yellow}
+                stroke={colors.primary}
               />
-              <Text style={[styles.sectionTitle, { color: colors.white }]}>
-                Phrases
+              <Text style={[styles.sectionTitle, { color: colors.text }]}>
+                Common Phrases
               </Text>
             </View>
-            <View style={styles.phrasesContainer}>
+            <View style={styles.cardsContainer}>
               <View
-                style={[styles.phraseBox, { backgroundColor: colors.blue }]}
+                style={[styles.phraseCard, { backgroundColor: colors.cardBg }]}
               >
-                <Text style={[styles.phraseLabel, { color: colors.yellow }]}>
+                <Text style={[styles.phraseLabel, { color: colors.primary }]}>
                   Hello
                 </Text>
-                <Text style={[styles.phraseText, { color: colors.white }]}>
+                <Text style={[styles.phraseText, { color: colors.text }]}>
                   {languageInfo.commonGreetings.hello}
                 </Text>
               </View>
               <View
-                style={[styles.phraseBox, { backgroundColor: colors.blue }]}
+                style={[styles.phraseCard, { backgroundColor: colors.cardBg }]}
               >
-                <Text style={[styles.phraseLabel, { color: colors.yellow }]}>
+                <Text style={[styles.phraseLabel, { color: colors.primary }]}>
                   Thank You
                 </Text>
-                <Text style={[styles.phraseText, { color: colors.white }]}>
+                <Text style={[styles.phraseText, { color: colors.text }]}>
                   {languageInfo.commonGreetings.thankYou}
                 </Text>
               </View>
@@ -176,30 +161,38 @@ const LanguageInfoModal: React.FC<LanguageInfoModalProps> = ({
           </View>
 
           {/* Cultural Info */}
-          <View style={styles.sectionHeader}>
-            <Info
-              width={18}
-              height={18}
-              strokeWidth={2}
-              stroke={colors.yellow}
-            />
-            <Text style={[styles.sectionTitle, { color: colors.white }]}>
-              Cultural Notes
-            </Text>
-          </View>
-          <View style={[styles.culturalBox, { backgroundColor: colors.blue }]}>
-            <View style={styles.culturalItem}>
-              <Text style={[styles.culturalLabel, { color: colors.yellow }]}>
-                Symbol
+          <View style={styles.sectionContainer}>
+            <View style={styles.sectionHeader}>
+              <Info
+                width={18}
+                height={18}
+                strokeWidth={2}
+                stroke={colors.primary}
+              />
+              <Text style={[styles.sectionTitle, { color: colors.text }]}>
+                Cultural Notes
               </Text>
-              <Text style={{ color: colors.white }}>{languageInfo.symbol}</Text>
             </View>
+            <View
+              style={[styles.culturalBox, { backgroundColor: colors.cardBg }]}
+            >
+              <View style={styles.culturalItem}>
+                <Text style={[styles.culturalLabel, { color: colors.primary }]}>
+                  Symbol
+                </Text>
+                <Text style={{ color: colors.text }}>
+                  {languageInfo.symbol}
+                </Text>
+              </View>
 
-            <View>
-              <Text style={[styles.culturalLabel, { color: colors.yellow }]}>
-                Fun Fact
-              </Text>
-              <Text style={{ color: colors.white }}>{languageInfo.fact}</Text>
+              <View>
+                <Text style={[styles.culturalLabel, { color: colors.primary }]}>
+                  Fun Fact
+                </Text>
+                <Text style={{ color: colors.text, lineHeight: 20 }}>
+                  {languageInfo.fact}
+                </Text>
+              </View>
             </View>
           </View>
         </ScrollView>
@@ -207,8 +200,6 @@ const LanguageInfoModal: React.FC<LanguageInfoModalProps> = ({
     </View>
   );
 };
-
-export default LanguageInfoModal;
 
 const styles = StyleSheet.create({
   modalOverlay: {
@@ -220,102 +211,146 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: "center",
     justifyContent: "center",
-    backgroundColor: "rgba(0, 0, 0, 0.7)",
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
+    zIndex: 1000,
   },
   modalContainer: {
-    width: "91.666667%", // w-11/12
-    maxWidth: 448, // max-w-md
-    borderRadius: 16, // rounded-2xl
-    padding: 20, // p-5
-    borderWidth: 2,
-  },
-  rotated180: {
-    transform: [{ rotate: "180deg" }],
+    width: "90%",
+    maxWidth: 420,
+    borderRadius: 24,
+    overflow: "hidden",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 12 },
+    shadowOpacity: 0.12,
+    shadowRadius: 24,
+    elevation: 10,
   },
   header: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    marginBottom: 16, // mb-4
+    paddingHorizontal: 20,
+    paddingVertical: 10,
   },
   titleContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
     flex: 1,
+    alignItems: "center",
   },
   titleText: {
-    fontSize: 24, // text-2xl
+    fontSize: 20,
+    fontWeight: "700",
     textAlign: "center",
-    fontWeight: "bold",
   },
   closeButton: {
-    borderRadius: 9999, // rounded-full
-    padding: 8, // p-2
+    width: 26,
+    height: 26,
+    borderRadius: 18,
+    backgroundColor: "rgba(255, 255, 255, 0.2)",
+    justifyContent: "center",
+    alignItems: "center",
   },
   imageBanner: {
-    marginBottom: 16, // mb-4
-    borderRadius: 8, // rounded-lg
-    overflow: "hidden",
+    width: "100%",
+    height: 180,
+    position: "relative",
+  },
+  bannerImage: {
+    width: "100%",
+    height: "100%",
+  },
+  imageOverlay: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+  },
+  regionBadge: {
+    position: "absolute",
+    bottom: 16,
+    left: 16,
+    backgroundColor: "rgba(255, 111, 74, 0.9)",
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderRadius: 20,
+  },
+  regionText: {
+    color: "#FFFFFF",
+    fontWeight: "600",
+    fontSize: 14,
   },
   scrollView: {
-    maxHeight: 384, // max-h-96
+    maxHeight: 400,
+  },
+  scrollContent: {
+    padding: 20,
   },
   sectionContainer: {
-    marginBottom: 16, // mb-4
+    marginBottom: 24,
   },
   sectionHeader: {
     flexDirection: "row",
     alignItems: "center",
-    marginBottom: 12, // mb-3
+    marginBottom: 12,
   },
   sectionTitle: {
-    fontWeight: "bold",
-    fontSize: 18, // text-lg
-    marginLeft: 8, // ml-2
+    fontWeight: "600",
+    fontSize: 17,
+    marginLeft: 8,
   },
   tagsContainer: {
     flexDirection: "row",
     flexWrap: "wrap",
+    marginLeft: -4,
   },
   tag: {
-    borderRadius: 9999, // rounded-full
-    paddingHorizontal: 12, // px-3
-    paddingVertical: 4, // py-1
-    marginRight: 8, // mr-2
-    marginBottom: 8, // mb-2
+    borderRadius: 16,
+    paddingHorizontal: 14,
+    paddingVertical: 8,
+    marginLeft: 8,
+    marginBottom: 8,
+    borderWidth: 1,
   },
-  phrasesContainer: {
+  cardsContainer: {
     flexDirection: "row",
-    gap: 8,
+    gap: 12,
   },
-  phraseBox: {
+  phraseCard: {
     flex: 1,
-    borderRadius: 12, // rounded-xl
-    padding: 12, // p-3
+    borderRadius: 16,
+    padding: 16,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.04,
+    shadowRadius: 4,
+    elevation: 1,
   },
   phraseLabel: {
-    textAlign: "center",
-    fontWeight: "600", // font-semibold
-    marginBottom: 6, // mb-1.5
+    marginBottom: 8,
+    fontSize: 14,
+    fontWeight: "600",
   },
   phraseText: {
-    fontWeight: "600", // font-semibold
-    textAlign: "center",
+    fontSize: 16,
+    fontWeight: "500",
   },
   culturalBox: {
-    borderRadius: 12, // rounded-xl
-    padding: 16, // p-4
-    marginBottom: 16, // mb-4
+    borderRadius: 16,
+    padding: 20,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.04,
+    shadowRadius: 4,
+    elevation: 1,
   },
   culturalItem: {
-    marginBottom: 12, // mb-3
+    marginBottom: 16,
   },
   culturalLabel: {
-    fontWeight: "600", // font-semibold
-    marginBottom: 8, // mb-2
-  },
-  boldText: {
-    fontWeight: "bold",
+    fontWeight: "600",
+    fontSize: 14,
+    marginBottom: 8,
   },
 });
+
+export default LanguageInfoModal;
