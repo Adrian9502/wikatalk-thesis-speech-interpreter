@@ -287,6 +287,7 @@ const styles = StyleSheet.create({
   },
   dropdownText: {
     fontSize: 16,
+    fontFamily: "Poppins-Regular",
     fontWeight: "500",
   },
   controls: {
@@ -315,6 +316,7 @@ const styles = StyleSheet.create({
     flexGrow: 1,
   },
   textField: {
+    fontFamily: "Poppins-Regular",
     fontSize: 17,
     fontWeight: "400",
     flex: 1,
@@ -370,6 +372,7 @@ const styles = StyleSheet.create({
   languageName: {
     color: "#FFFFFF",
     fontSize: 14,
+    fontFamily: "Poppins-Regular",
     fontWeight: "600",
   },
 });

@@ -52,7 +52,7 @@ const TabIcon: React.FC<TabIconProps> = ({ Icon, color, name, focused }) => {
             fontSize: 12,
             textAlign: "center",
             color: color,
-            fontWeight: focused ? "600" : "400",
+            fontFamily: focused ? "Poppins-Bold" : "Poppins-Regular",
             marginTop: 6,
             opacity,
           }}
