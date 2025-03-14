@@ -10,7 +10,7 @@ import { useRecordingTranslation } from "@/hooks/useRecordingTranslation";
 import { useRecording } from "@/hooks/useRecording";
 import LanguageSection from "@/components/home/LanguageSection";
 import LanguageInfoModal from "@/components/home/LanguageInfoModal";
-import LoadingTranslate from "@/components/home/LoadingTranslate";
+import Loading from "@/components/home/Loading";
 import { TITLE_COLORS } from "@/theme/colors";
 import WikaTalkLogo from "@/components/WikaTalkLogo";
 const Home = () => {
@@ -188,7 +188,7 @@ const Home = () => {
           )}
 
         {/* Loading Indicator */}
-        {loading && <LoadingTranslate />}
+        {loading && <Loading />}
       </SafeAreaView>
     </View>
   );
