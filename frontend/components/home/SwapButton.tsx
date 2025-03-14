@@ -8,7 +8,8 @@ import {
   Easing,
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
-import { MaterialCommunityIcons } from "@expo/vector-icons";
+import { Ionicons } from "@expo/vector-icons";
+import { BASE_COLORS } from "@/constant/colors";
 
 interface SwapButtonProps {
   onPress: () => void;
@@ -100,11 +101,7 @@ const SwapButton: React.FC<SwapButtonProps> = ({
           end={{ x: 1, y: 1 }}
           style={styles.gradientContainer}
         >
-          <MaterialCommunityIcons
-            name="swap-vertical"
-            size={iconSize}
-            color={iconColor}
-          />
+          <Ionicons name="swap-vertical" size={22} color={BASE_COLORS.white} />
         </LinearGradient>
       </TouchableOpacity>
     </Animated.View>
@@ -119,9 +116,9 @@ const styles = StyleSheet.create({
     zIndex: 10,
   },
   buttonContainer: {
-    width: 58,
-    height: 58,
-    borderRadius: 29,
+    width: 50,
+    height: 50,
+    borderRadius: 25,
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 6 },
     shadowOpacity: 0.25,

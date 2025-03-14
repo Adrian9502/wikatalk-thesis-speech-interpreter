@@ -1,30 +1,21 @@
-import {
-  View,
-  TouchableOpacity,
-  KeyboardAvoidingView,
-  Platform,
-  ImageBackground,
-} from "react-native";
-import { LinearGradient } from "expo-linear-gradient";
-import * as Speech from "expo-speech";
 import React, { useEffect } from "react";
-import { StatusBar } from "expo-status-bar";
+import { View, KeyboardAvoidingView, Platform, StyleSheet } from "react-native";
+import * as Speech from "expo-speech";
 import { SafeAreaView } from "react-native-safe-area-context";
-import MaterialCommunityIcons from "react-native-vector-icons/MaterialCommunityIcons";
-
-import TranslateBottom from "@/components/translate/TranslateBottom";
-import TranslateTop from "@/components/translate/TranslateTop";
 import { useTranslation } from "@/hooks/useTranslation";
-import SwapButton from "@/components/SwapButton";
+import WikaTalkLogo from "@/components/WikaTalkLogo";
+import TranslateSection from "@/components/translate/TranslateSection";
+import { TITLE_COLORS } from "@/constant/colors";
 
 const Translate = () => {
   const {
     state,
     updateState,
-    handleSpeech,
     debouncedTranslate,
     handleSwapLanguages,
     copyToClipboard,
+    handleSourceSpeech,
+    handleTranslatedSpeech,
   } = useTranslation();
 
   // Stop speech when changing languages
@@ -64,58 +55,39 @@ const Translate = () => {
       style={{ flex: 1 }}
       keyboardVerticalOffset={Platform.OS === "ios" ? 0 : -100}
     >
-      <ImageBackground
-        source={require("@/assets/images/ph-flag-2.jpg")}
-        style={{ width: "100%", height: "100%" }}
-        resizeMode="cover"
-      >
-        <LinearGradient
-          colors={[
-            "rgba(0, 56, 168, 0.9)",
-            "rgba(0, 0, 0, 0.7)",
-            "rgba(206, 17, 38, 0.9)",
-          ]}
-          className="flex-1"
-        >
-          <SafeAreaView className="flex-1">
-            <StatusBar style="light" />
+      <SafeAreaView style={styles.container}>
+        <WikaTalkLogo title="Translate" />
 
-            <View className="flex-1 relative mx-4 my-6 gap-4">
-              <TranslateTop
-                sourceLanguage={state.sourceLanguage}
-                sourceText={state.sourceText}
-                openSource={state.openSource}
-                copiedSource={state.copiedSource}
-                isSpeaking={state.isSpeaking}
-                updateState={updateState}
-                handleSourceSpeech={() =>
-                  handleSpeech(state.sourceText, state.sourceLanguage)
-                }
-                copyToClipboard={copyToClipboard}
-              />
-
-              {/* Language swap */}
-              <SwapButton onPress={handleSwapLanguages} />
-
-              <TranslateBottom
-                targetLanguage={state.targetLanguage}
-                translatedText={state.translatedText}
-                openTarget={state.openTarget}
-                copiedTarget={state.copiedTarget}
-                isTranslating={state.isTranslating}
-                error={state.error}
-                isSpeaking={state.isSpeaking}
-                updateState={updateState}
-                handleTranslatedSpeech={() =>
-                  handleSpeech(state.translatedText, state.targetLanguage)
-                }
-                copyToClipboard={copyToClipboard}
-              />
-            </View>
-          </SafeAreaView>
-        </LinearGradient>
-      </ImageBackground>
+        <TranslateSection
+          sourceLanguage={state.sourceLanguage}
+          targetLanguage={state.targetLanguage}
+          sourceText={state.sourceText}
+          translatedText={state.translatedText}
+          openSource={state.openSource}
+          openTarget={state.openTarget}
+          copiedSource={state.copiedSource}
+          copiedTarget={state.copiedTarget}
+          isSpeaking={state.isSpeaking}
+          isTranslating={state.isTranslating}
+          error={state.error}
+          updateState={updateState}
+          handleSourceSpeech={handleSourceSpeech}
+          handleTranslatedSpeech={handleTranslatedSpeech}
+          copyToClipboard={copyToClipboard}
+          handleSwapLanguages={handleSwapLanguages}
+        />
+      </SafeAreaView>
     </KeyboardAvoidingView>
   );
 };
+
+const styles = StyleSheet.create({
+  container: {
+    paddingBottom: 16,
+    flex: 1,
+    paddingHorizontal: 20,
+    backgroundColor: TITLE_COLORS.customNavyBlue,
+  },
+});
+
 export default Translate;

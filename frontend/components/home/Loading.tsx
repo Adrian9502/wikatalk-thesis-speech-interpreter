@@ -1,5 +1,6 @@
 import React, { useEffect } from "react";
 import { View, StyleSheet, Animated, Easing } from "react-native";
+import DotsLoader from "@/components/DotLoader";
 
 const Loading: React.FC = () => {
   // Modern color palette with vibrant colors
@@ -8,7 +9,6 @@ const Loading: React.FC = () => {
   // Create animated values
   const barAnimation = React.useRef(new Animated.Value(0)).current;
   const textOpacity = React.useRef(new Animated.Value(0)).current;
-  const dotScale = React.useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
     // Text fade in
@@ -29,29 +29,10 @@ const Loading: React.FC = () => {
       })
     ).start();
 
-    // Dots pulsing animation
-    Animated.loop(
-      Animated.sequence([
-        Animated.timing(dotScale, {
-          toValue: 1,
-          duration: 800,
-          easing: Easing.out(Easing.cubic),
-          useNativeDriver: true,
-        }),
-        Animated.timing(dotScale, {
-          toValue: 0,
-          duration: 800,
-          easing: Easing.in(Easing.cubic),
-          useNativeDriver: true,
-        }),
-      ])
-    ).start();
-
     return () => {
       // Cleanup animations
       barAnimation.stopAnimation();
       textOpacity.stopAnimation();
-      dotScale.stopAnimation();
     };
   }, []);
 
@@ -66,16 +47,6 @@ const Loading: React.FC = () => {
     inputRange: [0, 0.25, 0.5, 0.75, 1],
     outputRange: colors.concat(colors[0]),
   });
-
-  // Calculate dot animations
-  const getScaleForDot = (index: number) => {
-    return dotScale.interpolate({
-      inputRange: [0, 1],
-      outputRange: [0.6, 1],
-      // Offset each dot in the animation cycle
-      extrapolate: "clamp",
-    });
-  };
 
   return (
     <View style={styles.overlay}>
@@ -96,23 +67,7 @@ const Loading: React.FC = () => {
             ]}
           />
         </View>
-
-        {/* Animated dots */}
-        <View style={styles.dotsContainer}>
-          {colors.map((color, index) => (
-            <Animated.View
-              key={index}
-              style={[
-                styles.dot,
-                {
-                  backgroundColor: color,
-                  transform: [{ scale: getScaleForDot(index) }],
-                  opacity: getScaleForDot(index),
-                },
-              ]}
-            />
-          ))}
-        </View>
+        <DotsLoader colors={colors} />
       </View>
     </View>
   );
@@ -140,6 +95,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     padding: 24,
+    zIndex: 999,
     borderRadius: 16,
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 8 },
@@ -153,7 +109,7 @@ const styles = StyleSheet.create({
     fontFamily: "Poppins-Medium",
     color: "#ffffff",
     textAlign: "center",
-    fontSize: 18,
+    fontSize: 14,
     marginBottom: 20,
     letterSpacing: 0.5,
   },
@@ -168,17 +124,5 @@ const styles = StyleSheet.create({
   progressBar: {
     height: 4,
     borderRadius: 4,
-  },
-  dotsContainer: {
-    flexDirection: "row",
-    justifyContent: "center",
-    alignItems: "center",
-    height: 30,
-  },
-  dot: {
-    width: 8,
-    height: 8,
-    borderRadius: 4,
-    marginHorizontal: 6,
   },
 });

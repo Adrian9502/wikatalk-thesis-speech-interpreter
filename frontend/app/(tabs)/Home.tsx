@@ -5,13 +5,13 @@ import React, { useEffect, useState } from "react";
 import { StatusBar } from "expo-status-bar";
 import { LANGUAGE_INFO } from "@/constant/languages";
 import getLanguageBackground from "@/utils/getLanguageBackground";
-import SwapButton from "@/components/SwapButton";
+import SwapButton from "@/components/home/SwapButton";
 import { useRecordingTranslation } from "@/hooks/useRecordingTranslation";
 import { useRecording } from "@/hooks/useRecording";
 import LanguageSection from "@/components/home/LanguageSection";
 import LanguageInfoModal from "@/components/home/LanguageInfoModal";
 import Loading from "@/components/home/Loading";
-import { TITLE_COLORS } from "@/theme/colors";
+import { BASE_COLORS, TITLE_COLORS } from "@/constant/colors";
 import WikaTalkLogo from "@/components/WikaTalkLogo";
 const Home = () => {
   // Constants
@@ -36,7 +36,6 @@ const Home = () => {
   const [activeLanguageInfo, setActiveLanguageInfo] = useState<string>("");
   const [openTopDropdown, setOpenTopDropdown] = useState<boolean>(false);
   const [openBottomDropdown, setOpenBottomDropdown] = useState<boolean>(false);
-  const [infoSection, setInfoSection] = useState<"top" | "bottom" | null>(null);
 
   // Close other dropdown when one opens
   useEffect(() => {
@@ -79,23 +78,14 @@ const Home = () => {
     }
   };
 
-  // UI helper functions
-  const closeDropdowns = () => {
-    setOpenTopDropdown(false);
-    setOpenBottomDropdown(false);
-    setShowLanguageInfo(false);
-  };
-
   const showInfo = (language: string, section: "top" | "bottom") => {
     setActiveLanguageInfo(language);
-    setInfoSection(section);
     setShowLanguageInfo(true);
   };
 
   const copyToClipboard = async (text: string) => {
     try {
       await Clipboard.setStringAsync(text);
-      // You could add a toast notification here
     } catch (error) {
       console.error("Failed to copy text: ", error);
     }
@@ -118,60 +108,53 @@ const Home = () => {
         style={styles.safeAreaView}
         edges={["top", "left", "right"]}
       >
-        <TouchableOpacity
-          activeOpacity={1}
-          onPress={closeDropdowns}
-          style={styles.mainContainer}
-        >
-          <WikaTalkLogo title={"Speak"} />
+        <WikaTalkLogo title={"Speak"} />
+        {/* Top section  */}
+        <LanguageSection
+          position="top"
+          language={language2}
+          setLanguage={setLanguage2}
+          textField={upperTextfield}
+          dropdownOpen={openTopDropdown}
+          setDropdownOpen={setOpenTopDropdown}
+          closeOtherDropdown={() => setOpenBottomDropdown(false)}
+          getLanguageBackground={getLanguageBackground}
+          showInfo={showInfo}
+          copyToClipboard={copyToClipboard}
+          clearText={clearText}
+          handlePress={handlePress}
+          recording={recording}
+          userId={2}
+        />
 
-          {/* Top section  */}
-          <LanguageSection
-            position="top"
-            language={language2}
-            setLanguage={setLanguage2}
-            textField={upperTextfield}
-            dropdownOpen={openTopDropdown}
-            setDropdownOpen={setOpenTopDropdown}
-            closeOtherDropdown={() => setOpenBottomDropdown(false)}
-            getLanguageBackground={getLanguageBackground}
-            showInfo={showInfo}
-            copyToClipboard={copyToClipboard}
-            clearText={clearText}
-            handlePress={handlePress}
-            recording={recording}
-            userId={2}
+        {/* Middle Section - Exchange icon  */}
+        <View style={styles.middleSection}>
+          {/* Switch icon */}
+          <SwapButton
+            onPress={handleSwapLanguage}
+            colors={[BASE_COLORS.blue, BASE_COLORS.orange]}
+            borderStyle={styles.swapButtonBorder}
+            iconColor={BASE_COLORS.white}
           />
+        </View>
 
-          {/* Middle Section - Exchange icon  */}
-          <View style={styles.middleSection}>
-            {/* Switch icon */}
-            <SwapButton
-              onPress={handleSwapLanguage}
-              colors={["#0a0f28", "#0a0f28"]}
-              borderStyle={styles.swapButtonBorder}
-              iconColor={"#FFD700"}
-            />
-          </View>
-
-          {/* Bottom section */}
-          <LanguageSection
-            position="bottom"
-            language={language1}
-            setLanguage={setLanguage1}
-            textField={bottomTextfield}
-            dropdownOpen={openBottomDropdown}
-            setDropdownOpen={setOpenBottomDropdown}
-            closeOtherDropdown={() => setOpenTopDropdown(false)}
-            getLanguageBackground={getLanguageBackground}
-            showInfo={showInfo}
-            copyToClipboard={copyToClipboard}
-            clearText={clearText}
-            handlePress={handlePress}
-            recording={recording}
-            userId={1}
-          />
-        </TouchableOpacity>
+        {/* Bottom section */}
+        <LanguageSection
+          position="bottom"
+          language={language1}
+          setLanguage={setLanguage1}
+          textField={bottomTextfield}
+          dropdownOpen={openBottomDropdown}
+          setDropdownOpen={setOpenBottomDropdown}
+          closeOtherDropdown={() => setOpenTopDropdown(false)}
+          getLanguageBackground={getLanguageBackground}
+          showInfo={showInfo}
+          copyToClipboard={copyToClipboard}
+          clearText={clearText}
+          handlePress={handlePress}
+          recording={recording}
+          userId={1}
+        />
 
         {/* Language Information Modal */}
         {showLanguageInfo &&
@@ -182,7 +165,6 @@ const Home = () => {
               languageName={activeLanguageInfo}
               onClose={() => {
                 setShowLanguageInfo(false);
-                setInfoSection(null);
               }}
             />
           )}
@@ -203,13 +185,9 @@ const styles = StyleSheet.create({
   },
   safeAreaView: {
     flex: 1,
-  },
-  mainContainer: {
-    flex: 1,
-    justifyContent: "center",
-    width: "100%",
     paddingHorizontal: 20,
   },
+
   middleSection: {
     alignItems: "center",
     justifyContent: "center",
@@ -218,7 +196,6 @@ const styles = StyleSheet.create({
     zIndex: 10,
   },
   swapButtonBorder: {
-    borderWidth: 2,
-    borderColor: "#F6F6F6",
+    borderWidth: 1,
   },
 });

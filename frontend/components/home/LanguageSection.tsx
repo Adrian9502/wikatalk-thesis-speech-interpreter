@@ -16,6 +16,7 @@ import { LinearGradient } from "expo-linear-gradient";
 import { MaterialCommunityIcons, Ionicons } from "@expo/vector-icons";
 import { DIALECTS } from "@/constant/languages";
 import { LanguageSectionProps } from "@/types/types";
+import { BASE_COLORS, getPositionalColors } from "@/constant/colors";
 
 const LanguageSection: React.FC<LanguageSectionProps> = ({
   position,
@@ -36,16 +37,8 @@ const LanguageSection: React.FC<LanguageSectionProps> = ({
   const [copySuccess, setCopySuccess] = useState(false);
   const [isFocus, setIsFocus] = useState(false);
 
-  // Colors based on position
-  const COLORS = {
-    primary: position === "top" ? "#4A6FFF" : "#FF6F4A",
-    secondary: position === "top" ? "#E2EAFF" : "#F3E2FF",
-    background: "#FFFFFF",
-    text: "#212132",
-    placeholder: "#9E9EA7",
-    border: "#E8E8ED",
-    success: "#10B981",
-  };
+  // Get colors based on position using the utility function
+  const COLORS = getPositionalColors(position);
 
   // Animation for recording
   useEffect(() => {
@@ -200,7 +193,7 @@ const LanguageSection: React.FC<LanguageSectionProps> = ({
             <MaterialCommunityIcons
               name={recording ? "microphone" : "microphone-outline"}
               size={28}
-              color="#FFFFFF"
+              color={BASE_COLORS.white}
             />
           </Animated.View>
         </TouchableOpacity>
@@ -239,7 +232,7 @@ const styles = StyleSheet.create({
     height: "45%",
     borderRadius: 24,
     overflow: "hidden",
-    backgroundColor: "#FFFFFF",
+    backgroundColor: BASE_COLORS.white,
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 10 },
     shadowOpacity: 0.1,
@@ -259,7 +252,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    marginBottom: 16,
+    marginBottom: 5,
     zIndex: 1000,
   },
   dropdownContainer: {
@@ -271,19 +264,19 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     borderWidth: 1,
     height: 46,
-    backgroundColor: "#FFFFFF",
+    backgroundColor: BASE_COLORS.white,
     paddingHorizontal: 12,
   },
   dropdownList: {
     borderRadius: 12,
     borderWidth: 1,
-    backgroundColor: "#FFFFFF",
+    backgroundColor: BASE_COLORS.white,
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 6 },
     shadowOpacity: 0.1,
     shadowRadius: 8,
     elevation: 6,
-    borderColor: "#E8E8ED",
+    borderColor: BASE_COLORS.borderColor,
   },
   dropdownText: {
     fontSize: 16,
@@ -307,7 +300,7 @@ const styles = StyleSheet.create({
     marginVertical: 8,
   },
   textArea: {
-    backgroundColor: "#FFFFFF",
+    backgroundColor: BASE_COLORS.white,
     borderRadius: 16,
     borderWidth: 1,
     padding: 16,
@@ -370,7 +363,7 @@ const styles = StyleSheet.create({
     borderRadius: 12,
   },
   languageName: {
-    color: "#FFFFFF",
+    color: BASE_COLORS.white,
     fontSize: 14,
     fontFamily: "Poppins-Regular",
     fontWeight: "600",

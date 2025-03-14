@@ -1,8 +1,7 @@
-import React, { useRef, useCallback } from "react";
+import React, { useEffect, useRef } from "react";
 import { View, Text, StyleSheet, Animated } from "react-native";
-import { TITLE_COLORS } from "@/theme/colors";
+import { TITLE_COLORS } from "@/constant/colors";
 import { useFonts } from "expo-font";
-import { useFocusEffect } from "@react-navigation/native";
 
 type WikaTalkLogoProps = {
   title: string;
@@ -14,18 +13,15 @@ const WikaTalkLogo = ({ title }: WikaTalkLogoProps) => {
     "Poppins-SemiBold": require("../assets/fonts/Poppins-SemiBold.ttf"),
   });
 
-  const fadeAnim = useRef(new Animated.Value(0)).current; // Initial opacity 0
+  const fadeAnim = useRef(new Animated.Value(0)).current; // Start opacity at 0
 
-  useFocusEffect(
-    useCallback(() => {
-      fadeAnim.setValue(0); // Reset opacity
-      Animated.timing(fadeAnim, {
-        toValue: 1, // Fully visible
-        duration: 1000, // 1 second fade-in
-        useNativeDriver: true,
-      }).start();
-    }, [])
-  );
+  useEffect(() => {
+    Animated.timing(fadeAnim, {
+      toValue: 1, // Fully visible
+      duration: 1000, // 1 second fade in
+      useNativeDriver: true,
+    }).start();
+  }, []); // Run when component mounts
 
   if (!fontsLoaded) {
     return null;
@@ -63,9 +59,6 @@ const WikaTalkLogo = ({ title }: WikaTalkLogoProps) => {
 const styles = StyleSheet.create({
   container: {
     width: "100%",
-    marginTop: 5,
-    marginBottom: 5,
-    borderRadius: 16,
     overflow: "hidden",
   },
   brandContainer: {
