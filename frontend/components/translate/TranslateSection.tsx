@@ -8,7 +8,6 @@ import {
   StyleSheet,
   Animated,
 } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
 import { Dropdown } from "react-native-element-dropdown";
 import { LinearGradient } from "expo-linear-gradient";
 import { Ionicons } from "@expo/vector-icons";
