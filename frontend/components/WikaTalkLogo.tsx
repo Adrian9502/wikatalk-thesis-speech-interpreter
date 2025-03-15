@@ -5,14 +5,10 @@ import { useFonts } from "expo-font";
 
 type WikaTalkLogoProps = {
   title: string;
+  fontSize?: number;
 };
 
-const WikaTalkLogo = ({ title }: WikaTalkLogoProps) => {
-  const [fontsLoaded] = useFonts({
-    "Poppins-Bold": require("../assets/fonts/Poppins-Bold.ttf"),
-    "Poppins-SemiBold": require("../assets/fonts/Poppins-SemiBold.ttf"),
-  });
-
+const WikaTalkLogo = ({ title, fontSize = 24 }: WikaTalkLogoProps) => {
   const fadeAnim = useRef(new Animated.Value(0)).current; // Start opacity at 0
 
   useEffect(() => {
@@ -23,33 +19,44 @@ const WikaTalkLogo = ({ title }: WikaTalkLogoProps) => {
     }).start();
   }, []); // Run when component mounts
 
-  if (!fontsLoaded) {
-    return null;
-  }
-
   return (
     <Animated.View style={[styles.container, { opacity: fadeAnim }]}>
       <View style={styles.brandContainer}>
         <View style={styles.wikaContainer}>
-          <Text style={[styles.letter, { color: TITLE_COLORS.customYellow }]}>
+          <Text
+            style={[
+              styles.letter,
+              { fontSize, color: TITLE_COLORS.customYellow },
+            ]}
+          >
             W
           </Text>
           <Text
-            style={[styles.letter, { color: TITLE_COLORS.customBlueLight }]}
+            style={[
+              styles.letter,
+              { fontSize, color: TITLE_COLORS.customBlueLight },
+            ]}
           >
             i
           </Text>
-          <Text style={[styles.letter, { color: TITLE_COLORS.customRed }]}>
+          <Text
+            style={[styles.letter, { fontSize, color: TITLE_COLORS.customRed }]}
+          >
             k
           </Text>
-          <Text style={[styles.letter, { color: TITLE_COLORS.customYellow }]}>
+          <Text
+            style={[
+              styles.letter,
+              { fontSize, color: TITLE_COLORS.customYellow },
+            ]}
+          >
             a
           </Text>
         </View>
 
         {/* Title text */}
         <View style={styles.titleWrapper}>
-          <Text style={styles.titleText}>{title}</Text>
+          <Text style={[styles.titleText, { fontSize }]}>{title}</Text>
         </View>
       </View>
     </Animated.View>
@@ -71,24 +78,18 @@ const styles = StyleSheet.create({
   },
   letter: {
     letterSpacing: 0.5,
-    fontSize: 24,
     fontFamily: "Poppins-Bold",
     textShadowColor: "rgba(0, 0, 0, 0.6)",
     textShadowOffset: { width: 1, height: 1 },
     textShadowRadius: 4,
   },
   titleWrapper: {
-    borderRadius: 12,
     overflow: "hidden",
   },
   titleText: {
     letterSpacing: 0.5,
-    fontSize: 24,
-    fontFamily: "Poppins-SemiBold",
+    fontFamily: "Poppins-Bold",
     color: TITLE_COLORS.customWhite,
-    textShadowColor: "rgba(0, 0, 0, 0.4)",
-    textShadowOffset: { width: 1, height: 1 },
-    textShadowRadius: 3,
   },
 });
 

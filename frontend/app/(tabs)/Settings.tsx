@@ -12,7 +12,7 @@ import { LinearGradient } from "expo-linear-gradient";
 import React, { useState } from "react";
 import { StatusBar } from "expo-status-bar";
 import SettingItem from "@/components/SettingItem";
-import Logo from "@/components/Logo";
+import Logo from "@/components/AuthLogo";
 import { useAuth } from "@/context/AuthContext";
 
 const Settings = () => {

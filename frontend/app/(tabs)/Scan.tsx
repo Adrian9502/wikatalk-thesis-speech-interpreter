@@ -12,7 +12,7 @@ import {
 import { LinearGradient } from "expo-linear-gradient";
 import DropDownPicker from "react-native-dropdown-picker";
 import { DIALECTS, LANGUAGE_BACKGROUND } from "@/constant/languages";
-import Logo from "@/components/Logo";
+import Logo from "@/components/AuthLogo";
 const Scan = () => {
   const [permission, requestPermission] = useCameraPermissions();
   const [selectedLanguage, setSelectedLanguage] = useState("Tagalog");

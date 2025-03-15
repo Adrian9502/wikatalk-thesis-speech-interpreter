@@ -1,36 +1,43 @@
-import { StyleSheet, Text, View, Dimensions, Image } from "react-native";
+import { View, Image, Text, StyleSheet } from "react-native";
 import React from "react";
+import WikaTalkLogo from "./WikaTalkLogo";
+import { TITLE_COLORS } from "@/constant/colors";
 
-const AuthLogo = () => {
+interface LogoProps {
+  title: string;
+}
+
+const AuthLogo: React.FC<LogoProps> = ({ title }) => {
   return (
-    <View style={styles.curvedTopContainer}>
+    <View style={styles.container}>
       <Image
-        className="w-full"
-        source={require("@/assets/images/WikaTalk-logo.png")}
+        source={require("@/assets/images/wikatalk-logo.png")}
+        style={styles.logo}
         resizeMode="contain"
       />
-      <View className="w-full items-center justify-center">
-        <Text className="font-pbold z-50 text-[3rem] -mb-6 text-emerald-500 text-center">
-          WikaTalk
-        </Text>
-        <Text className="font-psemibold text-xl text-emerald-500">
-          Speak Freely, Understand Instantly.
-        </Text>
-      </View>
+      <WikaTalkLogo title={title} fontSize={35} />
+      <Text style={styles.tagline}>Speak Freely, Understand Instantly.</Text>
     </View>
   );
 };
-export default AuthLogo;
 
 const styles = StyleSheet.create({
-  curvedTopContainer: {
-    width: Dimensions.get("window").width,
-    height: 350,
-    display: "flex",
-    justifyContent: "center",
+  container: {
     alignItems: "center",
-    backgroundColor: "#fff",
-    borderBottomLeftRadius: "100%",
-    borderBottomRightRadius: "100%",
+    justifyContent: "center",
+  },
+  logo: {
+    width: 100,
+    height: 100,
+  },
+  tagline: {
+    fontFamily: "Poppins-Medium",
+    fontSize: 14,
+    marginTop: -15,
+    color: TITLE_COLORS.customYellow,
+    textShadowOffset: { width: 1, height: 1 },
+    textShadowRadius: 3,
   },
 });
+
+export default AuthLogo;
