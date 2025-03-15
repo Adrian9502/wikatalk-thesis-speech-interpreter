@@ -1,0 +1,67 @@
+import React from "react";
+import { View, Text, Animated, Pressable, StyleSheet } from "react-native";
+import { TITLE_COLORS } from "@/constant/colors";
+import DotsLoader from "@/components/DotLoader";
+
+interface SubmitButtonProps {
+  activeTab: "signin" | "signup";
+  isLoading: boolean;
+  buttonScale: Animated.Value;
+  onPress: () => void;
+}
+
+const SubmitButton: React.FC<SubmitButtonProps> = ({
+  activeTab,
+  isLoading,
+  buttonScale,
+  onPress,
+}) => (
+  <Animated.View
+    style={{
+      transform: [{ scale: buttonScale }],
+      width: "100%",
+      borderRadius: 8,
+      overflow: "hidden",
+      marginVertical: 8,
+      shadowColor: "#000",
+      shadowOffset: { width: 0, height: 2 },
+      shadowOpacity: 0.1,
+      shadowRadius: 3,
+      elevation: 2,
+    }}
+  >
+    <Pressable
+      style={[styles.submitButton, { backgroundColor: TITLE_COLORS.customRed }]}
+      disabled={isLoading}
+      onPress={onPress}
+    >
+      <View style={styles.submitButtonContent}>
+        {isLoading && <DotsLoader />}
+        <Text style={styles.submitButtonText}>
+          {activeTab === "signin" ? "Sign In" : "Sign Up"}
+        </Text>
+      </View>
+    </Pressable>
+  </Animated.View>
+);
+
+const styles = StyleSheet.create({
+  submitButton: {
+    paddingVertical: 12,
+    alignItems: "center",
+    justifyContent: "center",
+    borderRadius: 8,
+  },
+  submitButtonContent: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  submitButtonText: {
+    color: "white",
+    fontSize: 16,
+    fontWeight: "bold",
+  },
+});
+
+export default SubmitButton;
