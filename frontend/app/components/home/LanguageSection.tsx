@@ -14,9 +14,9 @@ import {
 import { Dropdown } from "react-native-element-dropdown";
 import { LinearGradient } from "expo-linear-gradient";
 import { MaterialCommunityIcons, Ionicons } from "@expo/vector-icons";
-import { DIALECTS } from "@/constant/languages";
-import { LanguageSectionProps } from "@/types/types";
-import { BASE_COLORS, getPositionalColors } from "@/constant/colors";
+import { DIALECTS } from "@/app/constant/languages";
+import { LanguageSectionProps } from "@/app/types/types";
+import { BASE_COLORS, getPositionalColors } from "@/app/constant/colors";
 
 const LanguageSection: React.FC<LanguageSectionProps> = ({
   position,

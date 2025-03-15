@@ -14,11 +14,11 @@ import { LinearGradient } from "expo-linear-gradient";
 import { StatusBar } from "expo-status-bar";
 import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
-import FormInput from "@/components/FormInput";
+import FormInput from "@/app/components/FormInput";
 import { Mail, KeyRound } from "lucide-react-native";
-import { useValidation } from "@/context/ValidationContext";
-import { useAuth } from "@/context/AuthContext";
-import FormMessage from "@/components/FormMessage";
+import { useValidation } from "@/app/context/ValidationContext";
+import { useAuth } from "@/app/context/AuthContext";
+import FormMessage from "@/app/components/FormMessage";
 import { router } from "expo-router";
 const { width } = Dimensions.get("window");
 

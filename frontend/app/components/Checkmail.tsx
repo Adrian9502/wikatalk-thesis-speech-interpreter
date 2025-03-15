@@ -2,7 +2,7 @@ import React from "react";
 import { SafeAreaView, Text, View, TouchableOpacity } from "react-native";
 import { StatusBar } from "expo-status-bar";
 import { router } from "expo-router";
-import AuthLogo from "@/components/AuthLogo";
+import AuthLogo from "@/app/components/AuthLogo";
 import styles from "@/utils/AuthStyles";
 const CheckEmail: React.FC = () => {
   return (

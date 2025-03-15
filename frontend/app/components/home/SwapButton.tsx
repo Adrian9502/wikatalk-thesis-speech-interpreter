@@ -9,7 +9,7 @@ import {
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { Ionicons } from "@expo/vector-icons";
-import { BASE_COLORS } from "@/constant/colors";
+import { BASE_COLORS } from "@/app/constant/colors";
 
 interface SwapButtonProps {
   onPress: () => void;

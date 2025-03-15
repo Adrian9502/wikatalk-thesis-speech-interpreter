@@ -1,6 +1,6 @@
 import React, { useEffect } from "react";
 import { View, StyleSheet, Animated, Easing } from "react-native";
-import DotsLoader from "@/components/DotLoader";
+import DotsLoader from "@/app/components/DotLoader";
 
 const Loading: React.FC = () => {
   // Modern color palette with vibrant colors

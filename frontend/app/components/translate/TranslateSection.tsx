@@ -11,11 +11,11 @@ import {
 import { Dropdown } from "react-native-element-dropdown";
 import { LinearGradient } from "expo-linear-gradient";
 import { Ionicons } from "@expo/vector-icons";
-import { DIALECTS } from "@/constant/languages";
-import { LanguageOption } from "@/types/types";
-import QuickPhrases from "@/components/translate/QuickPhrases";
-import { BASE_COLORS } from "@/constant/colors";
-import DotsLoader from "@/components/DotLoader";
+import { DIALECTS } from "@/app/constant/languages";
+import { LanguageOption } from "@/app/types/types";
+import QuickPhrases from "@/app/components/translate/QuickPhrases";
+import { BASE_COLORS } from "@/app/constant/colors";
+import DotsLoader from "@/app/components/DotLoader";
 interface TranslateSectionProps {
   sourceLanguage: string;
   targetLanguage: string;

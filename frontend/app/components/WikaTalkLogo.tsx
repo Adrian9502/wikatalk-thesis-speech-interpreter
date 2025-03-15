@@ -1,6 +1,6 @@
 import React, { useEffect, useRef } from "react";
 import { View, Text, StyleSheet, Animated } from "react-native";
-import { TITLE_COLORS } from "@/constant/colors";
+import { TITLE_COLORS } from "@/app/constant/colors";
 import { useFonts } from "expo-font";
 
 type WikaTalkLogoProps = {

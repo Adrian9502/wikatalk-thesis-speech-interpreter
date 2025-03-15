@@ -9,7 +9,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import axios from "axios";
 import { AppState, AppStateStatus, InteractionManager } from "react-native";
 import { router } from "expo-router";
-import { showToast } from "@/lib/showToast";
+import { showToast } from "@/app/lib/showToast";
 
 // get the api url from the .env file
 const API_URL = `${process.env.EXPO_PUBLIC_BACKEND_URL}`;

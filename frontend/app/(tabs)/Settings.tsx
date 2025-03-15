@@ -11,9 +11,9 @@ import {
 import { LinearGradient } from "expo-linear-gradient";
 import React, { useState } from "react";
 import { StatusBar } from "expo-status-bar";
-import SettingItem from "@/components/SettingItem";
-import Logo from "@/components/Logo";
-import { useAuth } from "@/context/AuthContext";
+import SettingItem from "@/app/components/SettingItem";
+import Logo from "@/app/components/Logo";
+import { useAuth } from "@/app/context/AuthContext";
 
 const Settings = () => {
   // auth context

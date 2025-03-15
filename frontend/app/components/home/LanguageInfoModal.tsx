@@ -8,8 +8,8 @@ import {
   StyleSheet,
 } from "react-native";
 import { MapPin, MessageCircle, X, Info } from "react-native-feather";
-import getLanguageBackground from "@/utils/getLanguageBackground";
-import { LANGUAGE_INFO } from "@/constant/languages";
+import getLanguageBackground from "@/app/utils/getLanguageBackground";
+import { LANGUAGE_INFO } from "@/app/constant/languages";
 import { LinearGradient } from "expo-linear-gradient";
 
 interface LanguageInfoModalProps {

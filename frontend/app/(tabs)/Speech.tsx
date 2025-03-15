@@ -3,16 +3,16 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import * as Clipboard from "expo-clipboard";
 import React, { useReducer } from "react";
 import { StatusBar } from "expo-status-bar";
-import { LANGUAGE_INFO } from "@/constant/languages";
-import getLanguageBackground from "@/utils/getLanguageBackground";
-import SwapButton from "@/components/home/SwapButton";
-import { useRecordingTranslation } from "@/hooks/useRecordingTranslation";
-import { useRecording } from "@/hooks/useRecording";
-import LanguageSection from "@/components/home/LanguageSection";
-import LanguageInfoModal from "@/components/home/LanguageInfoModal";
-import Loading from "@/components/home/Loading";
-import { BASE_COLORS, TITLE_COLORS } from "@/constant/colors";
-import WikaTalkLogo from "@/components/WikaTalkLogo";
+import { LANGUAGE_INFO } from "@/app/constant/languages";
+import getLanguageBackground from "@/app/utils/getLanguageBackground";
+import SwapButton from "@/app/components/home/SwapButton";
+import { useRecordingTranslation } from "@/app/hooks/useRecordingTranslation";
+import { useRecording } from "@/app/hooks/useRecording";
+import LanguageSection from "@/app/components/home/LanguageSection";
+import LanguageInfoModal from "@/app/components/home/LanguageInfoModal";
+import Loading from "@/app/components/home/Loading";
+import { BASE_COLORS, TITLE_COLORS } from "@/app/constant/colors";
+import WikaTalkLogo from "@/app/components/WikaTalkLogo";
 
 // Constants
 const INITIAL_TEXT =

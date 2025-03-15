@@ -1,10 +1,10 @@
 import { useState, useCallback } from "react";
-import { translateText } from "@/lib/translationService";
+import { translateText } from "@/app/lib/translationService";
 import * as Speech from "expo-speech";
 import * as Clipboard from "expo-clipboard";
 import debounce from "lodash/debounce";
 import { Alert } from "react-native";
-import { LanguageOption } from "@/types/types";
+import { LanguageOption } from "@/app/types/types";
 
 interface LanguageCodeMap {
   [key: string]: string;
