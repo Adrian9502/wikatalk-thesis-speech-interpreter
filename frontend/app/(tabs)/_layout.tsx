@@ -115,9 +115,9 @@ export default function TabsLayout() {
       }}
     >
       <Tabs.Screen
-        name="Home"
+        name="Speech"
         options={{
-          title: "Home",
+          title: "Speech",
           headerShown: false,
           tabBarIcon: ({ color, focused }) => (
             <TabIcon

@@ -74,9 +74,9 @@ const Index = () => {
   useEffect(() => {
     clearFormMessage();
 
-    // setTimeout(() => {
-    //   router.push("/(tabs)/Home");
-    // }, 2000);
+    setTimeout(() => {
+      router.push("/(tabs)/Speech");
+    }, 2000);
 
     let mounted = true;
 
@@ -86,12 +86,12 @@ const Index = () => {
         await new Promise((resolve) => setTimeout(resolve, 100));
 
         if (isLoggedIn) {
-          router.replace("/(tabs)/Home");
+          router.replace("/(tabs)/Speech");
         } else {
           setIsAuthChecking(false);
         }
       }
-      router.navigate('/(tabs)/Home');
+      router.navigate("/(tabs)/Speech");
     };
 
     initializeApp();

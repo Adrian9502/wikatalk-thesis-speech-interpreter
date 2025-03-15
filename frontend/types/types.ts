@@ -1,5 +1,6 @@
 import { Audio } from "expo-av";
 import { ImageSourcePropType } from "react-native";
+
 export type LanguageOption =
   | "Tagalog"
   | "Cebuano"
@@ -12,22 +13,6 @@ export type LanguageOption =
   | "Kapampangan"
   | "Bisaya";
 
-export interface HomeSectionProps {
-  textfield: string;
-  language: string;
-  languageBackground: string;
-  dropdownOpen: boolean;
-  setDropdownOpen: React.Dispatch<React.SetStateAction<boolean>>;
-  setLanguage: React.Dispatch<React.SetStateAction<string>>;
-  dialects: { label: string; value: string }[];
-  showInfo: (language: string, section: "top" | "bottom") => void;
-  copyToClipboard: (text: string) => Promise<void>;
-  clearText: (section: "top" | "bottom") => void;
-  handleMicPress: (event: number) => Promise<void>;
-  isRecording: Audio.Recording | undefined;
-  activeUser: number;
-  userId: number;
-}
 export interface ControlButtonsProps {
   // Basic properties
   showInfoHandler: (language: string, section: "top" | "bottom") => void;
@@ -48,8 +33,8 @@ export interface LanguageSectionProps {
   language: string;
   textField: string;
   dropdownOpen: boolean;
-  setDropdownOpen: React.Dispatch<React.SetStateAction<boolean>>;
-  setLanguage: React.Dispatch<React.SetStateAction<string>>;
+  setDropdownOpen: (isOpen: boolean) => void;
+  setLanguage: (lang: string) => void;
   closeOtherDropdown: () => void;
   getLanguageBackground: (language: string) => string | ImageSourcePropType;
   showInfo: (language: string, section: "top" | "bottom") => void;
