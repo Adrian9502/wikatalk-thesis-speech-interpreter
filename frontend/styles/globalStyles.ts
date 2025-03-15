@@ -1,9 +1,9 @@
 import { StyleSheet } from "react-native";
-
+import { TITLE_COLORS } from "@/constant/colors";
 export const globalStyles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 16,
-    backgroundColor: "#f8f9fa",
+    backgroundColor: TITLE_COLORS.customNavyBlue,
+    paddingHorizontal: 20,
   },
 });

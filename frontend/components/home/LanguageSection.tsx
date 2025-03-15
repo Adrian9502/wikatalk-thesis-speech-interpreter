@@ -6,6 +6,7 @@ import useLanguageStore from "@/store/useLanguageStore";
 import LanguageSectionHeader from "./LanguageSectionHeader";
 import TextAreaSection from "./TextAreaSection";
 import LanguageBottomSection from "./LanguageBottomSection";
+import { globalStyles } from "@/styles/globalStyles";
 
 interface LanguageSectionProps {
   position: "top" | "bottom";
@@ -88,7 +89,7 @@ const LanguageSection: React.FC<LanguageSectionProps> = ({
   }, [recording]);
 
   return (
-    <View style={styles.container}>
+    <View style={styles.translateContainer}>
       <LinearGradient
         colors={[COLORS.secondary, COLORS.background]}
         start={{ x: 0, y: 0 }}
@@ -124,7 +125,7 @@ const LanguageSection: React.FC<LanguageSectionProps> = ({
 };
 
 const styles = StyleSheet.create({
-  container: {
+  translateContainer: {
     width: "100%",
     height: "45%",
     borderRadius: 24,

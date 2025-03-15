@@ -1,39 +1,32 @@
 import React, { useEffect } from "react";
-import { View, KeyboardAvoidingView, Platform, StyleSheet } from "react-native";
-import * as Speech from "expo-speech";
+import { KeyboardAvoidingView, Platform, StyleSheet } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { useTranslation } from "@/hooks/useTranslation";
 import WikaTalkLogo from "@/components/WikaTalkLogo";
 import TranslateSection from "@/components/translate/TranslateSection";
 import { TITLE_COLORS } from "@/constant/colors";
+import { globalStyles } from "@/styles/globalStyles";
+import {
+  useTranslateStore,
+  debouncedTranslate,
+} from "@/store/useTranslateStore";
 
 const Translate = () => {
   const {
-    state,
+    sourceText,
+    sourceLanguage,
+    targetLanguage,
+    stopSpeech,
     updateState,
-    debouncedTranslate,
-    handleSwapLanguages,
-    copyToClipboard,
-    handleSourceSpeech,
-    handleTranslatedSpeech,
-  } = useTranslation();
+  } = useTranslateStore();
 
   // Stop speech when changing languages
   useEffect(() => {
-    const stopSpeech = async (): Promise<void> => {
-      const isSpeakingNow = await Speech.isSpeakingAsync();
-      if (isSpeakingNow) {
-        await Speech.stop();
-        updateState({ isSpeaking: false });
-      }
-    };
-
     stopSpeech();
-  }, [state.sourceLanguage, state.targetLanguage]);
+  }, [sourceLanguage, targetLanguage, stopSpeech]);
 
   // Trigger translation when inputs change
   useEffect(() => {
-    if (state.sourceText.trim()) {
+    if (sourceText.trim()) {
       debouncedTranslate();
     } else {
       updateState({ translatedText: "" });
@@ -42,12 +35,7 @@ const Translate = () => {
     return () => {
       debouncedTranslate.cancel();
     };
-  }, [
-    state.sourceText,
-    state.sourceLanguage,
-    state.targetLanguage,
-    debouncedTranslate,
-  ]);
+  }, [sourceText, sourceLanguage, targetLanguage, updateState]);
 
   return (
     <KeyboardAvoidingView
@@ -55,39 +43,12 @@ const Translate = () => {
       style={{ flex: 1 }}
       keyboardVerticalOffset={Platform.OS === "ios" ? 0 : -100}
     >
-      <SafeAreaView style={styles.container}>
+      <SafeAreaView style={globalStyles.container}>
         <WikaTalkLogo title="Translate" />
-
-        <TranslateSection
-          sourceLanguage={state.sourceLanguage}
-          targetLanguage={state.targetLanguage}
-          sourceText={state.sourceText}
-          translatedText={state.translatedText}
-          openSource={state.openSource}
-          openTarget={state.openTarget}
-          copiedSource={state.copiedSource}
-          copiedTarget={state.copiedTarget}
-          isSpeaking={state.isSpeaking}
-          isTranslating={state.isTranslating}
-          error={state.error}
-          updateState={updateState}
-          handleSourceSpeech={handleSourceSpeech}
-          handleTranslatedSpeech={handleTranslatedSpeech}
-          copyToClipboard={copyToClipboard}
-          handleSwapLanguages={handleSwapLanguages}
-        />
+        <TranslateSection />
       </SafeAreaView>
     </KeyboardAvoidingView>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    paddingBottom: 16,
-    flex: 1,
-    paddingHorizontal: 20,
-    backgroundColor: TITLE_COLORS.customNavyBlue,
-  },
-});
 
 export default Translate;

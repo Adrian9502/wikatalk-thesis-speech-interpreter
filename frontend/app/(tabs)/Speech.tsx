@@ -13,7 +13,7 @@ import Loading from "@/components/home/Loading";
 import { BASE_COLORS, TITLE_COLORS } from "@/constant/colors";
 import WikaTalkLogo from "@/components/WikaTalkLogo";
 import useLanguageStore from "@/store/useLanguageStore";
-
+import { globalStyles } from "@/styles/globalStyles";
 const Speech = () => {
   // Zustand store
   const {
@@ -63,7 +63,7 @@ const Speech = () => {
   };
 
   return (
-    <View style={styles.container}>
+    <View style={globalStyles.container}>
       <StatusBar style="light" />
 
       <SafeAreaView
@@ -122,13 +122,8 @@ const Speech = () => {
 export default Speech;
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: TITLE_COLORS.customNavyBlue,
-  },
   safeAreaView: {
     flex: 1,
-    paddingHorizontal: 20,
   },
   middleSection: {
     alignItems: "center",

@@ -71,7 +71,7 @@ const styles = StyleSheet.create({
   },
   letter: {
     letterSpacing: 0.5,
-    fontSize: 28,
+    fontSize: 24,
     fontFamily: "Poppins-Bold",
     textShadowColor: "rgba(0, 0, 0, 0.6)",
     textShadowOffset: { width: 1, height: 1 },
@@ -83,7 +83,7 @@ const styles = StyleSheet.create({
   },
   titleText: {
     letterSpacing: 0.5,
-    fontSize: 28,
+    fontSize: 24,
     fontFamily: "Poppins-SemiBold",
     color: TITLE_COLORS.customWhite,
     textShadowColor: "rgba(0, 0, 0, 0.4)",
