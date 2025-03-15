@@ -101,7 +101,7 @@ const TranslateSection: React.FC<TranslateSectionProps> = ({
             ]}
             selectedTextStyle={[
               styles.dropdownText,
-              { color: BASE_COLORS.darkText, borderRadius: 8 },
+              { color: BASE_COLORS.blue, borderRadius: 8 },
             ]}
             data={DIALECTS}
             maxHeight={250}
@@ -174,7 +174,7 @@ const TranslateSection: React.FC<TranslateSectionProps> = ({
             ]}
             selectedTextStyle={[
               styles.dropdownText,
-              { color: BASE_COLORS.darkText, borderRadius: 8 },
+              { color: BASE_COLORS.orange, borderRadius: 8 },
             ]}
             data={DIALECTS}
             maxHeight={250}
