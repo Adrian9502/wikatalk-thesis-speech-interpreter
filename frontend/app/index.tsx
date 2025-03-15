@@ -19,20 +19,17 @@ import {
 import { LinearGradient } from "expo-linear-gradient";
 import { StatusBar } from "expo-status-bar";
 import { router } from "expo-router";
-import { useAuth } from "@/app/context/AuthContext";
+import { useAuth } from "@/context/AuthContext";
 import React, { useEffect, useState, useRef } from "react";
 import { Ionicons } from "@expo/vector-icons";
-import WikaTalkLogo from "@/app/components/WikaTalkLogo";
-import FormInput from "@/app/components/FormInput";
+import WikaTalkLogo from "@/components/WikaTalkLogo";
+import FormInput from "@/components/FormInput";
 import { useForm } from "react-hook-form";
-import FormMessage from "@/app/components/FormMessage";
+import FormMessage from "@/components/FormMessage";
 import { User, Lock, Mail } from "lucide-react-native";
 import { yupResolver } from "@hookform/resolvers/yup";
-import { useValidation } from "@/app/context/ValidationContext";
-import {
-  SignUpFormData,
-  SignInFormData,
-} from "@/app/context/ValidationContext";
+import { useValidation } from "@/context/ValidationContext";
+import { SignUpFormData, SignInFormData } from "@/context/ValidationContext";
 import { verifyInstallation } from "nativewind";
 // check nativewind installation
 verifyInstallation();

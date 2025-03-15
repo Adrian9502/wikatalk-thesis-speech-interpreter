@@ -1,4 +1,4 @@
-import { LANGUAGE_BACKGROUND } from "@/app/constant/languages";
+import { LANGUAGE_BACKGROUND } from "@/constant/languages";
 import { ImageSourcePropType } from "react-native";
 
 const getLanguageBackground = (language: string): ImageSourcePropType => {

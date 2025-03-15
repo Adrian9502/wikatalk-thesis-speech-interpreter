@@ -1,4 +1,4 @@
-import { ValidationProvider } from "@/app/context/ValidationContext";
+import { ValidationProvider } from "@/context/ValidationContext";
 import { Stack } from "expo-router";
 
 export default function AuthLayout() {

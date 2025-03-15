@@ -13,12 +13,12 @@ import { LinearGradient } from "expo-linear-gradient";
 import { StatusBar } from "expo-status-bar";
 import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
-import FormInput from "@/app/components/FormInput";
+import FormInput from "@/components/FormInput";
 import { Mail, CheckCircle } from "lucide-react-native";
-import { useAuth } from "@/app/context/AuthContext";
-import FormMessage from "@/app/components/FormMessage";
+import { useAuth } from "@/context/AuthContext";
+import FormMessage from "@/components/FormMessage";
 import { router } from "expo-router";
-import { useValidation } from "@/app/context/ValidationContext";
+import { useValidation } from "@/context/ValidationContext";
 
 interface VerificationFormData {
   verificationCode: string;

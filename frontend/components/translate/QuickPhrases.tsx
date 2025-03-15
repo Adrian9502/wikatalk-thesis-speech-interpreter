@@ -6,9 +6,9 @@ import {
   ScrollView,
   StyleSheet,
 } from "react-native";
-import QUICK_PHRASES from "@/app/constant/quickPhrases";
-import { LanguageOption } from "@/app/types/types";
-import { BASE_COLORS } from "@/app/constant/colors";
+import QUICK_PHRASES from "@/constant/quickPhrases";
+import { LanguageOption } from "@/types/types";
+import { BASE_COLORS } from "@/constant/colors";
 
 const QuickPhrases = ({
   onSelectPhrase,

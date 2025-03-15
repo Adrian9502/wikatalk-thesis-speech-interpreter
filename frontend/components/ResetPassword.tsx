@@ -14,12 +14,12 @@ import {
 import { StatusBar } from "expo-status-bar";
 import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
-import FormInput from "@/app/components/FormInput";
+import FormInput from "@/components/FormInput";
 import { Lock } from "lucide-react-native";
-import { useValidation } from "@/app/context/ValidationContext";
+import { useValidation } from "@/context/ValidationContext";
 import { router, useLocalSearchParams } from "expo-router";
-import { useAuth } from "@/app/context/AuthContext";
-import AuthLogo from "@/app/components/AuthLogo";
+import { useAuth } from "@/context/AuthContext";
+import AuthLogo from "@/components/AuthLogo";
 import styles from "@/utils/AuthStyles";
 
 interface ResetPasswordFormData {

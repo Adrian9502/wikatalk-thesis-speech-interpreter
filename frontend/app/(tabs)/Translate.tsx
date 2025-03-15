@@ -2,10 +2,10 @@ import React, { useEffect } from "react";
 import { View, KeyboardAvoidingView, Platform, StyleSheet } from "react-native";
 import * as Speech from "expo-speech";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { useTranslation } from "@/app/hooks/useTranslation";
-import WikaTalkLogo from "@/app/components/WikaTalkLogo";
-import TranslateSection from "@/app/components/translate/TranslateSection";
-import { TITLE_COLORS } from "@/app/constant/colors";
+import { useTranslation } from "@/hooks/useTranslation";
+import WikaTalkLogo from "@/components/WikaTalkLogo";
+import TranslateSection from "@/components/translate/TranslateSection";
+import { TITLE_COLORS } from "@/constant/colors";
 
 const Translate = () => {
   const {

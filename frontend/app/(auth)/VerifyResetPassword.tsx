@@ -11,10 +11,10 @@ import {
 } from "react-native";
 import { useForm } from "react-hook-form";
 import { StatusBar } from "expo-status-bar";
-import FormInput from "@/app/components/FormInput";
+import FormInput from "@/components/FormInput";
 import { router } from "expo-router";
-import { useAuth } from "@/app/context/AuthContext";
-import AuthLogo from "@/app/components/AuthLogo";
+import { useAuth } from "@/context/AuthContext";
+import AuthLogo from "@/components/AuthLogo";
 import { CheckCircle } from "lucide-react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 

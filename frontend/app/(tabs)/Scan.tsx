@@ -11,8 +11,8 @@ import {
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import DropDownPicker from "react-native-dropdown-picker";
-import { DIALECTS, LANGUAGE_BACKGROUND } from "@/app/constant/languages";
-import Logo from "@/app/components/Logo";
+import { DIALECTS, LANGUAGE_BACKGROUND } from "@/constant/languages";
+import Logo from "@/components/Logo";
 const Scan = () => {
   const [permission, requestPermission] = useCameraPermissions();
   const [selectedLanguage, setSelectedLanguage] = useState("Tagalog");
