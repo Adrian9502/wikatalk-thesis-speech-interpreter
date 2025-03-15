@@ -1,7 +1,14 @@
 import React, { useState, useEffect } from "react";
-import { View, Text, TouchableOpacity, ScrollView } from "react-native";
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  ScrollView,
+  StyleSheet,
+} from "react-native";
 import QUICK_PHRASES from "@/constant/quickPhrases";
 import { LanguageOption } from "@/types/types";
+import { BASE_COLORS } from "@/constant/colors";
 
 const QuickPhrases = ({
   onSelectPhrase,
@@ -34,33 +41,37 @@ const QuickPhrases = ({
 
   // If no phrases available for the selected language
   if (selectedLanguagePhrases.length === 0) {
-    return null; // Or return a placeholder
+    return null;
   }
 
   return (
-    <View className="w-full mt-2 mb-3 ">
-      <Text className="text-customBlue font-psemibold mb-2 text-base">
-        Quick Phrases:
-      </Text>
+    <View style={styles.container}>
+      <Text style={styles.title}>Quick Phrases:</Text>
 
       {/* Category Tabs */}
       <ScrollView
         horizontal
         showsHorizontalScrollIndicator={false}
-        className="mb-2 "
+        style={styles.categoryScrollView}
       >
         {categories.map((category) => (
           <TouchableOpacity
             key={category}
             onPress={() => setActiveCategory(category)}
-            className={`px-3 py-1 mx-2 rounded-lg ${
-              activeCategory === category ? "bg-customBlue" : "bg-blue-100"
-            }`}
+            style={[
+              styles.categoryTab,
+              activeCategory === category
+                ? styles.activeTab
+                : styles.inactiveTab,
+            ]}
           >
             <Text
-              className={`font-medium ${
-                activeCategory === category ? "text-white" : "text-customBlue"
-              }`}
+              style={[
+                styles.categoryText,
+                activeCategory === category
+                  ? styles.activeTabText
+                  : styles.inactiveTabText,
+              ]}
             >
               {category}
             </Text>
@@ -72,20 +83,73 @@ const QuickPhrases = ({
       <ScrollView
         horizontal
         showsHorizontalScrollIndicator={false}
-        className="pb-1"
+        style={styles.phrasesScrollView}
       >
         {currentPhrases.map((phrase, index) => (
           <TouchableOpacity
             key={index}
             onPress={() => onSelectPhrase(phrase.text)}
-            className="bg-blue-50 border border-customBlue px-3 py-2 rounded-full mr-2 flex-row items-center"
+            style={styles.phraseButton}
           >
-            <Text className="text-customBlue ">{phrase.label}</Text>
+            <Text style={styles.phraseText}>{phrase.label}</Text>
           </TouchableOpacity>
         ))}
       </ScrollView>
     </View>
   );
 };
+
+const styles = StyleSheet.create({
+  container: {
+    width: "100%",
+  },
+  title: {
+    color: BASE_COLORS.blue,
+    fontWeight: "600",
+    marginBottom: 8,
+    fontSize: 16,
+  },
+  categoryScrollView: {
+    marginBottom: 8,
+  },
+  categoryTab: {
+    paddingHorizontal: 12,
+    paddingVertical: 4,
+    marginHorizontal: 8,
+    borderRadius: 8,
+  },
+  activeTab: {
+    backgroundColor: BASE_COLORS.blue,
+  },
+  inactiveTab: {
+    backgroundColor: BASE_COLORS.lightBlue,
+  },
+  categoryText: {
+    fontWeight: "500",
+  },
+  activeTabText: {
+    color: BASE_COLORS.white,
+  },
+  inactiveTabText: {
+    color: BASE_COLORS.blue,
+  },
+  phrasesScrollView: {
+    paddingBottom: 4,
+  },
+  phraseButton: {
+    backgroundColor: BASE_COLORS.lightBlue,
+    borderWidth: 1,
+    borderColor: BASE_COLORS.blue,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: 999,
+    marginRight: 8,
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  phraseText: {
+    color: BASE_COLORS.blue,
+  },
+});
 
 export default QuickPhrases;
