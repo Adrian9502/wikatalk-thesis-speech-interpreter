@@ -56,6 +56,7 @@ const ForgotPassword: React.FC = () => {
 
   // When component unmount, clear the form message
   useEffect(() => {
+    clearFormMessage();
     return () => {
       clearFormMessage();
     };

@@ -19,7 +19,6 @@ import { globalStyles } from "@/styles/globalStyles";
 import { BASE_COLORS, TITLE_COLORS } from "@/constant/colors";
 
 // Component imports
-import Logo from "@/components/AuthLogo";
 import AuthTabs from "@/components/auth/AuthTabs";
 import SignInForm from "@/components/auth/SignInForm";
 import SignUpForm from "@/components/auth/SignUpForm";
