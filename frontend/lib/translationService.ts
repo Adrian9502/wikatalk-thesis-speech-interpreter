@@ -9,7 +9,7 @@ if (!api_key) {
   );
 }
 const sys_instruct =
-  "You are a translator. Translate the phrases only. If you cannot provide a translation for that phrase. Just put a invisible space.";
+  "You are a translator. Translate the following phrases only. Do not include the original text in the response. If a phrase cannot be translated, return it as is.";
 
 const genAI = new GoogleGenerativeAI(api_key);
 const model = genAI.getGenerativeModel({
