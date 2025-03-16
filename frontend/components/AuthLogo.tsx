@@ -28,8 +28,8 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   logo: {
-    width: 110,
-    height: 110,
+    width: 150,
+    height: 150,
   },
   wikaText: {
     fontFamily: "Poppins-Bold",
@@ -44,6 +44,7 @@ const styles = StyleSheet.create({
   tagline: {
     fontFamily: "Poppins-Medium",
     fontSize: 14,
+    marginTop: -12,
     color: TITLE_COLORS.customWhite,
     textShadowOffset: { width: 1, height: 1 },
     textShadowRadius: 3,
