@@ -148,7 +148,6 @@ const AuthGuard = ({ children }: { children: React.ReactNode }) => {
 
 const RootLayout = () => {
   const [fontsLoaded, error] = useFonts({
-    EagleLake: require("../assets/fonts/EagleLake-Regular.ttf"),
     "Poppins-Black": require("../assets/fonts/Poppins-Black.ttf"),
     "Poppins-Bold": require("../assets/fonts/Poppins-Bold.ttf"),
     "Poppins-ExtraBold": require("../assets/fonts/Poppins-ExtraBold.ttf"),

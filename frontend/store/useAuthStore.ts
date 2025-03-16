@@ -277,13 +277,8 @@ export const useAuthStore = create<AuthState>()(
             error.response?.data?.message ||
             error.message ||
             "Registration failed";
-
           set({ error: message });
-          showToast({
-            type: "error",
-            title: "Registration failed",
-            description: message,
-          });
+          get().setFormMessage(message, "error");
 
           return { success: false, message };
         } finally {

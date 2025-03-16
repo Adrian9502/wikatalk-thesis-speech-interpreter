@@ -1,7 +1,13 @@
 import React from "react";
-import { View, Text, Animated, Pressable, StyleSheet } from "react-native";
+import {
+  View,
+  Text,
+  Animated,
+  Pressable,
+  StyleSheet,
+  ActivityIndicator,
+} from "react-native";
 import { TITLE_COLORS } from "@/constant/colors";
-import DotsLoader from "@/components/DotLoader";
 
 interface SubmitButtonProps {
   activeTab: "signin" | "signup";
@@ -36,7 +42,13 @@ const SubmitButton: React.FC<SubmitButtonProps> = ({
       onPress={onPress}
     >
       <View style={styles.submitButtonContent}>
-        {isLoading && <DotsLoader />}
+        {isLoading && (
+          <ActivityIndicator
+            style={{ marginRight: 10 }}
+            size={20}
+            color={TITLE_COLORS.customWhite}
+          />
+        )}
         <Text style={styles.submitButtonText}>
           {activeTab === "signin" ? "Sign In" : "Sign Up"}
         </Text>

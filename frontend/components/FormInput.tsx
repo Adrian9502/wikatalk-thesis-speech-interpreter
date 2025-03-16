@@ -56,7 +56,7 @@ const FormInput = <T extends FieldValues>({
               {IconComponent && (
                 <IconComponent
                   size={18}
-                  color="#0038A8"
+                  color="#4A6FFF"
                   style={styles.inputIcon}
                 />
               )}
@@ -137,7 +137,7 @@ const styles = StyleSheet.create({
     marginRight: 10,
   },
   input: {
-    fontFamily: "Roboto",
+    fontFamily: "Poppins-Regular",
     flex: 1,
     paddingVertical: 10,
     fontSize: 14,
