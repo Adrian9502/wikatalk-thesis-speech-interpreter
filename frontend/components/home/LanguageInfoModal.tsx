@@ -6,6 +6,7 @@ import {
   Image,
   ScrollView,
   StyleSheet,
+  Dimensions,
 } from "react-native";
 import { MapPin, MessageCircle, X, Info } from "react-native-feather";
 import getLanguageBackground from "@/utils/getLanguageBackground";
@@ -28,6 +29,7 @@ const LanguageInfoModal: React.FC<LanguageInfoModalProps> = ({
   }
 
   const languageInfo = LANGUAGE_INFO[languageName];
+  const windowHeight = Dimensions.get("window").height;
 
   // Modern color scheme
   const colors = {
@@ -45,7 +47,13 @@ const LanguageInfoModal: React.FC<LanguageInfoModalProps> = ({
   return (
     <View style={styles.modalOverlay}>
       <View
-        style={[styles.modalContainer, { backgroundColor: colors.background }]}
+        style={[
+          styles.modalContainer,
+          {
+            backgroundColor: colors.background,
+            maxHeight: windowHeight * 0.8, // Limit modal height to 80% of screen
+          },
+        ]}
       >
         {/* Header with close button */}
         <LinearGradient
@@ -89,7 +97,7 @@ const LanguageInfoModal: React.FC<LanguageInfoModalProps> = ({
 
         <ScrollView
           style={styles.scrollView}
-          showsVerticalScrollIndicator={false}
+          showsVerticalScrollIndicator={true}
           contentContainerStyle={styles.scrollContent}
         >
           {/* Major Cities */}
@@ -251,7 +259,7 @@ const styles = StyleSheet.create({
   },
   imageBanner: {
     width: "100%",
-    height: 180,
+    height: 150,
     position: "relative",
   },
   bannerImage: {
@@ -280,7 +288,7 @@ const styles = StyleSheet.create({
     fontSize: 14,
   },
   scrollView: {
-    maxHeight: 400,
+    flexGrow: 0,
   },
   scrollContent: {
     padding: 20,
