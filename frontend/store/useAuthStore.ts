@@ -538,12 +538,7 @@ export const useAuthStore = create<AuthState>()(
           );
 
           if (response.data.success) {
-            showToast({
-              type: "success",
-              title: "Email sent!",
-              description: response.data.message,
-            });
-
+            get().setFormMessage(response.data.message, "success");
             await Promise.all([
               AsyncStorage.setItem("resetEmailAddress", email),
               AsyncStorage.setItem("isResetPasswordFlow", "true"),
@@ -551,21 +546,14 @@ export const useAuthStore = create<AuthState>()(
 
             return { success: true };
           } else {
-            showToast({
-              type: "error",
-              title: "Error sending email",
-              description: response.data.message,
-            });
+            get().setFormMessage(response.data.message, "error");
             return { success: false, message: response.data.message };
           }
         } catch (error: any) {
           const message =
             error.response?.data?.message || "Failed to process your request";
-          showToast({
-            type: "error",
-            title: "Error sending email",
-            description: message,
-          });
+          get().setFormMessage(message, "error");
+
           return { success: false, message };
         } finally {
           set({ isLoading: false });
@@ -590,10 +578,9 @@ export const useAuthStore = create<AuthState>()(
               AsyncStorage.setItem("resetToken", response.data.resetToken),
               AsyncStorage.setItem("isResetPasswordFlow", "true"),
             ]);
-
             showToast({
               type: "success",
-              title: "Code Verified successfully!",
+              title: "Verification Error",
               description: response.data.message,
             });
 
@@ -607,24 +594,14 @@ export const useAuthStore = create<AuthState>()(
             };
           } else {
             const errorMessage = response.data.message || "Verification failed";
-
-            showToast({
-              type: "error",
-              title: "Verification Error",
-              description: errorMessage,
-            });
+            get().setFormMessage(errorMessage, "error");
 
             return { success: false, message: errorMessage };
           }
         } catch (error: any) {
           const message =
             error.response?.data?.message || "Verification failed";
-
-          showToast({
-            type: "error",
-            title: "Verification Error",
-            description: message,
-          });
+          get().setFormMessage(message, "error");
           return { success: false, message };
         } finally {
           set({ isLoading: false });
@@ -663,12 +640,7 @@ export const useAuthStore = create<AuthState>()(
         } catch (error: any) {
           const message =
             error.response?.data?.message || "Password reset failed";
-
-          showToast({
-            type: "error",
-            title: "Password reset error",
-            description: message,
-          });
+          get().setFormMessage(message, "error");
 
           return { success: false, message };
         } finally {

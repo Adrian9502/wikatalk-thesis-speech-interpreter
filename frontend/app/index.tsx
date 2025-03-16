@@ -31,6 +31,7 @@ import SubmitButton from "@/components/auth/SubmitButton";
 import { useAuthForms } from "@/hooks/useAuthForms";
 // style
 import { styles } from "@/styles/authStyles";
+import AuthLogo from "@/components/AuthLogo";
 // Enable layout animation for Android
 if (Platform.OS === "android") {
   if (UIManager.setLayoutAnimationEnabledExperimental) {
@@ -162,7 +163,7 @@ const Index = () => {
         >
           {/* Logo */}
           <View style={styles.logoContainer}>
-            <Logo title="Talk" />
+            <AuthLogo title="Talk" />
           </View>
 
           {/* Form container */}
