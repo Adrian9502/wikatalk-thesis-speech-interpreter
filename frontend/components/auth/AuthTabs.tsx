@@ -96,11 +96,11 @@ const styles = StyleSheet.create({
     zIndex: 10,
   },
   tabButtonText: {
-    fontWeight: "bold",
+    fontFamily: "Poppins-Medium",
     fontSize: 14,
   },
   activeTabText: {
-    fontWeight: "700",
+    fontFamily: "Poppins-Medium",
   },
   inactiveTabText: {},
 });

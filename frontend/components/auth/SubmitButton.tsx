@@ -72,7 +72,7 @@ const styles = StyleSheet.create({
   submitButtonText: {
     color: "white",
     fontSize: 16,
-    fontWeight: "bold",
+    fontFamily: "Poppins-Medium",
   },
 });
 

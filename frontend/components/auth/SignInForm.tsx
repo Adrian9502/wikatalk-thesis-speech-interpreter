@@ -58,6 +58,7 @@ const styles = StyleSheet.create({
   },
   forgotPasswordText: {
     fontSize: 12,
+    fontFamily: "Poppins-Regular",
   },
 });
 

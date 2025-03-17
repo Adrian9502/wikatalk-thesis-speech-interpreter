@@ -77,11 +77,13 @@ const SignUpForm: React.FC<SignUpFormProps> = ({ control, errors }) => {
 const styles = StyleSheet.create({
   helpText: {
     padding: 4,
+    fontFamily: "Poppins-Regular",
     marginBottom: 4,
     fontSize: 13,
   },
   helpTextBold: {
     fontWeight: "600",
+    fontFamily: "Poppins-Regular",
   },
 });
 
