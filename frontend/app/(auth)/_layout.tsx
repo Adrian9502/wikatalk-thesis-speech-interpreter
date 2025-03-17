@@ -6,7 +6,7 @@ export default function AuthLayout() {
     <ValidationProvider>
       <Stack screenOptions={{ headerShown: false }}>
         <Stack.Screen name="VerifyEmail" />
-        <Stack.Screen name="ResetPassword" />
+        <Stack.Screen name="ForgotPassword" />
         <Stack.Screen name="VerifyResetPassword" />
         <Stack.Screen name="SetNewPassword" />
       </Stack>
