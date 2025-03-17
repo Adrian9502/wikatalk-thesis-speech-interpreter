@@ -7,6 +7,7 @@ import DotsLoader from "@/components/DotLoader";
 import { StatusBar } from "expo-status-bar";
 
 import { SafeAreaView } from "react-native-safe-area-context";
+import AuthLogo from "@/components/AuthLogo";
 interface AuthProviderProps {
   children: ReactNode;
 }
@@ -22,6 +23,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     return (
       <SafeAreaView style={styles.container}>
         <StatusBar style="light" />
+        <AuthLogo title="Talk" />
         <DotsLoader />
       </SafeAreaView>
     );
@@ -34,7 +36,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: TITLE_COLORS.customNavyBlue,
-    justifyContent: "center",
+    justifyContent: "space-around",
     alignItems: "center",
   },
 });

@@ -91,15 +91,6 @@ const Index = () => {
     };
   }, [isAppReady, isLoggedIn]);
 
-  // Show loading screen while app is initializing
-  if (!isAppReady) {
-    return (
-      <View
-        style={{ flex: 1, backgroundColor: TITLE_COLORS.customNavyBlue }}
-      ></View>
-    );
-  }
-
   const switchTab = (tab: TabType) => {
     // Only animate if the tab is actually changing
     if (activeTab !== tab) {
