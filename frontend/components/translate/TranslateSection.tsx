@@ -5,11 +5,11 @@ import { LinearGradient } from "expo-linear-gradient";
 import { Ionicons } from "@expo/vector-icons";
 import { DIALECTS } from "@/constant/languages";
 import { LanguageOption } from "@/types/types";
-import QuickPhrases from "@/components/translate/QuickPhrases";
+import QuickPhrases from "@/components/Translate/QuickPhrases";
 import { BASE_COLORS } from "@/constant/colors";
 import { useTranslateStore } from "@/store/useTranslateStore";
-import SourceTextArea from "@/components/translate/SourceTextArea";
-import TargetTextArea from "@/components/translate/TargetTextArea";
+import SourceTextArea from "@/components/Translate/SourceTextArea";
+import TargetTextArea from "@/components/Translate/TargetTextArea";
 
 const TranslateSection = () => {
   const { sourceLanguage, targetLanguage, updateState, handleSwapLanguages } =

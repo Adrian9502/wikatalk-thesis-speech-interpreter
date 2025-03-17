@@ -13,21 +13,6 @@ export type LanguageOption =
   | "Kapampangan"
   | "Bisaya";
 
-export interface ControlButtonsProps {
-  // Basic properties
-  showInfoHandler: (language: string, section: "top" | "bottom") => void;
-  copyHandler: (text: string) => Promise<void>;
-  clearTextHandler: (section: "top" | "bottom") => void;
-
-  // Data needed for handlers
-  languageValue: string;
-  textValue: string;
-  position: "top" | "bottom";
-
-  // Optional props with default values
-  buttonBgColor?: string;
-  successColor?: string;
-}
 export interface LanguageSectionProps {
   position: "top" | "bottom";
   language: string;

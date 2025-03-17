@@ -2,7 +2,7 @@ import React, { useEffect } from "react";
 import { KeyboardAvoidingView, Platform, StyleSheet } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import WikaTalkLogo from "@/components/WikaTalkLogo";
-import TranslateSection from "@/components/translate/TranslateSection";
+import TranslateSection from "@/components/Translate/TranslateSection";
 import { TITLE_COLORS } from "@/constant/colors";
 import { globalStyles } from "@/styles/globalStyles";
 import {
