@@ -2,7 +2,7 @@ import React, { useEffect } from "react";
 import { View, StyleSheet, Animated, Easing } from "react-native";
 import DotsLoader from "@/components/DotLoader";
 
-const Loading: React.FC = () => {
+const SpeechLoading: React.FC = () => {
   // Modern color palette with vibrant colors
   const colors: string[] = ["#FCD116", "#4785ff", "#ce1126", "#FCD116"];
 
@@ -73,7 +73,7 @@ const Loading: React.FC = () => {
   );
 };
 
-export default Loading;
+export default SpeechLoading;
 
 // Styles
 const styles = StyleSheet.create({

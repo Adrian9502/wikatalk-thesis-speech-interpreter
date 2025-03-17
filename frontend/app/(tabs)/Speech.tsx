@@ -9,7 +9,7 @@ import { useRecordingTranslation } from "@/hooks/useRecordingTranslation";
 import { useRecording } from "@/hooks/useRecording";
 import LanguageSection from "@/components/home/LanguageSection";
 import LanguageInfoModal from "@/components/home/LanguageInfoModal";
-import Loading from "@/components/home/Loading";
+import SpeechLoading from "@/components/home/SpeechLoading";
 import { BASE_COLORS } from "@/constant/colors";
 import WikaTalkLogo from "@/components/WikaTalkLogo";
 import useLanguageStore from "@/store/useLanguageStore";
@@ -118,7 +118,7 @@ const Speech = () => {
           )}
 
         {/* Loading Indicator */}
-        {loading && <Loading />}
+        {loading && <SpeechLoading />}
       </SafeAreaView>
     </View>
   );
