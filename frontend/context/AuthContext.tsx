@@ -1,13 +1,7 @@
 import React, { useEffect, ReactNode } from "react";
 import { useAuthStore, initializeAuth } from "@/store/useAuthStore";
-import { StyleSheet } from "react-native";
 import { showToast } from "@/lib/showToast";
-import { TITLE_COLORS } from "@/constant/colors";
-import DotsLoader from "@/components/DotLoader";
-import { StatusBar } from "expo-status-bar";
-
-import { SafeAreaView } from "react-native-safe-area-context";
-import AuthLogo from "@/components/AuthLogo";
+import AppLoading from "@/components/AppLoading";
 interface AuthProviderProps {
   children: ReactNode;
 }
@@ -20,26 +14,11 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   }, []);
 
   if (!isAppReady) {
-    return (
-      <SafeAreaView style={styles.container}>
-        <StatusBar style="light" />
-        <AuthLogo title="Talk" />
-        <DotsLoader />
-      </SafeAreaView>
-    );
+    return <AppLoading />;
   }
 
   return <>{children}</>;
 };
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: TITLE_COLORS.customNavyBlue,
-    justifyContent: "space-around",
-    alignItems: "center",
-  },
-});
 
 // Hook for compatibility with existing code
 export const useAuth = () => {
