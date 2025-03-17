@@ -28,17 +28,17 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   logo: {
-    width: 150,
-    height: 150,
+    width: 120,
+    height: 120,
   },
   wikaText: {
     fontFamily: "Poppins-Bold",
-    fontSize: 36,
+    fontSize: 34,
     color: TITLE_COLORS.customYellow,
   },
   talkText: {
     fontFamily: "Poppins-Bold",
-    fontSize: 36,
+    fontSize: 34,
     color: BASE_COLORS.white,
   },
   tagline: {

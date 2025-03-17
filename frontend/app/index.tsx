@@ -154,17 +154,16 @@ const Index = () => {
           },
         ]}
       >
+        {/* Logo */}
+        <View style={styles.logoContainer}>
+          <AuthLogo title="Talk" />
+        </View>
         <StatusBar style="light" />
         <KeyboardAvoidingView
           behavior={Platform.OS === "ios" ? "padding" : "height"}
           style={styles.keyboardAvoidingView}
           keyboardVerticalOffset={Platform.OS === "ios" ? 40 : 0}
         >
-          {/* Logo */}
-          <View style={styles.logoContainer}>
-            <AuthLogo title="Talk" />
-          </View>
-
           {/* Form container */}
           <View
             style={[

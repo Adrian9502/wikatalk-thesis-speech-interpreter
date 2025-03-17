@@ -4,7 +4,6 @@ export const styles = StyleSheet.create({
   keyboardAvoidingView: {
     width: "85%",
     maxWidth: 350,
-    alignItems: "center",
   },
   logoContainer: {
     alignItems: "center",
