@@ -6,7 +6,6 @@ import useLanguageStore from "@/store/useLanguageStore";
 import LanguageSectionHeader from "./LanguageSectionHeader";
 import TextAreaSection from "./TextAreaSection";
 import LanguageBottomSection from "./LanguageBottomSection";
-import { globalStyles } from "@/styles/globalStyles";
 
 interface LanguageSectionProps {
   position: "top" | "bottom";

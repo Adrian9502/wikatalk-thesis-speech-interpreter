@@ -1,7 +1,7 @@
 // Speech.tsx
 import { View, StyleSheet } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import React from "react";
+import React, { useState } from "react";
 import { StatusBar } from "expo-status-bar";
 import { LANGUAGE_INFO } from "@/constant/languages";
 import SwapButton from "@/components/home/SwapButton";
@@ -10,7 +10,7 @@ import { useRecording } from "@/hooks/useRecording";
 import LanguageSection from "@/components/home/LanguageSection";
 import LanguageInfoModal from "@/components/home/LanguageInfoModal";
 import Loading from "@/components/home/Loading";
-import { BASE_COLORS, TITLE_COLORS } from "@/constant/colors";
+import { BASE_COLORS } from "@/constant/colors";
 import WikaTalkLogo from "@/components/WikaTalkLogo";
 import useLanguageStore from "@/store/useLanguageStore";
 import { globalStyles } from "@/styles/globalStyles";
@@ -32,6 +32,9 @@ const Speech = () => {
   const { recording, startRecording, stopRecording } = useRecording();
   const { loading, translateAudio, speakText } = useRecordingTranslation();
 
+  // track which user is recording
+  const [recordingUser, setRecordingUser] = useState<number | null>(null);
+
   // Handle text field updates based on user
   const handleTextfield = (translatedText: string, transcribedText: string) => {
     if (activeUser === 1) {
@@ -46,6 +49,7 @@ const Speech = () => {
     setActiveUser(userNum);
 
     if (recording) {
+      setRecordingUser(null); // Clear recording user when stopping
       const uri = await stopRecording();
       if (uri) {
         const sourceLang = userNum === 1 ? language1 : language2;
@@ -58,6 +62,7 @@ const Speech = () => {
         }
       }
     } else {
+      setRecordingUser(userNum); // Set which user is recording
       startRecording();
     }
   };
@@ -77,7 +82,7 @@ const Speech = () => {
         <LanguageSection
           position="top"
           handlePress={handleMicPress}
-          recording={!!recording}
+          recording={!!recording && recordingUser === 2}
           userId={2}
         />
 
@@ -95,7 +100,7 @@ const Speech = () => {
         <LanguageSection
           position="bottom"
           handlePress={handleMicPress}
-          recording={!!recording}
+          recording={!!recording && recordingUser === 1}
           userId={1}
         />
 
