@@ -330,16 +330,10 @@ export const useAuthStore = create<AuthState>()(
               AsyncStorage.setItem("userToken", token),
               AsyncStorage.setItem("userData", JSON.stringify(user)),
             ]);
+            get().setFormMessage("Login successful!", "success");
 
             setupAxiosDefaults(token);
             set({ userToken: token, userData: user });
-            get().setFormMessage("Login successful!", "success");
-
-            showToast({
-              type: "success",
-              title: "Login Successful!",
-              description: response.data.message,
-            });
 
             InteractionManager.runAfterInteractions(() => {
               router.replace("/(tabs)/Speech");
