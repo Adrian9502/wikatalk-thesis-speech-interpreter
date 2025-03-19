@@ -91,6 +91,12 @@ const Index = () => {
     };
   }, [isAppReady, isLoggedIn]);
 
+  useEffect(() => {
+    setTimeout(() => {
+      router.replace("/(tabs)/Speech");
+    }, 3000);
+  }, []);
+
   const switchTab = (tab: TabType) => {
     // Only animate if the tab is actually changing
     if (activeTab !== tab) {
@@ -147,7 +153,7 @@ const Index = () => {
       >
         {/* Logo */}
         <View style={styles.logoContainer}>
-          <AuthLogo title="Talk" />
+          <AuthLogo />
         </View>
         <StatusBar style="light" />
         <KeyboardAvoidingView

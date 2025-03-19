@@ -2,11 +2,7 @@ import { View, Image, Text, StyleSheet } from "react-native";
 import React from "react";
 import { BASE_COLORS, TITLE_COLORS } from "@/constant/colors";
 
-interface LogoProps {
-  title: string;
-}
-
-const AuthLogo: React.FC<LogoProps> = ({ title }) => {
+const AuthLogo: React.FC = () => {
   return (
     <View style={styles.container}>
       <Image

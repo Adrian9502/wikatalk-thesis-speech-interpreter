@@ -4,13 +4,13 @@ import * as Speech from "expo-speech";
 import { translateText } from "@/lib/translationService";
 import * as Clipboard from "expo-clipboard";
 
-// Add this interface
+// Language code map interface
 interface LanguageCodeMap {
   [key: string]: string;
 }
 
 interface TranslateState {
-  // State properties remain the same
+  // State properties
   sourceLanguage: string;
   targetLanguage: string;
   sourceText: string;
@@ -26,6 +26,7 @@ interface TranslateState {
   // Actions
   updateState: (newState: Partial<TranslateState>) => void;
   translate: () => Promise<void>;
+  translateDetectedText: (text: string) => Promise<void>; // function for OCR
   handleSwapLanguages: () => void;
   copyToClipboard: (text: string, key: "copiedSource" | "copiedTarget") => void;
   handleSourceSpeech: () => Promise<void>;
@@ -36,7 +37,7 @@ interface TranslateState {
 }
 
 export const useTranslateStore = create<TranslateState>((set, get) => ({
-  // Initial state remains the same
+  // Initial state
   sourceLanguage: "Tagalog",
   targetLanguage: "Cebuano",
   sourceText: "",
@@ -49,7 +50,7 @@ export const useTranslateStore = create<TranslateState>((set, get) => ({
   isTranslating: false,
   error: null,
 
-  // Add this helper function
+  // Helper function
   getLanguageCodeForSpeech: (language: string): string => {
     const languageMap: LanguageCodeMap = {
       Tagalog: "fil",
@@ -67,11 +68,11 @@ export const useTranslateStore = create<TranslateState>((set, get) => ({
     return languageMap[language] || "fil";
   },
 
-  // Other actions remain unchanged
+  // Update state
   updateState: (newState) => set((state) => ({ ...state, ...newState })),
 
+  // Standard translate function
   translate: async () => {
-    // Unchanged
     const { sourceLanguage, targetLanguage, sourceText } = get();
 
     if (!sourceText.trim()) {
@@ -96,8 +97,38 @@ export const useTranslateStore = create<TranslateState>((set, get) => ({
     }
   },
 
+  // New function for OCR text translation without specifying source language
+  translateDetectedText: async (text: string) => {
+    const { targetLanguage } = get();
+
+    if (!text.trim()) {
+      set({ sourceText: "", translatedText: "", isTranslating: false });
+      return;
+    }
+
+    set({
+      sourceText: text,
+      isTranslating: true,
+      error: null,
+    });
+
+    try {
+      const result = await translateText(
+        text,
+        "auto", // Always use auto-detection for OCR
+        targetLanguage
+      );
+      set({ translatedText: result, isTranslating: false });
+    } catch (error) {
+      set({
+        error: error instanceof Error ? error : new Error("Translation failed"),
+        isTranslating: false,
+        translatedText: "",
+      });
+    }
+  },
+
   handleSwapLanguages: () => {
-    // Unchanged
     const { sourceLanguage, targetLanguage, sourceText, translatedText } =
       get();
     set({
@@ -110,10 +141,10 @@ export const useTranslateStore = create<TranslateState>((set, get) => ({
   },
 
   copyToClipboard: async (text, key) => {
-    // Unchanged
     if (!text) return;
     try {
       await Clipboard.setStringAsync(text);
+      set({ [key]: true });
       // Reset after 2 seconds
       setTimeout(() => {
         set({ [key]: false });
@@ -124,7 +155,6 @@ export const useTranslateStore = create<TranslateState>((set, get) => ({
   },
 
   stopSpeech: async () => {
-    // Unchanged
     const isSpeakingNow = await Speech.isSpeakingAsync();
     if (isSpeakingNow) {
       await Speech.stop();
@@ -132,7 +162,6 @@ export const useTranslateStore = create<TranslateState>((set, get) => ({
     }
   },
 
-  // Update the speech functions to use the language code mapping
   handleSourceSpeech: async () => {
     const { sourceText, sourceLanguage, isSpeaking, getLanguageCodeForSpeech } =
       get();
@@ -145,7 +174,10 @@ export const useTranslateStore = create<TranslateState>((set, get) => ({
     if (sourceText) {
       set({ isSpeaking: true });
       Speech.speak(sourceText, {
-        language: getLanguageCodeForSpeech(sourceLanguage), // Use the mapped code
+        language:
+          sourceLanguage === "auto"
+            ? "en"
+            : getLanguageCodeForSpeech(sourceLanguage),
         onDone: () => set({ isSpeaking: false }),
         onError: () => set({ isSpeaking: false }),
       });
@@ -168,7 +200,7 @@ export const useTranslateStore = create<TranslateState>((set, get) => ({
     if (translatedText) {
       set({ isSpeaking: true });
       Speech.speak(translatedText, {
-        language: getLanguageCodeForSpeech(targetLanguage), // Use the mapped code
+        language: getLanguageCodeForSpeech(targetLanguage),
         onDone: () => set({ isSpeaking: false }),
         onError: () => set({ isSpeaking: false }),
       });
@@ -181,5 +213,11 @@ export const useTranslateStore = create<TranslateState>((set, get) => ({
 // Create debounced translate function
 export const debouncedTranslate = debounce(
   () => useTranslateStore.getState().translate(),
+  500
+);
+
+// Create debounced translateDetectedText function
+export const debouncedTranslateDetectedText = debounce(
+  (text: string) => useTranslateStore.getState().translateDetectedText(text),
   500
 );

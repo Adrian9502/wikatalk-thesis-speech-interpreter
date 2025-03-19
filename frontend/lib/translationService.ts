@@ -1,4 +1,3 @@
-// translationService.ts
 import { GoogleGenerativeAI } from "@google/generative-ai";
 
 // API KEY FROM ENV VARIABLES
@@ -8,8 +7,9 @@ if (!api_key) {
     "Missing EXPO_PUBLIC_TRANSLATE_API_KEY. Check your environment variables."
   );
 }
+
 const sys_instruct =
-  "You are a translator. Translate the following phrases only. Do not include the original text in the response. If a phrase cannot be translated, return it as is.";
+  "You are a professional translator specializing in Filipino languages. When asked to translate, always translate directly into the requested target language (never into English unless English is explicitly the target language). For Filipino languages like Tagalog, Cebuano, Hiligaynon, etc., provide authentic translations in those languages only. Never respond in English when another language is requested.";
 
 const genAI = new GoogleGenerativeAI(api_key);
 const model = genAI.getGenerativeModel({
@@ -31,12 +31,32 @@ export const translateText = async (
       `Translating from ${sourceLanguage} to ${targetLanguage}: "${sourceText}"`
     );
 
-    const prompt = `"Translate the phrase from ${sourceLanguage} to ${targetLanguage}: ${sourceText}"`;
+    // More explicit prompt that emphasizes the target language
+    const prompt = `Translate the following text DIRECTLY into ${targetLanguage} (not English): "${sourceText}"`;
 
-    const result = await model.generateContent(prompt);
+    // For auto-detection, add more context
+    const finalPrompt =
+      sourceLanguage === "auto"
+        ? `Translate this text DIRECTLY into ${targetLanguage} (not English). Do NOT include the detected language, explanations, or prefixes: "${sourceText}"`
+        : prompt;
+
+    const result = await model.generateContent(finalPrompt);
     console.log("Raw response:", result.response.text());
 
-    return result.response.text().replace(prompt, "").trim();
+    // Clean up the response to remove any explanations
+    let translation = result.response.text().trim();
+
+    // Remove any prefixes like "In Tagalog:" or "Translation:"
+    translation = translation
+      .replace(
+        /^(In|Into|Translated to|Translation to|Translation in|Translation into)\s+[^:]+:\s*/i,
+        ""
+      )
+      .replace(/^Here('s| is) the [^:]+:\s*/i, "")
+      .replace(/^Translation:\s*/i, "")
+      .trim();
+
+    return translation;
   } catch (error) {
     console.error("Translation error:", error);
     throw new Error("Translation failed");

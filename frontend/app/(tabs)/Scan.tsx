@@ -1,153 +1,328 @@
-import { CameraView, CameraType, useCameraPermissions } from "expo-camera";
-import React, { useState } from "react";
-import { StatusBar } from "expo-status-bar";
+import React, { useRef, useEffect } from "react";
 import {
-  ImageBackground,
   StyleSheet,
   Text,
   View,
-  SafeAreaView,
   TouchableOpacity,
+  ActivityIndicator,
+  TextInput,
+  ScrollView,
+  KeyboardAvoidingView,
+  Platform,
+  Keyboard,
 } from "react-native";
-import { LinearGradient } from "expo-linear-gradient";
-import DropDownPicker from "react-native-dropdown-picker";
-import { DIALECTS, LANGUAGE_BACKGROUND } from "@/constant/languages";
-import Logo from "@/components/AuthLogo";
-const Scan = () => {
-  const [permission, requestPermission] = useCameraPermissions();
-  const [selectedLanguage, setSelectedLanguage] = useState("Tagalog");
-  const [translatedText, setTranslatedText] = useState("");
-  const [open, setOpen] = useState<boolean>(false);
+import { StatusBar } from "expo-status-bar";
+import { CameraView, useCameraPermissions } from "expo-camera";
+import * as ImagePicker from "expo-image-picker";
+import { SafeAreaView } from "react-native-safe-area-context";
+import { Dropdown } from "react-native-element-dropdown";
+import { Ionicons } from "@expo/vector-icons";
+import { DIALECTS } from "@/constant/languages";
+import { globalStyles } from "@/styles/globalStyles";
+import { BASE_COLORS } from "@/constant/colors";
+import { useScanTranslateStore } from "@/store/useScanTranslateStore";
+import { useImageProcessing } from "@/hooks/useImageProcessing";
+import DotsLoader from "@/components/DotLoader";
+import LanguageSelector from "@/components/Scan/LanguageSelector";
+import TextDisplay from "@/components/Scan/TextDisplay";
+import CameraControls from "@/components/Scan/CameraControls";
 
-  const getLanguageBackground = (language: string) => {
-    return (
-      LANGUAGE_BACKGROUND[language] ||
-      require("@/assets/images/languages/tagalog-bg.jpg")
-    );
+// Define types for the state and hook returns
+interface ScanTranslateState {
+  targetLanguage: string;
+  sourceText: string;
+  translatedText: string;
+  isTranslating: boolean;
+  isSourceSpeaking: boolean; // Updated property
+  isTargetSpeaking: boolean; // Updated property
+  copiedSource: boolean;
+  copiedTarget: boolean;
+  clearText: () => void;
+  updateState: (state: Partial<ScanTranslateState>) => void;
+  translateDetectedText: (text: string) => Promise<void>;
+  debouncedTranslateText: (text: string) => void;
+  copyToClipboard: (
+    text: string,
+    field: "copiedSource" | "copiedTarget"
+  ) => void;
+  handleSourceSpeech: (text: string) => void; // Updated method
+  handleTargetSpeech: (text: string) => void; // Updated method
+  stopSpeech: () => void;
+}
+
+const Scan: React.FC = () => {
+  const [permission, requestPermission] = useCameraPermissions();
+  const cameraRef = useRef<any>(null);
+
+  const {
+    targetLanguage,
+    sourceText,
+    translatedText,
+    isTranslating,
+    isSourceSpeaking, // Updated property
+    isTargetSpeaking, // Updated property
+    clearText,
+    updateState,
+    translateDetectedText,
+    debouncedTranslateText,
+    copyToClipboard,
+    handleSourceSpeech, // Updated method
+    handleTargetSpeech, // Updated method
+    stopSpeech,
+    copiedSource,
+    copiedTarget,
+  } = useScanTranslateStore() as ScanTranslateState;
+
+  const { isProcessing, ocrProgress, processImage, recognizeText } =
+    useImageProcessing();
+
+  useEffect(() => {
+    clearText();
+    return () => stopSpeech();
+  }, []);
+
+  // Function to capture image and process it
+  const takePicture = async (): Promise<void> => {
+    if (isProcessing || !cameraRef.current) return;
+
+    try {
+      const photo = await cameraRef.current.takePictureAsync({ quality: 0.8 });
+      if (!photo?.uri) throw new Error("Could not get photo URI");
+
+      const extractedText = await recognizeText(photo.uri);
+
+      if (extractedText) {
+        await translateDetectedText(extractedText); // Use immediate translation here
+      } else {
+        updateState({ sourceText: "No text detected", translatedText: "" });
+      }
+    } catch (error) {
+      updateState({
+        sourceText: `Error: ${
+          error instanceof Error ? error.message : "Unknown error"
+        }`,
+        translatedText: "",
+      });
+    }
   };
 
+  // Function to pick image from gallery
+  const pickImage = async (): Promise<void> => {
+    if (isProcessing) return;
+
+    try {
+      const result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        allowsEditing: true,
+        quality: 0.8,
+      });
+
+      if (!result.canceled && result.assets && result.assets[0].uri) {
+        const extractedText = await recognizeText(result.assets[0].uri);
+
+        if (extractedText) {
+          await translateDetectedText(extractedText); // Use immediate translation here
+        } else {
+          updateState({ sourceText: "No text detected", translatedText: "" });
+        }
+      }
+    } catch (error) {
+      updateState({
+        sourceText: `Error processing image: ${
+          error instanceof Error ? error.message : "Unknown error"
+        }`,
+        translatedText: "",
+      });
+    }
+  };
+
+  // Render permission request screen
   if (!permission) {
-    // Camera permissions are still loading.
-    return <View />;
+    return (
+      <SafeAreaView style={[globalStyles.container, styles.centeredContainer]}>
+        <StatusBar style="light" />
+        <DotsLoader />
+      </SafeAreaView>
+    );
   }
 
+  // Render camera permission request
   if (!permission.granted) {
-    // Camera permissions are not granted yet.
     return (
-      <SafeAreaView className="flex-1 bg-emerald-500">
-        <StatusBar style="dark" />
-        <Logo title="WikaScan" />
-        <View className="items-center justify-center h-1/2">
-          <Text className="text-center font-pmedium text-white pb-2">
-            We need your permission to show the camera
-          </Text>
-          <TouchableOpacity
-            activeOpacity={0.9}
-            onPress={requestPermission}
-            className="p-3 bg-white rounded-xl"
-          >
-            <Text className="text-customBlue font-psemibold">
-              Grant Permission
-            </Text>
-          </TouchableOpacity>
-        </View>
+      <SafeAreaView style={[globalStyles.container, styles.centeredContainer]}>
+        <StatusBar style="light" />
+        <Text style={styles.permissionText}>
+          We need your permission to show the camera
+        </Text>
+        <TouchableOpacity
+          activeOpacity={0.9}
+          onPress={requestPermission}
+          style={styles.permissionButton}
+        >
+          <Text style={styles.permissionButtonText}>Grant Permission</Text>
+        </TouchableOpacity>
       </SafeAreaView>
     );
   }
 
   return (
-    <ImageBackground
-      source={getLanguageBackground(selectedLanguage)}
-      className="flex-1 w-full h-full"
-      resizeMode="cover"
-    >
+    <SafeAreaView style={globalStyles.container}>
       <StatusBar style="light" />
-      <LinearGradient
-        colors={[
-          "rgba(0, 56, 168, 0.85)",
-          "rgba(0, 0, 0, 0.6)",
-          "rgba(206, 17, 38, 0.85)",
-        ]}
-        className="flex-1"
+      <KeyboardAvoidingView
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
+        style={styles.keyboardView}
+        keyboardVerticalOffset={Platform.OS === "ios" ? 0 : 20}
       >
-        <SafeAreaView className="flex-1 pt-12">
-          {/* Camera container */}
-          <View className="flex-1 ">
-            <View className="h-1/2 mx-4 mt-2 rounded-2xl overflow-hidden border-2 border-white">
-              <CameraView style={styles.camera} facing="back"></CameraView>
-            </View>
-            {/* Results and language selection */}
-            <View className="flex-1 mx-4 my-2 bg-white/80 rounded-xl p-4 elevation">
-              <View className="flex-row items-center justify-between mb-2">
-                <DropDownPicker
-                  open={open}
-                  value={selectedLanguage}
-                  items={DIALECTS}
-                  setOpen={setOpen}
-                  setValue={setSelectedLanguage}
-                  placeholder="Select a language"
-                  style={{
-                    width: 150,
-                    backgroundColor: "#fff",
-                    borderWidth: 2,
-                    borderColor: "#0038A8",
-                  }}
-                  dropDownContainerStyle={{
-                    backgroundColor: "#ffffff",
-                    borderColor: "#0038A8",
-                  }}
-                  labelStyle={{
-                    fontSize: 16,
-                    color: "#0038A8",
-                    fontWeight: "600",
-                  }}
-                  textStyle={{
-                    fontSize: 16,
-                    color: "#0038A8",
-                  }}
-                  listItemContainerStyle={{
-                    height: 35,
-                    justifyContent: "center",
-                    paddingVertical: 0,
-                  }}
-                  listItemLabelStyle={{
-                    fontSize: 16,
-                    color: "#0038A8",
-                  }}
-                  itemSeparator={true}
-                  itemSeparatorStyle={{
-                    backgroundColor: "#0038A8",
-                    height: 1,
-                  }}
-                  dropDownDirection="BOTTOM"
+        <View style={styles.cameraContainer}>
+          <View style={styles.cameraViewContainer}>
+            <CameraView
+              style={{ flex: 1 }}
+              facing="back"
+              ref={cameraRef}
+              onMountError={(event) => {
+                const error = event as unknown as Error;
+                updateState({
+                  sourceText: `Camera mount error: ${error.message}`,
+                });
+              }}
+            />
+
+            <CameraControls
+              takePicture={takePicture}
+              pickImage={pickImage}
+              isProcessing={isProcessing}
+            />
+          </View>
+
+          <View style={styles.translationContainer}>
+            <LanguageSelector
+              targetLanguage={targetLanguage}
+              onLanguageChange={(language: string) => {
+                updateState({ targetLanguage: language });
+                if (sourceText) translateDetectedText(sourceText);
+              }}
+            />
+
+            {isProcessing && (
+              <View style={styles.progressContainer}>
+                <View
+                  style={[
+                    styles.progressBar,
+                    { width: `${ocrProgress * 100}%` },
+                  ]}
                 />
-              </View>
-              {/* result text container */}
-              <View className="flex-1 p-2">
-                <Text className="text-xl font-pmedium text-customBlue">
-                  {translatedText || "No translation yet"}
+                <Text style={styles.progressText}>
+                  {Math.round(ocrProgress * 100)}% - Recognizing text...
                 </Text>
               </View>
-            </View>
+            )}
+
+            <TextDisplay
+              title="Detected Text:"
+              text={sourceText}
+              placeholder="Scan or select an image to detect text"
+              isLoading={isProcessing}
+              isSpeaking={isSourceSpeaking} // Updated property
+              copied={copiedSource}
+              onChangeText={(text: string) => {
+                // Use debounced translation here instead of immediate translation
+                debouncedTranslateText(text);
+              }}
+              onCopy={() => copyToClipboard(sourceText, "copiedSource")}
+              onSpeak={() => handleSourceSpeech(sourceText)} // Updated method
+              onClear={clearText}
+              editable={true}
+              color={BASE_COLORS.blue}
+            />
+
+            <TextDisplay
+              title="Translation:"
+              text={translatedText}
+              placeholder="Translation will appear here"
+              isLoading={isTranslating}
+              isSpeaking={isTargetSpeaking} // Updated property
+              copied={copiedTarget}
+              onCopy={() => copyToClipboard(translatedText, "copiedTarget")}
+              onSpeak={() => handleTargetSpeech(translatedText)} // Updated method
+              editable={false}
+              color={BASE_COLORS.orange}
+            />
           </View>
-        </SafeAreaView>
-      </LinearGradient>
-    </ImageBackground>
+        </View>
+      </KeyboardAvoidingView>
+    </SafeAreaView>
   );
 };
 
 export default Scan;
 
 const styles = StyleSheet.create({
-  camera: {
+  keyboardView: {
     flex: 1,
   },
-  picker: {
-    flex: 1,
+  centeredContainer: {
+    justifyContent: "center",
+    gap: 100,
     alignItems: "center",
-    color: "#CE1126",
-    fontWeight: 600,
+  },
+  permissionText: {
+    textAlign: "center",
+    fontFamily: "Poppins-Medium",
+    color: BASE_COLORS.white,
+    paddingBottom: 4,
+    fontSize: 15,
+  },
+  permissionButton: {
+    padding: 14,
+    backgroundColor: BASE_COLORS.lightBlue,
+    borderRadius: 8,
+  },
+  permissionButtonText: {
+    color: BASE_COLORS.blue,
+    fontFamily: "Poppins-SemiBold",
+  },
+  cameraContainer: {
+    flex: 1,
+  },
+  cameraViewContainer: {
+    height: "40%",
+    marginTop: 8,
+    borderRadius: 16,
+    overflow: "hidden",
+    borderWidth: 1,
+    borderColor: "white",
+  },
+  translationContainer: {
+    flex: 1,
     borderWidth: 2,
-    height: 50,
+    marginVertical: 10,
+    backgroundColor: BASE_COLORS.lightBlue,
+    borderRadius: 12,
+    padding: 16,
+    paddingTop: 20,
+    shadowColor: "#000",
+    elevation: 3,
+  },
+  progressContainer: {
+    height: 20,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: BASE_COLORS.orange,
+    borderRadius: 8,
+    overflow: "hidden",
+    position: "relative",
+  },
+  progressBar: {
+    height: "100%",
+    backgroundColor: BASE_COLORS.blue,
+    borderRadius: 10,
+  },
+  progressText: {
+    position: "absolute",
+    width: "100%",
+    textAlign: "center",
+    color: "white",
+    fontFamily: "Poppins-Medium",
+    fontSize: 12,
   },
 });
