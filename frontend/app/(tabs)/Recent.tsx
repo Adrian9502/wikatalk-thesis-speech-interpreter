@@ -13,7 +13,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { globalStyles } from "@/styles/globalStyles";
 import { BASE_COLORS, TITLE_COLORS } from "@/constant/colors";
 import WikaTalkLogo from "@/components/WikaTalkLogo";
-import { Feather } from "@expo/vector-icons";
+import { Feather, Ionicons } from "@expo/vector-icons";
 import { Calendar, Trash2, AlertTriangle } from "react-native-feather";
 
 // Define types
@@ -265,7 +265,11 @@ const RecentTranslations: React.FC = () => {
             style={styles.deleteIcon}
             onPress={() => handleDeletePress(item.id)}
           >
-            <Trash2 width={18} height={18} color={TITLE_COLORS.customRed} />
+            <Ionicons
+              name="trash-outline"
+              size={20}
+              color={BASE_COLORS.orange}
+            />
           </TouchableOpacity>
         </View>
 
@@ -428,7 +432,7 @@ const styles = StyleSheet.create({
     fontSize: 13,
   },
   deleteIcon: {
-    padding: 8,
+    padding: 5,
   },
   contentContainer: {
     backgroundColor: BASE_COLORS.white,

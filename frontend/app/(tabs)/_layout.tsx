@@ -7,6 +7,7 @@ import {
   Camera,
   Clock,
   Settings,
+  Globe,
 } from "react-native-feather";
 import { LinearGradient } from "expo-linear-gradient";
 
@@ -120,12 +121,7 @@ export default function TabsLayout() {
           title: "Speech",
           headerShown: false,
           tabBarIcon: ({ color, focused }) => (
-            <TabIcon
-              Icon={MessageCircle}
-              color={color}
-              name="Speech"
-              focused={focused}
-            />
+            <TabIcon Icon={Mic} color={color} name="Speech" focused={focused} />
           ),
         }}
       />
@@ -136,7 +132,7 @@ export default function TabsLayout() {
           headerShown: false,
           tabBarIcon: ({ color, focused }) => (
             <TabIcon
-              Icon={Mic}
+              Icon={Globe}
               color={color}
               name="Translate"
               focused={focused}
