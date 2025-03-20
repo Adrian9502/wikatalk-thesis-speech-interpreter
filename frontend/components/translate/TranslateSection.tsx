@@ -10,6 +10,7 @@ import { BASE_COLORS } from "@/constant/colors";
 import { useTranslateStore } from "@/store/useTranslateStore";
 import SourceTextArea from "@/components/Translate/SourceTextArea";
 import TargetTextArea from "@/components/Translate/TargetTextArea";
+import { Repeat } from "react-native-feather";
 
 const TranslateSection = () => {
   const { sourceLanguage, targetLanguage, updateState, handleSwapLanguages } =
@@ -108,9 +109,10 @@ const TranslateSection = () => {
               end={{ x: 1, y: 1 }}
               style={styles.swapGradient}
             >
-              <Ionicons
-                name="swap-horizontal"
-                size={20}
+              <Repeat
+                width={20}
+                height={20}
+                strokeWidth={2}
                 color={BASE_COLORS.white}
               />
             </LinearGradient>
