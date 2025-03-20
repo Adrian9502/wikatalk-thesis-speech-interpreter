@@ -19,7 +19,8 @@ interface TranslateState {
   openTarget: boolean;
   copiedSource: boolean;
   copiedTarget: boolean;
-  isSpeaking: boolean;
+  isSourceSpeaking: boolean; // Separate state for source speaking
+  isTargetSpeaking: boolean; // Separate state for target speaking
   isTranslating: boolean;
   error: string | Error | null;
 
@@ -46,7 +47,8 @@ export const useTranslateStore = create<TranslateState>((set, get) => ({
   openTarget: false,
   copiedSource: false,
   copiedTarget: false,
-  isSpeaking: false,
+  isSourceSpeaking: false, // Initialize source speaking state
+  isTargetSpeaking: false, // Initialize target speaking state
   isTranslating: false,
   error: null,
 
@@ -155,31 +157,46 @@ export const useTranslateStore = create<TranslateState>((set, get) => ({
   },
 
   stopSpeech: async () => {
-    const isSpeakingNow = await Speech.isSpeakingAsync();
-    if (isSpeakingNow) {
+    const isSourceSpeakingNow = get().isSourceSpeaking;
+    const isTargetSpeakingNow = get().isTargetSpeaking;
+
+    if (isSourceSpeakingNow || isTargetSpeakingNow) {
       await Speech.stop();
-      set({ isSpeaking: false });
+      set({
+        isSourceSpeaking: false,
+        isTargetSpeaking: false,
+      });
     }
   },
 
   handleSourceSpeech: async () => {
-    const { sourceText, sourceLanguage, isSpeaking, getLanguageCodeForSpeech } =
-      get();
+    const {
+      sourceText,
+      sourceLanguage,
+      isSourceSpeaking,
+      getLanguageCodeForSpeech,
+    } = get();
 
-    if (isSpeaking) {
+    if (isSourceSpeaking) {
       await get().stopSpeech();
       return;
     }
 
+    // Stop any ongoing target speech first
+    if (get().isTargetSpeaking) {
+      await Speech.stop();
+      set({ isTargetSpeaking: false });
+    }
+
     if (sourceText) {
-      set({ isSpeaking: true });
+      set({ isSourceSpeaking: true });
       Speech.speak(sourceText, {
         language:
           sourceLanguage === "auto"
             ? "en"
             : getLanguageCodeForSpeech(sourceLanguage),
-        onDone: () => set({ isSpeaking: false }),
-        onError: () => set({ isSpeaking: false }),
+        onDone: () => set({ isSourceSpeaking: false }),
+        onError: () => set({ isSourceSpeaking: false }),
       });
     }
   },
@@ -188,21 +205,27 @@ export const useTranslateStore = create<TranslateState>((set, get) => ({
     const {
       translatedText,
       targetLanguage,
-      isSpeaking,
+      isTargetSpeaking,
       getLanguageCodeForSpeech,
     } = get();
 
-    if (isSpeaking) {
+    if (isTargetSpeaking) {
       await get().stopSpeech();
       return;
     }
 
+    // Stop any ongoing source speech first
+    if (get().isSourceSpeaking) {
+      await Speech.stop();
+      set({ isSourceSpeaking: false });
+    }
+
     if (translatedText) {
-      set({ isSpeaking: true });
+      set({ isTargetSpeaking: true });
       Speech.speak(translatedText, {
         language: getLanguageCodeForSpeech(targetLanguage),
-        onDone: () => set({ isSpeaking: false }),
-        onError: () => set({ isSpeaking: false }),
+        onDone: () => set({ isTargetSpeaking: false }),
+        onError: () => set({ isTargetSpeaking: false }),
       });
     }
   },

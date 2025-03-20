@@ -18,7 +18,7 @@ const TargetTextArea = () => {
     targetLanguage,
     translatedText,
     copiedTarget,
-    isSpeaking,
+    isTargetSpeaking,
     isTranslating,
     error,
     handleTranslatedSpeech,
@@ -47,9 +47,11 @@ const TargetTextArea = () => {
             disabled={!translatedText || isTranslating}
           >
             <Ionicons
-              name={isSpeaking ? "volume-high" : "volume-medium-outline"}
+              name={isTargetSpeaking ? "volume-high" : "volume-medium-outline"}
               size={22}
-              color={isSpeaking ? BASE_COLORS.success : BASE_COLORS.orange}
+              color={
+                isTargetSpeaking ? BASE_COLORS.success : BASE_COLORS.orange
+              }
             />
           </TouchableOpacity>
 

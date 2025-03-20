@@ -17,7 +17,7 @@ const SourceTextArea = () => {
     sourceLanguage,
     sourceText,
     copiedSource,
-    isSpeaking,
+    isSourceSpeaking,
     updateState,
     handleSourceSpeech,
     copyToClipboard,
@@ -46,9 +46,9 @@ const SourceTextArea = () => {
             disabled={!sourceText}
           >
             <Ionicons
-              name={isSpeaking ? "volume-high" : "volume-medium-outline"}
+              name={isSourceSpeaking ? "volume-high" : "volume-medium-outline"}
               size={22}
-              color={isSpeaking ? BASE_COLORS.success : BASE_COLORS.blue}
+              color={isSourceSpeaking ? BASE_COLORS.success : BASE_COLORS.blue}
             />
           </TouchableOpacity>
 
