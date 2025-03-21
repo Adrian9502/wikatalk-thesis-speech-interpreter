@@ -11,7 +11,7 @@ import Toast from "react-native-toast-message";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import "react-native-reanimated";
 import AppLoading from "@/components/AppLoading";
-
+import ThemeProvider from "@/components/ThemeProvider";
 SplashScreen.preventAutoHideAsync();
 
 const RootLayout = () => {
@@ -40,18 +40,20 @@ const RootLayout = () => {
 
   return (
     <AuthProvider>
-      <PaperProvider>
-        <ValidationProvider>
-          <SafeAreaProvider>
-            <Stack screenOptions={{ headerShown: false }}>
-              <Stack.Screen name="index" options={{ headerShown: false }} />
-              <Stack.Screen name="(auth)" options={{ headerShown: false }} />
-              <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-            </Stack>
-            <Toast />
-          </SafeAreaProvider>
-        </ValidationProvider>
-      </PaperProvider>
+      <ThemeProvider>
+        <PaperProvider>
+          <ValidationProvider>
+            <SafeAreaProvider>
+              <Stack screenOptions={{ headerShown: false }}>
+                <Stack.Screen name="index" options={{ headerShown: false }} />
+                <Stack.Screen name="(auth)" options={{ headerShown: false }} />
+                <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+              </Stack>
+              <Toast />
+            </SafeAreaProvider>
+          </ValidationProvider>
+        </PaperProvider>
+      </ThemeProvider>
     </AuthProvider>
   );
 };

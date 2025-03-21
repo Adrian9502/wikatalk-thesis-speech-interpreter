@@ -17,7 +17,8 @@ import { useAuth } from "@/context/AuthContext";
 import { useValidation } from "@/context/ValidationContext";
 import { globalStyles } from "@/styles/globalStyles";
 import { BASE_COLORS, TITLE_COLORS } from "@/constant/colors";
-
+import useThemeStore from "@/store/useThemeStore";
+import { getGlobalStyles } from "@/styles/globalStyles";
 // Component imports
 import AuthTabs from "@/components/auth/AuthTabs";
 import SignInForm from "@/components/auth/SignInForm";
@@ -31,6 +32,7 @@ import { useAuthForms } from "@/hooks/useAuthForms";
 // style
 import { styles } from "@/styles/authStyles";
 import AuthLogo from "@/components/AuthLogo";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 // Enable layout animation for Android
 if (Platform.OS === "android") {
   if (UIManager.setLayoutAnimationEnabledExperimental) {
@@ -54,6 +56,12 @@ interface SignUpFormValues {
 type TabType = "signin" | "signup";
 
 const Index = () => {
+  // Theme store
+  const { activeTheme } = useThemeStore();
+
+  // Get the dynamic styles based on the current theme
+  const dynamicStyles = getGlobalStyles(activeTheme.backgroundColor);
+
   const { signUpSchema, signInSchema } = useValidation();
   const {
     login,
@@ -143,9 +151,8 @@ const Index = () => {
     <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
       <SafeAreaView
         style={[
-          globalStyles.container,
+          dynamicStyles.container,
           {
-            backgroundColor: TITLE_COLORS.customNavyBlue,
             justifyContent: "center",
             alignItems: "center",
           },

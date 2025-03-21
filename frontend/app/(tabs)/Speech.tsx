@@ -1,4 +1,3 @@
-// Speech.tsx
 import { View, StyleSheet } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import React, { useState } from "react";
@@ -13,8 +12,15 @@ import SpeechLoading from "@/components/Speech/SpeechLoading";
 import { BASE_COLORS } from "@/constant/colors";
 import WikaTalkLogo from "@/components/WikaTalkLogo";
 import useLanguageStore from "@/store/useLanguageStore";
-import { globalStyles } from "@/styles/globalStyles";
+import useThemeStore from "@/store/useThemeStore";
+import { getGlobalStyles } from "@/styles/globalStyles";
+
 const Speech = () => {
+  // Theme store
+  const { activeTheme } = useThemeStore();
+
+  // Get the dynamic styles based on the current theme
+  const dynamicStyles = getGlobalStyles(activeTheme.backgroundColor);
   // Zustand store
   const {
     language1,
@@ -68,7 +74,7 @@ const Speech = () => {
   };
 
   return (
-    <View style={globalStyles.container}>
+    <View style={dynamicStyles.container}>
       <StatusBar style="light" />
 
       <SafeAreaView
@@ -90,7 +96,6 @@ const Speech = () => {
         <View style={styles.middleSection}>
           <SwapButton
             onPress={swapLanguages}
-            colors={[BASE_COLORS.blue, BASE_COLORS.orange]}
             borderStyle={styles.swapButtonBorder}
             iconColor={BASE_COLORS.white}
           />

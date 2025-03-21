@@ -1,15 +1,9 @@
-import { View, Text, Animated, TouchableOpacity } from "react-native";
+import { View, Animated } from "react-native";
 import React, { useRef, useEffect } from "react";
 import { Tabs } from "expo-router";
-import {
-  MessageCircle,
-  Mic,
-  Camera,
-  Clock,
-  Settings,
-  Globe,
-} from "react-native-feather";
+import { Mic, Camera, Clock, Settings, Globe } from "react-native-feather";
 import { LinearGradient } from "expo-linear-gradient";
+import useThemeStore from "@/store/useThemeStore";
 
 interface TabIconProps {
   Icon: any;
@@ -45,7 +39,7 @@ const TabIcon: React.FC<TabIconProps> = ({ Icon, color, name, focused }) => {
           stroke={color}
           width={focused ? 23 : 22}
           height={focused ? 23 : 22}
-          strokeWidth={focused ? 2 : 1.5}
+          strokeWidth={focused ? 1.5 : 1.5}
         />
 
         <Animated.Text
@@ -53,7 +47,7 @@ const TabIcon: React.FC<TabIconProps> = ({ Icon, color, name, focused }) => {
             fontSize: 12,
             textAlign: "center",
             color: color,
-            fontFamily: focused ? "Poppins-Bold" : "Poppins-Regular",
+            fontFamily: focused ? "Poppins-Medium" : "Poppins-Regular",
             marginTop: 6,
             opacity,
           }}
@@ -79,9 +73,14 @@ const TabIcon: React.FC<TabIconProps> = ({ Icon, color, name, focused }) => {
 };
 
 export default function TabsLayout() {
+  // Get the active theme from the store
+  const { activeTheme } = useThemeStore();
+
+  console.log(activeTheme);
+
   // Modern active color with better contrast against dark navy
-  const activeColor = "#5CB3FF";
-  const inactiveColor = "#f5f5f5";
+  const activeColor = activeTheme.tabActiveColor;
+  const inactiveColor = activeTheme.tabInactiveColor;
 
   return (
     <Tabs
@@ -90,20 +89,15 @@ export default function TabsLayout() {
         tabBarActiveTintColor: activeColor,
         tabBarInactiveTintColor: inactiveColor,
         tabBarStyle: {
-          backgroundColor: "#0a0f28",
+          backgroundColor: activeTheme.tabBarColor,
           height: 68,
           paddingBottom: 8,
           paddingTop: 10,
           borderTopWidth: 0,
-          elevation: 12,
-          shadowColor: "#000",
-          shadowOffset: { width: 0, height: -4 },
-          shadowOpacity: 0.2,
-          shadowRadius: 8,
         },
         tabBarBackground: () => (
           <LinearGradient
-            colors={["rgba(10, 15, 40, 0.9)", "#0a0f28"]}
+            colors={[`${activeTheme.tabBarColor}90`, activeTheme.tabBarColor]}
             style={{
               position: "absolute",
               left: 0,

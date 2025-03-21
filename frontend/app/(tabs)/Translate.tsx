@@ -3,13 +3,19 @@ import { KeyboardAvoidingView, Platform } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import WikaTalkLogo from "@/components/WikaTalkLogo";
 import TranslateSection from "@/components/Translate/TranslateSection";
-import { globalStyles } from "@/styles/globalStyles";
 import {
   useTranslateStore,
   debouncedTranslate,
 } from "@/store/useTranslateStore";
-
+import useThemeStore from "@/store/useThemeStore";
+import { getGlobalStyles } from "@/styles/globalStyles";
 const Translate = () => {
+  // Theme store
+  const { activeTheme } = useThemeStore();
+
+  // Get the dynamic styles based on the current theme
+  const dynamicStyles = getGlobalStyles(activeTheme.backgroundColor);
+
   const {
     sourceText,
     sourceLanguage,
@@ -42,7 +48,7 @@ const Translate = () => {
       style={{ flex: 1 }}
       keyboardVerticalOffset={Platform.OS === "ios" ? 0 : -100}
     >
-      <SafeAreaView style={globalStyles.container}>
+      <SafeAreaView style={dynamicStyles.container}>
         <WikaTalkLogo title="Translate" />
         <TranslateSection />
       </SafeAreaView>

@@ -7,17 +7,21 @@ import {
   TouchableOpacity,
   ImageBackground,
   Alert,
+  FlatList,
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import React, { useState } from "react";
 import { StatusBar } from "expo-status-bar";
 import SettingItem from "@/components/SettingItem";
-import Logo from "@/components/AuthLogo";
+import ThemeSelector from "@/components/ThemeSelector";
 import { useAuth } from "@/context/AuthContext";
+import useThemeStore from "@/store/useThemeStore";
 
 const Settings = () => {
   // auth context
   const { logout, userData } = useAuth();
+  // Get theme from store
+  const { activeTheme } = useThemeStore();
   // App settings state
   const [darkMode, setDarkMode] = useState(false);
   const [notifications, setNotifications] = useState(true);
@@ -81,61 +85,75 @@ const Settings = () => {
             </View>
           </View>
 
-          <ScrollView className="flex-1 bg-gray-100 px-6 pt-6">
-            <View className="mb-6">
-              <View className="bg-gray-50 rounded-xl p-2">
-                <SettingItem
-                  icon="bell"
-                  label="Notifications"
-                  value={notifications}
-                  toggleSwitch={() => setNotifications(!notifications)}
-                />
-              </View>
-            </View>
+          <FlatList
+            data={[{ key: "settings" }]}
+            className="flex-1 bg-gray-100 px-6 pt-6"
+            renderItem={() => (
+              <>
+                <View className="mb-6">
+                  <View className="bg-gray-50 rounded-xl p-2">
+                    <SettingItem
+                      icon="bell"
+                      label="Notifications"
+                      value={notifications}
+                      toggleSwitch={() => setNotifications(!notifications)}
+                    />
+                  </View>
+                </View>
 
-            <View className="mb-6">
-              <Text className="text-lg font-semibold text-gray-800 mb-2">
-                Account
-              </Text>
-              <View className="bg-gray-50 rounded-xl p-2">
-                <SettingItem
-                  icon="user-cog"
-                  label="Account Details"
-                  onPress={() => console.log("Account details pressed")}
-                />
-                <SettingItem
-                  icon="lock"
-                  label="Change Password"
-                  onPress={() => console.log("Change password pressed")}
-                />
-              </View>
-            </View>
+                {/* Theme Section */}
+                <View className="mb-6">
+                  <Text className="text-lg font-semibold text-gray-800 mb-2">
+                    Appearance
+                  </Text>
+                  <ThemeSelector />
+                </View>
 
-            <View className="mb-6">
-              <Text className="text-lg font-semibold text-gray-800 mb-2">
-                Support
-              </Text>
-              <View className="bg-gray-50 rounded-xl p-2">
-                <SettingItem
-                  icon="question-circle"
-                  label="Help & FAQ"
-                  onPress={() => console.log("Help pressed")}
-                />
-                <SettingItem
-                  icon="comment-alt"
-                  label="Contact Support"
-                  onPress={() => console.log("Contact support pressed")}
-                />
-              </View>
-            </View>
+                <View className="mb-6">
+                  <Text className="text-lg font-semibold text-gray-800 mb-2">
+                    Account
+                  </Text>
+                  <View className="bg-gray-50 rounded-xl p-2">
+                    <SettingItem
+                      icon="user-cog"
+                      label="Account Details"
+                      onPress={() => console.log("Account details pressed")}
+                    />
+                    <SettingItem
+                      icon="lock"
+                      label="Change Password"
+                      onPress={() => console.log("Change password pressed")}
+                    />
+                  </View>
+                </View>
 
-            <TouchableOpacity
-              className="mb-8 mt-4 bg-customRed/80 rounded-xl py-4 items-center"
-              onPress={handleLogout}
-            >
-              <Text className="text-white font-medium">Logout</Text>
-            </TouchableOpacity>
-          </ScrollView>
+                <View className="mb-6">
+                  <Text className="text-lg font-semibold text-gray-800 mb-2">
+                    Support
+                  </Text>
+                  <View className="bg-gray-50 rounded-xl p-2">
+                    <SettingItem
+                      icon="question-circle"
+                      label="Help & FAQ"
+                      onPress={() => console.log("Help pressed")}
+                    />
+                    <SettingItem
+                      icon="comment-alt"
+                      label="Contact Support"
+                      onPress={() => console.log("Contact support pressed")}
+                    />
+                  </View>
+                </View>
+
+                <TouchableOpacity
+                  className="mb-8 mt-4 bg-customRed/80 rounded-xl py-4 items-center"
+                  onPress={handleLogout}
+                >
+                  <Text className="text-white font-medium">Logout</Text>
+                </TouchableOpacity>
+              </>
+            )}
+          ></FlatList>
         </LinearGradient>
       </ImageBackground>
     </SafeAreaView>

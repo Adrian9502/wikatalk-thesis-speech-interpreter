@@ -14,7 +14,9 @@ import { globalStyles } from "@/styles/globalStyles";
 import { BASE_COLORS, TITLE_COLORS } from "@/constant/colors";
 import WikaTalkLogo from "@/components/WikaTalkLogo";
 import { Feather, Ionicons } from "@expo/vector-icons";
-import { Calendar, Trash2, AlertTriangle } from "react-native-feather";
+import { Calendar, AlertTriangle } from "react-native-feather";
+import useThemeStore from "@/store/useThemeStore";
+import { getGlobalStyles } from "@/styles/globalStyles";
 
 // Define types
 type TabType = "Speech" | "Translate" | "Scan";
@@ -89,6 +91,11 @@ const DeleteConfirmation: React.FC<DeleteConfirmationProps> = ({
 };
 
 const RecentTranslations: React.FC = () => {
+  // Theme store
+  const { activeTheme } = useThemeStore();
+
+  // Get the dynamic styles based on the current theme
+  const dynamicStyles = getGlobalStyles(activeTheme.backgroundColor);
   // State to track active tab
   const [activeTab, setActiveTab] = useState<TabType>("Speech");
 
@@ -331,7 +338,7 @@ const RecentTranslations: React.FC = () => {
   };
 
   return (
-    <View style={globalStyles.container}>
+    <View style={dynamicStyles.container}>
       <StatusBar style="light" />
       <SafeAreaView style={styles.safeAreaView}>
         {/* Header */}

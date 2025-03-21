@@ -15,9 +15,6 @@ import { StatusBar } from "expo-status-bar";
 import { CameraView, useCameraPermissions } from "expo-camera";
 import * as ImagePicker from "expo-image-picker";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { Dropdown } from "react-native-element-dropdown";
-import { Ionicons } from "@expo/vector-icons";
-import { DIALECTS } from "@/constant/languages";
 import { globalStyles } from "@/styles/globalStyles";
 import { BASE_COLORS } from "@/constant/colors";
 import { useScanTranslateStore } from "@/store/useScanTranslateStore";
@@ -26,7 +23,8 @@ import DotsLoader from "@/components/DotLoader";
 import LanguageSelector from "@/components/Scan/LanguageSelector";
 import TextDisplay from "@/components/Scan/TextDisplay";
 import CameraControls from "@/components/Scan/CameraControls";
-
+import useThemeStore from "@/store/useThemeStore";
+import { getGlobalStyles } from "@/styles/globalStyles";
 // Define types for the state and hook returns
 interface ScanTranslateState {
   targetLanguage: string;
@@ -51,6 +49,12 @@ interface ScanTranslateState {
 }
 
 const Scan: React.FC = () => {
+  // Theme store
+  const { activeTheme } = useThemeStore();
+
+  // Get the dynamic styles based on the current theme
+  const dynamicStyles = getGlobalStyles(activeTheme.backgroundColor);
+
   const [permission, requestPermission] = useCameraPermissions();
   const cameraRef = useRef<any>(null);
 
@@ -139,7 +143,7 @@ const Scan: React.FC = () => {
   // Render permission request screen
   if (!permission) {
     return (
-      <SafeAreaView style={[globalStyles.container, styles.centeredContainer]}>
+      <SafeAreaView style={[dynamicStyles.container, styles.centeredContainer]}>
         <StatusBar style="light" />
         <DotsLoader />
       </SafeAreaView>
@@ -149,7 +153,7 @@ const Scan: React.FC = () => {
   // Render camera permission request
   if (!permission.granted) {
     return (
-      <SafeAreaView style={[globalStyles.container, styles.centeredContainer]}>
+      <SafeAreaView style={[dynamicStyles.container, styles.centeredContainer]}>
         <StatusBar style="light" />
         <Text style={styles.permissionText}>
           We need your permission to show the camera
@@ -166,7 +170,7 @@ const Scan: React.FC = () => {
   }
 
   return (
-    <SafeAreaView style={globalStyles.container}>
+    <SafeAreaView style={dynamicStyles.container}>
       <StatusBar style="light" />
       <KeyboardAvoidingView
         behavior={Platform.OS === "ios" ? "padding" : "height"}
@@ -291,10 +295,11 @@ const styles = StyleSheet.create({
     overflow: "hidden",
     borderWidth: 1,
     borderColor: "white",
+    shadowColor: "#000",
+    elevation: 3,
   },
   translationContainer: {
     flex: 1,
-    borderWidth: 2,
     marginVertical: 10,
     backgroundColor: BASE_COLORS.lightBlue,
     borderRadius: 12,
