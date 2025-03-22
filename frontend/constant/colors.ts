@@ -44,12 +44,20 @@ export const CUSTOM_BACKGROUND = {
   cadmiumYellow: "#FDDA0D",
   citrineYellow: "#E4D00A",
 };
+/*
+ORIGINAL:  
+  lightBlue: "#E2EAFF",
+  lightPink: "#F3E2FF",
+Alternative colors for light blue and light pink
+  lightBlue: "#cddbfe",
+  lightPink: "#f2dfff",
+*/
 
 export const BASE_COLORS: Record<string, string> = {
   blue: "#4A6FFF",
   orange: "#FF6F4A",
-  lightBlue: "#E2EAFF",
-  lightPink: "#F3E2FF",
+  lightBlue: "#cddbfe",
+  lightPink: "#f2dfff",
   white: "#FFFFFF",
   darkText: "#212132",
   placeholderText: "#9E9EA7",
