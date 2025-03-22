@@ -243,7 +243,7 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     padding: 10,
     overflow: "hidden",
-    backgroundColor: BASE_COLORS.lightBlue,
+    backgroundColor: "#e7edfd",
   },
   translationContainer: {
     flex: 1,

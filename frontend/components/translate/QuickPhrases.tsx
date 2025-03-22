@@ -105,27 +105,30 @@ const styles = StyleSheet.create({
   },
   title: {
     color: BASE_COLORS.blue,
-    fontWeight: "600",
+    fontFamily: "Poppins-Medium",
     marginBottom: 8,
-    fontSize: 16,
+    fontSize: 14,
   },
   categoryScrollView: {
     marginBottom: 8,
   },
   categoryTab: {
     paddingHorizontal: 12,
-    paddingVertical: 4,
+    paddingVertical: 3,
+    alignItems: "center",
+    justifyContent: "center",
     marginHorizontal: 8,
-    borderRadius: 8,
+    borderRadius: 7,
   },
   activeTab: {
     backgroundColor: BASE_COLORS.blue,
   },
   inactiveTab: {
-    backgroundColor: BASE_COLORS.lightBlue,
+    borderWidth: 1,
+    borderColor: BASE_COLORS.lightBlue,
   },
   categoryText: {
-    fontWeight: "500",
+    fontFamily: "Poppins-Regular",
   },
   activeTabText: {
     color: BASE_COLORS.white,
@@ -137,18 +140,18 @@ const styles = StyleSheet.create({
     paddingBottom: 4,
   },
   phraseButton: {
-    backgroundColor: BASE_COLORS.lightBlue,
     borderWidth: 1,
     borderColor: BASE_COLORS.blue,
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-    borderRadius: 999,
-    marginRight: 8,
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+    borderRadius: 13,
+    marginRight: 6,
     flexDirection: "row",
     alignItems: "center",
   },
   phraseText: {
     color: BASE_COLORS.blue,
+    fontFamily: "Poppins-Regular",
   },
 });
 
