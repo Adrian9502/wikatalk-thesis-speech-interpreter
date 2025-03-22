@@ -97,7 +97,6 @@ const Speech = () => {
           <SwapButton
             onPress={swapLanguages}
             borderStyle={styles.swapButtonBorder}
-            iconColor={BASE_COLORS.white}
           />
         </View>
 
@@ -138,7 +137,7 @@ const styles = StyleSheet.create({
   middleSection: {
     alignItems: "center",
     justifyContent: "center",
-    width: "100%",
+    transform: "rotate(90deg)",
     marginVertical: 8,
     zIndex: 10,
   },

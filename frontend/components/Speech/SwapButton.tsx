@@ -13,19 +13,15 @@ import { Repeat } from "react-native-feather";
 
 interface SwapButtonProps {
   onPress: () => void;
-  iconSize?: number;
   colors?: [string, string, ...string[]];
   borderStyle?: StyleProp<ViewStyle>;
-  iconColor?: string;
   isActive?: boolean;
 }
 
 const SwapButton: React.FC<SwapButtonProps> = ({
   onPress,
-  iconSize = 24,
   colors = ["#4A6FFF", "#9C4AFF"],
   borderStyle = {},
-  iconColor = "#FFFFFF",
   isActive = false,
 }) => {
   // Animation for press feedback
@@ -96,7 +92,7 @@ const SwapButton: React.FC<SwapButtonProps> = ({
         activeOpacity={0.9}
       >
         <LinearGradient
-          colors={colors}
+          colors={[BASE_COLORS.blue, BASE_COLORS.orange]}
           start={{ x: 0, y: 0 }}
           end={{ x: 1, y: 1 }}
           style={styles.gradientContainer}
