@@ -10,13 +10,13 @@ import {
   Modal,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { globalStyles } from "@/styles/globalStyles";
 import { BASE_COLORS, TITLE_COLORS } from "@/constant/colors";
 import WikaTalkLogo from "@/components/WikaTalkLogo";
 import { Feather, Ionicons } from "@expo/vector-icons";
-import { Calendar, AlertTriangle } from "react-native-feather";
+import { Calendar } from "react-native-feather";
 import useThemeStore from "@/store/useThemeStore";
 import { getGlobalStyles } from "@/styles/globalStyles";
+import ConfirmationModal from "@/components/ConfirmationModal";
 
 // Define types
 type TabType = "Speech" | "Translate" | "Scan";
@@ -35,60 +35,6 @@ interface HistoryItems {
   Translate: HistoryItem[];
   Scan: HistoryItem[];
 }
-
-interface DeleteConfirmationProps {
-  visible: boolean;
-  onCancel: () => void;
-  onConfirm: () => void;
-}
-
-const DeleteConfirmation: React.FC<DeleteConfirmationProps> = ({
-  visible,
-  onCancel,
-  onConfirm,
-}) => {
-  return (
-    <Modal
-      transparent
-      visible={visible}
-      animationType="fade"
-      onRequestClose={onCancel}
-    >
-      <View style={styles.modalOverlay}>
-        <View style={styles.modalContainer}>
-          <View style={styles.modalIconContainer}>
-            <AlertTriangle
-              width={32}
-              height={32}
-              color={TITLE_COLORS.customRed}
-            />
-          </View>
-          <Text style={styles.modalTitle}>Delete Translation</Text>
-          <Text style={styles.modalText}>
-            Are you sure you want to delete this translation? This action cannot
-            be undone.
-          </Text>
-
-          <View style={styles.modalButtonContainer}>
-            <TouchableOpacity
-              style={[styles.modalButton, styles.cancelButton]}
-              onPress={onCancel}
-            >
-              <Text style={styles.cancelButtonText}>Cancel</Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              style={[styles.modalButton, styles.deleteButton]}
-              onPress={onConfirm}
-            >
-              <Text style={styles.deleteButtonText}>Delete</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-      </View>
-    </Modal>
-  );
-};
 
 const RecentTranslations: React.FC = () => {
   // Theme store
@@ -263,7 +209,7 @@ const RecentTranslations: React.FC = () => {
             <Calendar
               width={14}
               height={14}
-              color={BASE_COLORS.white}
+              color={BASE_COLORS.blue}
               style={styles.dateIcon}
             />
             <Text style={styles.dateText}>{item.date}</Text>
@@ -283,25 +229,33 @@ const RecentTranslations: React.FC = () => {
         <View style={styles.contentContainer}>
           {/* Language Header */}
           <View style={styles.languageHeaderContainer}>
-            <View style={styles.languageHeaderContent}>
+            <LinearGradient
+              colors={[BASE_COLORS.blue, BASE_COLORS.orange]}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 0 }}
+              style={styles.languageHeaderContent}
+            >
               <View style={styles.languageBlock}>
                 <Text style={styles.languageLabel}>From</Text>
                 <Text style={styles.languageText}>{item.fromLanguage}</Text>
               </View>
 
-              <View style={styles.exchangeIconContainer}>
+              <LinearGradient
+                colors={["#4A6FFF", "#9C4AFF"]}
+                style={styles.exchangeIconContainer}
+              >
                 <Feather
                   name="repeat"
                   size={16}
                   color={TITLE_COLORS.customWhite}
                 />
-              </View>
+              </LinearGradient>
 
               <View style={styles.languageBlock}>
                 <Text style={styles.languageLabel}>To</Text>
                 <Text style={styles.languageText}>{item.toLanguage}</Text>
               </View>
-            </View>
+            </LinearGradient>
           </View>
 
           {/* Content Container */}
@@ -343,7 +297,7 @@ const RecentTranslations: React.FC = () => {
       <SafeAreaView style={styles.safeAreaView}>
         {/* Header */}
         <View style={styles.header}>
-          <WikaTalkLogo title="Recent Translations" />
+          <WikaTalkLogo title="Recent" />
         </View>
 
         {/* Tabs */}
@@ -359,10 +313,13 @@ const RecentTranslations: React.FC = () => {
         </ScrollView>
 
         {/* Delete Confirmation Modal */}
-        <DeleteConfirmation
+        <ConfirmationModal
           visible={deleteConfirmVisible}
+          title="Delete Translation"
+          text="Are you sure you want to delete this translation? This action cannot be undone."
           onCancel={handleDeleteCancel}
           onConfirm={handleDeleteConfirm}
+          confirmButtonText="Delete"
         />
       </SafeAreaView>
     </View>
@@ -383,6 +340,9 @@ const styles = StyleSheet.create({
     paddingBottom: 24,
   },
   tabOuterContainer: {
+    borderWidth: 2,
+    borderColor: BASE_COLORS.lightBlue,
+    borderRadius: 14,
     marginBottom: 20,
   },
   tabContainer: {
@@ -427,22 +387,31 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   dateContainer: {
+    borderRadius: 8,
+    backgroundColor: BASE_COLORS.lightBlue,
+    borderColor: BASE_COLORS.white,
+    borderWidth: 1,
+    paddingHorizontal: 8,
+    paddingVertical: 4,
     flexDirection: "row",
-    alignItems: "center",
   },
   dateIcon: {
     marginRight: 6,
   },
   dateText: {
-    fontFamily: "Poppins-Regular",
-    color: BASE_COLORS.white,
-    fontSize: 13,
+    fontFamily: "Poppins-Medium",
+    color: BASE_COLORS.blue,
+    fontSize: 12,
   },
   deleteIcon: {
-    padding: 5,
+    padding: 4,
+    backgroundColor: BASE_COLORS.lightPink,
+    borderRadius: 8,
   },
   contentContainer: {
     backgroundColor: BASE_COLORS.white,
+    borderColor: BASE_COLORS.lightBlue,
+    borderWidth: 1,
     borderRadius: 16,
     overflow: "hidden",
     shadowColor: "#000",
@@ -453,7 +422,6 @@ const styles = StyleSheet.create({
   },
   languageHeaderContainer: {
     overflow: "hidden",
-    backgroundColor: BASE_COLORS.blue,
     borderTopLeftRadius: 16,
     borderTopRightRadius: 16,
   },
@@ -476,14 +444,15 @@ const styles = StyleSheet.create({
     marginBottom: 2,
   },
   languageText: {
-    fontSize: 15,
+    fontSize: 17,
     fontFamily: "Poppins-SemiBold",
     color: TITLE_COLORS.customWhite,
   },
   exchangeIconContainer: {
-    backgroundColor: "rgba(255, 255, 255, 0.2)",
     width: 32,
     height: 32,
+    borderWidth: 1,
+    borderColor: BASE_COLORS.white,
     borderRadius: 16,
     justifyContent: "center",
     alignItems: "center",
@@ -554,78 +523,6 @@ const styles = StyleSheet.create({
     color: BASE_COLORS.placeholderText,
     fontFamily: "Poppins-Regular",
     textAlign: "center",
-  },
-  // Modal styles
-  modalOverlay: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    backgroundColor: "rgba(0, 0, 0, 0.5)",
-  },
-  modalContainer: {
-    width: "80%",
-    backgroundColor: BASE_COLORS.white,
-    borderRadius: 20,
-    padding: 24,
-    alignItems: "center",
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.2,
-    shadowRadius: 16,
-    elevation: 8,
-  },
-  modalIconContainer: {
-    width: 64,
-    height: 64,
-    borderRadius: 32,
-    backgroundColor: "rgba(206, 17, 38, 0.1)",
-    justifyContent: "center",
-    alignItems: "center",
-    marginBottom: 16,
-  },
-  modalTitle: {
-    fontSize: 18,
-    fontFamily: "Poppins-SemiBold",
-    color: TITLE_COLORS.customNavyBlue,
-    marginBottom: 8,
-  },
-  modalText: {
-    fontSize: 14,
-    fontFamily: "Poppins-Regular",
-    color: BASE_COLORS.darkText,
-    marginBottom: 24,
-    lineHeight: 20,
-    textAlign: "center",
-  },
-  modalButtonContainer: {
-    flexDirection: "row",
-    justifyContent: "center",
-    width: "100%",
-    gap: 12,
-  },
-  modalButton: {
-    paddingVertical: 12,
-    paddingHorizontal: 16,
-    borderRadius: 8,
-    minWidth: 120,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  cancelButton: {
-    backgroundColor: BASE_COLORS.lightBlue,
-  },
-  deleteButton: {
-    backgroundColor: TITLE_COLORS.customRed,
-  },
-  cancelButtonText: {
-    color: TITLE_COLORS.customNavyBlue,
-    fontFamily: "Poppins-Medium",
-    fontSize: 14,
-  },
-  deleteButtonText: {
-    color: BASE_COLORS.white,
-    fontFamily: "Poppins-Medium",
-    fontSize: 14,
   },
 });
 

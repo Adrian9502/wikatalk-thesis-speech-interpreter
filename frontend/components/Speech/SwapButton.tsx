@@ -20,7 +20,6 @@ interface SwapButtonProps {
 
 const SwapButton: React.FC<SwapButtonProps> = ({
   onPress,
-  colors = ["#4A6FFF", "#9C4AFF"],
   borderStyle = {},
   isActive = false,
 }) => {
