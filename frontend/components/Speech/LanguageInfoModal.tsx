@@ -12,6 +12,8 @@ import { MapPin, MessageCircle, X, Info } from "react-native-feather";
 import getLanguageBackground from "@/utils/getLanguageBackground";
 import { LANGUAGE_INFO } from "@/constant/languages";
 import { LinearGradient } from "expo-linear-gradient";
+import useThemeStore from "@/store/useThemeStore";
+import { getGlobalStyles } from "@/styles/globalStyles";
 
 interface LanguageInfoModalProps {
   visible: boolean;
@@ -27,16 +29,17 @@ const LanguageInfoModal: React.FC<LanguageInfoModalProps> = ({
   if (!visible || !languageName || !LANGUAGE_INFO[languageName]) {
     return null;
   }
-
+  const { activeTheme } = useThemeStore(); // Get the dynamic styles based on the current theme
+  const dynamicStyles = getGlobalStyles(activeTheme.backgroundColor);
   const languageInfo = LANGUAGE_INFO[languageName];
   const windowHeight = Dimensions.get("window").height;
 
   // Modern color scheme
   const colors = {
-    primary: "#4A6FFF", // Primary blue
+    primary: activeTheme.secondaryColor, // Primary blue
     secondary: "#FF6F4A", // Secondary accent
     background: "#FFFFFF",
-    cardBg: "#F9FAFF", // Light blue tint for cards
+    cardBg: "#F9FAFF",
     text: "#212132",
     textLight: "#9E9EA7",
     accent: "#10B981", // Success/accent color
@@ -51,16 +54,16 @@ const LanguageInfoModal: React.FC<LanguageInfoModalProps> = ({
           styles.modalContainer,
           {
             backgroundColor: colors.background,
-            maxHeight: windowHeight * 0.8, // Limit modal height to 80% of screen
+            maxHeight: windowHeight * 0.8,
           },
         ]}
       >
         {/* Header with close button */}
-        <LinearGradient
-          colors={[colors.primary, "#6A8AFF"]}
-          start={{ x: 0, y: 0 }}
-          end={{ x: 1, y: 0 }}
-          style={styles.header}
+        <View
+          style={[
+            styles.header,
+            { backgroundColor: activeTheme.backgroundColor },
+          ]}
         >
           <View style={styles.titleContainer}>
             <Text style={[styles.titleText, { color: colors.background }]}>
@@ -75,7 +78,7 @@ const LanguageInfoModal: React.FC<LanguageInfoModalProps> = ({
               stroke={colors.background}
             />
           </TouchableOpacity>
-        </LinearGradient>
+        </View>
 
         {/* Image Banner */}
         <View style={styles.imageBanner}>
@@ -225,7 +228,7 @@ const styles = StyleSheet.create({
   modalContainer: {
     width: "80%",
     maxWidth: 420,
-    borderRadius: 24,
+    borderRadius: 12,
     overflow: "hidden",
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 12 },

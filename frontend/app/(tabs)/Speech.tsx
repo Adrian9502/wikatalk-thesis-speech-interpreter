@@ -9,7 +9,6 @@ import { useRecording } from "@/hooks/useRecording";
 import LanguageSection from "@/components/Speech/LanguageSection";
 import LanguageInfoModal from "@/components/Speech/LanguageInfoModal";
 import SpeechLoading from "@/components/Speech/SpeechLoading";
-import { BASE_COLORS } from "@/constant/colors";
 import WikaTalkLogo from "@/components/WikaTalkLogo";
 import useLanguageStore from "@/store/useLanguageStore";
 import useThemeStore from "@/store/useThemeStore";
@@ -107,23 +106,23 @@ const Speech = () => {
           recording={!!recording && recordingUser === 1}
           userId={1}
         />
-
-        {/* Language Information Modal */}
-        {showLanguageInfo &&
-          activeLanguageInfo &&
-          LANGUAGE_INFO[activeLanguageInfo] && (
-            <LanguageInfoModal
-              visible={showLanguageInfo}
-              languageName={activeLanguageInfo}
-              onClose={() => {
-                toggleLanguageInfo(false);
-              }}
-            />
-          )}
-
-        {/* Loading Indicator */}
-        {loading && <SpeechLoading />}
       </SafeAreaView>
+
+      {/* Language Information Modal */}
+      {showLanguageInfo &&
+        activeLanguageInfo &&
+        LANGUAGE_INFO[activeLanguageInfo] && (
+          <LanguageInfoModal
+            visible={showLanguageInfo}
+            languageName={activeLanguageInfo}
+            onClose={() => {
+              toggleLanguageInfo(false);
+            }}
+          />
+        )}
+
+      {/* Loading Indicator */}
+      {loading && <SpeechLoading />}
     </View>
   );
 };

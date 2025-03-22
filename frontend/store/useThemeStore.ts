@@ -32,7 +32,7 @@ const createThemeOptions = (): ThemeOption[] => {
       name: "Black",
       backgroundColor: CUSTOM_BACKGROUND.Black,
       tabBarColor: CUSTOM_BACKGROUND.Black,
-      secondaryColor: BASE_COLORS.orange,
+      secondaryColor: BASE_COLORS.blue,
       tabActiveColor: TITLE_COLORS.customBlueLight,
       tabInactiveColor: "#ebe5e5",
     },
@@ -90,8 +90,8 @@ const createThemeOptions = (): ThemeOption[] => {
       backgroundColor: CUSTOM_BACKGROUND.babyBlue,
       tabBarColor: CUSTOM_BACKGROUND.babyBlue,
       secondaryColor: BASE_COLORS.blue,
-      tabActiveColor: "#0038a8",
-      tabInactiveColor: "#fff",
+      tabActiveColor: "#483607",
+      tabInactiveColor: "#686861",
     },
     {
       name: "Midnight Blue",
@@ -205,7 +205,7 @@ const createThemeOptions = (): ThemeOption[] => {
       tabBarColor: CUSTOM_BACKGROUND.gambogeYellow,
       secondaryColor: "#ffaa33",
       tabActiveColor: TITLE_COLORS.customRed,
-      tabInactiveColor: "#ebe5e5",
+      tabInactiveColor: "#1a1a1a",
     },
     {
       name: "Mango",
@@ -213,7 +213,7 @@ const createThemeOptions = (): ThemeOption[] => {
       tabBarColor: CUSTOM_BACKGROUND.mangoYellow,
       secondaryColor: "#ffaa33",
       tabActiveColor: TITLE_COLORS.customRed,
-      tabInactiveColor: "#86670b",
+      tabInactiveColor: "#1a1a1a",
     },
     {
       name: "Yellow Orange",
@@ -221,7 +221,7 @@ const createThemeOptions = (): ThemeOption[] => {
       tabBarColor: CUSTOM_BACKGROUND.yellowOrange,
       secondaryColor: "#ffaa33",
       tabActiveColor: TITLE_COLORS.customRed,
-      tabInactiveColor: "#ebe5e5",
+      tabInactiveColor: "#1a1a1a",
     },
     {
       name: "Mustard",
