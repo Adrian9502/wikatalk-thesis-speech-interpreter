@@ -118,7 +118,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   cancelButton: {
-    backgroundColor: BASE_COLORS.lightBlue,
+    backgroundColor: TITLE_COLORS.customWhite,
   },
   deleteButton: {
     backgroundColor: TITLE_COLORS.customRed,

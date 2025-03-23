@@ -1,5 +1,4 @@
 import { create } from "zustand";
-
 import { persist, createJSONStorage } from "zustand/middleware";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import {
@@ -16,6 +15,7 @@ export type ThemeOption = {
   secondaryColor: string;
   tabActiveColor: string;
   tabInactiveColor: string;
+  lightColor: string;
 };
 
 interface ThemeState {
@@ -35,6 +35,7 @@ const createThemeOptions = (): ThemeOption[] => {
       secondaryColor: BASE_COLORS.blue,
       tabActiveColor: TITLE_COLORS.customBlueLight,
       tabInactiveColor: "#ebe5e5",
+      lightColor: BASE_COLORS.lightBlue,
     },
     {
       name: "Charcoal Black",
@@ -43,6 +44,7 @@ const createThemeOptions = (): ThemeOption[] => {
       secondaryColor: BASE_COLORS.blue,
       tabActiveColor: TITLE_COLORS.customYellow,
       tabInactiveColor: "#ebe5e5",
+      lightColor: BASE_COLORS.lightBlue,
     },
     {
       name: "Jet Black",
@@ -51,6 +53,7 @@ const createThemeOptions = (): ThemeOption[] => {
       secondaryColor: BASE_COLORS.blue,
       tabActiveColor: TITLE_COLORS.customYellow,
       tabInactiveColor: "#ebe5e5",
+      lightColor: BASE_COLORS.lightBlue,
     },
     {
       name: "Matte Black",
@@ -59,6 +62,7 @@ const createThemeOptions = (): ThemeOption[] => {
       secondaryColor: BASE_COLORS.blue,
       tabActiveColor: TITLE_COLORS.customBlueLight,
       tabInactiveColor: "#ebe5e5",
+      lightColor: BASE_COLORS.lightBlue,
     },
     {
       name: "Onyx Black",
@@ -67,6 +71,7 @@ const createThemeOptions = (): ThemeOption[] => {
       secondaryColor: BASE_COLORS.blue,
       tabActiveColor: TITLE_COLORS.customYellow,
       tabInactiveColor: "#ebe5e5",
+      lightColor: BASE_COLORS.lightBlue,
     },
     // Blue
     {
@@ -76,6 +81,7 @@ const createThemeOptions = (): ThemeOption[] => {
       secondaryColor: BASE_COLORS.blue,
       tabActiveColor: TITLE_COLORS.customBlueLight,
       tabInactiveColor: "#ebe5e5",
+      lightColor: BASE_COLORS.lightBlue,
     },
     {
       name: "Sky Blue",
@@ -84,6 +90,7 @@ const createThemeOptions = (): ThemeOption[] => {
       secondaryColor: BASE_COLORS.blue,
       tabActiveColor: "#FFD700",
       tabInactiveColor: "#fff",
+      lightColor: BASE_COLORS.lightBlue,
     },
     {
       name: "Baby Blue",
@@ -92,6 +99,7 @@ const createThemeOptions = (): ThemeOption[] => {
       secondaryColor: BASE_COLORS.blue,
       tabActiveColor: "#483607",
       tabInactiveColor: "#686861",
+      lightColor: BASE_COLORS.lightBlue,
     },
     {
       name: "Midnight Blue",
@@ -100,6 +108,7 @@ const createThemeOptions = (): ThemeOption[] => {
       secondaryColor: BASE_COLORS.blue,
       tabActiveColor: TITLE_COLORS.customYellow,
       tabInactiveColor: "#ebe5e5",
+      lightColor: BASE_COLORS.lightBlue,
     },
     {
       name: "Neon Blue",
@@ -108,6 +117,7 @@ const createThemeOptions = (): ThemeOption[] => {
       secondaryColor: BASE_COLORS.blue,
       tabActiveColor: TITLE_COLORS.customYellow,
       tabInactiveColor: "#ebe5e5",
+      lightColor: BASE_COLORS.lightBlue,
     },
     {
       name: "Royal Blue",
@@ -116,6 +126,7 @@ const createThemeOptions = (): ThemeOption[] => {
       secondaryColor: "#5989ff",
       tabActiveColor: TITLE_COLORS.customYellow,
       tabInactiveColor: "#ebe5e5",
+      lightColor: BASE_COLORS.lightBlue,
     },
     {
       name: "Sapphire ",
@@ -124,6 +135,7 @@ const createThemeOptions = (): ThemeOption[] => {
       secondaryColor: "#5989ff",
       tabActiveColor: TITLE_COLORS.customYellow,
       tabInactiveColor: "#ebe5e5",
+      lightColor: BASE_COLORS.lightBlue,
     },
     {
       name: "Zaffre",
@@ -132,6 +144,7 @@ const createThemeOptions = (): ThemeOption[] => {
       secondaryColor: "#5989ff",
       tabActiveColor: TITLE_COLORS.customYellow,
       tabInactiveColor: "#ebe5e5",
+      lightColor: BASE_COLORS.lightBlue,
     },
     // Red
     {
@@ -141,6 +154,7 @@ const createThemeOptions = (): ThemeOption[] => {
       secondaryColor: BASE_COLORS.orange,
       tabActiveColor: TITLE_COLORS.customYellow,
       tabInactiveColor: "#ebe5e5",
+      lightColor: BASE_COLORS.lightPink,
     },
     {
       name: "Burgundy Red",
@@ -149,6 +163,7 @@ const createThemeOptions = (): ThemeOption[] => {
       secondaryColor: BASE_COLORS.orange,
       tabActiveColor: TITLE_COLORS.customYellow,
       tabInactiveColor: "#ebe5e5",
+      lightColor: BASE_COLORS.lightPink,
     },
     {
       name: "Cadmium Red",
@@ -157,6 +172,7 @@ const createThemeOptions = (): ThemeOption[] => {
       secondaryColor: BASE_COLORS.orange,
       tabActiveColor: TITLE_COLORS.customYellow,
       tabInactiveColor: "#ebe5e5",
+      lightColor: BASE_COLORS.lightPink,
     },
     {
       name: "Cherry Red",
@@ -165,6 +181,7 @@ const createThemeOptions = (): ThemeOption[] => {
       secondaryColor: BASE_COLORS.orange,
       tabActiveColor: TITLE_COLORS.customYellow,
       tabInactiveColor: "#ebe5e5",
+      lightColor: BASE_COLORS.lightPink,
     },
     {
       name: "Dark Red",
@@ -173,6 +190,7 @@ const createThemeOptions = (): ThemeOption[] => {
       secondaryColor: BASE_COLORS.orange,
       tabActiveColor: TITLE_COLORS.customYellow,
       tabInactiveColor: "#ebe5e5",
+      lightColor: BASE_COLORS.lightPink,
     },
     {
       name: "Falu",
@@ -181,6 +199,7 @@ const createThemeOptions = (): ThemeOption[] => {
       secondaryColor: BASE_COLORS.orange,
       tabActiveColor: TITLE_COLORS.customYellow,
       tabInactiveColor: "#ebe5e5",
+      lightColor: BASE_COLORS.lightPink,
     },
     {
       name: "Maroon",
@@ -189,6 +208,7 @@ const createThemeOptions = (): ThemeOption[] => {
       secondaryColor: BASE_COLORS.orange,
       tabActiveColor: TITLE_COLORS.customYellow,
       tabInactiveColor: "#ebe5e5",
+      lightColor: BASE_COLORS.lightPink,
     },
     {
       name: "Ox Blood",
@@ -197,63 +217,71 @@ const createThemeOptions = (): ThemeOption[] => {
       secondaryColor: BASE_COLORS.orange,
       tabActiveColor: TITLE_COLORS.customYellow,
       tabInactiveColor: "#ebe5e5",
+      lightColor: BASE_COLORS.lightPink,
     },
     // Yellow
     {
       name: "Gamboge",
       backgroundColor: CUSTOM_BACKGROUND.gambogeYellow,
       tabBarColor: CUSTOM_BACKGROUND.gambogeYellow,
-      secondaryColor: "#ffaa33",
+      secondaryColor: "#ff930c",
       tabActiveColor: TITLE_COLORS.customRed,
       tabInactiveColor: "#1a1a1a",
+      lightColor: "#fffcdf",
     },
     {
       name: "Mango",
       backgroundColor: CUSTOM_BACKGROUND.mangoYellow,
       tabBarColor: CUSTOM_BACKGROUND.mangoYellow,
-      secondaryColor: "#ffaa33",
+      secondaryColor: "#ff930c",
       tabActiveColor: TITLE_COLORS.customRed,
       tabInactiveColor: "#1a1a1a",
+      lightColor: "#fffcdf",
     },
     {
       name: "Yellow Orange",
       backgroundColor: CUSTOM_BACKGROUND.yellowOrange,
       tabBarColor: CUSTOM_BACKGROUND.yellowOrange,
-      secondaryColor: "#ffaa33",
+      secondaryColor: "#ff930c",
       tabActiveColor: TITLE_COLORS.customRed,
       tabInactiveColor: "#1a1a1a",
+      lightColor: "#fffcdf",
     },
     {
       name: "Mustard",
       backgroundColor: CUSTOM_BACKGROUND.mustardYellow,
       tabBarColor: CUSTOM_BACKGROUND.mustardYellow,
-      secondaryColor: "#ffaa33",
+      secondaryColor: "#ff930c",
       tabActiveColor: TITLE_COLORS.customRed,
       tabInactiveColor: BASE_COLORS.darkText,
+      lightColor: "#fffcdf",
     },
     {
       name: "Amber Yellow",
       backgroundColor: CUSTOM_BACKGROUND.amberYellow,
       tabBarColor: CUSTOM_BACKGROUND.amberYellow,
-      secondaryColor: "#ffaa33",
+      secondaryColor: "#ff930c",
       tabActiveColor: TITLE_COLORS.customRed,
       tabInactiveColor: BASE_COLORS.darkText,
+      lightColor: "#fffcdf",
     },
     {
       name: "Cadmium Yellow",
       backgroundColor: CUSTOM_BACKGROUND.cadmiumYellow,
       tabBarColor: CUSTOM_BACKGROUND.cadmiumYellow,
-      secondaryColor: "#ffaa33",
+      secondaryColor: "#ff930c",
       tabActiveColor: TITLE_COLORS.customRed,
       tabInactiveColor: BASE_COLORS.darkText,
+      lightColor: "#fffcdf",
     },
     {
       name: "Amber",
       backgroundColor: CUSTOM_BACKGROUND.citrineYellow,
       tabBarColor: CUSTOM_BACKGROUND.citrineYellow,
-      secondaryColor: "#ffaa33",
+      secondaryColor: "#ff930c",
       tabActiveColor: TITLE_COLORS.customRed,
       tabInactiveColor: BASE_COLORS.darkText,
+      lightColor: "#fffcdf",
     },
   ];
 };
@@ -266,6 +294,7 @@ const defaultTheme = {
   secondaryColor: BASE_COLORS.blue,
   tabActiveColor: TITLE_COLORS.customBlueLight,
   tabInactiveColor: "#ebe5e5",
+  lightColor: BASE_COLORS.lightBlue,
 };
 const useThemeStore = create<ThemeState>()(
   persist(

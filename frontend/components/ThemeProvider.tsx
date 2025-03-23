@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from "react";
 import { View, ActivityIndicator } from "react-native";
 import useThemeStore from "@/store/useThemeStore";
+import { CUSTOM_BACKGROUND } from "@/constant/colors";
+import DotsLoader from "./DotLoader";
 
 interface ThemeProviderProps {
   children: React.ReactNode;
@@ -12,7 +14,7 @@ const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
 
   useEffect(() => {
     // When the store is hydrated
-    setIsLoaded(true);
+    setTimeout(() => setIsLoaded(true), 500);
   }, []);
 
   if (!isLoaded) {
@@ -22,10 +24,11 @@ const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
           flex: 1,
           justifyContent: "center",
           alignItems: "center",
-          backgroundColor: activeTheme.backgroundColor,
+          backgroundColor:
+            activeTheme.backgroundColor || CUSTOM_BACKGROUND.navyBlue,
         }}
       >
-        <ActivityIndicator size="large" color="#fff" />
+        <DotsLoader />
       </View>
     );
   }

@@ -1,6 +1,6 @@
 import { Audio } from "expo-av";
 import { ImageSourcePropType } from "react-native";
-
+import { Feather } from "@expo/vector-icons";
 export type LanguageOption =
   | "Tagalog"
   | "Cebuano"
@@ -36,3 +36,6 @@ export interface MicButtonProps {
   activeUser: any;
   userId: string | number;
 }
+
+// Settings and Settings Item component
+export type FeatherIconName = React.ComponentProps<typeof Feather>["name"];
