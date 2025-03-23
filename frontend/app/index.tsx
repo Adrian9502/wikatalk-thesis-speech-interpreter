@@ -15,8 +15,7 @@ import { router } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useAuth } from "@/context/AuthContext";
 import { useValidation } from "@/context/ValidationContext";
-import { globalStyles } from "@/styles/globalStyles";
-import { BASE_COLORS, TITLE_COLORS } from "@/constant/colors";
+import { BASE_COLORS } from "@/constant/colors";
 import useThemeStore from "@/store/useThemeStore";
 import { getGlobalStyles } from "@/styles/globalStyles";
 // Component imports
@@ -32,7 +31,6 @@ import { useAuthForms } from "@/hooks/useAuthForms";
 // style
 import { styles } from "@/styles/authStyles";
 import AuthLogo from "@/components/AuthLogo";
-import AsyncStorage from "@react-native-async-storage/async-storage";
 // Enable layout animation for Android
 if (Platform.OS === "android") {
   if (UIManager.setLayoutAnimationEnabledExperimental) {
