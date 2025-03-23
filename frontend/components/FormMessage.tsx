@@ -63,7 +63,7 @@ const FormMessage: React.FC<FormMessageProps> = ({
       </View>
       {onDismiss && (
         <TouchableOpacity onPress={onDismiss} style={styles.closeButton}>
-          <Ionicons name="close" size={18} color={getTextColor()} />
+          <Ionicons name="close" size={17} color={getTextColor()} />
         </TouchableOpacity>
       )}
     </View>
@@ -88,12 +88,12 @@ const styles = StyleSheet.create({
     marginRight: 8,
   },
   message: {
-    fontSize: 14,
-    fontFamily: "Roboto",
+    fontSize: 13,
+    fontFamily: "Poppins-Regular",
     flex: 1,
   },
   closeButton: {
-    padding: 4,
+    padding: 1,
   },
 });
 
