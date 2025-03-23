@@ -9,7 +9,7 @@ const AppLoading = () => {
   return (
     <SafeAreaView style={styles.container}>
       <StatusBar style="light" />
-      <AuthLogo title="Talk" />
+      <AuthLogo />
       <DotsLoader />
     </SafeAreaView>
   );

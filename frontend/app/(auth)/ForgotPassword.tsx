@@ -19,10 +19,10 @@ import { useAuth } from "@/context/AuthContext";
 import FormMessage from "@/components/FormMessage";
 import { router } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { globalStyles } from "@/styles/globalStyles";
 import { BASE_COLORS, TITLE_COLORS } from "@/constant/colors";
-import { styles as authStyles } from "@/styles/authStyles";
 import AuthLogo from "@/components/AuthLogo";
+import useThemeStore from "@/store/useThemeStore";
+import { getGlobalStyles } from "@/styles/globalStyles";
 interface ForgotPasswordFormData {
   email: string;
 }
@@ -31,6 +31,11 @@ interface VerificationFormData {
 }
 
 const ForgotPassword: React.FC = () => {
+  // Theme store
+  const { activeTheme } = useThemeStore();
+  // Get the dynamic styles based on the current theme
+  const dynamicStyles = getGlobalStyles(activeTheme.backgroundColor);
+
   const [codeSent, setCodeSent] = useState<boolean>(false);
   const [countdown, setCountdown] = useState<number>(0);
   const [resendDisabled, setResendDisabled] = useState<boolean>(false);
@@ -145,6 +150,7 @@ const ForgotPassword: React.FC = () => {
       );
 
       if (result.success) {
+        clearFormMessage();
         console.log("✅ Verification successful!");
         // Navigate to reset password screen with the reset token
         router.push("/(auth)/SetNewPassword");
@@ -158,9 +164,8 @@ const ForgotPassword: React.FC = () => {
   return (
     <SafeAreaView
       style={[
-        globalStyles.container,
+        dynamicStyles.container,
         {
-          backgroundColor: TITLE_COLORS.customNavyBlue,
           justifyContent: "center",
           alignItems: "center",
         },
@@ -169,7 +174,7 @@ const ForgotPassword: React.FC = () => {
       <StatusBar style="light" />
       {/* Logo */}
       <View style={styles.logoContainer}>
-        <AuthLogo title="Talk" />
+        <AuthLogo />
       </View>
       <KeyboardAvoidingView
         behavior={Platform.OS === "ios" ? "padding" : "height"}

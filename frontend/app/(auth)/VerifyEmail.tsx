@@ -19,15 +19,21 @@ import FormMessage from "@/components/FormMessage";
 import { router } from "expo-router";
 import { useValidation } from "@/context/ValidationContext";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { globalStyles } from "@/styles/globalStyles";
 import { BASE_COLORS, TITLE_COLORS } from "@/constant/colors";
 import AuthLogo from "@/components/AuthLogo";
+import useThemeStore from "@/store/useThemeStore";
+import { getGlobalStyles } from "@/styles/globalStyles";
 
 interface VerificationFormData {
   verificationCode: string;
 }
 
 const VerifyEmail: React.FC = () => {
+  const { activeTheme } = useThemeStore();
+
+  // Get the dynamic styles based on the current theme
+  const dynamicStyles = getGlobalStyles(activeTheme.backgroundColor);
+
   const [countdown, setCountdown] = useState<number>(30);
   const [resendDisabled, setResendDisabled] = useState<boolean>(true);
   const {
@@ -130,7 +136,7 @@ const VerifyEmail: React.FC = () => {
   return (
     <SafeAreaView
       style={[
-        globalStyles.container,
+        dynamicStyles.container,
         {
           backgroundColor: TITLE_COLORS.customNavyBlue,
           justifyContent: "center",
@@ -141,7 +147,7 @@ const VerifyEmail: React.FC = () => {
       <StatusBar style="light" />
       {/* Logo */}
       <View style={styles.logoContainer}>
-        <AuthLogo title="Talk" />
+        <AuthLogo />
       </View>
       <KeyboardAvoidingView
         behavior={Platform.OS === "ios" ? "padding" : "height"}

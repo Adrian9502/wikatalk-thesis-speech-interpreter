@@ -7,7 +7,7 @@ import {
   KeyboardAvoidingView,
   ActivityIndicator,
   Platform,
-  Alert,
+  StyleSheet,
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { StatusBar } from "expo-status-bar";
@@ -21,12 +21,24 @@ import FormMessage from "@/components/FormMessage";
 import { router } from "expo-router";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { showToast } from "@/lib/showToast";
+import { SafeAreaView } from "react-native-safe-area-context";
+import useThemeStore from "@/store/useThemeStore";
+import { getGlobalStyles } from "@/styles/globalStyles";
+import { BASE_COLORS, TITLE_COLORS } from "@/constant/colors";
+import AppLoading from "@/components/AppLoading";
+
 interface ResetPasswordFormData {
   password: string;
   confirmPassword: string;
 }
 
 const SetNewPassword: React.FC = () => {
+  // Theme store
+  const { activeTheme } = useThemeStore();
+
+  // Get the dynamic styles based on the current theme
+  const dynamicStyles = getGlobalStyles(activeTheme.backgroundColor);
+
   const {
     resetPassword,
     clearResetData,
@@ -93,19 +105,7 @@ const SetNewPassword: React.FC = () => {
   };
 
   if (!resetToken) {
-    return (
-      <ImageBackground
-        source={require("../../assets/images/philippines-tapestry.jpg")}
-        className="flex-1 w-full h-full"
-      >
-        <LinearGradient
-          colors={["rgba(0, 56, 168, 0.8)", "rgba(206, 17, 38, 0.8)"]}
-          className="flex-1 justify-center items-center"
-        >
-          <ActivityIndicator size="large" color="#ffffff" />
-        </LinearGradient>
-      </ImageBackground>
-    );
+    return <AppLoading />;
   }
 
   const handleGoBack = async () => {
@@ -114,96 +114,179 @@ const SetNewPassword: React.FC = () => {
   };
 
   return (
-    <ImageBackground
-      source={require("../../assets/images/philippines-tapestry.jpg")}
-      className="flex-1 w-full h-full"
-    >
+    <SafeAreaView style={[dynamicStyles.container, styles.safeAreaContainer]}>
       <StatusBar style="light" />
-      <LinearGradient
-        colors={["rgba(0, 56, 168, 0.8)", "rgba(206, 17, 38, 0.8)"]}
-        className="flex-1 justify-center items-center"
+      <KeyboardAvoidingView
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
+        style={styles.keyboardAvoidingView}
+        keyboardVerticalOffset={Platform.OS === "ios" ? 40 : 0}
       >
-        <KeyboardAvoidingView
-          behavior={Platform.OS === "ios" ? "padding" : "height"}
-          className="w-[85%] max-w-[350px] items-center"
-          keyboardVerticalOffset={Platform.OS === "ios" ? 40 : 0}
-        >
+        {/* Form container */}
+        <View style={styles.formOuterContainer}>
+          <Text style={styles.headerTitle}>Set New Password</Text>
+          <Text style={styles.headerSubtitle}>
+            Create a new password for your account
+          </Text>
+
           {/* Form container */}
-          <View className="bg-white/95 rounded-2xl p-5 w-full items-center shadow-md">
-            <Text className="text-3xl font-bold text-customBlue mb-2">
-              Set New Password
-            </Text>
-            <Text className="text-center text-sm text-gray-600 mb-2 px-2">
-              Create a new password for your account
-            </Text>
-
-            {/* Form container */}
-            <View className="w-full mt-5">
-              {formMessage && (
-                <FormMessage
-                  message={formMessage.text}
-                  type={formMessage.type}
-                  onDismiss={clearFormMessage}
-                />
-              )}
-
-              {/* Display email */}
-              <View className="flex-row items-center bg-[#F0F8FF] rounded-lg p-3 mb-4 border border-customBlue">
-                <Mail size={20} color="#0038A8" />
-                <Text className="ml-2 text-customBlue font-medium">
-                  {email ?? "Loading..."}
-                </Text>
-              </View>
-
-              <FormInput
-                control={control}
-                name="password"
-                placeholder="New Password"
-                IconComponent={Lock}
-                error={errors.password?.message}
-                secureTextEntry
+          <View style={styles.formInnerContainer}>
+            {formMessage && (
+              <FormMessage
+                message={formMessage.text}
+                type={formMessage.type}
+                onDismiss={clearFormMessage}
               />
+            )}
 
-              <FormInput
-                control={control}
-                name="confirmPassword"
-                placeholder="Confirm New Password"
-                IconComponent={Lock}
-                error={errors.confirmPassword?.message}
-                secureTextEntry
-              />
+            {/* Display email */}
+            <View style={styles.emailContainer}>
+              <Mail size={20} color="#0038A8" />
+              <Text style={styles.emailText}>{email ?? "Loading..."}</Text>
+            </View>
 
-              {/* Reset Password Button */}
-              <View className="w-full rounded-lg overflow-hidden my-4 shadow">
-                <Pressable
-                  className="bg-customRed py-3.5 items-center justify-center rounded-lg"
-                  disabled={isLoading}
-                  onPress={handleSubmit(handleResetPassword)}
-                >
-                  <View className="flex-row items-center justify-center">
-                    {isLoading && (
-                      <ActivityIndicator
-                        size="small"
-                        color="#FFFFFF"
-                        className="mr-2"
-                      />
-                    )}
-                    <Text className="text-white text-base font-bold">
-                      Reset Password
-                    </Text>
-                  </View>
-                </Pressable>
-              </View>
+            <FormInput
+              control={control}
+              name="password"
+              placeholder="New Password"
+              IconComponent={Lock}
+              error={errors.password?.message}
+              secureTextEntry
+            />
 
-              <Pressable onPress={handleGoBack}>
-                <Text className=" text-sm text-gray-400 mb-2">Go back</Text>
+            <FormInput
+              control={control}
+              name="confirmPassword"
+              placeholder="Confirm New Password"
+              IconComponent={Lock}
+              error={errors.confirmPassword?.message}
+              secureTextEntry
+            />
+
+            {/* Reset Password Button */}
+            <View style={styles.buttonContainer}>
+              <Pressable
+                style={styles.resetButton}
+                disabled={isLoading}
+                onPress={handleSubmit(handleResetPassword)}
+              >
+                <View style={styles.buttonContentContainer}>
+                  {isLoading && (
+                    <ActivityIndicator
+                      size="small"
+                      color="#FFFFFF"
+                      style={styles.activityIndicator}
+                    />
+                  )}
+                  <Text style={styles.buttonText}>Reset Password</Text>
+                </View>
               </Pressable>
             </View>
+
+            <Pressable onPress={handleGoBack}>
+              <Text style={styles.goBackText}>Go back</Text>
+            </Pressable>
           </View>
-        </KeyboardAvoidingView>
-      </LinearGradient>
-    </ImageBackground>
+        </View>
+      </KeyboardAvoidingView>
+    </SafeAreaView>
   );
 };
+
+const styles = StyleSheet.create({
+  backgroundImage: {
+    flex: 1,
+    width: "100%",
+    height: "100%",
+  },
+  safeAreaContainer: {
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  keyboardAvoidingView: {
+    width: "85%",
+    maxWidth: 350,
+    alignItems: "center",
+  },
+  formOuterContainer: {
+    backgroundColor: "rgba(255, 255, 255, 0.95)",
+    borderRadius: 16,
+    padding: 20,
+    width: "100%",
+    alignItems: "center",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 3,
+    elevation: 3,
+  },
+  headerTitle: {
+    fontSize: 22,
+    fontFamily: "Poppins-SemiBold",
+    color: TITLE_COLORS.customBlue,
+    marginBottom: 8,
+  },
+  headerSubtitle: {
+    textAlign: "center",
+    fontFamily: "Poppins-Regular",
+    fontSize: 14,
+    color: BASE_COLORS.placeholderText,
+  },
+  formInnerContainer: {
+    width: "100%",
+    marginTop: 8,
+  },
+  emailContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#F0F8FF",
+    borderRadius: 8,
+    padding: 12,
+    marginBottom: 12,
+    borderWidth: 1,
+    borderColor: TITLE_COLORS.customBlue,
+  },
+  emailText: {
+    marginLeft: 8,
+    color: TITLE_COLORS.customBlue,
+    fontFamily: "Poppins-Regular",
+  },
+  buttonContainer: {
+    width: "100%",
+    borderRadius: 8,
+    overflow: "hidden",
+    marginVertical: 16,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.2,
+    shadowRadius: 1.5,
+    elevation: 2,
+  },
+  resetButton: {
+    backgroundColor: TITLE_COLORS.customRed,
+    paddingVertical: 11,
+    alignItems: "center",
+    justifyContent: "center",
+    borderRadius: 8,
+  },
+  buttonContentContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  activityIndicator: {
+    marginRight: 8,
+  },
+  buttonText: {
+    color: "white",
+    fontSize: 15,
+    fontFamily: "Poppins-Medium",
+  },
+  goBackText: {
+    fontSize: 12,
+    color: BASE_COLORS.placeholderText,
+    marginBottom: 8,
+    fontFamily: "Poppins-Regular",
+  },
+});
 
 export default SetNewPassword;
