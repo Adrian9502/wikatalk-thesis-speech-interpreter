@@ -107,7 +107,7 @@ export const renderLogoutButton = (onPressLogout: () => void) => (
     <TouchableOpacity style={styles.logoutButton} onPress={onPressLogout}>
       <Feather
         name="log-out"
-        size={18}
+        size={20}
         color={TITLE_COLORS.customWhite}
         style={styles.logoutIcon}
       />
@@ -185,9 +185,9 @@ const styles = StyleSheet.create({
     marginBottom: 15,
   },
   logoutButton: {
-    backgroundColor: "#fe5151",
+    backgroundColor: TITLE_COLORS.customRed,
     borderRadius: 8,
-    padding: 8,
+    padding: 13,
     alignItems: "center",
     justifyContent: "center",
     flexDirection: "row",
@@ -197,7 +197,7 @@ const styles = StyleSheet.create({
   },
   logoutText: {
     color: TITLE_COLORS.customWhite,
-    fontSize: 14,
+    fontSize: 16,
     fontFamily: "Poppins-Medium",
   },
 });
