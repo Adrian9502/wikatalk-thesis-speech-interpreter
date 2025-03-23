@@ -6,9 +6,6 @@ import {
   TouchableOpacity,
   TextInput,
   ScrollView,
-  StyleProp,
-  ViewStyle,
-  TextStyle,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { BASE_COLORS } from "@/constant/colors";
@@ -123,7 +120,7 @@ const styles = StyleSheet.create({
   textSection: {
     flex: 1,
     marginVertical: 6,
-    minHeight: 120, // Add minimum height
+    minHeight: 120,
   },
   sectionHeader: {
     flexDirection: "row",
@@ -133,7 +130,7 @@ const styles = StyleSheet.create({
   },
   sectionTitle: {
     fontSize: 14,
-    fontFamily: "Poppins-Regular",
+    fontFamily: "Poppins-Medium",
   },
   controls: {
     flexDirection: "row",
@@ -149,18 +146,18 @@ const styles = StyleSheet.create({
   },
   textAreaWrapper: {
     flex: 1,
-    minHeight: 100, // Add minimum height
+    minHeight: 100,
   },
   textArea: {
     flex: 1,
     backgroundColor: "#F5F5F5",
     borderRadius: 8,
     padding: 10,
-    minHeight: 100, // Add minimum height
+    minHeight: 100,
   },
   scrollContent: {
     flexGrow: 1,
-    minHeight: 80, // Add minimum height to content
+    minHeight: 80,
   },
   textField: {
     fontFamily: "Poppins-Regular",
@@ -168,7 +165,7 @@ const styles = StyleSheet.create({
     color: "#333",
     flex: 1,
     textAlignVertical: "top",
-    minHeight: 80, // Add minimum height
+    minHeight: 80,
   },
   translatedText: {
     fontSize: 16,
@@ -181,7 +178,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     backgroundColor: "#F5F5F5",
     borderRadius: 8,
-    minHeight: 100, // Add minimum height
+    minHeight: 100,
   },
 });
 

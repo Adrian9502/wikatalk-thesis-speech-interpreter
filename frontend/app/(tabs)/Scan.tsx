@@ -4,18 +4,13 @@ import {
   Text,
   View,
   TouchableOpacity,
-  ActivityIndicator,
-  TextInput,
-  ScrollView,
   KeyboardAvoidingView,
   Platform,
-  Keyboard,
 } from "react-native";
 import { StatusBar } from "expo-status-bar";
 import { CameraView, useCameraPermissions } from "expo-camera";
 import * as ImagePicker from "expo-image-picker";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { globalStyles } from "@/styles/globalStyles";
 import { BASE_COLORS } from "@/constant/colors";
 import { useScanTranslateStore } from "@/store/useScanTranslateStore";
 import { useImageProcessing } from "@/hooks/useImageProcessing";
@@ -63,22 +58,21 @@ const Scan: React.FC = () => {
     sourceText,
     translatedText,
     isTranslating,
-    isSourceSpeaking, // Updated property
-    isTargetSpeaking, // Updated property
+    isSourceSpeaking,
+    isTargetSpeaking,
     clearText,
     updateState,
     translateDetectedText,
     debouncedTranslateText,
     copyToClipboard,
-    handleSourceSpeech, // Updated method
-    handleTargetSpeech, // Updated method
+    handleSourceSpeech,
+    handleTargetSpeech,
     stopSpeech,
     copiedSource,
     copiedTarget,
   } = useScanTranslateStore() as ScanTranslateState;
 
-  const { isProcessing, ocrProgress, processImage, recognizeText } =
-    useImageProcessing();
+  const { isProcessing, ocrProgress, recognizeText } = useImageProcessing();
 
   useEffect(() => {
     clearText();
@@ -226,14 +220,13 @@ const Scan: React.FC = () => {
               text={sourceText}
               placeholder="Scan or select an image to detect text"
               isLoading={isProcessing}
-              isSpeaking={isSourceSpeaking} // Updated property
+              isSpeaking={isSourceSpeaking}
               copied={copiedSource}
               onChangeText={(text: string) => {
-                // Use debounced translation here instead of immediate translation
                 debouncedTranslateText(text);
               }}
               onCopy={() => copyToClipboard(sourceText, "copiedSource")}
-              onSpeak={() => handleSourceSpeech(sourceText)} // Updated method
+              onSpeak={() => handleSourceSpeech(sourceText)}
               onClear={clearText}
               editable={true}
               color={BASE_COLORS.blue}
@@ -244,10 +237,10 @@ const Scan: React.FC = () => {
               text={translatedText}
               placeholder="Translation will appear here"
               isLoading={isTranslating}
-              isSpeaking={isTargetSpeaking} // Updated property
+              isSpeaking={isTargetSpeaking}
               copied={copiedTarget}
               onCopy={() => copyToClipboard(translatedText, "copiedTarget")}
-              onSpeak={() => handleTargetSpeech(translatedText)} // Updated method
+              onSpeak={() => handleTargetSpeech(translatedText)}
               editable={false}
               color={BASE_COLORS.orange}
             />
@@ -301,7 +294,7 @@ const styles = StyleSheet.create({
   translationContainer: {
     flex: 1,
     marginVertical: 10,
-    backgroundColor: BASE_COLORS.lightBlue,
+    backgroundColor: "#E2EAFF",
     borderRadius: 12,
     padding: 16,
     paddingTop: 20,
@@ -327,7 +320,7 @@ const styles = StyleSheet.create({
     width: "100%",
     textAlign: "center",
     color: "white",
-    fontFamily: "Poppins-Medium",
+    fontFamily: "Poppins-Regular",
     fontSize: 12,
   },
 });

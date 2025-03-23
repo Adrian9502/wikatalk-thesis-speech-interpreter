@@ -25,17 +25,14 @@ const LanguageSelector: React.FC<LanguageSelectorProps> = ({
             styles.dropdown,
             {
               borderColor: BASE_COLORS.borderColor,
-              backgroundColor: BASE_COLORS.lightPink,
+              backgroundColor: "white",
             },
-            isFocused && { borderColor: BASE_COLORS.orange },
+            isFocused && { borderColor: BASE_COLORS.blue },
           ]}
-          placeholderStyle={[
-            styles.dropdownText,
-            { color: BASE_COLORS.placeholderText },
-          ]}
+          placeholderStyle={[styles.dropdownText, { color: BASE_COLORS.blue }]}
           selectedTextStyle={[
             styles.dropdownText,
-            { color: BASE_COLORS.orange, borderRadius: 8 },
+            { color: BASE_COLORS.blue, borderRadius: 8 },
           ]}
           data={DIALECTS}
           maxHeight={250}
@@ -53,10 +50,10 @@ const LanguageSelector: React.FC<LanguageSelectorProps> = ({
             <Ionicons
               name={isFocused ? "chevron-up" : "chevron-down"}
               size={18}
-              color={BASE_COLORS.orange}
+              color={BASE_COLORS.blue}
             />
           )}
-          activeColor={BASE_COLORS.lightPink}
+          activeColor={BASE_COLORS.lightBlue}
           containerStyle={styles.dropdownList}
         />
       </View>
@@ -73,8 +70,8 @@ const styles = StyleSheet.create({
   },
   languageLabel: {
     fontSize: 16,
-    fontFamily: "Poppins-Regular",
-    color: BASE_COLORS.orange,
+    fontFamily: "Poppins-Medium",
+    color: BASE_COLORS.blue,
     marginBottom: 7,
   },
   dropdownContainer: {
@@ -98,7 +95,7 @@ const styles = StyleSheet.create({
   },
   dropdownText: {
     fontSize: 15,
-    fontFamily: "Poppins-Medium",
+    fontFamily: "Poppins-Regular",
   },
 });
 
