@@ -8,6 +8,7 @@ import {
   Platform,
   UIManager,
   Keyboard,
+  StyleSheet,
   TouchableWithoutFeedback,
 } from "react-native";
 import { StatusBar } from "expo-status-bar";
@@ -28,9 +29,8 @@ import AuthSwitcher from "@/components/auth/AuthSwitcher";
 import SubmitButton from "@/components/auth/SubmitButton";
 // Custom hook
 import { useAuthForms } from "@/hooks/useAuthForms";
-// style
-import { styles } from "@/styles/authStyles";
 import AuthLogo from "@/components/AuthLogo";
+
 // Enable layout animation for Android
 if (Platform.OS === "android") {
   if (UIManager.setLayoutAnimationEnabledExperimental) {
@@ -97,11 +97,11 @@ const Index = () => {
     };
   }, [isAppReady, isLoggedIn]);
 
-  // useEffect(() => {
-  //   setTimeout(() => {
-  //     router.replace("/(tabs)/Speech");
-  //   }, 3000);
-  // }, []);
+  useEffect(() => {
+    setTimeout(() => {
+      router.replace("/(tabs)/Speech");
+    }, 3000);
+  }, []);
 
   const switchTab = (tab: TabType) => {
     // Only animate if the tab is actually changing
@@ -157,9 +157,7 @@ const Index = () => {
         ]}
       >
         {/* Logo */}
-        <View style={styles.logoContainer}>
-          <AuthLogo />
-        </View>
+        <AuthLogo />
         <StatusBar style="light" />
         <KeyboardAvoidingView
           behavior={Platform.OS === "ios" ? "padding" : "height"}
@@ -233,3 +231,26 @@ const Index = () => {
 };
 
 export default Index;
+
+const styles = StyleSheet.create({
+  keyboardAvoidingView: {
+    width: "85%",
+    maxWidth: 350,
+  },
+  formOuterContainer: {
+    borderRadius: 16,
+    padding: 16,
+    width: "100%",
+    alignItems: "center",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 3,
+    elevation: 2,
+    minHeight: 400,
+  },
+  formInnerContainer: {
+    minHeight: 350,
+    width: "100%",
+  },
+});

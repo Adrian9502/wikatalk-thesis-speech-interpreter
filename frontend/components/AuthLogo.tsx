@@ -10,9 +10,10 @@ const AuthLogo: React.FC = () => {
         style={styles.logo}
         resizeMode="contain"
       />
-      <Text style={styles.wikaText}>
-        Wika<Text style={styles.talkText}>Talk</Text>
-      </Text>
+      <View style={{ flexDirection: "row" }}>
+        <Text style={[styles.wikaText, { color: "#FFEC18" }]}>Wika</Text>
+        <Text style={styles.talkText}>Talk</Text>
+      </View>
       <Text style={styles.tagline}>Speak Freely, Understand Instantly.</Text>
     </View>
   );
@@ -21,6 +22,7 @@ const AuthLogo: React.FC = () => {
 const styles = StyleSheet.create({
   container: {
     alignItems: "center",
+    marginBottom: 15,
     justifyContent: "center",
   },
   logo: {
