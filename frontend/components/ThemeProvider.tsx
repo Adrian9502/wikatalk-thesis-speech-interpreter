@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from "react";
-import { View, ActivityIndicator } from "react-native";
+import { View } from "react-native";
 import useThemeStore from "@/store/useThemeStore";
 import { CUSTOM_BACKGROUND } from "@/constant/colors";
-import DotsLoader from "./DotLoader";
+import AppLoading from "./AppLoading";
 
 interface ThemeProviderProps {
   children: React.ReactNode;
@@ -28,7 +28,7 @@ const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
             activeTheme.backgroundColor || CUSTOM_BACKGROUND.navyBlue,
         }}
       >
-        <DotsLoader />
+        <AppLoading />
       </View>
     );
   }
