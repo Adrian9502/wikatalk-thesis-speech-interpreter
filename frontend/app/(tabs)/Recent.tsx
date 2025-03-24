@@ -62,7 +62,10 @@ const RecentTranslations: React.FC = () => {
         {/* History Items */}
         <ScrollView
           style={styles.scrollView}
-          contentContainerStyle={styles.scrollContent}
+          contentContainerStyle={[
+            styles.scrollContent,
+            historyItems[activeTab].length === 0 && styles.emptyScrollContent,
+          ]}
           showsVerticalScrollIndicator={false}
         >
           <HistoryList
@@ -95,6 +98,9 @@ const styles = StyleSheet.create({
   },
   scrollContent: {
     paddingBottom: 24,
+  },
+  emptyScrollContent: {
+    flexGrow: 1,
   },
 });
 

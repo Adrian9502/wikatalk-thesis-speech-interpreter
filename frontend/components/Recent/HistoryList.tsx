@@ -1,4 +1,5 @@
 import React from "react";
+import { View, StyleSheet } from "react-native";
 import { HistoryItemType, TabType } from "@/types/types";
 import EmptyHistory from "@/components/Recent/EmptyHistory";
 import HistoryItem from "@/components/Recent/HistoryItem";
@@ -15,7 +16,11 @@ const HistoryList: React.FC<HistoryListProps> = ({
   onDeletePress,
 }) => {
   if (items.length === 0) {
-    return <EmptyHistory tabType={activeTab} />;
+    return (
+      <View style={styles.emptyContainer}>
+        <EmptyHistory tabType={activeTab} />
+      </View>
+    );
   }
 
   return (
@@ -26,5 +31,13 @@ const HistoryList: React.FC<HistoryListProps> = ({
     </>
   );
 };
+
+const styles = StyleSheet.create({
+  emptyContainer: {
+    flex: 1,
+    height: "100%",
+    justifyContent: "center",
+  },
+});
 
 export default HistoryList;

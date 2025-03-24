@@ -1,4 +1,3 @@
-// File: components/Recent/EmptyState.tsx
 import React from "react";
 import { View, Text, StyleSheet } from "react-native";
 import { Feather } from "@expo/vector-icons";
@@ -39,7 +38,6 @@ const EmptyHistory: React.FC<EmptyStateProps> = ({ tabType }) => {
 
 const styles = StyleSheet.create({
   emptyContainer: {
-    flex: 1,
     justifyContent: "center",
     alignItems: "center",
   },
