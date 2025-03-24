@@ -9,7 +9,6 @@ import { useRecording } from "@/hooks/useRecording";
 import LanguageSection from "@/components/Speech/LanguageSection";
 import LanguageInfoModal from "@/components/Speech/LanguageInfoModal";
 import SpeechLoading from "@/components/Speech/SpeechLoading";
-import WikaTalkLogo from "@/components/WikaTalkLogo";
 import useLanguageStore from "@/store/useLanguageStore";
 import useThemeStore from "@/store/useThemeStore";
 import { getGlobalStyles } from "@/styles/globalStyles";
@@ -73,16 +72,13 @@ const Speech = () => {
   };
 
   return (
-    <View style={dynamicStyles.container}>
+    <SafeAreaView
+      edges={["top", "left", "right"]}
+      style={[dynamicStyles.container]}
+    >
       <StatusBar style="light" />
 
-      <SafeAreaView
-        style={styles.safeAreaView}
-        edges={["top", "left", "right"]}
-      >
-        {/* WikaSpeak */}
-        <WikaTalkLogo title={"Speak"} />
-
+      <View style={{ flex: 1 }}>
         {/* Top section */}
         <LanguageSection
           position="top"
@@ -106,7 +102,7 @@ const Speech = () => {
           recording={!!recording && recordingUser === 1}
           userId={1}
         />
-      </SafeAreaView>
+      </View>
 
       {/* Language Information Modal */}
       {showLanguageInfo &&
@@ -123,16 +119,13 @@ const Speech = () => {
 
       {/* Loading Indicator */}
       {loading && <SpeechLoading />}
-    </View>
+    </SafeAreaView>
   );
 };
 
 export default Speech;
 
 const styles = StyleSheet.create({
-  safeAreaView: {
-    flex: 1,
-  },
   middleSection: {
     alignItems: "center",
     justifyContent: "center",

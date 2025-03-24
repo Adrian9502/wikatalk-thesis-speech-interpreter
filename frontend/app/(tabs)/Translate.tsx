@@ -1,7 +1,6 @@
 import React, { useEffect } from "react";
 import { KeyboardAvoidingView, Platform } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import WikaTalkLogo from "@/components/WikaTalkLogo";
 import TranslateSection from "@/components/Translate/TranslateSection";
 import {
   useTranslateStore,
@@ -49,7 +48,6 @@ const Translate = () => {
       keyboardVerticalOffset={Platform.OS === "ios" ? 0 : -100}
     >
       <SafeAreaView style={dynamicStyles.container}>
-        <WikaTalkLogo title="Translate" />
         <TranslateSection />
       </SafeAreaView>
     </KeyboardAvoidingView>

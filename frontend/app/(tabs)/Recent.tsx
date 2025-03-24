@@ -11,7 +11,6 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { BASE_COLORS, TITLE_COLORS } from "@/constant/colors";
-import WikaTalkLogo from "@/components/WikaTalkLogo";
 import { Feather, Ionicons } from "@expo/vector-icons";
 import { Calendar } from "react-native-feather";
 import useThemeStore from "@/store/useThemeStore";
@@ -295,11 +294,6 @@ const RecentTranslations: React.FC = () => {
     <View style={dynamicStyles.container}>
       <StatusBar style="light" />
       <SafeAreaView style={styles.safeAreaView}>
-        {/* Header */}
-        <View style={styles.header}>
-          <WikaTalkLogo title="Recent" />
-        </View>
-
         {/* Tabs */}
         {renderTabs()}
 
@@ -330,9 +324,7 @@ const styles = StyleSheet.create({
   safeAreaView: {
     flex: 1,
   },
-  header: {
-    marginBottom: 24,
-  },
+
   scrollView: {
     flex: 1,
   },

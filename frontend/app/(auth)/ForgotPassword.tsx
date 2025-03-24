@@ -20,7 +20,7 @@ import FormMessage from "@/components/FormMessage";
 import { router } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { BASE_COLORS, TITLE_COLORS } from "@/constant/colors";
-import AuthLogo from "@/components/AuthLogo";
+import Logo from "@/components/Logo";
 import useThemeStore from "@/store/useThemeStore";
 import { getGlobalStyles } from "@/styles/globalStyles";
 interface ForgotPasswordFormData {
@@ -174,7 +174,7 @@ const ForgotPassword: React.FC = () => {
       <StatusBar style="light" />
       {/* Logo */}
       <View style={styles.logoContainer}>
-        <AuthLogo />
+        <Logo />
       </View>
       <KeyboardAvoidingView
         behavior={Platform.OS === "ios" ? "padding" : "height"}

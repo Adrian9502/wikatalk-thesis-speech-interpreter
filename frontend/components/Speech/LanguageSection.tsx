@@ -126,7 +126,7 @@ const LanguageSection: React.FC<LanguageSectionProps> = ({
 const styles = StyleSheet.create({
   translateContainer: {
     width: "100%",
-    height: "45%",
+    height: "48%",
     borderRadius: 24,
     overflow: "hidden",
     backgroundColor: BASE_COLORS.white,

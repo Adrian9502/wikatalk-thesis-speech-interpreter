@@ -1,7 +1,7 @@
 import { SafeAreaView, StyleSheet } from "react-native";
 import React from "react";
 import { StatusBar } from "expo-status-bar";
-import AuthLogo from "./AuthLogo";
+import Logo from "./Logo";
 import DotsLoader from "./DotLoader";
 import { TITLE_COLORS } from "@/constant/colors";
 
@@ -9,7 +9,7 @@ const AppLoading = () => {
   return (
     <SafeAreaView style={styles.container}>
       <StatusBar style="light" />
-      <AuthLogo />
+      <Logo />
       <DotsLoader />
     </SafeAreaView>
   );

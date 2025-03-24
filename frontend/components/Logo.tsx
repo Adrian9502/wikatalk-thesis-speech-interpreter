@@ -2,7 +2,7 @@ import { View, Image, Text, StyleSheet } from "react-native";
 import React from "react";
 import { BASE_COLORS, TITLE_COLORS } from "@/constant/colors";
 
-const AuthLogo: React.FC = () => {
+const Logo: React.FC = () => {
   return (
     <View style={styles.container}>
       <Image
@@ -49,4 +49,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default AuthLogo;
+export default Logo;

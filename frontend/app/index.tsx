@@ -29,7 +29,7 @@ import AuthSwitcher from "@/components/auth/AuthSwitcher";
 import SubmitButton from "@/components/auth/SubmitButton";
 // Custom hook
 import { useAuthForms } from "@/hooks/useAuthForms";
-import AuthLogo from "@/components/AuthLogo";
+import Logo from "@/components/Logo";
 
 // Enable layout animation for Android
 if (Platform.OS === "android") {
@@ -157,7 +157,7 @@ const Index = () => {
         ]}
       >
         {/* Logo */}
-        <AuthLogo />
+        <Logo />
         <StatusBar style="light" />
         <KeyboardAvoidingView
           behavior={Platform.OS === "ios" ? "padding" : "height"}
