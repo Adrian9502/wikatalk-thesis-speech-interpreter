@@ -283,7 +283,6 @@ const styles = StyleSheet.create({
   },
   cameraViewContainer: {
     height: "40%",
-    marginTop: 8,
     borderRadius: 16,
     overflow: "hidden",
     borderWidth: 1,
