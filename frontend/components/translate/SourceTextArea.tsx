@@ -153,9 +153,11 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     borderWidth: 1,
     padding: 16,
+    maxHeight: "100%",
   },
   scrollContent: {
-    flexGrow: 1,
+    overflow: "hidden",
+    paddingBottom: 20,
   },
   textField: {
     fontFamily: "Poppins-Regular",

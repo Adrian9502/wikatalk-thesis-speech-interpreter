@@ -76,7 +76,10 @@ const TargetTextArea = () => {
           scrollEnabled={true}
           nestedScrollEnabled={true}
           showsVerticalScrollIndicator={false}
-          contentContainerStyle={styles.scrollContent}
+          contentContainerStyle={[
+            styles.scrollContent,
+            { flex: isTranslating ? 1 : 0 },
+          ]}
         >
           {isTranslating ? (
             <View style={styles.loadingContainer}>
@@ -96,6 +99,7 @@ const TargetTextArea = () => {
               style={[styles.textField, { color: BASE_COLORS.darkText }]}
               placeholder="Translation will appear here..."
               placeholderTextColor={BASE_COLORS.placeholderText}
+              textAlignVertical="top"
             />
           )}
         </ScrollView>
@@ -159,15 +163,16 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     borderWidth: 1,
     padding: 16,
+    maxHeight: "100%",
   },
   scrollContent: {
-    flexGrow: 1,
+    overflow: "hidden",
+    paddingBottom: 20,
   },
   textField: {
     fontFamily: "Poppins-Regular",
     fontSize: 17,
     fontWeight: "400",
-    flex: 1,
     lineHeight: 24,
     textAlignVertical: "top",
   },
@@ -175,7 +180,8 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
-    padding: 20,
+    height: "100%",
+    width: "100%",
   },
   errorText: {
     color: BASE_COLORS.orange,
