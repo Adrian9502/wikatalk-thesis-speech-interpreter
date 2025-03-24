@@ -39,3 +39,21 @@ export interface MicButtonProps {
 
 // Settings and Settings Item component
 export type FeatherIconName = React.ComponentProps<typeof Feather>["name"];
+
+// Recent component
+export type TabType = "Speech" | "Translate" | "Scan";
+
+export interface HistoryItemType {
+  id: string;
+  date: string;
+  fromLanguage: string;
+  toLanguage: string;
+  originalText: string;
+  translatedText: string;
+}
+
+export interface HistoryItems {
+  Speech: HistoryItemType[];
+  Translate: HistoryItemType[];
+  Scan: HistoryItemType[];
+}
