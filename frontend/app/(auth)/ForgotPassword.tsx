@@ -304,6 +304,7 @@ export default ForgotPassword;
 
 export const styles = StyleSheet.create({
   logoContainer: {
+    width: "100%",
     marginBottom: 10,
   },
   keyboardAvoidingView: {

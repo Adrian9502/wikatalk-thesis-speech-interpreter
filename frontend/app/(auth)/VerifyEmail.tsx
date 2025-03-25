@@ -249,6 +249,7 @@ export default VerifyEmail;
 const styles = StyleSheet.create({
   logoContainer: {
     marginBottom: 10,
+    width: "100%",
   },
   keyboardAvoidingView: {
     width: "85%",
