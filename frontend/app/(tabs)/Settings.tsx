@@ -8,7 +8,7 @@ import { FeatherIconName } from "@/types/types";
 import ConfirmationModal from "@/components/ConfirmationModal";
 import { globalStyles } from "@/styles/globalStyles";
 import * as SettingsRenderers from "@/components/Settings/SettingsRenderer";
-
+import { router } from "expo-router";
 // Types
 type SettingItemWithToggle = {
   icon: FeatherIconName;
@@ -65,12 +65,12 @@ const Settings = () => {
         {
           icon: "user",
           label: "Account Details",
-          onPress: () => console.log("Account details pressed"),
+          onPress: () => router.push("/(settings)/AccountDetails"),
         },
         {
           icon: "lock",
           label: "Change Password",
-          onPress: () => console.log("Change password pressed"),
+          onPress: () => router.push("/(settings)/ChangePassword"),
         },
       ],
     },
@@ -91,12 +91,12 @@ const Settings = () => {
         {
           icon: "help-circle",
           label: "Help & FAQ",
-          onPress: () => console.log("Help pressed"),
+          onPress: () => router.push("/(settings)/HelpAndFAQ"),
         },
         {
           icon: "headphones",
           label: "Contact Support",
-          onPress: () => console.log("Contact support pressed"),
+          onPress: () => router.push("/(settings)/ContactSupport"),
         },
       ],
     },
