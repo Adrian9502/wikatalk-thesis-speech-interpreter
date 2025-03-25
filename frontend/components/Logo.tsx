@@ -10,9 +10,23 @@ const Logo: React.FC = () => {
         style={styles.logo}
         resizeMode="contain"
       />
-      <View style={{ flexDirection: "row" }}>
-        <Text style={[styles.wikaText, { color: "#FFEC18" }]}>Wika</Text>
-        <Text style={styles.talkText}>Talk</Text>
+      <View
+        style={{
+          flexDirection: "row",
+          alignSelf: "center",
+          width: "100%",
+          justifyContent: "center",
+        }}
+      >
+        <Text
+          style={[styles.wikaText, { color: "#FFEC18" }]}
+          allowFontScaling={false}
+        >
+          Wika
+        </Text>
+        <Text style={styles.talkText} allowFontScaling={false}>
+          Talk
+        </Text>
       </View>
       <Text style={styles.tagline}>Speak Freely, Understand Instantly.</Text>
     </View>
@@ -21,23 +35,26 @@ const Logo: React.FC = () => {
 
 const styles = StyleSheet.create({
   container: {
+    width: "100%",
     alignItems: "center",
     marginBottom: 15,
     justifyContent: "center",
   },
   logo: {
-    width: 120,
-    height: 120,
+    width: 100,
+    height: 100,
   },
   wikaText: {
     fontFamily: "Poppins-Bold",
-    fontSize: 34,
+    fontSize: 30,
     color: TITLE_COLORS.customYellow,
+    flexShrink: 1,
   },
   talkText: {
     fontFamily: "Poppins-Bold",
-    fontSize: 34,
+    fontSize: 30,
     color: BASE_COLORS.white,
+    flexShrink: 1,
   },
   tagline: {
     fontFamily: "Poppins-Medium",
@@ -46,6 +63,7 @@ const styles = StyleSheet.create({
     color: TITLE_COLORS.customWhite,
     textShadowOffset: { width: 1, height: 1 },
     textShadowRadius: 3,
+    flexShrink: 1,
   },
 });
 
