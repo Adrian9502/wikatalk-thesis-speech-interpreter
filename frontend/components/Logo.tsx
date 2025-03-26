@@ -35,6 +35,8 @@ const Logo: React.FC = () => {
 
 const styles = StyleSheet.create({
   container: {
+    borderWidth: 2,
+    borderColor: "red",
     width: "100%",
     alignItems: "center",
     marginBottom: 15,
@@ -43,18 +45,24 @@ const styles = StyleSheet.create({
   logo: {
     width: 100,
     height: 100,
+    borderWidth: 2,
+    borderColor: "blue",
   },
   wikaText: {
     fontFamily: "Poppins-Bold",
     fontSize: 30,
     color: TITLE_COLORS.customYellow,
     flexShrink: 1,
+    borderWidth: 2,
+    borderColor: "yellow",
   },
   talkText: {
     fontFamily: "Poppins-Bold",
     fontSize: 30,
     color: BASE_COLORS.white,
     flexShrink: 1,
+    borderWidth: 2,
+    borderColor: "green",
   },
   tagline: {
     fontFamily: "Poppins-Medium",
@@ -64,6 +72,8 @@ const styles = StyleSheet.create({
     textShadowOffset: { width: 1, height: 1 },
     textShadowRadius: 3,
     flexShrink: 1,
+    borderWidth: 2,
+    borderColor: "pink",
   },
 });
 
