@@ -1,4 +1,4 @@
-import { View, Image, Text, StyleSheet, Platform } from "react-native";
+import { View, Image, Text, StyleSheet } from "react-native";
 import React from "react";
 import { BASE_COLORS, TITLE_COLORS } from "@/constant/colors";
 
@@ -9,40 +9,34 @@ const Logo: React.FC = () => {
         source={require("@/assets/images/wikatalk-logo.png")}
         style={styles.logo}
         resizeMode="contain"
-        fadeDuration={0}
       />
-      <View style={styles.textContainer}>
+      <View
+        style={{
+          flexDirection: "row",
+          alignSelf: "center",
+          width: "100%",
+          justifyContent: "center",
+        }}
+      >
         <Text
           style={[styles.wikaText, { color: "#FFEC18" }]}
           allowFontScaling={false}
-          numberOfLines={1}
-          adjustsFontSizeToFit
         >
           Wika
         </Text>
-        <Text
-          style={styles.talkText}
-          allowFontScaling={false}
-          numberOfLines={1}
-          adjustsFontSizeToFit
-        >
+        <Text style={styles.talkText} allowFontScaling={false}>
           Talk
         </Text>
       </View>
-      <Text
-        style={styles.tagline}
-        allowFontScaling={false}
-        numberOfLines={2}
-        adjustsFontSizeToFit
-      >
-        Speak Freely, Understand Instantly.
-      </Text>
+      <Text style={styles.tagline}>Speak Freely, Understand Instantly.</Text>
     </View>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
+    borderWidth: 2,
+    borderColor: "red",
     width: "100%",
     alignItems: "center",
     marginBottom: 15,
@@ -51,45 +45,35 @@ const styles = StyleSheet.create({
   logo: {
     width: 100,
     height: 100,
-    ...Platform.select({
-      android: {
-        elevation: 0,
-      },
-      ios: {
-        shadowOpacity: 0,
-      },
-    }),
-  },
-  textContainer: {
-    flexDirection: "row",
-    alignSelf: "center",
-    width: "100%",
-    justifyContent: "center",
-    marginTop: 10,
+    borderWidth: 2,
+    borderColor: "blue",
   },
   wikaText: {
     fontFamily: "Poppins-Bold",
     fontSize: 30,
     color: TITLE_COLORS.customYellow,
     flexShrink: 1,
-    textAlign: "center",
+    borderWidth: 2,
+    borderColor: "yellow",
   },
   talkText: {
     fontFamily: "Poppins-Bold",
     fontSize: 30,
     color: BASE_COLORS.white,
     flexShrink: 1,
-    textAlign: "center",
+    borderWidth: 2,
+    borderColor: "green",
   },
   tagline: {
     fontFamily: "Poppins-Medium",
     fontSize: 14,
-    marginTop: 5,
+    marginTop: -12,
     color: TITLE_COLORS.customWhite,
     textShadowOffset: { width: 1, height: 1 },
     textShadowRadius: 3,
-    textAlign: "center",
-    paddingHorizontal: 20,
+    flexShrink: 1,
+    borderWidth: 2,
+    borderColor: "pink",
   },
 });
 
