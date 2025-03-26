@@ -30,6 +30,7 @@ import SubmitButton from "@/components/auth/SubmitButton";
 // Custom hook
 import { useAuthForms } from "@/hooks/useAuthForms";
 import Logo from "@/components/Logo";
+import AppLoading from "@/components/AppLoading";
 
 // Enable layout animation for Android
 if (Platform.OS === "android") {
@@ -97,11 +98,11 @@ const Index = () => {
     };
   }, [isAppReady, isLoggedIn]);
 
-  useEffect(() => {
-    setTimeout(() => {
-      router.replace("/(tabs)/Speech");
-    }, 2000);
-  }, []);
+  // useEffect(() => {
+  //   setTimeout(() => {
+  //     router.replace("/(tabs)/Speech");
+  //   }, 2000);
+  // }, []);
 
   const switchTab = (tab: TabType) => {
     // Only animate if the tab is actually changing
@@ -147,84 +148,80 @@ const Index = () => {
 
   return (
     <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
-      <SafeAreaView
-        style={[
-          dynamicStyles.container,
-          {
-            justifyContent: "center",
-            alignItems: "center",
-          },
-        ]}
-      >
-        {/* Logo */}
-        <Logo />
+      <SafeAreaView style={[dynamicStyles.container]}>
         <StatusBar style="light" />
-        <KeyboardAvoidingView
-          behavior={Platform.OS === "ios" ? "padding" : "height"}
-          style={styles.keyboardAvoidingView}
-          keyboardVerticalOffset={Platform.OS === "ios" ? 40 : 0}
+        <View
+          style={{ flex: 1, justifyContent: "center", alignItems: "center" }}
         >
-          {/* Form container */}
-          <View
-            style={[
-              styles.formOuterContainer,
-              { backgroundColor: BASE_COLORS.white },
-            ]}
+          {/* Logo */}
+          <Logo />
+          <KeyboardAvoidingView
+            behavior={Platform.OS === "ios" ? "padding" : "height"}
+            style={styles.keyboardAvoidingView}
+            keyboardVerticalOffset={Platform.OS === "ios" ? 40 : 0}
           >
-            {/* Tab navigation */}
-            <AuthTabs
-              activeTab={activeTab}
-              switchTab={switchTab}
-              tabIndicatorPosition={tabIndicatorPosition}
-            />
-
             {/* Form container */}
-            <View style={styles.formInnerContainer}>
-              {formMessage && (
-                <FormMessage
-                  message={formMessage.text}
-                  type={formMessage.type}
-                  onDismiss={clearFormMessage}
-                />
-              )}
+            <View
+              style={[
+                styles.formOuterContainer,
+                { backgroundColor: BASE_COLORS.white },
+              ]}
+            >
+              {/* Tab navigation */}
+              <AuthTabs
+                activeTab={activeTab}
+                switchTab={switchTab}
+                tabIndicatorPosition={tabIndicatorPosition}
+              />
 
-              {/* Sign In Form */}
-              {activeTab === "signin" && (
-                <SignInForm
-                  control={signIn.control}
-                  errors={signIn.errors}
-                  navigateToForgotPassword={() =>
-                    router.push("/(auth)/ForgotPassword")
+              {/* Form container */}
+              <View style={styles.formInnerContainer}>
+                {formMessage && (
+                  <FormMessage
+                    message={formMessage.text}
+                    type={formMessage.type}
+                    onDismiss={clearFormMessage}
+                  />
+                )}
+
+                {/* Sign In Form */}
+                {activeTab === "signin" && (
+                  <SignInForm
+                    control={signIn.control}
+                    errors={signIn.errors}
+                    navigateToForgotPassword={() =>
+                      router.push("/(auth)/ForgotPassword")
+                    }
+                  />
+                )}
+
+                {/* Sign Up Form */}
+                {activeTab === "signup" && (
+                  <SignUpForm control={signUp.control} errors={signUp.errors} />
+                )}
+
+                {/* Submit Button */}
+                <SubmitButton
+                  activeTab={activeTab}
+                  isLoading={isLoading}
+                  buttonScale={buttonScale}
+                  onPress={handleSubmit}
+                />
+
+                {/* Social login options */}
+                {activeTab === "signin" && <SocialLogin />}
+
+                {/* Switch between sign in and sign up */}
+                <AuthSwitcher
+                  activeTab={activeTab}
+                  onSwitch={() =>
+                    switchTab(activeTab === "signin" ? "signup" : "signin")
                   }
                 />
-              )}
-
-              {/* Sign Up Form */}
-              {activeTab === "signup" && (
-                <SignUpForm control={signUp.control} errors={signUp.errors} />
-              )}
-
-              {/* Submit Button */}
-              <SubmitButton
-                activeTab={activeTab}
-                isLoading={isLoading}
-                buttonScale={buttonScale}
-                onPress={handleSubmit}
-              />
-
-              {/* Social login options */}
-              {activeTab === "signin" && <SocialLogin />}
-
-              {/* Switch between sign in and sign up */}
-              <AuthSwitcher
-                activeTab={activeTab}
-                onSwitch={() =>
-                  switchTab(activeTab === "signin" ? "signup" : "signin")
-                }
-              />
+              </View>
             </View>
-          </View>
-        </KeyboardAvoidingView>
+          </KeyboardAvoidingView>
+        </View>
       </SafeAreaView>
     </TouchableWithoutFeedback>
   );
@@ -241,7 +238,6 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     padding: 16,
     width: "100%",
-    alignItems: "center",
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
