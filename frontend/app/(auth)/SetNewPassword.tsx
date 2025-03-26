@@ -26,6 +26,7 @@ import useThemeStore from "@/store/useThemeStore";
 import { getGlobalStyles } from "@/styles/globalStyles";
 import { BASE_COLORS, TITLE_COLORS } from "@/constant/colors";
 import AppLoading from "@/components/AppLoading";
+import Logo from "@/components/Logo";
 
 interface ResetPasswordFormData {
   password: string;
@@ -116,6 +117,10 @@ const SetNewPassword: React.FC = () => {
   return (
     <SafeAreaView style={[dynamicStyles.container, styles.safeAreaContainer]}>
       <StatusBar style="light" />
+      {/* Logo */}
+      <View style={styles.logoContainer}>
+        <Logo />
+      </View>
       <KeyboardAvoidingView
         behavior={Platform.OS === "ios" ? "padding" : "height"}
         style={styles.keyboardAvoidingView}
@@ -197,6 +202,10 @@ const styles = StyleSheet.create({
     flex: 1,
     width: "100%",
     height: "100%",
+  },
+  logoContainer: {
+    marginBottom: 10,
+    width: "100%",
   },
   safeAreaContainer: {
     justifyContent: "center",

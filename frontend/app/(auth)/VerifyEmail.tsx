@@ -73,11 +73,16 @@ const VerifyEmail: React.FC = () => {
     };
   }, [countdown]);
 
+  // Clear form message on mount
+  useEffect(() => {
+    clearFormMessage();
+  }, []);
+
   const handleResendCode = async () => {
     if (resendDisabled) return;
 
     try {
-      clearFormMessage(); // Clear any existing message
+      clearFormMessage();
       const result = await resendVerificationEmail();
       if (result.success) {
         console.log("✅ Success! Verification email resent");
@@ -102,8 +107,6 @@ const VerifyEmail: React.FC = () => {
 
       if (result.success) {
         console.log("✅ Verification successful!");
-        setFormMessage("Email verified successfully!", "success");
-
         // Use InteractionManager to ensure UI is ready
         InteractionManager.runAfterInteractions(() => {
           // Use replace instead of push to prevent going back

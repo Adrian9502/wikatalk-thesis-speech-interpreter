@@ -1,13 +1,19 @@
 const emailTemplates = {
   verification: (name, verificationCode) => ({
     subject: "Verify Your Email",
-    html: `
-   <!DOCTYPE html>
+    html: `<!DOCTYPE html>
 <html>
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Verify Your WikaTalk Email</title>
+    <!-- POPPINS FONT-->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap"
+      rel="stylesheet"
+    />
+    <title>Verify Your Email</title>
     <style type="text/css">
       /* Reset styles for email clients */
       body,
@@ -17,126 +23,10 @@ const emailTemplates = {
       a,
       table,
       td {
-        font-family: Arial, sans-serif;
+        font-family: "Arial", sans-serif;
         line-height: 1.5;
         margin: 0;
         padding: 0;
-      }
-
-      /* Main container */
-      body {
-        background-color: #f4f4f4;
-        margin: 0;
-        padding: 0;
-      }
-
-      /* Philippine flag colors */
-      .email-container {
-        max-width: 600px;
-        margin: 0 auto;
-        background: linear-gradient(
-          to bottom,
-          rgba(0, 56, 168, 0.8),
-          rgba(206, 17, 38, 0.8)
-        );
-        border-radius: 8px;
-        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.37);
-      }
-
-      .logo-img {
-        max-width: 80px;
-        height: auto;
-        pointer-events: none;
-      }
-
-      .logo-text {
-        color: #fdb913;
-        margin: 0;
-        font-size: 30px;
-        font-weight: bold;
-        text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.3);
-      }
-
-      .tagline {
-        color: #0038a8;
-        margin: 0;
-        font-size: 15px;
-        font-weight: bold;
-      }
-
-      /* Content area */
-      .content {
-        padding: 40px;
-      }
-
-      .greeting {
-        color: #fff;
-        font-size: 20px;
-        margin: 0 0 20px;
-      }
-
-      .title {
-        color: #fff;
-        font-size: 22px;
-        margin: 0 0 20px;
-      }
-
-      .description {
-        color: #ffffff;
-        font-size: 16px;
-        margin: 0 0 20px;
-      }
-
-      /* Verification code box */
-      .code-container {
-        background-color: #ffffff;
-        border-radius: 6px;
-        padding: 20px;
-        margin: 30px 0;
-        text-align: center;
-      }
-
-      .verification-code {
-        font-size: 40px;
-        letter-spacing: 10px;
-        font-weight: bold;
-        color: #ce1126;
-        margin: 0;
-        font-family: monospace;
-      }
-
-      .expiry-note {
-        color: #fff;
-        font-size: 14px;
-        margin: 20px 0;
-      }
-
-      /* Footer */
-      .footer {
-        padding: 20px 40px;
-        background-color: #f8f8f8;
-        border-radius: 0 0 8px 8px;
-      }
-
-      .footer-text {
-        color: #999999;
-        font-size: 12px;
-        margin: 0;
-        text-align: center;
-      }
-
-      /* Additional info */
-      .additional-info {
-        max-width: 600px;
-        margin: 20px auto 0;
-        text-align: center;
-        padding: 0 20px;
-      }
-
-      .info-text {
-        color: #999999;
-        font-size: 12px;
-        margin: 0;
       }
     </style>
   </head>
@@ -158,11 +48,7 @@ const emailTemplates = {
             style="
               max-width: 600px;
               margin: 0 auto;
-              background: linear-gradient(
-                to bottom,
-                rgba(0, 56, 168, 0.8),
-                rgba(206, 17, 38, 0.8)
-              );
+              background: #0a0f28;
               border-radius: 8px;
               box-shadow: 0 2px 4px rgba(0, 0, 0, 0.37);
             "
@@ -171,30 +57,38 @@ const emailTemplates = {
             <tr>
               <td style="padding: 30px 40px; text-align: center">
                 <img
-                  class="logo-img"
-                  style="max-width: 80px; height: auto; pointer-events: none"
-                  src="https://i.imgur.com/4vxin6d.png"
+                  style="
+                    background: transparent;
+                    background-color: transparent;
+                    width: 90px;
+                    height: auto;
+                    pointer-events: none;
+                  "
+                  src="https://github.com/Adrian9502/wikatalk-thesis-speech-interpreter/blob/main/frontend/assets/images/WikaTalk-logo.png?raw=true"
                   alt="WikaTalk-logo"
                 />
                 <h1
                   class="logo-text"
                   style="
-                    color: #fff;
+                    color: #ffdc04;
                     margin: 0;
                     font-size: 30px;
-                    font-weight: bold;
-                    text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.3);
+                    font-weight: 700;
+                    word-spacing: -15px;
                   "
                 >
-                  WikaTalk
+                  Wika<span
+                    style="font-size: 30px; font-weight: 700; color: #fff"
+                    >Talk</span
+                  >
                 </h1>
+
                 <h2
-                  class="tagline"
                   style="
-                    color: #facc15;
+                    color: #fff;
                     margin: 0;
-                    font-size: 15px;
-                    font-weight: bold;
+                    font-size: 12px;
+                    font-weight: 500;
                   "
                 >
                   Speak Freely, Understand Instantly.
@@ -204,24 +98,38 @@ const emailTemplates = {
 
             <!-- Content -->
             <tr>
-              <td class="content" style="padding: 40px">
+              <td style="padding: 40px">
                 <!-- Personalized Greeting -->
-                <p
-                  class="greeting"
-                  style="color: #fff; font-size: 20px; margin: 0 0 20px"
-                >
-                  Hi <b>${name}</b>,
-                </p>
 
                 <h2
-                  class="title"
-                  style="color: #fff; font-size: 22px; margin: 0 0 20px"
+                  style="
+                    color: #fff;
+                    font-size: 23px;
+                    font-weight: 600;
+                    margin: 10;
+                  "
                 >
                   Verify Your Email Address
                 </h2>
                 <p
-                  class="description"
-                  style="color: #ffffff; font-size: 16px; margin: 0 0 20px"
+                  style="
+                    color: #ffffff;
+                    font-size: 16px;
+                    font-weight: 500;
+                    margin: 10px 0 20px;
+                    text-align: center;
+                  "
+                >
+                  Hi <b>${name}</b>!
+                </p>
+                <p
+                  style="
+                    color: #ffffff;
+                    font-size: 16px;
+                    font-weight: 300;
+                    margin: 10px 0 20px;
+                    text-align: center;
+                  "
                 >
                   Welcome to WikaTalk! To complete your registration and ensure
                   the security of your account, please verify your email address
@@ -230,7 +138,6 @@ const emailTemplates = {
 
                 <!-- Verification Code -->
                 <div
-                  class="code-container"
                   style="
                     background-color: #ffffff;
                     border-radius: 6px;
@@ -240,12 +147,11 @@ const emailTemplates = {
                   "
                 >
                   <p
-                    class="verification-code"
                     style="
                       font-size: 40px;
                       letter-spacing: 10px;
                       font-weight: bold;
-                      color: #ce1126;
+                      color: #ff3b30;
                       margin: 0;
                       font-family: monospace;
                     "
@@ -254,13 +160,9 @@ const emailTemplates = {
                   </p>
                 </div>
 
-                <p
-                  class="expiry-note"
-                  style="color: #fff; font-size: 14px; margin: 20px 0"
-                >
+                <p style="color: #fff; font-size: 14px; margin: 20px 0">
                   This verification code will expire in 30 minutes. If you
-                  didn't create a WikaTalk account, you can safely ignore this
-                  email.
+                  didn't create an account, you can safely ignore this email.
                 </p>
               </td>
             </tr>
@@ -268,7 +170,6 @@ const emailTemplates = {
             <!-- Footer -->
             <tr>
               <td
-                class="footer"
                 style="
                   padding: 20px 40px;
                   background-color: #f8f8f8;
@@ -276,7 +177,6 @@ const emailTemplates = {
                 "
               >
                 <p
-                  class="footer-text"
                   style="
                     color: #999999;
                     font-size: 12px;
@@ -300,14 +200,8 @@ const emailTemplates = {
             style="max-width: 600px; margin: 20px auto 0"
           >
             <tr>
-              <td
-                class="additional-info"
-                style="text-align: center; padding: 0 20px"
-              >
-                <p
-                  class="info-text"
-                  style="color: #999999; font-size: 12px; margin: 0"
-                >
+              <td style="text-align: center; padding: 0 20px">
+                <p style="color: #999999; font-size: 12px; margin: 0">
                   This is an automated message, please do not reply to this
                   email.<br />
                   You're receiving this email because you recently created a new
@@ -321,18 +215,23 @@ const emailTemplates = {
     </table>
   </body>
 </html>
-
-    `,
+`,
   }),
   welcome: (name) => ({
     subject: "Welcome to WikaTalk!",
-    html: `
-    <!DOCTYPE html>
+    html: `<!DOCTYPE html>
 <html>
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Welcome to WikaTalk</title>
+    <!-- POPPINS FONT-->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap"
+      rel="stylesheet"
+    />
     <style type="text/css">
       body,
       p,
@@ -341,7 +240,7 @@ const emailTemplates = {
       a,
       table,
       td {
-        font-family: Arial, sans-serif;
+        font-family: "Poppins", sans-serif;
         line-height: 1.5;
       }
     </style>
@@ -362,11 +261,7 @@ const emailTemplates = {
             style="
               max-width: 600px;
               margin: 0 auto;
-              background: linear-gradient(
-                to bottom,
-                rgba(0, 56, 168, 0.8),
-                rgba(206, 17, 38, 0.8)
-              );
+              background: #0a0f28;
               border-radius: 8px;
               box-shadow: 0 2px 4px rgba(0, 0, 0, 0.37);
             "
@@ -375,30 +270,38 @@ const emailTemplates = {
             <tr>
               <td style="padding: 30px 40px; text-align: center">
                 <img
-                  class="logo-img"
-                  style="max-width: 80px; height: auto; pointer-events: none"
-                  src="https://i.imgur.com/4vxin6d.png"
+                  style="
+                    background: transparent;
+                    background-color: transparent;
+                    width: 90px;
+                    height: auto;
+                    pointer-events: none;
+                  "
+                  src="https://github.com/Adrian9502/wikatalk-thesis-speech-interpreter/blob/main/frontend/assets/images/WikaTalk-logo.png?raw=true"
                   alt="WikaTalk-logo"
                 />
                 <h1
                   class="logo-text"
                   style="
-                    color: #fff;
+                    color: #ffdc04;
                     margin: 0;
                     font-size: 30px;
-                    font-weight: bold;
-                    text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.3);
+                    font-weight: 700;
+                    word-spacing: -15px;
                   "
                 >
-                  WikaTalk
+                  Wika<span
+                    style="font-size: 30px; font-weight: 700; color: #fff"
+                    >Talk</span
+                  >
                 </h1>
+
                 <h2
-                  class="tagline"
                   style="
-                    color: #facc15;
+                    color: #fff;
                     margin: 0;
-                    font-size: 15px;
-                    font-weight: bold;
+                    font-size: 12px;
+                    font-weight: 500;
                   "
                 >
                   Speak Freely, Understand Instantly.
@@ -410,15 +313,37 @@ const emailTemplates = {
             <tr>
               <td style="padding: 40px">
                 <!-- Personalized Greeting -->
-                <p style="color: #fff; font-size: 20px; margin: 0 0 20px">
+                <h2
+                  style="
+                    color: #fff;
+                    font-size: 20px;
+                    font-weight: 600;
+                    margin: 10;
+                  "
+                >
+                  Welcome to Your Language Journey
+                </h2>
+                <p
+                  style="
+                    color: #ffffff;
+                    font-size: 15px;
+                    font-weight: 500;
+                    margin: 10px 0 20px;
+                    text-align: center;
+                  "
+                >
                   Mabuhay, <b>${name}</b>!
                 </p>
 
-                <h2 style="color: #fff; font-size: 22px; margin: 0 0 20px">
-                  Welcome to Your Language Journey
-                </h2>
-
-                <p style="color: #ffffff; font-size: 16px; margin: 0 0 20px">
+                <p
+                  style="
+                    color: #ffffff;
+                    font-size: 14px;
+                    font-weight: 400;
+                    margin: 10px 0 20px;
+                    text-align: center;
+                  "
+                >
                   Thank you for joining WikaTalk! We're excited to help you
                   break down language barriers across the Philippines. Here's
                   what you can do with your new account:
@@ -459,7 +384,7 @@ const emailTemplates = {
                                     style="
                                       width: 32px;
                                       height: 32px;
-                                      background-color: rgba(0, 56, 168, 0.8);
+                                      background-color: #1f51ff;
                                       border-radius: 50%;
                                       text-align: center;
                                       line-height: 32px;
@@ -473,17 +398,17 @@ const emailTemplates = {
                                 <td style="vertical-align: top">
                                   <h3
                                     style="
-                                      color: rgba(206, 17, 38, 0.8);
+                                      color: #ff3b30;
                                       margin: 0 0 8px;
-                                      font-size: 16px;
-                                      font-weight: 600;
+                                      font-size: 18px;
+                                      font-weight: 700;
                                     "
                                   >
                                     Speech-to-Speech Translation
                                   </h3>
                                   <p
                                     style="
-                                      color: #555;
+                                      color: #333;
                                       margin: 0;
                                       font-size: 14px;
                                     "
@@ -510,7 +435,7 @@ const emailTemplates = {
                                     style="
                                       width: 32px;
                                       height: 32px;
-                                      background-color: rgba(0, 56, 168, 0.8);
+                                      background-color: #1f51ff;
                                       border-radius: 50%;
                                       text-align: center;
                                       line-height: 32px;
@@ -524,17 +449,17 @@ const emailTemplates = {
                                 <td style="vertical-align: top">
                                   <h3
                                     style="
-                                      color: rgba(206, 17, 38, 0.8);
+                                      color: #ff3b30;
                                       margin: 0 0 8px;
-                                      font-size: 16px;
-                                      font-weight: 600;
+                                      font-size: 18px;
+                                      font-weight: 700;
                                     "
                                   >
                                     Text Translation
                                   </h3>
                                   <p
                                     style="
-                                      color: #555;
+                                      color: #222;
                                       margin: 0;
                                       font-size: 14px;
                                     "
@@ -561,7 +486,7 @@ const emailTemplates = {
                                     style="
                                       width: 32px;
                                       height: 32px;
-                                      background-color: rgba(0, 56, 168, 0.8);
+                                      background-color: #1f51ff;
                                       border-radius: 50%;
                                       text-align: center;
                                       line-height: 32px;
@@ -575,17 +500,17 @@ const emailTemplates = {
                                 <td style="vertical-align: top">
                                   <h3
                                     style="
-                                      color: rgba(206, 17, 38, 0.8);
+                                      color: #ff3b30;
                                       margin: 0 0 8px;
-                                      font-size: 16px;
-                                      font-weight: 600;
+                                      font-size: 18px;
+                                      font-weight: 700;
                                     "
                                   >
                                     Text Scanning
                                   </h3>
                                   <p
                                     style="
-                                      color: #555;
+                                      color: #222;
                                       margin: 0;
                                       font-size: 14px;
                                     "
@@ -612,7 +537,7 @@ const emailTemplates = {
                                     style="
                                       width: 32px;
                                       height: 32px;
-                                      background-color: rgba(0, 56, 168, 0.8);
+                                      background-color: #1f51ff;
                                       border-radius: 50%;
                                       text-align: center;
                                       line-height: 32px;
@@ -626,17 +551,17 @@ const emailTemplates = {
                                 <td style="vertical-align: top">
                                   <h3
                                     style="
-                                      color: rgba(206, 17, 38, 0.8);
+                                      color: #ff3b30;
                                       margin: 0 0 8px;
-                                      font-size: 16px;
-                                      font-weight: 600;
+                                      font-size: 18px;
+                                      font-weight: 700;
                                     "
                                   >
                                     Translation History
                                   </h3>
                                   <p
                                     style="
-                                      color: #555;
+                                      color: #222;
                                       margin: 0;
                                       font-size: 14px;
                                     "
@@ -710,17 +635,22 @@ const emailTemplates = {
     </table>
   </body>
 </html>
-
-    `,
+`,
   }),
   passwordReset: (name, resetCode) => ({
     subject: "Password Reset Request",
-    html: `
-      <!DOCTYPE html>
+    html: `<!DOCTYPE html>
 <html>
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <!-- POPPINS FONT-->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap"
+      rel="stylesheet"
+    />
     <title>Password Reset Code - WikaTalk</title>
     <style type="text/css">
       /* Reset styles for email clients */
@@ -731,7 +661,7 @@ const emailTemplates = {
       a,
       table,
       td {
-        font-family: Arial, sans-serif;
+        font-family: "Poppins", sans-serif;
         line-height: 1.5;
       }
     </style>
@@ -752,11 +682,7 @@ const emailTemplates = {
             style="
               max-width: 600px;
               margin: 0 auto;
-              background: linear-gradient(
-                to bottom,
-                rgba(0, 56, 168, 0.8),
-                rgba(206, 17, 38, 0.8)
-              );
+              background: #0a0f28;
               border-radius: 8px;
               box-shadow: 0 2px 4px rgba(0, 0, 0, 0.37);
             "
@@ -765,30 +691,38 @@ const emailTemplates = {
             <tr>
               <td style="padding: 30px 40px; text-align: center">
                 <img
-                  class="logo-img"
-                  style="max-width: 70px; height: auto; pointer-events: none"
-                  src="https://i.imgur.com/4vxin6d.png"
+                  style="
+                    background: transparent;
+                    background-color: transparent;
+                    width: 90px;
+                    height: auto;
+                    pointer-events: none;
+                  "
+                  src="https://github.com/Adrian9502/wikatalk-thesis-speech-interpreter/blob/main/frontend/assets/images/WikaTalk-logo.png?raw=true"
                   alt="WikaTalk-logo"
                 />
                 <h1
                   class="logo-text"
                   style="
-                    color: #fff;
+                    color: #ffdc04;
                     margin: 0;
                     font-size: 30px;
-                    font-weight: bold;
-                    text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.3);
+                    font-weight: 700;
+                    word-spacing: -15px;
                   "
                 >
-                  WikaTalk
+                  Wika<span
+                    style="font-size: 30px; font-weight: 700; color: #fff"
+                    >Talk</span
+                  >
                 </h1>
+
                 <h2
-                  class="tagline"
                   style="
-                    color: #facc15;
+                    color: #fff;
                     margin: 0;
-                    font-size: 15px;
-                    font-weight: bold;
+                    font-size: 12px;
+                    font-weight: 500;
                   "
                 >
                   Speak Freely, Understand Instantly.
@@ -800,16 +734,28 @@ const emailTemplates = {
             <tr>
               <td style="padding: 40px">
                 <!-- Personalized Greeting -->
-
-                <h2 style="color: #fff; font-size: 22px; margin: 0 0 20px">
+                <h2
+                  style="
+                    color: #fff;
+                    font-size: 23px;
+                    font-weight: 600;
+                    margin: 10;
+                  "
+                >
                   Password Reset
                 </h2>
 
-                <p style="color: #fff; font-size: 20px; margin: 0 0 20px">
-                  Hi <b>${name}</b>,
-                </p>
+                <p style="color: #fff; font-size: 20px">Hi <b>${name}</b>,</p>
 
-                <p style="color: #ffffff; font-size: 16px; margin: 0 0 20px">
+                <p
+                  style="
+                    color: #ffffff;
+                    font-size: 16px;
+                    font-weight: 300;
+                    margin: 10px 0 20px;
+                    text-align: center;
+                  "
+                >
                   We received a request to reset your password. Use the
                   following code to complete the process:
                 </p>
@@ -829,7 +775,7 @@ const emailTemplates = {
                       font-size: 40px;
                       letter-spacing: 10px;
                       font-weight: bold;
-                      color: rgba(0, 56, 168, 0.8);
+                      color: #ff3b30;
                       margin: 0;
                       font-family: monospace;
                     "
@@ -838,12 +784,28 @@ const emailTemplates = {
                   </p>
                 </div>
 
-                <p style="color: #fff; font-size: 14px; margin: 20px 0">
+                <p
+                  style="
+                    color: #ffffff;
+                    font-size: 16px;
+                    font-weight: 300;
+                    margin: 10px 0 20px;
+                    text-align: center;
+                  "
+                >
                   This code will expire in 30 minutes.
                 </p>
-                <p style="color: #fff; font-size: 14px; margin: 20px 0">
-                  If you didn't request a password reset, you can safely ignore
-                  this email.
+                <p
+                  style="
+                    color: #ffffff;
+                    font-size: 16px;
+                    font-weight: 300;
+                    margin: 10px 0 20px;
+                    text-align: center;
+                  "
+                >
+                  If you didn’t request a password reset, no action is required,
+                  and you can safely ignore this email.
                 </p>
               </td>
             </tr>
@@ -879,18 +841,22 @@ const emailTemplates = {
     </table>
   </body>
 </html>
-
-
-    `,
+`,
   }),
   passwordChanged: (name, formattedDate, formattedTime) => ({
     subject: "Password Changed Successfully",
-    html: `
-    <!DOCTYPE html>
+    html: `<!DOCTYPE html>
 <html>
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <!-- POPPINS FONT-->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap"
+      rel="stylesheet"
+    />
     <title>Your Password Has Been Successfully Changed</title>
     <style type="text/css">
       /* Reset styles for email clients */
@@ -901,7 +867,7 @@ const emailTemplates = {
       a,
       table,
       td {
-        font-family: Arial, sans-serif;
+        font-family: "Poppins", sans-serif;
         line-height: 1.5;
       }
     </style>
@@ -922,11 +888,7 @@ const emailTemplates = {
             style="
               max-width: 600px;
               margin: 0 auto;
-              background: linear-gradient(
-                to bottom,
-                rgba(0, 56, 168, 0.8),
-                rgba(206, 17, 38, 0.8)
-              );
+              background: #0a0f28;
               border-radius: 8px;
               box-shadow: 0 2px 4px rgba(0, 0, 0, 0.37);
             "
@@ -935,30 +897,38 @@ const emailTemplates = {
             <tr>
               <td style="padding: 30px 40px; text-align: center">
                 <img
-                  class="logo-img"
-                  style="max-width: 70px; height: auto; pointer-events: none"
-                  src="https://i.imgur.com/4vxin6d.png"
+                  style="
+                    background: transparent;
+                    background-color: transparent;
+                    width: 90px;
+                    height: auto;
+                    pointer-events: none;
+                  "
+                  src="https://github.com/Adrian9502/wikatalk-thesis-speech-interpreter/blob/main/frontend/assets/images/WikaTalk-logo.png?raw=true"
                   alt="WikaTalk-logo"
                 />
                 <h1
                   class="logo-text"
                   style="
-                    color: #fff;
+                    color: #ffdc04;
                     margin: 0;
                     font-size: 30px;
-                    font-weight: bold;
-                    text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.3);
+                    font-weight: 700;
+                    word-spacing: -15px;
                   "
                 >
-                  WikaTalk
+                  Wika<span
+                    style="font-size: 30px; font-weight: 700; color: #fff"
+                    >Talk</span
+                  >
                 </h1>
+
                 <h2
-                  class="tagline"
                   style="
-                    color: #facc15;
+                    color: #fff;
                     margin: 0;
-                    font-size: 15px;
-                    font-weight: bold;
+                    font-size: 12px;
+                    font-weight: 500;
                   "
                 >
                   Speak Freely, Understand Instantly.
@@ -971,13 +941,21 @@ const emailTemplates = {
               <td style="padding: 40px">
                 <!-- Personalized Greeting -->
 
-                <h2 style="color: #fff; font-size: 22px; margin: 10">
+                <h2
+                  style="
+                    color: #fff;
+                    font-size: 23px;
+                    font-weight: 600;
+                    margin: 10;
+                  "
+                >
                   Your Password Has Been Changed
                 </h2>
                 <p
                   style="
                     color: #ffffff;
                     font-size: 16px;
+                    font-weight: 300;
                     margin: 10px 0 20px;
                     text-align: left;
                   "
@@ -986,13 +964,12 @@ const emailTemplates = {
                   We wanted to let you know that your password was successfully
                   changed on
                   <span
-                    style="color: #facc15; font-weight: 600; font-size: 18px"
+                    style="color: #ffdc04; font-weight: 600; font-size: 18px"
                     >${formattedDate}, ${formattedTime}</span
                   >. If you made this change, no further action is needed.
                   However, if you did not request this password change, please
                   reset your password immediately and contact our support team.
-                </p>
-                <p style="color: #fff; font-size: 16px; margin: 20px 0">
+                  <br /><br />
                   For your security, we recommend using a strong and unique
                   password.
                 </p>
@@ -1030,8 +1007,7 @@ const emailTemplates = {
     </table>
   </body>
 </html>
-
-    `,
+`,
   }),
 };
 
