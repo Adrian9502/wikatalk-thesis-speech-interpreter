@@ -138,7 +138,6 @@ const VerifyEmail: React.FC = () => {
       style={[
         dynamicStyles.container,
         {
-          backgroundColor: TITLE_COLORS.customNavyBlue,
           justifyContent: "center",
           alignItems: "center",
         },
