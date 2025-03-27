@@ -98,11 +98,11 @@ const Index = () => {
     };
   }, [isAppReady, isLoggedIn]);
 
-  // useEffect(() => {
-  //   setTimeout(() => {
-  //     router.replace("/(tabs)/Speech");
-  //   }, 2000);
-  // }, []);
+  useEffect(() => {
+    setTimeout(() => {
+      router.replace("/(tabs)/Speech");
+    }, 2000);
+  }, []);
 
   const switchTab = (tab: TabType) => {
     // Only animate if the tab is actually changing

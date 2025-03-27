@@ -9,7 +9,6 @@ import { PaperProvider } from "react-native-paper";
 import { AuthProvider } from "@/context/AuthContext";
 import Toast from "react-native-toast-message";
 import { SafeAreaProvider } from "react-native-safe-area-context";
-import "react-native-reanimated";
 import AppLoading from "@/components/AppLoading";
 import ThemeProvider from "@/components/ThemeProvider";
 SplashScreen.preventAutoHideAsync();

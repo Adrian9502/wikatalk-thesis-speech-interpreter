@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useRef } from "react";
 import {
   View,
   StyleSheet,
@@ -6,6 +6,7 @@ import {
   Image,
   Text,
   TouchableOpacity,
+  Easing,
   ImageSourcePropType,
   Animated,
 } from "react-native";
@@ -33,16 +34,88 @@ const LanguageBottomSection: React.FC<LanguageBottomSectionProps> = ({
   showLanguageDetails,
   micAnimation,
 }) => {
+  // Animation for microphone icon scaling
+  const micAnimationPulse = useRef(new Animated.Value(1)).current;
+
+  // Animation for pulse shadow
+  const pulseAnim = useRef(new Animated.Value(0)).current;
+
+  // Microphone icon scaling animation
+  useEffect(() => {
+    Animated.loop(
+      Animated.sequence([
+        Animated.timing(micAnimationPulse, {
+          toValue: 1.1,
+          duration: 500,
+          easing: Easing.ease,
+          useNativeDriver: true,
+        }),
+        Animated.timing(micAnimationPulse, {
+          toValue: 1,
+          duration: 500,
+          easing: Easing.ease,
+          useNativeDriver: true,
+        }),
+      ])
+    ).start();
+  }, [micAnimationPulse]);
+
+  // Pulse shadow animation
+  useEffect(() => {
+    if (recording) {
+      Animated.loop(
+        Animated.sequence([
+          Animated.parallel([
+            Animated.timing(pulseAnim, {
+              toValue: 1,
+              duration: 1500,
+              useNativeDriver: true,
+            }),
+          ]),
+        ])
+      ).start();
+    } else {
+      pulseAnim.setValue(0);
+    }
+  }, [recording, pulseAnim]);
   return (
     <View style={styles.bottomSection}>
       <TouchableOpacity
         activeOpacity={0.8}
         onPress={() => handlePress(userId)}
-        style={[styles.micButton, { backgroundColor: COLORS.primary }]}
+        style={[
+          styles.micButton,
+          {
+            backgroundColor: recording ? "#F82C2C" : COLORS.primary,
+          },
+        ]}
       >
+        {recording && (
+          <Animated.View
+            style={{
+              position: "absolute",
+              width: "100%",
+              height: "100%",
+              borderRadius: 50, // Matches button's border radius
+              backgroundColor: "rgba(248, 44, 44, 0.2)", // Translucent red
+              transform: [
+                {
+                  scale: pulseAnim.interpolate({
+                    inputRange: [0, 1],
+                    outputRange: [1, 2.5],
+                  }),
+                },
+              ],
+              opacity: pulseAnim.interpolate({
+                inputRange: [0, 1],
+                outputRange: [0.7, 0],
+              }),
+            }}
+          />
+        )}
         <Animated.View style={{ transform: [{ scale: micAnimation }] }}>
           <MaterialCommunityIcons
-            name={recording ? "microphone" : "microphone-outline"}
+            name={recording ? "microphone" : "microphone-off"}
             size={28}
             color={BASE_COLORS.white}
           />
