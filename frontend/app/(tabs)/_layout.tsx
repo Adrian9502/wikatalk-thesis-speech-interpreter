@@ -27,7 +27,13 @@ const TabIcon: React.FC<TabIconProps> = ({ Icon, color, name, focused }) => {
   }, [focused]);
 
   return (
-    <View style={{ alignItems: "center", justifyContent: "center", width: 70 }}>
+    <View
+      style={{
+        alignItems: "center",
+        justifyContent: "center",
+        width: 70,
+      }}
+    >
       <Animated.View
         style={{
           alignItems: "center",
@@ -37,9 +43,9 @@ const TabIcon: React.FC<TabIconProps> = ({ Icon, color, name, focused }) => {
       >
         <Icon
           stroke={color}
-          width={focused ? 23 : 22}
-          height={focused ? 23 : 22}
-          strokeWidth={focused ? 1.5 : 1.5}
+          width={focused ? 22 : 21}
+          height={focused ? 22 : 21}
+          strokeWidth={1.5}
         />
 
         <Animated.Text
@@ -48,25 +54,13 @@ const TabIcon: React.FC<TabIconProps> = ({ Icon, color, name, focused }) => {
             textAlign: "center",
             color: color,
             fontFamily: focused ? "Poppins-Medium" : "Poppins-Regular",
-            marginTop: 6,
+            marginTop: 5,
             opacity,
           }}
           numberOfLines={1}
         >
           {name}
         </Animated.Text>
-
-        {focused && (
-          <Animated.View
-            style={{
-              width: 4,
-              height: 4,
-              borderRadius: 2,
-              backgroundColor: color,
-              marginTop: 3,
-            }}
-          />
-        )}
       </Animated.View>
     </View>
   );
@@ -75,9 +69,6 @@ const TabIcon: React.FC<TabIconProps> = ({ Icon, color, name, focused }) => {
 export default function TabsLayout() {
   // Get the active theme from the store
   const { activeTheme } = useThemeStore();
-
-  console.log(activeTheme);
-
   // Modern active color with better contrast against dark navy
   const activeColor = activeTheme.tabActiveColor;
   const inactiveColor = activeTheme.tabInactiveColor;
@@ -91,13 +82,12 @@ export default function TabsLayout() {
         tabBarStyle: {
           backgroundColor: activeTheme.tabBarColor,
           height: 68,
-          paddingBottom: 8,
           paddingTop: 10,
           borderTopWidth: 0,
         },
         tabBarBackground: () => (
           <LinearGradient
-            colors={[`${activeTheme.tabBarColor}90`, activeTheme.tabBarColor]}
+            colors={[activeTheme.tabBarColor, activeTheme.tabBarColor]}
             style={{
               position: "absolute",
               left: 0,

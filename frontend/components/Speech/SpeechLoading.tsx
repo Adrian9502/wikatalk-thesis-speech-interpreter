@@ -1,72 +1,24 @@
-import React, { useEffect } from "react";
-import { View, StyleSheet, Animated, Easing } from "react-native";
+import React from "react";
+import { View, StyleSheet, Animated } from "react-native";
 import DotsLoader from "@/components/DotLoader";
-
+import useThemeStore from "@/store/useThemeStore";
 const SpeechLoading: React.FC = () => {
-  // Modern color palette with vibrant colors
+  const { activeTheme } = useThemeStore();
+
   const colors: string[] = ["#FCD116", "#4785ff", "#ce1126", "#FCD116"];
-
-  // Create animated values
-  const barAnimation = React.useRef(new Animated.Value(0)).current;
-  const textOpacity = React.useRef(new Animated.Value(0)).current;
-
-  useEffect(() => {
-    // Text fade in
-    Animated.timing(textOpacity, {
-      toValue: 1,
-      duration: 800,
-      easing: Easing.out(Easing.cubic),
-      useNativeDriver: true,
-    }).start();
-
-    // Progress bar animation
-    Animated.loop(
-      Animated.timing(barAnimation, {
-        toValue: 1,
-        duration: 1500,
-        easing: Easing.inOut(Easing.cubic),
-        useNativeDriver: false,
-      })
-    ).start();
-
-    return () => {
-      // Cleanup animations
-      barAnimation.stopAnimation();
-      textOpacity.stopAnimation();
-    };
-  }, []);
-
-  // Interpolate bar width
-  const barWidth = barAnimation.interpolate({
-    inputRange: [0, 0.5, 1],
-    outputRange: ["5%", "70%", "5%"],
-  });
-
-  // Interpolate bar color
-  const barColor = barAnimation.interpolate({
-    inputRange: [0, 0.25, 0.5, 0.75, 1],
-    outputRange: colors.concat(colors[0]),
-  });
 
   return (
     <View style={styles.overlay}>
-      <View style={styles.container}>
-        <Animated.Text style={[styles.loadingText, { opacity: textOpacity }]}>
+      <View
+        style={[
+          styles.container,
+          { backgroundColor: activeTheme.backgroundColor },
+        ]}
+      >
+        <Animated.Text style={[styles.loadingText]}>
           Translating...
         </Animated.Text>
 
-        {/* Progress bar */}
-        <View style={styles.progressBarContainer}>
-          <Animated.View
-            style={[
-              styles.progressBar,
-              {
-                width: barWidth,
-                backgroundColor: barColor,
-              },
-            ]}
-          />
-        </View>
         <DotsLoader colors={colors} />
       </View>
     </View>
@@ -90,7 +42,7 @@ const styles = StyleSheet.create({
   },
   container: {
     backgroundColor: "#0a0f28",
-    width: "80%",
+    width: "75%",
     maxWidth: 350,
     alignItems: "center",
     justifyContent: "center",
