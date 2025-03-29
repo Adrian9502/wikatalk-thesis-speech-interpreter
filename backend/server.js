@@ -2,6 +2,7 @@ const express = require("express");
 const cors = require("cors");
 const bodyParser = require("body-parser");
 const connectDB = require("./config/db");
+
 require("dotenv").config();
 
 const app = express();
@@ -21,9 +22,11 @@ app.get("/", (req, res) => {
 
 // Import routes
 const userRoutes = require("./routes/user.routes");
+const audioRoutes = require("./routes/audio.routes");
 
 // Mount routes - simplify route mounting to avoid duplication
 app.use("/api/users", userRoutes);
+app.use("/api/audio", audioRoutes);
 
 // Test route
 app.get("/api/users/test", (req, res) => {
