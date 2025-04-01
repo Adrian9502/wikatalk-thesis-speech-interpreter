@@ -12,6 +12,7 @@ import SpeechLoading from "@/components/Speech/SpeechLoading";
 import useLanguageStore from "@/store/useLanguageStore";
 import useThemeStore from "@/store/useThemeStore";
 import { getGlobalStyles } from "@/styles/globalStyles";
+import axios from "axios"; // Add this import
 
 const Speech = () => {
   // Theme store
@@ -48,6 +49,29 @@ const Speech = () => {
     }
   };
 
+  // New function to save translation to history
+  const saveToHistory = async (
+    fromLang: string,
+    toLang: string,
+    originalText: string,
+    translatedText: string
+  ) => {
+    try {
+      const BACKEND_URL =
+        process.env.EXPO_PUBLIC_BACKEND_URL || "http://localhost:5000";
+      await axios.post(`${BACKEND_URL}/api/translations`, {
+        type: "Speech",
+        fromLanguage: fromLang,
+        toLanguage: toLang,
+        originalText,
+        translatedText,
+      });
+      console.log("Translation saved to history");
+    } catch (error) {
+      console.error("Failed to save translation history:", error);
+    }
+  };
+
   // Handle microphone press
   const handleMicPress = async (userNum: number) => {
     setActiveUser(userNum);
@@ -63,6 +87,16 @@ const Speech = () => {
         if (result) {
           handleTextfield(result.translatedText, result.transcribedText);
           speakText(result.translatedText);
+
+          // Save to history - only if we have actual text
+          if (result.transcribedText && result.translatedText) {
+            await saveToHistory(
+              sourceLang,
+              targetLang,
+              result.transcribedText,
+              result.translatedText
+            );
+          }
         }
       }
     } else {

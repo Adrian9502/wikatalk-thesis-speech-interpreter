@@ -23,11 +23,11 @@ app.get("/", (req, res) => {
 // Import routes
 const userRoutes = require("./routes/user.routes");
 const audioRoutes = require("./routes/audio.routes");
+const translationRoutes = require("./routes/translation.routes");
 
-// Mount routes - simplify route mounting to avoid duplication
 app.use("/api/users", userRoutes);
 app.use("/api/audio", audioRoutes);
-
+app.use("/api/translations", translationRoutes);
 // Test route
 app.get("/api/users/test", (req, res) => {
   res.send("WikaTalk API is running");

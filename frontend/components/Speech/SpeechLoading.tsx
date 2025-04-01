@@ -1,14 +1,24 @@
 import React from "react";
-import { View, StyleSheet, Animated } from "react-native";
+import { View, StyleSheet, Animated, Dimensions } from "react-native";
 import DotsLoader from "@/components/DotLoader";
 import useThemeStore from "@/store/useThemeStore";
+
 const SpeechLoading: React.FC = () => {
   const { activeTheme } = useThemeStore();
-
   const colors: string[] = ["#FCD116", "#4785ff", "#ce1126", "#FCD116"];
 
+  // Get screen dimensions to ensure full coverage
+  const { height, width } = Dimensions.get("window");
+
   return (
-    <View style={styles.overlay}>
+    <View
+      style={[
+        styles.overlay,
+        { width, height }, // Ensure full screen coverage
+      ]}
+      // This ensures touch events are captured by this view
+      pointerEvents="auto"
+    >
       <View
         style={[
           styles.container,
@@ -36,6 +46,7 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     flex: 1,
+    zIndex: 9999,
     alignItems: "center",
     justifyContent: "center",
     backgroundColor: "rgba(0, 0, 0, 0.5)",
@@ -47,7 +58,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     padding: 24,
-    zIndex: 999,
+    zIndex: 10000, // Even higher z-index
     borderRadius: 16,
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 8 },
@@ -64,17 +75,5 @@ const styles = StyleSheet.create({
     fontSize: 14,
     marginBottom: 20,
     letterSpacing: 0.5,
-  },
-  progressBarContainer: {
-    width: "100%",
-    height: 4,
-    backgroundColor: "rgba(255, 255, 255, 0.1)",
-    borderRadius: 4,
-    overflow: "hidden",
-    marginBottom: 20,
-  },
-  progressBar: {
-    height: 4,
-    borderRadius: 4,
   },
 });
