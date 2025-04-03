@@ -150,7 +150,6 @@ const styles = StyleSheet.create({
   dropdownText: {
     fontSize: 16,
     fontFamily: "Poppins-Regular",
-    fontWeight: "500",
   },
   controls: {
     flexDirection: "row",

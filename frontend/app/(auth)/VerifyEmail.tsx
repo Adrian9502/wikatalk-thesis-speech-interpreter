@@ -302,7 +302,6 @@ const styles = StyleSheet.create({
     marginLeft: 8,
     fontFamily: "Poppins-Regular",
     color: BASE_COLORS.darkText,
-    fontWeight: "500",
   },
   noteContainer: {
     backgroundColor: "#F0F8FF",
@@ -349,9 +348,8 @@ const styles = StyleSheet.create({
   },
   resendButtonText: {
     color: "#0038A8",
-    fontSize: 14,
+    fontSize: 12,
     fontFamily: "Poppins-Regular",
-    fontWeight: "600",
   },
   resendDisabledText: {
     color: "#9CA3AF",

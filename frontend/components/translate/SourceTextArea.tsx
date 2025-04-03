@@ -130,7 +130,6 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 16,
     fontFamily: "Poppins-Regular",
-    fontWeight: "600",
   },
   controls: {
     flexDirection: "row",
@@ -162,7 +161,6 @@ const styles = StyleSheet.create({
   textField: {
     fontFamily: "Poppins-Regular",
     fontSize: 17,
-    fontWeight: "400",
     flex: 1,
     lineHeight: 24,
     textAlignVertical: "top",

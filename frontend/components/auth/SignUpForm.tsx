@@ -82,7 +82,6 @@ const styles = StyleSheet.create({
     fontSize: 13,
   },
   helpTextBold: {
-    fontWeight: "600",
     fontFamily: "Poppins-Regular",
   },
 });

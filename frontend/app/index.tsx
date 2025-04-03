@@ -13,7 +13,6 @@ import {
 } from "react-native";
 import { StatusBar } from "expo-status-bar";
 import { router } from "expo-router";
-import { SafeAreaView } from "react-native-safe-area-context";
 import { useAuth } from "@/context/AuthContext";
 import { useValidation } from "@/context/ValidationContext";
 import { BASE_COLORS } from "@/constant/colors";
@@ -150,7 +149,7 @@ const Index = () => {
 
   return (
     <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
-      <SafeAreaView style={[dynamicStyles.container]}>
+      <View style={[dynamicStyles.container]}>
         <StatusBar style="light" />
         <View
           style={{ flex: 1, justifyContent: "center", alignItems: "center" }}
@@ -224,7 +223,7 @@ const Index = () => {
             </View>
           </KeyboardAvoidingView>
         </View>
-      </SafeAreaView>
+      </View>
     </TouchableWithoutFeedback>
   );
 };

@@ -200,7 +200,6 @@ const styles = StyleSheet.create({
     color: BASE_COLORS.white,
     fontSize: 14,
     fontFamily: "Poppins-Regular",
-    fontWeight: "600",
   },
 });
 

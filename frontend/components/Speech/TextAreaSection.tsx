@@ -52,7 +52,6 @@ const styles = StyleSheet.create({
   textField: {
     fontFamily: "Poppins-Regular",
     fontSize: 17,
-    fontWeight: "400",
     flex: 1,
     lineHeight: 24,
     textAlignVertical: "top",

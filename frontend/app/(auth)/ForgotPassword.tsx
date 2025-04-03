@@ -18,7 +18,6 @@ import { useValidation } from "@/context/ValidationContext";
 import { useAuth } from "@/context/AuthContext";
 import FormMessage from "@/components/FormMessage";
 import { router } from "expo-router";
-import { SafeAreaView } from "react-native-safe-area-context";
 import { BASE_COLORS, TITLE_COLORS } from "@/constant/colors";
 import Logo from "@/components/Logo";
 import useThemeStore from "@/store/useThemeStore";
@@ -162,7 +161,7 @@ const ForgotPassword: React.FC = () => {
   };
 
   return (
-    <SafeAreaView
+    <View
       style={[
         dynamicStyles.container,
         {
@@ -296,7 +295,7 @@ const ForgotPassword: React.FC = () => {
           </View>
         </View>
       </KeyboardAvoidingView>
-    </SafeAreaView>
+    </View>
   );
 };
 
@@ -378,7 +377,6 @@ export const styles = StyleSheet.create({
     marginLeft: 8,
     fontFamily: "Poppins-Regular",
     color: BASE_COLORS.darkText,
-    fontWeight: "500",
   },
   resendButton: {
     marginTop: 16,
@@ -386,9 +384,8 @@ export const styles = StyleSheet.create({
   },
   resendButtonText: {
     color: "#0038A8",
-    fontSize: 14,
+    fontSize: 12,
     fontFamily: "Poppins-Regular",
-    fontWeight: "600",
   },
   resendDisabledText: {
     fontFamily: "Poppins-Regular",

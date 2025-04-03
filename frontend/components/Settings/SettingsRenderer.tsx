@@ -150,7 +150,7 @@ const styles = StyleSheet.create({
   avatarText: {
     fontSize: 24,
     color: "white",
-    fontWeight: "bold",
+    fontFamily: "Poppins-Medium",
   },
   userInfoContainer: {
     flex: 1,

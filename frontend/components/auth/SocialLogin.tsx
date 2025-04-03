@@ -82,7 +82,7 @@ const styles = StyleSheet.create({
   },
   googleButtonText: {
     fontSize: 14,
-    fontWeight: "500",
+    fontFamily: "Poppins-Regular",
     color: BASE_COLORS.white,
   },
 });

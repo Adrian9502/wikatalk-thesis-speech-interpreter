@@ -29,8 +29,8 @@ const LanguageInfoModal: React.FC<LanguageInfoModalProps> = ({
   if (!visible || !languageName || !LANGUAGE_INFO[languageName]) {
     return null;
   }
-  const { activeTheme } = useThemeStore(); // Get the dynamic styles based on the current theme
-  const dynamicStyles = getGlobalStyles(activeTheme.backgroundColor);
+  // Get the dynamic styles based on the current theme
+  const { activeTheme } = useThemeStore();
   const languageInfo = LANGUAGE_INFO[languageName];
   const windowHeight = Dimensions.get("window").height;
 
@@ -128,7 +128,14 @@ const LanguageInfoModal: React.FC<LanguageInfoModalProps> = ({
                     },
                   ]}
                 >
-                  <Text style={{ color: colors.text }}>{city}</Text>
+                  <Text
+                    style={{
+                      color: colors.text,
+                      fontFamily: "Poppins-Regular",
+                    }}
+                  >
+                    {city}
+                  </Text>
                 </View>
               ))}
             </View>
@@ -191,7 +198,9 @@ const LanguageInfoModal: React.FC<LanguageInfoModalProps> = ({
                 <Text style={[styles.culturalLabel, { color: colors.primary }]}>
                   Symbol
                 </Text>
-                <Text style={{ color: colors.text }}>
+                <Text
+                  style={{ color: colors.text, fontFamily: "Poppins-Regular" }}
+                >
                   {languageInfo.symbol}
                 </Text>
               </View>
@@ -200,7 +209,13 @@ const LanguageInfoModal: React.FC<LanguageInfoModalProps> = ({
                 <Text style={[styles.culturalLabel, { color: colors.primary }]}>
                   Fun Fact
                 </Text>
-                <Text style={{ color: colors.text, lineHeight: 20 }}>
+                <Text
+                  style={{
+                    color: colors.text,
+                    lineHeight: 20,
+                    fontFamily: "Poppins-Regular",
+                  }}
+                >
                   {languageInfo.fact}
                 </Text>
               </View>
@@ -249,7 +264,7 @@ const styles = StyleSheet.create({
   },
   titleText: {
     fontSize: 20,
-    fontWeight: "700",
+    fontFamily: "Poppins-Medium",
     textAlign: "center",
   },
   closeButton: {
@@ -281,13 +296,13 @@ const styles = StyleSheet.create({
     bottom: 16,
     left: 16,
     backgroundColor: "rgba(255, 111, 74, 0.9)",
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-    borderRadius: 20,
+    paddingHorizontal: 12,
+    paddingVertical: 4,
+    borderRadius: 10,
   },
   regionText: {
     color: "#FFFFFF",
-    fontWeight: "600",
+    fontFamily: "Poppins-Medium",
     fontSize: 14,
   },
   scrollView: {
@@ -305,8 +320,8 @@ const styles = StyleSheet.create({
     marginBottom: 12,
   },
   sectionTitle: {
-    fontWeight: "600",
-    fontSize: 17,
+    fontFamily: "Poppins-Medium",
+    fontSize: 15,
     marginLeft: 8,
   },
   tagsContainer: {
@@ -315,12 +330,16 @@ const styles = StyleSheet.create({
     marginLeft: -4,
   },
   tag: {
-    borderRadius: 16,
+    borderRadius: 12,
     paddingHorizontal: 14,
     paddingVertical: 8,
     marginLeft: 8,
     marginBottom: 8,
-    borderWidth: 1,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.04,
+    shadowRadius: 4,
+    elevation: 1,
   },
   cardsContainer: {
     flexDirection: "row",
@@ -339,11 +358,11 @@ const styles = StyleSheet.create({
   phraseLabel: {
     marginBottom: 8,
     fontSize: 14,
-    fontWeight: "600",
+    fontFamily: "Poppins-Regular",
   },
   phraseText: {
     fontSize: 16,
-    fontWeight: "500",
+    fontFamily: "Poppins-Regular",
   },
   culturalBox: {
     borderRadius: 16,
@@ -358,7 +377,7 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   culturalLabel: {
-    fontWeight: "600",
+    fontFamily: "Poppins-Regular",
     fontSize: 14,
     marginBottom: 8,
   },
