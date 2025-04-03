@@ -2,6 +2,7 @@ import { create } from "zustand";
 import { translateText } from "@/lib/translationService";
 import * as Speech from "expo-speech";
 import * as Clipboard from "expo-clipboard";
+import { saveTranslationHistory } from "@/utils/saveTranslationHistory";
 
 // Define types for the store
 type PhilippineLanguage =
@@ -89,6 +90,15 @@ export const useScanTranslateStore = create<ScanTranslateState>((set, get) => ({
         get().targetLanguage
       );
       set({ translatedText, isTranslating: false });
+
+      // Save to history
+      await saveTranslationHistory({
+        type: "Scan",
+        fromLanguage: "auto", // For auto-detected language
+        toLanguage: get().targetLanguage,
+        originalText: text,
+        translatedText,
+      });
     } catch (error) {
       set({
         error: error instanceof Error ? error : new Error("Translation failed"),

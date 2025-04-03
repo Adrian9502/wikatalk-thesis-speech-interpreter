@@ -1,10 +1,10 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { StatusBar } from "expo-status-bar";
 import {
   View,
   StyleSheet,
   ScrollView,
-  ActivityIndicator,
+  RefreshControl,
   Text,
   TouchableOpacity,
 } from "react-native";
@@ -17,7 +17,10 @@ import HistoryList from "@/components/Recent/HistoryList";
 import { TabType, HistoryItems } from "@/types/types";
 import axios from "axios";
 import { format } from "date-fns";
-
+import DotsLoader from "@/components/DotLoader";
+import { BASE_COLORS } from "@/constant/colors";
+import { useAuthStore } from "@/store/useAuthStore";
+import createAuthenticatedApi from "@/lib/api";
 interface TranslationAPIItem {
   _id: string;
   type: TabType;
@@ -48,18 +51,15 @@ const RecentTranslations: React.FC = () => {
   });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-
+  const [refreshing, setRefreshing] = useState(false);
   // Function to fetch history from the API
   const fetchHistory = async (tabType: TabType) => {
     try {
       setLoading(true);
       setError(null);
 
-      const BACKEND_URL =
-        process.env.EXPO_PUBLIC_BACKEND_URL || "http://localhost:5000";
-      const response = await axios.get(
-        `${BACKEND_URL}/api/translations?type=${tabType}`
-      );
+      const api = createAuthenticatedApi();
+      const response = await api.get(`/api/translations?type=${tabType}`);
 
       // Format the data to match our HistoryItems structure
       const formattedData = response.data.data.map(
@@ -72,7 +72,6 @@ const RecentTranslations: React.FC = () => {
           translatedText: item.translatedText,
         })
       );
-
       // Update just this tab's data
       setHistoryItems((prev) => ({
         ...prev,
@@ -91,6 +90,18 @@ const RecentTranslations: React.FC = () => {
     fetchHistory(activeTab);
   }, [activeTab]);
 
+  // Refresh function to reload data
+  const onRefresh = useCallback(() => {
+    setRefreshing(true);
+    fetchHistory(activeTab)
+      .then(() => {
+        setRefreshing(false);
+      })
+      .catch(() => {
+        setRefreshing(false);
+      });
+  }, [activeTab]);
+
   // Handle delete confirmation
   const handleDeletePress = (id: string): void => {
     setItemToDelete(id);
@@ -103,7 +114,15 @@ const RecentTranslations: React.FC = () => {
       try {
         const BACKEND_URL =
           process.env.EXPO_PUBLIC_BACKEND_URL || "http://localhost:5000";
-        await axios.delete(`${BACKEND_URL}/api/translations/${itemToDelete}`);
+
+        // Get token from auth store
+        const { userToken } = useAuthStore.getState();
+
+        await axios.delete(`${BACKEND_URL}/api/translations/${itemToDelete}`, {
+          headers: {
+            Authorization: `Bearer ${userToken}`,
+          },
+        });
 
         // Update local state after successful delete
         const updatedHistoryItems = { ...historyItems };
@@ -134,43 +153,54 @@ const RecentTranslations: React.FC = () => {
         {/* Tabs */}
         <TabSelector activeTab={activeTab} onTabChange={setActiveTab} />
 
-        {/* History Items */}
-        <ScrollView
-          style={styles.scrollView}
-          contentContainerStyle={[
-            styles.scrollContent,
-            historyItems[activeTab].length === 0 &&
-              !loading &&
-              styles.emptyScrollContent,
-          ]}
-          showsVerticalScrollIndicator={false}
-        >
-          {loading ? (
-            <View style={styles.loadingContainer}>
-              <ActivityIndicator
-                size="large"
-                color={activeTheme.tabActiveColor}
+        {/* Loading State */}
+        {loading ? (
+          <View style={styles.loadingContainer}>
+            <DotsLoader />
+          </View>
+        ) : error ? (
+          <View style={styles.errorContainer}>
+            <Text
+              style={[styles.errorText, { color: activeTheme.tabActiveColor }]}
+            >
+              {error}
+            </Text>
+            <TouchableOpacity
+              style={[
+                styles.retryButton,
+                { backgroundColor: BASE_COLORS.blue },
+              ]}
+              onPress={() => fetchHistory(activeTab)}
+            >
+              <Text style={styles.retryButtonText}>Retry</Text>
+            </TouchableOpacity>
+          </View>
+        ) : (
+          /* History Items */
+          <ScrollView
+            style={styles.scrollView}
+            contentContainerStyle={[
+              styles.scrollContent,
+              historyItems[activeTab].length === 0 && styles.emptyScrollContent,
+            ]}
+            showsVerticalScrollIndicator={false}
+            refreshControl={
+              <RefreshControl
+                refreshing={refreshing}
+                onRefresh={onRefresh}
+                colors={[BASE_COLORS.blue]} // Color of the refresh spinner
+                tintColor={activeTheme.tabActiveColor} // For iOS
+                progressBackgroundColor={activeTheme.backgroundColor} // For Android
               />
-              <Text style={styles.loadingText}>Loading history...</Text>
-            </View>
-          ) : error ? (
-            <View style={styles.errorContainer}>
-              <Text style={styles.errorText}>{error}</Text>
-              <TouchableOpacity
-                style={styles.retryButton}
-                onPress={() => fetchHistory(activeTab)}
-              >
-                <Text style={styles.retryButtonText}>Retry</Text>
-              </TouchableOpacity>
-            </View>
-          ) : (
+            }
+          >
             <HistoryList
               items={historyItems[activeTab]}
               activeTab={activeTab}
               onDeletePress={handleDeletePress}
             />
-          )}
-        </ScrollView>
+          </ScrollView>
+        )}
 
         {/* Delete Confirmation Modal */}
         <ConfirmationModal
@@ -194,16 +224,19 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   scrollContent: {
+    flexGrow: 1,
     paddingBottom: 24,
   },
   emptyScrollContent: {
-    flexGrow: 1,
+    justifyContent: "center",
+    alignItems: "center",
   },
   loadingContainer: {
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
-    height: 300,
+    height: "100%",
+    width: "100%",
   },
   loadingText: {
     marginTop: 12,
@@ -213,21 +246,20 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
-    height: 300,
+    height: "100%",
+    width: "100%",
   },
   errorText: {
-    color: "#ff3b30",
     fontFamily: "Poppins-Regular",
     marginBottom: 12,
   },
   retryButton: {
     paddingHorizontal: 20,
     paddingVertical: 8,
-    backgroundColor: "#1F51FF",
     borderRadius: 8,
   },
   retryButtonText: {
-    color: "#ffffff",
+    color: "#fff",
     fontFamily: "Poppins-Medium",
   },
 });

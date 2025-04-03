@@ -21,7 +21,13 @@ const Translate = () => {
     targetLanguage,
     stopSpeech,
     updateState,
+    clearSourceText,
   } = useTranslateStore();
+
+  // Clear source text when the component mounts
+  useEffect(() => {
+    clearSourceText;
+  }, []);
 
   // Stop speech when changing languages
   useEffect(() => {

@@ -1,6 +1,6 @@
 import { View, StyleSheet } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { StatusBar } from "expo-status-bar";
 import { LANGUAGE_INFO } from "@/constant/languages";
 import SwapButton from "@/components/Speech/SwapButton";
@@ -12,12 +12,10 @@ import SpeechLoading from "@/components/Speech/SpeechLoading";
 import useLanguageStore from "@/store/useLanguageStore";
 import useThemeStore from "@/store/useThemeStore";
 import { getGlobalStyles } from "@/styles/globalStyles";
-import axios from "axios"; // Add this import
-
+import { saveTranslationHistory } from "@/utils/saveTranslationHistory";
 const Speech = () => {
   // Theme store
   const { activeTheme } = useThemeStore();
-
   // Get the dynamic styles based on the current theme
   const dynamicStyles = getGlobalStyles(activeTheme.backgroundColor);
   // Zustand store
@@ -31,6 +29,7 @@ const Speech = () => {
     setActiveUser,
     setBothTexts,
     toggleLanguageInfo,
+    clearText,
   } = useLanguageStore();
 
   // Custom hooks
@@ -46,29 +45,6 @@ const Speech = () => {
       setBothTexts(translatedText, transcribedText);
     } else {
       setBothTexts(transcribedText, translatedText);
-    }
-  };
-
-  // New function to save translation to history
-  const saveToHistory = async (
-    fromLang: string,
-    toLang: string,
-    originalText: string,
-    translatedText: string
-  ) => {
-    try {
-      const BACKEND_URL =
-        process.env.EXPO_PUBLIC_BACKEND_URL || "http://localhost:5000";
-      await axios.post(`${BACKEND_URL}/api/translations`, {
-        type: "Speech",
-        fromLanguage: fromLang,
-        toLanguage: toLang,
-        originalText,
-        translatedText,
-      });
-      console.log("Translation saved to history");
-    } catch (error) {
-      console.error("Failed to save translation history:", error);
     }
   };
 
@@ -90,12 +66,13 @@ const Speech = () => {
 
           // Save to history - only if we have actual text
           if (result.transcribedText && result.translatedText) {
-            await saveToHistory(
-              sourceLang,
-              targetLang,
-              result.transcribedText,
-              result.translatedText
-            );
+            await saveTranslationHistory({
+              type: "Speech",
+              fromLanguage: sourceLang,
+              toLanguage: targetLang,
+              originalText: result.transcribedText,
+              translatedText: result.translatedText,
+            });
           }
         }
       }
@@ -104,7 +81,11 @@ const Speech = () => {
       startRecording();
     }
   };
-
+  // clear text on component mount
+  useEffect(() => {
+    clearText("top");
+    clearText("bottom");
+  }, []);
   return (
     <SafeAreaView
       edges={["top", "left", "right"]}

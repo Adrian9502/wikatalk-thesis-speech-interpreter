@@ -1,84 +1,75 @@
 const Translation = require("../models/translation.model");
+const { protect } = require("../middleware/auth.middleware");
 
-// Save a new translation to history
-exports.saveTranslation = async (req, res) => {
+// Update saveTranslation to get userId from authenticated request
+const saveTranslation = async (req, res) => {
   try {
     const { type, fromLanguage, toLanguage, originalText, translatedText } =
       req.body;
 
-    // Validate required fields
-    if (
-      !type ||
-      !fromLanguage ||
-      !toLanguage ||
-      !originalText ||
-      !translatedText
-    ) {
-      return res.status(400).json({
-        success: false,
-        message: "Missing required fields",
-      });
-    }
-
-    // Create new translation record
-    const translation = new Translation({
+    // Create translation object with user ID if available
+    const translationData = {
       type,
       fromLanguage,
       toLanguage,
       originalText,
       translatedText,
-    });
+    };
 
-    await translation.save();
+    // Add userId if request has authenticated user
+    if (req.user && req.user.id) {
+      translationData.userId = req.user.id;
+    }
 
-    return res.status(201).json({
+    const translation = await Translation.create(translationData);
+
+    res.status(201).json({
       success: true,
+      message: "Translation saved successfully",
       data: translation,
     });
   } catch (error) {
     console.error("Error saving translation:", error);
-    return res.status(500).json({
+    res.status(500).json({
       success: false,
-      message: error.message || "Failed to save translation",
+      message: "Failed to save translation",
+      error: error.message,
     });
   }
 };
 
-// Get translations, with optional type filter
-exports.getTranslations = async (req, res) => {
+// Update getTranslations to filter by userId
+const getTranslations = async (req, res) => {
   try {
     const { type } = req.query;
-    const query = {};
+    const filter = type ? { type } : {};
 
-    // Filter by type if provided
-    if (type && ["Speech", "Translate", "Scan"].includes(type)) {
-      query.type = type;
+    // If user is authenticated, filter by userId
+    if (req.user && req.user.id) {
+      filter.userId = req.user.id;
     }
 
-    const translations = await Translation.find(query)
-      .sort({ date: -1 }) // Newest first
-      .limit(100); // Limit results
+    const translations = await Translation.find(filter).sort({ date: -1 });
 
-    return res.status(200).json({
+    res.status(200).json({
       success: true,
       count: translations.length,
       data: translations,
     });
   } catch (error) {
-    console.error("Error retrieving translations:", error);
-    return res.status(500).json({
+    console.error("Error fetching translations:", error);
+    res.status(500).json({
       success: false,
-      message: error.message || "Failed to retrieve translations",
+      message: "Failed to fetch translations",
+      error: error.message,
     });
   }
 };
 
-// Delete a translation by ID
-exports.deleteTranslation = async (req, res) => {
+// Update deleteTranslation to check ownership
+const deleteTranslation = async (req, res) => {
   try {
-    const { id } = req.params;
-
-    const translation = await Translation.findByIdAndDelete(id);
+    const translation = await Translation.findById(req.params.id);
 
     if (!translation) {
       return res.status(404).json({
@@ -87,15 +78,37 @@ exports.deleteTranslation = async (req, res) => {
       });
     }
 
-    return res.status(200).json({
+    // Check if the translation belongs to the user
+    if (
+      req.user &&
+      req.user.id &&
+      translation.userId &&
+      translation.userId.toString() !== req.user.id.toString()
+    ) {
+      return res.status(403).json({
+        success: false,
+        message: "Not authorized to delete this translation",
+      });
+    }
+
+    await translation.deleteOne();
+
+    res.status(200).json({
       success: true,
       message: "Translation deleted successfully",
     });
   } catch (error) {
     console.error("Error deleting translation:", error);
-    return res.status(500).json({
+    res.status(500).json({
       success: false,
-      message: error.message || "Failed to delete translation",
+      message: "Failed to delete translation",
+      error: error.message,
     });
   }
+};
+
+module.exports = {
+  saveTranslation,
+  getTranslations,
+  deleteTranslation,
 };

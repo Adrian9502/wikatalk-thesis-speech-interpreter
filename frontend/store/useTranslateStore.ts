@@ -3,6 +3,7 @@ import { debounce } from "lodash";
 import * as Speech from "expo-speech";
 import { translateText } from "@/lib/translationService";
 import * as Clipboard from "expo-clipboard";
+import { saveTranslationHistory } from "@/utils/saveTranslationHistory";
 
 // Language code map interface
 interface LanguageCodeMap {
@@ -91,6 +92,15 @@ export const useTranslateStore = create<TranslateState>((set, get) => ({
         targetLanguage
       );
       set({ translatedText: result, isTranslating: false });
+
+      // Save to history
+      await saveTranslationHistory({
+        type: "Translate",
+        fromLanguage: sourceLanguage,
+        toLanguage: targetLanguage,
+        originalText: sourceText,
+        translatedText: result,
+      });
     } catch (error) {
       set({
         error: error instanceof Error ? error : new Error("Translation failed"),
@@ -121,6 +131,15 @@ export const useTranslateStore = create<TranslateState>((set, get) => ({
         targetLanguage
       );
       set({ translatedText: result, isTranslating: false });
+
+      // Save to history
+      await saveTranslationHistory({
+        type: "Translate",
+        fromLanguage: "auto", // For auto-detected language
+        toLanguage: targetLanguage,
+        originalText: text,
+        translatedText: result,
+      });
     } catch (error) {
       set({
         error: error instanceof Error ? error : new Error("Translation failed"),

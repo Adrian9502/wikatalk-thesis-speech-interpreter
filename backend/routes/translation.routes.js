@@ -5,10 +5,11 @@ const {
   getTranslations,
   deleteTranslation,
 } = require("../controllers/translation.controller");
+const { protect } = require("../middleware/auth.middleware");
 
-// Routes for translations
-router.post("/", saveTranslation);
-router.get("/", getTranslations);
-router.delete("/:id", deleteTranslation);
+// Protected routes - require authentication
+router.post("/", protect, saveTranslation);
+router.get("/", protect, getTranslations);
+router.delete("/:id", protect, deleteTranslation);
 
 module.exports = router;
