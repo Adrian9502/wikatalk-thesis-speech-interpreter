@@ -57,3 +57,14 @@ export interface HistoryItems {
   Translate: HistoryItemType[];
   Scan: HistoryItemType[];
 }
+
+// Theme types
+export type ThemeOption = {
+  name: string;
+  backgroundColor: string;
+  tabBarColor: string;
+  secondaryColor: string;
+  tabActiveColor: string;
+  tabInactiveColor: string;
+  lightColor: string;
+};

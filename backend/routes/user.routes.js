@@ -11,6 +11,7 @@ const {
   forgotPassword,
   resetPassword,
 } = require("../controllers/user.controller");
+
 const { protect } = require("../middleware/auth.middleware");
 
 // Public routes

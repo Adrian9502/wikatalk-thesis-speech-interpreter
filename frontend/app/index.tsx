@@ -30,7 +30,6 @@ import SubmitButton from "@/components/auth/SubmitButton";
 // Custom hook
 import { useAuthForms } from "@/hooks/useAuthForms";
 import Logo from "@/components/Logo";
-import AppLoading from "@/components/AppLoading";
 
 // Enable layout animation for Android
 if (Platform.OS === "android") {
@@ -76,10 +75,19 @@ const Index = () => {
   const tabIndicatorPosition = useRef(new Animated.Value(0)).current;
   const { signIn, signUp } = useAuthForms(signInSchema, signUpSchema);
 
+  const { syncThemeWithServer } = useThemeStore();
   // Handle app initialization and redirection
   useEffect(() => {
-    clearFormMessage();
     let mounted = true;
+
+    // If not logged in, reset to default theme
+    if (isAppReady && !isLoggedIn) {
+      useThemeStore.getState().resetToDefaultTheme();
+    } else if (isLoggedIn) {
+      // Only sync with server if logged in
+      syncThemeWithServer();
+    }
+    clearFormMessage();
 
     const initializeApp = async () => {
       if (isAppReady && mounted) {

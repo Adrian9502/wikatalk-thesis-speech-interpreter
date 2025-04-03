@@ -5,6 +5,7 @@ import axios from "axios";
 import { AppState, AppStateStatus, InteractionManager } from "react-native";
 import { router } from "expo-router";
 import { showToast } from "@/lib/showToast";
+import useThemeStore from "./useThemeStore";
 
 // API URL from environment
 const API_URL = `${process.env.EXPO_PUBLIC_BACKEND_URL}`;
@@ -92,6 +93,18 @@ const setupAxiosDefaults = (token: string | null) => {
   } else {
     delete axios.defaults.headers.common["Authorization"];
   }
+
+  // Add response interceptor for token expiry/auth issues
+  axios.interceptors.response.use(
+    (response) => response,
+    (error) => {
+      if (error.response?.status === 401) {
+        // Handle token expiry
+        console.warn("Authentication error, may need to log in again");
+      }
+      return Promise.reject(error);
+    }
+  );
 };
 
 // Test API connection
@@ -335,6 +348,9 @@ export const useAuthStore = create<AuthState>()(
             setupAxiosDefaults(token);
             set({ userToken: token, userData: user });
 
+            // After successful login, sync the theme
+            const themeStore = useThemeStore.getState();
+            await themeStore.syncThemeWithServer();
             InteractionManager.runAfterInteractions(() => {
               router.replace("/(tabs)/Speech");
             });
@@ -358,6 +374,7 @@ export const useAuthStore = create<AuthState>()(
         set({ isLoading: true });
 
         try {
+          useThemeStore.getState().resetToDefaultTheme();
           // Clear storage
           await Promise.all([
             AsyncStorage.removeItem("userToken"),

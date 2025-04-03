@@ -23,9 +23,11 @@ app.get("/", (req, res) => {
 // Import routes
 const userRoutes = require("./routes/user.routes");
 const translationRoutes = require("./routes/translation.routes");
+const themeRoutes = require("./routes/theme.routes");
 
 app.use("/api/users", userRoutes);
 app.use("/api/translations", translationRoutes);
+app.use("/api/users/theme", themeRoutes);
 // Test route
 app.get("/api/users/test", (req, res) => {
   res.send("WikaTalk API is running");
