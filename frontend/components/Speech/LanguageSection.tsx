@@ -1,5 +1,12 @@
 import React, { useState, useEffect } from "react";
-import { View, StyleSheet, Animated } from "react-native";
+import {
+  View,
+  StyleSheet,
+  Animated,
+  Keyboard,
+  KeyboardAvoidingView,
+  Platform,
+} from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { BASE_COLORS, getPositionalColors } from "@/constant/colors";
 import useLanguageStore from "@/store/useLanguageStore";
@@ -22,6 +29,7 @@ const LanguageSection: React.FC<LanguageSectionProps> = ({
 }) => {
   // Animation for microphone button
   const [micAnimation] = useState(new Animated.Value(1));
+  const [keyboardVisible, setKeyboardVisible] = useState(false);
 
   // Get state from Zustand store
   const {
@@ -61,6 +69,27 @@ const LanguageSection: React.FC<LanguageSectionProps> = ({
   // Get colors based on position using the utility function
   const COLORS = getPositionalColors(position);
 
+  // Track keyboard visibility
+  useEffect(() => {
+    const keyboardDidShowListener = Keyboard.addListener(
+      "keyboardDidShow",
+      () => {
+        setKeyboardVisible(true);
+      }
+    );
+    const keyboardDidHideListener = Keyboard.addListener(
+      "keyboardDidHide",
+      () => {
+        setKeyboardVisible(false);
+      }
+    );
+
+    return () => {
+      keyboardDidShowListener.remove();
+      keyboardDidHideListener.remove();
+    };
+  }, []);
+
   // Animation for recording
   useEffect(() => {
     if (recording) {
@@ -88,7 +117,15 @@ const LanguageSection: React.FC<LanguageSectionProps> = ({
   }, [recording]);
 
   return (
-    <View style={styles.translateContainer}>
+    <View
+      style={[
+        styles.translateContainer,
+        keyboardVisible &&
+          position === "bottom" &&
+          styles.keyboardVisibleBottom,
+        keyboardVisible && position === "top" && styles.keyboardVisibleTop,
+      ]}
+    >
       <LinearGradient
         colors={[COLORS.secondary, COLORS.background]}
         start={{ x: 0, y: 0 }}
@@ -107,18 +144,24 @@ const LanguageSection: React.FC<LanguageSectionProps> = ({
       />
 
       {/* Text Area */}
-      <TextAreaSection textField={textField} colors={COLORS} />
-
-      {/* Bottom Section */}
-      <LanguageBottomSection
-        language={language}
-        handlePress={handlePress}
-        recording={recording}
-        userId={userId}
+      <TextAreaSection
+        textField={textField}
         colors={COLORS}
-        showLanguageDetails={showLanguageDetails}
-        micAnimation={micAnimation}
+        position={position}
       />
+
+      {/* Bottom Section - Hide when keyboard is visible */}
+      {(!keyboardVisible || position === "top") && (
+        <LanguageBottomSection
+          language={language}
+          handlePress={handlePress}
+          recording={recording}
+          userId={userId}
+          colors={COLORS}
+          showLanguageDetails={showLanguageDetails}
+          micAnimation={micAnimation}
+        />
+      )}
     </View>
   );
 };
@@ -144,6 +187,12 @@ const styles = StyleSheet.create({
     right: 0,
     top: 0,
     bottom: 0,
+  },
+  keyboardVisibleBottom: {
+    height: "100%", // Expand the bottom section when keyboard is visible
+  },
+  keyboardVisibleTop: {
+    height: "70%", // Shrink the top section when keyboard is visible
   },
 });
 

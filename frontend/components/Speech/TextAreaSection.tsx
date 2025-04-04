@@ -1,16 +1,29 @@
 import React from "react";
 import { View, ScrollView, StyleSheet, TextInput } from "react-native";
 import { BASE_COLORS } from "@/constant/colors";
+import useLanguageStore from "@/store/useLanguageStore";
 
 interface TextAreaSectionProps {
   textField: string;
   colors: any;
+  position: "top" | "bottom";
 }
 
 const TextAreaSection: React.FC<TextAreaSectionProps> = ({
   textField,
   colors: COLORS,
+  position,
 }) => {
+  const { setUpperText, setBottomText } = useLanguageStore();
+
+  const handleTextChange = (text: string) => {
+    if (position === "top") {
+      setUpperText(text);
+    } else {
+      setBottomText(text);
+    }
+  };
+
   return (
     <View style={styles.textAreaWrapper}>
       <ScrollView
@@ -23,12 +36,13 @@ const TextAreaSection: React.FC<TextAreaSectionProps> = ({
         <TextInput
           value={textField}
           multiline={true}
-          editable={false}
+          editable={true}
           style={[styles.textField, { color: COLORS.text }]}
           placeholder={
             "Tap the microphone icon to begin recording. Tap again to stop."
           }
           placeholderTextColor={COLORS.placeholder}
+          onChangeText={handleTextChange}
         />
       </ScrollView>
     </View>

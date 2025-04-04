@@ -84,6 +84,8 @@ const useLanguageStore = create<LanguageStore>((set) => ({
     set((state) => ({
       language1: state.language2,
       language2: state.language1,
+      upperTextfield: state.bottomTextfield,
+      bottomTextfield: state.upperTextfield,
     })),
 
   copyToClipboard: async (text) => {
