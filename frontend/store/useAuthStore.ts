@@ -23,12 +23,6 @@ interface UserData {
   tempToken?: string;
 }
 
-interface ShowToastData {
-  type: "success" | "error" | "info";
-  title: string;
-  description: string;
-}
-
 interface AuthResponse {
   success: boolean;
   message?: string;
@@ -120,7 +114,7 @@ const testAPIConnection = async () => {
 };
 
 // Constants
-const INACTIVE_TIMEOUT = 5 * 60 * 1000; // 5 minutes
+const INACTIVE_TIMEOUT = 10 * 60 * 1000; // 10 minutes
 
 // Define the store
 export const useAuthStore = create<AuthState>()(
@@ -162,9 +156,19 @@ export const useAuthStore = create<AuthState>()(
             appInactiveTime &&
             currentTime - appInactiveTime > INACTIVE_TIMEOUT
           ) {
-            if (!userData?.tempToken || userData?.isVerified) {
-              get().clearStorage();
-            }
+            // Check if we're in a password reset flow
+            AsyncStorage.getItem("isResetPasswordFlow").then((isResetFlow) => {
+              if (isResetFlow === "true") {
+                // Only clear for password reset flow
+                get().clearResetData();
+                console.log("Reset flow timeout - cleared reset data");
+              } else if (userData?.tempToken && !userData?.isVerified) {
+                // Only clear for verification flow that's incomplete
+                get().clearStorage();
+                console.log("Verification flow timeout - cleared storage");
+              }
+              // Normal logged-in users are not affected
+            });
           }
           set({ appInactiveTime: null });
         } else if (nextAppState === "background") {
@@ -671,7 +675,7 @@ export const useAuthStore = create<AuthState>()(
           setTimeout(() => {
             router.replace("/");
           }, 1000);
-
+          console.log("✅ clearResetData run successfully!");
           return { success: true };
         } catch (error) {
           console.error("Error clearing storage:", error);
