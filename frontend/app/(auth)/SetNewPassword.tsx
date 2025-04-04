@@ -3,13 +3,11 @@ import {
   Pressable,
   Text,
   View,
-  ImageBackground,
   KeyboardAvoidingView,
   ActivityIndicator,
   Platform,
   StyleSheet,
 } from "react-native";
-import { LinearGradient } from "expo-linear-gradient";
 import { StatusBar } from "expo-status-bar";
 import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
@@ -21,7 +19,6 @@ import FormMessage from "@/components/FormMessage";
 import { router } from "expo-router";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { showToast } from "@/lib/showToast";
-import { SafeAreaView } from "react-native-safe-area-context";
 import useThemeStore from "@/store/useThemeStore";
 import { getGlobalStyles } from "@/styles/globalStyles";
 import { BASE_COLORS, TITLE_COLORS } from "@/constant/colors";
@@ -115,7 +112,7 @@ const SetNewPassword: React.FC = () => {
   };
 
   return (
-    <SafeAreaView style={[dynamicStyles.container, styles.safeAreaContainer]}>
+    <View style={[dynamicStyles.container, styles.safeAreaContainer]}>
       <StatusBar style="light" />
       {/* Logo */}
       <View style={styles.logoContainer}>
@@ -193,7 +190,7 @@ const SetNewPassword: React.FC = () => {
           </View>
         </View>
       </KeyboardAvoidingView>
-    </SafeAreaView>
+    </View>
   );
 };
 

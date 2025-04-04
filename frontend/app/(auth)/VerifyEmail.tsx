@@ -18,7 +18,6 @@ import { useAuth } from "@/context/AuthContext";
 import FormMessage from "@/components/FormMessage";
 import { router } from "expo-router";
 import { useValidation } from "@/context/ValidationContext";
-import { SafeAreaView } from "react-native-safe-area-context";
 import { BASE_COLORS, TITLE_COLORS } from "@/constant/colors";
 import Logo from "@/components/Logo";
 import useThemeStore from "@/store/useThemeStore";
@@ -137,7 +136,7 @@ const VerifyEmail: React.FC = () => {
   };
 
   return (
-    <SafeAreaView
+    <View
       style={[
         dynamicStyles.container,
         {
@@ -242,7 +241,7 @@ const VerifyEmail: React.FC = () => {
           </View>
         </View>
       </KeyboardAvoidingView>
-    </SafeAreaView>
+    </View>
   );
 };
 
