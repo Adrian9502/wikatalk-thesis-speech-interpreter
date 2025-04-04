@@ -19,6 +19,7 @@ interface LanguageSectionProps {
   handlePress: (userId: number) => void;
   recording?: boolean;
   userId: number;
+  onTextAreaFocus?: (position: "top" | "bottom") => void;
 }
 
 const LanguageSection: React.FC<LanguageSectionProps> = ({
@@ -26,6 +27,7 @@ const LanguageSection: React.FC<LanguageSectionProps> = ({
   handlePress,
   recording,
   userId,
+  onTextAreaFocus,
 }) => {
   // Animation for microphone button
   const [micAnimation] = useState(new Animated.Value(1));
@@ -148,6 +150,7 @@ const LanguageSection: React.FC<LanguageSectionProps> = ({
         textField={textField}
         colors={COLORS}
         position={position}
+        onTextAreaFocus={onTextAreaFocus}
       />
 
       {/* Bottom Section - Hide when keyboard is visible */}

@@ -1,6 +1,13 @@
-import { View, StyleSheet } from "react-native";
+import {
+  View,
+  StyleSheet,
+  KeyboardAvoidingView,
+  Platform,
+  Keyboard,
+  Animated,
+} from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { StatusBar } from "expo-status-bar";
 import { LANGUAGE_INFO } from "@/constant/languages";
 import SwapButton from "@/components/Speech/SwapButton";
@@ -13,11 +20,15 @@ import useLanguageStore from "@/store/useLanguageStore";
 import useThemeStore from "@/store/useThemeStore";
 import { getGlobalStyles } from "@/styles/globalStyles";
 import { saveTranslationHistory } from "@/utils/saveTranslationHistory";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
+
 const Speech = () => {
   // Theme store
   const { activeTheme } = useThemeStore();
   // Get the dynamic styles based on the current theme
   const dynamicStyles = getGlobalStyles(activeTheme.backgroundColor);
+  // Get safe area insets
+  const insets = useSafeAreaInsets();
   // Zustand store
   const {
     language1,
@@ -38,6 +49,12 @@ const Speech = () => {
 
   // track which user is recording
   const [recordingUser, setRecordingUser] = useState<number | null>(null);
+  // Track if keyboard is visible
+  const [keyboardVisible, setKeyboardVisible] = useState(false);
+  // Track which section is being edited (top=false, bottom=true)
+  const [isBottomActive, setIsBottomActive] = useState(false);
+  // Track content position
+  const contentPosition = useRef(new Animated.Value(0)).current;
 
   // Handle text field updates based on user
   const handleTextfield = (translatedText: string, transcribedText: string) => {
@@ -81,11 +98,62 @@ const Speech = () => {
       startRecording();
     }
   };
+
+  // Listen for text input focus to track which section is active
+  const handleTextAreaFocus = (position: "top" | "bottom") => {
+    setIsBottomActive(position === "bottom");
+  };
+
+  // Track keyboard visibility
+  useEffect(() => {
+    const keyboardDidShowListener = Keyboard.addListener(
+      "keyboardDidShow",
+      () => {
+        setKeyboardVisible(true);
+
+        // If bottom section is active, animate content up
+        if (isBottomActive) {
+          Animated.timing(contentPosition, {
+            toValue: -200, // Move content up by 200 units when keyboard shows
+            duration: 300,
+            useNativeDriver: true,
+          }).start();
+        }
+      }
+    );
+
+    const keyboardDidHideListener = Keyboard.addListener(
+      "keyboardDidHide",
+      () => {
+        setKeyboardVisible(false);
+
+        // Animate content back to original position
+        Animated.timing(contentPosition, {
+          toValue: 0,
+          duration: 300,
+          useNativeDriver: true,
+        }).start();
+      }
+    );
+
+    return () => {
+      keyboardDidShowListener.remove();
+      keyboardDidHideListener.remove();
+    };
+  }, [isBottomActive]);
+
   // clear text on component mount
   useEffect(() => {
     clearText("top");
     clearText("bottom");
   }, []);
+
+  // Calculate keyboard offset based on platform and tab bar height
+  const keyboardOffset =
+    Platform.OS === "ios"
+      ? 90 + insets.bottom // For iOS include the bottom inset
+      : 0; // Android doesn't need this offset with height behavior
+
   return (
     <SafeAreaView
       edges={["top", "left", "right"]}
@@ -93,31 +161,45 @@ const Speech = () => {
     >
       <StatusBar style="light" />
 
-      <View style={{ flex: 1 }}>
-        {/* Top section */}
-        <LanguageSection
-          position="top"
-          handlePress={handleMicPress}
-          recording={!!recording && recordingUser === 2}
-          userId={2}
-        />
-
-        {/* Middle Section - Exchange icon */}
-        <View style={styles.middleSection}>
-          <SwapButton
-            onPress={swapLanguages}
-            borderStyle={styles.swapButtonBorder}
+      <KeyboardAvoidingView
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
+        style={styles.keyboardAvoidingView}
+        keyboardVerticalOffset={keyboardOffset}
+        enabled={true}
+      >
+        <Animated.View
+          style={[
+            styles.contentContainer,
+            { transform: [{ translateY: contentPosition }] },
+          ]}
+        >
+          {/* Top section */}
+          <LanguageSection
+            position="top"
+            handlePress={handleMicPress}
+            recording={!!recording && recordingUser === 2}
+            userId={2}
+            onTextAreaFocus={handleTextAreaFocus}
           />
-        </View>
 
-        {/* Bottom section */}
-        <LanguageSection
-          position="bottom"
-          handlePress={handleMicPress}
-          recording={!!recording && recordingUser === 1}
-          userId={1}
-        />
-      </View>
+          {/* Middle Section - Exchange icon */}
+          <View style={styles.middleSection}>
+            <SwapButton
+              onPress={swapLanguages}
+              borderStyle={styles.swapButtonBorder}
+            />
+          </View>
+
+          {/* Bottom section */}
+          <LanguageSection
+            position="bottom"
+            handlePress={handleMicPress}
+            recording={!!recording && recordingUser === 1}
+            userId={1}
+            onTextAreaFocus={handleTextAreaFocus}
+          />
+        </Animated.View>
+      </KeyboardAvoidingView>
 
       {/* Language Information Modal */}
       {showLanguageInfo &&
@@ -141,6 +223,14 @@ const Speech = () => {
 export default Speech;
 
 const styles = StyleSheet.create({
+  keyboardAvoidingView: {
+    flex: 1,
+    width: "100%",
+  },
+  contentContainer: {
+    flex: 1,
+    width: "100%",
+  },
   middleSection: {
     alignItems: "center",
     justifyContent: "center",
