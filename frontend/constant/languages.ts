@@ -102,10 +102,10 @@ export const LANGUAGE_INFO: Record<string, LanguageInfo> = {
     commonGreetings: { hello: "Komusta", thankYou: "Dakal a Salamat" },
   },
   Bisaya: {
-    region: "Visayas, parts of Mindanao",
+    region: "Central and Eastern Visayas",
     majorCities: ["Cebu City", "Dumaguete", "Tagbilaran"],
     symbol: "Chocolate Hills",
-    fact: "Often used interchangeably with Cebuano but also includes other dialects",
+    fact: "Often used interchangeably with Cebuano but includes other Visayan dialects",
     commonGreetings: { hello: "Maayong adlaw", thankYou: "Salamat" },
   },
 };
