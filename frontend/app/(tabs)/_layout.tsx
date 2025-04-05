@@ -2,7 +2,6 @@ import { View, Animated } from "react-native";
 import React, { useRef, useEffect } from "react";
 import { Tabs } from "expo-router";
 import { Mic, Camera, Clock, Settings, Globe } from "react-native-feather";
-import { LinearGradient } from "expo-linear-gradient";
 import useThemeStore from "@/store/useThemeStore";
 
 interface TabIconProps {
@@ -86,14 +85,14 @@ export default function TabsLayout() {
           borderTopWidth: 0,
         },
         tabBarBackground: () => (
-          <LinearGradient
-            colors={[activeTheme.tabBarColor, activeTheme.tabBarColor]}
+          <View
             style={{
               position: "absolute",
               left: 0,
               right: 0,
               top: 0,
               bottom: 0,
+              backgroundColor: activeTheme.tabBarColor,
             }}
           />
         ),
