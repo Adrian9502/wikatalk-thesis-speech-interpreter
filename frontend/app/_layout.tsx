@@ -3,7 +3,6 @@ import { useFonts } from "expo-font";
 import { Stack } from "expo-router";
 import "react-native-url-polyfill/auto";
 import { SplashScreen } from "expo-router";
-import "../global.css";
 import { ValidationProvider } from "@/context/ValidationContext";
 import { PaperProvider } from "react-native-paper";
 import { AuthProvider } from "@/context/AuthContext";
