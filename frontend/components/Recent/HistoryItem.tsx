@@ -1,17 +1,79 @@
-import React from "react";
-import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
+import React, { useState, useRef, useEffect } from "react";
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  StyleSheet,
+  Pressable,
+  LayoutAnimation,
+  Platform,
+  UIManager,
+  Animated,
+} from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { Feather, Ionicons } from "@expo/vector-icons";
 import { Calendar } from "react-native-feather";
 import { BASE_COLORS, TITLE_COLORS } from "@/constant/colors";
 import { HistoryItemType } from "@/types/types";
 import TranslationText from "./TranslationText";
+
+// Enable LayoutAnimation for Android
+if (
+  Platform.OS === "android" &&
+  UIManager.setLayoutAnimationEnabledExperimental
+) {
+  UIManager.setLayoutAnimationEnabledExperimental(true);
+}
+
 interface HistoryItemProps {
   item: HistoryItemType;
   onDeletePress: (id: string) => void;
 }
 
 const HistoryItem: React.FC<HistoryItemProps> = ({ item, onDeletePress }) => {
+  const [expanded, setExpanded] = useState(false);
+  const [needsExpandButton, setNeedsExpandButton] = useState(false);
+  const contentRef = useRef<View>(null);
+  const fadeAnim = useRef(new Animated.Value(1)).current;
+
+  // Check if content exceeds collapsed height
+  useEffect(() => {
+    // Reset measurement when item changes
+    setNeedsExpandButton(false);
+
+    // Use a small delay to ensure content is properly laid out
+    const timer = setTimeout(() => {
+      if (contentRef.current) {
+        contentRef.current.measure((x, y, width, height, pageX, pageY) => {
+          // Only show the expand button if content height exceeds our threshold
+          setNeedsExpandButton(height > 120);
+        });
+      }
+    }, 100);
+
+    return () => clearTimeout(timer);
+  }, [item]);
+
+  const toggleExpansion = () => {
+    // Start fade out animation
+    Animated.timing(fadeAnim, {
+      toValue: 0,
+      duration: 150,
+      useNativeDriver: true,
+    }).start(() => {
+      // After fade out, change the expanded state
+      LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
+      setExpanded(!expanded);
+
+      // Then fade back in
+      Animated.timing(fadeAnim, {
+        toValue: 1,
+        duration: 300,
+        useNativeDriver: true,
+      }).start();
+    });
+  };
+
   return (
     <View style={styles.historyContainer}>
       {/* Date and Delete button */}
@@ -29,16 +91,20 @@ const HistoryItem: React.FC<HistoryItemProps> = ({ item, onDeletePress }) => {
           style={styles.deleteIcon}
           onPress={() => onDeletePress(item.id)}
         >
-          <Ionicons name="trash-outline" size={20} color={BASE_COLORS.white} />
+          <Ionicons name="trash-outline" size={15} color={BASE_COLORS.white} />
         </TouchableOpacity>
       </View>
 
       <View style={styles.contentContainer}>
         {/* Language Header */}
         <View style={styles.languageHeaderContainer}>
-          <View style={styles.languageHeaderContent}>
+          <LinearGradient
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 1 }}
+            colors={[BASE_COLORS.blue, BASE_COLORS.orange]}
+            style={styles.languageHeaderContent}
+          >
             <View style={styles.languageBlock}>
-              <Text style={styles.languageLabel}>From</Text>
               <Text style={styles.languageText}>{item.fromLanguage}</Text>
             </View>
 
@@ -48,33 +114,76 @@ const HistoryItem: React.FC<HistoryItemProps> = ({ item, onDeletePress }) => {
               end={{ x: 1, y: 1 }}
               style={styles.exchangeIconContainer}
             >
-              <Feather
-                name="repeat"
-                size={16}
-                color={TITLE_COLORS.customWhite}
-              />
+              <Feather name="repeat" size={16} color={BASE_COLORS.white} />
             </LinearGradient>
 
             <View style={styles.languageBlock}>
-              <Text style={styles.languageLabel}>To</Text>
               <Text style={styles.languageText}>{item.toLanguage}</Text>
             </View>
-          </View>
+          </LinearGradient>
         </View>
 
-        {/* Content Container */}
-        <View style={styles.translationContainer}>
-          <TranslationText
-            label="Original"
-            text={item.originalText}
-            isOriginal
-          />
-          <TranslationText
-            label="Translation"
-            text={item.translatedText}
-            isOriginal={false}
-          />
-        </View>
+        {/* Translation Content with Fade Animation */}
+        <Pressable onPress={needsExpandButton ? toggleExpansion : undefined}>
+          <Animated.View
+            style={[
+              styles.translationContainer,
+              expanded ? styles.expandedContainer : styles.collapsedContainer,
+              { opacity: fadeAnim },
+            ]}
+          >
+            <View ref={contentRef} style={styles.translationInnerContainer}>
+              <TranslationText
+                label="Original"
+                text={item.originalText}
+                isOriginal
+              />
+              <TranslationText
+                label="Translation"
+                text={item.translatedText}
+                isOriginal={false}
+              />
+            </View>
+
+            {/* Gradient fade when collapsed */}
+            {!expanded && needsExpandButton && (
+              <LinearGradient
+                colors={[
+                  "rgba(255,255,255,0)",
+                  "rgba(255,255,255,0.9)",
+                  "rgba(255,255,255,1)",
+                ]}
+                style={styles.expandGradient}
+              />
+            )}
+          </Animated.View>
+        </Pressable>
+
+        {/* Expand/Collapse Button with Animation - ONLY SHOW WHEN NEEDED */}
+        {needsExpandButton && (
+          <TouchableOpacity
+            style={styles.expandCollapseButton}
+            onPress={toggleExpansion}
+            activeOpacity={0.7}
+          >
+            <Animated.View
+              style={{
+                opacity: fadeAnim,
+                flexDirection: "row",
+                alignItems: "center",
+              }}
+            >
+              <Text style={styles.expandCollapseText}>
+                {expanded ? "Show Less" : "Show More"}
+              </Text>
+              <Ionicons
+                name={expanded ? "chevron-up" : "chevron-down"}
+                size={18}
+                color={BASE_COLORS.blue}
+              />
+            </Animated.View>
+          </TouchableOpacity>
+        )}
       </View>
     </View>
   );
@@ -96,17 +205,20 @@ const styles = StyleSheet.create({
     paddingHorizontal: 8,
     paddingVertical: 4,
     flexDirection: "row",
+    justifyContent: "center",
+    alignItems: "center",
   },
   dateIcon: {
     marginRight: 6,
+    alignSelf: "center",
   },
   dateText: {
-    fontFamily: "Poppins-Medium",
+    fontFamily: "Poppins-Regular",
     color: BASE_COLORS.white,
-    fontSize: 13,
+    fontSize: 12,
   },
   deleteIcon: {
-    padding: 4,
+    padding: 5,
     backgroundColor: BASE_COLORS.orange,
     borderRadius: 8,
   },
@@ -125,7 +237,6 @@ const styles = StyleSheet.create({
   },
   languageHeaderContent: {
     flexDirection: "row",
-    backgroundColor: BASE_COLORS.blue,
     justifyContent: "space-between",
     alignItems: "center",
     paddingVertical: 7,
@@ -135,30 +246,56 @@ const styles = StyleSheet.create({
     alignItems: "center",
     flex: 1,
   },
-  languageLabel: {
-    fontSize: 12,
-    fontFamily: "Poppins-Regular",
-    color: TITLE_COLORS.customWhite,
-  },
   languageText: {
-    fontSize: 17,
-    fontFamily: "Poppins-SemiBold",
+    fontSize: 16,
+    fontFamily: "Poppins-Medium",
     color: TITLE_COLORS.customWhite,
   },
   exchangeIconContainer: {
     width: 32,
     height: 32,
     borderWidth: 1,
-    borderColor: BASE_COLORS.lightBlue,
+    borderColor: BASE_COLORS.white,
     borderRadius: 16,
     justifyContent: "center",
     alignItems: "center",
   },
   translationContainer: {
+    position: "relative",
+    overflow: "hidden",
+  },
+  translationInnerContainer: {
     paddingHorizontal: 8,
     paddingVertical: 12,
     flexDirection: "row",
     gap: 12,
+  },
+  collapsedContainer: {
+    maxHeight: 120,
+  },
+  expandedContainer: {
+    // No max height constraint
+  },
+  expandGradient: {
+    height: 50,
+    position: "absolute",
+    bottom: 0,
+    left: 0,
+    right: 0,
+  },
+  expandCollapseButton: {
+    flexDirection: "row",
+    justifyContent: "center",
+    alignItems: "center",
+    padding: 10,
+    borderTopWidth: 1,
+    borderTopColor: "#f0f0f0",
+  },
+  expandCollapseText: {
+    fontFamily: "Poppins-Regular",
+    color: BASE_COLORS.blue,
+    fontSize: 13,
+    marginRight: 5,
   },
 });
 

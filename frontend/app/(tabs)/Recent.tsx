@@ -18,9 +18,10 @@ import { TabType, HistoryItems } from "@/types/types";
 import axios from "axios";
 import { format } from "date-fns";
 import DotsLoader from "@/components/DotLoader";
-import { BASE_COLORS } from "@/constant/colors";
+import { BASE_COLORS, TITLE_COLORS } from "@/constant/colors";
 import { useAuthStore } from "@/store/useAuthStore";
 import createAuthenticatedApi from "@/lib/api";
+import { showToast } from "@/lib/showToast";
 interface TranslationAPIItem {
   _id: string;
   type: TabType;
@@ -130,6 +131,11 @@ const RecentTranslations: React.FC = () => {
           (item) => item.id !== itemToDelete
         );
         setHistoryItems(updatedHistoryItems);
+        showToast({
+          type: "success",
+          title: "Translation Deleted",
+          description: "Translation deleted successfully.",
+        });
       } catch (err) {
         console.error("Error deleting history item:", err);
         setError("Failed to delete item. Please try again.");
@@ -188,9 +194,9 @@ const RecentTranslations: React.FC = () => {
               <RefreshControl
                 refreshing={refreshing}
                 onRefresh={onRefresh}
-                colors={[BASE_COLORS.blue]} // Color of the refresh spinner
+                colors={[BASE_COLORS.white]} // Color of the refresh spinner
                 tintColor={activeTheme.tabActiveColor} // For iOS
-                progressBackgroundColor={activeTheme.backgroundColor} // For Android
+                progressBackgroundColor={activeTheme.secondaryColor} // For Android
               />
             }
           >

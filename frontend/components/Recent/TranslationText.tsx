@@ -17,14 +17,11 @@ const TranslationText: React.FC<TranslationTextProps> = ({
     <View style={styles.textLabelContainer}>
       <Text style={styles.textLabel}>{label}</Text>
     </View>
-    <ScrollView
-      style={styles.textScrollView}
-      contentContainerStyle={styles.textScrollContent}
-    >
+    <View style={styles.textContainer}>
       <Text style={isOriginal ? styles.originalText : styles.translatedText}>
         {text}
       </Text>
-    </ScrollView>
+    </View>
   </View>
 );
 
@@ -33,9 +30,11 @@ export default TranslationText;
 const styles = StyleSheet.create({
   textSection: {
     flex: 1,
-    backgroundColor: TITLE_COLORS.customWhite,
+    backgroundColor: BASE_COLORS.white,
     borderRadius: 8,
-    padding: 12,
+    borderWidth: 1,
+    borderColor: BASE_COLORS.borderColor,
+    padding: 8,
   },
   textLabelContainer: {
     flexDirection: "row",
@@ -44,26 +43,23 @@ const styles = StyleSheet.create({
   },
   textLabel: {
     fontSize: 11,
-    fontFamily: "Poppins-Medium",
+    fontFamily: "Poppins-Regular",
     color: BASE_COLORS.placeholderText,
     marginRight: 6,
   },
-  textScrollView: {
-    maxHeight: 100,
-  },
-  textScrollContent: {
-    paddingRight: 8,
+  textContainer: {
+    width: "100%",
   },
   originalText: {
     color: BASE_COLORS.blue,
-    fontSize: 16,
-    fontFamily: "Poppins-Medium",
+    fontSize: 17,
+    fontFamily: "Poppins-Regular",
     lineHeight: 22,
   },
   translatedText: {
     color: BASE_COLORS.orange,
-    fontSize: 16,
-    fontFamily: "Poppins-Medium",
+    fontSize: 17,
+    fontFamily: "Poppins-Regular",
     lineHeight: 22,
   },
 });

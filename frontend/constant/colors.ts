@@ -54,8 +54,8 @@ Alternative colors for light blue and light pink
 */
 
 export const BASE_COLORS: Record<string, string> = {
-  blue: "#4A6FFF",
-  orange: "#FF6F4A",
+  blue: "#3B6FE5",
+  orange: "#FF6B6B",
   lightBlue: "#d9e3ff",
   lightPink: "#f2dfff",
   white: "#FFFFFF",

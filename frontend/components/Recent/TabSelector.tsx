@@ -1,5 +1,12 @@
-import React from "react";
-import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
+import React, { useRef, useEffect, useState } from "react";
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  StyleSheet,
+  Animated,
+  LayoutChangeEvent,
+} from "react-native";
 import { Feather } from "@expo/vector-icons";
 import { BASE_COLORS } from "@/constant/colors";
 import { TabType } from "@/types/types";
@@ -16,21 +23,65 @@ const TabSelector: React.FC<TabSelectorProps> = ({
 }) => {
   const tabs: TabType[] = ["Speech", "Translate", "Scan"];
 
+  // Store tab widths and positions
+  const [tabMeasurements, setTabMeasurements] = useState<
+    Array<{ x: number; width: number }>
+  >([]);
+
+  // For native animation of position only
+  const indicatorPosition = useRef(new Animated.Value(0)).current;
+
+  // Non-animated currentWidth state for the indicator
+  const [indicatorWidth, setIndicatorWidth] = useState(0);
+
+  // Handle container layout to get overall width
+  const handleContainerLayout = (event: LayoutChangeEvent) => {
+    const { width } = event.nativeEvent.layout;
+  };
+
+  // Handle tab layout to record position and width
+  const handleTabLayout = (index: number, event: LayoutChangeEvent) => {
+    const { x, width } = event.nativeEvent.layout;
+
+    setTabMeasurements((prev) => {
+      const newMeasurements = [...prev];
+      newMeasurements[index] = { x, width };
+      return newMeasurements;
+    });
+  };
+
+  // Update indicator position and width when activeTab changes
+  useEffect(() => {
+    const activeIndex = tabs.indexOf(activeTab);
+    if (activeIndex >= 0 && tabMeasurements[activeIndex]) {
+      const { x, width } = tabMeasurements[activeIndex];
+
+      // Animate position with native driver
+      Animated.spring(indicatorPosition, {
+        toValue: x,
+        useNativeDriver: true,
+        friction: 8,
+        tension: 50,
+      }).start();
+
+      // Set width directly (no animation)
+      setIndicatorWidth(width);
+    }
+  }, [activeTab, tabMeasurements, tabs, indicatorPosition]);
+
   return (
     <View style={styles.tabOuterContainer}>
-      <View style={styles.tabContainer}>
-        {tabs.map((tab) => (
+      <View style={styles.tabContainer} onLayout={handleContainerLayout}>
+        {tabs.map((tab, index) => (
           <TouchableOpacity
             key={tab}
-            style={[
-              styles.tabButton,
-              activeTab === tab && styles.activeTabButton,
-            ]}
+            style={styles.tabButton}
             onPress={() => onTabChange(tab)}
+            onLayout={(e) => handleTabLayout(index, e)}
           >
             <Feather
               name={getTabIcon(tab)}
-              size={20}
+              size={18}
               color={activeTab === tab ? BASE_COLORS.white : BASE_COLORS.blue}
             />
             <Text
@@ -43,6 +94,17 @@ const TabSelector: React.FC<TabSelectorProps> = ({
             </Text>
           </TouchableOpacity>
         ))}
+
+        {/* Animated Indicator - we set width directly and only animate translateX */}
+        <Animated.View
+          style={[
+            styles.indicator,
+            {
+              width: indicatorWidth, // Set width directly (not animated)
+              transform: [{ translateX: indicatorPosition }], // Only animate position
+            },
+          ]}
+        />
       </View>
     </View>
   );
@@ -55,7 +117,7 @@ const styles = StyleSheet.create({
   },
   tabContainer: {
     flexDirection: "row",
-    backgroundColor: BASE_COLORS.lightBlue,
+    backgroundColor: BASE_COLORS.white,
     borderRadius: 14,
     overflow: "hidden",
     shadowColor: "#000",
@@ -63,26 +125,33 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.06,
     shadowRadius: 8,
     elevation: 2,
+    position: "relative", // For absolute positioned indicator
   },
   tabButton: {
     flex: 1,
-    paddingVertical: 12,
+    paddingVertical: 9,
     alignItems: "center",
     justifyContent: "center",
     flexDirection: "row",
     gap: 8,
+    zIndex: 1, // Place above indicator
   },
-  activeTabButton: {
+  indicator: {
+    position: "absolute",
+    height: "100%",
     backgroundColor: BASE_COLORS.blue,
+    borderRadius: 12,
+    zIndex: 0, // Place below tabs
   },
   tabText: {
-    fontSize: 14,
-    fontFamily: "Poppins-Medium",
+    fontSize: 13,
+    fontFamily: "Poppins-Regular",
     color: BASE_COLORS.blue,
   },
   activeTabText: {
     color: BASE_COLORS.white,
-    fontFamily: "Poppins-SemiBold",
+    fontSize: 14,
+    fontFamily: "Poppins-Medium",
   },
 });
 
