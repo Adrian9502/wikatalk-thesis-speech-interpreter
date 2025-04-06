@@ -119,10 +119,10 @@ export const renderLogoutButton = (onPressLogout: () => void) => (
 // Styles
 const styles = StyleSheet.create({
   headerText: {
-    fontSize: 24,
-    fontFamily: "Poppins-SemiBold",
+    fontSize: 20,
+    fontFamily: "Poppins-Medium",
     color: BASE_COLORS.white,
-    marginBottom: 12,
+    marginBottom: 7,
   },
   profileContainer: {
     marginBottom: 24,
@@ -132,7 +132,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     backgroundColor: TITLE_COLORS.customWhite,
     padding: 12,
-    borderRadius: 14,
+    borderRadius: 16,
   },
   avatarContainer: {
     width: 64,
@@ -186,7 +186,7 @@ const styles = StyleSheet.create({
   },
   logoutButton: {
     backgroundColor: TITLE_COLORS.customRed,
-    borderRadius: 8,
+    borderRadius: 16,
     padding: 13,
     alignItems: "center",
     justifyContent: "center",

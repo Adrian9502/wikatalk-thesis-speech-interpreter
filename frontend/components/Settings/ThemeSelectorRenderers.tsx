@@ -3,7 +3,7 @@ import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { Feather } from "@expo/vector-icons";
 import { BASE_COLORS } from "@/constant/colors";
-import { ThemeOption } from "@/store/useThemeStore";
+import { ThemeOption } from "@/types/types";
 
 // Render functions
 export const renderHeader = (expanded: boolean, toggleExpanded: () => void) => (
@@ -95,11 +95,11 @@ const styles = StyleSheet.create({
     borderWidth: 2,
     borderColor: "transparent",
     backgroundColor: "transparent",
-    borderRadius: 12,
+    borderRadius: 16,
   },
   activeColorPreview: {
-    borderColor: BASE_COLORS.blue,
-    backgroundColor: BASE_COLORS.blue,
+    borderColor: BASE_COLORS.placeholderText,
+    backgroundColor: BASE_COLORS.placeholderText,
   },
   themeName: {
     fontFamily: "Poppins-Regular",

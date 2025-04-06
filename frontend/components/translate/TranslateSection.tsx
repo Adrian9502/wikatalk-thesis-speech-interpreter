@@ -199,13 +199,13 @@ const styles = StyleSheet.create({
     zIndex: 2000,
   },
   dropdown: {
-    borderRadius: 12,
+    borderRadius: 16,
     borderWidth: 1,
     height: 46,
     paddingHorizontal: 12,
   },
   dropdownList: {
-    borderRadius: 12,
+    borderRadius: 8,
     borderWidth: 1,
     backgroundColor: BASE_COLORS.white,
     shadowColor: "#000",
@@ -239,7 +239,7 @@ const styles = StyleSheet.create({
   },
   quickPhrasesContainer: {
     marginBottom: 16,
-    borderRadius: 12,
+    borderRadius: 16,
     padding: 10,
     overflow: "hidden",
     backgroundColor: "#e7edfd",

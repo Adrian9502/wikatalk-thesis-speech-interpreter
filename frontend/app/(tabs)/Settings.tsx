@@ -75,17 +75,6 @@ const Settings = () => {
       ],
     },
     {
-      title: "Preferences",
-      items: [
-        {
-          icon: "bell",
-          label: "Notifications",
-          value: notifications,
-          toggleSwitch: () => setNotifications(!notifications),
-        },
-      ],
-    },
-    {
       title: "Support",
       items: [
         {

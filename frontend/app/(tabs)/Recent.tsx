@@ -53,6 +53,7 @@ const RecentTranslations: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [refreshing, setRefreshing] = useState(false);
+
   // Function to fetch history from the API
   const fetchHistory = async (tabType: TabType) => {
     try {
@@ -266,7 +267,7 @@ const styles = StyleSheet.create({
   },
   retryButtonText: {
     color: "#fff",
-    fontFamily: "Poppins-Medium",
+    fontFamily: "Poppins-Regular",
   },
 });
 

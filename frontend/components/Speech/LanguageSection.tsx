@@ -173,7 +173,7 @@ const styles = StyleSheet.create({
   translateContainer: {
     width: "100%",
     height: "48%",
-    borderRadius: 24,
+    borderRadius: 16,
     overflow: "hidden",
     backgroundColor: BASE_COLORS.white,
     shadowColor: "#000",

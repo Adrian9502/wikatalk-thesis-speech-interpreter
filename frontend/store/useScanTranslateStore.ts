@@ -86,7 +86,7 @@ export const useScanTranslateStore = create<ScanTranslateState>((set, get) => ({
     try {
       const translatedText = await translateText(
         text,
-        "auto",
+        "Auto",
         get().targetLanguage
       );
       set({ translatedText, isTranslating: false });
@@ -94,7 +94,7 @@ export const useScanTranslateStore = create<ScanTranslateState>((set, get) => ({
       // Save to history
       await saveTranslationHistory({
         type: "Scan",
-        fromLanguage: "auto", // For auto-detected language
+        fromLanguage: "Auto Detect", // For auto-detected language
         toLanguage: get().targetLanguage,
         originalText: text,
         translatedText,

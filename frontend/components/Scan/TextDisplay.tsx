@@ -1,22 +1,22 @@
 import React from "react";
 import {
-  StyleSheet,
-  Text,
   View,
+  Text,
   TouchableOpacity,
-  TextInput,
+  StyleSheet,
   ScrollView,
+  TextInput,
+  ActivityIndicator,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { BASE_COLORS } from "@/constant/colors";
-import DotsLoader from "@/components/DotLoader";
 
 interface TextDisplayProps {
   title: string;
   text: string;
   placeholder: string;
   isLoading: boolean;
-  isSpeaking: boolean; // This will be isSourceSpeaking or isTargetSpeaking
+  isSpeaking: boolean;
   copied: boolean;
   onChangeText?: (text: string) => void;
   onCopy: () => void;
@@ -85,18 +85,33 @@ const TextDisplay: React.FC<TextDisplayProps> = ({
       <View style={styles.textAreaWrapper}>
         {isLoading ? (
           <View style={styles.loaderContainer}>
-            <DotsLoader />
+            <ActivityIndicator size="large" color={color} />
           </View>
+        ) : editable ? (
+          <ScrollView
+            style={styles.textArea}
+            contentContainerStyle={styles.scrollContent}
+            showsVerticalScrollIndicator={true}
+            nestedScrollEnabled={true}
+          >
+            <TextInput
+              value={text}
+              onChangeText={onChangeText}
+              multiline
+              style={styles.textField}
+              placeholder={placeholder}
+              placeholderTextColor={BASE_COLORS.placeholderText}
+              editable={editable}
+            />
+          </ScrollView>
         ) : (
           <ScrollView
             style={styles.textArea}
-            scrollEnabled={true}
-            nestedScrollEnabled={true}
-            showsVerticalScrollIndicator={false}
             contentContainerStyle={styles.scrollContent}
-            keyboardShouldPersistTaps="handled"
+            showsVerticalScrollIndicator={true}
+            nestedScrollEnabled={true}
           >
-            {editable ? (
+            {text ? (
               <TextInput
                 value={text}
                 onChangeText={onChangeText}
@@ -104,10 +119,18 @@ const TextDisplay: React.FC<TextDisplayProps> = ({
                 style={styles.textField}
                 placeholder={placeholder}
                 placeholderTextColor={BASE_COLORS.placeholderText}
-                textAlignVertical="top"
+                editable={false}
               />
             ) : (
-              <Text style={styles.translatedText}>{text || placeholder}</Text>
+              <TextInput
+                value={text}
+                onChangeText={onChangeText}
+                multiline
+                style={styles.textField}
+                placeholder={placeholder}
+                placeholderTextColor={BASE_COLORS.placeholderText}
+                editable={false}
+              />
             )}
           </ScrollView>
         )}
@@ -129,8 +152,8 @@ const styles = StyleSheet.create({
     marginBottom: 4,
   },
   sectionTitle: {
-    fontSize: 14,
-    fontFamily: "Poppins-Medium",
+    fontSize: 16,
+    fontFamily: "Poppins-Regular",
   },
   controls: {
     flexDirection: "row",
@@ -152,25 +175,32 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: "#F5F5F5",
     borderRadius: 8,
-    padding: 10,
     minHeight: 100,
+    maxHeight: 200,
   },
   scrollContent: {
     flexGrow: 1,
     minHeight: 80,
+    padding: 10,
   },
   textField: {
     fontFamily: "Poppins-Regular",
-    fontSize: 16,
-    color: "#333",
-    flex: 1,
+    fontSize: 17,
+    lineHeight: 24,
+    color: BASE_COLORS.darkText,
     textAlignVertical: "top",
     minHeight: 80,
   },
   translatedText: {
-    fontSize: 16,
+    fontSize: 17,
+    lineHeight: 24,
     fontFamily: "Poppins-Regular",
     color: "#333",
+  },
+  placeholderText: {
+    fontSize: 17,
+    fontFamily: "Poppins-Regular",
+    color: BASE_COLORS.placeholderText,
   },
   loaderContainer: {
     flex: 1,

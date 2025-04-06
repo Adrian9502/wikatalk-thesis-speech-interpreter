@@ -18,8 +18,8 @@ const LanguageSelector: React.FC<LanguageSelectorProps> = ({
 
   return (
     <View style={styles.languageSelectionContainer}>
+      <Text style={styles.languageLabel}>Translate to</Text>
       <View style={styles.dropdownContainer}>
-        <Text style={styles.languageLabel}>Translate to</Text>
         <Dropdown
           style={[
             styles.dropdown,
@@ -70,9 +70,10 @@ const styles = StyleSheet.create({
   },
   languageLabel: {
     fontSize: 16,
-    fontFamily: "Poppins-Medium",
+    fontFamily: "Poppins-Regular",
     color: BASE_COLORS.blue,
-    marginBottom: 7,
+    marginRight: 12,
+    minWidth: 100,
   },
   dropdownContainer: {
     flex: 1,
@@ -80,8 +81,7 @@ const styles = StyleSheet.create({
   },
   dropdown: {
     borderRadius: 8,
-    borderWidth: 1,
-    height: 50,
+    height: 40,
     paddingHorizontal: 12,
   },
   dropdownList: {

@@ -112,13 +112,13 @@ const TabSelector: React.FC<TabSelectorProps> = ({
 
 const styles = StyleSheet.create({
   tabOuterContainer: {
-    borderRadius: 14,
+    borderRadius: 16,
     marginBottom: 20,
   },
   tabContainer: {
     flexDirection: "row",
     backgroundColor: BASE_COLORS.white,
-    borderRadius: 14,
+    borderRadius: 16,
     overflow: "hidden",
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
@@ -140,7 +140,7 @@ const styles = StyleSheet.create({
     position: "absolute",
     height: "100%",
     backgroundColor: BASE_COLORS.blue,
-    borderRadius: 12,
+    borderRadius: 16,
     zIndex: 0, // Place below tabs
   },
   tabText: {

@@ -90,7 +90,7 @@ const ThemeSelector = () => {
 const styles = StyleSheet.create({
   container: {
     backgroundColor: "#fff",
-    borderRadius: 14,
+    borderRadius: 16,
     padding: 12,
   },
 });

@@ -26,8 +26,8 @@ interface ScanTranslateState {
   sourceText: string;
   translatedText: string;
   isTranslating: boolean;
-  isSourceSpeaking: boolean; // Updated property
-  isTargetSpeaking: boolean; // Updated property
+  isSourceSpeaking: boolean;
+  isTargetSpeaking: boolean;
   copiedSource: boolean;
   copiedTarget: boolean;
   clearText: () => void;
@@ -216,7 +216,7 @@ const Scan: React.FC = () => {
             )}
 
             <TextDisplay
-              title="Detected Text:"
+              title="Detected Text"
               text={sourceText}
               placeholder="Scan or select an image to detect text"
               isLoading={isProcessing}
@@ -233,7 +233,7 @@ const Scan: React.FC = () => {
             />
 
             <TextDisplay
-              title="Translation:"
+              title="Translation"
               text={translatedText}
               placeholder="Translation will appear here"
               isLoading={isTranslating}
@@ -285,16 +285,15 @@ const styles = StyleSheet.create({
     height: "40%",
     borderRadius: 16,
     overflow: "hidden",
-    borderWidth: 1,
-    borderColor: "white",
+
     shadowColor: "#000",
     elevation: 3,
   },
   translationContainer: {
     flex: 1,
     marginVertical: 10,
-    backgroundColor: "#E2EAFF",
-    borderRadius: 12,
+    backgroundColor: BASE_COLORS.lightBlue,
+    borderRadius: 16,
     padding: 16,
     paddingTop: 20,
     shadowColor: "#000",
@@ -305,7 +304,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     backgroundColor: BASE_COLORS.orange,
-    borderRadius: 8,
+    borderRadius: 16,
     overflow: "hidden",
     position: "relative",
   },

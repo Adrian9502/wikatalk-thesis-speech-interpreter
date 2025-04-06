@@ -38,7 +38,7 @@ const defaultTheme = {
 };
 
 // Helper function to get auth state without importing useAuthStore
-const getAuthState = () => {
+const getAuthState = async () => {
   // Dynamically import to avoid circular dependency
   try {
     // Get auth state directly from storage

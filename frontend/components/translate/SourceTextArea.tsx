@@ -101,7 +101,7 @@ const SourceTextArea = () => {
 const styles = StyleSheet.create({
   textSectionContainer: {
     height: "49%",
-    borderRadius: 24,
+    borderRadius: 16,
     overflow: "hidden",
     backgroundColor: BASE_COLORS.white,
     shadowColor: "#000",
@@ -128,7 +128,7 @@ const styles = StyleSheet.create({
     zIndex: 100,
   },
   sectionTitle: {
-    fontSize: 16,
+    fontSize: 18,
     fontFamily: "Poppins-Regular",
   },
   controls: {
