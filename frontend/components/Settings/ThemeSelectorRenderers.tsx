@@ -9,10 +9,20 @@ import { ThemeOption } from "@/types/types";
 export const renderHeader = (expanded: boolean, toggleExpanded: () => void) => (
   <View style={styles.headerRow}>
     <Text style={styles.title}>Choose Theme</Text>
-    <TouchableOpacity onPress={toggleExpanded}>
+    <TouchableOpacity
+      onPress={toggleExpanded}
+      activeOpacity={0.7}
+      style={styles.expandButtonContainer}
+    >
       <Text style={styles.expandButton}>
         {expanded ? "Show Less" : "Show More"}
       </Text>
+      <Feather
+        name={expanded ? "chevron-up" : "chevron-down"}
+        size={16}
+        color={BASE_COLORS.blue}
+        style={styles.expandIcon}
+      />
     </TouchableOpacity>
   </View>
 );
@@ -50,11 +60,7 @@ export const renderThemeRow = (
   onSelect: (theme: ThemeOption) => void
 ) => (
   <View style={styles.themeRow}>
-    {rowItems.map((theme) => (
-      <React.Fragment key={theme.name}>
-        {renderThemeItem(theme, activeTheme, onSelect)}
-      </React.Fragment>
-    ))}
+    {rowItems.map((theme) => renderThemeItem(theme, activeTheme, onSelect))}
   </View>
 );
 
@@ -67,45 +73,51 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: 13,
-    fontFamily: "Poppins-Medium",
-    color: "#333",
+    fontFamily: "Poppins-Regular",
+    color: BASE_COLORS.darkText,
+  },
+  expandButtonContainer: {
+    flexDirection: "row",
+    alignItems: "center",
   },
   expandButton: {
+    color: BASE_COLORS.blue,
     fontSize: 12,
-    color: "#4A6FFF",
-    fontFamily: "Poppins-Medium",
+    fontFamily: "Poppins-Regular",
+  },
+  expandIcon: {
+    marginLeft: 4,
   },
   themeRow: {
     flexDirection: "row",
-    justifyContent: "flex-start",
+    flexWrap: "wrap",
+    justifyContent: "space-between",
     marginBottom: 5,
   },
   themeItem: {
-    flex: 1,
+    width: "23%",
     alignItems: "center",
-    maxWidth: "33%",
   },
   colorPreview: {
-    width: 60,
-    height: 60,
-    padding: 5,
-    marginBottom: 6,
-    alignItems: "center",
-    justifyContent: "center",
-    borderWidth: 2,
-    borderColor: "transparent",
-    backgroundColor: "transparent",
+    width: 50,
+    height: 50,
     borderRadius: 16,
+    padding: 5,
+    borderColor: "transparent",
+    borderWidth: 2,
+    backgroundColor: "transparent",
+    justifyContent: "center",
+    alignItems: "center",
   },
   activeColorPreview: {
-    borderColor: BASE_COLORS.placeholderText,
-    backgroundColor: BASE_COLORS.placeholderText,
+    borderColor: BASE_COLORS.blue,
+    backgroundColor: BASE_COLORS.blue,
   },
   themeName: {
+    fontSize: 11,
     fontFamily: "Poppins-Regular",
-    fontSize: 12,
     textAlign: "center",
-    color: "#666",
+    color: BASE_COLORS.darkText,
   },
 });
 

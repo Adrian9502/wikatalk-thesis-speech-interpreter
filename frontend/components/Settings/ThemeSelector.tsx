@@ -1,5 +1,5 @@
-import React, { useState } from "react";
-import { View, StyleSheet } from "react-native";
+import React, { useState, useEffect, useRef } from "react";
+import { View, StyleSheet, Animated } from "react-native";
 import useThemeStore from "@/store/useThemeStore";
 import * as ThemeRenderers from "@/components/Settings/ThemeSelectorRenderers";
 import { ThemeOption } from "@/types/types";
@@ -13,6 +13,10 @@ type ThemeCategory = {
 const ThemeSelector = () => {
   const { themeOptions, activeTheme, setTheme } = useThemeStore();
   const [expanded, setExpanded] = useState(false);
+
+  // Animation values
+  const fadeAnim = useRef(new Animated.Value(1)).current;
+  const [animating, setAnimating] = useState(false);
 
   // Organize themes by category
   const categorizeThemes = (): ThemeCategory[] => {
@@ -61,6 +65,32 @@ const ThemeSelector = () => {
     return categories.flatMap((category) => category.themes.slice(0, 2));
   };
 
+  // Toggle expanded state with animation
+  const toggleExpanded = () => {
+    if (animating) return;
+
+    setAnimating(true);
+
+    // Fade out
+    Animated.timing(fadeAnim, {
+      toValue: 0,
+      duration: 250,
+      useNativeDriver: true,
+    }).start(() => {
+      // Change the expanded state
+      setExpanded(!expanded);
+
+      // Then fade back in
+      Animated.timing(fadeAnim, {
+        toValue: 1,
+        duration: 250,
+        useNativeDriver: true,
+      }).start(() => {
+        setAnimating(false);
+      });
+    });
+  };
+
   // Create grid layout by rows
   const renderThemeGrid = () => {
     const displayThemes = getDisplayThemes();
@@ -81,8 +111,10 @@ const ThemeSelector = () => {
 
   return (
     <View style={styles.container}>
-      {ThemeRenderers.renderHeader(expanded, () => setExpanded(!expanded))}
-      <View>{renderThemeGrid()}</View>
+      {ThemeRenderers.renderHeader(expanded, toggleExpanded)}
+      <Animated.View style={{ opacity: fadeAnim }}>
+        {renderThemeGrid()}
+      </Animated.View>
     </View>
   );
 };
