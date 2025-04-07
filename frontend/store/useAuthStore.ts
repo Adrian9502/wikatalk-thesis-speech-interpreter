@@ -6,7 +6,7 @@ import { AppState, AppStateStatus, InteractionManager } from "react-native";
 import { router } from "expo-router";
 import { showToast } from "@/lib/showToast";
 import useThemeStore from "./useThemeStore";
-
+import { useTranslateStore } from "./useTranslateStore";
 // API URL from environment
 const API_URL = `${process.env.EXPO_PUBLIC_BACKEND_URL}`;
 
@@ -376,6 +376,15 @@ export const useAuthStore = create<AuthState>()(
       // Logout user
       logout: async () => {
         set({ isLoading: true });
+        const { updateState } = useTranslateStore.getState();
+        updateState({
+          sourceText: "",
+          translatedText: "",
+          copiedSource: false,
+          copiedTarget: false,
+          isSourceSpeaking: false,
+          isTargetSpeaking: false,
+        });
 
         try {
           useThemeStore.getState().resetToDefaultTheme();

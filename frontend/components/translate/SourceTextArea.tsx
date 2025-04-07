@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import {
   View,
   TextInput,
@@ -11,6 +11,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import { BASE_COLORS } from "@/constant/colors";
 import { useTranslateStore } from "@/store/useTranslateStore";
+import { useAuthStore } from "@/store/useAuthStore";
 
 const SourceTextArea = () => {
   const {
@@ -24,6 +25,12 @@ const SourceTextArea = () => {
     clearSourceText,
   } = useTranslateStore();
 
+  const { userToken } = useAuthStore();
+  // Reset text area when the component mounts or when user changes
+  useEffect(() => {
+    // Clear any existing text to ensure no text persists between users
+    clearSourceText();
+  }, [userToken]);
   return (
     <View style={styles.textSectionContainer}>
       <LinearGradient
