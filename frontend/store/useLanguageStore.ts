@@ -8,6 +8,7 @@ import { saveTranslationHistory } from "@/utils/saveTranslationHistory";
 // Constants
 export const INITIAL_TEXT =
   "Tap the microphone icon to begin recording. Tap again to stop.";
+export const ERROR_TEXT = "Translation failed. Please try again.";
 
 type LanguageStore = {
   // State
@@ -21,8 +22,9 @@ type LanguageStore = {
   openTopDropdown: boolean;
   openBottomDropdown: boolean;
   isTranslating: boolean;
-  isTopSpeaking: boolean; // New state for TTS tracking
-  isBottomSpeaking: boolean; // New state for TTS tracking
+  isTopSpeaking: boolean;
+  isBottomSpeaking: boolean;
+  translationError: boolean;
 
   // Actions
   setLanguage1: (lang: string) => void;
@@ -46,6 +48,9 @@ type LanguageStore = {
   debouncedTranslate: (text: string, position: "top" | "bottom") => void;
   speakText: (text: string, language: string) => Promise<void>;
   stopSpeech: () => Promise<void>;
+  setTranslationError: (hasError: boolean) => void;
+  showTranslationError: () => void;
+  clearTranslationError: () => void;
 };
 
 const useLanguageStore = create<LanguageStore>((set, get) => ({
@@ -62,21 +67,29 @@ const useLanguageStore = create<LanguageStore>((set, get) => ({
   isTranslating: false,
   isTopSpeaking: false,
   isBottomSpeaking: false,
+  translationError: false,
 
   // Actions
   setLanguage1: (lang) => set({ language1: lang }),
   setLanguage2: (lang) => set({ language2: lang }),
 
   setUpperText: (text) => {
+    // Don't update text if there's an error
+    if (get().translationError) return;
     set({ upperTextfield: text });
   },
 
   setBottomText: (text) => {
+    // Don't update text if there's an error
+    if (get().translationError) return;
     set({ bottomTextfield: text });
   },
 
-  setBothTexts: (upper, bottom) =>
-    set({ upperTextfield: upper, bottomTextfield: bottom }),
+  setBothTexts: (upper, bottom) => {
+    // Don't update text if there's an error
+    if (get().translationError) return;
+    set({ upperTextfield: upper, bottomTextfield: bottom });
+  },
 
   setActiveUser: (userId) => set({ activeUser: userId }),
 
@@ -96,22 +109,28 @@ const useLanguageStore = create<LanguageStore>((set, get) => ({
       openTopDropdown: isOpen ? false : state.openTopDropdown,
     })),
 
-  clearText: (section) =>
-    set((state) => {
-      if (section === "top") {
-        return { upperTextfield: "" };
-      } else {
-        return { bottomTextfield: "" };
-      }
-    }),
+  clearText: (section) => {
+    // Clear error state when clearing text
+    set({ translationError: false });
 
-  swapLanguages: () =>
+    if (section === "top") {
+      set({ upperTextfield: "" });
+    } else {
+      set({ bottomTextfield: "" });
+    }
+  },
+
+  swapLanguages: () => {
+    // Don't swap if there's an error
+    if (get().translationError) return;
+
     set((state) => ({
       language1: state.language2,
       language2: state.language1,
       upperTextfield: state.bottomTextfield,
       bottomTextfield: state.upperTextfield,
-    })),
+    }));
+  },
 
   copyToClipboard: async (text) => {
     try {
@@ -127,6 +146,25 @@ const useLanguageStore = create<LanguageStore>((set, get) => ({
       showLanguageInfo: true,
     }),
 
+  // Error management
+  setTranslationError: (hasError) => set({ translationError: hasError }),
+
+  showTranslationError: () => {
+    set({
+      translationError: true,
+      isTranslating: false,
+    });
+  },
+
+  clearTranslationError: () => {
+    set({
+      translationError: false,
+      // Reset text fields to empty when clearing error
+      upperTextfield: "",
+      bottomTextfield: "",
+    });
+  },
+
   // Stop any ongoing speech
   stopSpeech: async () => {
     if (await Speech.isSpeakingAsync()) {
@@ -138,7 +176,8 @@ const useLanguageStore = create<LanguageStore>((set, get) => ({
 
   // Speak text with TTS
   speakText: async (text, positionOrLanguage) => {
-    if (!text || text === INITIAL_TEXT) return Promise.resolve();
+    if (!text || text === INITIAL_TEXT || text === ERROR_TEXT)
+      return Promise.resolve();
 
     // Stop any ongoing speech first
     await get().stopSpeech();
@@ -172,14 +211,14 @@ const useLanguageStore = create<LanguageStore>((set, get) => ({
     });
   },
 
-  // New translation function for edited text
+  // Translation function for edited text
   translateEditedText: async (text, position) => {
-    if (!text || text === INITIAL_TEXT) return;
+    if (!text || text === INITIAL_TEXT || text === ERROR_TEXT) return;
 
     const srcLang = position === "top" ? get().language2 : get().language1;
     const tgtLang = position === "top" ? get().language1 : get().language2;
 
-    set({ isTranslating: true });
+    set({ isTranslating: true, translationError: false });
 
     try {
       const translatedText = await translateText(text, srcLang, tgtLang);
@@ -204,6 +243,7 @@ const useLanguageStore = create<LanguageStore>((set, get) => ({
       });
     } catch (error) {
       console.error("Translation error:", error);
+      get().showTranslationError();
     } finally {
       set({ isTranslating: false });
     }

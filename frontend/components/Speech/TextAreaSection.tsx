@@ -5,6 +5,7 @@ import {
   StyleSheet,
   TextInput,
   ActivityIndicator,
+  Text,
 } from "react-native";
 import { BASE_COLORS } from "@/constant/colors";
 import useLanguageStore from "@/store/useLanguageStore";
@@ -31,12 +32,16 @@ const TextAreaSection: React.FC<TextAreaSectionProps> = ({
     isTranslating,
     isTopSpeaking,
     isBottomSpeaking,
+    translationError,
   } = useLanguageStore();
 
   // Determine if this section is currently speaking
   const isSpeaking = position === "top" ? isTopSpeaking : isBottomSpeaking;
 
   const handleTextChange = (text: string) => {
+    // If there's an error, don't allow editing
+    if (translationError) return;
+
     // If initial text, clear it when user starts typing
     if (textField === INITIAL_TEXT && text !== INITIAL_TEXT) {
       text = text.replace(INITIAL_TEXT, "");
@@ -55,6 +60,11 @@ const TextAreaSection: React.FC<TextAreaSectionProps> = ({
     }
   };
 
+  // If there's an error and no text, show the error message
+  const displayValue = translationError
+    ? "Translation failed. Please try again."
+    : textField;
+
   return (
     <View style={styles.textAreaWrapper}>
       <ScrollView
@@ -64,16 +74,24 @@ const TextAreaSection: React.FC<TextAreaSectionProps> = ({
         showsVerticalScrollIndicator={true}
         contentContainerStyle={styles.scrollContent}
       >
-        <TextInput
-          value={textField}
-          multiline={true}
-          editable={true}
-          style={[styles.textField, { color: COLORS.text }]}
-          placeholder={INITIAL_TEXT}
-          placeholderTextColor={COLORS.placeholder}
-          onChangeText={handleTextChange}
-          onFocus={() => onTextAreaFocus && onTextAreaFocus(position)}
-        />
+        {translationError ? (
+          // Show error message in red text when there's an error
+          <Text style={[styles.textField, styles.errorText]}>
+            Translation failed. Please try again.
+          </Text>
+        ) : (
+          // Show normal text input when there's no error
+          <TextInput
+            value={textField}
+            multiline={true}
+            editable={!translationError}
+            style={[styles.textField, { color: COLORS.text }]}
+            placeholder={INITIAL_TEXT}
+            placeholderTextColor={COLORS.placeholder}
+            onChangeText={handleTextChange}
+            onFocus={() => onTextAreaFocus && onTextAreaFocus(position)}
+          />
+        )}
       </ScrollView>
 
       {/* Show loading indicator when translating */}
@@ -123,6 +141,9 @@ const styles = StyleSheet.create({
     lineHeight: 24,
     textAlignVertical: "top",
     minHeight: 80,
+  },
+  errorText: {
+    color: BASE_COLORS.orange,
   },
   loadingContainer: {
     position: "absolute",

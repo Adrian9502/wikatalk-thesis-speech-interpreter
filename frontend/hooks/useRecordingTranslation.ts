@@ -1,6 +1,7 @@
 import { useState, useCallback } from "react";
 import axios from "axios";
 import * as Speech from "expo-speech";
+import useLanguageStore from "@/store/useLanguageStore";
 
 interface TranslationResult {
   translatedText: string;
@@ -18,6 +19,9 @@ export const useRecordingTranslation = () => {
     error: null,
   });
 
+  // Get the showTranslationError function from the language store
+  const { showTranslationError } = useLanguageStore();
+
   const translateAudio = useCallback(
     async (
       uri: string | undefined,
@@ -29,6 +33,7 @@ export const useRecordingTranslation = () => {
       if (!FILEUPLOAD_URL || !uri) {
         const error = new Error("No file upload URL or recording URI found");
         setState({ loading: false, error });
+        showTranslationError(); // Show error in text area
         return null;
       }
 
@@ -65,10 +70,11 @@ export const useRecordingTranslation = () => {
           loading: false,
           error: error instanceof Error ? error : new Error(String(error)),
         });
+        showTranslationError(); // Show error in text area
         return null;
       }
     },
-    []
+    [showTranslationError]
   );
 
   const speakText = useCallback(

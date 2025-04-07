@@ -41,6 +41,7 @@ const Speech = () => {
     setBothTexts,
     toggleLanguageInfo,
     clearText,
+    clearTranslationError,
   } = useLanguageStore();
 
   // Custom hooks
@@ -67,6 +68,8 @@ const Speech = () => {
 
   // Handle microphone press
   const handleMicPress = async (userNum: number) => {
+    // Clear any previous error when starting a new recording
+    clearTranslationError();
     setActiveUser(userNum);
 
     if (recording) {
@@ -146,6 +149,7 @@ const Speech = () => {
   useEffect(() => {
     clearText("top");
     clearText("bottom");
+    clearTranslationError(); // Clear any errors on component mount
   }, []);
 
   // Calculate keyboard offset based on platform and tab bar height
