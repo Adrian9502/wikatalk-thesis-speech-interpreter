@@ -100,19 +100,6 @@ const TextAreaSection: React.FC<TextAreaSectionProps> = ({
           <ActivityIndicator size="small" color={COLORS.primary} />
         </View>
       )}
-
-      {/* Show speaking indicator */}
-      {isSpeaking && (
-        <View
-          style={[styles.speakingContainer, { right: isTranslating ? 46 : 12 }]}
-        >
-          <Ionicons
-            name="volume-high"
-            size={18}
-            color={COLORS.success || "#10B981"}
-          />
-        </View>
-      )}
     </View>
   );
 };
@@ -149,13 +136,6 @@ const styles = StyleSheet.create({
     position: "absolute",
     top: 12,
     right: 12,
-    backgroundColor: "rgba(255,255,255,0.7)",
-    borderRadius: 12,
-    padding: 4,
-  },
-  speakingContainer: {
-    position: "absolute",
-    top: 12,
     backgroundColor: "rgba(255,255,255,0.7)",
     borderRadius: 12,
     padding: 4,
