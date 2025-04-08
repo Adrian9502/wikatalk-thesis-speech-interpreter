@@ -1,22 +1,12 @@
 import React, { useRef, useEffect, useState } from "react";
-import { View, StyleSheet, Animated } from "react-native";
+import { View, StyleSheet } from "react-native";
 import LottieView from "lottie-react-native";
 import * as SplashScreen from "expo-splash-screen";
-import AppLoading from "./AppLoading";
+import AppLoading from "@/components/AppLoading";
 
-interface SplashAnimationProps {
-  onAnimationFinish?: () => void; // Make optional with ?
-}
-
-const SplashAnimation: React.FC<SplashAnimationProps> = ({
-  onAnimationFinish,
-}) => {
-  const fadeAnim = useRef(new Animated.Value(1)).current;
+const SplashAnimation: React.FC = () => {
   const animationRef = useRef<LottieView>(null);
   const [animationCompleted, setAnimationCompleted] = useState(false);
-
-  // Flag to ensure animation is complete before unmounting
-  const animationFinishedRef = useRef(false);
 
   useEffect(() => {
     // Hide the native splash screen
@@ -29,21 +19,8 @@ const SplashAnimation: React.FC<SplashAnimationProps> = ({
   }, []);
 
   const handleAnimationFinish = () => {
-    // Mark animation as finished
-    animationFinishedRef.current = true;
-
-    // Show the AppLoading component
+    // Just mark animation as completed to show the loading indicator
     setAnimationCompleted(true);
-
-    // If onAnimationFinish is provided, call it
-    // We'll delay it slightly to ensure AppLoading is visible
-    if (onAnimationFinish) {
-      // Only notify parent after a short delay to ensure
-      // AppLoading is visible if needed
-      setTimeout(() => {
-        onAnimationFinish();
-      }, 100);
-    }
   };
 
   return (
@@ -59,8 +36,8 @@ const SplashAnimation: React.FC<SplashAnimationProps> = ({
         />
       </View>
       <View style={styles.loadingContainer}>
-        {/* Show AppLoading only after animation completes */}
-        {animationCompleted && <AppLoading />}
+        {/* Show loading indicator after animation completes */}
+        <AppLoading />
       </View>
     </View>
   );

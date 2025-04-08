@@ -1,37 +1,39 @@
 import React, { useEffect, useState } from "react";
-import { View } from "react-native";
 import useThemeStore from "@/store/useThemeStore";
 import { CUSTOM_BACKGROUND } from "@/constant/colors";
-import AppLoading from "./AppLoading";
 
 interface ThemeProviderProps {
   children: React.ReactNode;
+  onThemeReady?: () => void;
 }
 
-const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
-  const [isLoaded, setIsLoaded] = useState(false);
-  const { activeTheme } = useThemeStore();
-
+const ThemeProvider: React.FC<ThemeProviderProps> = ({
+  children,
+  onThemeReady,
+}) => {
+  // Load theme
   useEffect(() => {
-    // When the store is hydrated
-    setTimeout(() => setIsLoaded(true), 500);
-  }, []);
+    // Ensure theme store is initialized
+    const loadTheme = async () => {
+      try {
+        // Small delay to ensure store is hydrated
+        await new Promise((resolve) => setTimeout(resolve, 300));
 
-  if (!isLoaded) {
-    return (
-      <View
-        style={{
-          flex: 1,
-          justifyContent: "center",
-          alignItems: "center",
-          backgroundColor:
-            activeTheme.backgroundColor || CUSTOM_BACKGROUND.navyBlue,
-        }}
-      >
-        <AppLoading />
-      </View>
-    );
-  }
+        // Signal that theme is ready
+        if (onThemeReady) {
+          onThemeReady();
+        }
+      } catch (error) {
+        console.error("Error initializing theme:", error);
+        // Signal ready anyway to prevent infinite loading
+        if (onThemeReady) {
+          onThemeReady();
+        }
+      }
+    };
+
+    loadTheme();
+  }, [onThemeReady]);
 
   return <>{children}</>;
 };

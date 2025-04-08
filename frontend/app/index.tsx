@@ -30,9 +30,6 @@ import SubmitButton from "@/components/auth/SubmitButton";
 import { useAuthForms } from "@/hooks/useAuthForms";
 import Logo from "@/components/Logo";
 
-// splash
-import SplashAnimation from "@/components/SplashAnimation";
-
 // Enable layout animation for Android
 if (Platform.OS === "android") {
   if (UIManager.setLayoutAnimationEnabledExperimental) {

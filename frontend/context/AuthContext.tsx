@@ -7,29 +7,11 @@ interface AuthProviderProps {
 }
 
 export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
-  const { isAppReady } = useAuthStore();
-  const [showSplash, setShowSplash] = useState(!isAppReady);
-
   useEffect(() => {
     initializeAuth();
   }, []);
 
-  // When app becomes ready, wait for splash animation to complete
-  useEffect(() => {
-    if (isAppReady && !showSplash) {
-      // App is ready and splash has completed
-    }
-  }, [isAppReady, showSplash]);
-
-  // Handle animation finish
-  const handleSplashAnimationFinish = () => {
-    setShowSplash(false);
-  };
-
-  if (!isAppReady) {
-    return <SplashAnimation onAnimationFinish={handleSplashAnimationFinish} />;
-  }
-
+  // _layout.tsx will handle the splash screen
   return <>{children}</>;
 };
 

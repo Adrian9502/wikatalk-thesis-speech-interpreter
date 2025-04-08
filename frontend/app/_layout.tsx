@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import { useFonts } from "expo-font";
 import { Stack } from "expo-router";
 import "react-native-url-polyfill/auto";
@@ -8,9 +8,10 @@ import { PaperProvider } from "react-native-paper";
 import { AuthProvider } from "@/context/AuthContext";
 import Toast from "react-native-toast-message";
 import { SafeAreaProvider } from "react-native-safe-area-context";
-import AppLoading from "@/components/AppLoading";
 import ThemeProvider from "@/components/ThemeProvider";
 import SplashAnimation from "@/components/SplashAnimation";
+import useThemeStore from "@/store/useThemeStore";
+import { useAuthStore } from "@/store/useAuthStore";
 
 // Prevent the splash screen from auto-hiding
 SplashScreen.preventAutoHideAsync();
@@ -29,26 +30,64 @@ const RootLayout = () => {
   });
 
   const [showSplashAnimation, setShowSplashAnimation] = useState<boolean>(true);
+  const [themeReady, setThemeReady] = useState<boolean>(false);
+  const [authReady, setAuthReady] = useState<boolean>(false);
+
+  // Stable callback for theme ready
+  const handleThemeReady = useCallback(() => {
+    console.log("Theme is ready");
+    setThemeReady(true);
+  }, []);
+
+  // Initialize auth state
+  useEffect(() => {
+    const initAuth = async () => {
+      await useAuthStore.getState().initializeAuth();
+      console.log("Auth is ready");
+      setAuthReady(true);
+    };
+
+    initAuth();
+  }, []);
 
   useEffect(() => {
     if (error) throw error;
+    if (fontsLoaded) {
+      console.log("Fonts are loaded");
+    }
   }, [fontsLoaded, error]);
 
-  // Handler for when Lottie animation finishes
-  const handleAnimationFinish = () => {
-    // Only hide the splash animation when fonts are loaded
-    if (fontsLoaded) {
+  // Add force timeout to prevent infinite loading
+  useEffect(() => {
+    const forceTimeout = setTimeout(() => {
+      if (showSplashAnimation) {
+        console.log("Force ending splash animation after timeout");
+        setShowSplashAnimation(false);
+      }
+    }, 8000); // 8 seconds max loading time
+
+    return () => clearTimeout(forceTimeout);
+  }, [showSplashAnimation]);
+
+  // Check if everything is ready whenever any of the dependencies change
+  useEffect(() => {
+    console.log(
+      `Checking app ready - Fonts: ${fontsLoaded}, Theme: ${themeReady}, Auth: ${authReady}`
+    );
+
+    if (fontsLoaded && themeReady && authReady) {
+      console.log("All resources loaded, hiding splash screen");
       setShowSplashAnimation(false);
     }
-  };
+  }, [fontsLoaded, themeReady, authReady]);
 
   if (showSplashAnimation) {
-    return <SplashAnimation onAnimationFinish={handleAnimationFinish} />;
+    return <SplashAnimation />;
   }
 
   return (
     <AuthProvider>
-      <ThemeProvider>
+      <ThemeProvider onThemeReady={handleThemeReady}>
         <PaperProvider>
           <ValidationProvider>
             <SafeAreaProvider>
