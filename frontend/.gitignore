@@ -1,5 +1,28 @@
 # Learn more https://docs.github.com/en/get-started/getting-started-with-git/ignoring-files
 
+android/
+*.properties
+*.gradle
+*.bat
+*.xml
+*.iml
+**/build/
+**/.gradle/
+**/generated/
+**/debug/
+**/release/
+**/src/main/assets/fonts/
+**/res/drawable*/
+**/res/values/
+
+frontend/android/
+frontend/android/app/
+**/MaterialCommunityIcons.ttf
+**/MainActivity.kt
+**/MainApplication.kt
+**/m_edit_text_material.xml
+**/splashscreen_logo.png
+
 # dependencies
 node_modules/
 npm-debug.log
