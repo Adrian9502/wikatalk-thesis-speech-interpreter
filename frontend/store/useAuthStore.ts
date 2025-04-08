@@ -6,6 +6,7 @@ import { AppState, AppStateStatus, InteractionManager } from "react-native";
 import { router } from "expo-router";
 import { showToast } from "@/lib/showToast";
 import useThemeStore from "./useThemeStore";
+import { setToken } from "@/lib/authTokenManager";
 import { useTranslateStore } from "./useTranslateStore";
 // API URL from environment
 const API_URL = `${process.env.EXPO_PUBLIC_BACKEND_URL}`;
@@ -350,6 +351,7 @@ export const useAuthStore = create<AuthState>()(
             get().setFormMessage("Login successful!", "success");
 
             setupAxiosDefaults(token);
+            setToken(token); // Update the token manager
             set({ userToken: token, userData: user });
 
             // After successful login, sync the theme
@@ -398,6 +400,7 @@ export const useAuthStore = create<AuthState>()(
 
           // Update state
           setupAxiosDefaults(null);
+          setToken(null); // Update the token manager
           set({ userToken: null, userData: null });
 
           showToast({
@@ -716,7 +719,6 @@ export const useAuthStore = create<AuthState>()(
     }
   )
 );
-
 // Initialize auth on app start
 export const initializeAuth = () => {
   const { initializeAuth } = useAuthStore.getState();
