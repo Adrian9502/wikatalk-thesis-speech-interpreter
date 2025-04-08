@@ -1,20 +1,33 @@
-import React, { useEffect, ReactNode } from "react";
+import React, { useEffect, useState, ReactNode } from "react";
 import { useAuthStore, initializeAuth } from "@/store/useAuthStore";
 import { showToast } from "@/lib/showToast";
-import AppLoading from "@/components/AppLoading";
+import SplashAnimation from "@/components/SplashAnimation";
 interface AuthProviderProps {
   children: ReactNode;
 }
 
 export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const { isAppReady } = useAuthStore();
+  const [showSplash, setShowSplash] = useState(!isAppReady);
 
   useEffect(() => {
     initializeAuth();
   }, []);
 
+  // When app becomes ready, wait for splash animation to complete
+  useEffect(() => {
+    if (isAppReady && !showSplash) {
+      // App is ready and splash has completed
+    }
+  }, [isAppReady, showSplash]);
+
+  // Handle animation finish
+  const handleSplashAnimationFinish = () => {
+    setShowSplash(false);
+  };
+
   if (!isAppReady) {
-    return <AppLoading />;
+    return <SplashAnimation onAnimationFinish={handleSplashAnimationFinish} />;
   }
 
   return <>{children}</>;

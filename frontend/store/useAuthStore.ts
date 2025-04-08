@@ -105,7 +105,7 @@ const setupAxiosDefaults = (token: string | null) => {
 // Test API connection
 const testAPIConnection = async () => {
   try {
-    const response = await axios.get(`${API_URL}/`);
+    const response = await axios.get(`${API_URL}`);
     console.log("API test successful:", response.data);
   } catch (error: any) {
     console.error("API test failed:", error.message);

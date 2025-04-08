@@ -6,7 +6,7 @@ const Logo: React.FC = () => {
   return (
     <View style={styles.container}>
       <Image
-        source={require("@/assets/images/wikatalk-logo.png")}
+        source={require("@/assets/images/icon.png")}
         style={styles.logo}
         resizeMode="contain"
       />

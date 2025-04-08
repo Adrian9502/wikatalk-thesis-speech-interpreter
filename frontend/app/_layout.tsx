@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { useFonts } from "expo-font";
 import { Stack } from "expo-router";
 import "react-native-url-polyfill/auto";
@@ -10,6 +10,9 @@ import Toast from "react-native-toast-message";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import AppLoading from "@/components/AppLoading";
 import ThemeProvider from "@/components/ThemeProvider";
+import SplashAnimation from "@/components/SplashAnimation";
+
+// Prevent the splash screen from auto-hiding
 SplashScreen.preventAutoHideAsync();
 
 const RootLayout = () => {
@@ -25,15 +28,22 @@ const RootLayout = () => {
     "Poppins-Thin": require("../assets/fonts/Poppins-Thin.ttf"),
   });
 
+  const [showSplashAnimation, setShowSplashAnimation] = useState<boolean>(true);
+
   useEffect(() => {
     if (error) throw error;
-    if (fontsLoaded) {
-      SplashScreen.hideAsync();
-    }
   }, [fontsLoaded, error]);
 
-  if (!fontsLoaded) {
-    return <AppLoading />;
+  // Handler for when Lottie animation finishes
+  const handleAnimationFinish = () => {
+    // Only hide the splash animation when fonts are loaded
+    if (fontsLoaded) {
+      setShowSplashAnimation(false);
+    }
+  };
+
+  if (showSplashAnimation) {
+    return <SplashAnimation onAnimationFinish={handleAnimationFinish} />;
   }
 
   return (

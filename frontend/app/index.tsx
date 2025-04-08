@@ -30,6 +30,9 @@ import SubmitButton from "@/components/auth/SubmitButton";
 import { useAuthForms } from "@/hooks/useAuthForms";
 import Logo from "@/components/Logo";
 
+// splash
+import SplashAnimation from "@/components/SplashAnimation";
+
 // Enable layout animation for Android
 if (Platform.OS === "android") {
   if (UIManager.setLayoutAnimationEnabledExperimental) {
@@ -146,7 +149,6 @@ const Index = () => {
       signUp.handleSubmit(handleSignUp)();
     }
   };
-
   return (
     <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
       <View style={[dynamicStyles.container]}>
