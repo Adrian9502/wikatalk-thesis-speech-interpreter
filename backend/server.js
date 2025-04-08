@@ -13,7 +13,9 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
 // Connect to MongoDB
-connectDB();
+connectDB().catch((err) => {
+  console.error("Failed to connect to MongoDB on startup:", err);
+});
 
 // Base route
 app.get("/", (req, res) => {
