@@ -9,6 +9,9 @@ yarn-error.log
 .env*.local
 .env
 
+# eas
+eas.json
+
 # Expo
 .expo/
 dist/
