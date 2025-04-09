@@ -10,6 +10,7 @@ import {
   Keyboard,
   StyleSheet,
   TouchableWithoutFeedback,
+  ScrollView,
 } from "react-native";
 import { StatusBar } from "expo-status-bar";
 import { router } from "expo-router";
@@ -75,6 +76,7 @@ const Index = () => {
   const { signIn, signUp } = useAuthForms(signInSchema, signUpSchema);
 
   const { syncThemeWithServer } = useThemeStore();
+
   // Handle app initialization and redirection
   useEffect(() => {
     let mounted = true;
@@ -108,7 +110,9 @@ const Index = () => {
   const switchTab = (tab: TabType) => {
     // Only animate if the tab is actually changing
     if (activeTab !== tab) {
-      LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
+      // Dismiss keyboard when switching tabs
+      Keyboard.dismiss();
+
       clearFormMessage();
 
       // Reset the form that's being switched away from
@@ -118,14 +122,33 @@ const Index = () => {
         signUp.reset();
       }
 
-      setActiveTab(tab);
-      Animated.timing(tabIndicatorPosition, {
-        toValue: tab === "signin" ? 0 : 1,
-        duration: 300,
-        useNativeDriver: false,
-      }).start();
+      // Use setTimeout to ensure layout completes before animation
+      setTimeout(() => {
+        LayoutAnimation.configureNext({
+          duration: 300,
+          create: {
+            type: LayoutAnimation.Types.easeInEaseOut,
+            property: LayoutAnimation.Properties.opacity,
+          },
+          update: {
+            type: LayoutAnimation.Types.easeInEaseOut,
+          },
+          delete: {
+            type: LayoutAnimation.Types.easeInEaseOut,
+            property: LayoutAnimation.Properties.opacity,
+          },
+        });
+
+        setActiveTab(tab);
+        Animated.timing(tabIndicatorPosition, {
+          toValue: tab === "signin" ? 0 : 1,
+          duration: 300,
+          useNativeDriver: false,
+        }).start();
+      }, 50);
     }
   };
+
   // Login handler
   const handleSignIn = async (data: LoginFormValues): Promise<void> => {
     clearFormMessage();
@@ -138,6 +161,7 @@ const Index = () => {
     const { fullName, username, email, password, confirmPassword } = data;
     await register(fullName, username, email, password, confirmPassword);
   };
+
   // handle sign in or sign up
   const handleSubmit = () => {
     if (activeTab === "signin") {
@@ -146,82 +170,90 @@ const Index = () => {
       signUp.handleSubmit(handleSignUp)();
     }
   };
+
   return (
     <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
       <View style={[dynamicStyles.container]}>
         <StatusBar style="light" />
-        <View
-          style={{ flex: 1, justifyContent: "center", alignItems: "center" }}
+        <ScrollView
+          contentContainerStyle={{ flexGrow: 1, justifyContent: "center" }}
+          keyboardShouldPersistTaps="handled"
+          showsVerticalScrollIndicator={false}
+          bounces={false}
         >
-          {/* Logo */}
-          <Logo />
-          <KeyboardAvoidingView
-            behavior={Platform.OS === "ios" ? "padding" : "height"}
-            style={styles.keyboardAvoidingView}
-            keyboardVerticalOffset={Platform.OS === "ios" ? 40 : 0}
+          <View
+            style={{ width: "100%", alignItems: "center", paddingVertical: 20 }}
           >
+            {/* Logo */}
+            <Logo />
+
             {/* Form container */}
-            <View
-              style={[
-                styles.formOuterContainer,
-                { backgroundColor: BASE_COLORS.white },
-              ]}
-            >
-              {/* Tab navigation */}
-              <AuthTabs
-                activeTab={activeTab}
-                switchTab={switchTab}
-                tabIndicatorPosition={tabIndicatorPosition}
-              />
+            <View style={styles.keyboardAvoidingView}>
+              <View
+                style={[
+                  styles.formOuterContainer,
+                  { backgroundColor: BASE_COLORS.white },
+                ]}
+              >
+                {/* Tab navigation */}
+                <AuthTabs
+                  activeTab={activeTab}
+                  switchTab={switchTab}
+                  tabIndicatorPosition={tabIndicatorPosition}
+                />
 
-              {/* Form container */}
-              <View style={styles.formInnerContainer}>
-                {formMessage && (
-                  <FormMessage
-                    message={formMessage.text}
-                    type={formMessage.type}
-                    onDismiss={clearFormMessage}
+                {/* Form container */}
+                <View style={styles.formInnerContainer}>
+                  {formMessage && (
+                    <FormMessage
+                      message={formMessage.text}
+                      type={formMessage.type}
+                      onDismiss={clearFormMessage}
+                    />
+                  )}
+
+                  {/* Sign In Form */}
+                  {activeTab === "signin" && (
+                    <SignInForm
+                      control={signIn.control}
+                      errors={signIn.errors}
+                      navigateToForgotPassword={() =>
+                        router.push("/(auth)/ForgotPassword")
+                      }
+                    />
+                  )}
+
+                  {/* Sign Up Form */}
+                  {activeTab === "signup" && (
+                    <SignUpForm
+                      control={signUp.control}
+                      errors={signUp.errors}
+                    />
+                  )}
+
+                  {/* Submit Button */}
+                  <SubmitButton
+                    activeTab={activeTab}
+                    isLoading={isLoading}
+                    buttonScale={buttonScale}
+                    onPress={handleSubmit}
                   />
-                )}
 
-                {/* Sign In Form */}
-                {activeTab === "signin" && (
-                  <SignInForm
-                    control={signIn.control}
-                    errors={signIn.errors}
-                    navigateToForgotPassword={() =>
-                      router.push("/(auth)/ForgotPassword")
+                  {/* Social login options */}
+                  {activeTab === "signin" && <SocialLogin />}
+
+                  {/* Switch between sign in and sign up */}
+                  <AuthSwitcher
+                    activeTab={activeTab}
+                    onSwitch={() =>
+                      switchTab(activeTab === "signin" ? "signup" : "signin")
                     }
                   />
-                )}
-
-                {/* Sign Up Form */}
-                {activeTab === "signup" && (
-                  <SignUpForm control={signUp.control} errors={signUp.errors} />
-                )}
-
-                {/* Submit Button */}
-                <SubmitButton
-                  activeTab={activeTab}
-                  isLoading={isLoading}
-                  buttonScale={buttonScale}
-                  onPress={handleSubmit}
-                />
-
-                {/* Social login options */}
-                {activeTab === "signin" && <SocialLogin />}
-
-                {/* Switch between sign in and sign up */}
-                <AuthSwitcher
-                  activeTab={activeTab}
-                  onSwitch={() =>
-                    switchTab(activeTab === "signin" ? "signup" : "signin")
-                  }
-                />
+                </View>
               </View>
             </View>
-          </KeyboardAvoidingView>
-        </View>
+          </View>
+        </ScrollView>
       </View>
     </TouchableWithoutFeedback>
   );
@@ -243,10 +275,8 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.1,
     shadowRadius: 3,
     elevation: 2,
-    minHeight: 400,
   },
   formInnerContainer: {
-    minHeight: 350,
     width: "100%",
   },
 });

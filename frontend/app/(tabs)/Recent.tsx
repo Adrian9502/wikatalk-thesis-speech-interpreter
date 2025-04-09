@@ -61,28 +61,44 @@ const RecentTranslations: React.FC = () => {
       setError(null);
 
       const api = createAuthenticatedApi();
-      const response = await api.get(`/api/translations?type=${tabType}`);
 
-      // Format the data to match our HistoryItems structure
-      const formattedData = response.data.data.map(
-        (item: TranslationAPIItem) => ({
-          id: item._id,
-          date: format(new Date(item.date), "MMM. d, yyyy - h:mma"),
-          fromLanguage: item.fromLanguage,
-          toLanguage: item.toLanguage,
-          originalText: item.originalText,
-          translatedText: item.translatedText,
-        })
-      );
-      // Update just this tab's data
-      setHistoryItems((prev) => ({
-        ...prev,
-        [tabType]: formattedData,
-      }));
+      try {
+        const response = await api.get(`/api/translations?type=${tabType}`);
+
+        // Format the data to match our HistoryItems structure
+        const formattedData = response.data.data.map(
+          (item: TranslationAPIItem) => ({
+            id: item._id,
+            date: format(new Date(item.date), "MMM. d, yyyy - h:mma"),
+            fromLanguage: item.fromLanguage,
+            toLanguage: item.toLanguage,
+            originalText: item.originalText,
+            translatedText: item.translatedText,
+          })
+        );
+
+        // Update just this tab's data
+        setHistoryItems((prev) => ({
+          ...prev,
+          [tabType]: formattedData,
+        }));
+      } catch (err: any) {
+        // If it's a 401, show empty state instead of error
+        if (err.response?.status === 401) {
+          setHistoryItems((prev) => ({
+            ...prev,
+            [tabType]: [],
+          }));
+        } else {
+          // For other errors, show the error message
+          setError("Failed to load history. Please try again.");
+        }
+      } finally {
+        setLoading(false);
+      }
     } catch (err) {
-      console.error("Error fetching history:", err);
-      setError("Failed to load history. Please try again.");
-    } finally {
+      console.error("Error creating API instance:", err);
+      setError("Failed to connect to server. Please try again.");
       setLoading(false);
     }
   };

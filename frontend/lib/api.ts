@@ -26,14 +26,18 @@ export const createAuthenticatedApi = (): AxiosInstance => {
     (error) => Promise.reject(error)
   );
 
+  // Modify the response interceptor to handle 401s more gracefully
   api.interceptors.response.use(
     (response) => response,
     (error) => {
-      if (error.response && error.response.status === 401) {
-        // We'll use a simple event emitter approach
-        if (window.dispatchEvent) {
-          window.dispatchEvent(new CustomEvent("authError"));
-        }
+      // Only redirect on 401 errors for non-history endpoints
+      // This prevents logout when simply checking for empty history
+      if (
+        error.response &&
+        error.response.status === 401 &&
+        !error.config.url.includes("/translations")
+      ) {
+        // Only redirect for critical auth failures, not for history
         router.replace("/");
       }
       return Promise.reject(error);

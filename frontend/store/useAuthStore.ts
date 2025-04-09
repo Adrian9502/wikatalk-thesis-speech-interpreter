@@ -607,7 +607,7 @@ export const useAuthStore = create<AuthState>()(
             ]);
             showToast({
               type: "success",
-              title: "Verification Error",
+              title: "Verification Successful",
               description: response.data.message,
             });
 
