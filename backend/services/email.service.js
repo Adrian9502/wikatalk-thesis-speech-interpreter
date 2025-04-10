@@ -111,21 +111,26 @@ const sendPasswordResetEmail = async (user) => {
 const sendPasswordChangedEmail = async (user) => {
   try {
     const passwordChangedAt = user.passwordLastChangedAt || new Date();
-    // Format the date to be human-readable
+
+    // Set the correct time zone for Philippines (UTC+8)
+    const timeZone = "Asia/Manila";
+
+    // Format the date with Philippines time zone
     const formattedDate = new Intl.DateTimeFormat("en-US", {
       weekday: "long",
       year: "numeric",
       month: "long",
       day: "numeric",
+      timeZone: timeZone,
     }).format(passwordChangedAt);
 
-    // Format time separately if needed
+    // Format time with Philippines time zone
     const formattedTime = new Intl.DateTimeFormat("en-US", {
       hour: "2-digit",
       minute: "2-digit",
       second: "2-digit",
       hour12: true,
-      timeZoneName: "short",
+      timeZone: timeZone,
     }).format(passwordChangedAt);
 
     console.log("Attempting to send PASSWORD CHANGED EMAIL to:", user.email);
