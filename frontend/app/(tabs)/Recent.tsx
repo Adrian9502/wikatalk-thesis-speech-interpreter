@@ -130,17 +130,9 @@ const RecentTranslations: React.FC = () => {
   const handleDeleteConfirm = async (): Promise<void> => {
     if (itemToDelete) {
       try {
-        const BACKEND_URL =
-          process.env.EXPO_PUBLIC_BACKEND_URL || "http://localhost:5000";
-
-        // Get token from auth store
-        const { userToken } = useAuthStore.getState();
-
-        await axios.delete(`${BACKEND_URL}/api/translations/${itemToDelete}`, {
-          headers: {
-            Authorization: `Bearer ${userToken}`,
-          },
-        });
+        // Use the createAuthenticatedApi instead of direct axios call
+        const api = createAuthenticatedApi();
+        await api.delete(`/api/translations/${itemToDelete}`);
 
         // Update local state after successful delete
         const updatedHistoryItems = { ...historyItems };

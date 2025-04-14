@@ -217,6 +217,7 @@ export const useAuthStore = create<AuthState>()(
 
               if (response.data.success && response.data.isVerified) {
                 setupAxiosDefaults(storedToken);
+                setToken(storedToken); // Add this line to ensure token is set in manager
                 set({
                   userToken: storedToken,
                   userData: { ...userData, isVerified: true },
@@ -224,17 +225,20 @@ export const useAuthStore = create<AuthState>()(
               } else {
                 await AsyncStorage.multiRemove(["userToken", "userData"]);
                 set({ userData: null, userToken: null });
+                setToken(null); // Clear token in manager too
               }
             } catch (error) {
               console.error("Verification check failed:", error);
               await AsyncStorage.multiRemove(["userToken", "userData"]);
               set({ userData: null, userToken: null });
+              setToken(null); // Clear token in manager too
             }
           }
         } catch (error) {
           console.error("Error loading auth info:", error);
           await AsyncStorage.clear();
           set({ userData: null, userToken: null });
+          setToken(null); // Clear token in manager too
         } finally {
           set({ isLoading: false, isAppReady: true });
         }
@@ -488,8 +492,8 @@ export const useAuthStore = create<AuthState>()(
             ]);
 
             setupAxiosDefaults(token);
+            setToken(token);
             set({ userToken: token, userData: user });
-
             showToast({
               type: "success",
               title: "Verification Success!",

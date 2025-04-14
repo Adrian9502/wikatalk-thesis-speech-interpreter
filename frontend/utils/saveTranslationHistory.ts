@@ -1,4 +1,5 @@
 import createAuthenticatedApi from "@/lib/api";
+import { getToken } from "@/lib/authTokenManager";
 
 export interface TranslationHistoryItem {
   type: "Speech" | "Translate" | "Scan";
@@ -14,12 +15,19 @@ export const saveTranslationHistory = async (
   try {
     const api = createAuthenticatedApi();
 
-    await api.post("/api/translations", item);
+    // Debug logging
+    console.log("Saving translation with token:", getToken());
 
-    console.log(`${item.type} translation saved to history`);
+    const response = await api.post("/api/translations", item);
+
+    console.log(`${item.type} translation saved to history:`, response.data);
     return true;
-  } catch (error) {
-    console.error(`Failed to save ${item.type} translation history:`, error);
+  } catch (error: any) {
+    console.error(
+      `Failed to save ${item.type} translation history:`,
+      error.response?.status,
+      error.response?.data || error.message
+    );
     return false;
   }
 };
