@@ -3,7 +3,6 @@ import React, { useEffect, useState, useRef } from "react";
 import {
   View,
   Animated,
-  KeyboardAvoidingView,
   LayoutAnimation,
   Platform,
   UIManager,
@@ -74,8 +73,6 @@ const Index = () => {
   const [buttonScale] = useState(new Animated.Value(1));
   const tabIndicatorPosition = useRef(new Animated.Value(0)).current;
   const { signIn, signUp } = useAuthForms(signInSchema, signUpSchema);
-
-  const { syncThemeWithServer } = useThemeStore();
 
   // reset to default theme if user is not logged in
   useEffect(() => {
