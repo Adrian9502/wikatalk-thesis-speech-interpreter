@@ -2,15 +2,13 @@ import React, { useEffect, useState, ReactNode } from "react";
 import { useAuthStore, initializeAuth } from "@/store/useAuthStore";
 import { showToast } from "@/lib/showToast";
 import SplashAnimation from "@/components/SplashAnimation";
+import { router } from "expo-router";
+
 interface AuthProviderProps {
   children: ReactNode;
 }
 
 export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
-  useEffect(() => {
-    initializeAuth();
-  }, []);
-
   // _layout.tsx will handle the splash screen
   return <>{children}</>;
 };

@@ -77,31 +77,17 @@ const Index = () => {
 
   const { syncThemeWithServer } = useThemeStore();
 
-  // Handle app initialization and redirection
+  // reset to default theme if user is not logged in
   useEffect(() => {
     let mounted = true;
 
     // If not logged in, reset to default theme
     if (isAppReady && !isLoggedIn) {
       useThemeStore.getState().resetToDefaultTheme();
-    } else if (isLoggedIn) {
-      // Only sync with server if logged in
-      syncThemeWithServer();
     }
+
     clearFormMessage();
 
-    const initializeApp = async () => {
-      if (isAppReady && mounted) {
-        // Add small delay to ensure layout is mounted
-        await new Promise((resolve) => setTimeout(resolve, 100));
-
-        if (isLoggedIn) {
-          router.replace("/(tabs)/Speech");
-        }
-      }
-    };
-
-    initializeApp();
     return () => {
       mounted = false;
     };

@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useCallback } from "react";
 import { useFonts } from "expo-font";
-import { Stack } from "expo-router";
+import { Stack, router } from "expo-router";
 import "react-native-url-polyfill/auto";
 import { SplashScreen } from "expo-router";
 import { ValidationProvider } from "@/context/ValidationContext";
@@ -32,6 +32,7 @@ const RootLayout = () => {
   const [showSplashAnimation, setShowSplashAnimation] = useState<boolean>(true);
   const [themeReady, setThemeReady] = useState<boolean>(false);
   const [authReady, setAuthReady] = useState<boolean>(false);
+  const [isAuthorized, setIsAuthorized] = useState<boolean>(false);
 
   // Stable callback for theme ready
   const handleThemeReady = useCallback(() => {
@@ -43,8 +44,18 @@ const RootLayout = () => {
   useEffect(() => {
     const initAuth = async () => {
       await useAuthStore.getState().initializeAuth();
-      console.log("Auth is ready");
+
+      // Check if user is logged in after auth initialization
+      const isLoggedIn = useAuthStore.getState().isLoggedIn;
+      console.log("Auth is ready, user logged in:", isLoggedIn);
+
+      setIsAuthorized(isLoggedIn);
       setAuthReady(true);
+
+      // If user is logged in, sync theme with server
+      if (isLoggedIn) {
+        await useThemeStore.getState().syncThemeWithServer();
+      }
     };
 
     initAuth();
@@ -69,17 +80,29 @@ const RootLayout = () => {
     return () => clearTimeout(forceTimeout);
   }, [showSplashAnimation]);
 
-  // Check if everything is ready whenever any of the dependencies change
+  // Check if everything is ready and handle navigation
   useEffect(() => {
     console.log(
-      `Checking app ready - Fonts: ${fontsLoaded}, Theme: ${themeReady}, Auth: ${authReady}`
+      `Checking app ready - Fonts: ${fontsLoaded}, Theme: ${themeReady}, Auth: ${authReady}, Authorized: ${isAuthorized}`
     );
 
     if (fontsLoaded && themeReady && authReady) {
       console.log("All resources loaded, hiding splash screen");
+
+      // Handle navigation based on authentication state
+      if (isAuthorized) {
+        console.log("User is logged in, redirecting to Speech");
+        // Use setTimeout to ensure navigation happens after splash screen is hidden
+        setTimeout(() => {
+          router.replace("/(tabs)/Speech");
+        }, 100);
+      } else {
+        console.log("User is not logged in, showing login screen");
+      }
+
       setShowSplashAnimation(false);
     }
-  }, [fontsLoaded, themeReady, authReady]);
+  }, [fontsLoaded, themeReady, authReady, isAuthorized]);
 
   if (showSplashAnimation) {
     return <SplashAnimation />;
