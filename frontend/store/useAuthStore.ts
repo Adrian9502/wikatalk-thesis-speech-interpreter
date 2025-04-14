@@ -184,63 +184,55 @@ export const useAuthStore = create<AuthState>()(
           await testAPIConnection();
 
           // Get stored data
-          const [storedToken, storedUserData, tempUserData] = await Promise.all(
-            [
-              AsyncStorage.getItem("userToken"),
-              AsyncStorage.getItem("userData"),
-              AsyncStorage.getItem("tempUserData"),
-            ]
-          );
+          const [storedToken, storedUserData] = await Promise.all([
+            AsyncStorage.getItem("userToken"),
+            AsyncStorage.getItem("userData"),
+          ]);
 
-          // Check for verification flow first
-          if (tempUserData) {
-            const parsedTempData = JSON.parse(tempUserData);
-            if (parsedTempData.tempToken) {
-              set({ userData: parsedTempData });
-              console.log("Restored verification session");
-              return;
-            }
-          }
+          console.log("Stored token exists:", !!storedToken);
+          console.log("Stored user data exists:", !!storedUserData);
 
           // Handle normal login flow
           if (storedToken && storedUserData) {
             const userData = JSON.parse(storedUserData);
 
+            // Set token in axios and token manager immediately
+            setupAxiosDefaults(storedToken);
+            setToken(storedToken);
+
+            // Set user data in state
+            set({
+              userToken: storedToken,
+              userData: userData,
+              isAppReady: true,
+            });
+
+            console.log("Auth restored from storage successfully");
+
+            // Optionally verify with backend, but don't block UI
             try {
-              // Verify user status with backend
               const response = await axios.post(
                 `${API_URL}/api/users/check-verification`,
-                {
-                  email: userData.email,
-                }
+                { email: userData.email }
               );
 
-              if (response.data.success && response.data.isVerified) {
-                setupAxiosDefaults(storedToken);
-                setToken(storedToken); // Add this line to ensure token is set in manager
-                set({
-                  userToken: storedToken,
-                  userData: { ...userData, isVerified: true },
-                });
-              } else {
-                await AsyncStorage.multiRemove(["userToken", "userData"]);
-                set({ userData: null, userToken: null });
-                setToken(null); // Clear token in manager too
+              if (!response.data.success || !response.data.isVerified) {
+                console.log("User verification failed, logging out");
+                await get().logout();
               }
             } catch (error) {
-              console.error("Verification check failed:", error);
-              await AsyncStorage.multiRemove(["userToken", "userData"]);
-              set({ userData: null, userToken: null });
-              setToken(null); // Clear token in manager too
+              console.error("Error checking verification:", error);
+              // Don't log out automatically on network error
             }
+          } else {
+            console.log("No stored auth data found");
+            set({ userData: null, userToken: null, isAppReady: true });
           }
         } catch (error) {
           console.error("Error loading auth info:", error);
-          await AsyncStorage.clear();
-          set({ userData: null, userToken: null });
-          setToken(null); // Clear token in manager too
+          set({ userData: null, userToken: null, isAppReady: true });
         } finally {
-          set({ isLoading: false, isAppReady: true });
+          set({ isLoading: false });
         }
 
         // Setup AppState listener
@@ -720,6 +712,15 @@ export const useAuthStore = create<AuthState>()(
         userToken: state.userToken,
         userData: state.userData,
       }),
+      onRehydrateStorage: (state) => {
+        return (restoredState, error) => {
+          if (error) {
+            console.error("Error rehydrating auth store:", error);
+          } else {
+            console.log("Auth store rehydrated:", !!restoredState?.userToken);
+          }
+        };
+      },
     }
   )
 );

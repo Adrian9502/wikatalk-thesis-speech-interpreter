@@ -9,7 +9,21 @@ interface AuthProviderProps {
 }
 
 export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
-  // _layout.tsx will handle the splash screen
+  const [isInitialized, setIsInitialized] = useState(false);
+
+  useEffect(() => {
+    const init = async () => {
+      await initializeAuth();
+      setIsInitialized(true);
+    };
+
+    init();
+  }, []);
+
+  if (!isInitialized) {
+    return <SplashAnimation />;
+  }
+
   return <>{children}</>;
 };
 

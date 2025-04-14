@@ -12,6 +12,7 @@ import ThemeProvider from "@/components/ThemeProvider";
 import SplashAnimation from "@/components/SplashAnimation";
 import useThemeStore from "@/store/useThemeStore";
 import { useAuthStore } from "@/store/useAuthStore";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 // Prevent the splash screen from auto-hiding
 SplashScreen.preventAutoHideAsync();
@@ -89,18 +90,22 @@ const RootLayout = () => {
     if (fontsLoaded && themeReady && authReady) {
       console.log("All resources loaded, hiding splash screen");
 
-      // Handle navigation based on authentication state
-      if (isAuthorized) {
-        console.log("User is logged in, redirecting to Speech");
-        // Use setTimeout to ensure navigation happens after splash screen is hidden
-        setTimeout(() => {
-          router.replace("/(tabs)/Speech");
-        }, 100);
-      } else {
-        console.log("User is not logged in, showing login screen");
-      }
+      // Check for token directly from AsyncStorage to be extra sure
+      AsyncStorage.getItem("userToken").then((token) => {
+        const isUserLoggedIn = !!token || isAuthorized;
+        console.log("Final auth check - Token exists:", !!token);
 
-      setShowSplashAnimation(false);
+        if (isUserLoggedIn) {
+          console.log("User is logged in, redirecting to Speech");
+          setTimeout(() => {
+            router.replace("/(tabs)/Speech");
+          }, 100);
+        } else {
+          console.log("User is not logged in, showing login screen");
+        }
+
+        setShowSplashAnimation(false);
+      });
     }
   }, [fontsLoaded, themeReady, authReady, isAuthorized]);
 
