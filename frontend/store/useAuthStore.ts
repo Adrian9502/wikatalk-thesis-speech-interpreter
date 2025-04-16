@@ -208,6 +208,7 @@ export const useAuthStore = create<AuthState>()(
             });
 
             console.log("Auth restored from storage successfully");
+            console.log("Auth is ready, user logged in: true"); // Update this log
 
             // Optionally verify with backend, but don't block UI
             try {
@@ -227,6 +228,7 @@ export const useAuthStore = create<AuthState>()(
           } else {
             console.log("No stored auth data found");
             set({ userData: null, userToken: null, isAppReady: true });
+            console.log("Auth is ready, user logged in: false");
           }
         } catch (error) {
           console.error("Error loading auth info:", error);

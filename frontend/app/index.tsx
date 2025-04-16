@@ -26,6 +26,7 @@ import FormMessage from "@/components/FormMessage";
 import SocialLogin from "@/components/auth/SocialLogin";
 import AuthSwitcher from "@/components/auth/AuthSwitcher";
 import SubmitButton from "@/components/auth/SubmitButton";
+import ProtectedRoute from "@/components/ProtectedRoute";
 // Custom hook
 import { useAuthForms } from "@/hooks/useAuthForms";
 import Logo from "@/components/Logo";
@@ -76,6 +77,8 @@ const Index = () => {
 
   // reset to default theme if user is not logged in
   useEffect(() => {
+    console.log("index rendered: is logged in - ", isLoggedIn);
+
     let mounted = true;
 
     // If not logged in, reset to default theme
@@ -242,7 +245,13 @@ const Index = () => {
   );
 };
 
-export default Index;
+export default function IndexWrapper() {
+  return (
+    <ProtectedRoute authRequired={false}>
+      <Index />
+    </ProtectedRoute>
+  );
+}
 
 const styles = StyleSheet.create({
   keyboardAvoidingView: {

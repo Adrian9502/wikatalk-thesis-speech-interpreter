@@ -1,4 +1,5 @@
-import React, { useEffect, useState, useCallback } from "react";
+import React, { useEffect, useState, useCallback, useRef } from "react";
+import { View } from "react-native";
 import { useFonts } from "expo-font";
 import { Stack, router } from "expo-router";
 import "react-native-url-polyfill/auto";
@@ -13,7 +14,7 @@ import SplashAnimation from "@/components/SplashAnimation";
 import useThemeStore from "@/store/useThemeStore";
 import { useAuthStore } from "@/store/useAuthStore";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-
+import ProtectedRoute from "@/components/ProtectedRoute";
 // Prevent the splash screen from auto-hiding
 SplashScreen.preventAutoHideAsync();
 
@@ -33,7 +34,9 @@ const RootLayout = () => {
   const [showSplashAnimation, setShowSplashAnimation] = useState<boolean>(true);
   const [themeReady, setThemeReady] = useState<boolean>(false);
   const [authReady, setAuthReady] = useState<boolean>(false);
-  const [isAuthorized, setIsAuthorized] = useState<boolean>(false);
+  const [initialURL, setInitialURL] = useState<string | null>(null);
+  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const hasNavigated = useRef<boolean>(false);
 
   // Stable callback for theme ready
   const handleThemeReady = useCallback(() => {
@@ -44,19 +47,28 @@ const RootLayout = () => {
   // Initialize auth state
   useEffect(() => {
     const initAuth = async () => {
+      // Check token directly first - this is more reliable than the store
+      const token = await AsyncStorage.getItem("userToken");
+
       await useAuthStore.getState().initializeAuth();
 
-      // Check if user is logged in after auth initialization
-      const isLoggedIn = useAuthStore.getState().isLoggedIn;
-      console.log("Auth is ready, user logged in:", isLoggedIn);
+      // Determine where to navigate based on token existence
+      if (token) {
+        console.log("Token found, user should be redirected to Speech");
+        setInitialURL("/(tabs)/Speech");
 
-      setIsAuthorized(isLoggedIn);
-      setAuthReady(true);
-
-      // If user is logged in, sync theme with server
-      if (isLoggedIn) {
-        await useThemeStore.getState().syncThemeWithServer();
+        // Try to sync theme if we have a token
+        try {
+          await useThemeStore.getState().syncThemeWithServer();
+        } catch (e) {
+          console.log("Theme sync error:", e);
+        }
+      } else {
+        console.log("No token found, user should see login screen");
+        setInitialURL("/"); // Login screen
       }
+
+      setAuthReady(true);
     };
 
     initAuth();
@@ -64,75 +76,91 @@ const RootLayout = () => {
 
   useEffect(() => {
     if (error) throw error;
-    if (fontsLoaded) {
-      console.log("Fonts are loaded");
-    }
-  }, [fontsLoaded, error]);
+  }, [error]);
 
   // Add force timeout to prevent infinite loading
   useEffect(() => {
     const forceTimeout = setTimeout(() => {
-      if (showSplashAnimation) {
-        console.log("Force ending splash animation after timeout");
-        setShowSplashAnimation(false);
+      console.log("Force ending splash animation after timeout");
+
+      // Even on timeout, make sure we've set the initial URL
+      if (!initialURL) {
+        setInitialURL("/");
       }
+
+      setShowSplashAnimation(false);
     }, 8000); // 8 seconds max loading time
 
     return () => clearTimeout(forceTimeout);
-  }, [showSplashAnimation]);
+  }, []);
 
-  // Check if everything is ready and handle navigation
+  // When all resources are loaded, navigate conditionally
   useEffect(() => {
-    console.log(
-      `Checking app ready - Fonts: ${fontsLoaded}, Theme: ${themeReady}, Auth: ${authReady}, Authorized: ${isAuthorized}`
-    );
+    if (
+      fontsLoaded &&
+      themeReady &&
+      authReady &&
+      initialURL &&
+      !hasNavigated.current
+    ) {
+      console.log("All resources loaded, navigating to:", initialURL);
+      hasNavigated.current = true;
 
-    if (fontsLoaded && themeReady && authReady) {
-      console.log("All resources loaded, hiding splash screen");
+      // First navigate to the appropriate screen
+      router.replace(initialURL);
 
-      // Check for token directly from AsyncStorage to be extra sure
-      AsyncStorage.getItem("userToken").then((token) => {
-        const isUserLoggedIn = !!token || isAuthorized;
-        console.log("Final auth check - Token exists:", !!token);
-
-        if (isUserLoggedIn) {
-          console.log("User is logged in, redirecting to Speech");
-          setTimeout(() => {
-            router.replace("/(tabs)/Speech");
-          }, 100);
-        } else {
-          console.log("User is not logged in, showing login screen");
-        }
-
+      // Then hide splash screen after navigation has time to complete
+      const hideTimeout = setTimeout(() => {
+        console.log("Navigation should be complete, now hiding splash");
         setShowSplashAnimation(false);
-      });
+      }, 800);
+
+      return () => clearTimeout(hideTimeout);
     }
-  }, [fontsLoaded, themeReady, authReady, isAuthorized]);
+  }, [fontsLoaded, themeReady, authReady, initialURL]);
 
   if (showSplashAnimation) {
+    // Show loading screen until everything is ready
+    return <SplashAnimation />;
+  }
+
+  if (!initialURL) {
+    // This is a safeguard - if somehow we got here without an initialURL
     return <SplashAnimation />;
   }
 
   return (
-    <AuthProvider>
-      <ThemeProvider onThemeReady={handleThemeReady}>
-        <PaperProvider>
-          <ValidationProvider>
-            <SafeAreaProvider>
-              <Stack screenOptions={{ headerShown: false }}>
-                <Stack.Screen name="index" options={{ headerShown: false }} />
-                <Stack.Screen name="(auth)" options={{ headerShown: false }} />
-                <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-              </Stack>
-              <Toast />
-            </SafeAreaProvider>
-          </ValidationProvider>
-        </PaperProvider>
-      </ThemeProvider>
-    </AuthProvider>
+    <View style={{ flex: 1 }}>
+      <AuthProvider>
+        <ThemeProvider onThemeReady={handleThemeReady}>
+          <PaperProvider>
+            <ValidationProvider>
+              <SafeAreaProvider>
+                <Stack screenOptions={{ headerShown: false }}>
+                  <Stack.Screen name="index" options={{ headerShown: false }} />
+                  <Stack.Screen
+                    name="(auth)"
+                    options={{ headerShown: false }}
+                  />
+                  <Stack.Screen
+                    name="(tabs)"
+                    options={{ headerShown: false }}
+                  />
+                </Stack>
+                <Toast />
+              </SafeAreaProvider>
+            </ValidationProvider>
+          </PaperProvider>
+        </ThemeProvider>
+      </AuthProvider>
+    </View>
   );
 };
 
-export default function App() {
-  return <RootLayout />;
+export default function RootLayoutWrapper() {
+  return (
+    <ProtectedRoute authRequired={true}>
+      <RootLayout />
+    </ProtectedRoute>
+  );
 }
