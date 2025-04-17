@@ -30,6 +30,7 @@ import ProtectedRoute from "@/components/ProtectedRoute";
 // Custom hook
 import { useAuthForms } from "@/hooks/useAuthForms";
 import Logo from "@/components/Logo";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 // Enable layout animation for Android
 if (Platform.OS === "android") {
@@ -81,9 +82,19 @@ const Index = () => {
 
     let mounted = true;
 
-    // If not logged in, reset to default theme
+    // Only reset theme if truly not logged in AND app is ready
     if (isAppReady && !isLoggedIn) {
-      useThemeStore.getState().resetToDefaultTheme();
+      // Check token directly instead of relying on isLoggedIn
+      AsyncStorage.getItem("userToken").then((token) => {
+        if (!token && mounted) {
+          console.log("No token found, resetting to default theme");
+          useThemeStore.getState().resetToDefaultTheme();
+        } else if (token) {
+          console.log("Token exists in storage, skipping theme reset");
+          // Redirect if on login screen but has token
+          router.replace("/(tabs)/Speech");
+        }
+      });
     }
 
     clearFormMessage();

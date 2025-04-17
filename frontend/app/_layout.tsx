@@ -47,28 +47,18 @@ const RootLayout = () => {
   // Initialize auth state
   useEffect(() => {
     const initAuth = async () => {
-      // Check token directly first - this is more reliable than the store
-      const token = await AsyncStorage.getItem("userToken");
-
       await useAuthStore.getState().initializeAuth();
-
-      // Determine where to navigate based on token existence
-      if (token) {
-        console.log("Token found, user should be redirected to Speech");
-        setInitialURL("/(tabs)/Speech");
-
-        // Try to sync theme if we have a token
-        try {
-          await useThemeStore.getState().syncThemeWithServer();
-        } catch (e) {
-          console.log("Theme sync error:", e);
-        }
-      } else {
-        console.log("No token found, user should see login screen");
-        setInitialURL("/"); // Login screen
-      }
-
       setAuthReady(true);
+
+      // Just sync theme if needed, but don't set initialURL here
+      try {
+        const token = await AsyncStorage.getItem("userToken");
+        if (token) {
+          await useThemeStore.getState().syncThemeWithServer();
+        }
+      } catch (e) {
+        console.log("Theme sync error:", e);
+      }
     };
 
     initAuth();
@@ -96,28 +86,17 @@ const RootLayout = () => {
 
   // When all resources are loaded, navigate conditionally
   useEffect(() => {
-    if (
-      fontsLoaded &&
-      themeReady &&
-      authReady &&
-      initialURL &&
-      !hasNavigated.current
-    ) {
-      console.log("All resources loaded, navigating to:", initialURL);
+    if (fontsLoaded && themeReady && authReady && !hasNavigated.current) {
       hasNavigated.current = true;
 
-      // First navigate to the appropriate screen
-      router.replace(initialURL);
-
-      // Then hide splash screen after navigation has time to complete
+      // AuthProvider will handle navigation
       const hideTimeout = setTimeout(() => {
-        console.log("Navigation should be complete, now hiding splash");
         setShowSplashAnimation(false);
       }, 800);
 
       return () => clearTimeout(hideTimeout);
     }
-  }, [fontsLoaded, themeReady, authReady, initialURL]);
+  }, [fontsLoaded, themeReady, authReady]);
 
   if (showSplashAnimation) {
     // Show loading screen until everything is ready

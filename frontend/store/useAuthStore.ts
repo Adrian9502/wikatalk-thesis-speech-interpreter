@@ -132,12 +132,23 @@ export const useAuthStore = create<AuthState>()(
 
       // Computed properties
       get isLoggedIn() {
-        return !!get().userToken;
+        // Check both store state and AsyncStorage
+        const token = get().userToken;
+        // This won't work as expected since it's synchronous
+        // Use state instead of computed getter
+        return !!token;
       },
       get isVerified() {
         return get().userData?.isVerified ?? false;
       },
+      checkIsLoggedIn: async () => {
+        const storeToken = get().userToken;
+        if (storeToken) return true;
 
+        // Fall back to AsyncStorage check
+        const token = await AsyncStorage.getItem("userToken");
+        return !!token;
+      },
       // Actions
       setIsLoading: (isLoading) => set({ isLoading }),
 

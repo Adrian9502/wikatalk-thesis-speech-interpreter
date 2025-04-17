@@ -11,41 +11,46 @@ interface AuthProviderProps {
 
 export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [isInitialized, setIsInitialized] = useState(false);
-  const { userToken, isLoggedIn } = useAuthStore();
 
   useEffect(() => {
+    // Only initialize if not already done in RootLayout
     const init = async () => {
-      // Check if token exists first
-      const token = await AsyncStorage.getItem("userToken");
-      console.log("Initial token check:", !!token);
+      try {
+        // Check if we already have auth state in store before initializing again
+        const isLoggedIn = useAuthStore.getState().isLoggedIn;
+        const isAppReady = useAuthStore.getState().isAppReady;
 
-      // Initialize auth store
-      await initializeAuth();
+        if (!isAppReady) {
+          console.log("Auth not initialized yet, initializing...");
+          await initializeAuth();
+        } else {
+          console.log("Auth already initialized, checking status...");
+        }
 
-      setIsInitialized(true);
-    };
-
-    init();
-  }, []);
-
-  // Redirect based on auth status when initialized
-  useEffect(() => {
-    if (isInitialized) {
-      const checkAuthAndRedirect = async () => {
+        // Get latest token after initialization
         const token = await AsyncStorage.getItem("userToken");
 
+        // Handle redirection based on token
         if (token) {
           console.log("Token exists, redirecting to Speech");
           router.replace("/(tabs)/Speech");
         } else {
           console.log("No token, staying on login screen");
+          // Only go to login if not already there
+          const currentPath = router.getCurrentRoute()?.path;
+          if (currentPath && !currentPath.includes("index")) {
+            router.replace("/");
+          }
         }
-      };
+      } catch (error) {
+        console.log("Auth initialization error:", error);
+      } finally {
+        setIsInitialized(true);
+      }
+    };
 
-      checkAuthAndRedirect();
-    }
-  }, [isInitialized]);
-
+    init();
+  }, []);
   if (!isInitialized) {
     return <SplashAnimation />;
   }
