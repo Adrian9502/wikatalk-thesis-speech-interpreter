@@ -1,4 +1,4 @@
-import React, { useRef, useEffect, useState } from "react";
+import React, { useRef, useEffect } from "react";
 import { View, StyleSheet } from "react-native";
 import LottieView from "lottie-react-native";
 import * as SplashScreen from "expo-splash-screen";
@@ -6,7 +6,6 @@ import AppLoading from "@/components/AppLoading";
 
 const SplashAnimation: React.FC = () => {
   const animationRef = useRef<LottieView>(null);
-  const [animationCompleted, setAnimationCompleted] = useState(false);
 
   useEffect(() => {
     // Hide the native splash screen
@@ -14,14 +13,16 @@ const SplashAnimation: React.FC = () => {
 
     // Play the animation automatically when component mounts
     if (animationRef.current) {
-      animationRef.current.play();
+      setTimeout(() => {
+        animationRef.current?.play();
+      }, 100);
     }
-  }, []);
 
-  const handleAnimationFinish = () => {
-    // Just mark animation as completed to show the loading indicator
-    setAnimationCompleted(true);
-  };
+    // Return cleanup function
+    return () => {
+      console.log("Splash animation unmounted");
+    };
+  }, []);
 
   return (
     <View style={styles.container}>
@@ -29,14 +30,12 @@ const SplashAnimation: React.FC = () => {
         <LottieView
           ref={animationRef}
           source={require("../assets/animations/splash-animation.json")}
-          autoPlay={false}
+          autoPlay={false} // Set to true to ensure animation starts
           loop={false}
-          onAnimationFinish={handleAnimationFinish}
           style={styles.animation}
         />
       </View>
       <View style={styles.loadingContainer}>
-        {/* Show loading indicator after animation completes */}
         <AppLoading />
       </View>
     </View>

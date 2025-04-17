@@ -15,6 +15,7 @@
         "NSSpeechSynthesisUsageDescription": "This app needs access to speech synthesis to read text aloud"
       }
     },
+    "backgroundColor": "#0a0f28",
     "splash": {
       "image": "./assets/images/icon.png",
       "resizeMode": "contain",

@@ -1,9 +1,10 @@
 import React, { useEffect, useState, ReactNode } from "react";
-import { View } from "react-native";
+import { useAuthStore } from "@/store/useAuthStore";
 import { router } from "expo-router";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { InteractionManager } from "react-native";
-import SplashAnimation from "@/components/SplashAnimation";
+import { InteractionManager, View, ActivityIndicator } from "react-native";
+import { useSplashStore } from "@/store/useSplashStore";
+import DotsLoader from "./DotLoader";
 
 interface ProtectedRouteProps {
   authRequired: boolean;
@@ -15,65 +16,65 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
   children,
 }) => {
   const [isChecking, setIsChecking] = useState<boolean>(true);
-  const [hasToken, setHasToken] = useState<boolean>(false);
-  const [shouldRedirect, setShouldRedirect] = useState<boolean>(false);
-  const [redirectPath, setRedirectPath] = useState<string>("");
+  const { isAppReady } = useAuthStore();
+  const { isLoadingComplete } = useSplashStore();
 
   useEffect(() => {
-    const checkAuth = async () => {
-      try {
-        const token = await AsyncStorage.getItem("userToken");
-        setHasToken(!!token);
+    // Only check auth if the app is ready
+    if (isAppReady) {
+      const checkAuth = async () => {
+        try {
+          const token = await AsyncStorage.getItem("userToken");
 
-        // Set redirect flag and path, but don't navigate yet
-        if (authRequired && !token) {
-          console.log("Auth required but no token, will redirect to login");
-          setShouldRedirect(true);
-          setRedirectPath("/");
-        } else if (!authRequired && token) {
-          console.log("Already authenticated, will redirect to app");
-          setShouldRedirect(true);
-          setRedirectPath("/(tabs)/Speech");
-        } else {
-          setShouldRedirect(false);
+          // Determine if we need to redirect
+          if (authRequired && !token) {
+            console.log("Auth required but no token, redirecting to login");
+            await InteractionManager.runAfterInteractions(() => {
+              router.replace("/");
+            });
+          } else if (!authRequired && token) {
+            console.log("Already authenticated, redirecting to app");
+            await InteractionManager.runAfterInteractions(() => {
+              router.replace("/(tabs)/Speech");
+            });
+          }
+
+          // Add a small delay to ensure smooth transition
+          setTimeout(() => {
+            setIsChecking(false);
+          }, 300);
+        } catch (error) {
+          console.error("Auth check error:", error);
+          setIsChecking(false);
         }
+      };
 
-        setIsChecking(false);
-      } catch (error) {
-        console.error("Auth check error:", error);
-        setIsChecking(false);
-      }
-    };
-
-    checkAuth();
-  }, [authRequired]);
-
-  // Separate effect for navigation
-  useEffect(() => {
-    if (!isChecking && shouldRedirect && redirectPath) {
-      // Wait for next frame and ensure interactions are complete
-      const navigationTimer = setTimeout(() => {
-        InteractionManager.runAfterInteractions(() => {
-          console.log(`Now navigating to: ${redirectPath}`);
-          router.replace(redirectPath);
-        });
-      }, 300);
-
-      return () => clearTimeout(navigationTimer);
+      checkAuth();
     }
-  }, [isChecking, shouldRedirect, redirectPath]);
+  }, [authRequired, isAppReady]);
 
-  if (isChecking) {
-    return <SplashAnimation />;
+  // If app is still loading, show nothing (splash is handled at root level)
+  if (!isAppReady || isChecking) {
+    // Only show a minimal loading indicator if the splash has already been shown
+    if (isLoadingComplete) {
+      return (
+        <View
+          style={{
+            backgroundColor: "#0a0f28",
+            flex: 1,
+            justifyContent: "center",
+            alignItems: "center",
+          }}
+        >
+          <DotsLoader />
+        </View>
+      );
+    }
+    // Return empty fragment - the splash is handled by RootLayout
+    return null;
   }
 
-  // Either we need auth and have token, or don't need auth and no token
-  if ((authRequired && hasToken) || (!authRequired && !hasToken)) {
-    return <>{children}</>;
-  }
-
-  // This is a fallback while navigation happens
-  return <SplashAnimation />;
+  return <>{children}</>;
 };
 
 export default ProtectedRoute;
