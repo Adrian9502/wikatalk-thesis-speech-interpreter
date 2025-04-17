@@ -3,11 +3,12 @@ import {
   Pressable,
   Text,
   View,
-  KeyboardAvoidingView,
   ActivityIndicator,
   InteractionManager,
-  Platform,
   StyleSheet,
+  TouchableWithoutFeedback,
+  Keyboard,
+  ScrollView,
 } from "react-native";
 import { StatusBar } from "expo-status-bar";
 import { useForm } from "react-hook-form";
@@ -136,112 +137,116 @@ const VerifyEmail: React.FC = () => {
   };
 
   return (
-    <View
-      style={[
-        dynamicStyles.container,
-        {
-          justifyContent: "center",
-          alignItems: "center",
-        },
-      ]}
-    >
-      <StatusBar style="light" />
-      {/* Logo */}
-      <View style={styles.logoContainer}>
-        <Logo />
-      </View>
-      <KeyboardAvoidingView
-        behavior={Platform.OS === "ios" ? "padding" : "height"}
-        style={styles.keyboardAvoidingView}
-        keyboardVerticalOffset={Platform.OS === "ios" ? 40 : 0}
-      >
-        {/* Form container */}
-        <View style={styles.formOuterContainer}>
-          <Text style={styles.titleText}>Verify Your Email</Text>
-          <Text style={styles.descriptionText}>
-            We've sent a verification code to your email
-          </Text>
+    <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
+      <View style={[dynamicStyles.container]}>
+        <StatusBar style="light" />
+        <ScrollView
+          contentContainerStyle={{
+            flexGrow: 1,
+            justifyContent: "center",
+            alignItems: "center",
+          }}
+          keyboardShouldPersistTaps="handled"
+          showsVerticalScrollIndicator={false}
+          bounces={false}
+        >
+          {/* Logo */}
+          <View style={styles.logoContainer}>
+            <Logo />
+          </View>
 
           {/* Form container */}
-          <View style={styles.formContainer}>
-            {/* Display sent email */}
-            <View style={styles.emailContainer}>
-              <Mail size={20} color="#0038A8" />
-              <Text style={styles.emailText}>{userData?.email}</Text>
-            </View>
-
-            <View style={styles.noteContainer}>
-              <Text style={styles.noteText}>
-                Note: If you don't see the email, check your spam or junk
-                folder.
+          <View style={styles.keyboardAvoidingView}>
+            <View style={styles.formOuterContainer}>
+              <Text style={styles.titleText}>Verify Your Email</Text>
+              <Text style={styles.descriptionText}>
+                We've sent a verification code to your email
               </Text>
-            </View>
 
-            {formMessage && (
-              <FormMessage
-                message={formMessage.text}
-                type={"error"}
-                onDismiss={clearFormMessage}
-              />
-            )}
-
-            {/* Verification Code Input */}
-            <FormInput
-              control={control}
-              name="verificationCode"
-              placeholder="Enter 6-digit verification code"
-              IconComponent={CheckCircle}
-              error={errors.verificationCode?.message}
-              keyboardType="number-pad"
-              maxLength={6}
-            />
-
-            {/* Verify Button */}
-            <View style={styles.buttonContainer}>
-              <Pressable
-                style={styles.submitButton}
-                disabled={isLoading}
-                onPress={handleSubmit(handleVerification)}
-              >
-                <View style={styles.buttonContent}>
-                  {isLoading && (
-                    <ActivityIndicator
-                      size="small"
-                      color="#FFFFFF"
-                      style={{ marginRight: 8 }}
-                    />
-                  )}
-                  <Text style={styles.buttonText}>Verify Email</Text>
+              {/* Form container */}
+              <View style={styles.formContainer}>
+                {/* Display sent email */}
+                <View style={styles.emailContainer}>
+                  <Mail size={20} color="#0038A8" />
+                  <Text style={styles.emailText}>{userData?.email}</Text>
                 </View>
-              </Pressable>
+
+                <View style={styles.noteContainer}>
+                  <Text style={styles.noteText}>
+                    Note: If you don't see the email, check your spam or junk
+                    folder.
+                  </Text>
+                </View>
+
+                {formMessage && (
+                  <FormMessage
+                    message={formMessage.text}
+                    type={"error"}
+                    onDismiss={clearFormMessage}
+                  />
+                )}
+
+                {/* Verification Code Input */}
+                <FormInput
+                  control={control}
+                  name="verificationCode"
+                  placeholder="Enter 6-digit verification code"
+                  IconComponent={CheckCircle}
+                  error={errors.verificationCode?.message}
+                  keyboardType="number-pad"
+                  maxLength={6}
+                />
+
+                {/* Verify Button */}
+                <View style={styles.buttonContainer}>
+                  <Pressable
+                    style={styles.submitButton}
+                    disabled={isLoading}
+                    onPress={handleSubmit(handleVerification)}
+                  >
+                    <View style={styles.buttonContent}>
+                      {isLoading && (
+                        <ActivityIndicator
+                          size="small"
+                          color="#FFFFFF"
+                          style={{ marginRight: 8 }}
+                        />
+                      )}
+                      <Text style={styles.buttonText}>Verify Email</Text>
+                    </View>
+                  </Pressable>
+                </View>
+
+                {/* Resend Code Button */}
+                <Pressable
+                  style={[
+                    styles.resendButton,
+                    resendDisabled && styles.resendButtonDisabled,
+                  ]}
+                  onPress={handleResendCode}
+                  disabled={resendDisabled}
+                >
+                  <Text
+                    style={[
+                      styles.resendButtonText,
+                      resendDisabled && styles.resendDisabledText,
+                    ]}
+                  >
+                    {resendDisabled
+                      ? `Resend Code (${countdown}s)`
+                      : "Resend Code"}
+                  </Text>
+                </Pressable>
+
+                <Pressable onPress={handleGoBack}>
+                  <Text style={styles.goBackText}>Go back</Text>
+                </Pressable>
+              </View>
             </View>
-
-            {/* Resend Code Button */}
-            <Pressable
-              style={[
-                styles.resendButton,
-                resendDisabled && styles.resendButtonDisabled,
-              ]}
-              onPress={handleResendCode}
-              disabled={resendDisabled}
-            >
-              <Text
-                style={[
-                  styles.resendButtonText,
-                  resendDisabled && styles.resendDisabledText,
-                ]}
-              >
-                {resendDisabled ? `Resend Code (${countdown}s)` : "Resend Code"}
-              </Text>
-            </Pressable>
-
-            <Pressable onPress={handleGoBack}>
-              <Text style={styles.goBackText}>Go back</Text>
-            </Pressable>
           </View>
-        </View>
-      </KeyboardAvoidingView>
-    </View>
+        </ScrollView>
+      </View>
+    </TouchableWithoutFeedback>
   );
 };
 
@@ -251,11 +256,11 @@ const styles = StyleSheet.create({
   logoContainer: {
     marginBottom: 10,
     width: "100%",
+    alignItems: "center",
   },
   keyboardAvoidingView: {
     width: "85%",
     maxWidth: 350,
-    alignItems: "center",
   },
   formOuterContainer: {
     backgroundColor: BASE_COLORS.white,
@@ -358,5 +363,6 @@ const styles = StyleSheet.create({
     fontFamily: "Poppins-Regular",
     color: "#9CA3AF",
     marginTop: 16,
+    textAlign: "center",
   },
 });

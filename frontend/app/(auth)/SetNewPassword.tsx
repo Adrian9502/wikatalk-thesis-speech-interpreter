@@ -3,10 +3,12 @@ import {
   Pressable,
   Text,
   View,
-  KeyboardAvoidingView,
   ActivityIndicator,
   Platform,
   StyleSheet,
+  TouchableWithoutFeedback,
+  Keyboard,
+  ScrollView,
 } from "react-native";
 import { StatusBar } from "expo-status-bar";
 import { useForm } from "react-hook-form";
@@ -112,85 +114,96 @@ const SetNewPassword: React.FC = () => {
   };
 
   return (
-    <View style={[dynamicStyles.container, styles.safeAreaContainer]}>
-      <StatusBar style="light" />
-      {/* Logo */}
-      <View style={styles.logoContainer}>
-        <Logo />
-      </View>
-      <KeyboardAvoidingView
-        behavior={Platform.OS === "ios" ? "padding" : "height"}
-        style={styles.keyboardAvoidingView}
-        keyboardVerticalOffset={Platform.OS === "ios" ? 40 : 0}
-      >
-        {/* Form container */}
-        <View style={styles.formOuterContainer}>
-          <Text style={styles.headerTitle}>Set New Password</Text>
-          <Text style={styles.headerSubtitle}>
-            Create a new password for your account
-          </Text>
+    <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
+      <View style={[dynamicStyles.container]}>
+        <StatusBar style="light" />
+        <ScrollView
+          contentContainerStyle={{
+            flexGrow: 1,
+            justifyContent: "center",
+            alignItems: "center",
+          }}
+          keyboardShouldPersistTaps="handled"
+          showsVerticalScrollIndicator={false}
+          bounces={false}
+        >
+          {/* Logo */}
+          <View style={styles.logoContainer}>
+            <Logo />
+          </View>
 
           {/* Form container */}
-          <View style={styles.formInnerContainer}>
-            {formMessage && (
-              <FormMessage
-                message={formMessage.text}
-                type={formMessage.type}
-                onDismiss={clearFormMessage}
-              />
-            )}
+          <View style={styles.keyboardAvoidingView}>
+            {/* Form container */}
+            <View style={styles.formOuterContainer}>
+              <Text style={styles.headerTitle}>Set New Password</Text>
+              <Text style={styles.headerSubtitle}>
+                Create a new password for your account
+              </Text>
 
-            {/* Display email */}
-            <View style={styles.emailContainer}>
-              <Mail size={20} color="#0038A8" />
-              <Text style={styles.emailText}>{email ?? "Loading..."}</Text>
-            </View>
+              {/* Form container */}
+              <View style={styles.formInnerContainer}>
+                {formMessage && (
+                  <FormMessage
+                    message={formMessage.text}
+                    type={formMessage.type}
+                    onDismiss={clearFormMessage}
+                  />
+                )}
 
-            <FormInput
-              control={control}
-              name="password"
-              placeholder="New Password"
-              IconComponent={Lock}
-              error={errors.password?.message}
-              secureTextEntry
-            />
-
-            <FormInput
-              control={control}
-              name="confirmPassword"
-              placeholder="Confirm New Password"
-              IconComponent={Lock}
-              error={errors.confirmPassword?.message}
-              secureTextEntry
-            />
-
-            {/* Reset Password Button */}
-            <View style={styles.buttonContainer}>
-              <Pressable
-                style={styles.resetButton}
-                disabled={isLoading}
-                onPress={handleSubmit(handleResetPassword)}
-              >
-                <View style={styles.buttonContentContainer}>
-                  {isLoading && (
-                    <ActivityIndicator
-                      size="small"
-                      color="#FFFFFF"
-                      style={styles.activityIndicator}
-                    />
-                  )}
-                  <Text style={styles.buttonText}>Reset Password</Text>
+                {/* Display email */}
+                <View style={styles.emailContainer}>
+                  <Mail size={20} color="#0038A8" />
+                  <Text style={styles.emailText}>{email ?? "Loading..."}</Text>
                 </View>
-              </Pressable>
-            </View>
 
-            <Pressable onPress={handleGoBack}>
-              <Text style={styles.goBackText}>Go back</Text>
-            </Pressable>
+                <FormInput
+                  control={control}
+                  name="password"
+                  placeholder="New Password"
+                  IconComponent={Lock}
+                  error={errors.password?.message}
+                  secureTextEntry
+                />
+
+                <FormInput
+                  control={control}
+                  name="confirmPassword"
+                  placeholder="Confirm New Password"
+                  IconComponent={Lock}
+                  error={errors.confirmPassword?.message}
+                  secureTextEntry
+                />
+
+                {/* Reset Password Button */}
+                <View style={styles.buttonContainer}>
+                  <Pressable
+                    style={styles.resetButton}
+                    disabled={isLoading}
+                    onPress={handleSubmit(handleResetPassword)}
+                  >
+                    <View style={styles.buttonContentContainer}>
+                      {isLoading && (
+                        <ActivityIndicator
+                          size="small"
+                          color="#FFFFFF"
+                          style={styles.activityIndicator}
+                        />
+                      )}
+                      <Text style={styles.buttonText}>Reset Password</Text>
+                    </View>
+                  </Pressable>
+                </View>
+
+                <Pressable onPress={handleGoBack}>
+                  <Text style={styles.goBackText}>Go back</Text>
+                </Pressable>
+              </View>
+            </View>
           </View>
-        </View>
-      </KeyboardAvoidingView>
-    </View>
+        </ScrollView>
+      </View>
+    </TouchableWithoutFeedback>
   );
 };
 
@@ -203,15 +216,11 @@ const styles = StyleSheet.create({
   logoContainer: {
     marginBottom: 10,
     width: "100%",
-  },
-  safeAreaContainer: {
-    justifyContent: "center",
     alignItems: "center",
   },
   keyboardAvoidingView: {
     width: "85%",
     maxWidth: 350,
-    alignItems: "center",
   },
   formOuterContainer: {
     backgroundColor: "rgba(255, 255, 255, 0.95)",
@@ -292,6 +301,7 @@ const styles = StyleSheet.create({
     color: BASE_COLORS.placeholderText,
     marginBottom: 8,
     fontFamily: "Poppins-Regular",
+    textAlign: "center",
   },
 });
 
