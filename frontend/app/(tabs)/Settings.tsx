@@ -45,8 +45,6 @@ const Settings = () => {
   const { logout, userData } = useAuth();
   // Get theme from store
   const { activeTheme } = useThemeStore();
-  // App settings state
-  const [notifications, setNotifications] = useState(true);
   // Modal state
   const [logoutModalVisible, setLogoutModalVisible] = useState(false);
 
