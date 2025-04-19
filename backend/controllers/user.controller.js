@@ -94,7 +94,7 @@ exports.loginUser = async (req, res) => {
   try {
     const { usernameOrEmail, password } = req.body;
 
-    console.log("login received in backend : ", req.body);
+    console.log("login received in backend");
     // Find user by email or username
     const user = await User.findOne({
       $or: [{ email: usernameOrEmail }, { username: usernameOrEmail }],
@@ -124,6 +124,8 @@ exports.loginUser = async (req, res) => {
         fullName: user.fullName,
         username: user.username,
         email: user.email,
+        theme: user.theme,
+        createdAt: user.createdAt,
         isVerified: user.isVerified,
         token: generateToken(user._id),
       },
