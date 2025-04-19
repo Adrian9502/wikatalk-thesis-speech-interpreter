@@ -362,7 +362,9 @@ export const useAuthStore = create<AuthState>()(
             setupAxiosDefaults(token);
             setToken(token); // Update the token manager
             set({ userToken: token, userData: user });
-
+            setTimeout(() => {
+              get().getUserProfile();
+            }, 500);
             // After successful login, sync the theme
             const themeStore = useThemeStore.getState();
             await themeStore.syncThemeWithServer();
@@ -434,20 +436,27 @@ export const useAuthStore = create<AuthState>()(
       // Get user profile
       getUserProfile: async () => {
         try {
-          const response = await axios.get(`${API_URL}/profile`);
+          const response = await axios.get(`${API_URL}/api/users/profile`);
 
           if (response.data.success) {
-            set({ userData: response.data.data });
-            return response.data.data;
+            // Update local userData with fresh data from server, including new fields
+            const updatedUserData = response.data.data;
+
+            // Save to storage
+            await AsyncStorage.setItem(
+              "userData",
+              JSON.stringify(updatedUserData)
+            );
+
+            // Update in state
+            set({ userData: updatedUserData });
+
+            return updatedUserData;
           }
         } catch (error: any) {
           console.error("Error fetching user profile:", error);
           if (error.response?.status === 401) {
-            showToast({
-              type: "error",
-              title: "Error, Session expired",
-              description: "Session expired. Please login again.",
-            });
+            // Token might be expired, log the user out
             get().logout();
           }
         }
