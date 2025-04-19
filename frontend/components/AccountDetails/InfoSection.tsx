@@ -1,0 +1,44 @@
+import React from "react";
+import { View } from "react-native";
+import { User, Mail, Calendar, Shield } from "react-native-feather";
+import { formatDate } from "@/utils/formatDate";
+import { UserData } from "@/types/types";
+import { InfoItem } from "@/components/AccountDetails/InfoItem";
+import styles from "@/styles/accountDetailsStyles";
+
+type InfoSectionProps = {
+  userData: UserData;
+  theme: any;
+};
+
+export const InfoSection = ({ userData, theme }: InfoSectionProps) => (
+  <View style={styles.card}>
+    <InfoItem
+      icon={<User width={20} height={20} color={theme.secondaryColor} />}
+      label="Username"
+      value={userData.username}
+      theme={theme}
+    />
+    <InfoItem
+      icon={<Mail width={20} height={20} color={theme.secondaryColor} />}
+      label="Email"
+      value={userData.email}
+      theme={theme}
+      showDivider
+    />
+    <InfoItem
+      icon={<Calendar width={20} height={20} color={theme.secondaryColor} />}
+      label="Account created at"
+      value={formatDate(userData.createdAt as string)}
+      theme={theme}
+      showDivider
+    />
+    <InfoItem
+      icon={<Shield width={20} height={20} color={theme.secondaryColor} />}
+      label="Verification Status"
+      value={userData.isVerified ? "Verified" : "Not Verified"}
+      theme={theme}
+      isLast
+    />
+  </View>
+);

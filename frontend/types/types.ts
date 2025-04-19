@@ -68,3 +68,11 @@ export type ThemeOption = {
   tabInactiveColor: string;
   lightColor: string;
 };
+
+export interface UserDataTypes {
+  fullName?: string;
+  email?: string;
+  username?: string;
+  createdAt?: string;
+  isVerified?: boolean;
+}
