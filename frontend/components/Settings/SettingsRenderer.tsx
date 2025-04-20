@@ -1,10 +1,11 @@
-import React from "react";
+import React, { useState } from "react";
 import { View, Text, Image, TouchableOpacity, StyleSheet } from "react-native";
 import { Feather } from "@expo/vector-icons";
 import SettingItem from "@/components/Settings/SettingItem";
 import ThemeSelector from "@/components/Settings/ThemeSelector";
 import { BASE_COLORS, TITLE_COLORS } from "@/constant/colors";
 import { FeatherIconName } from "@/types/types";
+import ProfilePictureModal from "../AccountDetails/ProfilePictureModal";
 
 // Types
 type SettingItemWithToggle = {
@@ -25,54 +26,80 @@ type SettingItemWithPress = {
 
 type SettingItemType = SettingItemWithToggle | SettingItemWithPress;
 
-export const renderHeader = () => (
-  <Text style={styles.headerText}>Settings</Text>
-);
+// Convert render functions to proper React components
+export const Header = () => <Text style={styles.headerText}>Settings</Text>;
 
-export const renderProfile = (userData: any, themeColor: string) => (
-  <View style={styles.profileContainer}>
-    <View style={styles.profileCard}>
-      <View style={[styles.avatarContainer, { backgroundColor: themeColor }]}>
-        {userData?.profilePicture ? (
-          <Image
-            source={{ uri: userData.profilePicture }}
-            style={styles.avatarImage}
-          />
-        ) : (
-          <Text style={styles.avatarText}>
-            {userData?.fullName?.charAt(0) || "U"}
+export const ProfileSection = ({
+  userData,
+  themeColor,
+}: {
+  userData: any;
+  themeColor: string;
+}) => {
+  // Hooks are valid here because this is a proper component
+  const [showPictureModal, setShowPictureModal] = useState(false);
+
+  return (
+    <View style={styles.profileContainer}>
+      <View style={styles.profileCard}>
+        <TouchableOpacity
+          style={[styles.avatarContainer, { backgroundColor: themeColor }]}
+          onPress={() => userData?.profilePicture && setShowPictureModal(true)}
+        >
+          {userData?.profilePicture ? (
+            <Image
+              source={{ uri: userData.profilePicture }}
+              style={styles.avatarImage}
+            />
+          ) : (
+            <Text style={styles.avatarText}>
+              {userData?.fullName?.charAt(0) || "U"}
+            </Text>
+          )}
+        </TouchableOpacity>
+
+        <View style={styles.userInfoContainer}>
+          <Text style={styles.userName}>{userData?.fullName || "User"}</Text>
+          <Text style={[styles.userEmail, { color: themeColor }]}>
+            {userData?.email || "email@example.com"}
           </Text>
-        )}
+        </View>
       </View>
 
-      <View style={styles.userInfoContainer}>
-        <Text style={styles.userName}>{userData?.fullName || "User"}</Text>
-        <Text style={[styles.userEmail, { color: themeColor }]}>
-          {userData?.email || "email@example.com"}
-        </Text>
-      </View>
+      {/* Profile Picture Modal */}
+      {userData?.profilePicture && (
+        <ProfilePictureModal
+          visible={showPictureModal}
+          imageUrl={userData.profilePicture}
+          onClose={() => setShowPictureModal(false)}
+        />
+      )}
     </View>
-  </View>
-);
+  );
+};
 
-export const renderAppearance = () => (
+export const AppearanceSection = () => (
   <View style={styles.appearanceContainer}>
     <Text style={styles.sectionTitle}>Appearance</Text>
     <ThemeSelector />
   </View>
 );
 
-export const renderSectionTitle = (title: string) => (
+export const SectionTitle = ({ title }: { title: string }) => (
   <View>
     <Text style={styles.sectionTitle}>{title}</Text>
   </View>
 );
 
-export const renderSettingItem = (
-  item: SettingItemType,
-  isLast: boolean,
-  isFirstItem: boolean
-) => (
+export const SettingItemComponent = ({
+  item,
+  isLast,
+  isFirstItem,
+}: {
+  item: SettingItemType;
+  isLast: boolean;
+  isFirstItem: boolean;
+}) => (
   <View style={{ marginBottom: isLast ? 24 : 0 }}>
     <View
       style={[
@@ -102,7 +129,11 @@ export const renderSettingItem = (
   </View>
 );
 
-export const renderLogoutButton = (onPressLogout: () => void) => (
+export const LogoutButton = ({
+  onPressLogout,
+}: {
+  onPressLogout: () => void;
+}) => (
   <View style={styles.logoutContainer}>
     <TouchableOpacity style={styles.logoutButton} onPress={onPressLogout}>
       <Feather

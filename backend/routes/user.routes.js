@@ -11,6 +11,7 @@ const {
   forgotPassword,
   resetPassword,
   updateUserProfile,
+  updateProfilePicture,
 } = require("../controllers/user.controller");
 
 const { protect } = require("../middleware/auth.middleware");
@@ -28,4 +29,6 @@ router.post("/resend-verification-code", resendVerificationCode);
 // Protected routes
 router.get("/profile", protect, getUserProfile);
 router.put("/profile", protect, updateUserProfile);
+router.put("/profile-picture", protect, updateProfilePicture);
+
 module.exports = router;

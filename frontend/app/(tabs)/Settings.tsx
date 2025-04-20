@@ -7,8 +7,16 @@ import useThemeStore from "@/store/useThemeStore";
 import { FeatherIconName } from "@/types/types";
 import ConfirmationModal from "@/components/ConfirmationModal";
 import { globalStyles } from "@/styles/globalStyles";
-import * as SettingsRenderers from "@/components/Settings/SettingsRenderer";
+import {
+  Header,
+  ProfileSection,
+  AppearanceSection,
+  SectionTitle,
+  SettingItemComponent,
+  LogoutButton,
+} from "@/components/Settings/SettingsRenderer";
 import { router } from "expo-router";
+
 // Types
 type SettingItemWithToggle = {
   icon: FeatherIconName;
@@ -151,27 +159,37 @@ const Settings = () => {
   const renderItem = ({ item }: { item: ListItem }) => {
     switch (item.type) {
       case "header":
-        return SettingsRenderers.renderHeader();
+        return <Header />;
+
       case "profile":
-        return SettingsRenderers.renderProfile(
-          userData,
-          activeTheme.secondaryColor
+        return (
+          <ProfileSection
+            userData={userData}
+            themeColor={activeTheme.secondaryColor}
+          />
         );
+
       case "appearance":
-        return SettingsRenderers.renderAppearance();
+        return <AppearanceSection />;
+
       case "section":
-        return SettingsRenderers.renderSectionTitle(item.data);
+        return <SectionTitle title={item.data} />;
+
       case "item":
         const { item: settingItem, isLast, isFirstItem } = item.data;
-        return SettingsRenderers.renderSettingItem(
-          settingItem,
-          isLast,
-          isFirstItem
+        return (
+          <SettingItemComponent
+            item={settingItem}
+            isLast={isLast}
+            isFirstItem={isFirstItem}
+          />
         );
+
       case "logout":
-        return SettingsRenderers.renderLogoutButton(() =>
-          setLogoutModalVisible(true)
+        return (
+          <LogoutButton onPressLogout={() => setLogoutModalVisible(true)} />
         );
+
       default:
         return null;
     }

@@ -25,6 +25,7 @@ export const SettingsSection = ({
   const handleSaveProfile = async (updatedData: {
     fullName: string;
     username: string;
+    profilePicture?: string;
   }) => {
     try {
       // Use the updateUserProfile method from useAuth

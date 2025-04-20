@@ -7,6 +7,11 @@ export default StyleSheet.create({
     alignItems: "center",
     paddingVertical: 16,
   },
+  avatarImage: {
+    width: "100%",
+    height: "100%",
+    borderRadius: 36,
+  },
   backButton: {
     padding: 5,
   },

@@ -1,11 +1,19 @@
 const User = require("../models/user.model");
 const jwt = require("jsonwebtoken");
+const cloudinary = require("cloudinary").v2;
 const {
   sendVerificationEmail,
   sendWelcomeEmail,
   sendPasswordResetEmail,
   sendPasswordChangedEmail,
 } = require("../services/email.service");
+
+// Configure Cloudinary for changing profile picture
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET,
+});
 
 // Generate JWT Token
 const generateToken = (id) => {
@@ -578,6 +586,57 @@ exports.updateUserProfile = async (req, res) => {
     res.status(500).json({
       success: false,
       message: error.message || "Failed to update profile",
+    });
+  }
+};
+
+// @desc    Update user profile picture
+// @route   PUT /api/users/profile-picture
+// @access  Private
+exports.updateProfilePicture = async (req, res) => {
+  try {
+    const { imageBase64 } = req.body;
+
+    if (!imageBase64) {
+      return res.status(400).json({
+        success: false,
+        message: "No image provided",
+      });
+    }
+
+    // Upload image to Cloudinary
+    const uploadResult = await cloudinary.uploader.upload(imageBase64, {
+      folder: "wikatalk_profile_pictures",
+      resource_type: "image",
+      transformation: [
+        { width: 500, height: 500, crop: "fill", gravity: "face" },
+      ],
+    });
+
+    // Update user profile picture URL in database
+    const updatedUser = await User.findByIdAndUpdate(
+      req.user._id,
+      { profilePicture: uploadResult.secure_url },
+      { new: true }
+    ).select("-password");
+
+    if (!updatedUser) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found",
+      });
+    }
+
+    res.json({
+      success: true,
+      message: "Profile picture updated successfully",
+      data: updatedUser,
+    });
+  } catch (error) {
+    console.error("Profile picture update error:", error);
+    res.status(500).json({
+      success: false,
+      message: error.message || "Failed to update profile picture",
     });
   }
 };

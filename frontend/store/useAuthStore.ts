@@ -737,38 +737,95 @@ export const useAuthStore = create<AuthState>()(
         try {
           set({ isLoading: true });
 
-          // Call API to update profile
-          const token = get().userToken;
-          if (!token) {
-            throw new Error("No authentication token found");
-          }
-
-          const response = await axios.put(
-            `${API_URL}/api/users/profile`,
-            updatedUserData,
-            {
-              headers: {
-                Authorization: `Bearer ${token}`,
-              },
+          // Special handling for profile picture (separate endpoint)
+          if (
+            updatedUserData.profilePicture &&
+            updatedUserData.profilePicture.startsWith("data:image")
+          ) {
+            const token = get().userToken;
+            if (!token) {
+              throw new Error("No authentication token found");
             }
-          );
 
-          if (response.data.success) {
-            // Update state with server response
-            const updatedUser = response.data.data;
-
-            // Update in state
-            set({ userData: updatedUser });
-
-            // Save to storage
-            await AsyncStorage.setItem("userData", JSON.stringify(updatedUser));
-
-            return { success: true, data: updatedUser };
-          } else {
-            throw new Error(
-              response.data.message || "Failed to update profile"
+            // Upload the profile picture
+            const picResponse = await axios.put(
+              `${API_URL}/api/users/profile-picture`,
+              { imageBase64: updatedUserData.profilePicture },
+              {
+                headers: {
+                  Authorization: `Bearer ${token}`,
+                  "Content-Type": "application/json",
+                },
+              }
             );
+
+            if (picResponse.data.success) {
+              // Update user data with the new picture URL from Cloudinary
+              const updatedUser = picResponse.data.data;
+
+              // Save to storage
+              await AsyncStorage.setItem(
+                "userData",
+                JSON.stringify(updatedUser)
+              );
+
+              // Update state
+              set({ userData: updatedUser });
+
+              // Remove profilePicture from updatedUserData since it's already processed
+              delete updatedUserData.profilePicture;
+
+              // If only the profile picture was being updated, return now
+              if (Object.keys(updatedUserData).length === 0) {
+                return { success: true, data: updatedUser };
+              }
+            } else {
+              throw new Error(
+                picResponse.data.message || "Failed to update profile picture"
+              );
+            }
           }
+
+          // Process other profile fields if they exist
+          if (Object.keys(updatedUserData).length > 0) {
+            const token = get().userToken;
+            if (!token) {
+              throw new Error("No authentication token found");
+            }
+
+            const response = await axios.put(
+              `${API_URL}/api/users/profile`,
+              updatedUserData,
+              {
+                headers: {
+                  Authorization: `Bearer ${token}`,
+                },
+              }
+            );
+
+            if (response.data.success) {
+              // Update state with server response
+              const updatedUser = response.data.data;
+
+              // Update in state
+              set({ userData: updatedUser });
+
+              // Save to storage
+              await AsyncStorage.setItem(
+                "userData",
+                JSON.stringify(updatedUser)
+              );
+
+              return { success: true, data: updatedUser };
+            } else {
+              throw new Error(
+                response.data.message || "Failed to update profile"
+              );
+            }
+          }
+
+          // If we get here, the profile picture was successfully updated
+          return { success: true, data: get().userData };
         } catch (error: any) {
           console.error("Error updating user profile:", error);
           const message =
