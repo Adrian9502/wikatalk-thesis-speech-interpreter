@@ -23,6 +23,9 @@ const AccountDetails = () => {
   // Get the dynamic styles based on the current theme
   const dynamicStyles = getGlobalStyles(activeTheme.backgroundColor);
 
+  const refreshUserData = () => {
+    getUserProfile();
+  };
   useEffect(() => {
     getUserProfile();
   }, []);
@@ -55,7 +58,10 @@ const AccountDetails = () => {
         <InfoSection userData={userData} theme={activeTheme} />
 
         <Text style={styles.sectionTitle}>Account Settings</Text>
-        <SettingsSection theme={activeTheme} />
+        <SettingsSection
+          theme={activeTheme}
+          onProfileUpdate={refreshUserData}
+        />
 
         <Text style={styles.sectionTitle}>Danger Zone</Text>
         <DangerSection />

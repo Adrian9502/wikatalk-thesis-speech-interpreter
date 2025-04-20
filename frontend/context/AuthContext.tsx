@@ -54,6 +54,7 @@ export const useAuth = () => {
     resetPassword,
     clearStorage,
     clearResetData,
+    updateUserProfile,
   } = useAuthStore();
 
   return {
@@ -79,5 +80,6 @@ export const useAuth = () => {
     resetPassword,
     clearStorage,
     clearResetData,
+    updateUserProfile,
   };
 };

@@ -520,3 +520,64 @@ exports.checkVerification = async (req, res) => {
     });
   }
 };
+
+// @desc    Update user profile
+// @route   PUT /api/users/profile
+// @access  Private
+exports.updateUserProfile = async (req, res) => {
+  try {
+    const { fullName, username } = req.body;
+
+    // Validate input
+    if (!fullName && !username) {
+      return res.status(400).json({
+        success: false,
+        message: "Please provide at least one field to update",
+      });
+    }
+
+    // Check if username is unique if it's being changed
+    if (username) {
+      const existingUser = await User.findOne({
+        username,
+        _id: { $ne: req.user._id },
+      });
+
+      if (existingUser) {
+        return res.status(400).json({
+          success: false,
+          message: "Username is already taken",
+        });
+      }
+    }
+
+    // Update user
+    const updatedUser = await User.findByIdAndUpdate(
+      req.user._id,
+      {
+        fullName: fullName || req.user.fullName,
+        username: username || req.user.username,
+      },
+      { new: true }
+    ).select("-password");
+
+    if (!updatedUser) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found",
+      });
+    }
+
+    res.json({
+      success: true,
+      message: "Profile updated successfully",
+      data: updatedUser,
+    });
+  } catch (error) {
+    console.error("Update profile error:", error);
+    res.status(500).json({
+      success: false,
+      message: error.message || "Failed to update profile",
+    });
+  }
+};

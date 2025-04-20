@@ -79,6 +79,11 @@ interface AuthState {
   clearStorage: () => Promise<{ success: boolean; message?: string }>;
   clearResetData: () => Promise<{ success: boolean; message?: string }>;
   handleAppStateChange: (nextAppState: AppStateStatus) => void;
+  updateUserProfile: (updatedUserData: Partial<UserData>) => Promise<{
+    success: boolean;
+    message?: string;
+    data?: UserData;
+  }>;
 }
 
 // Initialize axios interceptors
@@ -724,6 +729,56 @@ export const useAuthStore = create<AuthState>()(
         } catch (error) {
           console.error("❌ Error clearing AsyncStorage:", error);
           return { success: false, message: "Error clearing storage" };
+        }
+      },
+
+      // Update user profile
+      updateUserProfile: async (updatedUserData: Partial<UserData>) => {
+        try {
+          set({ isLoading: true });
+
+          // Call API to update profile
+          const token = get().userToken;
+          if (!token) {
+            throw new Error("No authentication token found");
+          }
+
+          const response = await axios.put(
+            `${API_URL}/api/users/profile`,
+            updatedUserData,
+            {
+              headers: {
+                Authorization: `Bearer ${token}`,
+              },
+            }
+          );
+
+          if (response.data.success) {
+            // Update state with server response
+            const updatedUser = response.data.data;
+
+            // Update in state
+            set({ userData: updatedUser });
+
+            // Save to storage
+            await AsyncStorage.setItem("userData", JSON.stringify(updatedUser));
+
+            return { success: true, data: updatedUser };
+          } else {
+            throw new Error(
+              response.data.message || "Failed to update profile"
+            );
+          }
+        } catch (error: any) {
+          console.error("Error updating user profile:", error);
+          const message =
+            error.response?.data?.message ||
+            error.message ||
+            "Failed to update profile";
+          get().setFormMessage(message, "error");
+          return { success: false, message };
+        } finally {
+          set({ isLoading: false });
         }
       },
     }),
