@@ -36,18 +36,15 @@ const EditProfileModal = ({
   const [error, setError] = useState("");
 
   useEffect(() => {
-    if (visible) {
-      StatusBar.setBarStyle("light-content");
-      if (Platform.OS === "android") {
-        StatusBar.setBackgroundColor("transparent");
-      }
-    }
-    return () => {
-      StatusBar.setBarStyle("default");
+    const setStatusBar = (style: "default" | "light-content") => {
+      StatusBar.setBarStyle(style);
       if (Platform.OS === "android") {
         StatusBar.setBackgroundColor("transparent");
       }
     };
+
+    if (visible) setStatusBar("light-content");
+    return () => setStatusBar("default");
   }, [visible]);
 
   const handleSave = async () => {
