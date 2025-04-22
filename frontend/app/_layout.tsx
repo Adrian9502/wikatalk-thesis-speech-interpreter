@@ -75,7 +75,7 @@ const RootLayout = () => {
       setShowSplashAnimation(false);
       markSplashShown();
       markLoadingComplete();
-    }, 8000);
+    }, 5000);
 
     return () => clearTimeout(forceTimeout);
   }, [markLoadingComplete, markSplashShown]);
