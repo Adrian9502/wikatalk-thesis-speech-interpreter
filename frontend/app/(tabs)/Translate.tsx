@@ -1,5 +1,10 @@
 import React, { useEffect } from "react";
-import { KeyboardAvoidingView, Platform } from "react-native";
+import {
+  KeyboardAvoidingView,
+  Platform,
+  TouchableWithoutFeedback,
+  Keyboard,
+} from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import TranslateSection from "@/components/Translate/TranslateSection";
 import {
@@ -8,6 +13,7 @@ import {
 } from "@/store/useTranslateStore";
 import useThemeStore from "@/store/useThemeStore";
 import { getGlobalStyles } from "@/styles/globalStyles";
+
 const Translate = () => {
   // Theme store
   const { activeTheme } = useThemeStore();
@@ -26,7 +32,7 @@ const Translate = () => {
 
   // Clear source text when the component mounts
   useEffect(() => {
-    clearSourceText;
+    clearSourceText(); // You were missing the parentheses here
   }, []);
 
   // Stop speech when changing languages
@@ -47,16 +53,23 @@ const Translate = () => {
     };
   }, [sourceText, sourceLanguage, targetLanguage, updateState]);
 
+  // Handle dismissing the keyboard
+  const dismissKeyboard = () => {
+    Keyboard.dismiss();
+  };
+
   return (
-    <KeyboardAvoidingView
-      behavior={Platform.OS === "ios" ? "padding" : "height"}
-      style={{ flex: 1 }}
-      keyboardVerticalOffset={Platform.OS === "ios" ? 0 : -100}
-    >
-      <SafeAreaView style={dynamicStyles.container}>
-        <TranslateSection />
-      </SafeAreaView>
-    </KeyboardAvoidingView>
+    <TouchableWithoutFeedback onPress={dismissKeyboard}>
+      <KeyboardAvoidingView
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
+        style={{ flex: 1 }}
+        keyboardVerticalOffset={Platform.OS === "ios" ? 0 : -100}
+      >
+        <SafeAreaView style={dynamicStyles.container}>
+          <TranslateSection />
+        </SafeAreaView>
+      </KeyboardAvoidingView>
+    </TouchableWithoutFeedback>
   );
 };
 

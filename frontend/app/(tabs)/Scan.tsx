@@ -6,6 +6,8 @@ import {
   TouchableOpacity,
   KeyboardAvoidingView,
   Platform,
+  TouchableWithoutFeedback,
+  Keyboard,
 } from "react-native";
 import { StatusBar } from "expo-status-bar";
 import { CameraView, useCameraPermissions } from "expo-camera";
@@ -164,90 +166,92 @@ const Scan: React.FC = () => {
   }
 
   return (
-    <SafeAreaView style={dynamicStyles.container}>
-      <StatusBar style="light" />
-      <KeyboardAvoidingView
-        behavior={Platform.OS === "ios" ? "padding" : "height"}
-        style={styles.keyboardView}
-        keyboardVerticalOffset={Platform.OS === "ios" ? 0 : 20}
-      >
-        <View style={styles.cameraContainer}>
-          <View style={styles.cameraViewContainer}>
-            <CameraView
-              style={{ flex: 1 }}
-              facing="back"
-              ref={cameraRef}
-              onMountError={(event) => {
-                const error = event as unknown as Error;
-                updateState({
-                  sourceText: `Camera mount error: ${error.message}`,
-                });
-              }}
-            />
+    <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+      <SafeAreaView style={dynamicStyles.container}>
+        <StatusBar style="light" />
+        <KeyboardAvoidingView
+          behavior={Platform.OS === "ios" ? "padding" : "height"}
+          style={styles.keyboardView}
+          keyboardVerticalOffset={Platform.OS === "ios" ? 0 : 20}
+        >
+          <View style={styles.cameraContainer}>
+            <View style={styles.cameraViewContainer}>
+              <CameraView
+                style={{ flex: 1 }}
+                facing="back"
+                ref={cameraRef}
+                onMountError={(event) => {
+                  const error = event as unknown as Error;
+                  updateState({
+                    sourceText: `Camera mount error: ${error.message}`,
+                  });
+                }}
+              />
 
-            <CameraControls
-              takePicture={takePicture}
-              pickImage={pickImage}
-              isProcessing={isProcessing}
-            />
+              <CameraControls
+                takePicture={takePicture}
+                pickImage={pickImage}
+                isProcessing={isProcessing}
+              />
+            </View>
+
+            <View style={styles.translationContainer}>
+              <LanguageSelector
+                targetLanguage={targetLanguage}
+                onLanguageChange={(language: string) => {
+                  updateState({ targetLanguage: language });
+                  if (sourceText) translateDetectedText(sourceText);
+                }}
+              />
+
+              {isProcessing && (
+                <View style={styles.progressContainer}>
+                  <View
+                    style={[
+                      styles.progressBar,
+                      { width: `${ocrProgress * 100}%` },
+                    ]}
+                  />
+                  <Text style={styles.progressText}>
+                    {Math.round(ocrProgress * 100)}% - Recognizing text...
+                  </Text>
+                </View>
+              )}
+
+              <TextDisplay
+                title="Detected Text"
+                text={sourceText}
+                placeholder="Scan or select an image to detect text"
+                isLoading={isProcessing}
+                isSpeaking={isSourceSpeaking}
+                copied={copiedSource}
+                onChangeText={(text: string) => {
+                  debouncedTranslateText(text);
+                }}
+                onCopy={() => copyToClipboard(sourceText, "copiedSource")}
+                onSpeak={() => handleSourceSpeech(sourceText)}
+                onClear={clearText}
+                editable={true}
+                color={BASE_COLORS.blue}
+              />
+
+              <TextDisplay
+                title="Translation"
+                text={translatedText}
+                placeholder="Translation will appear here"
+                isLoading={isTranslating}
+                isSpeaking={isTargetSpeaking}
+                copied={copiedTarget}
+                onCopy={() => copyToClipboard(translatedText, "copiedTarget")}
+                onSpeak={() => handleTargetSpeech(translatedText)}
+                editable={false}
+                color={BASE_COLORS.orange}
+              />
+            </View>
           </View>
-
-          <View style={styles.translationContainer}>
-            <LanguageSelector
-              targetLanguage={targetLanguage}
-              onLanguageChange={(language: string) => {
-                updateState({ targetLanguage: language });
-                if (sourceText) translateDetectedText(sourceText);
-              }}
-            />
-
-            {isProcessing && (
-              <View style={styles.progressContainer}>
-                <View
-                  style={[
-                    styles.progressBar,
-                    { width: `${ocrProgress * 100}%` },
-                  ]}
-                />
-                <Text style={styles.progressText}>
-                  {Math.round(ocrProgress * 100)}% - Recognizing text...
-                </Text>
-              </View>
-            )}
-
-            <TextDisplay
-              title="Detected Text"
-              text={sourceText}
-              placeholder="Scan or select an image to detect text"
-              isLoading={isProcessing}
-              isSpeaking={isSourceSpeaking}
-              copied={copiedSource}
-              onChangeText={(text: string) => {
-                debouncedTranslateText(text);
-              }}
-              onCopy={() => copyToClipboard(sourceText, "copiedSource")}
-              onSpeak={() => handleSourceSpeech(sourceText)}
-              onClear={clearText}
-              editable={true}
-              color={BASE_COLORS.blue}
-            />
-
-            <TextDisplay
-              title="Translation"
-              text={translatedText}
-              placeholder="Translation will appear here"
-              isLoading={isTranslating}
-              isSpeaking={isTargetSpeaking}
-              copied={copiedTarget}
-              onCopy={() => copyToClipboard(translatedText, "copiedTarget")}
-              onSpeak={() => handleTargetSpeech(translatedText)}
-              editable={false}
-              color={BASE_COLORS.orange}
-            />
-          </View>
-        </View>
-      </KeyboardAvoidingView>
-    </SafeAreaView>
+        </KeyboardAvoidingView>
+      </SafeAreaView>
+    </TouchableWithoutFeedback>
   );
 };
 

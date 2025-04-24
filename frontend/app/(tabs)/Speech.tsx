@@ -5,6 +5,7 @@ import {
   Platform,
   Keyboard,
   Animated,
+  TouchableWithoutFeedback,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import React, { useEffect, useState, useRef } from "react";
@@ -50,8 +51,6 @@ const Speech = () => {
 
   // track which user is recording
   const [recordingUser, setRecordingUser] = useState<number | null>(null);
-  // Track if keyboard is visible
-  const [keyboardVisible, setKeyboardVisible] = useState(false);
   // Track which section is being edited (top=false, bottom=true)
   const [isBottomActive, setIsBottomActive] = useState(false);
   // Track content position
@@ -112,8 +111,6 @@ const Speech = () => {
     const keyboardDidShowListener = Keyboard.addListener(
       "keyboardDidShow",
       () => {
-        setKeyboardVisible(true);
-
         // If bottom section is active, animate content up
         if (isBottomActive) {
           Animated.timing(contentPosition, {
@@ -128,8 +125,6 @@ const Speech = () => {
     const keyboardDidHideListener = Keyboard.addListener(
       "keyboardDidHide",
       () => {
-        setKeyboardVisible(false);
-
         // Animate content back to original position
         Animated.timing(contentPosition, {
           toValue: 0,
@@ -164,47 +159,47 @@ const Speech = () => {
       style={[dynamicStyles.container]}
     >
       <StatusBar style="light" />
-
-      <KeyboardAvoidingView
-        behavior={Platform.OS === "ios" ? "padding" : "height"}
-        style={styles.keyboardAvoidingView}
-        keyboardVerticalOffset={keyboardOffset}
-        enabled={true}
-      >
-        <Animated.View
-          style={[
-            styles.contentContainer,
-            { transform: [{ translateY: contentPosition }] },
-          ]}
+      <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
+        <KeyboardAvoidingView
+          behavior={Platform.OS === "ios" ? "padding" : "height"}
+          style={styles.keyboardAvoidingView}
+          keyboardVerticalOffset={keyboardOffset}
+          enabled={true}
         >
-          {/* Top section */}
-          <LanguageSection
-            position="top"
-            handlePress={handleMicPress}
-            recording={!!recording && recordingUser === 2}
-            userId={2}
-            onTextAreaFocus={handleTextAreaFocus}
-          />
-
-          {/* Middle Section - Exchange icon */}
-          <View style={styles.middleSection}>
-            <SwapButton
-              onPress={swapLanguages}
-              borderStyle={styles.swapButtonBorder}
+          <Animated.View
+            style={[
+              styles.contentContainer,
+              { transform: [{ translateY: contentPosition }] },
+            ]}
+          >
+            {/* Top section */}
+            <LanguageSection
+              position="top"
+              handlePress={handleMicPress}
+              recording={!!recording && recordingUser === 2}
+              userId={2}
+              onTextAreaFocus={handleTextAreaFocus}
             />
-          </View>
 
-          {/* Bottom section */}
-          <LanguageSection
-            position="bottom"
-            handlePress={handleMicPress}
-            recording={!!recording && recordingUser === 1}
-            userId={1}
-            onTextAreaFocus={handleTextAreaFocus}
-          />
-        </Animated.View>
-      </KeyboardAvoidingView>
+            {/* Middle Section - Exchange icon */}
+            <View style={styles.middleSection}>
+              <SwapButton
+                onPress={swapLanguages}
+                borderStyle={styles.swapButtonBorder}
+              />
+            </View>
 
+            {/* Bottom section */}
+            <LanguageSection
+              position="bottom"
+              handlePress={handleMicPress}
+              recording={!!recording && recordingUser === 1}
+              userId={1}
+              onTextAreaFocus={handleTextAreaFocus}
+            />
+          </Animated.View>
+        </KeyboardAvoidingView>
+      </TouchableWithoutFeedback>
       {/* Language Information Modal */}
       {showLanguageInfo &&
         activeLanguageInfo &&
