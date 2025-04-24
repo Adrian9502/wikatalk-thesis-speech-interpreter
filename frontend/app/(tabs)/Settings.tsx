@@ -73,11 +73,6 @@ const Settings = () => {
           label: "Account Details",
           onPress: () => router.push("/(settings)/AccountDetails"),
         },
-        {
-          icon: "lock",
-          label: "Change Password",
-          onPress: () => router.push("/(settings)/ChangePassword"),
-        },
       ],
     },
     {

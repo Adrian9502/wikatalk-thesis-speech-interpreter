@@ -76,6 +76,13 @@ interface AuthState {
     verificationCode: string
   ) => Promise<AuthResponse>;
   resetPassword: (token: string, newPassword: string) => Promise<AuthResponse>;
+  changePassword: (
+    currentPassword: string,
+    newPassword: string
+  ) => Promise<{
+    success: boolean;
+    message?: string;
+  }>;
   clearStorage: () => Promise<{ success: boolean; message?: string }>;
   clearResetData: () => Promise<{ success: boolean; message?: string }>;
   handleAppStateChange: (nextAppState: AppStateStatus) => void;
@@ -691,6 +698,57 @@ export const useAuthStore = create<AuthState>()(
           const message =
             error.response?.data?.message || "Password reset failed";
           get().setFormMessage(message, "error");
+
+          return { success: false, message };
+        } finally {
+          set({ isLoading: false });
+        }
+      },
+
+      // Change password
+      changePassword: async (currentPassword: string, newPassword: string) => {
+        set({ isLoading: true });
+
+        try {
+          const token = get().userToken;
+          if (!token) {
+            throw new Error("Authentication token not found");
+          }
+
+          const response = await axios.put(
+            `${API_URL}/api/users/change-password`,
+            { currentPassword, newPassword },
+            {
+              headers: {
+                Authorization: `Bearer ${token}`,
+              },
+            }
+          );
+
+          if (response.data.success) {
+            showToast({
+              type: "success",
+              title: "Password Updated",
+              description: "Your password has been changed successfully",
+            });
+            return { success: true };
+          } else {
+            throw new Error(
+              response.data.message || "Failed to change password"
+            );
+          }
+        } catch (error: any) {
+          console.error("Password change error:", error);
+          const message =
+            error.response?.data?.message ||
+            error.message ||
+            "Failed to change password";
+
+          // showToast({
+          //   type: "error",
+          //   title: "Password Change Failed",
+          //   description: message,
+          // });
 
           return { success: false, message };
         } finally {

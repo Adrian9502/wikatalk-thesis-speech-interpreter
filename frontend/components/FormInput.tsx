@@ -15,7 +15,7 @@ interface FormInputProps<T extends FieldValues> {
   placeholder: string;
   control: Control<T>;
   name: Path<T>;
-  IconComponent: LucideIcon;
+  IconComponent: React.ComponentType<any>;
   error?: string;
   secureTextEntry?: boolean;
   keyboardType?: KeyboardTypeOptions;

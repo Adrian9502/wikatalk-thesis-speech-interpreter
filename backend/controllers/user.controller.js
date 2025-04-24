@@ -505,6 +505,9 @@ exports.resetPassword = async (req, res) => {
   }
 };
 
+// @desc    Check verification status
+// @route   POST /api/users/check-verification
+// @access  Public
 exports.checkVerification = async (req, res) => {
   try {
     const { email } = req.body;
@@ -525,6 +528,53 @@ exports.checkVerification = async (req, res) => {
     res.status(500).json({
       success: false,
       message: error.message,
+    });
+  }
+};
+
+// @desc    Change user password
+// @route   PUT /api/users/change-password
+// @access  Private
+exports.changePassword = async (req, res) => {
+  try {
+    const { currentPassword, newPassword } = req.body;
+
+    // Find the user
+    const user = await User.findById(req.user._id);
+
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found",
+      });
+    }
+
+    // Check if current password is correct
+    const isMatch = await user.matchPassword(currentPassword);
+    if (!isMatch) {
+      return res.status(401).json({
+        success: false,
+        message: "Current password is incorrect",
+      });
+    }
+
+    // Update password
+    user.password = newPassword;
+    user.passwordLastChangedAt = new Date(); // Record timestamp of change
+    await user.save();
+
+    // Send password changed email notification
+    await sendPasswordChangedEmail(user);
+
+    res.json({
+      success: true,
+      message: "Password changed successfully",
+    });
+  } catch (error) {
+    console.error("Password change error:", error);
+    res.status(500).json({
+      success: false,
+      message: error.message || "Failed to change password",
     });
   }
 };
