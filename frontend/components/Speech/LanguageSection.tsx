@@ -1,15 +1,8 @@
 import React, { useState, useEffect } from "react";
-import {
-  View,
-  StyleSheet,
-  Animated,
-  Keyboard,
-  KeyboardAvoidingView,
-  Platform,
-} from "react-native";
+import { View, StyleSheet, Animated, Keyboard } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { BASE_COLORS, getPositionalColors } from "@/constant/colors";
-import useLanguageStore from "@/store/useLanguageStore";
+import useLanguageStore, { INITIAL_TEXT } from "@/store/useLanguageStore";
 import LanguageSectionHeader from "./LanguageSectionHeader";
 import TextAreaSection from "./TextAreaSection";
 import LanguageBottomSection from "./LanguageBottomSection";
@@ -44,6 +37,7 @@ const LanguageSection: React.FC<LanguageSectionProps> = ({
     toggleTopDropdown,
     toggleBottomDropdown,
     showLanguageDetails,
+    translateOnLanguageChange,
   } = useLanguageStore();
 
   // Determine which language and text to use based on position
@@ -52,10 +46,19 @@ const LanguageSection: React.FC<LanguageSectionProps> = ({
 
   // Set language based on position
   const setLanguage = (lang: string) => {
+    const prevLang = position === "top" ? language2 : language1;
+    const text = textField;
+
+    // First update the language in the store
     if (position === "top") {
       setLanguage2(lang);
     } else {
       setLanguage1(lang);
+    }
+
+    // If there's actual text (not initial placeholder), trigger translation with the new language
+    if (text && text !== INITIAL_TEXT) {
+      translateOnLanguageChange(text, position, prevLang, lang);
     }
   };
 

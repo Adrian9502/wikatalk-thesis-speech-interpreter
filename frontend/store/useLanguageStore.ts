@@ -45,6 +45,12 @@ type LanguageStore = {
     text: string,
     position: "top" | "bottom"
   ) => Promise<void>;
+  translateOnLanguageChange: (
+    text: string,
+    position: "top" | "bottom",
+    prevLang: string,
+    newLang: string
+  ) => Promise<void>;
   debouncedTranslate: (text: string, position: "top" | "bottom") => void;
   speakText: (text: string, language: string) => Promise<void>;
   stopSpeech: () => Promise<void>;
@@ -248,7 +254,41 @@ const useLanguageStore = create<LanguageStore>((set, get) => ({
       set({ isTranslating: false });
     }
   },
+  translateOnLanguageChange: async (text, position, prevLang, newLang) => {
+    // Don't translate if text is empty or placeholder
+    if (!text || text === INITIAL_TEXT || text === ERROR_TEXT) return;
 
+    // Determine target language based on position
+    const tgtLang = position === "top" ? get().language1 : get().language2;
+
+    set({ isTranslating: true, translationError: false });
+
+    try {
+      // Translate the text from previous language to the new language
+      const translatedText = await translateText(text, prevLang, newLang);
+
+      // Update the appropriate text field
+      if (position === "top") {
+        set({ upperTextfield: translatedText });
+      } else {
+        set({ bottomTextfield: translatedText });
+      }
+
+      // Save this translation to history
+      await saveTranslationHistory({
+        type: "Speech",
+        fromLanguage: prevLang,
+        toLanguage: newLang,
+        originalText: text,
+        translatedText: translatedText,
+      });
+    } catch (error) {
+      console.error("Translation error after language change:", error);
+      get().showTranslationError();
+    } finally {
+      set({ isTranslating: false });
+    }
+  },
   // Debounced version to limit API calls
   debouncedTranslate: debounce((text, position) => {
     get().translateEditedText(text, position);
