@@ -61,6 +61,7 @@ const LanguageInfoModal: React.FC<LanguageInfoModalProps> = ({
       visible={visible}
       transparent={true}
       animationType="fade"
+      statusBarTranslucent={true}
       onRequestClose={onClose}
     >
       <View style={styles.modalOverlay}>
