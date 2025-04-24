@@ -45,10 +45,10 @@ const ValidationContext = createContext<ValidationContextType | undefined>(
 );
 
 // Regex patterns
-const passwordPattern =
+export const passwordPattern =
   /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+export const userNamePattern = /^[a-zA-Z0-9_]+$/;
 const emailPattern = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
-const userNamePattern = /^[a-zA-Z0-9_]+$/;
 
 // Validation schemas
 const signUpSchema = yup.object().shape({

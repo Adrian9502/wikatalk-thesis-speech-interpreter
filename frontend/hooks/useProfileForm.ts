@@ -1,11 +1,13 @@
 // This file is used in Edit Profile Modal
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useForm } from "react-hook-form";
 import * as yup from "yup";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as ImagePicker from "expo-image-picker";
 import { Platform, StatusBar } from "react-native";
-
+import { debounce } from "lodash";
+import { useAuthStore } from "@/store/useAuthStore";
+import { passwordPattern, userNamePattern } from "@/context/ValidationContext";
 // Form type definition
 type ProfileFormType = {
   fullName: string;
@@ -14,12 +16,22 @@ type ProfileFormType = {
   newPassword?: string;
   confirmPassword?: string;
 };
-
 // Create validation schema
 const createFormSchema = (changePasswordEnabled: boolean) => {
   return yup.object({
-    fullName: yup.string().required("Full name is required"),
-    username: yup.string().required("Username is required"),
+    fullName: yup
+      .string()
+      .required("Full name is required")
+      .min(2, "Name must be at least 2 characters")
+      .matches(/^[a-zA-Z\s]*$/, "Name can only contain letters and spaces"),
+    username: yup
+      .string()
+      .required("Username is required")
+      // Add username pattern validation
+      .matches(
+        userNamePattern,
+        "Username can only contain letters, numbers, and underscores"
+      ),
     currentPassword: yup.string().when([], {
       is: () => changePasswordEnabled,
       then: (schema) => schema.required("Current password is required"),
@@ -30,7 +42,11 @@ const createFormSchema = (changePasswordEnabled: boolean) => {
       then: (schema) =>
         schema
           .required("New password is required")
-          .min(6, "Password must be at least 6 characters"),
+          // Replace min(6) with the passwordPattern
+          .matches(
+            passwordPattern,
+            "Password must be at least 8 characters long and include an uppercase letter, a lowercase letter, a number, and a special character."
+          ),
       otherwise: (schema) => schema.optional(),
     }),
     confirmPassword: yup.string().when([], {
@@ -44,6 +60,7 @@ const createFormSchema = (changePasswordEnabled: boolean) => {
   });
 };
 
+// Add to your hook
 export const useProfileForm = ({ userData, visible, onSave }: any) => {
   // State management
   const [profilePicture, setProfilePicture] = useState<string | null>(
@@ -54,6 +71,31 @@ export const useProfileForm = ({ userData, visible, onSave }: any) => {
   const [error, setError] = useState("");
   const [imageChanged, setImageChanged] = useState(false);
   const [passwordError, setPasswordError] = useState("");
+  const [isPasswordValid, setIsPasswordValid] = useState<boolean | null>(null);
+  const [isValidating, setIsValidating] = useState(false);
+
+  // Get validateCurrentPassword from auth store
+  const validateCurrentPassword = useAuthStore(
+    (state) => state.validateCurrentPassword
+  );
+
+  // Create a debounced password validator
+  const debouncedPasswordValidator = useRef(
+    debounce(async (password: string) => {
+      if (!password || password.length < 6) return;
+
+      setIsValidating(true);
+      try {
+        const result = await validateCurrentPassword(password);
+        setIsPasswordValid(result.success);
+      } catch (error) {
+        setIsPasswordValid(false);
+        console.log("Password validation error:", error);
+      } finally {
+        setIsValidating(false);
+      }
+    }, 800)
+  ).current;
 
   // Initialize form
   const { control, handleSubmit, reset, formState, watch } =
@@ -233,6 +275,26 @@ export const useProfileForm = ({ userData, visible, onSave }: any) => {
     }
   };
 
+  // Watch the current password field
+  const currentPassword = watch("currentPassword");
+
+  // Effect to validate password when it changes
+  useEffect(() => {
+    if (changePassword && currentPassword) {
+      debouncedPasswordValidator(currentPassword);
+    } else {
+      setIsPasswordValid(null); // Reset when not changing password
+    }
+  }, [currentPassword, changePassword]);
+
+  // Reset validation state when modal visibility changes
+  useEffect(() => {
+    if (!visible) {
+      setIsPasswordValid(null);
+    }
+  }, [visible]);
+
+  // Return additional states in your hook
   return {
     control,
     handleSubmit,
@@ -245,5 +307,9 @@ export const useProfileForm = ({ userData, visible, onSave }: any) => {
     handleSelectImage,
     onFormSubmit,
     togglePasswordChange,
+    passwordValidation: {
+      isPasswordValid,
+      isValidating,
+    },
   };
 };

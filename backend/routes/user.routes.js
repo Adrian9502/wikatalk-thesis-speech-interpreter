@@ -13,6 +13,7 @@ const {
   updateUserProfile,
   updateProfilePicture,
   changePassword,
+  validatePassword,
 } = require("../controllers/user.controller");
 
 const { protect } = require("../middleware/auth.middleware");
@@ -32,5 +33,5 @@ router.get("/profile", protect, getUserProfile);
 router.put("/profile", protect, updateUserProfile);
 router.put("/profile-picture", protect, updateProfilePicture);
 router.put("/change-password", protect, changePassword);
-
+router.post("/validate-password", protect, validatePassword);
 module.exports = router;

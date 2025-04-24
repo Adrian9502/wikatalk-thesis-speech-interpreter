@@ -579,6 +579,39 @@ exports.changePassword = async (req, res) => {
   }
 };
 
+// @desc    Validate current password and will be used in frontend to check if the password is correct before allowing the user to change it
+// @route   POST /api/users/validate-password
+// @access  Private
+exports.validatePassword = async (req, res) => {
+  try {
+    const { currentPassword } = req.body;
+
+    // Find the user
+    const user = await User.findById(req.user._id);
+
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found",
+      });
+    }
+
+    // Check if current password is correct
+    const isMatch = await user.matchPassword(currentPassword);
+
+    return res.json({
+      success: isMatch,
+      message: isMatch ? "Password is valid" : "Password is invalid",
+    });
+  } catch (error) {
+    console.error("Password validation error:", error);
+    res.status(500).json({
+      success: false,
+      message: error.message || "Failed to validate password",
+    });
+  }
+};
+
 // @desc    Update user profile
 // @route   PUT /api/users/profile
 // @access  Private

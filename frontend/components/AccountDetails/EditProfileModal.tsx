@@ -41,6 +41,7 @@ const EditProfileModal = ({
     handleSelectImage,
     onFormSubmit,
     togglePasswordChange,
+    passwordValidation,
   } = useProfileForm({ userData, visible, onSave });
 
   return (
@@ -82,6 +83,7 @@ const EditProfileModal = ({
               changePassword={passwordState.changePassword}
               passwordError={passwordState.passwordError}
               togglePasswordChange={togglePasswordChange}
+              passwordValidation={passwordValidation}
               theme={theme}
             />
 

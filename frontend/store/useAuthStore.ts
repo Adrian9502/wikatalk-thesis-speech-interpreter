@@ -43,7 +43,9 @@ interface AuthState {
   error: string | null;
   formMessage: FormMessage | null;
   appInactiveTime: number | null;
-
+  validateCurrentPassword: (
+    password: string
+  ) => Promise<{ success: boolean; message?: string }>;
   // Derived state
   isLoggedIn: boolean;
   isVerified: boolean;
@@ -753,6 +755,34 @@ export const useAuthStore = create<AuthState>()(
           return { success: false, message };
         } finally {
           set({ isLoading: false });
+        }
+      },
+      // Validate current password using debounce
+      validateCurrentPassword: async (password: string) => {
+        try {
+          const token = get().userToken;
+          if (!token) {
+            throw new Error("Authentication token not found");
+          }
+
+          const response = await axios.post(
+            `${API_URL}/api/users/validate-password`,
+            { currentPassword: password },
+            {
+              headers: {
+                Authorization: `Bearer ${token}`,
+              },
+            }
+          );
+
+          return {
+            success: response.data.success,
+            message: response.data.message,
+          };
+        } catch (error: any) {
+          const message =
+            error.response?.data?.message || "Failed to validate password";
+          return { success: false, message };
         }
       },
 

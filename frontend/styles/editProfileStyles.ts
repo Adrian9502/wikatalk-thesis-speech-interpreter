@@ -130,4 +130,27 @@ export default StyleSheet.create({
     fontSize: 13,
     fontFamily: "Poppins-Medium",
   },
+  passwordField: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+  },
+  validationIconContainer: {
+    marginLeft: 10,
+    height: 20,
+    justifyContent: "center",
+  },
+  invalidPasswordWarning: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingHorizontal: 4,
+    marginTop: -8,
+    marginBottom: 16,
+  },
+  invalidPasswordText: {
+    color: "#f59e0b",
+    fontFamily: "Poppins-Regular",
+    fontSize: 12,
+    marginLeft: 6,
+  },
 });
