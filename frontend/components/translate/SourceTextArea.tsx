@@ -88,14 +88,23 @@ const SourceTextArea = () => {
           scrollEnabled={true}
           nestedScrollEnabled={true}
           showsVerticalScrollIndicator={false}
-          contentContainerStyle={styles.scrollContent}
+          contentContainerStyle={[
+            styles.scrollContent,
+            { minHeight: sourceText ? 120 : 50 }, // Add dynamic minimum height
+          ]}
         >
           <TextInput
             placeholder="Enter text to translate..."
             value={sourceText}
             onChangeText={(text) => updateState({ sourceText: text })}
             multiline
-            style={[styles.textField, { color: BASE_COLORS.darkText }]}
+            style={[
+              styles.textField,
+              {
+                color: BASE_COLORS.darkText,
+                minHeight: sourceText ? 100 : 40, // Add minimum height based on content
+              },
+            ]}
             placeholderTextColor={BASE_COLORS.placeholderText}
             textAlignVertical="top"
           />
@@ -159,11 +168,12 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     borderWidth: 1,
     padding: 16,
-    maxHeight: "100%",
+    flex: 1,
   },
   scrollContent: {
     overflow: "hidden",
     paddingBottom: 20,
+    flexGrow: 1,
   },
   textField: {
     fontFamily: "Poppins-Regular",
