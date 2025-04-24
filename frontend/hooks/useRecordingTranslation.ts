@@ -28,7 +28,8 @@ export const useRecordingTranslation = () => {
       srcLang: string,
       tgtLang: string
     ): Promise<TranslationResult | null> => {
-      const FILEUPLOAD_URL = process.env.EXPO_PUBLIC_NGROK_FILEUPLOAD_URL;
+      const FILEUPLOAD_URL =
+        process.env.EXPO_PUBLIC_NLP_TRANSLATE_AUDIO_API_URL;
 
       if (!FILEUPLOAD_URL || !uri) {
         const error = new Error("No file upload URL or recording URI found");

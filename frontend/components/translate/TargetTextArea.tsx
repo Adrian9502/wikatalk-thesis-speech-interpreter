@@ -78,7 +78,7 @@ const TargetTextArea = () => {
           showsVerticalScrollIndicator={false}
           contentContainerStyle={[
             styles.scrollContent,
-            { flex: isTranslating ? 1 : 0 },
+            isTranslating ? { flex: 1 } : {},
           ]}
         >
           {isTranslating ? (
@@ -96,7 +96,14 @@ const TargetTextArea = () => {
               value={translatedText}
               multiline={true}
               editable={false}
-              style={[styles.textField, { color: BASE_COLORS.darkText }]}
+              style={[
+                styles.textField,
+                {
+                  color: BASE_COLORS.darkText,
+                  flex: 1,
+                  minHeight: 100,
+                },
+              ]}
               placeholder="Translation will appear here..."
               placeholderTextColor={BASE_COLORS.placeholderText}
               textAlignVertical="top"
@@ -167,12 +174,12 @@ const styles = StyleSheet.create({
   scrollContent: {
     overflow: "hidden",
     paddingBottom: 20,
+    minHeight: 50,
   },
   textField: {
     fontFamily: "Poppins-Regular",
     fontSize: 17,
     lineHeight: 24,
-    textAlignVertical: "top",
   },
   loadingContainer: {
     flex: 1,

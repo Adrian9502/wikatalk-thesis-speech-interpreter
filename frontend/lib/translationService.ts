@@ -1,21 +1,13 @@
-import { GoogleGenerativeAI } from "@google/generative-ai";
+import axios from "axios";
 
-// API KEY FROM ENV VARIABLES
-const api_key = process.env.EXPO_PUBLIC_TRANSLATE_API_KEY;
-if (!api_key) {
+// Get the API URL from environment variables
+const TRANSLATE_TEXT_URL = process.env.EXPO_PUBLIC_NLP_TRANSLATE_TEXT_API_URL;
+
+if (!TRANSLATE_TEXT_URL) {
   throw new Error(
-    "Missing EXPO_PUBLIC_TRANSLATE_API_KEY. Check your environment variables."
+    "Missing EXPO_PUBLIC_NLP_TRANSLATE_TEXT_API_URL. Check your environment variables."
   );
 }
-
-const sys_instruct =
-  "You are a professional translator specializing in Filipino languages. When asked to translate, always translate directly into the requested target language (never into English unless English is explicitly the target language). For Filipino languages like Tagalog, Cebuano, Hiligaynon, etc., provide authentic translations in those languages only. Never respond in English when another language is requested.";
-
-const genAI = new GoogleGenerativeAI(api_key);
-const model = genAI.getGenerativeModel({
-  model: "gemini-2.0-flash",
-  systemInstruction: sys_instruct,
-});
 
 export const translateText = async (
   sourceText: string,
@@ -31,34 +23,40 @@ export const translateText = async (
       `Translating from ${sourceLanguage} to ${targetLanguage}: "${sourceText}"`
     );
 
-    // More explicit prompt that emphasizes the target language
-    const prompt = `Translate the following text DIRECTLY into ${targetLanguage} (not English): "${sourceText}"`;
+    // Send the text as a query parameter as specified in the API docs
+    const response = await axios.post(
+      `${TRANSLATE_TEXT_URL}?text=${encodeURIComponent(sourceText)}`,
+      {
+        srcLang: sourceLanguage === "auto" ? "detect" : sourceLanguage,
+        tgtLang: targetLanguage,
+      },
+      {
+        headers: {
+          "Content-Type": "application/x-www-form-urlencoded",
+        },
+      }
+    );
 
-    // For auto-detection, add more context
-    const finalPrompt =
-      sourceLanguage === "auto"
-        ? `Translate this text DIRECTLY into ${targetLanguage} (not English). Do NOT include the detected language, explanations, or prefixes: "${sourceText}"`
-        : prompt;
+    // Extract the translation
+    const translatedText =
+      typeof response?.data === "string"
+        ? response.data
+        : response?.data?.translated_text || "";
 
-    const result = await model.generateContent(finalPrompt);
-    console.log("Raw response:", result.response.text());
-
-    // Clean up the response to remove any explanations
-    let translation = result.response.text().trim();
-
-    // Remove any prefixes like "In Tagalog:" or "Translation:"
-    translation = translation
-      .replace(
-        /^(In|Into|Translated to|Translation to|Translation in|Translation into)\s+[^:]+:\s*/i,
-        ""
-      )
-      .replace(/^Here('s| is) the [^:]+:\s*/i, "")
-      .replace(/^Translation:\s*/i, "")
-      .trim();
-
-    return translation;
+    console.log("Translation success:", translatedText);
+    return translatedText;
   } catch (error) {
     console.error("Translation error:", error);
+
+    // Add more detailed error logging
+    if (axios.isAxiosError(error)) {
+      console.error("Request details:", {
+        status: error.response?.status,
+        statusText: error.response?.statusText,
+        data: error.response?.data,
+        url: TRANSLATE_TEXT_URL,
+      });
+    }
     throw new Error("Translation failed");
   }
 };
