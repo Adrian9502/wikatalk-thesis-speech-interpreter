@@ -217,7 +217,6 @@ const HelpFAQ = () => {
                           />
                         )}
                       </TouchableOpacity>
-
                       {expandedQuestions.includes(item.id) && (
                         <View style={styles.answerContainer}>
                           <Text style={[styles.answerText]}>{item.answer}</Text>
@@ -238,11 +237,10 @@ const HelpFAQ = () => {
                 ]}
                 onPress={() => setContactModalVisible(true)}
               >
-                <Text style={styles.contactButtonText}>Contact Support</Text>   
+                <Text style={styles.contactButtonText}>Contact Support</Text>
               </TouchableOpacity>
             </View>
           </ScrollView>
-           
           <ContactSupportModal
             visible={contactModalVisible}
             onClose={() => setContactModalVisible(false)}
