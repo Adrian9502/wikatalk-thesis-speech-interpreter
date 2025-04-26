@@ -16,6 +16,7 @@ import {
   LogoutButton,
 } from "@/components/Settings/SettingsRenderer";
 import { router } from "expo-router";
+import ContactSupportModal from "@/components/HelpAndFAQ/ContactSupportModal";
 
 // Types
 type SettingItemWithToggle = {
@@ -55,6 +56,7 @@ const Settings = () => {
   const { activeTheme } = useThemeStore();
   // Modal state
   const [logoutModalVisible, setLogoutModalVisible] = useState(false);
+  const [contactModalVisible, setContactModalVisible] = useState(false);
 
   const handleLogout = async () => {
     try {
@@ -86,7 +88,7 @@ const Settings = () => {
         {
           icon: "headphones",
           label: "Contact Support",
-          onPress: () => router.push("/(settings)/ContactSupport"),
+          onPress: () => setContactModalVisible(true),
         },
       ],
     },
@@ -210,6 +212,11 @@ const Settings = () => {
           setLogoutModalVisible(false);
           handleLogout();
         }}
+      />
+
+      <ContactSupportModal
+        visible={contactModalVisible}
+        onClose={() => setContactModalVisible(false)}
       />
 
       <FlatList
