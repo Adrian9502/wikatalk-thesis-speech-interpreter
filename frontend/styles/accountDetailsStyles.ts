@@ -3,23 +3,33 @@ import { BASE_COLORS } from "@/constant/colors";
 
 export default StyleSheet.create({
   headerContainer: {
+    padding: 16,
     flexDirection: "row",
     alignItems: "center",
-    paddingVertical: 16,
-  },
-  avatarImage: {
-    width: "100%",
-    height: "100%",
-    borderRadius: 36,
+    justifyContent: "space-between",
   },
   backButton: {
-    padding: 5,
+    width: 40,
+    height: 40,
+    justifyContent: "center",
+    alignItems: "flex-start",
   },
+  headerTitleContainer: {
+    flex: 1,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  placeholderView: { width: 40 },
   headerTitle: {
     fontSize: 20,
     fontFamily: "Poppins-Medium",
     color: BASE_COLORS.white,
-    marginLeft: 8,
+  },
+
+  avatarImage: {
+    width: "100%",
+    height: "100%",
+    borderRadius: 36,
   },
   loadingContainer: {
     flex: 1,

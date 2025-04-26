@@ -8,12 +8,14 @@ type HeaderProps = {
   title: string;
   onBackPress: () => void;
 };
-
 export const Header = ({ title, onBackPress }: HeaderProps) => (
   <View style={styles.headerContainer}>
     <TouchableOpacity style={styles.backButton} onPress={onBackPress}>
       <ChevronLeft width={30} height={30} color={BASE_COLORS.white} />
     </TouchableOpacity>
-    <Text style={styles.headerTitle}>{title}</Text>
+    <View style={styles.headerTitleContainer}>
+      <Text style={styles.headerTitle}>{title}</Text>
+    </View>
+    <View style={styles.placeholderView} />
   </View>
 );
