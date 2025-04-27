@@ -14,6 +14,7 @@ const {
   updateProfilePicture,
   changePassword,
   validatePassword,
+  loginWithGoogle,
 } = require("../controllers/user.controller");
 
 const { protect } = require("../middleware/auth.middleware");
@@ -27,7 +28,7 @@ router.post("/forgot-password", forgotPassword);
 router.post("/verify-reset-code", verifyResetCode);
 router.post("/reset-password", resetPassword);
 router.post("/resend-verification-code", resendVerificationCode);
-
+router.post("/login/google", loginWithGoogle);
 // Protected routes
 router.get("/profile", protect, getUserProfile);
 router.put("/profile", protect, updateUserProfile);

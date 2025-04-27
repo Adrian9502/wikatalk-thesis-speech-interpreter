@@ -1,9 +1,106 @@
-import React from "react";
-import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
-import { Ionicons } from "@expo/vector-icons";
-import { BASE_COLORS, TITLE_COLORS } from "@/constant/colors";
+import React, { useState, useEffect } from "react";
+import { View, Text, StyleSheet, Platform, Alert } from "react-native";
+import { BASE_COLORS } from "@/constant/colors";
+import {
+  GoogleSigninButton,
+  statusCodes,
+  GoogleSignin,
+  SignInResponse,
+} from "@react-native-google-signin/google-signin";
+import { useAuthStore } from "@/store/useAuthStore";
 
 const SocialLogin = () => {
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const loginWithGoogle = useAuthStore((state) => state.loginWithGoogle);
+
+  useEffect(() => {
+    const checkGoogleConfig = async () => {
+      try {
+        const isConfigured = await GoogleSignin.hasPlayServices({
+          showPlayServicesUpdateDialog: true,
+        });
+
+        console.log("Google Play Services available:", isConfigured);
+      } catch (error) {
+        console.error("Google Play Services check failed:", error);
+      }
+    };
+
+    checkGoogleConfig();
+  }, []);
+
+  const handleGoogleSignIn = async () => {
+    try {
+      setIsSubmitting(true);
+      console.log("Starting Google Sign In");
+      console.log(
+        "WebClientId:",
+        process.env.EXPO_PUBLIC_GOOGLE_CLIENT_ID_WEB?.substring(0, 10) + "..."
+      );
+      const userInfo: SignInResponse = await GoogleSignin.signIn();
+      console.log("Google Sign-In Success!", userInfo);
+      const idToken = userInfo?.data?.idToken ?? "";
+      const userData = userInfo?.data?.user;
+
+      if (!userData || !idToken) {
+        throw new Error("Failed to get user data from Google Sign-In");
+      }
+
+      await loginWithGoogle(idToken, {
+        name: userData.name ?? userData.email,
+        email: userData.email,
+        photo: userData.photo,
+      });
+    } catch (error: any) {
+      console.error("Full Google sign-in error:", error);
+      if (error.code) {
+        switch (error.code) {
+          case statusCodes.SIGN_IN_CANCELLED:
+            // Don't show alert for cancellation
+            console.log("Sign-in cancelled by user");
+            break;
+          case statusCodes.IN_PROGRESS:
+            Alert.alert("Sign in already in progress");
+            break;
+          case statusCodes.PLAY_SERVICES_NOT_AVAILABLE:
+            Alert.alert("Google Play services not available or outdated");
+            break;
+          default:
+            console.error(
+              `Google sign in error with code: ${error.code}`,
+              error
+            );
+            Alert.alert(
+              "Google Sign-In Error",
+              `Error code: ${error.code} - ${error.message}`
+            );
+        }
+      } else {
+        // Check if it's a failed-to-get-data error (which often happens on cancel)
+        if (
+          error.message &&
+          error.message.includes("Failed to get user data")
+        ) {
+          // This is likely a cancellation or silent failure - don't show alert
+          console.log("Sign-in process did not complete");
+        } else {
+          // Show alert for other errors
+          const errorMessage =
+            error instanceof Error
+              ? `${error.name}: ${error.message}`
+              : "Unknown error type";
+          console.error("Google sign in error:", errorMessage);
+          Alert.alert(
+            "Google Sign-In Error",
+            `Something went wrong: ${errorMessage}`
+          );
+        }
+      }
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
   return (
     <>
       <View style={styles.dividerContainer}>
@@ -21,18 +118,13 @@ const SocialLogin = () => {
       </View>
 
       <View style={styles.socialButtonsContainer}>
-        <View style={styles.googleButtonContainer}>
-          <TouchableOpacity style={styles.googleButton}>
-            <View style={styles.googleIconContainer}>
-              <Ionicons
-                name="logo-google"
-                size={20}
-                color={TITLE_COLORS.customRed}
-              />
-            </View>
-            <Text style={styles.googleButtonText}>Sign in with Google</Text>
-          </TouchableOpacity>
-        </View>
+        <GoogleSigninButton
+          size={GoogleSigninButton.Size.Wide}
+          color={GoogleSigninButton.Color.Dark}
+          onPress={handleGoogleSignIn}
+          style={styles.googleButton}
+          disabled={isSubmitting}
+        />
       </View>
     </>
   );
@@ -55,35 +147,14 @@ const styles = StyleSheet.create({
   socialButtonsContainer: {
     flexDirection: "row",
     justifyContent: "center",
+    alignItems: "center",
     marginBottom: 12,
-  },
-  googleButtonContainer: {
-    flexDirection: "row",
-    justifyContent: "center",
-    marginTop: 10,
+    minHeight: 48,
+    paddingVertical: 8,
   },
   googleButton: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    backgroundColor: BASE_COLORS.blue,
-    paddingVertical: 10,
-    paddingHorizontal: 10,
-    borderRadius: 5,
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.2,
-    shadowRadius: 2,
-  },
-  googleIconContainer: {
-    marginRight: 10,
-    padding: 5,
-    borderRadius: 5,
-    backgroundColor: BASE_COLORS.white,
-  },
-  googleButtonText: {
-    fontSize: 14,
-    fontFamily: "Poppins-Regular",
-    color: BASE_COLORS.white,
+    width: "100%",
+    height: Platform.OS === "ios" ? 48 : 48,
   },
 });
 

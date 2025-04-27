@@ -14,6 +14,7 @@ import SplashAnimation from "@/components/SplashAnimation";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { InteractionManager } from "react-native";
 import { useSplashStore } from "@/store/useSplashStore";
+import { GoogleSignin } from "@react-native-google-signin/google-signin";
 
 // Prevent the splash screen from auto-hiding
 SplashScreen.preventAutoHideAsync();
@@ -45,6 +46,19 @@ const RootLayout = () => {
   const handleThemeReady = useCallback(() => {
     console.log("Theme is ready");
     setThemeReady(true);
+  }, []);
+
+  // Google Sign in
+  useEffect(() => {
+    const googleWebClientId = process.env.EXPO_PUBLIC_GOOGLE_CLIENT_ID_WEB;
+    const googleIosClientId = process.env.EXPO_PUBLIC_GOOGLE_CLIENT_ID_IOS;
+    GoogleSignin.configure({
+      webClientId: googleWebClientId,
+      offlineAccess: true,
+      iosClientId: googleIosClientId,
+      profileImageSize: 120,
+      scopes: ["profile", "email"],
+    });
   }, []);
 
   useEffect(() => {

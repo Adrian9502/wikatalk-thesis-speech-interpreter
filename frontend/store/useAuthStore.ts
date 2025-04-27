@@ -8,6 +8,7 @@ import { showToast } from "@/lib/showToast";
 import useThemeStore from "./useThemeStore";
 import { setToken } from "@/lib/authTokenManager";
 import { useTranslateStore } from "./useTranslateStore";
+import { GoogleSignin } from "@react-native-google-signin/google-signin";
 // API URL from environment
 const API_URL = `${process.env.EXPO_PUBLIC_BACKEND_URL}`;
 
@@ -68,6 +69,14 @@ interface AuthState {
     confirmPassword: string
   ) => Promise<AuthResponse>;
   login: (usernameOrEmail: string, password: string) => Promise<AuthResponse>;
+  loginWithGoogle: (
+    idToken: string,
+    user: {
+      name: string;
+      email: string;
+      photo: string | null;
+    }
+  ) => Promise<AuthResponse>;
   logout: () => Promise<void>;
   getUserProfile: () => Promise<UserData | undefined>;
   verifyEmail: (verificationCode: string) => Promise<AuthResponse>;
@@ -400,6 +409,128 @@ export const useAuthStore = create<AuthState>()(
         }
       },
 
+      // Login with Google
+      loginWithGoogle: async (idToken, user) => {
+        set({ isLoading: true, error: null });
+        get().clearFormMessage();
+        const { name, email, photo } = user;
+
+        try {
+          // Call backend API to authenticate with Google
+          const response = await axios.post(
+            `${API_URL}/api/users/login/google`,
+            {
+              idToken,
+              name,
+              email,
+              photo,
+            }
+          );
+
+          if (response.data.success) {
+            const { token, ...userData } = response.data.data;
+            // Store user data and token
+
+            await Promise.all([
+              AsyncStorage.setItem("userToken", token),
+              AsyncStorage.setItem(
+                "userData",
+                JSON.stringify({
+                  ...userData,
+                  fullName: name,
+                  email: email,
+                  profilePicture: photo || "",
+                  isVerified: true,
+                })
+              ),
+            ]);
+            // Set token in axios and token manager
+            setupAxiosDefaults(token);
+            setToken(token); // Update state
+            set({
+              userToken: token,
+              userData: {
+                ...userData,
+                fullName: name,
+                email: email,
+                profilePicture: photo || "",
+                isVerified: true,
+              },
+              isAppReady: true,
+            });
+
+            const themeStore = useThemeStore.getState(); // Wait for theme sync to complete
+            await themeStore.syncThemeWithServer(); // Show success toast
+
+            showToast({
+              type: "success",
+              title: "Signed in with Google Successful!",
+              description: `Welcome, ${name}!`,
+            });
+            // Delay navigation to ensure theme is applied and toast is visible
+            setTimeout(() => {
+              router.replace("/(tabs)/Speech");
+            }, 300);
+            return { success: true };
+          }
+          throw new Error(response.data.message || "Google login failed");
+        } catch (error: any) {
+          console.log("Google login error:", error);
+
+          // Fall back to direct login if backend fails
+          try {
+            // Store Google user data directly
+            const googleUserData = {
+              fullName: name,
+              email: email,
+              profilePicture: photo || "",
+              isVerified: true,
+            };
+
+            await Promise.all([
+              AsyncStorage.setItem("userData", JSON.stringify(googleUserData)),
+              AsyncStorage.setItem("userToken", idToken),
+            ]);
+
+            // Set token in axios and token manager
+            setupAxiosDefaults(idToken);
+            setToken(idToken);
+
+            // Update state
+            set({
+              userToken: idToken,
+              userData: googleUserData,
+              isAppReady: true,
+            });
+            // Add this line to sync theme in the fallback case too
+            const themeStore = useThemeStore.getState();
+            await themeStore.syncThemeWithServer();
+
+            showToast({
+              type: "success",
+              title: "Signed in with Google",
+              description: `Welcome, ${name}!`,
+            });
+
+            // Navigate to main app
+            setTimeout(() => {
+              router.replace("/(tabs)/Speech");
+            }, 300);
+            return { success: true };
+          } catch (fallbackError) {
+            const message =
+              error.response?.data?.message ||
+              error.message ||
+              "Google login failed";
+            set({ error: message });
+            get().setFormMessage(message, "error");
+            return { success: false, message };
+          }
+        } finally {
+          set({ isLoading: false });
+        }
+      },
+
       // Logout user
       logout: async () => {
         set({ isLoading: true });
@@ -415,6 +546,16 @@ export const useAuthStore = create<AuthState>()(
 
         try {
           useThemeStore.getState().resetToDefaultTheme();
+
+          // Sign out from Google first
+          try {
+            await GoogleSignin.signOut();
+            console.log("Successfully signed out from Google");
+          } catch (googleError) {
+            console.error("Error signing out from Google:", googleError);
+            // Continue logout process even if Google signout fails
+          }
+
           // Clear storage
           await Promise.all([
             AsyncStorage.removeItem("userToken"),
@@ -757,6 +898,7 @@ export const useAuthStore = create<AuthState>()(
           set({ isLoading: false });
         }
       },
+
       // Validate current password using debounce
       validateCurrentPassword: async (password: string) => {
         try {

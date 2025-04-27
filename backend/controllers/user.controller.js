@@ -1,6 +1,7 @@
 const User = require("../models/user.model");
 const jwt = require("jsonwebtoken");
 const cloudinary = require("cloudinary").v2;
+const crypto = require("crypto");
 const {
   sendVerificationEmail,
   sendWelcomeEmail,
@@ -142,6 +143,57 @@ exports.loginUser = async (req, res) => {
     res.status(500).json({
       success: false,
       message: error.message,
+    });
+  }
+};
+
+// @desc    Login with Google
+// @route   POST /api/users/login/google
+// @access  Public
+exports.loginWithGoogle = async (req, res) => {
+  try {
+    const { idToken, email, name, photo } = req.body;
+
+    // Check if user exists
+    let user = await User.findOne({ email });
+
+    if (!user) {
+      // Create new user if doesn't exist
+      user = await User.create({
+        fullName: name,
+        username: email.split("@")[0], // Generate username from email
+        email,
+        password: crypto.randomBytes(16).toString("hex"), // Generate random password
+        profilePicture: photo || "",
+        isVerified: true, // Google users are pre-verified
+      });
+    } else {
+      // Update user profile picture if it exists
+      if (photo && !user.profilePicture) {
+        user.profilePicture = photo;
+        await user.save();
+      }
+    }
+
+    res.json({
+      success: true,
+      data: {
+        _id: user._id,
+        fullName: user.fullName,
+        username: user.username,
+        email: user.email,
+        profilePicture: user.profilePicture || photo,
+        theme: user.theme,
+        createdAt: user.createdAt,
+        isVerified: true,
+        token: generateToken(user._id),
+      },
+    });
+  } catch (error) {
+    console.error("Google sign-in error:", error);
+    res.status(500).json({
+      success: false,
+      message: error.message || "Failed to authenticate with Google",
     });
   }
 };
