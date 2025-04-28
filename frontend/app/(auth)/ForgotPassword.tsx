@@ -3,11 +3,13 @@ import {
   Pressable,
   Text,
   View,
-  KeyboardAvoidingView,
+  TouchableWithoutFeedback,
   ActivityIndicator,
   Platform,
   StyleSheet,
   Alert,
+  Keyboard,
+  ScrollView,
 } from "react-native";
 import { StatusBar } from "expo-status-bar";
 import { useForm } from "react-hook-form";
@@ -22,9 +24,11 @@ import { BASE_COLORS, TITLE_COLORS } from "@/constant/colors";
 import Logo from "@/components/Logo";
 import useThemeStore from "@/store/useThemeStore";
 import { getGlobalStyles } from "@/styles/globalStyles";
+
 interface ForgotPasswordFormData {
   email: string;
 }
+
 interface VerificationFormData {
   verificationCode: string;
 }
@@ -96,6 +100,9 @@ const ForgotPassword: React.FC = () => {
     console.log("Sending reset code to:", data.email);
     setEmail(data.email);
 
+    // Dismiss keyboard first
+    Keyboard.dismiss();
+
     try {
       const result = await sendPasswordResetCode(data.email);
       console.log("Password reset API response:", result);
@@ -122,6 +129,9 @@ const ForgotPassword: React.FC = () => {
   const handleResendCode = async () => {
     if (resendDisabled) return;
 
+    // Dismiss keyboard
+    Keyboard.dismiss();
+
     try {
       const result = await sendPasswordResetCode(email);
 
@@ -142,6 +152,9 @@ const ForgotPassword: React.FC = () => {
   const handleVerifyCode = async (data: VerificationFormData) => {
     console.log("Verifying code:", data.verificationCode);
 
+    // Dismiss keyboard
+    Keyboard.dismiss();
+
     try {
       const result = await verifyPasswordResetCode(
         email,
@@ -161,141 +174,151 @@ const ForgotPassword: React.FC = () => {
   };
 
   return (
-    <View
-      style={[
-        dynamicStyles.container,
-        {
-          justifyContent: "center",
-          alignItems: "center",
-        },
-      ]}
-    >
-      <StatusBar style="light" />
-      {/* Logo */}
-      <View style={styles.logoContainer}>
-        <Logo />
-      </View>
-      <KeyboardAvoidingView
-        behavior={Platform.OS === "ios" ? "padding" : "height"}
-        style={styles.keyboardAvoidingView}
-        keyboardVerticalOffset={Platform.OS === "ios" ? 40 : 0}
-      >
-        {/* Form container */}
-        <View
-          style={[
-            styles.formOuterContainer,
-            { backgroundColor: BASE_COLORS.white },
-          ]}
+    <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
+      <View style={[dynamicStyles.container]}>
+        <StatusBar style="light" />
+        <ScrollView
+          contentContainerStyle={{
+            flexGrow: 1,
+            justifyContent: "center",
+            alignItems: "center",
+            width: "100%",
+          }}
+          keyboardShouldPersistTaps="handled"
+          showsVerticalScrollIndicator={false}
+          bounces={false}
         >
-          <Text style={styles.titleText}>Forgot Password</Text>
-          <Text style={styles.descriptionText}>
-            {codeSent
-              ? "Enter the verification code sent to your email"
-              : "Enter your email address and we'll send you a code to reset your password"}
-          </Text>
+          {/* Logo */}
+          <View style={styles.logoContainer}>
+            <Logo />
+          </View>
 
           {/* Form container */}
-          <View style={styles.formContainer}>
-            {formMessage && (
-              <FormMessage
-                message={formMessage.text}
-                type={formMessage.type}
-                onDismiss={clearFormMessage}
-              />
-            )}
-
-            {!codeSent ? (
-              <>
-                <FormInput
-                  control={emailControl}
-                  name="email"
-                  placeholder="Email"
-                  IconComponent={Mail}
-                  error={emailErrors.email?.message}
-                  keyboardType="email-address"
-                />
-
-                {/* Submit Button */}
-                <View style={styles.buttonContainer}>
-                  <Pressable
-                    style={[styles.submitButton]}
-                    disabled={isLoading}
-                    onPress={handleEmailSubmit(handleSendCode)}
-                  >
-                    <View style={styles.buttonContent}>
-                      {isLoading && (
-                        <ActivityIndicator
-                          style={{ marginRight: 10 }}
-                          size={20}
-                          color={TITLE_COLORS.customWhite}
-                        />
-                      )}
-                      <Text style={styles.buttonText}>Send Recovery Code</Text>
-                    </View>
-                  </Pressable>
-                </View>
-              </>
-            ) : (
-              <>
-                {/* Display sent email */}
-                <View style={styles.emailContainer}>
-                  <Mail size={20} color="#4A6FFF" />
-                  <Text style={styles.emailText}>{email}</Text>
-                </View>
-
-                {/* Verification Code Input */}
-                <FormInput
-                  control={verificationControl}
-                  name="verificationCode"
-                  placeholder="Enter 6-digit verification code"
-                  IconComponent={KeyRound}
-                  error={verificationErrors.verificationCode?.message}
-                  keyboardType="number-pad"
-                  maxLength={6}
-                />
-
-                {/* Verify Button */}
-                <View style={styles.buttonContainer}>
-                  <Pressable
-                    style={[styles.submitButton]}
-                    disabled={isLoading}
-                    onPress={handleVerificationSubmit(handleVerifyCode)}
-                  >
-                    <View style={styles.buttonContent}>
-                      {isLoading && (
-                        <ActivityIndicator size="small" color="#FFFFFF" />
-                      )}
-                      <Text style={styles.buttonText}>Verify Code</Text>
-                    </View>
-                  </Pressable>
-                </View>
-
-                {/* Resend Code Button */}
-                <Pressable
-                  style={[styles.resendButton]}
-                  onPress={handleResendCode}
-                  disabled={resendDisabled}
-                >
-                  <Text style={[styles.resendButtonText]}>
-                    {resendDisabled
-                      ? `Resend Code (${countdown}s)`
-                      : "Resend Code"}
-                  </Text>
-                </Pressable>
-              </>
-            )}
-            <Pressable
-              onPress={() => {
-                clearFormMessage();
-                router.back();
-              }}
+          <View style={styles.keyboardAvoidingView}>
+            <View
+              style={[
+                styles.formOuterContainer,
+                { backgroundColor: BASE_COLORS.white },
+              ]}
             >
-              <Text style={styles.goBackText}>Go back</Text>
-            </Pressable>
+              <Text style={styles.titleText}>Forgot Password</Text>
+              <Text style={styles.descriptionText}>
+                {codeSent
+                  ? "Enter the verification code sent to your email"
+                  : "Enter your email address and we'll send you a code to reset your password"}
+              </Text>
+
+              {/* Form container */}
+              <View style={styles.formContainer}>
+                {formMessage && (
+                  <FormMessage
+                    message={formMessage.text}
+                    type={formMessage.type}
+                    onDismiss={clearFormMessage}
+                  />
+                )}
+
+                {!codeSent ? (
+                  <>
+                    <FormInput
+                      control={emailControl}
+                      name="email"
+                      placeholder="Email"
+                      IconComponent={Mail}
+                      error={emailErrors.email?.message}
+                      keyboardType="email-address"
+                    />
+
+                    {/* Submit Button */}
+                    <View style={styles.buttonContainer}>
+                      <Pressable
+                        style={[styles.submitButton]}
+                        disabled={isLoading}
+                        onPress={handleEmailSubmit(handleSendCode)}
+                      >
+                        <View style={styles.buttonContent}>
+                          {isLoading && (
+                            <ActivityIndicator
+                              style={{ marginRight: 10 }}
+                              size={20}
+                              color={TITLE_COLORS.customWhite}
+                            />
+                          )}
+                          <Text style={styles.buttonText}>
+                            Send Recovery Code
+                          </Text>
+                        </View>
+                      </Pressable>
+                    </View>
+                  </>
+                ) : (
+                  <>
+                    {/* Display sent email */}
+                    <View style={styles.emailContainer}>
+                      <Mail size={20} color="#4A6FFF" />
+                      <Text style={styles.emailText}>{email}</Text>
+                    </View>
+
+                    {/* Verification Code Input */}
+                    <FormInput
+                      control={verificationControl}
+                      name="verificationCode"
+                      placeholder="Enter 6-digit verification code"
+                      IconComponent={KeyRound}
+                      error={verificationErrors.verificationCode?.message}
+                      keyboardType="number-pad"
+                      maxLength={6}
+                    />
+
+                    {/* Verify Button */}
+                    <View style={styles.buttonContainer}>
+                      <Pressable
+                        style={[styles.submitButton]}
+                        disabled={isLoading}
+                        onPress={handleVerificationSubmit(handleVerifyCode)}
+                      >
+                        <View style={styles.buttonContent}>
+                          {isLoading && (
+                            <ActivityIndicator size="small" color="#FFFFFF" />
+                          )}
+                          <Text style={styles.buttonText}>Verify Code</Text>
+                        </View>
+                      </Pressable>
+                    </View>
+
+                    {/* Resend Code Button */}
+                    <Pressable
+                      style={[styles.resendButton]}
+                      onPress={handleResendCode}
+                      disabled={resendDisabled}
+                    >
+                      <Text
+                        style={[
+                          styles.resendButtonText,
+                          resendDisabled && styles.resendDisabledText,
+                        ]}
+                      >
+                        {resendDisabled
+                          ? `Resend Code (${countdown}s)`
+                          : "Resend Code"}
+                      </Text>
+                    </Pressable>
+                  </>
+                )}
+                <Pressable
+                  onPress={() => {
+                    clearFormMessage();
+                    router.back();
+                  }}
+                >
+                  <Text style={styles.goBackText}>Go back</Text>
+                </Pressable>
+              </View>
+            </View>
           </View>
-        </View>
-      </KeyboardAvoidingView>
-    </View>
+        </ScrollView>
+      </View>
+    </TouchableWithoutFeedback>
   );
 };
 
@@ -304,12 +327,12 @@ export default ForgotPassword;
 export const styles = StyleSheet.create({
   logoContainer: {
     width: "100%",
+    alignItems: "center",
     marginBottom: 10,
   },
   keyboardAvoidingView: {
     width: "85%",
     maxWidth: 350,
-    alignItems: "center",
   },
   formOuterContainer: {
     backgroundColor: BASE_COLORS.white,
@@ -388,14 +411,14 @@ export const styles = StyleSheet.create({
     fontFamily: "Poppins-Regular",
   },
   resendDisabledText: {
-    fontFamily: "Poppins-Regular",
     color: "#9CA3AF",
   },
   goBackText: {
     fontSize: 12,
     fontFamily: "Poppins-Regular",
     color: "#9CA3AF",
+    textAlign: "center",
+    marginTop: 16,
     marginBottom: 8,
-    paddingHorizontal: 8,
   },
 });
