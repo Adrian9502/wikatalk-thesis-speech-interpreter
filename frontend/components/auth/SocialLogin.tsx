@@ -8,10 +8,11 @@ import {
   SignInResponse,
 } from "@react-native-google-signin/google-signin";
 import { useAuthStore } from "@/store/useAuthStore";
+import CustomGoogleButton from "@/components/auth/GoogleLoginButton";
 
 const SocialLogin = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const loginWithGoogle = useAuthStore((state) => state.loginWithGoogle);
+  const { loginWithGoogle } = useAuthStore();
 
   useEffect(() => {
     const checkGoogleConfig = async () => {
@@ -118,12 +119,9 @@ const SocialLogin = () => {
       </View>
 
       <View style={styles.socialButtonsContainer}>
-        <GoogleSigninButton
-          size={GoogleSigninButton.Size.Wide}
-          color={GoogleSigninButton.Color.Dark}
+        <CustomGoogleButton
           onPress={handleGoogleSignIn}
-          style={styles.googleButton}
-          disabled={isSubmitting}
+          isSubmitting={isSubmitting}
         />
       </View>
     </>
