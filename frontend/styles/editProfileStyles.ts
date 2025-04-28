@@ -153,4 +153,20 @@ export default StyleSheet.create({
     fontSize: 12,
     marginLeft: 6,
   },
+  googleUserInfoContainer: {
+    flexDirection: "row",
+    backgroundColor: "#f2f0f0",
+    borderRadius: 8,
+    padding: 12,
+    marginVertical: 16,
+    alignItems: "flex-start",
+    borderLeftWidth: 4,
+  },
+  googleUserInfoText: {
+    marginLeft: 10,
+    flex: 1,
+    fontSize: 13,
+    fontFamily: "Poppins-Regular",
+    lineHeight: 20,
+  },
 });

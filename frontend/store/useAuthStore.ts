@@ -437,13 +437,14 @@ export const useAuthStore = create<AuthState>()(
                 "userData",
                 JSON.stringify({
                   ...userData,
-                  fullName: name,
-                  email: email,
-                  profilePicture: photo || "",
+                  fullName: userData.fullName || name,
+                  email: userData.email || email,
+                  profilePicture: userData.profilePicture || photo || "",
                   isVerified: true,
                 })
               ),
             ]);
+
             // Set token in axios and token manager
             setupAxiosDefaults(token);
             setToken(token); // Update state
@@ -451,10 +452,11 @@ export const useAuthStore = create<AuthState>()(
               userToken: token,
               userData: {
                 ...userData,
-                fullName: name,
-                email: email,
-                profilePicture: photo || "",
+                fullName: userData.fullName || name,
+                email: userData.email || email,
+                profilePicture: userData.profilePicture || photo || "",
                 isVerified: true,
+                authProvider: "google",
               },
               isAppReady: true,
             });

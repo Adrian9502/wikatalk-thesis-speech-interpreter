@@ -44,6 +44,8 @@ const EditProfileModal = ({
     passwordValidation,
   } = useProfileForm({ userData, visible, onSave });
 
+  const isGoogleUser = userData?.authProvider === "google";
+
   return (
     <Modal
       visible={visible}
@@ -85,6 +87,7 @@ const EditProfileModal = ({
               togglePasswordChange={togglePasswordChange}
               passwordValidation={passwordValidation}
               theme={theme}
+              isGoogleUser={isGoogleUser}
             />
 
             <ModalFooter

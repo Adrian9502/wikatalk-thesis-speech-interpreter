@@ -152,22 +152,42 @@ exports.loginUser = async (req, res) => {
 // @access  Public
 exports.loginWithGoogle = async (req, res) => {
   try {
-    const { idToken, email, name, photo } = req.body;
+    const { email, name, photo } = req.body;
 
     // Check if user exists
     let user = await User.findOne({ email });
+    let isNewUser = false;
 
     if (!user) {
+      // This is a new user - set flag for welcome email
+      isNewUser = true;
+
       // Create new user if doesn't exist
       user = await User.create({
         fullName: name,
         username: email.split("@")[0], // Generate username from email
         email,
-        password: crypto.randomBytes(16).toString("hex"), // Generate random password
+        password: crypto.randomBytes(16).toString("hex"),
         profilePicture: photo || "",
         isVerified: true, // Google users are pre-verified
+        authProvider: "google",
       });
+
+      // Send welcome email for new Google users
+      try {
+        await sendWelcomeEmail(user);
+        console.log(`Welcome email sent to new Google user: ${email}`);
+      } catch (emailError) {
+        console.error("Welcome email failed to send:", emailError);
+        // Continue even if welcome email fails (non-critical)
+      }
     } else {
+      // Update existing user to mark as Google user if they're signing in with Google
+      if (!user.authProvider || user.authProvider !== "google") {
+        user.authProvider = "google";
+        await user.save();
+      }
+
       // Update user profile picture if it exists
       if (photo && !user.profilePicture) {
         user.profilePicture = photo;
@@ -186,7 +206,9 @@ exports.loginWithGoogle = async (req, res) => {
         theme: user.theme,
         createdAt: user.createdAt,
         isVerified: true,
+        authProvider: user.authProvider,
         token: generateToken(user._id),
+        isNewUser, // Optionally include this flag in response
       },
     });
   } catch (error) {

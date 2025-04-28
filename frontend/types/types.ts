@@ -76,4 +76,5 @@ export interface UserDataTypes {
   createdAt?: string;
   isVerified?: boolean;
   profilePicture?: string;
+  authProvider?: string;
 }
