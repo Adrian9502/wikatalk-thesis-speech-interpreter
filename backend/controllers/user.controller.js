@@ -6,7 +6,7 @@ const {
   sendVerificationEmail,
   sendWelcomeEmail,
   sendPasswordResetEmail,
-  sendPasswordChangedEmail,
+  sendPasswordChangedEmail, sendAccountDeletionEmail, sendAccountDeletionConfirmationEmail
 } = require("../services/email.service");
 
 // Configure Cloudinary for changing profile picture
@@ -794,6 +794,195 @@ exports.updateProfilePicture = async (req, res) => {
     res.status(500).json({
       success: false,
       message: error.message || "Failed to update profile picture",
+    });
+  }
+};
+
+// @desc    Request account deletion (send verification code)
+// @route   POST /api/users/request-deletion
+// @access  Private
+exports.requestAccountDeletion = async (req, res) => {
+  try {
+    // Find the user
+    const user = await User.findById(req.user._id);
+
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found",
+      });
+    }
+
+    // Check if user has requested a code recently (add cooldown of 2 minutes)
+    const cooldownPeriod = 2 * 60 * 1000; // 2 minutes in milliseconds
+
+    if (user.lastDeletionRequestedAt &&
+      Date.now() - new Date(user.lastDeletionRequestedAt).getTime() < cooldownPeriod) {
+
+      // Calculate remaining cooldown time in seconds
+      const remainingTime = Math.ceil(
+        (cooldownPeriod - (Date.now() - new Date(user.lastDeletionRequestedAt).getTime())) / 1000
+      );
+
+      return res.status(429).json({
+        success: false,
+        message: "You've requested a code recently. Please wait a moment before trying again.",
+        remainingTime,
+        isRateLimited: true
+      });
+    }
+
+    // Generate deletion verification code
+    const deletionCode = generateVerificationCode();
+
+    // Update the user with new code and request timestamp
+    user.deletionCode = deletionCode;
+    user.deletionCodeExpires = Date.now() + 5 * 60000; // 5 minutes
+    user.lastDeletionRequestedAt = new Date();
+    await user.save();
+
+    // Send email with deletion code
+    await sendAccountDeletionEmail({
+      email: user.email,
+      fullName: user.fullName,
+      deletionCode,
+    });
+
+    res.json({
+      success: true,
+      message: "Account deletion verification code sent to your email",
+    });
+  } catch (error) {
+    console.error("Account deletion request error:", error);
+    res.status(500).json({
+      success: false,
+      message: "Failed to process account deletion request",
+    });
+  }
+};
+
+// @desc    Verify account deletion code
+// @route   POST /api/users/verify-deletion
+// @access  Private
+exports.verifyDeletionCode = async (req, res) => {
+  try {
+    const { verificationCode } = req.body;
+
+    // Find the user
+    const user = await User.findById(req.user._id);
+
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found",
+      });
+    }
+
+    // Check if deletion code exists and is valid
+    if (!user.deletionCode) {
+      return res.status(400).json({
+        success: false,
+        message: "No deletion code found. Please request a new one",
+      });
+    }
+
+    if (user.deletionCodeExpires < Date.now()) {
+      return res.status(400).json({
+        success: false,
+        message: "Verification code has expired. Please request a new one",
+      });
+    }
+
+    if (user.deletionCode !== verificationCode) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid verification code",
+      });
+    }
+
+    // Generate deletion token
+    const deletionToken = jwt.sign(
+      { id: user._id, action: 'delete-account' },
+      process.env.JWT_SECRET,
+      { expiresIn: "15m" }
+    );
+
+    res.json({
+      success: true,
+      message: "Account deletion verification successful",
+      deletionToken,
+    });
+  } catch (error) {
+    console.error("Account deletion verification error:", error);
+    res.status(500).json({
+      success: false,
+      message: "Failed to verify account deletion code",
+    });
+  }
+};
+
+// @desc    Delete user account with token
+// @route   DELETE /api/users/delete-account
+// @access  Private
+exports.deleteAccount = async (req, res) => {
+  try {
+    const { deletionToken } = req.body;
+
+    // Verify the deletion token
+    let decoded;
+    try {
+      decoded = jwt.verify(deletionToken, process.env.JWT_SECRET);
+    } catch (error) {
+      return res.status(401).json({
+        success: false,
+        message: "Invalid or expired deletion token",
+      });
+    }
+
+    // Check if the token has the correct action and matches the authenticated user
+    if (decoded.action !== 'delete-account' || decoded.id !== req.user._id.toString()) {
+      return res.status(401).json({
+        success: false,
+        message: "Invalid deletion token",
+      });
+    }
+
+    // Find the user
+    const user = await User.findById(req.user._id);
+
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found",
+      });
+    }
+
+    // Store user data before deletion for confirmation email
+    const userData = {
+      email: user.email,
+      fullName: user.fullName
+    };
+
+    // Send confirmation email first
+    try {
+      await sendAccountDeletionConfirmationEmail(userData);
+    } catch (emailError) {
+      console.error("Failed to send deletion confirmation email:", emailError);
+      // Continue with deletion even if email fails
+    }
+
+    // Delete the user
+    await user.deleteOne();
+
+    res.json({
+      success: true,
+      message: "Your account has been permanently deleted",
+    });
+  } catch (error) {
+    console.error("Account deletion error:", error);
+    res.status(500).json({
+      success: false,
+      message: "Failed to delete account",
     });
   }
 };

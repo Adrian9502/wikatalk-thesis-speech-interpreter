@@ -14,11 +14,12 @@ const connectDB = async () => {
     const options = {
       useNewUrlParser: true,
       useUnifiedTopology: true,
-      serverSelectionTimeoutMS: 10000, // Give more time for serverless cold starts
-      socketTimeoutMS: 45000, // Close sockets after 45 seconds of inactivity
+      serverSelectionTimeoutMS: 60000, // Give more time for serverless cold starts
+      socketTimeoutMS: 60000, // Close sockets after 45 seconds of inactivity
       retryWrites: true,
       w: "majority",
       maxPoolSize: 10, // Maintain up to 10 socket connections
+      connectTimeoutMS: 60000, // Close sockets after 60 seconds of inactivity
     };
 
     // Connect to MongoDB

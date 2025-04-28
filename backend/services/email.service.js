@@ -183,9 +183,88 @@ const sendWelcomeEmail = async (user) => {
   }
 };
 
+const sendAccountDeletionEmail = async (user) => {
+  try {
+    console.log("Attempting to send ACCOUNT DELETION EMAIL to:", user.email);
+    const { subject, html } = emailTemplates.accountDeletion(
+      user.fullName,
+      user.deletionCode
+    );
+    const info = await transporter.sendMail({
+      from: {
+        name: "WikaTalk",
+        address: "noreply@wikatalk.com",
+      },
+      to: user.email,
+      subject,
+      html,
+    });
+
+    console.log("Account Deletion Email send successfully:", user.email);
+    return true;
+  } catch (error) {
+    console.error("Failed to send password reset email:", error);
+
+    throw error;
+  }
+};
+
+const sendAccountDeletionConfirmationEmail = async (userData) => {
+  try {
+    console.log("Sending account deletion confirmation email to:", userData.email);
+
+    // Set the correct time zone for Philippines (UTC+8)
+    const now = new Date();
+    const timeZone = "Asia/Manila";
+
+    // Format the date with Philippines time zone
+    const formattedDate = new Intl.DateTimeFormat("en-US", {
+      weekday: "long",
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+      timeZone: timeZone,
+    }).format(now);
+
+    // Format time with Philippines time zone
+    const formattedTime = new Intl.DateTimeFormat("en-US", {
+      hour: "2-digit",
+      minute: "2-digit",
+      second: "2-digit",
+      hour12: true,
+      timeZone: timeZone,
+    }).format(now);
+
+    const { subject, html } = emailTemplates.accountDeletionConfirmation(
+      userData.fullName,
+      formattedDate,
+      formattedTime
+    );
+
+    const info = await transporter.sendMail({
+      from: {
+        name: "WikaTalk",
+        address: "noreply@wikatalk.com",
+      },
+      to: userData.email,
+      subject,
+      html,
+    });
+
+    console.log("Account deletion confirmation email sent successfully to:", userData.email);
+    return true;
+  } catch (error) {
+    console.error("Failed to send account deletion confirmation email:", error);
+    return false;
+  }
+};
+
+// Add to exports
 module.exports = {
   sendVerificationEmail,
   sendPasswordChangedEmail,
   sendPasswordResetEmail,
   sendWelcomeEmail,
+  sendAccountDeletionEmail,
+  sendAccountDeletionConfirmationEmail,
 };

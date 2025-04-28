@@ -102,6 +102,18 @@ interface AuthState {
     message?: string;
     data?: UserData;
   }>;
+  requestAccountDeletion: () => Promise<{
+    success: boolean;
+    message?: string;
+    isRateLimited?: boolean;
+    remainingTime?: number;
+  }>;
+  verifyDeletionCode: (
+    code: string
+  ) => Promise<{ success: boolean; deletionToken?: string; message?: string }>;
+  deleteAccount: (
+    token: string
+  ) => Promise<{ success: boolean; message?: string }>;
 }
 
 // Initialize axios interceptors
@@ -1065,6 +1077,110 @@ export const useAuthStore = create<AuthState>()(
             error.message ||
             "Failed to update profile";
           get().setFormMessage(message, "error");
+          return { success: false, message };
+        } finally {
+          set({ isLoading: false });
+        }
+      },
+
+      // Request account deletion (send verification code)
+      requestAccountDeletion: async () => {
+        set({ isLoading: true });
+        try {
+          const response = await axios.post(
+            `${API_URL}/api/users/request-deletion`
+          );
+          if (response.data.success) {
+            return { success: true, message: response.data.message };
+          }
+          throw new Error(
+            response.data.message || "Failed to request account deletion"
+          );
+        } catch (error: any) {
+          const message =
+            error.response?.data?.message || "Failed to process request";
+          // Pass through rate limiting info from the backend
+          return {
+            success: false,
+            message,
+            isRateLimited: error.response?.data?.isRateLimited || false,
+            remainingTime: error.response?.data?.remainingTime || 0,
+          };
+        } finally {
+          set({ isLoading: false });
+        }
+      },
+
+      // Verify account deletion code
+      verifyDeletionCode: async (verificationCode: string) => {
+        set({ isLoading: true });
+
+        try {
+          const response = await axios.post(
+            `${API_URL}/api/users/verify-deletion`,
+            { verificationCode }
+          );
+
+          if (response.data.success) {
+            await AsyncStorage.setItem(
+              "deletionToken",
+              response.data.deletionToken
+            );
+            return {
+              success: true,
+              deletionToken: response.data.deletionToken,
+            };
+          }
+
+          throw new Error(response.data.message || "Verification failed");
+        } catch (error: any) {
+          const message =
+            error.response?.data?.message || "Verification failed";
+          return { success: false, message };
+        } finally {
+          set({ isLoading: false });
+        }
+      },
+
+      // Delete account with token
+      deleteAccount: async (deletionToken: string) => {
+        set({ isLoading: true });
+
+        try {
+          const response = await axios.delete(
+            `${API_URL}/api/users/delete-account`,
+            {
+              data: { deletionToken },
+            }
+          );
+
+          if (response.data.success) {
+            // Clear local storage and state
+            await get().clearStorage();
+
+            showToast({
+              type: "success",
+              title: "Account Deleted",
+              description: "Your account has been permanently deleted",
+            });
+
+            // Navigate to auth screen
+            setTimeout(() => {
+              router.replace("/");
+            }, 1000);
+
+            return { success: true };
+          }
+
+          throw new Error(response.data.message || "Failed to delete account");
+        } catch (error: any) {
+          const message =
+            error.response?.data?.message || "Failed to delete account";
+          showToast({
+            type: "error",
+            title: "Deletion Failed",
+            description: message,
+          });
           return { success: false, message };
         } finally {
           set({ isLoading: false });

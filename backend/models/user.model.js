@@ -70,11 +70,21 @@ const userSchema = new mongoose.Schema(
       type: Boolean,
       default: false,
     },
-
     // Store theme
     theme: {
       type: String,
       default: "Default Navy", // Default theme name
+    },
+    deletionCode: {
+      type: String,
+      length: 6,
+    },
+    deletionCodeExpires: {
+      type: Date,
+    },
+    lastDeletionRequestedAt: {
+      type: Date,
+      default: null,
     },
   },
   { timestamps: true }

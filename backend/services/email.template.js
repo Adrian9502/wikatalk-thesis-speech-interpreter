@@ -1009,6 +1009,459 @@ const emailTemplates = {
 </html>
 `,
   }),
+  accountDeletion: (name, deletionCode) => ({
+    subject: "Account Deletion Request",
+    html: `
+    <!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <!-- POPPINS FONT-->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap"
+      rel="stylesheet"
+    />
+    <title>Account Deletion Confirmation - WikaTalk</title>
+    <style type="text/css">
+      /* Reset styles for email clients */
+      body,
+      p,
+      div,
+      span,
+      a,
+      table,
+      td {
+        font-family: "Poppins", sans-serif;
+        line-height: 1.5;
+      }
+    </style>
+  </head>
+  <body style="margin: 0; padding: 0; background-color: #f4f4f4">
+    <table
+      role="presentation"
+      cellpadding="0"
+      cellspacing="0"
+      style="width: 100%; background-color: #f4f4f4; margin: 0; padding: 40px 0"
+    >
+      <tr>
+        <td style="text-align: center">
+          <table
+            role="presentation"
+            cellpadding="0"
+            cellspacing="0"
+            style="
+              max-width: 600px;
+              margin: 0 auto;
+              background: #0a0f28;
+              border-radius: 8px;
+              box-shadow: 0 2px 4px rgba(0, 0, 0, 0.37);
+            "
+          >
+            <!-- Header -->
+            <tr>
+              <td style="padding: 30px 40px; text-align: center">
+                <img
+                  style="
+                    background: transparent;
+                    background-color: transparent;
+                    width: 90px;
+                    height: auto;
+                    pointer-events: none;
+                  "
+                  src="https://github.com/Adrian9502/wikatalk-thesis-speech-interpreter/blob/main/frontend/assets/images/WikaTalk-logo.png?raw=true"
+                  alt="WikaTalk-logo"
+                />
+                <h1
+                  class="logo-text"
+                  style="
+                    color: #ffdc04;
+                    margin: 0;
+                    font-size: 30px;
+                    font-weight: 700;
+                    word-spacing: -15px;
+                  "
+                >
+                  Wika<span
+                    style="font-size: 30px; font-weight: 700; color: #fff"
+                    >Talk</span
+                  >
+                </h1>
+                <h2
+                  style="
+                    color: #fff;
+                    margin: 0;
+                    font-size: 12px;
+                    font-weight: 500;
+                  "
+                >
+                  Speak Freely, Understand Instantly.
+                </h2>
+              </td>
+            </tr>
+
+            <!-- Content -->
+            <tr>
+              <td style="padding: 40px">
+                <!-- Personalized Greeting -->
+                <h2
+                  style="
+                    color: #fff;
+                    font-size: 23px;
+                    font-weight: 600;
+                    margin: 10;
+                  "
+                >
+                  Account Deletion Request
+                </h2>
+
+                <p style="color: #fff; font-size: 20px">Hi <b>${name}</b>,</p>
+
+                <p
+                  style="
+                    color: #ffffff;
+                    font-size: 16px;
+                    font-weight: 300;
+                    margin: 10px 0 20px;
+                    text-align: center;
+                  "
+                >
+                  We received a request to delete your WikaTalk account. To confirm this action, please use the following verification code:
+                </p>
+
+                <!-- Verification Code -->
+                <div
+                  style="
+                    background-color: #ffffff;
+                    border-radius: 6px;
+                    padding: 20px;
+                    margin: 30px 0;
+                    text-align: center;
+                  "
+                >
+                  <p
+                    style="
+                      font-size: 40px;
+                      letter-spacing: 10px;
+                      font-weight: bold;
+                      color: #ff3b30;
+                      margin: 0;
+                      font-family: monospace;
+                    "
+                  >
+                    ${deletionCode}
+                  </p>
+                </div>
+
+                <p
+                  style="
+                    color: #ffffff;
+                    font-size: 16px;
+                    font-weight: 300;
+                    margin: 10px 0 20px;
+                    text-align: center;
+                  "
+                >
+                  This code will expire in 30 minutes.
+                </p>
+                <p
+                  style="
+                    color: #ffffff;
+                    font-size: 16px;
+                    font-weight: 300;
+                    margin: 10px 0 20px;
+                    text-align: center;
+                  "
+                >
+                  Please note that this action is permanent and will remove all your data from our system. If you didn't request to delete your account, please ignore this email and secure your account immediately.
+                </p>
+              </td>
+            </tr>
+
+            <!-- Footer -->
+            <tr>
+              <td
+                style="
+                  padding: 20px 40px;
+                  background-color: #f8f8f8;
+                  border-radius: 0 0 8px 8px;
+                "
+              >
+                <p
+                  style="
+                    color: #999999;
+                    font-size: 12px;
+                    margin: 0;
+                    text-align: center;
+                  "
+                >
+                  © ${new Date().getFullYear()} WikaTalk. All rights
+                  reserved.<br />
+                  If you have any questions, please contact our support team.
+                </p>
+              </td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+    </table>
+  </body>
+</html>
+    `
+  }),
+  accountDeletionConfirmation: (name, formattedDate, formattedTime) => ({
+    subject: "Account Deletion Successful",
+    html: `
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <meta charset="UTF-8" />
+          <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+          <!-- POPPINS FONT-->
+          <link rel="preconnect" href="https://fonts.googleapis.com" />
+          <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+          <link
+            href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap"
+            rel="stylesheet"
+          />
+          <title>Account Successfully Deleted - WikaTalk</title>
+          <style type="text/css">
+            body,
+            p,
+            div,
+            span,
+            a,
+            table,
+            td {
+              font-family: "Poppins", sans-serif;
+              line-height: 1.5;
+            }
+            .social-icon {
+              display: inline-block;
+              margin: 0 8px;
+            }
+          </style>
+        </head>
+        <body style="margin: 0; padding: 0; background-color: #f4f4f4">
+          <table
+            role="presentation"
+            cellpadding="0"
+            cellspacing="0"
+            style="width: 100%; background-color: #f4f4f4; margin: 0; padding: 40px 0"
+          >
+            <tr>
+              <td style="text-align: center">
+                <table
+                  role="presentation"
+                  cellpadding="0"
+                  cellspacing="0"
+                  style="
+                    max-width: 600px;
+                    margin: 0 auto;
+                    background: #0a0f28;
+                    border-radius: 8px;
+                    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.37);
+                  "
+                >
+                  <!-- Header -->
+                  <tr>
+                    <td style="padding: 30px 40px; text-align: center">
+                      <img
+                        style="
+                          background: transparent;
+                          background-color: transparent;
+                          width: 90px;
+                          height: auto;
+                          pointer-events: none;
+                        "
+                        src="https://github.com/Adrian9502/wikatalk-thesis-speech-interpreter/blob/main/frontend/assets/images/WikaTalk-logo.png?raw=true"
+                        alt="WikaTalk-logo"
+                      />
+                      <h1
+                        class="logo-text"
+                        style="
+                          color: #ffdc04;
+                          margin: 0;
+                          font-size: 30px;
+                          font-weight: 700;
+                          word-spacing: -15px;
+                        "
+                      >
+                        Wika<span
+                          style="font-size: 30px; font-weight: 700; color: #fff"
+                          >Talk</span
+                        >
+                      </h1>
+                      <h2
+                        style="
+                          color: #fff;
+                          margin: 0;
+                          font-size: 12px;
+                          font-weight: 500;
+                        "
+                      >
+                        Speak Freely, Understand Instantly.
+                      </h2>
+                    </td>
+                  </tr>
+  
+                  <!-- Content -->
+                  <tr>
+                    <td style="padding: 40px">
+                      <!-- Personalized Greeting -->
+                      <h2
+                        style="
+                          color: #fff;
+                          font-size: 23px;
+                          font-weight: 600;
+                          margin: 10;
+                        "
+                      >
+                        Account Successfully Deleted
+                      </h2>
+  
+                      <p
+                        style="
+                          color: #ffffff;
+                          font-size: 16px;
+                          font-weight: 300;
+                          margin: 10px 0 20px;
+                          text-align: left;
+                        "
+                      >
+                        Hi ${name}, <br />
+                        We're confirming that your WikaTalk account has been
+                        successfully deleted on
+                        <span
+                          style="color: #ffdc04; font-weight: 600; font-size: 18px"
+                          >${formattedDate}, ${formattedTime}</span
+                        >.
+                      </p>
+  
+                      <p
+                        style="
+                          color: #ffffff;
+                          font-size: 16px;
+                          font-weight: 300;
+                          margin: 20px 0;
+                          text-align: left;
+                        "
+                      >
+                        All your personal data and information have been permanently
+                        removed from our systems as requested. We're sorry to see you
+                        go, but we respect your decision.
+                      </p>
+  
+                      <p
+                        style="
+                          color: #ffffff;
+                          font-size: 16px;
+                          font-weight: 300;
+                          margin: 20px 0;
+                          text-align: left;
+                        "
+                      >
+                        If you deleted your account by mistake or wish to use WikaTalk
+                        again in the future, you'll need to create a new account.
+                      </p>
+  
+                      <p
+                        style="
+                          color: #ffffff;
+                          font-size: 16px;
+                          font-weight: 300;
+                          margin: 20px 0;
+                          text-align: left;
+                        "
+                      >
+                        Thank you for being part of our community. We appreciate the
+                        time you spent with us.
+                      </p>
+  
+                      <div style="margin-top: 30px; text-align: center">
+                        <p style="color: #ffffff; font-size: 16px; font-weight: 300">
+                          Follow us on social media:
+                        </p>
+                        <div style="margin: 15px 0">
+                          <a
+                            target="_blank"
+                            href="https://www.facebook.com/john.adrian.bonto"
+                            class="social-icon"
+                            style="text-decoration: none"
+                          >
+                            <img
+                              src="https://cdn-icons-png.flaticon.com/128/5968/5968764.png"
+                              alt="Facebook"
+                              width="32"
+                              height="32"
+                            />
+                          </a>
+                          <a
+                            target="_blank"
+                            href="https://github.com/Adrian9502"
+                            class="social-icon"
+                            style="text-decoration: none"
+                          >
+                            <img
+                              src="https://cdn-icons-png.flaticon.com/128/733/733553.png"
+                              alt="GitHub"
+                              width="32"
+                              height="32"
+                            />
+                          </a>
+                          <a
+                            target="_blank"
+                            href="mailto:bontojohnadrian@gmail.com"
+                            class="social-icon"
+                            style="text-decoration: none"
+                          >
+                            <img
+                              src="https://cdn-icons-png.flaticon.com/128/5968/5968534.png"
+                              alt="Gmail"
+                              width="32"
+                              height="32"
+                            />
+                          </a>
+                        </div>
+                      </div>
+                    </td>
+                  </tr>
+  
+                  <!-- Footer -->
+                  <tr>
+                    <td
+                      style="
+                        padding: 20px 40px;
+                        background-color: #f8f8f8;
+                        border-radius: 0 0 8px 8px;
+                      "
+                    >
+                      <p
+                        style="
+                          color: #999999;
+                          font-size: 12px;
+                          margin: 0;
+                          text-align: center;
+                        "
+                      >
+                        © ${new Date().getFullYear()} WikaTalk. All rights
+                        reserved.<br />
+                        If you have any questions, please contact our support team.
+                      </p>
+                    </td>
+                  </tr>
+                </table>
+              </td>
+            </tr>
+          </table>
+        </body>
+      </html>
+    `
+  }),
 };
 
 module.exports = { emailTemplates };
+
+

@@ -108,7 +108,7 @@ export default StyleSheet.create({
   },
   saveButton: {
     paddingVertical: 8,
-    borderRadius: 8,
+    borderRadius: 12,
     alignItems: "center",
     justifyContent: "center",
     marginTop: 8,

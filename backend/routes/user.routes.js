@@ -14,7 +14,9 @@ const {
   updateProfilePicture,
   changePassword,
   validatePassword,
-  loginWithGoogle,
+  loginWithGoogle, requestAccountDeletion,
+  verifyDeletionCode,
+  deleteAccount
 } = require("../controllers/user.controller");
 
 const { protect } = require("../middleware/auth.middleware");
@@ -35,4 +37,7 @@ router.put("/profile", protect, updateUserProfile);
 router.put("/profile-picture", protect, updateProfilePicture);
 router.put("/change-password", protect, changePassword);
 router.post("/validate-password", protect, validatePassword);
+router.post('/request-deletion', protect, requestAccountDeletion);
+router.post('/verify-deletion', protect, verifyDeletionCode);
+router.delete('/delete-account', protect, deleteAccount);
 module.exports = router;

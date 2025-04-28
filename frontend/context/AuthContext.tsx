@@ -55,6 +55,9 @@ export const useAuth = () => {
     clearStorage,
     clearResetData,
     updateUserProfile,
+    requestAccountDeletion,
+    verifyDeletionCode,
+    deleteAccount,
   } = useAuthStore();
 
   return {
@@ -81,5 +84,8 @@ export const useAuth = () => {
     clearStorage,
     clearResetData,
     updateUserProfile,
+    requestAccountDeletion,
+    verifyDeletionCode,
+    deleteAccount,
   };
 };
