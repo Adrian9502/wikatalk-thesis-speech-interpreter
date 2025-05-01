@@ -12,25 +12,18 @@ import {
   TouchableWithoutFeedback,
   Keyboard,
 } from "react-native";
-import {
-  ChevronDown,
-  ChevronLeft,
-  ChevronUp,
-  Search,
-  X,
-} from "react-native-feather";
+import { ChevronDown, ChevronUp, Search, X } from "react-native-feather";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import useThemeStore from "@/store/useThemeStore";
 import { BASE_COLORS } from "@/constant/colors";
-import { useRouter } from "expo-router";
 import faqItems from "@/utils/HelpAndFAQ/faqItems";
 import { FAQItem } from "@/types/faqItems";
 import categories from "@/utils/HelpAndFAQ/categories";
 import ContactSupportModal from "@/components/HelpAndFAQ/ContactSupportModal";
+import { Header } from "@/components/Header";
 const HelpFAQ = () => {
   // Get the dynamic styles based on the current theme
   const { activeTheme } = useThemeStore();
-  const router = useRouter();
   const [expandedCategory, setExpandedCategory] = useState<string | null>(
     "general"
   );
@@ -77,18 +70,7 @@ const HelpFAQ = () => {
             backgroundColor={activeTheme.backgroundColor}
             barStyle="light-content"
           />
-          <View style={styles.header}>
-            <TouchableOpacity
-              style={styles.backButton}
-              onPress={() => router.back()}
-            >
-              <ChevronLeft width={24} height={24} color="#ffffff" />
-            </TouchableOpacity>
-            <View style={styles.headerTitleContainer}>
-              <Text style={styles.headerText}>Help & FAQ</Text>
-            </View>
-            <View style={styles.placeholderView} />
-          </View>
+          <Header title="Help & FAQ" />
           <View style={styles.searchContainer}>
             <View style={[styles.searchBar]}>
               <Search

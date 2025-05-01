@@ -1,7 +1,6 @@
 import React, { useEffect } from "react";
 import { Text, View, ScrollView } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { useNavigation } from "@react-navigation/native";
 
 import { useAuth } from "@/context/AuthContext";
 import useThemeStore from "@/store/useThemeStore";
@@ -12,12 +11,11 @@ import { ProfileCard } from "@/components/AccountDetails/ProfileCard";
 import { InfoSection } from "@/components/AccountDetails/InfoSection";
 import { SettingsSection } from "@/components/AccountDetails/SettingsSection";
 import { DangerSection } from "@/components/AccountDetails/DangerSection";
-import { Header } from "@/components/AccountDetails/Header";
+import { Header } from "@/components/Header";
 import styles from "@/styles/accountDetailsStyles";
 
 const AccountDetails = () => {
   const { activeTheme } = useThemeStore();
-  const navigation = useNavigation();
   const { userData, getUserProfile } = useAuth();
 
   // Get the dynamic styles based on the current theme
@@ -33,10 +31,7 @@ const AccountDetails = () => {
   if (!userData) {
     return (
       <SafeAreaView style={dynamicStyles.container}>
-        <Header
-          title="Account Details"
-          onBackPress={() => navigation.goBack()}
-        />
+        <Header title="Account Details" />
         <View style={styles.loadingContainer}>
           <DotsLoader />
         </View>
@@ -46,7 +41,7 @@ const AccountDetails = () => {
 
   return (
     <SafeAreaView style={dynamicStyles.container}>
-      <Header title="Account Details" onBackPress={() => navigation.goBack()} />
+      <Header title="Account Details" />
 
       <ScrollView
         style={styles.scrollView}
