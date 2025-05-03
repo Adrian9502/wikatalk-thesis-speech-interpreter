@@ -45,7 +45,12 @@ interface PronunciationState {
   // Actions
   fetchPronunciations: () => Promise<void>;
   setSearchTerm: (term: string) => void;
-  getFilteredPronunciations: (language: string) => PronunciationItem[];
+  // Fix this line to add the missing parameters with their default values
+  getFilteredPronunciations: (
+    language: string,
+    page?: number,
+    limit?: number
+  ) => PronunciationItem[];
   playAudio: (index: number, text: string) => Promise<void>;
   stopAudio: () => Promise<void>;
 }
@@ -83,19 +88,43 @@ export const usePronunciationStore = create<PronunciationState>((set, get) => ({
 
   setSearchTerm: (term) => set({ searchTerm: term }),
 
-  getFilteredPronunciations: (language) => {
+  // Update the getFilteredPronunciations method
+  getFilteredPronunciations: (language: string, page = 1, limit = 25) => {
+    const { transformedData, searchTerm } = get();
+    const languageData = transformedData[language] || [];
+    const filtered = searchTerm.trim()
+      ? languageData.filter((item) => {
+          const lowercaseSearchTerm = searchTerm.toLowerCase();
+          return (
+            item.english.toLowerCase().includes(lowercaseSearchTerm) ||
+            item.translation.toLowerCase().includes(lowercaseSearchTerm) ||
+            item.pronunciation.toLowerCase().includes(lowercaseSearchTerm)
+          );
+        })
+      : languageData; // Calculate pagination
+    const startIndex = (page - 1) * limit;
+    const endIndex = startIndex + limit; // Return paginated results
+    return filtered.slice(startIndex, endIndex);
+  },
+
+  // Add a method to get the total count (useful for pagination)
+  getTotalCount: (language: string) => {
     const { transformedData, searchTerm } = get();
     const languageData = transformedData[language] || [];
 
-    if (!searchTerm.trim()) return languageData;
+    // Count after filtering
+    if (!searchTerm.trim()) return languageData.length;
 
-    const lowercaseSearchTerm = searchTerm.toLowerCase();
-    return languageData.filter(
-      (item) =>
+    const filtered = languageData.filter((item) => {
+      const lowercaseSearchTerm = searchTerm.toLowerCase();
+      return (
         item.english.toLowerCase().includes(lowercaseSearchTerm) ||
         item.translation.toLowerCase().includes(lowercaseSearchTerm) ||
         item.pronunciation.toLowerCase().includes(lowercaseSearchTerm)
-    );
+      );
+    });
+
+    return filtered.length;
   },
 
   playAudio: async (index, text) => {
