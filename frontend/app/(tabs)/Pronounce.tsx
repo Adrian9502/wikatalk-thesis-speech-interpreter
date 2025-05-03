@@ -1,371 +1,490 @@
-import React, { useState, useEffect, SetStateAction } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import {
   StyleSheet,
   Text,
   View,
   TouchableOpacity,
-  ScrollView,
   ActivityIndicator,
+  TextInput,
+  FlatList,
+  Keyboard,
+  TouchableWithoutFeedback,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Dropdown } from "react-native-element-dropdown";
 import { Ionicons } from "@expo/vector-icons";
-import * as Speech from "expo-speech";
 import { DIALECTS } from "@/constant/languages";
 import useThemeStore from "@/store/useThemeStore";
 import { getGlobalStyles } from "@/styles/globalStyles";
 import { BASE_COLORS } from "@/constant/colors";
+import {
+  usePronunciationStore,
+  debouncedSetSearchTerm,
+} from "@/store/usePronunciationStore";
+import { Search, X } from "react-native-feather";
+import AppLoading from "@/components/AppLoading";
 
-// Add these interfaces near the top of your file
 interface PronunciationItem {
-  meaning: string;
+  english: string;
   translation: string;
   pronunciation: string;
 }
 
-interface PronunciationData {
-  [key: string]: PronunciationItem[];
-}
-
-// Updated pronunciation data with meaning and pronunciation guide
-const MOCK_PRONUNCIATION_DATA: PronunciationData = {
-  Cebuano: [
-    {
-      meaning: "Hello",
-      translation: "Kumusta",
-      pronunciation: "koo-MOOS-tah",
-    },
-    {
-      meaning: "Thank you",
-      translation: "Salamat",
-      pronunciation: "sah-LAH-mat",
-    },
-    {
-      meaning: "Yes",
-      translation: "Oo",
-      pronunciation: "oh-OH",
-    },
-    {
-      meaning: "No",
-      translation: "Dili",
-      pronunciation: "DEE-lee",
-    },
-    {
-      meaning: "Good morning",
-      translation: "Maayong buntag",
-      pronunciation: "mah-AH-yong BOON-tag",
-    },
-    {
-      meaning: "Good afternoon",
-      translation: "Maayong hapon",
-      pronunciation: "mah-AH-yong hah-PON",
-    },
-    {
-      meaning: "Good evening",
-      translation: "Maayong gabii",
-      pronunciation: "mah-AH-yong gah-BEE",
-    },
-    {
-      meaning: "Where are you?",
-      translation: "Asa ka?",
-      pronunciation: "AH-sah kah",
-    },
-    {
-      meaning: "What is your name?",
-      translation: "Unsa imong ngalan?",
-      pronunciation: "OON-sah ee-MONG nga-LAN",
-    },
-    {
-      meaning: "I love you",
-      translation: "Gihigugma tika",
-      pronunciation: "gee-hee-GOOG-mah TEE-kah",
-    },
-  ],
-  Hiligaynon: [
-    {
-      meaning: "Hello",
-      translation: "Kamusta",
-      pronunciation: "kah-MOOS-tah",
-    },
-    {
-      meaning: "Thank you",
-      translation: "Salamat",
-      pronunciation: "sah-LAH-mat",
-    },
-    // Add more with proper pronunciation guides
-  ],
-  // Continue for other languages
-};
-
 const Pronounce = () => {
-  // Theme store
   const { activeTheme } = useThemeStore();
-
-  // Get the dynamic styles based on the current theme
   const dynamicStyles = getGlobalStyles(activeTheme.backgroundColor);
-
-  // State for the selected language
   const [selectedLanguage, setSelectedLanguage] = useState("Cebuano");
   const [isDropdownFocus, setIsDropdownFocus] = useState(false);
-  const [currentPlayingIndex, setCurrentPlayingIndex] = useState(null);
-  const [isLoading, setIsLoading] = useState(false);
+  const [searchInput, setSearchInput] = useState("");
 
-  // Using expo-speech to pronounce the phrases
-  const handlePlayAudio = (index: any, text: string) => {
-    setIsLoading(true);
-    setCurrentPlayingIndex(index);
+  const {
+    fetchPronunciations,
+    getFilteredPronunciations,
+    playAudio,
+    stopAudio,
+    isLoading,
+    setSearchTerm,
+    error,
+    currentPlayingIndex,
+    isAudioLoading,
+  } = usePronunciationStore();
 
-    Speech.speak(text, {
-      language: "fil",
-      rate: 0.45,
-      onStart: () => {
-        setIsLoading(false);
-      },
-      onDone: () => {
-        setCurrentPlayingIndex(null);
-      },
-      onError: () => {
-        setIsLoading(false);
-        setCurrentPlayingIndex(null);
-      },
-    });
+  const handleSearch = () => {
+    setSearchTerm(searchInput);
   };
 
-  // Stop any ongoing speech when component unmounts or language changes
+  useEffect(() => {
+    fetchPronunciations();
+  }, []);
+
   useEffect(() => {
     return () => {
-      Speech.stop();
+      stopAudio();
     };
-  }, [selectedLanguage]);
+  }, []);
 
-  // Get the pronunciation data for the selected language
-  const pronunciationData: PronunciationItem[] =
-    MOCK_PRONUNCIATION_DATA[selectedLanguage] || [];
+  const handleLanguageChange = (language: string) => {
+    stopAudio();
+    setSelectedLanguage(language);
+  };
 
-  return (
-    <SafeAreaView style={[dynamicStyles.container, styles.container]}>
-      <View style={styles.header}>
-        <Text style={styles.headerTitle}>Pronunciation Guide</Text>
-        <Text style={styles.headerSubtitle}>
-          Learn how to pronounce common phrases
+  const languagePronunciationData = getFilteredPronunciations(selectedLanguage);
+
+  const renderItem = useCallback(
+    ({ item, index }: { item: PronunciationItem; index: number }) => (
+      <TouchableOpacity
+        activeOpacity={0.8}
+        onPress={() => playAudio(index, item.translation)}
+        style={[styles.card, styles.cardContainer]}
+      >
+        <View style={styles.cardContent}>
+          <View style={styles.textContainer}>
+            <Text style={styles.englishText}>{item.english}</Text>
+            <Text style={styles.translationText}>{item.translation}</Text>
+            <Text style={styles.pronunciationText}>{item.pronunciation}</Text>
+          </View>
+          <View style={styles.audioContainer}>
+            {isAudioLoading && currentPlayingIndex === index ? (
+              <ActivityIndicator size="small" color={BASE_COLORS.blue} />
+            ) : (
+              <View
+                style={[
+                  styles.playButton,
+                  currentPlayingIndex === index && styles.playButtonActive,
+                ]}
+              >
+                <Ionicons
+                  name={
+                    currentPlayingIndex === index
+                      ? "volume-high"
+                      : "volume-medium-outline"
+                  }
+                  size={22}
+                  color={
+                    currentPlayingIndex === index
+                      ? BASE_COLORS.white
+                      : BASE_COLORS.blue
+                  }
+                />
+              </View>
+            )}
+          </View>
+        </View>
+      </TouchableOpacity>
+    ),
+    [currentPlayingIndex, isAudioLoading, playAudio]
+  );
+
+  const keyExtractor = useCallback(
+    (item: PronunciationItem, index: number) => `pronunciation-${index}`,
+    []
+  );
+
+  const ListEmptyComponent = useCallback(
+    () => (
+      <View style={styles.emptyStateContainer}>
+        <View style={styles.iconWrapper}>
+          <Search width={40} height={40} color="#fff" />
+        </View>
+        <Text style={styles.emptyStateTitle}>No results found</Text>
+        <Text style={styles.emptyStateText}>
+          Try adjusting your search or selecting a different language.
         </Text>
       </View>
+    ),
+    []
+  );
 
-      {/* Language Selection Dropdown */}
-      <View style={styles.dropdownContainer}>
-        <Text style={styles.dropdownLabel}>Select Language:</Text>
-        <Dropdown
-          style={[
-            styles.dropdown,
-            {
-              borderColor: BASE_COLORS.borderColor,
-              backgroundColor: BASE_COLORS.lightBlue,
-            },
-            isDropdownFocus && { borderColor: BASE_COLORS.blue },
-          ]}
-          placeholderStyle={[
-            styles.dropdownText,
-            { color: BASE_COLORS.placeholderText },
-          ]}
-          selectedTextStyle={[
-            styles.dropdownText,
-            { color: BASE_COLORS.blue, borderRadius: 8 },
-          ]}
-          data={DIALECTS}
-          maxHeight={250}
-          labelField="label"
-          valueField="value"
-          placeholder="Select language"
-          value={selectedLanguage}
-          onFocus={() => setIsDropdownFocus(true)}
-          onBlur={() => setIsDropdownFocus(false)}
-          onChange={(item) => {
-            setSelectedLanguage(item.value);
-            setIsDropdownFocus(false);
-            setCurrentPlayingIndex(null);
-            // Stop any ongoing speech
-            Speech.stop();
-          }}
-          renderRightIcon={() => (
-            <Ionicons
-              name={isDropdownFocus ? "chevron-up" : "chevron-down"}
-              size={18}
-              color={BASE_COLORS.blue}
-            />
-          )}
-          activeColor={BASE_COLORS.lightBlue}
-          containerStyle={styles.dropdownList}
-        />
-      </View>
+  if (isLoading) {
+    return <AppLoading />;
+  }
 
-      {/* Pronunciation Table */}
-      <View style={styles.tableContainer}>
-        {/* Table Header */}
-        <View style={styles.tableHeader}>
-          <Text style={[styles.tableHeaderText, { flex: 2 }]}>Meaning</Text>
-          <Text style={[styles.tableHeaderText, { flex: 2 }]}>
-            {selectedLanguage}
+  if (error) {
+    return (
+      <SafeAreaView style={[dynamicStyles.container, styles.centerContainer]}>
+        <View style={styles.errorContainer}>
+          <Ionicons name="alert-circle" size={60} color={BASE_COLORS.orange} />
+          <Text style={styles.errorTitle}>Oops!</Text>
+          <Text style={styles.errorText}>
+            We couldn't load the pronunciation data
           </Text>
-          <Text style={[styles.tableHeaderText, { flex: 3 }]}>
-            Pronunciation
-          </Text>
-          <Text style={[styles.tableHeaderText, { flex: 1 }]}>Audio</Text>
+          <TouchableOpacity
+            style={styles.retryButton}
+            onPress={fetchPronunciations}
+          >
+            <Text style={styles.retryButtonText}>Try Again</Text>
+          </TouchableOpacity>
+        </View>
+      </SafeAreaView>
+    );
+  }
+
+  return (
+    <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
+      <SafeAreaView style={dynamicStyles.container}>
+        <View style={styles.header}>
+          <Text style={styles.headerTitle}>Pronunciation Guide</Text>
         </View>
 
-        {/* Table Body */}
-        <ScrollView style={styles.tableBody}>
-          {pronunciationData.map((item: PronunciationItem, index: number) => (
-            <View
-              key={index}
-              style={[
-                styles.tableRow,
-                index % 2 === 0 ? styles.tableRowEven : styles.tableRowOdd,
-              ]}
-            >
-              <Text style={[styles.tableCell, { flex: 2 }]}>
-                {item.meaning}
-              </Text>
-              <Text style={[styles.tableCell, { flex: 2 }]}>
-                {item.translation}
-              </Text>
-              <Text
-                style={[styles.tableCell, { flex: 3, fontStyle: "italic" }]}
-              >
-                {item.pronunciation}
-              </Text>
-              <View style={[styles.tableCell]}>
+        {/* Language Selection with Search Bar */}
+        <View style={styles.controlsContainer}>
+          <View style={styles.searchContainer}>
+            <View style={styles.searchBar}>
+              <Search width={20} height={20} color={BASE_COLORS.blue} />
+              <TextInput
+                style={styles.searchInput}
+                placeholder="Search words/phrases"
+                placeholderTextColor={BASE_COLORS.placeholderText}
+                value={searchInput}
+                onChangeText={(text) => {
+                  setSearchInput(text);
+                  debouncedSetSearchTerm(text);
+                }}
+                returnKeyType="search"
+              />
+              {searchInput !== "" && (
                 <TouchableOpacity
-                  onPress={() => handlePlayAudio(index, item.translation)}
-                  disabled={isLoading}
-                  style={styles.audioButton}
+                  style={styles.clearButton}
+                  onPress={() => {
+                    setSearchInput("");
+                    setSearchTerm("");
+                  }}
                 >
-                  {isLoading && currentPlayingIndex === index ? (
-                    <ActivityIndicator size="small" color={BASE_COLORS.blue} />
-                  ) : (
-                    <Ionicons
-                      name={
-                        currentPlayingIndex === index
-                          ? "volume-high"
-                          : "volume-medium-outline"
-                      }
-                      size={22}
-                      color={
-                        currentPlayingIndex === index
-                          ? BASE_COLORS.success
-                          : BASE_COLORS.blue
-                      }
-                    />
-                  )}
+                  <X
+                    width={16}
+                    height={16}
+                    color={BASE_COLORS.placeholderText}
+                  />
                 </TouchableOpacity>
-              </View>
+              )}
             </View>
-          ))}
-        </ScrollView>
-      </View>
-    </SafeAreaView>
+          </View>
+
+          <View style={styles.dropdownContainer}>
+            <Dropdown
+              style={[
+                styles.dropdown,
+                isDropdownFocus && { borderColor: BASE_COLORS.blue },
+              ]}
+              placeholderStyle={styles.dropdownPlaceholder}
+              selectedTextStyle={styles.dropdownSelectedText}
+              data={DIALECTS}
+              maxHeight={250}
+              labelField="label"
+              valueField="value"
+              placeholder="Select language"
+              value={selectedLanguage}
+              onFocus={() => setIsDropdownFocus(true)}
+              onBlur={() => setIsDropdownFocus(false)}
+              onChange={(item) => {
+                handleLanguageChange(item.value);
+                setIsDropdownFocus(false);
+              }}
+              renderRightIcon={() => (
+                <Ionicons
+                  name={isDropdownFocus ? "chevron-up" : "chevron-down"}
+                  size={18}
+                  color={BASE_COLORS.blue}
+                />
+              )}
+              activeColor={BASE_COLORS.lightBlue}
+              containerStyle={styles.dropdownList}
+            />
+          </View>
+        </View>
+        <Text style={styles.listHeaderTitle}>{selectedLanguage} Phrases</Text>
+        {/* Pronunciation List */}
+        <View style={styles.listContainer}>
+          <FlatList
+            data={languagePronunciationData}
+            renderItem={renderItem}
+            keyExtractor={keyExtractor}
+            ListEmptyComponent={ListEmptyComponent}
+            contentContainerStyle={styles.flatListContent}
+            initialNumToRender={10}
+            maxToRenderPerBatch={10}
+            windowSize={10}
+            showsVerticalScrollIndicator={false}
+            removeClippedSubviews={true}
+          />
+        </View>
+      </SafeAreaView>
+    </TouchableWithoutFeedback>
   );
 };
 
 const styles = StyleSheet.create({
-  container: {
-    padding: 16,
+  centerContainer: {
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  loadingText: {
+    marginTop: 16,
+    fontSize: 16,
+    fontFamily: "Poppins-Medium",
+    color: BASE_COLORS.white,
+  },
+  errorContainer: {
+    alignItems: "center",
+    padding: 24,
+  },
+  errorTitle: {
+    fontSize: 20,
+    fontFamily: "Poppins-Medium",
+    color: BASE_COLORS.white,
+    marginTop: 16,
+  },
+  errorText: {
+    marginTop: 8,
+    marginBottom: 24,
+    fontSize: 14,
+    fontFamily: "Poppins-Regular",
+    color: BASE_COLORS.white,
+    textAlign: "center",
+  },
+  retryButton: {
+    backgroundColor: BASE_COLORS.blue,
+    paddingHorizontal: 24,
+    paddingVertical: 12,
+    borderRadius: 12,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.1,
+    shadowRadius: 6,
+    elevation: 4,
+  },
+  retryButtonText: {
+    fontFamily: "Poppins-Regular",
+    fontSize: 14,
+    color: BASE_COLORS.white,
   },
   header: {
     marginBottom: 20,
   },
   headerTitle: {
-    fontSize: 23,
-    fontFamily: "Poppins-Bold",
-    color: "#fff",
-    marginBottom: 4,
+    fontSize: 24,
+    fontFamily: "Poppins-SemiBold",
+    color: BASE_COLORS.white,
   },
-  headerSubtitle: {
-    fontSize: 14,
+  controlsContainer: {
+    flexDirection: "row",
+    marginBottom: 16,
+  },
+  searchContainer: {
+    flex: 1,
+    marginRight: 12,
+  },
+  searchBar: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: BASE_COLORS.white,
+    borderRadius: 12,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderWidth: 1,
+    borderColor: BASE_COLORS.borderColor,
+    height: 48,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 4,
+    elevation: 2,
+  },
+  searchInput: {
+    flex: 1,
+    marginLeft: 8,
     fontFamily: "Poppins-Regular",
-    color: "#fff",
+    fontSize: 14,
+    color: BASE_COLORS.darkText,
+  },
+  clearButton: {
+    padding: 4,
   },
   dropdownContainer: {
-    marginBottom: 20,
-  },
-  dropdownLabel: {
-    fontSize: 14,
-    fontFamily: "Poppins-Regular",
-    color: "#fff",
-    marginBottom: 8,
+    flex: 1,
   },
   dropdown: {
-    borderRadius: 16,
+    height: 48,
+    borderRadius: 12,
     borderWidth: 1,
-    height: 46,
+    borderColor: BASE_COLORS.borderColor,
     paddingHorizontal: 12,
+    backgroundColor: BASE_COLORS.white,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 4,
+    elevation: 2,
   },
   dropdownList: {
-    borderRadius: 8,
-    borderWidth: 1,
+    borderRadius: 12,
+    borderWidth: 0,
     backgroundColor: BASE_COLORS.white,
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 6 },
     shadowOpacity: 0.1,
     shadowRadius: 8,
-    elevation: 6,
-    borderColor: BASE_COLORS.borderColor,
+    elevation: 8,
   },
-  dropdownText: {
-    fontSize: 15,
+  dropdownPlaceholder: {
+    fontSize: 14,
     fontFamily: "Poppins-Regular",
+    color: BASE_COLORS.placeholderText,
   },
-  tableContainer: {
-    flex: 1,
-    backgroundColor: BASE_COLORS.white,
-    borderRadius: 16,
-    overflow: "hidden",
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.1,
-    shadowRadius: 8,
-    elevation: 5,
-    marginBottom: 20,
-  },
-  tableHeader: {
-    flexDirection: "row",
-    backgroundColor: BASE_COLORS.blue,
-    paddingVertical: 12,
-    paddingHorizontal: 16,
-  },
-  tableHeaderText: {
-    color: BASE_COLORS.white,
+  dropdownSelectedText: {
+    fontSize: 14,
     fontFamily: "Poppins-Medium",
-    fontSize: 14,
-  },
-  tableBody: {
-    flex: 1,
-  },
-  tableRow: {
-    flexDirection: "row",
-    paddingVertical: 12,
-    paddingHorizontal: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: BASE_COLORS.borderColor,
-  },
-  tableRowEven: {
-    backgroundColor: BASE_COLORS.white,
-  },
-  tableRowOdd: {
-    backgroundColor: BASE_COLORS.lightGray,
-  },
-  tableCell: {
-    flex: 1,
-    alignItems: "center",
-    fontFamily: "Poppins-Regular",
-    fontSize: 14,
     color: BASE_COLORS.darkText,
   },
-  audioButton: {
-    width: 40,
-    height: 40,
+  dropdownIcon: {
+    marginRight: 8,
+  },
+  listContainer: {
+    flex: 1,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: -4 },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 8,
+    overflow: "hidden",
+  },
+  flatListContent: {
+    paddingBottom: 20,
+  },
+  listHeaderTitle: {
+    fontSize: 18,
+    fontFamily: "Poppins-Medium",
+    color: BASE_COLORS.white,
+    marginBottom: 4,
+  },
+  card: {
+    marginVertical: 6,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: BASE_COLORS.borderColor,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 4,
+    elevation: 2,
+    backgroundColor: BASE_COLORS.white,
+  },
+  cardContainer: {
+    backgroundColor: BASE_COLORS.white,
+  },
+  cardContent: {
+    flexDirection: "row",
+    padding: 16,
+    alignItems: "center",
+  },
+  textContainer: {
+    flex: 1,
+  },
+  englishText: {
+    fontFamily: "Poppins-Medium",
+    fontSize: 16,
+    color: BASE_COLORS.darkText,
+    marginBottom: 2,
+  },
+  translationText: {
+    fontFamily: "Poppins-SemiBold",
+    fontSize: 17,
+    color: BASE_COLORS.blue,
+    marginBottom: 4,
+  },
+  pronunciationText: {
+    fontFamily: "Poppins-Medium",
+    fontSize: 15,
+    letterSpacing: 0.5,
+    color: BASE_COLORS.orange,
+  },
+  audioContainer: {
+    marginLeft: 12,
     justifyContent: "center",
     alignItems: "center",
-    borderRadius: 20,
+  },
+  playButton: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: BASE_COLORS.lightBlue,
+    borderWidth: 1,
+    borderColor: BASE_COLORS.blue,
+  },
+  playButtonActive: {
+    backgroundColor: BASE_COLORS.blue,
+  },
+  emptyStateContainer: {
+    alignItems: "center",
+    justifyContent: "center",
+    paddingVertical: 80,
+    paddingHorizontal: 32,
+  },
+  iconWrapper: {
+    backgroundColor: BASE_COLORS.orange,
+    padding: 20,
+    borderRadius: 50,
+    marginBottom: 20,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  emptyStateTitle: {
+    fontFamily: "Poppins-Medium",
+    fontSize: 17,
+    color: BASE_COLORS.white,
+    marginBottom: 10,
+  },
+  emptyStateText: {
+    fontFamily: "Poppins-Regular",
+    fontSize: 14,
+    color: BASE_COLORS.borderColor,
+    textAlign: "center",
+    maxWidth: 280,
   },
 });
 
