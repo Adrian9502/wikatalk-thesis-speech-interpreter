@@ -7,11 +7,11 @@ import {
   TouchableOpacity,
   Linking,
   ImageSourcePropType,
-  Clipboard,
   ToastAndroid,
   Platform,
   Alert,
 } from "react-native";
+import Clipboard from "@react-native-clipboard/clipboard";
 import { Feather } from "@expo/vector-icons";
 import { BASE_COLORS } from "@/constant/colors";
 import { SocialLink, SocialLinkType } from "@/types/teamMebersTypes";

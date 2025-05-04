@@ -35,11 +35,15 @@ const About: React.FC = () => {
 
         <View style={styles.descriptionSection}>
           <Text style={styles.descriptionText}>
-            WikaTalk: A Mobile-Based Filipino Dialect Interpreter with Gamified
-            Features Using Natural Language Processing (NLP). This project was
-            developed as a requirement for the completion of our Bachelor's
-            degree in Computer Science at City College of Calamba for the
-            Academic Year 2025–2026.
+            <Text style={{ fontFamily: "Poppins-SemiBold" }}>WikaTalk</Text>: A
+            Mobile-Based Filipino Dialect Interpreter with Gamified Features
+            using Natural Language Processing (NLP).
+          </Text>
+          <Text style={styles.descriptionText}>
+            This application was developed as part of our undergraduate thesis
+            in fulfillment of the requirements for the degree of Bachelor of
+            Science in Computer Science at City College of Calamba, Academic
+            Year 2025–2026.
           </Text>
         </View>
       </ScrollView>
@@ -55,9 +59,10 @@ const styles = StyleSheet.create({
     marginBottom: 32,
   },
   descriptionText: {
+    marginBottom: 4,
     fontSize: 13,
     fontFamily: "Poppins-Regular",
     color: "white",
-    lineHeight: 24,
+    lineHeight: 20,
   },
 });

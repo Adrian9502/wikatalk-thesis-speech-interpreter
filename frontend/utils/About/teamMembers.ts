@@ -25,7 +25,7 @@ const teamMembers: TeamMember[] = [
     name: "Ronald Curzon",
     role: "NLP Engineer / Machine Learning Specialist",
     bio: "In charge of training and fine-tuning the Natural Language Processing model using Hugging Face and Google Colab. Also contributed to the mobile application’s development through collaborative implementation and version control via GitHub.",
-    // image: require("@/assets/team/jane.jpg"),
+    image: require("@/assets/team/ronald.png"),
     socialLinks: [
       { type: "facebook", url: "https://www.facebook.com/rbcurzon" },
       {
@@ -44,7 +44,7 @@ const teamMembers: TeamMember[] = [
     name: "Hannie Edrielle Marababol",
     role: "Research & Documentation Lead",
     bio: "Primary author of the thesis manuscript. Oversaw the formulation of the research framework, literature review, and methodology, ensuring alignment with academic standards and project goals.",
-    // image: require("@/assets/team/mike.jpg"),
+    image: require("@/assets/team/hannie.png"),
     socialLinks: [
       {
         type: "facebook",
@@ -57,7 +57,7 @@ const teamMembers: TeamMember[] = [
     name: "Christian Almazan",
     role: "Research & Documentation Assistant",
     bio: "Assisted in the preparation and organization of project documentation. Contributed to the thesis manuscript through research support, editing, and formatting in coordination with the lead researcher.",
-    // image: require("@/assets/team/sarah.jpg"),
+    image: require("@/assets/team/christian.png"),
     socialLinks: [
       { type: "facebook", url: "https://www.facebook.com/share/1BitbvHQXs/" },
     ],
