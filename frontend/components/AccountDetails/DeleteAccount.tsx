@@ -409,7 +409,7 @@ const styles = StyleSheet.create({
     padding: 12,
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "#FF3B30",
+    backgroundColor: TITLE_COLORS.customRed,
     justifyContent: "center",
     position: "relative", // For absolute positioning of close button
   },
