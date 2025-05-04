@@ -3,12 +3,20 @@ import React, { useRef, useEffect } from "react";
 import { Tabs } from "expo-router";
 import { Mic, Camera, Settings, Globe, Volume2 } from "react-native-feather";
 import useThemeStore from "@/store/useThemeStore";
+import { Ionicons } from "@expo/vector-icons";
 
 interface TabIconProps {
-  Icon: any;
+  Icon: React.ComponentType<any>;
   color: string;
   name: string;
   focused: boolean;
+}
+interface IconProps {
+  color: string;
+  width?: number;
+  height?: number;
+  strokeWidth?: number;
+  stroke?: string;
 }
 
 const TabIcon: React.FC<TabIconProps> = ({ Icon, color, name, focused }) => {
@@ -45,6 +53,7 @@ const TabIcon: React.FC<TabIconProps> = ({ Icon, color, name, focused }) => {
           width={focused ? 22 : 21}
           height={focused ? 22 : 21}
           strokeWidth={1.5}
+          color={color}
         />
 
         <Animated.Text
@@ -64,6 +73,10 @@ const TabIcon: React.FC<TabIconProps> = ({ Icon, color, name, focused }) => {
     </View>
   );
 };
+
+const GameIcon: React.FC<IconProps> = ({ color, width }) => (
+  <Ionicons name="game-controller-outline" size={width} color={color} />
+);
 
 export default function TabsLayout() {
   // Get the active theme from the store
@@ -133,6 +146,21 @@ export default function TabsLayout() {
               Icon={Camera}
               color={color}
               name="Scan"
+              focused={focused}
+            />
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="Games"
+        options={{
+          title: "Games",
+          headerShown: false,
+          tabBarIcon: ({ color, focused }) => (
+            <TabIcon
+              Icon={GameIcon}
+              color={color}
+              name="Games"
               focused={focused}
             />
           ),
