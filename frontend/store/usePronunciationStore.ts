@@ -42,10 +42,18 @@ interface PronunciationState {
   currentPlayingIndex: number | null;
   isAudioLoading: boolean;
 
+  // New properties for Word of Day feature
+  wordOfTheDay: {
+    english: string;
+    translation: string;
+    pronunciation: string;
+    language: string;
+  } | null;
+  isWordOfDayPlaying: boolean;
+
   // Actions
   fetchPronunciations: () => Promise<void>;
   setSearchTerm: (term: string) => void;
-  // Fix this line to add the missing parameters with their default values
   getFilteredPronunciations: (
     language: string,
     page?: number,
@@ -53,6 +61,10 @@ interface PronunciationState {
   ) => PronunciationItem[];
   playAudio: (index: number, text: string) => Promise<void>;
   stopAudio: () => Promise<void>;
+
+  // New actions for Word of Day feature
+  getWordOfTheDay: () => void;
+  playWordOfDayAudio: () => Promise<void>;
 }
 
 export const usePronunciationStore = create<PronunciationState>((set, get) => ({
@@ -64,6 +76,8 @@ export const usePronunciationStore = create<PronunciationState>((set, get) => ({
   transformedData: {},
   currentPlayingIndex: null,
   isAudioLoading: false,
+  wordOfTheDay: null,
+  isWordOfDayPlaying: false,
 
   // Actions
   fetchPronunciations: async () => {
@@ -88,7 +102,6 @@ export const usePronunciationStore = create<PronunciationState>((set, get) => ({
 
   setSearchTerm: (term) => set({ searchTerm: term }),
 
-  // Update the getFilteredPronunciations method
   getFilteredPronunciations: (language: string, page = 1, limit = 25) => {
     const { transformedData, searchTerm } = get();
     const languageData = transformedData[language] || [];
@@ -101,18 +114,16 @@ export const usePronunciationStore = create<PronunciationState>((set, get) => ({
             item.pronunciation.toLowerCase().includes(lowercaseSearchTerm)
           );
         })
-      : languageData; // Calculate pagination
+      : languageData;
     const startIndex = (page - 1) * limit;
-    const endIndex = startIndex + limit; // Return paginated results
+    const endIndex = startIndex + limit;
     return filtered.slice(startIndex, endIndex);
   },
 
-  // Add a method to get the total count (useful for pagination)
   getTotalCount: (language: string) => {
     const { transformedData, searchTerm } = get();
     const languageData = transformedData[language] || [];
 
-    // Count after filtering
     if (!searchTerm.trim()) return languageData.length;
 
     const filtered = languageData.filter((item) => {
@@ -128,13 +139,12 @@ export const usePronunciationStore = create<PronunciationState>((set, get) => ({
   },
 
   playAudio: async (index, text) => {
-    // Stop any already playing audio
     await get().stopAudio();
 
     set({ isAudioLoading: true, currentPlayingIndex: index });
 
     Speech.speak(text, {
-      language: "fil", // Filipino language code
+      language: "fil",
       rate: 0.45,
       onStart: () => {
         set({ isAudioLoading: false });
@@ -152,34 +162,78 @@ export const usePronunciationStore = create<PronunciationState>((set, get) => ({
     await Speech.stop();
     set({ currentPlayingIndex: null });
   },
+
+  getWordOfTheDay: () => {
+    const { pronunciationData } = get();
+
+    if (pronunciationData.length === 0) {
+      return;
+    }
+
+    const randomIndex = Math.floor(Math.random() * pronunciationData.length);
+    const randomWord = pronunciationData[randomIndex];
+
+    const languages = Object.keys(randomWord.translations);
+    const randomLanguage =
+      languages[Math.floor(Math.random() * languages.length)];
+    const translationData = randomWord.translations[randomLanguage];
+
+    const formattedLanguage =
+      randomLanguage.charAt(0).toUpperCase() + randomLanguage.slice(1);
+
+    set({
+      wordOfTheDay: {
+        english: randomWord.english,
+        translation: translationData.translation,
+        pronunciation: translationData.pronunciation,
+        language: formattedLanguage,
+      },
+    });
+  },
+
+  playWordOfDayAudio: async () => {
+    const { wordOfTheDay } = get();
+    if (!wordOfTheDay) return;
+
+    await get().stopAudio();
+
+    set({ isWordOfDayPlaying: true, isAudioLoading: true });
+
+    Speech.speak(wordOfTheDay.translation, {
+      language: "fil",
+      rate: 0.45,
+      onStart: () => {
+        set({ isAudioLoading: false });
+      },
+      onDone: () => {
+        set({ isWordOfDayPlaying: false });
+      },
+      onError: () => {
+        set({ isAudioLoading: false, isWordOfDayPlaying: false });
+      },
+    });
+  },
 }));
 
-// Helper function to transform the API data into the format needed by the UI
 const transformPronunciationData = (
   data: PronunciationDataItem[]
 ): PronunciationData => {
   const result: PronunciationData = {};
 
-  // Initialize empty arrays for each dialect
   DIALECTS.forEach((dialect) => {
     result[dialect.value] = [];
   });
 
-  // Track entries we've already added to each dialect to prevent duplicates
   const addedEntries: Record<string, Set<string>> = {};
   DIALECTS.forEach((dialect) => {
     addedEntries[dialect.value] = new Set();
   });
 
-  // Process each phrase
   data.forEach((item) => {
-    // For each language, create a pronunciation item
     Object.entries(item.translations).forEach(([language, translationData]) => {
       const dialectKey = language.charAt(0).toUpperCase() + language.slice(1);
 
-      // Special handling for all dialects
       if (language === "bisaya") {
-        // Add to Bisaya category if it exists and not already added
         if (result["Bisaya"] && !addedEntries["Bisaya"].has(item.english)) {
           result["Bisaya"].push({
             english: item.english,
@@ -189,7 +243,6 @@ const transformPronunciationData = (
           addedEntries["Bisaya"].add(item.english);
         }
 
-        // Also add to Cebuano since they're the same (if not already added)
         if (result["Cebuano"] && !addedEntries["Cebuano"].has(item.english)) {
           result["Cebuano"].push({
             english: item.english,
@@ -210,7 +263,6 @@ const transformPronunciationData = (
         });
         addedEntries["Cebuano"].add(item.english);
       } else if (language === "tagalog") {
-        // Add Tagalog data to Filipino category if not already added
         if (result["Filipino"] && !addedEntries["Filipino"].has(item.english)) {
           result["Filipino"].push({
             english: item.english,
@@ -220,7 +272,6 @@ const transformPronunciationData = (
           addedEntries["Filipino"].add(item.english);
         }
 
-        // Also add to a Tagalog category if it exists and not already added
         if (result["Tagalog"] && !addedEntries["Tagalog"].has(item.english)) {
           result["Tagalog"].push({
             english: item.english,
@@ -230,7 +281,6 @@ const transformPronunciationData = (
           addedEntries["Tagalog"].add(item.english);
         }
       } else {
-        // Add the phrase to the appropriate language array if not already added
         const standardKey = dialectKey;
 
         if (
@@ -253,5 +303,5 @@ const transformPronunciationData = (
 
 export const debouncedSetSearchTerm = debounce(
   (term: string) => usePronunciationStore.getState().setSearchTerm(term),
-  300 // 300ms debounce time
+  300
 );
