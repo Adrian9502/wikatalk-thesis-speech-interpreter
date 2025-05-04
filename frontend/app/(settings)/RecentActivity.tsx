@@ -15,13 +15,12 @@ import ConfirmationModal from "@/components/ConfirmationModal";
 import TabSelector from "@/components/Recent/TabSelector";
 import HistoryList from "@/components/Recent/HistoryList";
 import { TabType, HistoryItems } from "@/types/types";
-import axios from "axios";
 import { format } from "date-fns";
 import DotsLoader from "@/components/DotLoader";
-import { BASE_COLORS, TITLE_COLORS } from "@/constant/colors";
-import { useAuthStore } from "@/store/useAuthStore";
+import { BASE_COLORS } from "@/constant/colors";
 import createAuthenticatedApi from "@/lib/api";
 import { showToast } from "@/lib/showToast";
+import { Header } from "@/components/Header";
 interface TranslationAPIItem {
   _id: string;
   type: TabType;
@@ -32,7 +31,7 @@ interface TranslationAPIItem {
   translatedText: string;
 }
 
-const RecentTranslations: React.FC = () => {
+const RecentActivity: React.FC = () => {
   // Theme store
   const { activeTheme } = useThemeStore();
   const dynamicStyles = getGlobalStyles(activeTheme.backgroundColor);
@@ -165,6 +164,7 @@ const RecentTranslations: React.FC = () => {
     <View style={dynamicStyles.container}>
       <StatusBar style="light" />
       <SafeAreaView style={styles.safeAreaView}>
+        <Header title="Recent Activity" />
         {/* Tabs */}
         <TabSelector activeTab={activeTab} onTabChange={setActiveTab} />
 
@@ -279,4 +279,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default RecentTranslations;
+export default RecentActivity;

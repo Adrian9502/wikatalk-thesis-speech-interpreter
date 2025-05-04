@@ -67,6 +67,18 @@ const Settings = () => {
   };
 
   const sections: SettingSection[] = [
+    // Activity Section
+    {
+      title: "Activity",
+      items: [
+        {
+          icon: "clock",
+          label: "Recent Activity",
+          onPress: () => router.push("/(settings)/RecentActivity"),
+        },
+      ],
+    },
+    // Account Section
     {
       title: "Account",
       items: [
@@ -77,6 +89,7 @@ const Settings = () => {
         },
       ],
     },
+    // Support section
     {
       title: "Support",
       items: [

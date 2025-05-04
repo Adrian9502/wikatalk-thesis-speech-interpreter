@@ -1,14 +1,7 @@
 import { View, Animated } from "react-native";
 import React, { useRef, useEffect } from "react";
 import { Tabs } from "expo-router";
-import {
-  Mic,
-  Camera,
-  Clock,
-  Settings,
-  Globe,
-  Volume2,
-} from "react-native-feather";
+import { Mic, Camera, Settings, Globe, Volume2 } from "react-native-feather";
 import useThemeStore from "@/store/useThemeStore";
 
 interface TabIconProps {
@@ -155,21 +148,6 @@ export default function TabsLayout() {
               Icon={Volume2}
               color={color}
               name="Pronounce"
-              focused={focused}
-            />
-          ),
-        }}
-      />
-      <Tabs.Screen
-        name="Recent"
-        options={{
-          title: "Recent",
-          headerShown: false,
-          tabBarIcon: ({ color, focused }) => (
-            <TabIcon
-              Icon={Clock}
-              color={color}
-              name="Recent"
               focused={focused}
             />
           ),
