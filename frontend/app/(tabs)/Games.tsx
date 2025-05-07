@@ -31,15 +31,25 @@ const Games = () => {
     isAudioLoading,
     getWordOfTheDay,
     playWordOfDayAudio,
+    fetchPronunciations,
+    pronunciationData,
   } = usePronunciationStore();
   const [wordOfDayModalVisible, setWordOfDayModalVisible] = useState(false);
   const [selectedGame, setSelectedGame] = useState(null);
 
-  // Get Word of the Day when component mounts
   useEffect(() => {
-    if (!wordOfTheDay) {
-      getWordOfTheDay();
-    }
+    const loadData = async () => {
+      // Check if we need to fetch the pronunciation data
+      if (pronunciationData.length === 0) {
+        await fetchPronunciations();
+      }
+      // After making sure data is loaded, get word of the day
+      if (!wordOfTheDay) {
+        getWordOfTheDay();
+      }
+    };
+
+    loadData();
   }, []);
 
   const gameOptions = [
