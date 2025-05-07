@@ -11,13 +11,14 @@ import useThemeStore from "@/store/useThemeStore";
 import { getGlobalStyles } from "@/styles/globalStyles";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { router } from "expo-router";
-import { Calendar, Zap, AlignCenter, Edit3, Star } from "react-native-feather";
+import { Calendar, Volume2 } from "react-native-feather";
 import { BASE_COLORS } from "@/constant/colors";
 import { usePronunciationStore } from "@/store/usePronunciationStore";
 import WordOfDayModal from "@/components/Games/WordOfDayModal";
-import * as Animatable from "react-native-animatable"; // You'll need to install this package
-
-const { width } = Dimensions.get("window");
+import * as Animatable from "react-native-animatable";
+import { LinearGradient } from "expo-linear-gradient";
+import { GameRoute } from "@/types/gamesTypes";
+import gameOptions from "@/utils/Games/gameOptions";
 
 const Games = () => {
   // Theme store
@@ -35,7 +36,6 @@ const Games = () => {
     pronunciationData,
   } = usePronunciationStore();
   const [wordOfDayModalVisible, setWordOfDayModalVisible] = useState(false);
-  const [selectedGame, setSelectedGame] = useState(null);
 
   useEffect(() => {
     const loadData = async () => {
@@ -52,40 +52,7 @@ const Games = () => {
     loadData();
   }, []);
 
-  const gameOptions = [
-    {
-      id: "multipleChoice",
-      title: "Multiple Choice Quiz",
-      icon: <Zap width={28} height={28} color={BASE_COLORS.white} />,
-      color: BASE_COLORS.blue,
-      description: "Test your knowledge with fun multiple-choice questions",
-      route: "/(games)/MultipleChoice",
-      animation: "bounceIn",
-      delay: 100,
-    },
-    {
-      id: "identification",
-      title: "Word Identification",
-      icon: <AlignCenter width={28} height={28} color={BASE_COLORS.white} />,
-      color: BASE_COLORS.orange,
-      description: "Identify the correct words in context",
-      route: "/(games)/Identification",
-      animation: "bounceIn",
-      delay: 200,
-    },
-    {
-      id: "fillBlanks",
-      title: "Fill in the Blanks",
-      icon: <Edit3 width={28} height={28} color={BASE_COLORS.white} />,
-      color: BASE_COLORS.success,
-      description: "Complete sentences with the right words",
-      route: "/(games)/FillInTheBlank",
-      animation: "bounceIn",
-      delay: 300,
-    },
-  ];
-
-  const handleGamePress = (route: any) => {
+  const handleGamePress = (route: GameRoute) => {
     // Add some haptic feedback here if desired
     router.push(route);
   };
@@ -94,103 +61,161 @@ const Games = () => {
     <View
       style={[styles.wrapper, { backgroundColor: activeTheme.backgroundColor }]}
     >
+      {/* Decorative Background Elements */}
+      <View style={styles.decorativeCircle1} />
+      <View style={styles.decorativeCircle2} />
+      <View style={styles.decorativeCircle3} />
+
       <SafeAreaView style={[dynamicStyles.container, styles.container]}>
+        {/* Page Header */}
+        <Animatable.View
+          animation="fadeIn"
+          duration={800}
+          style={styles.pageHeader}
+        >
+          <View>
+            <Text style={styles.pageTitle}>Game Challenges</Text>
+            <Text style={styles.pageSubtitle}>
+              Select a game to improve your skills
+            </Text>
+          </View>
+        </Animatable.View>
+
         <ScrollView
           showsVerticalScrollIndicator={false}
           contentContainerStyle={styles.scrollContent}
         >
-          {/* Animated Header */}
+          {/* Word of the Day Card - Moved to Top */}
           <Animatable.View
-            animation="fadeIn"
+            animation="fadeInUp"
             duration={800}
-            style={styles.header}
+            delay={100}
+            style={styles.wordOfDayContainer}
           >
-            <View style={styles.headerTitleContainer}>
-              <Text style={styles.headerTitle}>Learning Games</Text>
-              <Text style={styles.headerSubtitle}>
-                Master language through play
+            <View style={styles.wordOfDaySectionHeader}>
+              <Text style={styles.wordOfDaySectionTitle}>Word of the Day</Text>
+              <Text style={styles.wordOfDaySectionSubtitle}>
+                Learn something new every day
               </Text>
             </View>
-          </Animatable.View>
-
-          {/* Word of the Day Card - Top section */}
-          <Animatable.View animation="fadeInUp" duration={800} delay={100}>
             <TouchableOpacity
               style={styles.wordOfDayCard}
               activeOpacity={0.8}
               onPress={() => setWordOfDayModalVisible(true)}
             >
-              <View style={styles.wordOfDayGradient}>
-                <View style={styles.wordOfDayContent}>
-                  <View style={styles.wordOfDayIconContainer}>
+              <LinearGradient
+                colors={["#3B82F6", "#1D4ED8"]}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 1 }}
+                style={styles.wordGradient}
+              >
+                {/* Decorative Elements */}
+                <View style={styles.decorativeShape1} />
+                <View style={styles.decorativeShape2} />
+
+                <View style={styles.wordHeader}>
+                  <View style={styles.calendarContainer}>
                     <Calendar
-                      width={28}
-                      height={28}
+                      width={18}
+                      height={18}
                       color={BASE_COLORS.white}
                     />
+                    <Text style={styles.wordLabel}>WORD OF THE DAY</Text>
                   </View>
-                  <View style={styles.wordOfDayTextContainer}>
-                    <Text style={styles.wordOfDayTitle}>Word of the Day</Text>
-                    <Text style={styles.wordOfDaySubtitle}>
-                      {wordOfTheDay ? wordOfTheDay.english : "Loading..."}
-                    </Text>
-                    <View style={styles.wordOfDayTagContainer}>
-                      <Text style={styles.wordOfDayDescription}>
-                        Tap to hear pronunciation
-                      </Text>
-                    </View>
-                  </View>
+                  <TouchableOpacity
+                    style={styles.soundButton}
+                    onPress={playWordOfDayAudio}
+                  >
+                    <Volume2 width={18} height={18} color={BASE_COLORS.white} />
+                  </TouchableOpacity>
                 </View>
-              </View>
+
+                <View style={styles.wordContent}>
+                  <Text style={styles.wordText}>
+                    {wordOfTheDay ? wordOfTheDay.english : "Loading..."}
+                  </Text>
+                  <Text style={styles.wordDefinition}>
+                    {wordOfTheDay && wordOfTheDay.translation
+                      ? wordOfTheDay.translation
+                      : "No Translation available"}
+                  </Text>
+                </View>
+
+                <View style={styles.wordFooter}>
+                  <Text style={styles.tapToExplore}>Tap to explore →</Text>
+                </View>
+              </LinearGradient>
             </TouchableOpacity>
           </Animatable.View>
 
-          {/* Game modes - Main section */}
+          {/* Games Section Header */}
           <Animatable.View
             animation="fadeInUp"
             duration={800}
-            delay={300}
-            style={styles.gamesContainer}
+            delay={150}
+            style={styles.gamesSectionHeader}
           >
-            <Text style={styles.gamesSectionTitle}>Choose Your Challenge</Text>
+            <Text style={styles.gamesSectionTitle}>Games</Text>
+            <Text style={styles.gamesSectionSubtitle}>
+              Challenge yourself with these games
+            </Text>
+          </Animatable.View>
 
-            {gameOptions.map((game, index) => (
+          {/* Game cards - Redesigned to be more compact but not too small */}
+          <View style={styles.gamesContainer}>
+            {gameOptions.map((game) => (
               <Animatable.View
                 key={game.id}
                 animation={game.animation}
                 delay={game.delay}
+                duration={800}
               >
                 <TouchableOpacity
-                  style={[
-                    styles.gameCard,
-                    { backgroundColor: game.color + "15" },
-                  ]}
+                  style={styles.gameCard}
                   activeOpacity={0.7}
                   onPress={() => handleGamePress(game.route)}
                 >
-                  <View
-                    style={[
-                      styles.gameCardIcon,
-                      { backgroundColor: game.color },
-                    ]}
+                  <LinearGradient
+                    colors={game.gradientColors}
+                    start={{ x: 0, y: 0 }}
+                    end={{ x: 1, y: 1 }}
+                    style={styles.gameCardGradient}
                   >
-                    {game.icon}
-                  </View>
-                  <View style={styles.gameCardContent}>
-                    <Text style={styles.gameCardTitle}>{game.title}</Text>
-                    <Text style={styles.gameCardDescription}>
-                      {game.description}
-                    </Text>
-                  </View>
-                  <View
-                    style={[styles.playButton, { backgroundColor: game.color }]}
-                  >
-                    <Text style={styles.playButtonText}>PLAY</Text>
-                  </View>
+                    <View style={styles.gameCardContent}>
+                      <View style={styles.gameIconContainer}>{game.icon}</View>
+                      <View style={styles.gameTextContainer}>
+                        <Text style={styles.gameCardTitle}>{game.title}</Text>
+                        <Text
+                          style={styles.gameCardDescription}
+                          numberOfLines={2}
+                        >
+                          {game.description}
+                        </Text>
+
+                        {/* Difficulty and Play button */}
+                        <View style={styles.gameCardActions}>
+                          <View style={styles.difficultyBadge}>
+                            <Text style={styles.difficultyText}>
+                              {game.difficulty}
+                            </Text>
+                          </View>
+                          <TouchableOpacity
+                            style={[
+                              styles.playButton,
+                              { backgroundColor: game.color },
+                            ]}
+                            onPress={() => handleGamePress(game.route)}
+                          >
+                            <Text style={styles.playButtonText}>PLAY</Text>
+                          </TouchableOpacity>
+                        </View>
+                      </View>
+                    </View>
+                  </LinearGradient>
                 </TouchableOpacity>
               </Animatable.View>
             ))}
-          </Animatable.View>
+          </View>
         </ScrollView>
 
         {/* Word of the Day Modal */}
@@ -209,140 +234,231 @@ const Games = () => {
   );
 };
 
-export default Games;
+const { width, height } = Dimensions.get("window");
+
 const styles = StyleSheet.create({
   wrapper: {
     flex: 1,
+    position: "relative",
+  },
+  decorativeCircle1: {
+    position: "absolute",
+    top: -100,
+    right: -80,
+    width: 200,
+    height: 200,
+    borderRadius: 100,
+    backgroundColor: `${BASE_COLORS.blue}20`,
+  },
+  decorativeCircle2: {
+    position: "absolute",
+    top: height * 0.3,
+    left: -60,
+    width: 120,
+    height: 120,
+    borderRadius: 60,
+    backgroundColor: `${BASE_COLORS.orange}15`,
+  },
+  decorativeCircle3: {
+    position: "absolute",
+    bottom: -80,
+    right: -40,
+    width: 160,
+    height: 160,
+    borderRadius: 80,
+    backgroundColor: `${BASE_COLORS.success}15`,
   },
   container: {
     flex: 1,
+    paddingHorizontal: 20,
   },
-  scrollContent: {
-    paddingBottom: 30,
-  },
-  header: {
-    marginBottom: 20,
+  pageHeader: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
+    marginTop: 10,
+    marginBottom: 24,
   },
-  headerTitleContainer: {
-    flex: 1,
-  },
-  headerTitle: {
-    fontSize: 24,
-    fontFamily: "Poppins-Medium",
+  pageTitle: {
+    fontSize: 22,
+    fontFamily: "Poppins-SemiBold",
     color: BASE_COLORS.white,
-    marginBottom: 5,
+    marginBottom: 4,
   },
-  headerSubtitle: {
-    fontSize: 13,
+  pageSubtitle: {
+    fontSize: 14,
     fontFamily: "Poppins-Regular",
     color: BASE_COLORS.white,
     opacity: 0.8,
   },
-  wordOfDayCard: {
-    borderRadius: 24,
-    marginBottom: 20,
-    overflow: "hidden",
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.3,
-    shadowRadius: 12,
-    elevation: 10,
+  scrollContent: {
+    paddingBottom: 40,
   },
-  wordOfDayGradient: {
-    width: "100%",
-    overflow: "hidden",
-    backgroundColor: BASE_COLORS.blue,
-    borderRadius: 24,
-    position: "relative",
+
+  // Word of the Day Styles
+  wordOfDayContainer: {
+    marginBottom: 25,
   },
-  wordOfDayContent: {
-    padding: 24,
-    flexDirection: "row",
-    alignItems: "center",
-    backgroundColor: "rgba(0, 0, 0, 0.1)", // Semi-transparent overlay
+  wordOfDaySectionHeader: {
+    marginBottom: 12,
   },
-  wordOfDayIconContainer: {
-    width: 60,
-    height: 60,
-    borderRadius: 30,
-    backgroundColor: "rgba(255, 255, 255, 0.2)",
-    justifyContent: "center",
-    alignItems: "center",
-    marginRight: 20,
-    borderWidth: 2,
-    borderColor: "rgba(255, 255, 255, 0.5)",
-  },
-  wordOfDayTextContainer: {
-    flex: 1,
-  },
-  wordOfDayTitle: {
-    fontSize: 17,
-    fontFamily: "Poppins-Medium",
-    color: BASE_COLORS.white,
-    marginBottom: 4,
-  },
-  wordOfDaySubtitle: {
-    fontSize: 26,
+  wordOfDaySectionTitle: {
+    fontSize: 20,
     fontFamily: "Poppins-SemiBold",
     color: BASE_COLORS.white,
-    marginBottom: 5,
   },
-  wordOfDayTagContainer: {
-    backgroundColor: "rgba(255, 255, 255, 0.2)",
-    borderRadius: 12,
-    paddingHorizontal: 10,
-    paddingVertical: 5,
-    alignSelf: "flex-start",
-  },
-  wordOfDayDescription: {
+  wordOfDaySectionSubtitle: {
     fontSize: 14,
     fontFamily: "Poppins-Regular",
     color: BASE_COLORS.white,
+    opacity: 0.7,
   },
-  gamesContainer: {
+  wordOfDayCard: {
+    borderRadius: 16,
+    overflow: "hidden",
+    height: 140,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.2,
+    shadowRadius: 10,
+    elevation: 8,
+  },
+  wordGradient: {
+    padding: 16,
+    height: "100%",
+    justifyContent: "space-between",
+    position: "relative",
+  },
+  decorativeShape1: {
+    position: "absolute",
+    top: -20,
+    right: -20,
+    width: 80,
+    height: 80,
+    borderRadius: 40,
+    backgroundColor: "rgba(255, 255, 255, 0.12)",
+  },
+  decorativeShape2: {
+    position: "absolute",
+    bottom: -30,
+    left: -20,
+    width: 60,
+    height: 60,
+    borderRadius: 30,
+    backgroundColor: "rgba(255, 255, 255, 0.08)",
+  },
+  wordHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+  },
+  calendarContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "rgba(255, 255, 255, 0.15)",
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    borderRadius: 12,
+  },
+  wordLabel: {
+    fontSize: 11,
+    fontFamily: "Poppins-SemiBold",
+    color: BASE_COLORS.white,
+    marginLeft: 6,
+    letterSpacing: 0.5,
+  },
+  soundButton: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: "rgba(255, 255, 255, 0.15)",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  wordContent: {
+    flex: 1,
+    justifyContent: "center",
+    paddingVertical: 6,
+  },
+  wordText: {
+    fontSize: 22,
+    fontFamily: "Poppins-Bold",
+    color: BASE_COLORS.white,
+    marginBottom: 6,
+    textShadowColor: "rgba(0, 0, 0, 0.2)",
+    textShadowOffset: { width: 0, height: 2 },
+    textShadowRadius: 3,
+  },
+  wordDefinition: {
+    fontSize: 14,
+    fontFamily: "Poppins-Regular",
+    color: BASE_COLORS.white,
+    opacity: 0.9,
+  },
+  wordFooter: {
+    alignItems: "flex-end",
+  },
+  tapToExplore: {
+    fontSize: 13,
+    fontFamily: "Poppins-Medium",
+    color: BASE_COLORS.white,
+    opacity: 0.9,
+  },
+
+  // Games Section Styles
+  gamesSectionHeader: {
     marginBottom: 16,
   },
   gamesSectionTitle: {
     fontSize: 20,
-    fontFamily: "Poppins-Bold",
+    fontFamily: "Poppins-SemiBold",
     color: BASE_COLORS.white,
-    marginBottom: 16,
+  },
+  gamesSectionSubtitle: {
+    fontSize: 14,
+    fontFamily: "Poppins-Regular",
+    color: BASE_COLORS.white,
+    opacity: 0.7,
+  },
+
+  // Game Cards
+  gamesContainer: {
+    gap: 16,
   },
   gameCard: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginBottom: 16,
-    padding: 16,
-    borderRadius: 20,
+    borderRadius: 16,
+    overflow: "hidden",
+    marginBottom: 4,
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.15,
     shadowRadius: 8,
-    elevation: 5,
-    borderWidth: 1,
-    borderColor: "rgba(255, 255, 255, 0.1)",
+    elevation: 6,
   },
-  gameCardIcon: {
-    width: 56,
-    height: 56,
+  gameCardGradient: {
     borderRadius: 16,
-    justifyContent: "center",
-    alignItems: "center",
-    marginRight: 16,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.2,
-    shadowRadius: 4,
-    elevation: 3,
   },
   gameCardContent: {
+    flexDirection: "row",
+    padding: 16,
+    alignItems: "center",
+  },
+  gameIconContainer: {
+    width: 50,
+    height: 50,
+    borderRadius: 15,
+    backgroundColor: "rgba(255, 255, 255, 0.2)",
+    justifyContent: "center",
+    alignItems: "center",
+    marginRight: 14,
+    borderWidth: 1,
+    borderColor: "rgba(255, 255, 255, 0.3)",
+  },
+  gameTextContainer: {
     flex: 1,
   },
   gameCardTitle: {
-    fontSize: 18,
+    fontSize: 16,
     fontFamily: "Poppins-SemiBold",
     color: BASE_COLORS.white,
     marginBottom: 4,
@@ -351,18 +467,37 @@ const styles = StyleSheet.create({
     fontSize: 13,
     fontFamily: "Poppins-Regular",
     color: BASE_COLORS.white,
-    opacity: 0.7,
+    opacity: 0.9,
+    marginBottom: 12,
+  },
+  gameCardActions: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+  },
+  difficultyBadge: {
+    backgroundColor: "rgba(0, 0, 0, 0.2)",
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 10,
+  },
+  difficultyText: {
+    fontSize: 11,
+    fontFamily: "Poppins-Medium",
+    color: BASE_COLORS.white,
   },
   playButton: {
     paddingHorizontal: 16,
-    paddingVertical: 8,
-    borderRadius: 12,
+    paddingVertical: 6,
+    borderRadius: 10,
     justifyContent: "center",
     alignItems: "center",
   },
   playButtonText: {
-    fontSize: 14,
+    fontSize: 12,
     fontFamily: "Poppins-Bold",
     color: BASE_COLORS.white,
   },
 });
+
+export default Games;
