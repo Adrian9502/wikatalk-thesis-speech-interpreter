@@ -89,9 +89,7 @@ export default PronunciationCard;
 const styles = StyleSheet.create({
   card: {
     marginVertical: 6,
-    borderRadius: 12,
-    borderWidth: 1,
-    borderColor: BASE_COLORS.borderColor,
+    borderRadius: 16,
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.05,
@@ -110,20 +108,20 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   englishText: {
-    fontFamily: "Poppins-Medium",
-    fontSize: 16,
+    fontFamily: "Poppins-Regular",
+    fontSize: 14,
     color: BASE_COLORS.darkText,
     marginBottom: 2,
   },
   translationText: {
-    fontFamily: "Poppins-SemiBold",
-    fontSize: 17,
+    fontFamily: "Poppins-Regular",
+    fontSize: 16,
     color: BASE_COLORS.blue,
     marginBottom: 4,
   },
   pronunciationText: {
-    fontFamily: "Poppins-Medium",
-    fontSize: 15,
+    fontFamily: "Poppins-Regular",
+    fontSize: 14,
     letterSpacing: 0.5,
     color: BASE_COLORS.orange,
   },
