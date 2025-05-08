@@ -52,9 +52,15 @@ const Games = () => {
     loadData();
   }, []);
 
-  const handleGamePress = (route: GameRoute) => {
-    // Add some haptic feedback here if desired
-    router.push(route);
+  const handleGamePress = (gameId: string, gameTitle: string) => {
+    router.push({
+      pathname: "/(games)/Levels",
+      params: {
+        gameMode: gameId,
+        gameTitle: gameTitle,
+        levelId: "1",
+      },
+    });
   };
 
   return (
@@ -173,7 +179,7 @@ const Games = () => {
                 <TouchableOpacity
                   style={styles.gameCard}
                   activeOpacity={0.7}
-                  onPress={() => handleGamePress(game.route)}
+                  onPress={() => handleGamePress(game.id, game.title)}
                 >
                   <LinearGradient
                     colors={game.gradientColors}
@@ -204,7 +210,7 @@ const Games = () => {
                               styles.playButton,
                               { backgroundColor: game.color },
                             ]}
-                            onPress={() => handleGamePress(game.route)}
+                            onPress={() => handleGamePress(game.id, game.title)}
                           >
                             <Text style={styles.playButtonText}>PLAY</Text>
                           </TouchableOpacity>

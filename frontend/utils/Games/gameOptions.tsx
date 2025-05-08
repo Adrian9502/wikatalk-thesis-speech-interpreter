@@ -1,14 +1,6 @@
 import { BASE_COLORS } from "@/constant/colors";
 import { GameRoute } from "@/types/gamesTypes";
-import {
-  Calendar,
-  Zap,
-  AlignCenter,
-  Edit3,
-  Star,
-  ChevronRight,
-  Volume2,
-} from "react-native-feather";
+import { Zap, AlignCenter, Edit3 } from "react-native-feather";
 
 interface GameOption {
   id: string;
@@ -17,7 +9,6 @@ interface GameOption {
   color: string;
   gradientColors: readonly [string, string];
   description: string;
-  route: GameRoute;
   animation: string;
   delay: number;
   difficulty: string;
@@ -31,7 +22,6 @@ const gameOptions: GameOption[] = [
     color: BASE_COLORS.blue,
     gradientColors: ["#2563EB", "#1E40AF"],
     description: "Test your knowledge with fun multiple-choice questions",
-    route: "/(games)/MultipleChoice",
     animation: "bounceIn",
     delay: 100,
     difficulty: "Beginner",
@@ -46,7 +36,6 @@ const gameOptions: GameOption[] = [
       string
     ],
     description: "Identify the correct words in context",
-    route: "/(games)/Identification",
     animation: "bounceIn",
     delay: 200,
     difficulty: "Intermediate",
@@ -61,7 +50,6 @@ const gameOptions: GameOption[] = [
       string
     ],
     description: "Complete sentences with the right words",
-    route: "/(games)/FillInTheBlank",
     animation: "bounceIn",
     delay: 300,
     difficulty: "Advanced",
