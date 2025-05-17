@@ -4,82 +4,74 @@ import {
   TouchableOpacity,
   View,
   ScrollView,
-  Dimensions,
   TextInput,
-  ActivityIndicator,
+  Platform,
   Keyboard,
+  StatusBar,
+  KeyboardAvoidingView,
 } from "react-native";
 import React, { useState, useEffect, useRef } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { router } from "expo-router";
-import {
-  ChevronLeft,
-  Volume2,
-  Check,
-  AlertTriangle,
-  XCircle,
-} from "react-native-feather";
+import gameSharedStyles from "@/styles/gamesSharedStyles";
+import { Check, X } from "react-native-feather";
 import { LinearGradient } from "expo-linear-gradient";
 import * as Animatable from "react-native-animatable";
 import { BASE_COLORS } from "@/constant/colors";
 import useThemeStore from "@/store/useThemeStore";
-import { getGlobalStyles } from "@/styles/globalStyles";
+import Timer from "@/components/Games/Timer";
+import AnswerReview from "@/components/Games/AnswerReview";
+import { Header } from "@/components/Header";
+import quizQuestions from "@/utils/Games/quizQuestions.json";
+import { getDifficultyColors, formatTime } from "@/utils/gameUtils";
+import DifficultyBadge from "@/components/Games/DifficultyBadge";
+import { setupBackButtonHandler } from "@/utils/gameUtils";
+import DecorativeCircles from "@/components/Games/DecorativeCircles";
+import GameNavigation from "@/components/Games/GameNavigation";
 
-// Mock data for the fill in the blank game
-const mockExercises = [
-  {
-    id: 1,
-    sentence: "Je vais acheter du ___ au marché.",
-    answer: "pain",
-    audio: "sentence-1-audio-url",
-    translation: "I am going to buy bread at the market.",
-    hint: "This is something you eat that's made from flour.",
-  },
-  {
-    id: 2,
-    sentence: "Elle ___ de la musique tous les jours.",
-    answer: "écoute",
-    audio: "sentence-2-audio-url",
-    translation: "She listens to music every day.",
-    hint: "This verb means to pay attention with your ears.",
-  },
-  {
-    id: 3,
-    sentence: "Nous allons ___ au restaurant ce soir.",
-    answer: "manger",
-    audio: "sentence-3-audio-url",
-    translation: "We are going to eat at the restaurant tonight.",
-    hint: "This is what you do with food.",
-  },
-  {
-    id: 4,
-    sentence: "Le ___ est très beau aujourd'hui.",
-    answer: "temps",
-    audio: "sentence-4-audio-url",
-    translation: "The weather is very nice today.",
-    hint: "This refers to atmospheric conditions.",
-  },
-  {
-    id: 5,
-    sentence: "Il faut ___ tes devoirs avant de sortir.",
-    answer: "finir",
-    audio: "sentence-5-audio-url",
-    translation: "You must finish your homework before going out.",
-    hint: "This verb means to complete something.",
-  },
-];
 interface FillInTheBlankProps {
-  levelId?: string;
+  levelId: number;
+  levelData: any;
+  difficulty?: string;
+  isStarted?: boolean;
 }
 
-const FillInTheBlank: React.FC<FillInTheBlankProps> = ({ levelId }) => {
+// Type the quiz questions data structure
+interface QuestionItem {
+  id: number;
+  dialect: string;
+  sentence: string;
+  answer: string;
+  title: string;
+  translation: string;
+  hint: string;
+}
+
+interface QuizQuestions {
+  fillBlanks: {
+    easy: QuestionItem[];
+    medium: QuestionItem[];
+    hard: QuestionItem[];
+    [key: string]: QuestionItem[];
+  };
+  multipleChoice: {
+    [key: string]: any[];
+  };
+  identification: {
+    [key: string]: any[];
+  };
+}
+
+const FillInTheBlank: React.FC<FillInTheBlankProps> = ({
+  levelId,
+  levelData,
+  difficulty = "easy",
+  isStarted = false,
+}) => {
   // Theme store
   const { activeTheme } = useThemeStore();
-  const dynamicStyles = getGlobalStyles(activeTheme.backgroundColor);
 
-  // Refs
-  const inputRef = useRef(null);
-
+  // Add proper type for the useRef
+  const inputRef = useRef<TextInput>(null);
   // Game state
   const [currentExerciseIndex, setCurrentExerciseIndex] = useState(0);
   const [userAnswer, setUserAnswer] = useState("");
@@ -87,39 +79,80 @@ const FillInTheBlank: React.FC<FillInTheBlankProps> = ({ levelId }) => {
   const [gameStatus, setGameStatus] = useState("playing"); // playing, completed
   const [showHint, setShowHint] = useState(false);
   const [showTranslation, setShowTranslation] = useState(false);
-  const [isPlaying, setIsPlaying] = useState(false);
-  const [isAudioLoading, setIsAudioLoading] = useState(false);
   const [showFeedback, setShowFeedback] = useState(false);
   const [isCorrect, setIsCorrect] = useState(false);
   const [attemptsLeft, setAttemptsLeft] = useState(2); // 2 attempts per question
+  const [timerRunning, setTimerRunning] = useState(false);
+  const [timeElapsed, setTimeElapsed] = useState(0);
 
-  const currentExercise = mockExercises[currentExerciseIndex];
-  const progress = ((currentExerciseIndex + 1) / mockExercises.length) * 100;
+  useEffect(() => {
+    // Set up the back handler
+    const cleanupBackHandler = setupBackButtonHandler(gameStatus, timerRunning);
+
+    // Clean up when component unmounts
+    return () => cleanupBackHandler();
+  }, [gameStatus, timerRunning]);
+
+  // Get the appropriate exercises based on difficulty
+  const getExercises = (): Array<{
+    id: number;
+    sentence: string;
+    answer: string;
+    translation: string;
+    hint: string;
+    title?: string; // Add these properties
+    dialect?: string;
+  }> => {
+    if (levelData) {
+      // If specific level data is provided, use it
+      return [
+        {
+          id: levelData.id,
+          sentence: levelData.sentence,
+          answer: levelData.answer,
+          translation: levelData.translation,
+          hint: levelData.hint,
+          title: levelData.title, // Include title
+          dialect: levelData.dialect, // Include dialect
+        },
+      ];
+    }
+
+    // Otherwise use the quiz questions data based on difficulty
+    const difficultyKey = difficulty?.toLowerCase() || "easy";
+    const typedQuizQuestions = quizQuestions as QuizQuestions;
+
+    // Get questions from the appropriate difficulty section
+    const difficultyQuestions =
+      typedQuizQuestions.fillBlanks[difficultyKey] || [];
+
+    // Format them to match the expected structure - now including title and dialect
+    return difficultyQuestions.map((question: QuestionItem) => ({
+      id: question.id,
+      sentence: question.sentence,
+      answer: question.answer,
+      translation: question.translation,
+      hint: question.hint,
+      title: question.title,
+      dialect: question.dialect,
+    }));
+  };
+
+  // Use the exercises from quizQuestions
+  const exercises = getExercises();
+  const currentExercise = exercises[currentExerciseIndex];
 
   // Format sentence with blank
   const formatSentence = () => {
+    if (!currentExercise) return "";
     return currentExercise.sentence.replace("___", "______");
-  };
-
-  // Play audio function (mock)
-  const playAudio = () => {
-    setIsAudioLoading(true);
-    setIsPlaying(true);
-
-    // Simulate audio loading and playing
-    setTimeout(() => {
-      setIsAudioLoading(false);
-
-      // Simulate audio playback duration
-      setTimeout(() => {
-        setIsPlaying(false);
-      }, 2000);
-    }, 1000);
   };
 
   // Check answer
   const checkAnswer = () => {
     Keyboard.dismiss();
+
+    if (!currentExercise) return;
 
     // Simple normalization for comparison
     const normalizedUserAnswer = userAnswer.trim().toLowerCase();
@@ -134,7 +167,7 @@ const FillInTheBlank: React.FC<FillInTheBlankProps> = ({ levelId }) => {
 
       // Move to next exercise after delay
       setTimeout(() => {
-        if (currentExerciseIndex < mockExercises.length - 1) {
+        if (currentExerciseIndex < exercises.length - 1) {
           moveToNext();
         } else {
           setGameStatus("completed");
@@ -148,7 +181,7 @@ const FillInTheBlank: React.FC<FillInTheBlankProps> = ({ levelId }) => {
       // If no attempts left, show correct answer and move on after delay
       if (newAttemptsLeft <= 0) {
         setTimeout(() => {
-          if (currentExerciseIndex < mockExercises.length - 1) {
+          if (currentExerciseIndex < exercises.length - 1) {
             moveToNext();
           } else {
             setGameStatus("completed");
@@ -205,416 +238,349 @@ const FillInTheBlank: React.FC<FillInTheBlankProps> = ({ levelId }) => {
     setShowTranslation(!showTranslation);
   };
 
-  // Go back to games screen
-  const handleBackPress = () => {
-    router.back();
+  // Initialize function to reset all state
+  const initialize = (data: any, id: number): void => {
+    setCurrentExerciseIndex(0);
+    setUserAnswer("");
+    setScore(0);
+    setShowFeedback(false);
+    setShowHint(false);
+    setShowTranslation(false);
+    setAttemptsLeft(2);
+    setGameStatus("playing");
+    setTimeElapsed(0);
+    setTimerRunning(false);
+    setIsCorrect(false);
+
+    console.log("Fill in the Blank initialized for level:", id);
   };
 
-  // Focus input on initial render
-  useEffect(() => {
+  // Start game function to begin gameplay
+  const startGame = () => {
+    setTimerRunning(true);
+
+    // Focus input after a delay
     setTimeout(() => {
       inputRef.current?.focus();
-    }, 500);
-  }, []);
+    }, 100);
+
+    console.log("Fill in the Blank game started");
+  };
+
+  // Initialize the game with level data - similar to MultipleChoice
+  useEffect(() => {
+    initialize(levelData, levelId);
+
+    // Add a short delay to ensure initialization completes before starting the game
+    if (isStarted) {
+      // Small delay to ensure initialization is complete
+      const timer = setTimeout(() => {
+        startGame();
+      }, 500);
+
+      return () => clearTimeout(timer);
+    }
+  }, [levelData, levelId, isStarted]);
+
+  // Stop timer when answer is checked
+  useEffect(() => {
+    if (showFeedback) {
+      setTimerRunning(false);
+      // Track elapsed time for results
+      setTimeElapsed((prev) => prev + 1); // This is a placeholder, needs actual timer integration
+    }
+  }, [showFeedback]);
 
   return (
-    <View
-      style={[styles.wrapper, { backgroundColor: activeTheme.backgroundColor }]}
+    <KeyboardAvoidingView
+      style={{ flex: 1 }}
+      behavior={Platform.OS === "ios" ? "padding" : undefined}
+      keyboardVerticalOffset={Platform.OS === "ios" ? 0 : 20}
     >
-      {/* Decorative Background Elements */}
-      <View style={styles.decorativeCircle1} />
-      <View style={styles.decorativeCircle2} />
+      <View
+        style={[
+          styles.wrapper,
+          { backgroundColor: activeTheme.backgroundColor },
+        ]}
+      >
+        <StatusBar barStyle="light-content" />
 
-      <SafeAreaView style={[styles.container]}>
-        {/* Header */}
-        <View style={styles.header}>
-          <TouchableOpacity style={styles.backButton} onPress={handleBackPress}>
-            <ChevronLeft width={24} height={24} color={BASE_COLORS.white} />
-          </TouchableOpacity>
-          <Text style={styles.headerTitle}>Fill in the Blanks</Text>
-          <View style={styles.placeholder} />
-        </View>
+        <DecorativeCircles variant="triple" />
+        <SafeAreaView style={styles.container}>
+          <Header
+            title="Fill in the Blanks"
+            disableBack={timerRunning || showFeedback}
+            hideBack={true}
+          />
 
-        {gameStatus === "playing" ? (
-          <ScrollView
-            showsVerticalScrollIndicator={false}
-            contentContainerStyle={styles.contentContainer}
-            keyboardShouldPersistTaps="handled"
-          >
-            {/* Progress Bar */}
-            <View style={styles.progressBarContainer}>
-              <View
-                style={[
-                  styles.progressBar,
-                  {
-                    width: `${progress}%`,
-                    backgroundColor: BASE_COLORS.success,
-                  },
-                ]}
-              />
-            </View>
-            <Text style={styles.progressText}>
-              Exercise {currentExerciseIndex + 1} of {mockExercises.length}
+          {/* Level Title  */}
+          <View style={styles.levelTitleContainer}>
+            <Text style={styles.levelTitleText}>
+              Level {levelId} :{" "}
+              {currentExercise?.title || "- Fill in the Blanks"}
             </Text>
+          </View>
 
-            {/* Score and Attempts Display */}
-            <View style={styles.statsContainer}>
-              <View style={styles.scoreContainer}>
-                <Text style={styles.scoreText}>Score: {score}</Text>
-              </View>
+          {gameStatus === "playing" ? (
+            <ScrollView
+              showsVerticalScrollIndicator={false}
+              contentContainerStyle={[styles.contentContainer, { flexGrow: 1 }]}
+              keyboardShouldPersistTaps="handled"
+              keyboardDismissMode="on-drag"
+            >
+              {/* Stats Container with Timer and Difficulty */}
+              <Animatable.View
+                animation="fadeIn"
+                duration={600}
+                delay={100}
+                style={styles.statsContainer}
+              >
+                {isStarted && <Timer isRunning={timerRunning} />}
+                <DifficultyBadge difficulty={difficulty} />
+              </Animatable.View>
+
+              {/* Attempts Display */}
               <View style={styles.attemptsContainer}>
                 <Text style={styles.attemptsText}>
                   Attempts: {Array(attemptsLeft).fill("●").join(" ")}
                 </Text>
               </View>
-            </View>
 
-            {/* Sentence Card */}
-            <Animatable.View
-              animation="fadeIn"
-              duration={500}
-              style={styles.sentenceCard}
-            >
-              <LinearGradient
-                colors={[BASE_COLORS.success, "#059669"]}
-                style={styles.sentenceGradient}
+              {/* Sentence Card */}
+              <Animatable.View
+                animation="fadeInUp"
+                duration={500}
+                style={styles.sentenceCard}
               >
-                <Text style={styles.sentenceText}>{formatSentence()}</Text>
-
-                <TouchableOpacity
-                  style={styles.audioButton}
-                  onPress={playAudio}
-                  disabled={isPlaying || isAudioLoading}
+                <LinearGradient
+                  colors={
+                    getDifficultyColors(difficulty, levelData) as readonly [
+                      string,
+                      string
+                    ]
+                  }
+                  style={styles.sentenceGradient}
                 >
-                  {isAudioLoading ? (
-                    <ActivityIndicator size="small" color={BASE_COLORS.white} />
-                  ) : (
-                    <Volume2 width={20} height={20} color={BASE_COLORS.white} />
+                  <Text style={styles.sentenceText}>{formatSentence()}</Text>
+                </LinearGradient>
+              </Animatable.View>
+
+              {/* Input Section */}
+              <Animatable.View
+                animation="fadeInUp"
+                duration={500}
+                delay={200}
+                style={styles.inputSection}
+              >
+                <View style={styles.inputContainer}>
+                  <TextInput
+                    ref={inputRef}
+                    style={styles.input}
+                    value={userAnswer}
+                    onChangeText={setUserAnswer}
+                    placeholder="Type your answer..."
+                    placeholderTextColor="rgba(255, 255, 255, 0.5)"
+                    onSubmitEditing={checkAnswer}
+                    returnKeyType="done"
+                  />
+
+                  {/* Clear button - only show when text exists and feedback isn't shown */}
+                  {userAnswer.trim() !== "" && !showFeedback && (
+                    <TouchableOpacity
+                      style={styles.clearButton}
+                      onPress={() => setUserAnswer("")}
+                      activeOpacity={0.7}
+                    >
+                      <X
+                        width={16}
+                        height={16}
+                        color="rgba(255, 255, 255, 0.6)"
+                      />
+                    </TouchableOpacity>
                   )}
-                </TouchableOpacity>
-              </LinearGradient>
-            </Animatable.View>
 
-            {/* Input Section */}
-            <View style={styles.inputSection}>
-              <Text style={styles.inputLabel}>Fill in the blank:</Text>
-              <View style={styles.inputContainer}>
-                <TextInput
-                  ref={inputRef}
-                  style={styles.input}
-                  value={userAnswer}
-                  onChangeText={setUserAnswer}
-                  placeholder="Type your answer here"
-                  placeholderTextColor="rgba(255, 255, 255, 0.5)"
-                  returnKeyType="done"
-                  onSubmitEditing={checkAnswer}
-                  editable={
-                    !showFeedback ||
-                    (showFeedback && !isCorrect && attemptsLeft > 0)
-                  }
-                />
+                  <TouchableOpacity
+                    style={[
+                      styles.submitButton,
+                      !userAnswer.trim() ? { opacity: 0.7 } : null,
+                      showFeedback && isCorrect ? styles.correctButton : null,
+                      showFeedback && !isCorrect
+                        ? styles.incorrectButton
+                        : null,
+                    ]}
+                    onPress={checkAnswer}
+                    disabled={!userAnswer.trim() || showFeedback}
+                  >
+                    {showFeedback ? (
+                      isCorrect ? (
+                        <Check
+                          width={24}
+                          height={24}
+                          color={BASE_COLORS.white}
+                        />
+                      ) : (
+                        <X width={24} height={24} color={BASE_COLORS.white} />
+                      )
+                    ) : (
+                      <Text style={styles.submitButtonText}>Check</Text>
+                    )}
+                  </TouchableOpacity>
+                </View>
+              </Animatable.View>
+
+              {/* Hint and Translation Buttons */}
+              <View style={styles.helpButtonsContainer}>
                 <TouchableOpacity
-                  style={[
-                    styles.submitButton,
-                    userAnswer.trim() === "" && styles.disabledButton,
-                    showFeedback && isCorrect && styles.correctButton,
-                    showFeedback && !isCorrect && styles.incorrectButton,
-                  ]}
-                  onPress={checkAnswer}
-                  disabled={
-                    userAnswer.trim() === "" ||
-                    (showFeedback && (isCorrect || attemptsLeft <= 0))
-                  }
+                  style={styles.hintButton}
+                  onPress={toggleHint}
                 >
-                  <Text style={styles.submitButtonText}>Check</Text>
+                  <Text style={styles.hintButtonText}>
+                    {showHint ? "Hide Hint" : "Show Hint"}
+                  </Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                  style={styles.hintButton}
+                  onPress={toggleTranslation}
+                >
+                  <Text style={styles.hintButtonText}>
+                    {showTranslation ? "Hide Translation" : "Show Translation"}
+                  </Text>
                 </TouchableOpacity>
               </View>
-            </View>
 
-            {/* Feedback Section */}
-            {showFeedback && (
+              {/* Show hint if enabled */}
+              {showHint && currentExercise?.hint && (
+                <Animatable.View
+                  animation="fadeIn"
+                  duration={300}
+                  style={styles.hintCard}
+                >
+                  <Text style={styles.hintLabel}>Hint:</Text>
+                  <Text style={styles.hintText}>{currentExercise.hint}</Text>
+                </Animatable.View>
+              )}
+
+              {/* Show translation if enabled */}
+              {showTranslation && currentExercise?.translation && (
+                <Animatable.View
+                  animation="fadeIn"
+                  duration={300}
+                  style={styles.translationCard}
+                >
+                  <Text style={styles.hintLabel}>Translation:</Text>
+                  <Text style={styles.translationText}>
+                    {currentExercise.translation}
+                  </Text>
+                </Animatable.View>
+              )}
+            </ScrollView>
+          ) : (
+            <ScrollView
+              showsVerticalScrollIndicator={false}
+              contentContainerStyle={styles.contentContainer}
+            >
+              {/* Stats Container with Time Taken */}
               <Animatable.View
                 animation="fadeIn"
-                duration={300}
-                style={styles.feedbackContainer}
+                duration={600}
+                delay={100}
+                style={styles.statsContainer}
               >
-                {isCorrect ? (
-                  <View style={styles.correctFeedback}>
-                    <Check width={24} height={24} color={BASE_COLORS.white} />
-                    <Text style={styles.feedbackText}>Correct!</Text>
-                  </View>
-                ) : (
-                  <View style={styles.incorrectFeedback}>
-                    {attemptsLeft > 0 ? (
-                      <>
-                        <AlertTriangle
-                          width={24}
-                          height={24}
-                          color={BASE_COLORS.white}
-                        />
-                        <Text style={styles.feedbackText}>
-                          Try again! {attemptsLeft}{" "}
-                          {attemptsLeft === 1 ? "attempt" : "attempts"} left.
-                        </Text>
-                      </>
-                    ) : (
-                      <>
-                        <XCircle
-                          width={24}
-                          height={24}
-                          color={BASE_COLORS.white}
-                        />
-                        <Text style={styles.feedbackText}>
-                          The correct answer is: {currentExercise.answer}
-                        </Text>
-                      </>
-                    )}
-                  </View>
-                )}
-              </Animatable.View>
-            )}
-
-            {/* Help Buttons */}
-            <View style={styles.helpButtonsContainer}>
-              <TouchableOpacity style={styles.hintButton} onPress={toggleHint}>
-                <Text style={styles.hintButtonText}>
-                  {showHint ? "Hide Hint" : "Show Hint"}
-                </Text>
-              </TouchableOpacity>
-
-              <TouchableOpacity
-                style={styles.translationButton}
-                onPress={toggleTranslation}
-              >
-                <Text style={styles.translationButtonText}>
-                  {showTranslation ? "Hide Translation" : "Show Translation"}
-                </Text>
-              </TouchableOpacity>
-            </View>
-
-            {/* Hint Card */}
-            {showHint && (
-              <Animatable.View
-                animation="fadeIn"
-                duration={300}
-                style={styles.hintCard}
-              >
-                <Text style={styles.hintLabel}>Hint:</Text>
-                <Text style={styles.hintText}>{currentExercise.hint}</Text>
-              </Animatable.View>
-            )}
-
-            {/* Translation Card */}
-            {showTranslation && (
-              <Animatable.View
-                animation="fadeIn"
-                duration={300}
-                style={styles.translationCard}
-              >
-                <Text style={styles.translationLabel}>Translation:</Text>
-                <Text style={styles.translationText}>
-                  {currentExercise.translation}
-                </Text>
-              </Animatable.View>
-            )}
-          </ScrollView>
-        ) : (
-          <ScrollView
-            showsVerticalScrollIndicator={false}
-            contentContainerStyle={styles.resultContainer}
-          >
-            <Animatable.View animation="fadeIn" duration={800}>
-              <LinearGradient
-                colors={[BASE_COLORS.success, "#059669"]}
-                style={styles.resultCard}
-              >
-                <Text style={styles.resultTitle}>Exercise Complete!</Text>
-                <Text style={styles.resultScore}>
-                  Your Score: {score}/{mockExercises.length}
-                </Text>
-                <Text style={styles.resultPercentage}>
-                  {Math.round((score / mockExercises.length) * 100)}% Correct
-                </Text>
-
-                <View style={styles.resultFeedback}>
-                  <Text style={styles.feedbackText}>
-                    {score === mockExercises.length
-                      ? "Perfect! You've mastered these exercises!"
-                      : score > mockExercises.length / 2
-                      ? "Good job! Keep practicing to improve."
-                      : "Practice makes perfect! Try again to improve your skills."}
+                <View style={styles.timeContainer}>
+                  <Text style={styles.timeValue}>
+                    Time: {formatTime(timeElapsed)}
                   </Text>
                 </View>
+                <DifficultyBadge difficulty={difficulty} />
+              </Animatable.View>
 
-                <TouchableOpacity
-                  style={styles.restartButton}
-                  onPress={handleRestart}
+              {/* Completion Message with score */}
+              <Animatable.View
+                animation="fadeInUp"
+                duration={700}
+                delay={200}
+                style={styles.questionCardWrapper}
+              >
+                <LinearGradient
+                  colors={
+                    score > 0
+                      ? (["#4CAF50", "#2E7D32"] as const)
+                      : ([BASE_COLORS.danger, "#C62828"] as const)
+                  }
+                  style={styles.questionGradient}
                 >
-                  <Text style={styles.restartButtonText}>Play Again</Text>
-                </TouchableOpacity>
+                  <View style={styles.resultIconLarge}>
+                    {score > 0 ? (
+                      <Check width={30} height={30} color={BASE_COLORS.white} />
+                    ) : (
+                      <X width={30} height={30} color={BASE_COLORS.white} />
+                    )}
+                  </View>
+                  <Text style={styles.completionTitle}>
+                    {score > 0 ? "Level Completed!" : "Try Again!"}
+                  </Text>
+                  <Text style={styles.completionMessage}>
+                    {score > 0
+                      ? `Great job! You answered correctly.`
+                      : `Your answer was incorrect. Keep practicing to improve.`}
+                  </Text>
+                </LinearGradient>
+              </Animatable.View>
 
-                <TouchableOpacity
-                  style={styles.backToGamesButton}
-                  onPress={handleBackPress}
-                >
-                  <Text style={styles.backToGamesText}>Back to Games</Text>
-                </TouchableOpacity>
-              </LinearGradient>
-            </Animatable.View>
-          </ScrollView>
-        )}
-      </SafeAreaView>
-    </View>
+              {/* Answer Review Section */}
+              <AnswerReview
+                question={exercises[0]?.sentence || "No question available"}
+                userAnswer={userAnswer || "(No answer provided)"}
+                isCorrect={score > 0}
+              />
+
+              {/* Navigation buttons */}
+              <GameNavigation
+                levelId={levelId}
+                gameMode="fillBlanks"
+                gameTitle="Fill in the Blank"
+                difficulty={difficulty}
+                onRestart={handleRestart}
+              />
+            </ScrollView>
+          )}
+        </SafeAreaView>
+      </View>
+    </KeyboardAvoidingView>
   );
 };
 
-const { width, height } = Dimensions.get("window");
-
 const styles = StyleSheet.create({
-  wrapper: {
-    flex: 1,
-    position: "relative",
-  },
-  decorativeCircle1: {
-    position: "absolute",
-    top: -100,
-    right: -80,
-    width: 200,
-    height: 200,
-    borderRadius: 100,
-    backgroundColor: `${BASE_COLORS.success}20`,
-  },
-  decorativeCircle2: {
-    position: "absolute",
-    bottom: -80,
-    left: -60,
-    width: 160,
-    height: 160,
-    borderRadius: 80,
-    backgroundColor: `${BASE_COLORS.blue}15`,
-  },
-  container: {
-    flex: 1,
-    paddingHorizontal: 20,
-  },
-  header: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    marginTop: 10,
-    marginBottom: 20,
-  },
-  backButton: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: "rgba(255, 255, 255, 0.15)",
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  headerTitle: {
-    fontSize: 18,
-    fontFamily: "Poppins-SemiBold",
-    color: BASE_COLORS.white,
-  },
-  placeholder: {
-    width: 40,
-  },
-  contentContainer: {
-    paddingBottom: 40,
-  },
-  progressBarContainer: {
-    height: 8,
-    backgroundColor: "rgba(255, 255, 255, 0.2)",
-    borderRadius: 4,
-    marginBottom: 8,
-    overflow: "hidden",
-  },
-  progressBar: {
-    height: "100%",
-    borderRadius: 4,
-  },
-  progressText: {
-    fontSize: 14,
-    fontFamily: "Poppins-Regular",
-    color: BASE_COLORS.white,
-    opacity: 0.8,
-    marginBottom: 16,
-  },
-  statsContainer: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    marginBottom: 16,
-  },
-  scoreContainer: {
-    backgroundColor: "rgba(255, 255, 255, 0.15)",
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 12,
-  },
-  scoreText: {
-    fontSize: 14,
-    fontFamily: "Poppins-SemiBold",
-    color: BASE_COLORS.white,
-  },
-  attemptsContainer: {
-    backgroundColor: "rgba(255, 255, 255, 0.15)",
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 12,
-  },
-  attemptsText: {
-    fontSize: 14,
-    fontFamily: "Poppins-SemiBold",
-    color: BASE_COLORS.white,
-  },
+  // Import all shared styles
+  ...gameSharedStyles,
+
+  // Override or add component-specific styles
   sentenceCard: {
-    borderRadius: 16,
-    overflow: "hidden",
+    ...gameSharedStyles.questionCardWrapper,
     marginBottom: 20,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.15,
-    shadowRadius: 8,
-    elevation: 5,
   },
   sentenceGradient: {
-    padding: 20,
-    borderRadius: 16,
-    position: "relative",
+    ...gameSharedStyles.questionGradient,
   },
   sentenceText: {
     fontSize: 18,
-    fontFamily: "Poppins-Medium",
+    fontFamily: "Poppins-SemiBold",
     color: BASE_COLORS.white,
     textAlign: "center",
-    marginBottom: 10,
-  },
-  audioButton: {
-    alignSelf: "center",
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: "rgba(255, 255, 255, 0.25)",
-    justifyContent: "center",
-    alignItems: "center",
-    marginTop: 10,
+    lineHeight: 26,
   },
   inputSection: {
+    marginTop: 24,
     marginBottom: 20,
-  },
-  inputLabel: {
-    fontSize: 16,
-    fontFamily: "Poppins-Medium",
-    color: BASE_COLORS.white,
-    marginBottom: 10,
   },
   inputContainer: {
     flexDirection: "row",
     alignItems: "center",
     backgroundColor: "rgba(255, 255, 255, 0.12)",
-    borderRadius: 12,
+    borderRadius: 16,
     overflow: "hidden",
+    marginTop: 16,
   },
   input: {
     flex: 1,
@@ -631,82 +597,59 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
   },
-  disabledButton: {
-    backgroundColor: "rgba(255, 255, 255, 0.3)",
-  },
-  correctButton: {
-    backgroundColor: "rgba(34, 197, 94, 0.8)",
-  },
-  incorrectButton: {
-    backgroundColor: "rgba(239, 68, 68, 0.8)",
-  },
   submitButtonText: {
     fontSize: 16,
     fontFamily: "Poppins-SemiBold",
     color: BASE_COLORS.white,
   },
-  feedbackContainer: {
-    marginVertical: 16,
+  correctButton: {
+    backgroundColor: BASE_COLORS.success,
+  },
+  incorrectButton: {
+    backgroundColor: BASE_COLORS.danger,
+  },
+  attemptsContainer: {
+    marginBottom: 12,
     alignItems: "center",
   },
-  correctFeedback: {
-    flexDirection: "row",
-    alignItems: "center",
-    backgroundColor: "rgba(34, 197, 94, 0.2)",
-    paddingHorizontal: 16,
-    paddingVertical: 10,
-    borderRadius: 12,
-  },
-  incorrectFeedback: {
-    flexDirection: "row",
-    alignItems: "center",
-    backgroundColor: "rgba(239, 68, 68, 0.2)",
-    paddingHorizontal: 16,
-    paddingVertical: 10,
-    borderRadius: 12,
-  },
-  feedbackText: {
-    fontSize: 16,
-    fontFamily: "Poppins-SemiBold",
+  attemptsText: {
+    fontSize: 14,
+    fontFamily: "Poppins-Medium",
     color: BASE_COLORS.white,
-    marginLeft: 8,
+    opacity: 0.9,
   },
   helpButtonsContainer: {
     flexDirection: "row",
     justifyContent: "space-between",
     marginBottom: 16,
+    gap: 10,
+  },
+  clearButton: {
+    height: 40,
+    width: 40,
+    justifyContent: "center",
+    alignItems: "center",
+    position: "absolute",
+    right: 90,
+    opacity: 0.7,
   },
   hintButton: {
     flex: 1,
-    backgroundColor: "rgba(255, 255, 255, 0.2)",
+    backgroundColor: "rgba(255, 255, 255, 0.15)",
+    paddingVertical: 12,
     paddingHorizontal: 16,
-    paddingVertical: 10,
-    borderRadius: 12,
-    marginRight: 10,
+    borderRadius: 16,
     alignItems: "center",
+    justifyContent: "center",
   },
   hintButtonText: {
     fontSize: 14,
     fontFamily: "Poppins-Medium",
     color: BASE_COLORS.white,
   },
-  translationButton: {
-    flex: 1,
-    backgroundColor: "rgba(255, 255, 255, 0.2)",
-    paddingHorizontal: 16,
-    paddingVertical: 10,
-    borderRadius: 12,
-    marginLeft: 10,
-    alignItems: "center",
-  },
-  translationButtonText: {
-    fontSize: 14,
-    fontFamily: "Poppins-Medium",
-    color: BASE_COLORS.white,
-  },
   hintCard: {
     backgroundColor: "rgba(255, 255, 255, 0.15)",
-    borderRadius: 12,
+    borderRadius: 16,
     padding: 16,
     marginBottom: 16,
   },
@@ -717,98 +660,10 @@ const styles = StyleSheet.create({
     marginBottom: 4,
   },
   hintText: {
-    fontSize: 15,
-    fontFamily: "Poppins-Regular",
-    color: BASE_COLORS.white,
-    fontStyle: "italic",
-  },
-  translationCard: {
-    backgroundColor: "rgba(255, 255, 255, 0.15)",
-    borderRadius: 12,
-    padding: 16,
-    marginBottom: 16,
-  },
-  translationLabel: {
     fontSize: 14,
-    fontFamily: "Poppins-SemiBold",
-    color: BASE_COLORS.white,
-    marginBottom: 4,
-  },
-  translationText: {
-    fontSize: 15,
     fontFamily: "Poppins-Regular",
     color: BASE_COLORS.white,
     fontStyle: "italic",
-  },
-  resultContainer: {
-    flexGrow: 1,
-    justifyContent: "center",
-    paddingVertical: 40,
-  },
-  resultCard: {
-    borderRadius: 20,
-    padding: 24,
-    alignItems: "center",
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.2,
-    shadowRadius: 12,
-    elevation: 8,
-  },
-  resultTitle: {
-    fontSize: 22,
-    fontFamily: "Poppins-Bold",
-    color: BASE_COLORS.white,
-    marginBottom: 16,
-  },
-  resultScore: {
-    fontSize: 18,
-    fontFamily: "Poppins-SemiBold",
-    color: BASE_COLORS.white,
-    marginBottom: 8,
-  },
-  resultPercentage: {
-    fontSize: 16,
-    fontFamily: "Poppins-Medium",
-    color: BASE_COLORS.white,
-    opacity: 0.9,
-    marginBottom: 20,
-  },
-  resultFeedback: {
-    backgroundColor: "rgba(255, 255, 255, 0.2)",
-    padding: 16,
-    borderRadius: 12,
-    marginVertical: 20,
-    width: "100%",
-  },
-  restartButton: {
-    backgroundColor: BASE_COLORS.white,
-    paddingHorizontal: 24,
-    paddingVertical: 12,
-    borderRadius: 12,
-    marginVertical: 8,
-    width: "100%",
-    alignItems: "center",
-  },
-  restartButtonText: {
-    fontSize: 16,
-    fontFamily: "Poppins-Bold",
-    color: BASE_COLORS.success,
-  },
-  backToGamesButton: {
-    paddingHorizontal: 24,
-    paddingVertical: 12,
-    borderRadius: 12,
-    marginTop: 8,
-    width: "100%",
-    alignItems: "center",
-    borderWidth: 1,
-    borderColor: "rgba(255, 255, 255, 0.5)",
-  },
-  backToGamesText: {
-    fontSize: 16,
-    fontFamily: "Poppins-Medium",
-    color: BASE_COLORS.white,
   },
 });
 

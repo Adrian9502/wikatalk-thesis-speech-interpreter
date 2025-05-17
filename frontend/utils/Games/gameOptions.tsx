@@ -16,8 +16,8 @@ interface GameOption {
 
 const gameOptions: GameOption[] = [
   {
-    id: "multipleChoice",
-    title: "Multiple Choice Quiz",
+    id: "multipleChoice", // Make sure this matches the key in quizQuestions.json
+    title: "Multiple Choice",
     icon: <Zap width={28} height={28} color={BASE_COLORS.white} />,
     color: BASE_COLORS.blue,
     gradientColors: ["#2563EB", "#1E40AF"],
@@ -27,7 +27,7 @@ const gameOptions: GameOption[] = [
     difficulty: "Beginner",
   },
   {
-    id: "identification",
+    id: "identification", // Make sure this matches the key in quizQuestions.json
     title: "Word Identification",
     icon: <AlignCenter width={28} height={28} color={BASE_COLORS.white} />,
     color: BASE_COLORS.orange,
@@ -41,7 +41,7 @@ const gameOptions: GameOption[] = [
     difficulty: "Intermediate",
   },
   {
-    id: "fillBlanks",
+    id: "fillBlanks", // Make sure this matches the key in quizQuestions.json
     title: "Fill in the Blanks",
     icon: <Edit3 width={28} height={28} color={BASE_COLORS.white} />,
     color: BASE_COLORS.success,

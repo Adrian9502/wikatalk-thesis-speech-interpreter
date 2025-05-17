@@ -1,24 +1,51 @@
 import React from "react";
 import { View, Text, TouchableOpacity } from "react-native";
-import { ChevronLeft } from "react-native-feather";
+import { ArrowLeft } from "react-native-feather";
 import { BASE_COLORS } from "@/constant/colors";
 import styles from "@/styles/accountDetailsStyles";
 import { useNavigation } from "expo-router";
 
 type HeaderProps = {
   title: string;
+  disableBack?: boolean;
+  hideBack?: boolean; // Add this new prop
+  onBackPress?: () => void;
 };
-export const Header = ({ title }: HeaderProps) => {
+
+export const Header = ({
+  title,
+  disableBack = false,
+  hideBack = false, // Default to showing the back button
+  onBackPress,
+}: HeaderProps) => {
   const navigation = useNavigation();
+
+  const handleBackPress = () => {
+    if (disableBack) return;
+
+    if (onBackPress) {
+      onBackPress();
+    } else {
+      navigation.goBack();
+    }
+  };
 
   return (
     <View style={styles.headerContainer}>
-      <TouchableOpacity
-        style={styles.backButton}
-        onPress={() => navigation.goBack()}
-      >
-        <ChevronLeft width={30} height={30} color={BASE_COLORS.white} />
-      </TouchableOpacity>
+      {!hideBack ? (
+        <TouchableOpacity
+          style={[
+            styles.backButton,
+            disableBack && { opacity: 0.4 }, // Visual indicator that back is disabled
+          ]}
+          onPress={handleBackPress}
+          disabled={disableBack}
+        >
+          <ArrowLeft width={24} height={24} color={BASE_COLORS.white} />
+        </TouchableOpacity>
+      ) : (
+        <View style={styles.placeholderView} /> // Placeholder to maintain layout
+      )}
       <View style={styles.headerTitleContainer}>
         <Text style={styles.headerTitle}>{title}</Text>
       </View>

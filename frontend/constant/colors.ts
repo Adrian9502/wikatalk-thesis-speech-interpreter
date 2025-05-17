@@ -63,6 +63,7 @@ export const BASE_COLORS: Record<string, string> = {
   placeholderText: "#9E9EA7",
   borderColor: "#E8E8ED",
   success: "#10B981",
+  danger: "#F44336",
 };
 
 export const getPositionalColors = (
@@ -78,4 +79,17 @@ export const getPositionalColors = (
     border: BASE_COLORS.borderColor,
     success: BASE_COLORS.success,
   };
+};
+
+export const difficultyColors = {
+  Easy: ["#4CAF50", "#2E7D32"] as const,
+  Medium: ["#FF9800", "#EF6C00"] as const,
+  Hard: ["#F44336", "#C62828"] as const,
+};
+
+// Game mode navigation
+export const gameModeNavigationColors = {
+  identification: ["#2563EB", "#1E40AF"] as const,
+  fillBlanks: ["#F97316", "#C2410C"] as const,
+  multipleChoice: ["#22C55E", "#15803D"] as const,
 };

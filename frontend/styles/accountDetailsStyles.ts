@@ -3,7 +3,8 @@ import { BASE_COLORS } from "@/constant/colors";
 
 export default StyleSheet.create({
   headerContainer: {
-    padding: 16,
+    paddingTop: 16,
+    paddingBottom: 16,
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
@@ -12,7 +13,9 @@ export default StyleSheet.create({
     width: 40,
     height: 40,
     justifyContent: "center",
-    alignItems: "flex-start",
+    alignItems: "center",
+    borderRadius: 20,
+    backgroundColor: "rgba(255, 255, 255, 0.1)",
   },
   headerTitleContainer: {
     flex: 1,
