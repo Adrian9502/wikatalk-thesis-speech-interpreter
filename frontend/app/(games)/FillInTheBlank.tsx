@@ -6,11 +6,10 @@ import {
   ScrollView,
   TextInput,
   Platform,
-  Keyboard,
   StatusBar,
   KeyboardAvoidingView,
 } from "react-native";
-import React, { useState, useEffect, useRef } from "react";
+import React, { useEffect, useRef } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
 import gameSharedStyles from "@/styles/gamesSharedStyles";
 import { Check, X } from "react-native-feather";
@@ -21,12 +20,12 @@ import useThemeStore from "@/store/useThemeStore";
 import Timer from "@/components/Games/Timer";
 import AnswerReview from "@/components/Games/AnswerReview";
 import { Header } from "@/components/Header";
-import quizQuestions from "@/utils/Games/quizQuestions.json";
 import { getDifficultyColors, formatTime } from "@/utils/gameUtils";
 import DifficultyBadge from "@/components/Games/DifficultyBadge";
 import { setupBackButtonHandler } from "@/utils/gameUtils";
 import DecorativeCircles from "@/components/Games/DecorativeCircles";
 import GameNavigation from "@/components/Games/GameNavigation";
+import useFillInTheBlankStore from "@/store/Games/useFillInTheBlankStore";
 
 interface FillInTheBlankProps {
   levelId: number;
@@ -70,20 +69,35 @@ const FillInTheBlank: React.FC<FillInTheBlankProps> = ({
   // Theme store
   const { activeTheme } = useThemeStore();
 
-  // Add proper type for the useRef
+  // Input ref
   const inputRef = useRef<TextInput>(null);
-  // Game state
-  const [currentExerciseIndex, setCurrentExerciseIndex] = useState(0);
-  const [userAnswer, setUserAnswer] = useState("");
-  const [score, setScore] = useState(0);
-  const [gameStatus, setGameStatus] = useState("playing"); // playing, completed
-  const [showHint, setShowHint] = useState(false);
-  const [showTranslation, setShowTranslation] = useState(false);
-  const [showFeedback, setShowFeedback] = useState(false);
-  const [isCorrect, setIsCorrect] = useState(false);
-  const [attemptsLeft, setAttemptsLeft] = useState(2); // 2 attempts per question
-  const [timerRunning, setTimerRunning] = useState(false);
-  const [timeElapsed, setTimeElapsed] = useState(0);
+
+  // Game state from store
+  const {
+    currentExerciseIndex,
+    userAnswer,
+    score,
+    gameStatus,
+    showHint,
+    showTranslation,
+    showFeedback,
+    isCorrect,
+    attemptsLeft,
+    timerRunning,
+    timeElapsed,
+    exercises,
+    setUserAnswer,
+    toggleHint,
+    toggleTranslation,
+    checkAnswer,
+    handleRestart,
+    initialize,
+    startGame,
+    formatSentence,
+  } = useFillInTheBlankStore();
+
+  // Current exercise
+  const currentExercise = exercises[currentExerciseIndex];
 
   useEffect(() => {
     // Set up the back handler
@@ -93,189 +107,21 @@ const FillInTheBlank: React.FC<FillInTheBlankProps> = ({
     return () => cleanupBackHandler();
   }, [gameStatus, timerRunning]);
 
-  // Get the appropriate exercises based on difficulty
-  const getExercises = (): Array<{
-    id: number;
-    sentence: string;
-    answer: string;
-    translation: string;
-    hint: string;
-    title?: string; // Add these properties
-    dialect?: string;
-  }> => {
-    if (levelData) {
-      // If specific level data is provided, use it
-      return [
-        {
-          id: levelData.id,
-          sentence: levelData.sentence,
-          answer: levelData.answer,
-          translation: levelData.translation,
-          hint: levelData.hint,
-          title: levelData.title, // Include title
-          dialect: levelData.dialect, // Include dialect
-        },
-      ];
-    }
-
-    // Otherwise use the quiz questions data based on difficulty
-    const difficultyKey = difficulty?.toLowerCase() || "easy";
-    const typedQuizQuestions = quizQuestions as QuizQuestions;
-
-    // Get questions from the appropriate difficulty section
-    const difficultyQuestions =
-      typedQuizQuestions.fillBlanks[difficultyKey] || [];
-
-    // Format them to match the expected structure - now including title and dialect
-    return difficultyQuestions.map((question: QuestionItem) => ({
-      id: question.id,
-      sentence: question.sentence,
-      answer: question.answer,
-      translation: question.translation,
-      hint: question.hint,
-      title: question.title,
-      dialect: question.dialect,
-    }));
-  };
-
-  // Use the exercises from quizQuestions
-  const exercises = getExercises();
-  const currentExercise = exercises[currentExerciseIndex];
-
-  // Format sentence with blank
-  const formatSentence = () => {
-    if (!currentExercise) return "";
-    return currentExercise.sentence.replace("___", "______");
-  };
-
-  // Check answer
-  const checkAnswer = () => {
-    Keyboard.dismiss();
-
-    if (!currentExercise) return;
-
-    // Simple normalization for comparison
-    const normalizedUserAnswer = userAnswer.trim().toLowerCase();
-    const normalizedCorrectAnswer = currentExercise.answer.toLowerCase();
-
-    const correct = normalizedUserAnswer === normalizedCorrectAnswer;
-    setIsCorrect(correct);
-    setShowFeedback(true);
-
-    if (correct) {
-      setScore(score + 1);
-
-      // Move to next exercise after delay
-      setTimeout(() => {
-        if (currentExerciseIndex < exercises.length - 1) {
-          moveToNext();
-        } else {
-          setGameStatus("completed");
-        }
-      }, 1500);
-    } else {
-      // Decrease attempts
-      const newAttemptsLeft = attemptsLeft - 1;
-      setAttemptsLeft(newAttemptsLeft);
-
-      // If no attempts left, show correct answer and move on after delay
-      if (newAttemptsLeft <= 0) {
-        setTimeout(() => {
-          if (currentExerciseIndex < exercises.length - 1) {
-            moveToNext();
-          } else {
-            setGameStatus("completed");
-          }
-        }, 2500);
-      } else {
-        // Hide feedback after a delay to allow another attempt
-        setTimeout(() => {
-          setShowFeedback(false);
-        }, 1500);
-      }
-    }
-  };
-
-  // Move to next exercise
-  const moveToNext = () => {
-    setCurrentExerciseIndex(currentExerciseIndex + 1);
-    setUserAnswer("");
-    setShowFeedback(false);
-    setShowHint(false);
-    setShowTranslation(false);
-    setAttemptsLeft(2);
-
-    // Focus on input after a delay
-    setTimeout(() => {
-      inputRef.current?.focus();
-    }, 100);
-  };
-
-  // Handle game restart
-  const handleRestart = () => {
-    setCurrentExerciseIndex(0);
-    setUserAnswer("");
-    setScore(0);
-    setShowFeedback(false);
-    setShowHint(false);
-    setShowTranslation(false);
-    setAttemptsLeft(2);
-    setGameStatus("playing");
-
-    // Focus on input after a delay
-    setTimeout(() => {
-      inputRef.current?.focus();
-    }, 100);
-  };
-
-  // Toggle hint visibility
-  const toggleHint = () => {
-    setShowHint(!showHint);
-  };
-
-  // Toggle translation visibility
-  const toggleTranslation = () => {
-    setShowTranslation(!showTranslation);
-  };
-
-  // Initialize function to reset all state
-  const initialize = (data: any, id: number): void => {
-    setCurrentExerciseIndex(0);
-    setUserAnswer("");
-    setScore(0);
-    setShowFeedback(false);
-    setShowHint(false);
-    setShowTranslation(false);
-    setAttemptsLeft(2);
-    setGameStatus("playing");
-    setTimeElapsed(0);
-    setTimerRunning(false);
-    setIsCorrect(false);
-
-    console.log("Fill in the Blank initialized for level:", id);
-  };
-
-  // Start game function to begin gameplay
-  const startGame = () => {
-    setTimerRunning(true);
-
-    // Focus input after a delay
-    setTimeout(() => {
-      inputRef.current?.focus();
-    }, 100);
-
-    console.log("Fill in the Blank game started");
-  };
-
-  // Initialize the game with level data - similar to MultipleChoice
+  // Initialize with quiz data
   useEffect(() => {
-    initialize(levelData, levelId);
+    // We need to pass the quizQuestions to the initialize function
+    // since they're imported in the component, not in the store
+    initialize(levelData, levelId, difficulty);
 
     // Add a short delay to ensure initialization completes before starting the game
     if (isStarted) {
-      // Small delay to ensure initialization is complete
       const timer = setTimeout(() => {
         startGame();
+
+        // Focus input after a delay
+        setTimeout(() => {
+          inputRef.current?.focus();
+        }, 100);
       }, 500);
 
       return () => clearTimeout(timer);

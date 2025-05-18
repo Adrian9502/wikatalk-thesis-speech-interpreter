@@ -27,6 +27,7 @@ interface MultipleChoiceState {
   initialize: (levelData: any, levelId: number) => void;
   startGame: () => void;
   handleRestart: () => void;
+  resetTimer: () => void;
 }
 
 const useMultipleChoiceStore = create<MultipleChoiceState>((set, get) => ({
@@ -49,6 +50,8 @@ const useMultipleChoiceStore = create<MultipleChoiceState>((set, get) => ({
   updateTimeElapsed: (time) => set({ timeElapsed: time }),
   setCurrentQuestion: (question) => set({ currentQuestion: question }),
   setLevelId: (id) => set({ levelId: id }),
+
+  resetTimer: () => set({ timeElapsed: 0, timerRunning: false }),
 
   handleOptionSelect: (optionId) => {
     const { selectedOption, currentQuestion, score } = get();
@@ -84,13 +87,14 @@ const useMultipleChoiceStore = create<MultipleChoiceState>((set, get) => ({
   initialize: (levelData, levelId) => {
     set({
       currentQuestion: levelData,
-      levelId,
+      progress: 0,
       score: 0,
       selectedOption: null,
       gameStatus: "playing",
+      timeElapsed: 0, // Reset timer when initializing
       timerRunning: false,
-      timeElapsed: 0,
     });
+    console.log(`Initialized level ${levelId} with data:`, levelData);
   },
 
   startGame: () => {

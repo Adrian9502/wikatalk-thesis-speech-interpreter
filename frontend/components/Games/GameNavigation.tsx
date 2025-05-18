@@ -40,10 +40,21 @@ const GameNavigation: React.FC<GameNavigationProps> = ({
     router.replace("/(tabs)/Games");
   };
 
-  // Use the direct function to navigate to next level
+  // Update the handleNextLevel function to use direct navigation
   const handleNextLevel = () => {
-    console.log(`Navigating to level ${numericLevelId + 1}`);
-    gameUtilsNextLevel(numericLevelId, gameMode, gameTitle, difficulty);
+    console.log(`Navigating to level ${numericLevelId + 1} for ${gameMode}`);
+
+    // Use direct navigation with replace to force a fresh load
+    router.replace({
+      pathname: "/(games)/Questions",
+      params: {
+        levelId: numericLevelId + 1,
+        gameMode,
+        gameTitle,
+        difficulty,
+        skipModal: "true",
+      },
+    });
   };
 
   // Game mode navigation handler

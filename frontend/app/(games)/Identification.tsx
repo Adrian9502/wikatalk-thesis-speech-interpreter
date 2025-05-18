@@ -6,19 +6,18 @@ import {
   ScrollView,
   StatusBar,
 } from "react-native";
-import React, { useEffect, useState, useMemo } from "react";
+import React, { useEffect } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Check, X } from "react-native-feather";
 import { LinearGradient } from "expo-linear-gradient";
 import * as Animatable from "react-native-animatable";
 import { BASE_COLORS } from "@/constant/colors";
 import useThemeStore from "@/store/useThemeStore";
+import useIdentificationStore from "@/store/Games/useIdentificationStore";
 import Timer from "@/components/Games/Timer";
 import AnswerReview from "@/components/Games/AnswerReview";
 import { Header } from "@/components/Header";
-import gameSharedStyles from "@/styles/gamesSharedStyles";
 import {
-  handleNextLevel,
   formatTime,
   getDifficultyColors,
   setupBackButtonHandler,
@@ -26,6 +25,7 @@ import {
 import DifficultyBadge from "@/components/Games/DifficultyBadge";
 import DecorativeCircles from "@/components/Games/DecorativeCircles";
 import GameNavigation from "@/components/Games/GameNavigation";
+import gameSharedStyles from "@/styles/gamesSharedStyles";
 
 interface IdentificationProps {
   levelId: number;
@@ -33,15 +33,6 @@ interface IdentificationProps {
   difficulty?: string;
   isStarted?: boolean;
 }
-
-interface WordItem {
-  display: string;
-  clean: string;
-  isPunctuation: boolean;
-}
-
-// Define type for feedback state
-type FeedbackType = "correct" | "incorrect" | null;
 
 const Identification: React.FC<IdentificationProps> = ({
   levelId,
@@ -52,137 +43,52 @@ const Identification: React.FC<IdentificationProps> = ({
   // Theme store
   const { activeTheme } = useThemeStore();
 
-  // Game state with proper types
-  const [currentSentenceIndex, setCurrentSentenceIndex] = useState(0);
-  const [score, setScore] = useState(0);
-  const [selectedWord, setSelectedWord] = useState<number | null>(null);
-  const [gameStatus, setGameStatus] = useState<"playing" | "completed">(
-    "playing"
-  );
-  const [showTranslation, setShowTranslation] = useState(false);
-  const [feedback, setFeedback] = useState<FeedbackType>(null);
-  const [timerRunning, setTimerRunning] = useState(false);
-  const [timeElapsed, setTimeElapsed] = useState(0);
+  // Game state from store
+  const {
+    currentSentenceIndex,
+    score,
+    selectedWord,
+    gameStatus,
+    showTranslation,
+    feedback,
+    timerRunning,
+    timeElapsed,
+    sentences,
+    words,
+    handleWordSelect,
+    toggleTranslation,
+    handleRestart,
+    initialize,
+    startGame,
+  } = useIdentificationStore();
 
-  // Convert levelData to the format expected by the component
-  const createSentencesFromData = (data) => {
-    // Create a sentence object in the format the component expects
-    return [
-      {
-        id: data.id,
-        sentence: data.sentence,
-        targetWord: data.targetWord,
-        translation: data.translation,
-        choices: data.choices || [],
-        description: data.description || "",
-        title: data.title || "",
-        dialect: data.dialect || "",
-      },
-    ];
-  };
-
-  // Use the converted data
-  const sentences = createSentencesFromData(levelData);
+  // Current sentence
   const currentSentence = sentences[currentSentenceIndex];
 
-  // Split sentence into words for selection
-  const words = useMemo(() => {
-    if (!currentSentence) return [];
-
-    if (currentSentence.choices && currentSentence.choices.length > 0) {
-      // Filter out duplicate choices
-      const uniqueChoices = [...new Set(currentSentence.choices)];
-
-      return uniqueChoices.map((choice) => ({
-        display: choice,
-        clean: choice,
-        isPunctuation: false,
-      }));
-    } else {
-      // Fall back to splitting sentence
-      return currentSentence.sentence.split(/\s+/).map((word) => {
-        const cleanWord = word.replace(/[.,!?;:]/g, "");
-        return {
-          display: word,
-          clean: cleanWord,
-          isPunctuation: Boolean(word.match(/[.,!?;:]/)),
-        };
-      });
-    }
-  }, [currentSentence]);
-
   useEffect(() => {
+    // Set up the back handler
+    const cleanupBackHandler = setupBackButtonHandler(gameStatus, timerRunning);
+
+    // Clean up when component unmounts
+    return () => cleanupBackHandler();
+  }, [gameStatus, timerRunning]);
+
+  // Initialize with level data
+  useEffect(() => {
+    initialize(levelData, levelId);
+
+    // Add a short delay to ensure initialization completes before starting the game
     if (isStarted) {
-      setTimerRunning(true);
-      console.log("Identification game started for level:", levelId);
+      const timer = setTimeout(() => {
+        startGame();
+      }, 500);
+
+      return () => clearTimeout(timer);
     }
-  }, [isStarted, levelId]);
+  }, [levelData, levelId, isStarted]);
 
-  useEffect(() => {
-    if (selectedWord !== null) {
-      setTimerRunning(false);
-      setTimeElapsed((prev) => prev + 1); // Placeholder for actual timer integration
-    }
-  }, [selectedWord]);
-
-  // Handle word selection
-  const handleWordSelect = (word: WordItem, index: number) => {
-    if (selectedWord !== null || word.isPunctuation) return;
-
-    setSelectedWord(index);
-
-    const isCorrect =
-      word.clean.toLowerCase() === currentSentence.targetWord.toLowerCase();
-
-    if (isCorrect) {
-      setScore(score + 1);
-      setFeedback("correct");
-    } else {
-      setFeedback("incorrect");
-    }
-
-    // Still use timeout to move to next question
-    setTimeout(() => {
-      if (currentSentenceIndex < sentences.length - 1) {
-        setCurrentSentenceIndex(currentSentenceIndex + 1);
-        setSelectedWord(null);
-        setFeedback(null);
-        setShowTranslation(false);
-      } else {
-        setGameStatus("completed");
-      }
-    }, 2000);
-  };
-
-  // Handle game restart
-  const handleRestart = () => {
-    setCurrentSentenceIndex(0);
-    setScore(0);
-    setSelectedWord(null);
-    setFeedback(null);
-    setShowTranslation(false);
-    setGameStatus("playing");
-    setTimerRunning(false);
-    setTimeElapsed(0);
-  };
-
-  // Toggle translation visibility
-  const toggleTranslation = () => {
-    setShowTranslation(!showTranslation);
-  };
-
-  // Next level handler - now using utility
-  const handleNextLevelLocal = () => {
-    handleNextLevel(
-      levelId,
-      "identification",
-      "Word Identification",
-      difficulty
-    );
-  };
-
-  // Get word style based on state - keep this component-specific
-  const getWordStyle = (word: WordItem, index: number) => {
+  // Get word style based on state
+  const getWordStyle = (word, index) => {
     const baseStyle = styles.word;
 
     // If this is the selected word
@@ -197,14 +103,6 @@ const Identification: React.FC<IdentificationProps> = ({
     // Otherwise just return the base style
     return baseStyle;
   };
-
-  useEffect(() => {
-    // Set up the back handler
-    const cleanupBackHandler = setupBackButtonHandler(gameStatus, timerRunning);
-
-    // Clean up when component unmounts
-    return () => cleanupBackHandler();
-  }, [gameStatus, timerRunning]);
 
   return (
     <View
@@ -221,7 +119,7 @@ const Identification: React.FC<IdentificationProps> = ({
           hideBack={true}
         />
 
-        {/* Level Title - outside game status condition */}
+        {/* Level Title */}
         <View style={styles.levelTitleContainer}>
           <Text style={styles.levelTitleText}>
             Level {levelId} :{" "}
@@ -233,6 +131,7 @@ const Identification: React.FC<IdentificationProps> = ({
 
         {gameStatus === "playing" ? (
           <ScrollView>
+            {/* Game content */}
             <Animatable.View
               animation="fadeIn"
               duration={600}
@@ -243,6 +142,7 @@ const Identification: React.FC<IdentificationProps> = ({
               <DifficultyBadge difficulty={difficulty} />
             </Animatable.View>
 
+            {/* Instruction Card */}
             <Animatable.View
               animation="fadeInUp"
               duration={500}
@@ -257,13 +157,13 @@ const Identification: React.FC<IdentificationProps> = ({
                 }
                 style={styles.instructionGradient}
               >
-                {/* display the sentence */}
                 <Text style={styles.questionText}>
-                  {currentSentence.sentence}
+                  {currentSentence?.sentence}
                 </Text>
               </LinearGradient>
             </Animatable.View>
 
+            {/* Words Container */}
             <Animatable.View
               animation="fadeInUp"
               duration={500}
@@ -289,6 +189,8 @@ const Identification: React.FC<IdentificationProps> = ({
                 ))}
               </View>
             </Animatable.View>
+
+            {/* Translation Button */}
             <TouchableOpacity
               style={styles.translationButton}
               onPress={toggleTranslation}
@@ -298,6 +200,7 @@ const Identification: React.FC<IdentificationProps> = ({
               </Text>
             </TouchableOpacity>
 
+            {/* Translation Card */}
             {showTranslation && (
               <Animatable.View
                 animation="fadeIn"
@@ -305,7 +208,7 @@ const Identification: React.FC<IdentificationProps> = ({
                 style={styles.translationCard}
               >
                 <Text style={styles.translationText}>
-                  {currentSentence.translation}
+                  {currentSentence?.translation}
                 </Text>
               </Animatable.View>
             )}
@@ -315,6 +218,7 @@ const Identification: React.FC<IdentificationProps> = ({
             showsVerticalScrollIndicator={false}
             contentContainerStyle={styles.contentContainer}
           >
+            {/* Results content */}
             <Animatable.View
               animation="fadeIn"
               duration={600}
@@ -329,6 +233,7 @@ const Identification: React.FC<IdentificationProps> = ({
               <DifficultyBadge difficulty={difficulty} />
             </Animatable.View>
 
+            {/* Completion Card */}
             <Animatable.View
               animation="fadeInUp"
               duration={700}
@@ -361,14 +266,14 @@ const Identification: React.FC<IdentificationProps> = ({
               </LinearGradient>
             </Animatable.View>
 
-            {/* Answer Review Section */}
+            {/* Answer Review */}
             <AnswerReview
-              question={currentSentence.sentence}
+              question={currentSentence?.sentence || ""}
               userAnswer={words[selectedWord]?.clean || "Unknown"}
               isCorrect={feedback === "correct"}
             />
 
-            {/* Navigation buttons */}
+            {/* Navigation */}
             <GameNavigation
               levelId={levelId}
               gameMode="identification"
@@ -384,76 +289,8 @@ const Identification: React.FC<IdentificationProps> = ({
 };
 
 const styles = StyleSheet.create({
-  ...gameSharedStyles, // Include all shared styles
-
-  // Component-specific styles for Identification
-  sentenceCard: {
-    marginBottom: 20,
-  },
-  sentenceContainer: {
-    backgroundColor: "rgba(0, 0, 0, 0.15)",
-    borderRadius: 16,
-    padding: 16,
-    flexDirection: "row",
-    flexWrap: "wrap",
-    justifyContent: "space-between",
-  },
-  instructionCardWrapper: {
-    borderRadius: 16,
-    overflow: "hidden",
-    marginBottom: 20,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.15,
-    shadowRadius: 8,
-    elevation: 5,
-  },
-  sentenceText: {
-    fontSize: 16,
-    fontFamily: "Poppins-Medium",
-    color: BASE_COLORS.white,
-    textAlign: "center",
-    lineHeight: 24,
-  },
-  word: {
-    paddingHorizontal: 16,
-    paddingVertical: 14,
-    borderRadius: 16,
-    backgroundColor: "rgba(30, 41, 59, 0.8)",
-    flexDirection: "row",
-    alignItems: "center",
-    width: "48%",
-    marginBottom: 10,
-  },
-  correctWord: {
-    backgroundColor: "rgba(34, 197, 94, 0.2)",
-    borderColor: BASE_COLORS.success,
-    borderWidth: 1,
-  },
-  incorrectWord: {
-    backgroundColor: "rgba(239, 68, 68, 0.2)",
-    borderColor: BASE_COLORS.danger,
-    borderWidth: 1,
-  },
-  wordText: {
-    fontSize: 15,
-    fontFamily: "Poppins-Medium",
-    color: BASE_COLORS.white,
-    flex: 1,
-  },
-  instructionGradient: {
-    padding: 20,
-    paddingVertical: 24,
-    borderRadius: 16,
-    position: "relative",
-  },
-  instructionText: {
-    fontSize: 16,
-    fontFamily: "Poppins-Medium",
-    color: BASE_COLORS.white,
-    textAlign: "center",
-    marginBottom: 16,
-  },
+  ...gameSharedStyles,
+  // Component-specific styles remain the same
 });
 
 export default Identification;
