@@ -5,6 +5,7 @@ import {
   View,
   ScrollView,
   StatusBar,
+  ActivityIndicator,
 } from "react-native";
 import React, { useEffect } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -13,7 +14,7 @@ import { LinearGradient } from "expo-linear-gradient";
 import * as Animatable from "react-native-animatable";
 import { BASE_COLORS } from "@/constant/colors";
 import useThemeStore from "@/store/useThemeStore";
-import useIdentificationStore from "@/store/Games/useIdentificationStore";
+import useQuizStore from "@/store/Games/useQuizStore";
 import Timer from "@/components/Games/Timer";
 import AnswerReview from "@/components/Games/AnswerReview";
 import { Header } from "@/components/Header";
@@ -43,24 +44,26 @@ const Identification: React.FC<IdentificationProps> = ({
   // Theme store
   const { activeTheme } = useThemeStore();
 
-  // Game state from store
+  // Get state and actions from the centralized store - UPDATED for useQuizStore
   const {
-    currentSentenceIndex,
-    score,
-    selectedWord,
-    gameStatus,
-    showTranslation,
-    feedback,
-    timerRunning,
-    timeElapsed,
-    sentences,
-    words,
-    handleWordSelect,
-    toggleTranslation,
-    handleRestart,
+    // Common game state
+    gameState: { score, gameStatus, timerRunning, timeElapsed },
+    // Identification specific state
+    identificationState: {
+      sentences,
+      currentSentenceIndex,
+      words,
+      selectedWord,
+      showTranslation,
+      feedback,
+    },
+    // Actions
     initialize,
     startGame,
-  } = useIdentificationStore();
+    handleRestart,
+    handleWordSelect,
+    toggleIdentificationTranslation: toggleTranslation,
+  } = useQuizStore();
 
   // Current sentence
   const currentSentence = sentences[currentSentenceIndex];
@@ -75,11 +78,14 @@ const Identification: React.FC<IdentificationProps> = ({
 
   // Initialize with level data
   useEffect(() => {
-    initialize(levelData, levelId);
+    console.log("Initializing Identification with data:", levelData);
+    // Pass the gameMode parameter "identification"
+    initialize(levelData, levelId, "identification", difficulty);
 
     // Add a short delay to ensure initialization completes before starting the game
     if (isStarted) {
       const timer = setTimeout(() => {
+        console.log("Starting identification game");
         startGame();
       }, 500);
 
@@ -89,30 +95,38 @@ const Identification: React.FC<IdentificationProps> = ({
 
   // Get word style based on state
   const getWordStyle = (word, index) => {
-    const baseStyle = styles.word;
+    const baseStyle = [
+      gameSharedStyles.optionCard,
+      {
+        height: 60, // Fixed height, not minHeight
+        position: "relative", // Add this to ensure absolute positioning works correctly
+      },
+    ];
 
-    // If this is the selected word
     if (selectedWord === index) {
       const isCorrect =
-        word.clean.toLowerCase() === currentSentence.targetWord.toLowerCase();
+        word.clean?.toLowerCase() ===
+        currentSentence?.targetWord?.toLowerCase();
       return isCorrect
-        ? [baseStyle, styles.correctWord]
-        : [baseStyle, styles.incorrectWord];
+        ? [...baseStyle, gameSharedStyles.correctOption]
+        : [...baseStyle, gameSharedStyles.incorrectOption];
     }
 
-    // Otherwise just return the base style
     return baseStyle;
   };
 
   return (
     <View
-      style={[styles.wrapper, { backgroundColor: activeTheme.backgroundColor }]}
+      style={[
+        gameSharedStyles.wrapper,
+        { backgroundColor: activeTheme.backgroundColor },
+      ]}
     >
       <StatusBar barStyle="light-content" />
 
       <DecorativeCircles variant="double" />
 
-      <SafeAreaView style={styles.container}>
+      <SafeAreaView style={gameSharedStyles.container}>
         <Header
           title={"Word Identification"}
           disableBack={timerRunning}
@@ -120,8 +134,8 @@ const Identification: React.FC<IdentificationProps> = ({
         />
 
         {/* Level Title */}
-        <View style={styles.levelTitleContainer}>
-          <Text style={styles.levelTitleText}>
+        <View style={gameSharedStyles.levelTitleContainer}>
+          <Text style={gameSharedStyles.levelTitleText}>
             Level {levelId} :{" "}
             {currentSentence?.title ||
               currentSentence?.dialect ||
@@ -130,23 +144,25 @@ const Identification: React.FC<IdentificationProps> = ({
         </View>
 
         {gameStatus === "playing" ? (
-          <ScrollView>
+          <ScrollView
+            showsVerticalScrollIndicator={false}
+            contentContainerStyle={gameSharedStyles.contentContainer}
+          >
             {/* Game content */}
             <Animatable.View
               animation="fadeIn"
               duration={600}
               delay={100}
-              style={styles.statsContainer}
+              style={gameSharedStyles.statsContainer}
             >
               {isStarted && <Timer isRunning={timerRunning} />}
               <DifficultyBadge difficulty={difficulty} />
             </Animatable.View>
 
-            {/* Instruction Card */}
             <Animatable.View
               animation="fadeInUp"
               duration={500}
-              style={styles.instructionCardWrapper}
+              style={gameSharedStyles.questionCardWrapper}
             >
               <LinearGradient
                 colors={
@@ -155,47 +171,84 @@ const Identification: React.FC<IdentificationProps> = ({
                     string
                   ]
                 }
-                style={styles.instructionGradient}
+                style={gameSharedStyles.questionGradient}
               >
-                <Text style={styles.questionText}>
-                  {currentSentence?.sentence}
+                <Text style={gameSharedStyles.questionText}>
+                  {currentSentence?.sentence || currentSentence?.question}
                 </Text>
               </LinearGradient>
             </Animatable.View>
 
-            {/* Words Container */}
+            {/* Words Container - Two per row */}
             <Animatable.View
               animation="fadeInUp"
               duration={500}
               delay={200}
-              style={styles.sentenceCard}
+              style={gameSharedStyles.optionsContainer}
             >
-              <View style={styles.sentenceContainer}>
-                {words.map((word, index) => (
-                  <TouchableOpacity
-                    key={`choice-${index}-${word.clean}`}
-                    style={getWordStyle(word, index)}
-                    onPress={() => handleWordSelect(word, index)}
-                    disabled={selectedWord !== null}
-                    activeOpacity={0.7}
-                  >
-                    <View style={styles.optionLetter}>
-                      <Text style={styles.optionLetterText}>
-                        {String.fromCharCode(65 + index)}
-                      </Text>
-                    </View>
-                    <Text style={styles.wordText}>{word.display}</Text>
-                  </TouchableOpacity>
-                ))}
+              <View style={styles.twoColumnContainer}>
+                {words && words.length > 0 ? (
+                  words.map((word, index) => (
+                    <Animatable.View
+                      key={`choice-${index}-${word.text || word.clean}`}
+                      animation="fadeInUp"
+                      duration={600}
+                      delay={300 + index * 100}
+                      style={styles.optionWrapper}
+                    >
+                      <TouchableOpacity
+                        style={getWordStyle(word, index)}
+                        onPress={() => handleWordSelect(index)}
+                        disabled={selectedWord !== null}
+                        activeOpacity={0.9}
+                      >
+                        <View style={gameSharedStyles.optionContent}>
+                          <View style={gameSharedStyles.optionIdContainer}>
+                            <Text style={gameSharedStyles.optionId}>
+                              {(word.id || "").toUpperCase()}
+                            </Text>
+                          </View>
+                          <Text style={gameSharedStyles.optionText}>
+                            {word.text || word.clean || word.original}
+                          </Text>
+                        </View>
+
+                        {/* Show check/x icon if selected - FIXED to use absolute positioning */}
+                        {selectedWord === index && (
+                          <View style={gameSharedStyles.resultIconContainer}>
+                            {word.clean?.toLowerCase() ===
+                            currentSentence?.targetWord?.toLowerCase() ? (
+                              <Check
+                                width={18}
+                                height={18}
+                                color={BASE_COLORS.white}
+                              />
+                            ) : (
+                              <X
+                                width={18}
+                                height={18}
+                                color={BASE_COLORS.white}
+                              />
+                            )}
+                          </View>
+                        )}
+                      </TouchableOpacity>
+                    </Animatable.View>
+                  ))
+                ) : (
+                  <Text style={{ color: "white", textAlign: "center" }}>
+                    No options available
+                  </Text>
+                )}
               </View>
             </Animatable.View>
 
             {/* Translation Button */}
             <TouchableOpacity
-              style={styles.translationButton}
+              style={gameSharedStyles.translationButton}
               onPress={toggleTranslation}
             >
-              <Text style={styles.translationButtonText}>
+              <Text style={gameSharedStyles.translationButtonText}>
                 {showTranslation ? "Hide Translation" : "Show Translation"}
               </Text>
             </TouchableOpacity>
@@ -205,28 +258,28 @@ const Identification: React.FC<IdentificationProps> = ({
               <Animatable.View
                 animation="fadeIn"
                 duration={300}
-                style={styles.translationCard}
+                style={gameSharedStyles.translationCard}
               >
-                <Text style={styles.translationText}>
+                <Text style={gameSharedStyles.translationText}>
                   {currentSentence?.translation}
                 </Text>
               </Animatable.View>
             )}
           </ScrollView>
-        ) : (
+        ) : gameStatus === "completed" ? (
           <ScrollView
             showsVerticalScrollIndicator={false}
-            contentContainerStyle={styles.contentContainer}
+            contentContainerStyle={gameSharedStyles.contentContainer}
           >
             {/* Results content */}
             <Animatable.View
               animation="fadeIn"
               duration={600}
               delay={100}
-              style={styles.statsContainer}
+              style={gameSharedStyles.statsContainer}
             >
-              <View style={styles.timeContainer}>
-                <Text style={styles.timeValue}>
+              <View style={gameSharedStyles.timeContainer}>
+                <Text style={gameSharedStyles.timeValue}>
                   Time: {formatTime(timeElapsed)}
                 </Text>
               </View>
@@ -238,7 +291,7 @@ const Identification: React.FC<IdentificationProps> = ({
               animation="fadeInUp"
               duration={700}
               delay={200}
-              style={styles.questionCardWrapper}
+              style={gameSharedStyles.questionCardWrapper}
             >
               <LinearGradient
                 colors={
@@ -246,19 +299,19 @@ const Identification: React.FC<IdentificationProps> = ({
                     ? (["#4CAF50", "#2E7D32"] as const)
                     : ([BASE_COLORS.danger, "#C62828"] as const)
                 }
-                style={styles.questionGradient}
+                style={gameSharedStyles.questionGradient}
               >
-                <View style={styles.resultIconLarge}>
+                <View style={gameSharedStyles.resultIconLarge}>
                   {score > 0 ? (
                     <Check width={30} height={30} color={BASE_COLORS.white} />
                   ) : (
                     <X width={30} height={30} color={BASE_COLORS.white} />
                   )}
                 </View>
-                <Text style={styles.completionTitle}>
+                <Text style={gameSharedStyles.completionTitle}>
                   {score > 0 ? "Level Completed!" : "Try Again!"}
                 </Text>
-                <Text style={styles.completionMessage}>
+                <Text style={gameSharedStyles.completionMessage}>
                   {score > 0
                     ? `Great job! You answered correctly.`
                     : `Your answer was incorrect. Keep practicing to improve.`}
@@ -268,8 +321,14 @@ const Identification: React.FC<IdentificationProps> = ({
 
             {/* Answer Review */}
             <AnswerReview
-              question={currentSentence?.sentence || ""}
-              userAnswer={words[selectedWord]?.clean || "Unknown"}
+              question={
+                currentSentence?.sentence || currentSentence?.question || ""
+              }
+              userAnswer={
+                words[selectedWord]?.text ||
+                words[selectedWord]?.clean ||
+                "Unknown"
+              }
               isCorrect={feedback === "correct"}
             />
 
@@ -282,15 +341,30 @@ const Identification: React.FC<IdentificationProps> = ({
               onRestart={handleRestart}
             />
           </ScrollView>
+        ) : (
+          // Default loading state when idle
+          <View style={gameSharedStyles.loaderContainer}>
+            <ActivityIndicator size="large" color={BASE_COLORS.blue} />
+          </View>
         )}
       </SafeAreaView>
     </View>
   );
 };
 
+// Only component-specific styles that differ from shared styles
 const styles = StyleSheet.create({
-  ...gameSharedStyles,
-  // Component-specific styles remain the same
+  // Identification specific: two-column layout for word options
+  twoColumnContainer: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    justifyContent: "space-between",
+    gap: 10,
+  },
+  optionWrapper: {
+    width: "48%",
+    marginBottom: 10,
+  },
 });
 
 export default Identification;

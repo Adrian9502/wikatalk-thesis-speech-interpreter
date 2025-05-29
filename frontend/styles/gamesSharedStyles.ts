@@ -43,6 +43,7 @@ export const gameSharedStyles = StyleSheet.create({
     borderRadius: 80,
     backgroundColor: `${BASE_COLORS.success}15`,
   },
+
   // Stats container styles
   statsContainer: {
     flexDirection: "row",
@@ -75,6 +76,7 @@ export const gameSharedStyles = StyleSheet.create({
     fontFamily: "Poppins-SemiBold",
     color: BASE_COLORS.white,
   },
+
   // Card styles
   questionCardWrapper: {
     borderRadius: 16,
@@ -124,6 +126,7 @@ export const gameSharedStyles = StyleSheet.create({
     alignSelf: "center",
     marginBottom: 16,
   },
+
   // Navigation buttons
   navigationContainer: {
     gap: 16,
@@ -233,6 +236,7 @@ export const gameSharedStyles = StyleSheet.create({
   incorrectAnswerText: {
     color: "white",
   },
+
   // Translation and hint styles
   translationButton: {
     alignSelf: "center",
@@ -261,7 +265,85 @@ export const gameSharedStyles = StyleSheet.create({
     textAlign: "center",
   },
 
-  // Component specific shared styles
+  // Level header styles
+  levelTitleContainer: {
+    paddingHorizontal: 4,
+    marginBottom: 16,
+  },
+  levelTitleText: {
+    fontSize: 13,
+    fontFamily: "Poppins-Medium",
+    color: BASE_COLORS.white,
+    opacity: 0.8,
+  },
+
+  // SHARED OPTION STYLES (moved from both components)
+  optionsContainer: {
+    marginBottom: 20,
+  },
+  optionCard: {
+    backgroundColor: "rgba(255, 255, 255, 0.15)",
+    padding: 16,
+    borderRadius: 16,
+    position: "relative",
+    overflow: "hidden",
+    borderWidth: 1,
+    borderColor: "rgba(255, 255, 255, 0.1)",
+  },
+  optionContent: {
+    flexDirection: "row",
+    alignItems: "center",
+    flex: 1,
+  },
+  optionIdContainer: {
+    width: 36,
+    height: 36,
+    borderRadius: 16,
+    backgroundColor: "rgba(255, 255, 255, 0.2)",
+    justifyContent: "center",
+    alignItems: "center",
+    marginRight: 14,
+  },
+  optionId: {
+    fontSize: 16,
+    fontFamily: "Poppins-SemiBold",
+    color: BASE_COLORS.white,
+  },
+  optionText: {
+    fontSize: 16,
+    fontFamily: "Poppins-Medium",
+    color: BASE_COLORS.white,
+    flex: 1,
+    lineHeight: 22,
+  },
+  correctOption: {
+    backgroundColor: "rgba(34, 197, 94, 0.2)",
+    borderColor: BASE_COLORS.success,
+  },
+  incorrectOption: {
+    backgroundColor: "rgba(239, 68, 68, 0.2)",
+    borderColor: BASE_COLORS.danger,
+  },
+  resultIconContainer: {
+    position: "absolute",
+    right: 16,
+    top: "50%", // Position at 50% from top
+    width: 32,
+    height: 32,
+    borderRadius: 18,
+    backgroundColor: "rgba(0, 0, 0, 0.3)",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+
+  // Loader styles
+  loaderContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+
+  // Component-specific shared styles
   optionLetter: {
     width: 30,
     height: 30,
@@ -275,17 +357,6 @@ export const gameSharedStyles = StyleSheet.create({
     fontSize: 14,
     fontFamily: "Poppins-SemiBold",
     color: BASE_COLORS.white,
-  },
-  // Level header styles
-  levelTitleContainer: {
-    paddingHorizontal: 4,
-    marginBottom: 16,
-  },
-  levelTitleText: {
-    fontSize: 13,
-    fontFamily: "Poppins-Medium",
-    color: BASE_COLORS.white,
-    opacity: 0.8,
   },
 });
 

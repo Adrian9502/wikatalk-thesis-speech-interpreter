@@ -4,60 +4,34 @@ import {
   TouchableOpacity,
   View,
   ScrollView,
-  TextInput,
-  Platform,
   StatusBar,
+  TextInput,
   KeyboardAvoidingView,
+  Platform,
 } from "react-native";
 import React, { useEffect, useRef } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
-import gameSharedStyles from "@/styles/gamesSharedStyles";
-import { Check, X } from "react-native-feather";
+import DifficultyBadge from "@/components/Games/DifficultyBadge";
+import { Check, X, AlertCircle, X as XIcon } from "react-native-feather";
 import { LinearGradient } from "expo-linear-gradient";
 import * as Animatable from "react-native-animatable";
 import { BASE_COLORS } from "@/constant/colors";
 import useThemeStore from "@/store/useThemeStore";
 import Timer from "@/components/Games/Timer";
-import AnswerReview from "@/components/Games/AnswerReview";
+import useQuizStore from "@/store/Games/useQuizStore";
 import { Header } from "@/components/Header";
-import { getDifficultyColors, formatTime } from "@/utils/gameUtils";
-import DifficultyBadge from "@/components/Games/DifficultyBadge";
+import AnswerReview from "@/components/Games/AnswerReview";
+import gameSharedStyles from "@/styles/gamesSharedStyles";
+import { formatTime, getDifficultyColors } from "@/utils/gameUtils";
 import { setupBackButtonHandler } from "@/utils/gameUtils";
 import DecorativeCircles from "@/components/Games/DecorativeCircles";
 import GameNavigation from "@/components/Games/GameNavigation";
-import useFillInTheBlankStore from "@/store/Games/useFillInTheBlankStore";
 
 interface FillInTheBlankProps {
   levelId: number;
   levelData: any;
   difficulty?: string;
   isStarted?: boolean;
-}
-
-// Type the quiz questions data structure
-interface QuestionItem {
-  id: number;
-  dialect: string;
-  sentence: string;
-  answer: string;
-  title: string;
-  translation: string;
-  hint: string;
-}
-
-interface QuizQuestions {
-  fillBlanks: {
-    easy: QuestionItem[];
-    medium: QuestionItem[];
-    hard: QuestionItem[];
-    [key: string]: QuestionItem[];
-  };
-  multipleChoice: {
-    [key: string]: any[];
-  };
-  identification: {
-    [key: string]: any[];
-  };
 }
 
 const FillInTheBlank: React.FC<FillInTheBlankProps> = ({
@@ -72,29 +46,33 @@ const FillInTheBlank: React.FC<FillInTheBlankProps> = ({
   // Input ref
   const inputRef = useRef<TextInput>(null);
 
-  // Game state from store
+  // Get state and actions from the centralized store
   const {
-    currentExerciseIndex,
-    userAnswer,
-    score,
-    gameStatus,
-    showHint,
-    showTranslation,
-    showFeedback,
-    isCorrect,
-    attemptsLeft,
-    timerRunning,
-    timeElapsed,
-    exercises,
+    // Common game state
+    gameState: { score, gameStatus, timerRunning, timeElapsed },
+    // FillInTheBlank specific state
+    fillInTheBlankState: {
+      exercises,
+      currentExerciseIndex,
+      userAnswer,
+      showHint,
+      showTranslation,
+      showFeedback,
+      isCorrect,
+      attemptsLeft,
+    },
+    // Actions
+    initialize,
+    startGame,
+    handleRestart,
     setUserAnswer,
     toggleHint,
     toggleTranslation,
     checkAnswer,
-    handleRestart,
-    initialize,
-    startGame,
     formatSentence,
-  } = useFillInTheBlankStore();
+    setTimerRunning,
+    setTimeElapsed,
+  } = useQuizStore();
 
   // Current exercise
   const currentExercise = exercises[currentExerciseIndex];
@@ -109,9 +87,8 @@ const FillInTheBlank: React.FC<FillInTheBlankProps> = ({
 
   // Initialize with quiz data
   useEffect(() => {
-    // We need to pass the quizQuestions to the initialize function
-    // since they're imported in the component, not in the store
-    initialize(levelData, levelId, difficulty);
+    // Pass the gameMode parameter "fillBlanks"
+    initialize(levelData, levelId, "fillBlanks", difficulty);
 
     // Add a short delay to ensure initialization completes before starting the game
     if (isStarted) {
@@ -133,7 +110,7 @@ const FillInTheBlank: React.FC<FillInTheBlankProps> = ({
     if (showFeedback) {
       setTimerRunning(false);
       // Track elapsed time for results
-      setTimeElapsed((prev) => prev + 1); // This is a placeholder, needs actual timer integration
+      setTimeElapsed(timeElapsed + 1); // This is a placeholder, needs actual timer integration
     }
   }, [showFeedback]);
 
@@ -188,7 +165,10 @@ const FillInTheBlank: React.FC<FillInTheBlankProps> = ({
               {/* Attempts Display */}
               <View style={styles.attemptsContainer}>
                 <Text style={styles.attemptsText}>
-                  Attempts: {Array(attemptsLeft).fill("●").join(" ")}
+                  Attempts:{" "}
+                  {attemptsLeft > 0
+                    ? Array(attemptsLeft).fill("●").join(" ")
+                    : "0"}
                 </Text>
               </View>
 
@@ -273,6 +253,41 @@ const FillInTheBlank: React.FC<FillInTheBlankProps> = ({
                   </TouchableOpacity>
                 </View>
               </Animatable.View>
+
+              {/* Feedback Message */}
+              {showFeedback && (
+                <Animatable.View
+                  animation="fadeIn"
+                  duration={300}
+                  style={[
+                    styles.feedbackCard,
+                    isCorrect
+                      ? styles.correctFeedback
+                      : styles.incorrectFeedback,
+                  ]}
+                >
+                  <View style={styles.feedbackIconContainer}>
+                    {isCorrect ? (
+                      <Check width={24} height={24} color={BASE_COLORS.white} />
+                    ) : (
+                      <AlertCircle
+                        width={24}
+                        height={24}
+                        color={BASE_COLORS.white}
+                      />
+                    )}
+                  </View>
+                  <Text style={styles.feedbackText}>
+                    {isCorrect
+                      ? "Correct! Well done."
+                      : attemptsLeft > 0
+                      ? `Incorrect! ${attemptsLeft} attempt${
+                          attemptsLeft === 1 ? "" : "s"
+                        } left.`
+                      : "Incorrect! No attempts left."}
+                  </Text>
+                </Animatable.View>
+              )}
 
               {/* Hint and Translation Buttons */}
               <View style={styles.helpButtonsContainer}>
@@ -479,6 +494,18 @@ const styles = StyleSheet.create({
     right: 90,
     opacity: 0.7,
   },
+  attemptsDots: {
+    flexDirection: "row",
+    justifyContent: "center",
+    marginTop: 4,
+    gap: 6,
+  },
+  attemptDot: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    backgroundColor: BASE_COLORS.white,
+  },
   hintButton: {
     flex: 1,
     backgroundColor: "rgba(255, 255, 255, 0.15)",
@@ -510,6 +537,38 @@ const styles = StyleSheet.create({
     fontFamily: "Poppins-Regular",
     color: BASE_COLORS.white,
     fontStyle: "italic",
+  },
+  feedbackCard: {
+    borderRadius: 16,
+    padding: 16,
+    marginVertical: 16,
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  correctFeedback: {
+    backgroundColor: "rgba(34, 197, 94, 0.2)",
+    borderWidth: 1,
+    borderColor: BASE_COLORS.success,
+  },
+  incorrectFeedback: {
+    backgroundColor: "rgba(239, 68, 68, 0.2)",
+    borderWidth: 1,
+    borderColor: BASE_COLORS.danger,
+  },
+  feedbackIconContainer: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: "rgba(255, 255, 255, 0.2)",
+    justifyContent: "center",
+    alignItems: "center",
+    marginRight: 12,
+  },
+  feedbackText: {
+    fontSize: 16,
+    fontFamily: "Poppins-Medium",
+    color: BASE_COLORS.white,
+    flex: 1,
   },
 });
 

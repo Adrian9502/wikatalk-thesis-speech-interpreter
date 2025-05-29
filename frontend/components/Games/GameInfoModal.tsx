@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useCallback } from "react";
 import {
   Modal,
   View,
@@ -24,206 +24,219 @@ interface GameInfoModalProps {
   difficulty?: string;
 }
 
-const GameInfoModal: React.FC<GameInfoModalProps> = ({
-  visible,
-  onClose,
-  onStart,
-  levelData,
-  gameMode,
-  isLoading = false,
-  difficulty = "Easy",
-}) => {
-  // Get gradient colors for the current difficulty
-  const getGradientColors = (): readonly [string, string] => {
-    // Check if the difficulty is a valid key in difficultyColors
-    if (difficulty && difficulty in difficultyColors) {
-      return difficultyColors[difficulty as DifficultyLevel];
-    }
+const GameInfoModal: React.FC<GameInfoModalProps> = React.memo(
+  ({
+    visible,
+    onClose,
+    onStart,
+    levelData,
+    gameMode,
+    isLoading = false,
+    difficulty = "Easy",
+  }) => {
+    // Get gradient colors for the current difficulty
+    const getGradientColors = (): readonly [string, string] => {
+      // Check if the difficulty is a valid key in difficultyColors
+      if (difficulty && difficulty in difficultyColors) {
+        return difficultyColors[difficulty as DifficultyLevel];
+      }
 
-    // Attempt to capitalize the difficulty to match keys
-    const capitalized =
-      difficulty.charAt(0).toUpperCase() + difficulty.slice(1).toLowerCase();
-    if (capitalized in difficultyColors) {
-      return difficultyColors[capitalized as DifficultyLevel];
-    }
+      // Attempt to capitalize the difficulty to match keys
+      const capitalized =
+        difficulty.charAt(0).toUpperCase() + difficulty.slice(1).toLowerCase();
+      if (capitalized in difficultyColors) {
+        return difficultyColors[capitalized as DifficultyLevel];
+      }
 
-    // Default fallback - explicitly typed as readonly tuple
-    return ["#2563EB", "#1E40AF"] as const;
-  };
+      // Default fallback - explicitly typed as readonly tuple
+      return ["#2563EB", "#1E40AF"] as const;
+    };
 
-  // Get game mode display name
-  const getGameModeName = () => {
-    switch (gameMode) {
-      case "multipleChoice":
-        return "Multiple Choice";
-      case "identification":
-        return "Word Identification";
-      case "fillBlanks":
-        return "Fill in the Blanks";
-      default:
-        return gameMode;
-    }
-  };
+    // Get game mode display name
+    const getGameModeName = () => {
+      switch (gameMode) {
+        case "multipleChoice":
+          return "Multiple Choice";
+        case "identification":
+          return "Word Identification";
+        case "fillBlanks":
+          return "Fill in the Blanks";
+        default:
+          return gameMode;
+      }
+    };
 
-  // Determine focus area icon based on level description
-  const renderFocusIcon = () => {
-    const description = levelData?.description || "";
+    // Determine focus area icon based on level description
+    const renderFocusIcon = () => {
+      const description = levelData?.description || "";
 
-    if (description.includes("Grammar")) {
-      return <AlertTriangle width={16} height={16} color="#FFFFFF" />;
-    } else if (description.includes("Pronunciation")) {
-      return <Star width={16} height={16} color="#FFFFFF" />;
-    } else {
-      return <BookOpen width={16} height={16} color="#FFFFFF" />;
-    }
-  };
+      if (description.includes("Grammar")) {
+        return <AlertTriangle width={16} height={16} color="#FFFFFF" />;
+      } else if (description.includes("Pronunciation")) {
+        return <Star width={16} height={16} color="#FFFFFF" />;
+      } else {
+        return <BookOpen width={16} height={16} color="#FFFFFF" />;
+      }
+    };
 
-  // Determine focus area text
-  const getFocusAreaText = () => {
-    const description = levelData?.description || "";
+    // Determine focus area text
+    const getFocusAreaText = () => {
+      const description = levelData?.description || "";
 
-    if (description.includes("Grammar")) {
-      return "Grammar";
-    } else if (description.includes("Pronunciation")) {
-      return "Pronunciation";
-    } else {
-      return "Vocabulary";
-    }
-  };
+      if (description.includes("Grammar")) {
+        return "Grammar";
+      } else if (description.includes("Pronunciation")) {
+        return "Pronunciation";
+      } else {
+        return "Vocabulary";
+      }
+    };
 
-  if (!levelData) return null;
+    // Optimize the start button handler
+    const handleStart = useCallback(() => {
+      if (isLoading) return;
+      onStart();
+    }, [isLoading, onStart]);
 
-  return (
-    <Modal
-      visible={visible}
-      transparent
-      animationType="fade"
-      statusBarTranslucent
-      onRequestClose={onClose}
-    >
-      <Animatable.View animation="fadeIn" duration={300} style={styles.overlay}>
+    // Return null early if not visible
+    if (!visible || !levelData) return null;
+
+    return (
+      <Modal
+        visible={visible}
+        transparent
+        animationType="fade"
+        statusBarTranslucent
+        onRequestClose={onClose}
+      >
         <Animatable.View
-          animation="zoomIn"
-          duration={400}
-          style={styles.modalContainer}
+          animation="fadeIn"
+          duration={300}
+          style={styles.overlay}
         >
-          <LinearGradient
-            colors={getGradientColors()}
-            start={{ x: 0, y: 0 }}
-            end={{ x: 1, y: 1 }}
-            style={styles.modalContent}
+          <Animatable.View
+            animation="zoomIn"
+            duration={400}
+            style={styles.modalContainer}
           >
-            {/* Decorative elements */}
-            <View style={styles.decorativeShape1} />
-            <View style={styles.decorativeShape2} />
-
-            {/* Close button */}
-            <TouchableOpacity
-              style={styles.closeButton}
-              onPress={onClose}
-              activeOpacity={0.8}
+            <LinearGradient
+              colors={getGradientColors()}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 1 }}
+              style={styles.modalContent}
             >
-              <X width={20} height={20} color="#fff" />
-            </TouchableOpacity>
+              {/* Decorative elements */}
+              <View style={styles.decorativeShape1} />
+              <View style={styles.decorativeShape2} />
 
-            {/* Level header */}
-            <Animatable.View
-              animation="fadeInDown"
-              duration={600}
-              delay={100}
-              style={styles.levelHeader}
-            >
-              <View style={styles.levelNumberContainer}>
-                <Text style={styles.levelNumber}>Level {levelData.id}</Text>
-              </View>
-              <Text style={styles.levelTitle}>{levelData.title}</Text>
-            </Animatable.View>
-
-            {/* Level badges */}
-            <Animatable.View
-              animation="fadeIn"
-              duration={600}
-              delay={200}
-              style={styles.badgesContainer}
-            >
-              <View style={styles.difficultyBadge}>
-                <Text style={styles.difficultyText}>{difficulty}</Text>
-              </View>
-
-              <View style={styles.focusAreaBadge}>
-                {renderFocusIcon()}
-                <Text style={styles.focusAreaText}>{getFocusAreaText()}</Text>
-              </View>
-            </Animatable.View>
-
-            {/* Level description */}
-            <Animatable.View
-              animation="fadeIn"
-              duration={600}
-              delay={250}
-              style={styles.descriptionContainer}
-            >
-              <Text style={styles.levelDescription}>
-                {levelData.description}
-              </Text>
-            </Animatable.View>
-
-            {/* Game mode info */}
-            <Animatable.View
-              animation="fadeIn"
-              duration={600}
-              delay={300}
-              style={styles.gameModeContainer}
-            >
-              <View style={styles.infoRow}>
-                <Text style={styles.infoLabel}>Game Mode:</Text>
-                <Text style={styles.infoValue}>{getGameModeName()}</Text>
-              </View>
-            </Animatable.View>
-
-            {/* How to play */}
-            <Animatable.View
-              animation="fadeIn"
-              duration={600}
-              delay={350}
-              style={styles.rulesContainer}
-            >
-              <Text style={styles.rulesTitle}>How to Play:</Text>
-              <Text style={styles.rulesText}>
-                {gameMode === "multipleChoice"
-                  ? "Select the correct answer from the options provided. The timer will stop when you answer. Be quick but accurate!"
-                  : gameMode === "identification"
-                  ? "Identify the correct word in the sentence. Tap on it to select. Read carefully before making your choice."
-                  : "Fill in the blank with the correct word from the options. Choose wisely as you only get one chance!"}
-              </Text>
-            </Animatable.View>
-
-            {/* Start button */}
-            <Animatable.View
-              animation="fadeInUp"
-              duration={600}
-              delay={400}
-              style={styles.buttonContainer}
-            >
+              {/* Close button */}
               <TouchableOpacity
-                style={styles.startButton}
-                onPress={onStart}
-                disabled={isLoading}
+                style={styles.closeButton}
+                onPress={onClose}
                 activeOpacity={0.8}
               >
-                {isLoading ? (
-                  <ActivityIndicator size="small" color="#000" />
-                ) : (
-                  <Text style={styles.startButtonText}>Start Level</Text>
-                )}
+                <X width={20} height={20} color="#fff" />
               </TouchableOpacity>
-            </Animatable.View>
-          </LinearGradient>
+
+              {/* Level header */}
+              <Animatable.View
+                animation="fadeInDown"
+                duration={600}
+                delay={100}
+                style={styles.levelHeader}
+              >
+                <View style={styles.levelNumberContainer}>
+                  <Text style={styles.levelNumber}>Level {levelData.id}</Text>
+                </View>
+                <Text style={styles.levelTitle}>{levelData.title}</Text>
+              </Animatable.View>
+
+              {/* Level badges */}
+              <Animatable.View
+                animation="fadeIn"
+                duration={600}
+                delay={200}
+                style={styles.badgesContainer}
+              >
+                <View style={styles.difficultyBadge}>
+                  <Text style={styles.difficultyText}>{difficulty}</Text>
+                </View>
+
+                <View style={styles.focusAreaBadge}>
+                  {renderFocusIcon()}
+                  <Text style={styles.focusAreaText}>{getFocusAreaText()}</Text>
+                </View>
+              </Animatable.View>
+
+              {/* Level description */}
+              <Animatable.View
+                animation="fadeIn"
+                duration={600}
+                delay={250}
+                style={styles.descriptionContainer}
+              >
+                <Text style={styles.levelDescription}>
+                  {levelData.description}
+                </Text>
+              </Animatable.View>
+
+              {/* Game mode info */}
+              <Animatable.View
+                animation="fadeIn"
+                duration={600}
+                delay={300}
+                style={styles.gameModeContainer}
+              >
+                <View style={styles.infoRow}>
+                  <Text style={styles.infoLabel}>Game Mode:</Text>
+                  <Text style={styles.infoValue}>{getGameModeName()}</Text>
+                </View>
+              </Animatable.View>
+
+              {/* How to play */}
+              <Animatable.View
+                animation="fadeIn"
+                duration={600}
+                delay={350}
+                style={styles.rulesContainer}
+              >
+                <Text style={styles.rulesTitle}>How to Play:</Text>
+                <Text style={styles.rulesText}>
+                  {gameMode === "multipleChoice"
+                    ? "Select the correct answer from the options provided. The timer will stop when you answer. Be quick but accurate!"
+                    : gameMode === "identification"
+                    ? "Identify the correct word in the sentence. Tap on it to select. Read carefully before making your choice."
+                    : "Fill in the blank with the correct word from the options. Choose wisely as you only get one chance!"}
+                </Text>
+              </Animatable.View>
+
+              {/* Start button */}
+              <Animatable.View
+                animation="fadeInUp"
+                duration={600}
+                delay={400}
+                style={styles.buttonContainer}
+              >
+                <TouchableOpacity
+                  style={styles.startButton}
+                  onPress={handleStart}
+                  disabled={isLoading}
+                  activeOpacity={0.8}
+                >
+                  {isLoading ? (
+                    <ActivityIndicator size="small" color="#000" />
+                  ) : (
+                    <Text style={styles.startButtonText}>START LEVEL</Text>
+                  )}
+                </TouchableOpacity>
+              </Animatable.View>
+            </LinearGradient>
+          </Animatable.View>
         </Animatable.View>
-      </Animatable.View>
-    </Modal>
-  );
-};
+      </Modal>
+    );
+  }
+);
 
 const styles = StyleSheet.create({
   overlay: {

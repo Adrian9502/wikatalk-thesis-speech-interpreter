@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import {
   View,
   ActivityIndicator,
@@ -14,9 +14,8 @@ import MultipleChoice from "./MultipleChoice";
 import Identification from "./Identification";
 import FillInTheBlank from "./FillInTheBlank";
 import GameInfoModal from "@/components/Games/GameInfoModal";
-
-// Import quiz data
-import quizData from "@/utils/Games/quizQuestions.json";
+import useQuizStore from "@/store/Games/useQuizStore";
+import AppLoading from "@/components/AppLoading";
 
 const Questions = () => {
   const params = useLocalSearchParams();
@@ -31,68 +30,63 @@ const Questions = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [showGame, setShowGame] = useState(skipModal);
 
-  // Get level-specific data based on game mode, difficulty, and level ID
-  const getLevelData = () => {
-    if (!gameMode || !quizData[gameMode]) {
-      return null;
-    }
+  // Get quiz store methods
+  const {
+    fetchQuestionsByMode,
+    getLevelData,
+    isLoading: storeLoading,
+    error,
+  } = useQuizStore();
 
-    // First try the specified difficulty
-    if (quizData[gameMode][difficulty]) {
-      const levelInCurrentDifficulty = quizData[gameMode][difficulty].find(
-        (item) => item.id === levelId
-      );
-
-      if (levelInCurrentDifficulty) {
-        return levelInCurrentDifficulty;
-      }
-    }
-
-    // If not found, try to find the level in any difficulty
-    const difficulties = Object.keys(quizData[gameMode]);
-    for (const diff of difficulties) {
-      const levelInDifficulty = quizData[gameMode][diff].find(
-        (item) => item.id === levelId
-      );
-      if (levelInDifficulty) {
-        // Return the level and the found difficulty - but DON'T update params here
-        return {
-          levelData: levelInDifficulty,
-          foundDifficulty: diff,
-        };
-      }
-    }
-
-    // If still not found, return the first level of the current difficulty as fallback
-    if (
-      quizData[gameMode][difficulty] &&
-      quizData[gameMode][difficulty].length > 0
-    ) {
-      return quizData[gameMode][difficulty][0];
-    }
-
-    return null;
-  };
-
-  const levelDataResult = getLevelData();
+  // State for level data
   const [levelData, setLevelData] = useState(null);
   const [actualDifficulty, setActualDifficulty] = useState(difficulty);
 
-  // Use an effect to handle router updates instead of during render
+  // Add local loading state
+  const [localLoading, setLocalLoading] = useState(true);
+
+  // Fetch questions on component mount
   useEffect(() => {
-    if (levelDataResult) {
-      if (levelDataResult.foundDifficulty) {
-        // We found the level in a different difficulty
-        setLevelData(levelDataResult.levelData);
-        setActualDifficulty(levelDataResult.foundDifficulty);
-        // Update URL params safely outside render
-        router.setParams({ difficulty: levelDataResult.foundDifficulty });
-      } else {
-        // Normal case - level is in expected difficulty
-        setLevelData(levelDataResult);
+    const loadQuizData = async () => {
+      setLocalLoading(true);
+      try {
+        // Start with shorter timeouts
+        const result = getLevelData(gameMode, levelId, difficulty);
+
+        if (result) {
+          // If we have the data already, use it immediately
+          if (result.foundDifficulty) {
+            setLevelData(result.levelData);
+            setActualDifficulty(result.foundDifficulty);
+          } else {
+            setLevelData(result);
+          }
+          // Small delay to prevent flicker
+          setTimeout(() => setLocalLoading(false), 100);
+          return; // Exit early if we have data
+        }
+
+        // Only fetch from API if we don't have the data cached
+        await fetchQuestionsByMode(gameMode);
+
+        const updatedResult = getLevelData(gameMode, levelId, difficulty);
+        if (updatedResult) {
+          if (updatedResult.foundDifficulty) {
+            setLevelData(updatedResult.levelData);
+            setActualDifficulty(updatedResult.foundDifficulty);
+          } else {
+            setLevelData(updatedResult);
+          }
+        }
+        setLocalLoading(false);
+      } catch (error) {
+        console.error("Error loading quiz data:", error);
+        setLocalLoading(false);
       }
-    }
-  }, [levelDataResult]);
+    };
+
+    loadQuizData();
+  }, [gameMode, levelId, difficulty]);
 
   // Handle game start
   const handleStartGame = () => {
@@ -119,10 +113,27 @@ const Questions = () => {
     router.back();
   };
 
-  // Render the appropriate game component based on the mode
-  const renderGameComponent = () => {
+  // Add memoization for better performance
+  const renderGameComponent = useCallback(() => {
+    if (storeLoading) {
+      return <ActivityIndicator size="large" color={BASE_COLORS.blue} />;
+    }
+
+    if (error) {
+      return (
+        <View style={styles.errorContainer}>
+          <Text style={styles.errorText}>{error}</Text>
+          <TouchableOpacity
+            style={styles.backButton}
+            onPress={() => router.replace("/(tabs)/Games")}
+          >
+            <Text style={styles.backButtonText}>Back to Games</Text>
+          </TouchableOpacity>
+        </View>
+      );
+    }
+
     if (!levelData) {
-      // Show a more informative message instead of redirecting immediately
       return (
         <View style={styles.errorContainer}>
           <Text style={styles.errorText}>
@@ -138,14 +149,24 @@ const Questions = () => {
       );
     }
 
-    // Add isStarted prop to game components
+    // If the game hasn't started yet, show a loading indicator
+    if (!gameStarted) {
+      return (
+        <View style={styles.loaderContainer}>
+          <ActivityIndicator size="large" color={BASE_COLORS.blue} />
+          <Text style={styles.loadingText}>Preparing your game...</Text>
+        </View>
+      );
+    }
+
+    // Use a switch-case for better performance than multiple if-else
     switch (gameMode) {
       case "multipleChoice":
         return (
           <MultipleChoice
             levelId={levelId}
             levelData={levelData}
-            difficulty={difficulty}
+            difficulty={actualDifficulty}
             isStarted={gameStarted}
           />
         );
@@ -154,7 +175,7 @@ const Questions = () => {
           <Identification
             levelId={levelId}
             levelData={levelData}
-            difficulty={difficulty}
+            difficulty={actualDifficulty}
             isStarted={gameStarted}
           />
         );
@@ -163,16 +184,24 @@ const Questions = () => {
           <FillInTheBlank
             levelId={levelId}
             levelData={levelData}
-            difficulty={difficulty}
+            difficulty={actualDifficulty}
             isStarted={gameStarted}
           />
         );
       default:
         // Redirect back to games if invalid mode
-        setTimeout(() => router.replace("/(tabs)/Games"), 1000);
+        router.replace("/(tabs)/Games");
         return <ActivityIndicator size="large" color={BASE_COLORS.blue} />;
     }
-  };
+  }, [
+    levelData,
+    gameMode,
+    levelId,
+    actualDifficulty,
+    gameStarted,
+    storeLoading,
+    error,
+  ]);
 
   // Log when the game state changes
   useEffect(() => {
@@ -180,6 +209,11 @@ const Questions = () => {
       console.log("Game has started:", gameMode, levelId);
     }
   }, [gameStarted]);
+
+  // Show loading state while fetching or initializing
+  if (localLoading || storeLoading || (!showGame && !showInfoModal)) {
+    return <AppLoading />;
+  }
 
   return (
     <View style={styles.container}>
@@ -193,7 +227,7 @@ const Questions = () => {
         levelData={levelData}
         gameMode={gameMode}
         isLoading={isLoading}
-        difficulty={difficulty}
+        difficulty={actualDifficulty}
       />
     </View>
   );
@@ -227,6 +261,18 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontFamily: "Poppins-SemiBold",
     color: BASE_COLORS.white,
+  },
+  loaderContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "#111B21",
+  },
+  loadingText: {
+    fontSize: 16,
+    fontFamily: "Poppins-Medium",
+    color: BASE_COLORS.white,
+    marginTop: 10,
   },
 });
 

@@ -9,33 +9,58 @@ import {
 } from "react-native";
 import React, { useState, useEffect } from "react";
 import { useLocalSearchParams, router } from "expo-router";
-import { ArrowLeft, Star, BookOpen, AlertTriangle } from "react-native-feather";
+import {
+  ArrowLeft,
+  Star,
+  BookOpen,
+  AlertTriangle,
+  CheckCircle,
+  Circle,
+  RefreshCw,
+} from "react-native-feather";
 import { LinearGradient } from "expo-linear-gradient";
 import * as Animatable from "react-native-animatable";
 import useThemeStore from "@/store/useThemeStore";
 import { BASE_COLORS } from "@/constant/colors";
 import { SafeAreaView } from "react-native-safe-area-context";
-import quizData from "@/utils/Games/quizQuestions.json";
 import GameInfoModal from "@/components/Games/GameInfoModal";
+import useQuizStore from "@/store/Games/useQuizStore";
+import DotsLoader from "@/components/DotLoader";
 
-const convertQuizToLevels = (gameMode) => {
+// Update the convertQuizToLevels function to fix level numbering
+const convertQuizToLevels = (gameMode, quizData) => {
+  console.log(
+    `Attempting to convert ${gameMode} data: ${
+      quizData
+        ? `Has ${gameMode} key: ${!!quizData[gameMode]}`
+        : "No quizData provided"
+    }`
+  );
+
   if (!quizData[gameMode]) return [];
 
   const difficulties = Object.keys(quizData[gameMode]);
+  console.log(`Found difficulties for ${gameMode}:`, difficulties);
+
   let allLevels = [];
+  let levelNumber = 1; // Start numbering from 1 for each game mode
 
   difficulties.forEach((difficulty, diffIndex) => {
     const difficultyQuestions = quizData[gameMode][difficulty] || [];
+    console.log(
+      `${gameMode}/${difficulty}: ${difficultyQuestions.length} questions`
+    );
 
     const levelsFromDifficulty = difficultyQuestions.map((item, index) => {
       const overallIndex = diffIndex * 5 + index;
       // Make all levels either completed or current, never locked
       const status = overallIndex < 3 ? "completed" : "current";
 
-      return {
-        id: item.id,
-        number: item.id,
-        title: item.title || `Level ${item.id}`,
+      // Create a level with sequential numbering
+      const level = {
+        id: item.id, // Keep original ID for internal reference
+        number: levelNumber++, // Use sequential number starting from 1
+        title: item.title || `Level ${levelNumber - 1}`, // Use level number in title if none provided
         description: item.description || "Practice your skills",
         difficulty: difficulty.charAt(0).toUpperCase() + difficulty.slice(1),
         status: status, // No more "locked" status
@@ -48,11 +73,14 @@ const convertQuizToLevels = (gameMode) => {
         questionData: item,
         difficultyCategory: difficulty,
       };
+
+      return level;
     });
 
     allLevels = [...allLevels, ...levelsFromDifficulty];
   });
 
+  console.log(`Converted ${allLevels.length} levels for ${gameMode}`);
   return allLevels;
 };
 
@@ -62,16 +90,60 @@ const LevelSelection = () => {
   const [levels, setLevels] = useState([]);
   const { activeTheme } = useThemeStore();
 
-  // New state variables for modal
+  // Get quiz store methods - only use store's loading and error states
+  const { fetchQuestionsByMode, questions, isLoading, error } = useQuizStore();
+
+  // Modal state variables
   const [selectedLevel, setSelectedLevel] = useState(null);
   const [showModal, setShowModal] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
+  const [isStartingGame, setIsStartingGame] = useState(false);
+  const [showLevels, setShowLevels] = useState(false);
 
+  // Fetch level data when component mounts
   useEffect(() => {
-    if (gameMode) {
-      setLevels(convertQuizToLevels(gameMode));
-    }
+    const fetchData = async () => {
+      if (gameMode) {
+        try {
+          await fetchQuestionsByMode(gameMode);
+        } catch (error) {
+          console.error("Error fetching questions:", error);
+        }
+      }
+    };
+
+    fetchData();
   }, [gameMode]);
+
+  // Process questions when they change in the store
+  useEffect(() => {
+    if (gameMode && questions) {
+      try {
+        console.log(
+          "Processing questions for levels:",
+          questions[gameMode]
+            ? Object.keys(questions[gameMode]).map(
+                (diff) => `${diff}: ${questions[gameMode][diff]?.length || 0}`
+              )
+            : "No questions data"
+        );
+
+        const currentLevels = convertQuizToLevels(gameMode, questions);
+        console.log(`Setting ${currentLevels.length} levels for UI`);
+        setLevels(currentLevels);
+
+        // Show levels with a small delay to ensure smooth animation
+        if (currentLevels.length > 0) {
+          setTimeout(() => {
+            setShowLevels(true);
+          }, 100);
+        }
+      } catch (error) {
+        console.error("Error converting levels:", error);
+        setLevels([]);
+        setShowLevels(false);
+      }
+    }
+  }, [gameMode, questions]);
 
   const completionPercentage =
     levels.length > 0
@@ -80,22 +152,20 @@ const LevelSelection = () => {
         100
       : 0;
 
-  // Updated handleLevelSelect - now it just shows the modal
   const handleLevelSelect = (level) => {
     if (level.status === "locked") return;
     setSelectedLevel(level);
     setShowModal(true);
   };
 
-  // New function to handle the START button press
   const handleStartGame = () => {
     if (!selectedLevel) return;
 
-    setIsLoading(true);
+    setIsStartingGame(true);
 
     // Simulate loading (can be removed if not needed)
     setTimeout(() => {
-      setIsLoading(false);
+      setIsStartingGame(false);
       setShowModal(false);
 
       // Navigate to Questions screen after modal is dismissed
@@ -107,11 +177,21 @@ const LevelSelection = () => {
             gameMode,
             gameTitle,
             difficulty: selectedLevel.difficultyCategory,
-            skipModal: "true", // Add this parameter to skip showing modal again
+            skipModal: "true",
           },
         });
       }, 300);
     }, 1000);
+  };
+
+  const handleRetry = async () => {
+    if (gameMode) {
+      try {
+        await fetchQuestionsByMode(gameMode);
+      } catch (error) {
+        console.error("Error retrying fetch:", error);
+      }
+    }
   };
 
   const handleBack = () => {
@@ -144,14 +224,13 @@ const LevelSelection = () => {
       <Animatable.View
         animation="fadeIn"
         duration={500}
-        delay={level.id * 50}
+        delay={level.id * 15}
         key={level.id}
       >
         <TouchableOpacity
-          activeOpacity={0.8} // Same opacity for all levels
+          activeOpacity={0.8}
           onPress={() => handleLevelSelect(level)}
-          // Removed disabled={level.status === "locked"}
-          style={styles.levelCard} // Removed conditional styling
+          style={styles.levelCard}
         >
           <LinearGradient
             colors={gradientColors}
@@ -166,7 +245,13 @@ const LevelSelection = () => {
               <View style={styles.levelNumberContainer}>
                 <Text style={styles.levelNumber}>{level.number}</Text>
               </View>
-              {/* Removed lock icon code */}
+              <View style={styles.specialIconContainer}>
+                {level.status === "completed" ? (
+                  <CheckCircle width={20} height={20} color="#FFFFFF" />
+                ) : (
+                  <Circle width={20} height={20} color="#FFFFFF" />
+                )}
+              </View>
             </View>
             <View style={styles.levelInfo}>
               <Text style={styles.levelTitle}>{level.title}</Text>
@@ -186,6 +271,62 @@ const LevelSelection = () => {
     );
   };
 
+  const renderContent = () => {
+    // Show loading state
+    if (isLoading) {
+      return (
+        <View style={styles.loaderContainer}>
+          <DotsLoader />
+        </View>
+      );
+    }
+
+    // Show error state
+    if (error) {
+      return (
+        <View style={styles.errorContainer}>
+          <AlertTriangle width={48} height={48} color={BASE_COLORS.error} />
+          <Text style={styles.errorTitle}>Unable to Load Levels</Text>
+          <Text style={styles.errorMessage}>{error}</Text>
+          <TouchableOpacity onPress={handleRetry} style={styles.retryButton}>
+            <RefreshCw width={20} height={20} color={BASE_COLORS.white} />
+            <Text style={styles.retryButtonText}>Try Again</Text>
+          </TouchableOpacity>
+        </View>
+      );
+    }
+
+    // Show loading state while preparing animations
+    if (levels.length > 0 && !showLevels) {
+      return (
+        <View style={styles.loaderContainer}>
+          <DotsLoader />
+        </View>
+      );
+    }
+
+    // Show levels grid with animations
+    if (showLevels) {
+      return (
+        <ScrollView
+          contentContainerStyle={styles.gridScrollContent}
+          showsVerticalScrollIndicator={false}
+        >
+          <View style={styles.levelGrid}>
+            {levels.map((level) => renderLevelCard(level))}
+          </View>
+        </ScrollView>
+      );
+    }
+
+    // Fallback empty state
+    return (
+      <View style={styles.loaderContainer}>
+        <DotsLoader />
+      </View>
+    );
+  };
+
   return (
     <View
       style={[
@@ -200,9 +341,10 @@ const LevelSelection = () => {
       <View style={styles.decorativeCircle3} />
 
       <SafeAreaView style={styles.safeArea}>
+        {/* Header */}
         <Animatable.View
           animation="fadeIn"
-          duration={800}
+          duration={500}
           style={styles.header}
         >
           <TouchableOpacity onPress={handleBack} style={styles.backButton}>
@@ -215,6 +357,7 @@ const LevelSelection = () => {
           <View style={{ width: 40 }} />
         </Animatable.View>
 
+        {/* Progress bar */}
         <Animatable.View
           animation="fadeIn"
           duration={800}
@@ -242,16 +385,10 @@ const LevelSelection = () => {
           </View>
         </Animatable.View>
 
-        <ScrollView
-          contentContainerStyle={styles.gridScrollContent}
-          showsVerticalScrollIndicator={false}
-        >
-          <View style={styles.levelGrid}>
-            {levels.map((level) => renderLevelCard(level))}
-          </View>
-        </ScrollView>
+        {/* Content Area */}
+        <View style={styles.contentArea}>{renderContent()}</View>
 
-        {/* Add GameInfoModal */}
+        {/* GameInfoModal */}
         {selectedLevel && (
           <GameInfoModal
             visible={showModal}
@@ -259,7 +396,7 @@ const LevelSelection = () => {
             onStart={handleStartGame}
             levelData={selectedLevel.questionData}
             gameMode={gameMode as string}
-            isLoading={isLoading}
+            isLoading={isStartingGame}
             difficulty={selectedLevel.difficulty}
           />
         )}
@@ -328,7 +465,7 @@ const styles = StyleSheet.create({
     textAlign: "center",
   },
   headerSubtitle: {
-    fontSize: 14,
+    fontSize: 13,
     fontFamily: "Poppins-Regular",
     color: BASE_COLORS.white,
     opacity: 0.8,
@@ -431,12 +568,6 @@ const styles = StyleSheet.create({
     fontFamily: "Poppins-Bold",
     color: BASE_COLORS.white,
   },
-  lockIconContainer: {
-    width: 30,
-    height: 30,
-    justifyContent: "center",
-    alignItems: "center",
-  },
   specialIconContainer: {
     width: 30,
     height: 30,
@@ -484,6 +615,61 @@ const styles = StyleSheet.create({
     fontSize: 12,
     fontFamily: "Poppins-SemiBold",
     color: BASE_COLORS.white,
+  },
+  contentArea: {
+    flex: 1,
+    position: "relative",
+  },
+  // Loading state styles
+  loaderContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  loadingText: {
+    marginTop: 16,
+    fontSize: 16,
+    fontFamily: "Poppins-Medium",
+    color: BASE_COLORS.white,
+    textAlign: "center",
+  },
+  // Error state styles
+  errorContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    padding: 20,
+  },
+  errorTitle: {
+    fontSize: 20,
+    fontFamily: "Poppins-SemiBold",
+    color: BASE_COLORS.white,
+    textAlign: "center",
+    marginTop: 16,
+    marginBottom: 8,
+  },
+  errorMessage: {
+    fontSize: 16,
+    fontFamily: "Poppins-Regular",
+    color: BASE_COLORS.white,
+    textAlign: "center",
+    opacity: 0.8,
+    marginBottom: 24,
+    lineHeight: 24,
+  },
+  retryButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: BASE_COLORS.blue,
+    paddingHorizontal: 24,
+    paddingVertical: 12,
+    borderRadius: 12,
+  },
+  retryButtonText: {
+    fontSize: 16,
+    fontFamily: "Poppins-Medium",
+    color: BASE_COLORS.white,
+    marginLeft: 8,
   },
 });
 

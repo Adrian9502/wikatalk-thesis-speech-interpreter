@@ -4,7 +4,6 @@ import { router } from "expo-router";
 import { ArrowRight } from "react-native-feather";
 import { LinearGradient } from "expo-linear-gradient";
 import { BASE_COLORS, gameModeNavigationColors } from "@/constant/colors";
-import { handleNextLevel as gameUtilsNextLevel } from "@/utils/gameUtils";
 import gameSharedStyles from "@/styles/gamesSharedStyles";
 
 interface GameNavigationProps {
@@ -26,7 +25,7 @@ const GameNavigation: React.FC<GameNavigationProps> = ({
   const numericLevelId = Number(levelId);
 
   const handleBackToLevels = () => {
-    router.push({
+    router.replace({
       pathname: "/(games)/Levels",
       params: {
         gameMode,
@@ -44,7 +43,6 @@ const GameNavigation: React.FC<GameNavigationProps> = ({
   const handleNextLevel = () => {
     console.log(`Navigating to level ${numericLevelId + 1} for ${gameMode}`);
 
-    // Use direct navigation with replace to force a fresh load
     router.replace({
       pathname: "/(games)/Questions",
       params: {
@@ -62,7 +60,7 @@ const GameNavigation: React.FC<GameNavigationProps> = ({
     newGameMode: string,
     newGameTitle: string
   ) => {
-    router.push({
+    router.replace({
       pathname: "/(games)/Levels",
       params: {
         gameMode: newGameMode,

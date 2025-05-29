@@ -1,0 +1,2606 @@
+{
+  "questions": [
+    {
+      "questionId": 1,
+      "level": "Level 1",
+      "difficulty": "easy",
+      "mode": "multipleChoice",
+      "title": "Tagalog: Everyday Action",
+      "description": "Understanding common Tagalog verbs",
+      "question": "What is the meaning of 'Naglalakad'?",
+      "options": [
+        { "id": "a", "text": "Sitting", "isCorrect": false },
+        { "id": "b", "text": "Walking", "isCorrect": true },
+        { "id": "c", "text": "Sleeping", "isCorrect": false },
+        { "id": "d", "text": "Eating", "isCorrect": false }
+      ]
+    },
+    {
+      "questionId": 2,
+      "level": "Level 2",
+      "difficulty": "easy",
+      "mode": "multipleChoice",
+      "title": "Tagalog: Basic Actions",
+      "description": "Identify a simple Tagalog verb",
+      "question": "What is the meaning of 'Kumakain'?",
+      "options": [
+        { "id": "a", "text": "Sleeping", "isCorrect": false },
+        { "id": "b", "text": "Eating", "isCorrect": true },
+        { "id": "c", "text": "Jumping", "isCorrect": false },
+        { "id": "d", "text": "Washing", "isCorrect": false }
+      ]
+    },
+    {
+      "questionId": 3,
+      "level": "Level 3",
+      "difficulty": "easy",
+      "mode": "multipleChoice",
+      "title": "Cebuano: Simple Daily Action",
+      "description": "Understand basic Cebuano verbs",
+      "question": "What does 'Tulog ko' mean?",
+      "options": [
+        { "id": "a", "text": "I’m sleeping", "isCorrect": true },
+        { "id": "b", "text": "I’m working", "isCorrect": false },
+        { "id": "c", "text": "I’m cooking", "isCorrect": false },
+        { "id": "d", "text": "I’m running", "isCorrect": false }
+      ]
+    },
+    {
+      "questionId": 4,
+      "level": "Level 4",
+      "difficulty": "easy",
+      "mode": "multipleChoice",
+      "title": "Hiligaynon: Easy Verbs",
+      "description": "Beginner-level Hiligaynon verb",
+      "question": "What does 'Nagakanta siya' mean?",
+      "options": [
+        { "id": "a", "text": "He is eating", "isCorrect": false },
+        { "id": "b", "text": "He is singing", "isCorrect": true },
+        { "id": "c", "text": "He is jumping", "isCorrect": false },
+        { "id": "d", "text": "He is fixing", "isCorrect": false }
+      ]
+    },
+    {
+      "questionId": 5,
+      "level": "Level 5",
+      "difficulty": "easy",
+      "mode": "multipleChoice",
+      "title": "Kapampangan: Simple Actions",
+      "description": "Understanding basic Kapampangan verbs",
+      "question": "What does \"Mangan ku\" mean?",
+      "options": [
+        { "id": "a", "text": "I will sleep", "isCorrect": false },
+        { "id": "b", "text": "I will eat", "isCorrect": true },
+        { "id": "c", "text": "I will play", "isCorrect": false },
+        { "id": "d", "text": "I will run", "isCorrect": false }
+      ]
+    },
+    {
+      "questionId": 6,
+      "level": "Level 6",
+      "difficulty": "easy",
+      "mode": "multipleChoice",
+      "title": "Ilocano: Basic Verbs",
+      "description": "Recognize common verbs in Ilocano",
+      "question": "What is the meaning of \"Aginom ti danum\"?",
+      "options": [
+        { "id": "a", "text": "Eat food", "isCorrect": false },
+        { "id": "b", "text": "Drink water", "isCorrect": true },
+        { "id": "c", "text": "Go to school", "isCorrect": false },
+        { "id": "d", "text": "Wash dishes", "isCorrect": false }
+      ]
+    },
+    {
+      "questionId": 7,
+      "level": "Level 7",
+      "difficulty": "easy",
+      "mode": "multipleChoice",
+      "title": "Waray: Simple Tasks",
+      "description": "Understanding everyday Waray phrases",
+      "question": "What does \"Nakaligo na hiya\" mean?",
+      "options": [
+        { "id": "a", "text": "She is cooking", "isCorrect": false },
+        { "id": "b", "text": "She has taken a bath", "isCorrect": true },
+        { "id": "c", "text": "She is reading", "isCorrect": false },
+        { "id": "d", "text": "She is writing", "isCorrect": false }
+      ]
+    },
+    {
+      "questionId": 8,
+      "level": "Level 8",
+      "difficulty": "easy",
+      "mode": "multipleChoice",
+      "title": "Bicol: Common Activities",
+      "description": "Identify basic Bicol verbs",
+      "question": "What does \"Nagbabasa siya nin libro\" mean?",
+      "options": [
+        { "id": "a", "text": "He is dancing", "isCorrect": false },
+        { "id": "b", "text": "He is reading a book", "isCorrect": true },
+        { "id": "c", "text": "He is fixing the bed", "isCorrect": false },
+        { "id": "d", "text": "He is listening to music", "isCorrect": false }
+      ]
+    },
+    {
+      "questionId": 9,
+      "level": "Level 9",
+      "difficulty": "easy",
+      "mode": "multipleChoice",
+      "title": "Cebuano: Routine Phrases",
+      "description": "Simple Cebuano expressions",
+      "question": "What does \"Maligo ko karon\" mean?",
+      "options": [
+        { "id": "a", "text": "I will cook later", "isCorrect": false },
+        { "id": "b", "text": "I will take a bath later", "isCorrect": true },
+        { "id": "c", "text": "I will drive later", "isCorrect": false },
+        { "id": "d", "text": "I will walk outside", "isCorrect": false }
+      ]
+    },
+    {
+      "questionId": 10,
+      "level": "Level 10",
+      "difficulty": "easy",
+      "mode": "multipleChoice",
+      "title": "Hiligaynon: Daily Routines",
+      "description": "Recognizing beginner-level verbs",
+      "question": "What does \"Nagakape si tatay\" mean?",
+      "options": [
+        { "id": "a", "text": "Father is reading", "isCorrect": false },
+        { "id": "b", "text": "Father is working", "isCorrect": false },
+        { "id": "c", "text": "Father is drinking coffee", "isCorrect": true },
+        { "id": "d", "text": "Father is cooking rice", "isCorrect": false }
+      ]
+    },
+    {
+      "questionId": 11,
+      "level": "Level 11",
+      "difficulty": "medium",
+      "mode": "multipleChoice",
+      "title": "Tagalog: Verb in Context",
+      "description": "Understand Tagalog verb usage",
+      "question": "What does \"Naglalakad siya papunta sa paaralan.\" mean?",
+      "options": [
+        { "id": "a", "text": "She is running to school", "isCorrect": false },
+        { "id": "b", "text": "She is walking to school", "isCorrect": true },
+        { "id": "c", "text": "She is skipping school", "isCorrect": false },
+        { "id": "d", "text": "She is leaving school", "isCorrect": false }
+      ]
+    },
+    {
+      "questionId": 12,
+      "level": "Level 12",
+      "difficulty": "medium",
+      "mode": "multipleChoice",
+      "title": "Cebuano: Descriptive Actions",
+      "description": "Identify correct verb interpretation",
+      "question": "What does \"Nagdula sila sa plaza.\" mean?",
+      "options": [
+        {
+          "id": "a",
+          "text": "They are eating in the plaza",
+          "isCorrect": false
+        },
+        {
+          "id": "b",
+          "text": "They are playing in the plaza",
+          "isCorrect": true
+        },
+        {
+          "id": "c",
+          "text": "They are sleeping in the plaza",
+          "isCorrect": false
+        },
+        {
+          "id": "d",
+          "text": "They are selling in the plaza",
+          "isCorrect": false
+        }
+      ]
+    },
+    {
+      "questionId": 13,
+      "level": "Level 13",
+      "difficulty": "medium",
+      "mode": "multipleChoice",
+      "title": "Ilocano: Mid-Level Verb",
+      "description": "Translate a routine sentence",
+      "question": "What does \"Agluto isuna ti pinitpit nga utong.\" mean?",
+      "options": [
+        { "id": "a", "text": "She is washing vegetables", "isCorrect": false },
+        {
+          "id": "b",
+          "text": "She is cooking chopped string beans",
+          "isCorrect": true
+        },
+        { "id": "c", "text": "She is peeling fruits", "isCorrect": false },
+        { "id": "d", "text": "She is slicing meat", "isCorrect": false }
+      ]
+    },
+    {
+      "questionId": 14,
+      "level": "Level 14",
+      "difficulty": "medium",
+      "mode": "multipleChoice",
+      "title": "Hiligaynon: Actions at Home",
+      "description": "Understand a common household activity",
+      "question": "What does \"Ginahugas niya ang mga plato.\" mean?",
+      "options": [
+        { "id": "a", "text": "He is breaking the plates", "isCorrect": false },
+        { "id": "b", "text": "He is washing the dishes", "isCorrect": true },
+        { "id": "c", "text": "He is cooking rice", "isCorrect": false },
+        { "id": "d", "text": "He is cleaning the table", "isCorrect": false }
+      ]
+    },
+    {
+      "questionId": 15,
+      "level": "Level 15",
+      "difficulty": "medium",
+      "mode": "multipleChoice",
+      "title": "Bicol: Everyday Tasks",
+      "description": "Interpret verbs used in daily activities",
+      "question": "What does \"Nagpapakakan siya nin irak\" mean?",
+      "options": [
+        { "id": "a", "text": "He is planting rice", "isCorrect": false },
+        { "id": "b", "text": "He is feeding the baby", "isCorrect": true },
+        { "id": "c", "text": "He is selling vegetables", "isCorrect": false },
+        { "id": "d", "text": "He is buying rice", "isCorrect": false }
+      ]
+    },
+    {
+      "questionId": 16,
+      "level": "Level 16",
+      "difficulty": "medium",
+      "mode": "multipleChoice",
+      "title": "Waray: Describing Habits",
+      "description": "Common Waray verbs in action",
+      "question": "What does \"Nagpapalit hiya hin tinapay ha tindahan.\" mean?",
+      "options": [
+        {
+          "id": "a",
+          "text": "He is making bread at the store",
+          "isCorrect": false
+        },
+        {
+          "id": "b",
+          "text": "He is buying bread at the store",
+          "isCorrect": true
+        },
+        { "id": "c", "text": "He is throwing bread", "isCorrect": false },
+        { "id": "d", "text": "He is selling bread", "isCorrect": false }
+      ]
+    },
+    {
+      "questionId": 17,
+      "level": "Level 17",
+      "difficulty": "medium",
+      "mode": "multipleChoice",
+      "title": "Pangasinan: Simple Communication",
+      "description": "Translate intent behind a Pangasinan verb",
+      "question": "What does \"Man-ebak ya balet\" mean?",
+      "options": [
+        { "id": "a", "text": "He is going to clean", "isCorrect": false },
+        { "id": "b", "text": "He is going home", "isCorrect": true },
+        { "id": "c", "text": "He is going to work", "isCorrect": false },
+        { "id": "d", "text": "He is traveling", "isCorrect": false }
+      ]
+    },
+    {
+      "questionId": 18,
+      "level": "Level 18",
+      "difficulty": "medium",
+      "mode": "multipleChoice",
+      "title": "Maguindanao: Community Action",
+      "description": "Identify the right interpretation",
+      "question": "What does \"Nagdatu ako sa panampalay\" mean?",
+      "options": [
+        { "id": "a", "text": "I harvested fish", "isCorrect": false },
+        { "id": "b", "text": "I went to the rice field", "isCorrect": true },
+        { "id": "c", "text": "I built a house", "isCorrect": false },
+        { "id": "d", "text": "I went to market", "isCorrect": false }
+      ]
+    },
+    {
+      "questionId": 19,
+      "level": "Level 19",
+      "difficulty": "medium",
+      "mode": "multipleChoice",
+      "title": "Kapampangan: Personal Routine",
+      "description": "Recognizing patterns of behavior",
+      "question": "What does \"Mibasa ku king librung Ingles.\" mean?",
+      "options": [
+        { "id": "a", "text": "I wrote a book", "isCorrect": false },
+        { "id": "b", "text": "I read the English book", "isCorrect": true },
+        { "id": "c", "text": "I bought a dictionary", "isCorrect": false },
+        { "id": "d", "text": "I opened a package", "isCorrect": false }
+      ]
+    },
+    {
+      "questionId": 20,
+      "level": "Level 20",
+      "difficulty": "medium",
+      "mode": "multipleChoice",
+      "title": "Bisaya: Home Tasks",
+      "description": "Understanding middle-difficulty verb",
+      "question": "What does \"Naglimpyo siya sa kwarto.\" mean?",
+      "options": [
+        { "id": "a", "text": "He is painting the room", "isCorrect": false },
+        { "id": "b", "text": "He is cleaning the room", "isCorrect": true },
+        { "id": "c", "text": "He is designing the room", "isCorrect": false },
+        { "id": "d", "text": "He is entering the room", "isCorrect": false }
+      ]
+    },
+    {
+      "questionId": 21,
+      "level": "Level 21",
+      "difficulty": "medium",
+      "mode": "multipleChoice",
+      "title": "Tagalog: Structured Activity",
+      "description": "Everyday structured tasks",
+      "question": "What does \"Nagsusulat siya ng liham sa kanyang kaibigan.\" mean?",
+      "options": [
+        { "id": "a", "text": "She is texting her friend", "isCorrect": false },
+        {
+          "id": "b",
+          "text": "She is writing a letter to her friend",
+          "isCorrect": true
+        },
+        { "id": "c", "text": "She is calling her friend", "isCorrect": false },
+        { "id": "d", "text": "She is ignoring her friend", "isCorrect": false }
+      ]
+    },
+    {
+      "questionId": 22,
+      "level": "Level 22",
+      "difficulty": "medium",
+      "mode": "multipleChoice",
+      "title": "Cebuano: Common Chores",
+      "description": "Daily household verb",
+      "question": "What does \"Nanglaba ko ganina buntag.\" mean?",
+      "options": [
+        {
+          "id": "a",
+          "text": "I was sweeping this morning",
+          "isCorrect": false
+        },
+        {
+          "id": "b",
+          "text": "I did the laundry this morning",
+          "isCorrect": true
+        },
+        { "id": "c", "text": "I cleaned the garden", "isCorrect": false },
+        { "id": "d", "text": "I studied this morning", "isCorrect": false }
+      ]
+    },
+    {
+      "questionId": 23,
+      "level": "Level 23",
+      "difficulty": "medium",
+      "mode": "multipleChoice",
+      "title": "Ilocano: Travel Verb",
+      "description": "Transportation-related activity",
+      "question": "What does \"Mapan isuna idiay mercado.\" mean?",
+      "options": [
+        { "id": "a", "text": "He is avoiding the market", "isCorrect": false },
+        { "id": "b", "text": "He is going to the market", "isCorrect": true },
+        {
+          "id": "c",
+          "text": "He is cooking at the market",
+          "isCorrect": false
+        },
+        { "id": "d", "text": "He is lost at the market", "isCorrect": false }
+      ]
+    },
+    {
+      "questionId": 24,
+      "level": "Level 24",
+      "difficulty": "medium",
+      "mode": "multipleChoice",
+      "title": "Hiligaynon: Food Context",
+      "description": "Action involving eating",
+      "question": "What does \"Nagapanihapon sila sang aga.\" mean?",
+      "options": [
+        {
+          "id": "a",
+          "text": "They are eating breakfast in the evening",
+          "isCorrect": false
+        },
+        {
+          "id": "b",
+          "text": "They are having dinner in the morning",
+          "isCorrect": true
+        },
+        { "id": "c", "text": "They are skipping dinner", "isCorrect": false },
+        { "id": "d", "text": "They are cooking lunch", "isCorrect": false }
+      ]
+    },
+    {
+      "questionId": 25,
+      "level": "Level 25",
+      "difficulty": "medium",
+      "mode": "multipleChoice",
+      "title": "Waray: Simple Errand",
+      "description": "Verb related to buying",
+      "question": "What does \"Mapalit ako hin gatas.\" mean?",
+      "options": [
+        { "id": "a", "text": "I will drink milk", "isCorrect": false },
+        { "id": "b", "text": "I will buy milk", "isCorrect": true },
+        { "id": "c", "text": "I will boil milk", "isCorrect": false },
+        { "id": "d", "text": "I will spill the milk", "isCorrect": false }
+      ]
+    },
+    {
+      "questionId": 26,
+      "level": "Level 26",
+      "difficulty": "medium",
+      "mode": "multipleChoice",
+      "title": "Bicol: Short Conversations",
+      "description": "Dialogue verb",
+      "question": "What does \"Nagtaram siya sa maestro.\" mean?",
+      "options": [
+        { "id": "a", "text": "He argued with the teacher", "isCorrect": false },
+        { "id": "b", "text": "He talked to the teacher", "isCorrect": true },
+        { "id": "c", "text": "He yelled at the teacher", "isCorrect": false },
+        { "id": "d", "text": "He ignored the teacher", "isCorrect": false }
+      ]
+    },
+    {
+      "questionId": 27,
+      "level": "Level 27",
+      "difficulty": "medium",
+      "mode": "multipleChoice",
+      "title": "Kapampangan: Directional Action",
+      "description": "Understanding motion",
+      "question": "What does \"Lumwal ya king balay.\" mean?",
+      "options": [
+        { "id": "a", "text": "He entered the house", "isCorrect": false },
+        { "id": "b", "text": "He went out of the house", "isCorrect": true },
+        { "id": "c", "text": "He ran around the house", "isCorrect": false },
+        { "id": "d", "text": "He cleaned the house", "isCorrect": false }
+      ]
+    },
+    {
+      "questionId": 28,
+      "level": "Level 28",
+      "difficulty": "medium",
+      "mode": "multipleChoice",
+      "title": "Pangasinan: School Routine",
+      "description": "Regular school activity",
+      "question": "What does \"Nanlapus la ed klase.\" mean?",
+      "options": [
+        { "id": "a", "text": "They failed the class", "isCorrect": false },
+        { "id": "b", "text": "They finished class", "isCorrect": true },
+        { "id": "c", "text": "They missed the exam", "isCorrect": false },
+        { "id": "d", "text": "They started a fight", "isCorrect": false }
+      ]
+    },
+    {
+      "questionId": 29,
+      "level": "Level 29",
+      "difficulty": "medium",
+      "mode": "multipleChoice",
+      "title": "Bisaya: Short-term Plans",
+      "description": "Describing planned action",
+      "question": "What does \"Mohawa ko sa trabaho ugma.\" mean?",
+      "options": [
+        {
+          "id": "a",
+          "text": "I’ll arrive at work tomorrow",
+          "isCorrect": false
+        },
+        {
+          "id": "b",
+          "text": "I’ll resign from work tomorrow",
+          "isCorrect": true
+        },
+        {
+          "id": "c",
+          "text": "I’ll work overtime tomorrow",
+          "isCorrect": false
+        },
+        { "id": "d", "text": "I’ll visit work tomorrow", "isCorrect": false }
+      ]
+    },
+    {
+      "questionId": 30,
+      "level": "Level 30",
+      "difficulty": "medium",
+      "mode": "multipleChoice",
+      "title": "Maguindanao: Statement with Emotion",
+      "description": "Action and feeling",
+      "question": "What does \"Nalipay ako sa imo tabang.\" mean?",
+      "options": [
+        { "id": "a", "text": "I am angry with your help", "isCorrect": false },
+        { "id": "b", "text": "I am happy with your help", "isCorrect": true },
+        { "id": "c", "text": "I am confused by your help", "isCorrect": false },
+        { "id": "d", "text": "I am questioning your help", "isCorrect": false }
+      ]
+    },
+    {
+      "questionId": 31,
+      "level": "Level 31",
+      "difficulty": "hard",
+      "mode": "multipleChoice",
+      "title": "Tagalog: Advanced Verb Tenses",
+      "description": "Identify correct aspect of the verb",
+      "question": "What does \"Makikinig siya sa lektura bukas ng umaga.\" mean?",
+      "options": [
+        {
+          "id": "a",
+          "text": "He is listening to the lecture now",
+          "isCorrect": false
+        },
+        {
+          "id": "b",
+          "text": "He listened to the lecture earlier",
+          "isCorrect": false
+        },
+        {
+          "id": "c",
+          "text": "He will listen to the lecture tomorrow morning",
+          "isCorrect": true
+        },
+        { "id": "d", "text": "He forgot the lecture", "isCorrect": false }
+      ]
+    },
+    {
+      "questionId": 32,
+      "level": "Level 32",
+      "difficulty": "hard",
+      "mode": "multipleChoice",
+      "title": "Cebuano: Passive Voice Construction",
+      "description": "Understand passive structure",
+      "question": "What does \"Gipalit ang libro sa tindahan.\" mean?",
+      "options": [
+        { "id": "a", "text": "The store bought a book", "isCorrect": false },
+        {
+          "id": "b",
+          "text": "The book was bought at the store",
+          "isCorrect": true
+        },
+        {
+          "id": "c",
+          "text": "They sold a book to the store",
+          "isCorrect": false
+        },
+        {
+          "id": "d",
+          "text": "Someone is looking for a book",
+          "isCorrect": false
+        }
+      ]
+    },
+    {
+      "questionId": 33,
+      "level": "Level 33",
+      "difficulty": "hard",
+      "mode": "multipleChoice",
+      "title": "Ilocano: Complex Sentence Structure",
+      "description": "Multiple actions in a sentence",
+      "question": "What does \"Kalpasan ti agtinnulongda, immayda idiay balay.\" mean?",
+      "options": [
+        {
+          "id": "a",
+          "text": "They arrived at home then helped",
+          "isCorrect": false
+        },
+        {
+          "id": "b",
+          "text": "After helping each other, they came home",
+          "isCorrect": true
+        },
+        {
+          "id": "c",
+          "text": "They went home to ask for help",
+          "isCorrect": false
+        },
+        { "id": "d", "text": "They fought at home", "isCorrect": false }
+      ]
+    },
+    {
+      "questionId": 34,
+      "level": "Level 34",
+      "difficulty": "hard",
+      "mode": "multipleChoice",
+      "title": "Waray: Contextual Meaning",
+      "description": "Inferring from full sentence",
+      "question": "What does \"Waray siya umabot ha klase tungod han bagyo.\" mean?",
+      "options": [
+        {
+          "id": "a",
+          "text": "He skipped class without reason",
+          "isCorrect": false
+        },
+        {
+          "id": "b",
+          "text": "He didn’t attend class because of the storm",
+          "isCorrect": true
+        },
+        {
+          "id": "c",
+          "text": "He was teaching during the storm",
+          "isCorrect": false
+        },
+        { "id": "d", "text": "He arrived late at class", "isCorrect": false }
+      ]
+    },
+    {
+      "questionId": 35,
+      "level": "Level 35",
+      "difficulty": "hard",
+      "mode": "multipleChoice",
+      "title": "Hiligaynon: Conditional Action",
+      "description": "Understand future possibilities",
+      "question": "What does \"Kon indi siya magtuon, indi siya makapasar.\" mean?",
+      "options": [
+        {
+          "id": "a",
+          "text": "He passed because he studied",
+          "isCorrect": false
+        },
+        {
+          "id": "b",
+          "text": "If he doesn’t study, he won’t pass",
+          "isCorrect": true
+        },
+        { "id": "c", "text": "He failed but he studied", "isCorrect": false },
+        { "id": "d", "text": "He is being forced to pass", "isCorrect": false }
+      ]
+    },
+    {
+      "questionId": 36,
+      "level": "Level 36",
+      "difficulty": "hard",
+      "mode": "multipleChoice",
+      "title": "Kapampangan: Future Perfect",
+      "description": "Time and completion",
+      "question": "What does \"Mekapagluto na ku bayu ka dumating.\" mean?",
+      "options": [
+        {
+          "id": "a",
+          "text": "I will start cooking when you arrive",
+          "isCorrect": false
+        },
+        {
+          "id": "b",
+          "text": "I will have finished cooking before you arrive",
+          "isCorrect": true
+        },
+        {
+          "id": "c",
+          "text": "I started cooking as you arrived",
+          "isCorrect": false
+        },
+        { "id": "d", "text": "I haven’t cooked yet", "isCorrect": false }
+      ]
+    },
+    {
+      "questionId": 37,
+      "level": "Level 37",
+      "difficulty": "hard",
+      "mode": "multipleChoice",
+      "title": "Pangasinan: Hypothetical Scenario",
+      "description": "Understanding conditional statements",
+      "question": "What does \"No agkakatuwa ya, di na mantaray.\" mean?",
+      "options": [
+        { "id": "a", "text": "If he’s sleepy, he’ll run", "isCorrect": false },
+        {
+          "id": "b",
+          "text": "If he’s not happy, he won’t go",
+          "isCorrect": true
+        },
+        { "id": "c", "text": "He won’t eat if he’s late", "isCorrect": false },
+        { "id": "d", "text": "If he’s fast, he’ll win", "isCorrect": false }
+      ]
+    },
+    {
+      "questionId": 38,
+      "level": "Level 38",
+      "difficulty": "hard",
+      "mode": "multipleChoice",
+      "title": "Bicol: Expressing Regret",
+      "description": "Identify emotional tone and action",
+      "question": "What does \"Sayang, dai ko nadara an payong.\" mean?",
+      "options": [
+        { "id": "a", "text": "I didn’t bring my shoes", "isCorrect": false },
+        {
+          "id": "b",
+          "text": "Too bad, I didn’t bring the umbrella",
+          "isCorrect": true
+        },
+        { "id": "c", "text": "I left my friend", "isCorrect": false },
+        { "id": "d", "text": "I missed the train", "isCorrect": false }
+      ]
+    },
+    {
+      "questionId": 39,
+      "level": "Level 39",
+      "difficulty": "hard",
+      "mode": "multipleChoice",
+      "title": "Bisaya: Past Intention",
+      "description": "Implied past action and plan",
+      "question": "What does \"Unta miadto ko sa simbahan apan nalimot ko.\" mean?",
+      "options": [
+        {
+          "id": "a",
+          "text": "I’m going to the church now",
+          "isCorrect": false
+        },
+        {
+          "id": "b",
+          "text": "I was supposed to go to church but I forgot",
+          "isCorrect": true
+        },
+        {
+          "id": "c",
+          "text": "I saw the church and remembered",
+          "isCorrect": false
+        },
+        { "id": "d", "text": "I planned to avoid church", "isCorrect": false }
+      ]
+    },
+    {
+      "questionId": 40,
+      "level": "Level 40",
+      "difficulty": "hard",
+      "mode": "multipleChoice",
+      "title": "Maguindanao: Verb + Honorific Usage",
+      "description": "Showing respect in action",
+      "question": "What does \"Ginagalang ko su panugunan nin kangilalagan.\" mean?",
+      "options": [
+        {
+          "id": "a",
+          "text": "I’m mocking the elder’s advice",
+          "isCorrect": false
+        },
+        {
+          "id": "b",
+          "text": "I respect the guidance of the elder",
+          "isCorrect": true
+        },
+        { "id": "c", "text": "I forgot the elder’s name", "isCorrect": false },
+        { "id": "d", "text": "I rejected the instruction", "isCorrect": false }
+      ]
+    },
+    {
+      "questionId": 41,
+      "level": "Level 41",
+      "difficulty": "hard",
+      "mode": "multipleChoice",
+      "title": "Tagalog: Idiomatic Use",
+      "description": "Contextual meaning beyond literal",
+      "question": "What does \"Nagbibilang ng poste.\" imply?",
+      "options": [
+        { "id": "a", "text": "He’s installing posts", "isCorrect": false },
+        { "id": "b", "text": "He is unemployed", "isCorrect": true },
+        { "id": "c", "text": "He is building a house", "isCorrect": false },
+        { "id": "d", "text": "He is teaching math", "isCorrect": false }
+      ]
+    },
+    {
+      "questionId": 42,
+      "level": "Level 42",
+      "difficulty": "hard",
+      "mode": "multipleChoice",
+      "title": "Cebuano: Cultural Context",
+      "description": "Understanding deeper meaning",
+      "question": "What does \"Gipaningkamotan niya nga malipay ang iyang ginikanan.\" mean?",
+      "options": [
+        {
+          "id": "a",
+          "text": "He wants his parents to leave",
+          "isCorrect": false
+        },
+        {
+          "id": "b",
+          "text": "He tried hard to make his parents happy",
+          "isCorrect": true
+        },
+        {
+          "id": "c",
+          "text": "He forgot about his parents",
+          "isCorrect": false
+        },
+        {
+          "id": "d",
+          "text": "He sent money to his parents",
+          "isCorrect": false
+        }
+      ]
+    },
+    {
+      "questionId": 43,
+      "level": "Level 43",
+      "difficulty": "hard",
+      "mode": "multipleChoice",
+      "title": "Ilocano: Subtle Tone",
+      "description": "Nuanced emotional expression",
+      "question": "What does \"Awan ti agbuybuya ti sinematayo.\" mean?",
+      "options": [
+        {
+          "id": "a",
+          "text": "No one is watching our movie",
+          "isCorrect": false
+        },
+        { "id": "b", "text": "Our movie is boring", "isCorrect": true },
+        { "id": "c", "text": "Everyone watched our movie", "isCorrect": false },
+        { "id": "d", "text": "The movie is very exciting", "isCorrect": false }
+      ]
+    },
+    {
+      "questionId": 44,
+      "level": "Level 44",
+      "difficulty": "hard",
+      "mode": "multipleChoice",
+      "title": "Hiligaynon: Polite Requests",
+      "description": "Understand formal speech",
+      "question": "What does \"Pwede bala ko makapangayo sang bulig?\" mean?",
+      "options": [
+        { "id": "a", "text": "I refuse to help", "isCorrect": false },
+        { "id": "b", "text": "May I ask for help?", "isCorrect": true },
+        { "id": "c", "text": "Help me now", "isCorrect": false },
+        { "id": "d", "text": "You must help me", "isCorrect": false }
+      ]
+    },
+    {
+      "questionId": 45,
+      "level": "Level 45",
+      "difficulty": "hard",
+      "mode": "multipleChoice",
+      "title": "Waray: Combining Time and Action",
+      "description": "Multiclausal statement",
+      "question": "What does \"Han natapos an klase, kinadto hiya ha library.\" mean?",
+      "options": [
+        { "id": "a", "text": "He stayed in class", "isCorrect": false },
+        {
+          "id": "b",
+          "text": "After class ended, he went to the library",
+          "isCorrect": true
+        },
+        { "id": "c", "text": "He returned home", "isCorrect": false },
+        { "id": "d", "text": "He skipped class", "isCorrect": false }
+      ]
+    },
+    {
+      "questionId": 46,
+      "level": "Level 46",
+      "difficulty": "hard",
+      "mode": "multipleChoice",
+      "title": "Pangasinan: Disagreement Phrase",
+      "description": "Expressing opinion indirectly",
+      "question": "What does \"Agko panangaro ed desisyonna.\" mean?",
+      "options": [
+        {
+          "id": "a",
+          "text": "I fully support his decision",
+          "isCorrect": false
+        },
+        {
+          "id": "b",
+          "text": "I do not agree with his decision",
+          "isCorrect": true
+        },
+        { "id": "c", "text": "I copied his idea", "isCorrect": false },
+        { "id": "d", "text": "I helped him decide", "isCorrect": false }
+      ]
+    },
+    {
+      "questionId": 47,
+      "level": "Level 47",
+      "difficulty": "hard",
+      "mode": "multipleChoice",
+      "title": "Bicol: Sequential Events",
+      "description": "Reading timeline in actions",
+      "question": "What does \"Pagkatapos maglinis, nagluto siya nin hapunan.\" mean?",
+      "options": [
+        { "id": "a", "text": "He cooked while cleaning", "isCorrect": false },
+        {
+          "id": "b",
+          "text": "After cleaning, he cooked dinner",
+          "isCorrect": true
+        },
+        {
+          "id": "c",
+          "text": "He forgot to clean and cook",
+          "isCorrect": false
+        },
+        { "id": "d", "text": "He skipped dinner", "isCorrect": false }
+      ]
+    },
+    {
+      "questionId": 48,
+      "level": "Level 48",
+      "difficulty": "hard",
+      "mode": "multipleChoice",
+      "title": "Bisaya: Expressing Uncertainty",
+      "description": "Indirect thinking or doubt",
+      "question": "What does \"Murag wala siya kasabot sa giistorya.\" mean?",
+      "options": [
+        { "id": "a", "text": "He understands clearly", "isCorrect": false },
+        {
+          "id": "b",
+          "text": "It seems he didn’t understand what was said",
+          "isCorrect": true
+        },
+        { "id": "c", "text": "He is repeating the words", "isCorrect": false },
+        { "id": "d", "text": "He is translating it", "isCorrect": false }
+      ]
+    },
+    {
+      "questionId": 49,
+      "level": "Level 49",
+      "difficulty": "hard",
+      "mode": "multipleChoice",
+      "title": "Kapampangan: Verb Tense Identification",
+      "description": "Comparing past and present",
+      "question": "What does \"Eya agpang keng sinabi nang Maria.\" mean?",
+      "options": [
+        { "id": "a", "text": "He agrees with Maria", "isCorrect": false },
+        {
+          "id": "b",
+          "text": "He does not agree with what Maria said",
+          "isCorrect": true
+        },
+        { "id": "c", "text": "He listens to Maria", "isCorrect": false },
+        { "id": "d", "text": "He admires Maria", "isCorrect": false }
+      ]
+    },
+    {
+      "questionId": 50,
+      "level": "Level 50",
+      "difficulty": "hard",
+      "mode": "multipleChoice",
+      "title": "Maguindanao: Abstract Concept",
+      "description": "Emotive and abstract phrase",
+      "question": "What does \"Kalilintad su kinaandam\" mean?",
+      "options": [
+        { "id": "a", "text": "Peace is forbidden", "isCorrect": false },
+        { "id": "b", "text": "Noise is acceptable", "isCorrect": false },
+        {
+          "id": "c",
+          "text": "Peace comes from preparedness",
+          "isCorrect": true
+        },
+        { "id": "d", "text": "Courage brings confusion", "isCorrect": false }
+      ]
+    },
+    {
+      "questionId": 51,
+      "level": "Level 1",
+      "difficulty": "easy",
+      "mode": "identification",
+      "title": "Kapampangan: Family Role",
+      "description": "Choose the correct word for a family member.",
+      "question": "I Maria ang ___ nang Juan.",
+      "targetWord": "indu",
+      "options": [
+        { "id": "a", "text": "tatang" },
+        { "id": "b", "text": "anak" },
+        { "id": "c", "text": "indu" },
+        { "id": "d", "text": "tita" },
+        { "id": "e", "text": "apu" },
+        { "id": "f", "text": "kuya" },
+        { "id": "g", "text": "asawa" },
+        { "id": "h", "text": "pamangkin" }
+      ],
+      "translation": "Maria is Juan’s mother."
+    },
+    {
+      "questionId": 52,
+      "level": "Level 2",
+      "difficulty": "easy",
+      "mode": "identification",
+      "title": "Cebuano: Weather Identification",
+      "description": "Choose the correct word related to weather.",
+      "question": "Nag-ulan og kusog nga ___.",
+      "targetWord": "tubig",
+      "options": [
+        { "id": "a", "text": "kahoy" },
+        { "id": "b", "text": "tubig" },
+        { "id": "c", "text": "hangin" },
+        { "id": "d", "text": "adlaw" },
+        { "id": "e", "text": "daplin" },
+        { "id": "f", "text": "eskuylahan" },
+        { "id": "g", "text": "ulap" },
+        { "id": "h", "text": "payong" }
+      ],
+      "translation": "Heavy water is pouring (It's raining heavily)."
+    },
+    {
+      "questionId": 53,
+      "level": "Level 3",
+      "difficulty": "easy",
+      "mode": "identification",
+      "title": "Ilocano: House Object",
+      "description": "Choose the correct item found in the house.",
+      "question": "Itugotmo ti ___ idiay kwarto.",
+      "targetWord": "silya",
+      "options": [
+        { "id": "a", "text": "lampara" },
+        { "id": "b", "text": "silya" },
+        { "id": "c", "text": "lutuan" },
+        { "id": "d", "text": "bintana" },
+        { "id": "e", "text": "kutsara" },
+        { "id": "f", "text": "lapis" },
+        { "id": "g", "text": "libro" },
+        { "id": "h", "text": "kurtina" }
+      ],
+      "translation": "Bring the chair to the room."
+    },
+    {
+      "questionId": 54,
+      "level": "Level 4",
+      "difficulty": "easy",
+      "mode": "identification",
+      "title": "Tagalog: Food Word",
+      "description": "Choose the correct word related to food.",
+      "question": "Kumain siya ng ___.",
+      "targetWord": "kanin",
+      "options": [
+        { "id": "a", "text": "upuan" },
+        { "id": "b", "text": "sapatos" },
+        { "id": "c", "text": "tubig" },
+        { "id": "d", "text": "kanin" },
+        { "id": "e", "text": "baso" },
+        { "id": "f", "text": "mesa" },
+        { "id": "g", "text": "ilaw" },
+        { "id": "h", "text": "bag" }
+      ],
+      "translation": "He ate rice."
+    },
+    {
+      "questionId": 55,
+      "level": "Level 5",
+      "difficulty": "easy",
+      "mode": "identification",
+      "title": "Waray: Daily Routine",
+      "description": "Choose the correct word for daily routine.",
+      "question": "Nag-aalmusal ako kada ___.",
+      "targetWord": "aga",
+      "options": [
+        { "id": "a", "text": "hapon" },
+        { "id": "b", "text": "gabi" },
+        { "id": "c", "text": "tanghali" },
+        { "id": "d", "text": "aga" },
+        { "id": "e", "text": "lunes" },
+        { "id": "f", "text": "init" },
+        { "id": "g", "text": "ulan" },
+        { "id": "h", "text": "adlaw" }
+      ],
+      "translation": "I eat breakfast every morning."
+    },
+    {
+      "questionId": 56,
+      "level": "Level 6",
+      "difficulty": "easy",
+      "mode": "identification",
+      "title": "Hiligaynon: Action Verb",
+      "description": "Choose the correct action verb for the sentence.",
+      "question": "Hiya nag-___ han irimnan.",
+      "targetWord": "inom",
+      "options": [
+        { "id": "a", "text": "luto" },
+        { "id": "b", "text": "kaon" },
+        { "id": "c", "text": "inom" },
+        { "id": "d", "text": "lakat" },
+        { "id": "e", "text": "tulo" },
+        { "id": "f", "text": "tuok" },
+        { "id": "g", "text": "himo" },
+        { "id": "h", "text": "lingkod" }
+      ],
+      "translation": "He drank at the store."
+    },
+    {
+      "questionId": 57,
+      "level": "Level 7",
+      "difficulty": "easy",
+      "mode": "identification",
+      "title": "Bicol: School Vocabulary",
+      "description": "Choose the appropriate word used in school.",
+      "question": "Ang ___ amo ang ginahalinan sang mga libro.",
+      "targetWord": "librarya",
+      "options": [
+        { "id": "a", "text": "kwarto" },
+        { "id": "b", "text": "librarya" },
+        { "id": "c", "text": "banyo" },
+        { "id": "d", "text": "silid" },
+        { "id": "e", "text": "kusina" },
+        { "id": "f", "text": "silya" },
+        { "id": "g", "text": "papel" },
+        { "id": "h", "text": "lapis" }
+      ],
+      "translation": "The library is where books come from."
+    },
+    {
+      "questionId": 58,
+      "level": "Level 8",
+      "difficulty": "easy",
+      "mode": "identification",
+      "title": "Pangasinan: Object in the Kitchen",
+      "description": "Choose the correct kitchen item.",
+      "question": "Gamit na ___ sa pagluto.",
+      "targetWord": "kawa",
+      "options": [
+        { "id": "a", "text": "kawa" },
+        { "id": "b", "text": "payong" },
+        { "id": "c", "text": "lapis" },
+        { "id": "d", "text": "sapatos" },
+        { "id": "e", "text": "telepono" },
+        { "id": "f", "text": "libro" },
+        { "id": "g", "text": "silya" },
+        { "id": "h", "text": "ilaw" }
+      ],
+      "translation": "Use the pan for cooking."
+    },
+    {
+      "questionId": 59,
+      "level": "Level 9",
+      "difficulty": "easy",
+      "mode": "identification",
+      "title": "Maguindanao: House Location",
+      "description": "Choose the correct word that refers to a location in the house.",
+      "question": "So sala et ___ ed bale.",
+      "targetWord": "abong",
+      "options": [
+        { "id": "a", "text": "abong" },
+        { "id": "b", "text": "tanap" },
+        { "id": "c", "text": "lababo" },
+        { "id": "d", "text": "danum" },
+        { "id": "e", "text": "silid" },
+        { "id": "f", "text": "simbaan" },
+        { "id": "g", "text": "payong" },
+        { "id": "h", "text": "sayan" }
+      ],
+      "translation": "The living room is inside the house."
+    },
+    {
+      "questionId": 60,
+      "level": "Level 10",
+      "difficulty": "easy",
+      "mode": "identification",
+      "title": "Bisaya: Clothing Word",
+      "description": "Choose the correct clothing item.",
+      "question": "Nagbisti siya og ___.",
+      "targetWord": "sinina",
+      "options": [
+        { "id": "a", "text": "sinina" },
+        { "id": "b", "text": "lapis" },
+        { "id": "c", "text": "papel" },
+        { "id": "d", "text": "plato" },
+        { "id": "e", "text": "bangko" },
+        { "id": "f", "text": "saging" },
+        { "id": "g", "text": "libro" },
+        { "id": "h", "text": "sapatos" }
+      ],
+      "translation": "He wore clothes."
+    },
+    {
+      "questionId": 61,
+      "level": "Level 11",
+      "difficulty": "medium",
+      "mode": "identification",
+      "title": "Tagalog: Nature Term",
+      "description": "Choose the correct word related to nature.",
+      "question": "Ang mga bata ay naglalaro sa tabi ng ___.",
+      "targetWord": "ilog",
+      "options": [
+        { "id": "a", "text": "mesa" },
+        { "id": "b", "text": "ilog" },
+        { "id": "c", "text": "pinto" },
+        { "id": "d", "text": "bag" },
+        { "id": "e", "text": "silid" },
+        { "id": "f", "text": "aso" },
+        { "id": "g", "text": "kotse" },
+        { "id": "h", "text": "paaralan" }
+      ]
+    },
+    {
+      "questionId": 62,
+      "level": "Level 12",
+      "difficulty": "medium",
+      "mode": "identification",
+      "title": "Cebuano: Animal Identification",
+      "description": "Choose the correct animal name.",
+      "question": "Ang ___ misinggit og kusog.",
+      "targetWord": "iro",
+      "options": [
+        { "id": "a", "text": "iro" },
+        { "id": "b", "text": "isda" },
+        { "id": "c", "text": "saging" },
+        { "id": "d", "text": "papel" },
+        { "id": "e", "text": "tawo" },
+        { "id": "f", "text": "sinina" },
+        { "id": "g", "text": "bayabas" },
+        { "id": "h", "text": "lapis" }
+      ]
+    },
+    {
+      "questionId": 63,
+      "level": "Level 13",
+      "difficulty": "medium",
+      "mode": "identification",
+      "title": "Ilocano: Time Expression",
+      "description": "Choose the correct time-related word.",
+      "question": "Agsang-atak kada ___.",
+      "targetWord": "bigat",
+      "options": [
+        { "id": "a", "text": "bigat" },
+        { "id": "b", "text": "rabii" },
+        { "id": "c", "text": "turog" },
+        { "id": "d", "text": "init" },
+        { "id": "e", "text": "aldaw" },
+        { "id": "f", "text": "lamesa" },
+        { "id": "g", "text": "balay" },
+        { "id": "h", "text": "libro" }
+      ]
+    },
+    {
+      "questionId": 64,
+      "level": "Level 14",
+      "difficulty": "medium",
+      "mode": "identification",
+      "title": "Kapampangan: Household Item",
+      "description": "Identify the correct item found at home.",
+      "question": "Pakidalang yang ___ king kwartu.",
+      "targetWord": "kutson",
+      "options": [
+        { "id": "a", "text": "lamesa" },
+        { "id": "b", "text": "kutson" },
+        { "id": "c", "text": "upuan" },
+        { "id": "d", "text": "ilaw" },
+        { "id": "e", "text": "bintana" },
+        { "id": "f", "text": "kurtina" },
+        { "id": "g", "text": "radyo" },
+        { "id": "h", "text": "kutsara" }
+      ]
+    },
+    {
+      "questionId": 65,
+      "level": "Level 15",
+      "difficulty": "medium",
+      "mode": "identification",
+      "title": "Waray: Place Word",
+      "description": "Choose the correct place noun.",
+      "question": "Adto hiya ha ___.",
+      "targetWord": "merkado",
+      "options": [
+        { "id": "a", "text": "balay" },
+        { "id": "b", "text": "merkado" },
+        { "id": "c", "text": "eskwelahan" },
+        { "id": "d", "text": "simbahan" },
+        { "id": "e", "text": "pista" },
+        { "id": "f", "text": "tubig" },
+        { "id": "g", "text": "lapis" },
+        { "id": "h", "text": "libro" }
+      ]
+    },
+    {
+      "questionId": 66,
+      "level": "Level 16",
+      "difficulty": "medium",
+      "mode": "identification",
+      "title": "Hiligaynon: Action Verb",
+      "description": "Identify the correct action verb.",
+      "question": "Gusto ko mag-___ sang tubig.",
+      "targetWord": "inom",
+      "options": [
+        { "id": "a", "text": "kaon" },
+        { "id": "b", "text": "inom" },
+        { "id": "c", "text": "luto" },
+        { "id": "d", "text": "tulog" },
+        { "id": "e", "text": "lakat" },
+        { "id": "f", "text": "siling" },
+        { "id": "g", "text": "lingkod" },
+        { "id": "h", "text": "tan-aw" }
+      ]
+    },
+    {
+      "questionId": 67,
+      "level": "Level 17",
+      "difficulty": "medium",
+      "mode": "identification",
+      "title": "Maguindanao: Emotion Word",
+      "description": "Choose the correct word expressing emotion.",
+      "question": "Siya na ___ sa giyera.",
+      "targetWord": "hadlok",
+      "options": [
+        { "id": "a", "text": "rido" },
+        { "id": "b", "text": "hadlok" },
+        { "id": "c", "text": "sakit" },
+        { "id": "d", "text": "lakat" },
+        { "id": "e", "text": "ampo" },
+        { "id": "f", "text": "ilok" },
+        { "id": "g", "text": "kalipay" },
+        { "id": "h", "text": "palad" }
+      ]
+    },
+    {
+      "questionId": 68,
+      "level": "Level 18",
+      "difficulty": "medium",
+      "mode": "identification",
+      "title": "Pangasinan: Tool Word",
+      "description": "Choose the word related to a tool.",
+      "question": "Gamitin mo ya ___ ed pagpaayos.",
+      "targetWord": "martilyo",
+      "options": [
+        { "id": "a", "text": "kutsilyo" },
+        { "id": "b", "text": "libro" },
+        { "id": "c", "text": "martilyo" },
+        { "id": "d", "text": "palad" },
+        { "id": "e", "text": "paso" },
+        { "id": "f", "text": "lamesa" },
+        { "id": "g", "text": "lapis" },
+        { "id": "h", "text": "silya" }
+      ]
+    },
+    {
+      "questionId": 69,
+      "level": "Level 19",
+      "difficulty": "medium",
+      "mode": "identification",
+      "title": "Bisaya: Transportation Word",
+      "description": "Choose the correct vehicle name.",
+      "question": "Nagsakay sila og ___.",
+      "targetWord": "jeep",
+      "options": [
+        { "id": "a", "text": "jeep" },
+        { "id": "b", "text": "lamesa" },
+        { "id": "c", "text": "sapatos" },
+        { "id": "d", "text": "sinina" },
+        { "id": "e", "text": "balay" },
+        { "id": "f", "text": "kape" },
+        { "id": "g", "text": "bangko" },
+        { "id": "h", "text": "papel" }
+      ]
+    },
+    {
+      "questionId": 70,
+      "level": "Level 20",
+      "difficulty": "medium",
+      "mode": "identification",
+      "title": "Bicol: Occupation",
+      "description": "Choose the correct profession.",
+      "question": "Ang ___ nagtutokdo sa mga estudyante.",
+      "targetWord": "maestro",
+      "options": [
+        { "id": "a", "text": "maestro" },
+        { "id": "b", "text": "pulis" },
+        { "id": "c", "text": "doktor" },
+        { "id": "d", "text": "inhenyero" },
+        { "id": "e", "text": "guwardya" },
+        { "id": "f", "text": "drayber" },
+        { "id": "g", "text": "mananayaw" },
+        { "id": "h", "text": "tindera" }
+      ]
+    },
+    {
+      "questionId": 71,
+      "level": "Level 21",
+      "difficulty": "medium",
+      "mode": "identification",
+      "title": "Tagalog: Location Inside a House",
+      "description": "Choose the correct location word.",
+      "question": "Nasa ___ ang remote.",
+      "targetWord": "mesa",
+      "options": [
+        { "id": "a", "text": "mesa" },
+        { "id": "b", "text": "bintana" },
+        { "id": "c", "text": "sahig" },
+        { "id": "d", "text": "dingding" },
+        { "id": "e", "text": "hagdan" },
+        { "id": "f", "text": "upuan" },
+        { "id": "g", "text": "ilaw" },
+        { "id": "h", "text": "kurtina" }
+      ],
+      "translation": "The remote is on the table."
+    },
+    {
+      "questionId": 72,
+      "level": "Level 22",
+      "difficulty": "medium",
+      "mode": "identification",
+      "title": "Cebuano: Time of Day",
+      "description": "Choose the time-related word.",
+      "question": "Molakaw ko kada ___.",
+      "targetWord": "buntag",
+      "options": [
+        { "id": "a", "text": "buntag" },
+        { "id": "b", "text": "udto" },
+        { "id": "c", "text": "gabii" },
+        { "id": "d", "text": "adlaw" },
+        { "id": "e", "text": "semana" },
+        { "id": "f", "text": "bulan" },
+        { "id": "g", "text": "tuig" },
+        { "id": "h", "text": "daplin" }
+      ],
+      "translation": "I leave every morning."
+    },
+    {
+      "questionId": 73,
+      "level": "Level 23",
+      "difficulty": "medium",
+      "mode": "identification",
+      "title": "Hiligaynon: Part of the Body",
+      "description": "Choose the body part mentioned.",
+      "question": "Nagmasakit ang akon ___.",
+      "targetWord": "tiyan",
+      "options": [
+        { "id": "a", "text": "tiyan" },
+        { "id": "b", "text": "ulo" },
+        { "id": "c", "text": "tiil" },
+        { "id": "d", "text": "mata" },
+        { "id": "e", "text": "kamot" },
+        { "id": "f", "text": "baba" },
+        { "id": "g", "text": "ilong" },
+        { "id": "h", "text": "dunggan" }
+      ],
+      "translation": "My stomach hurts."
+    },
+    {
+      "questionId": 74,
+      "level": "Level 24",
+      "difficulty": "medium",
+      "mode": "identification",
+      "title": "Waray: Action in School",
+      "description": "Choose the correct classroom-related action.",
+      "question": "Nag___ hiya han assignment.",
+      "targetWord": "surat",
+      "options": [
+        { "id": "a", "text": "basa" },
+        { "id": "b", "text": "surat" },
+        { "id": "c", "text": "tuon" },
+        { "id": "d", "text": "patik" },
+        { "id": "e", "text": "lingkod" },
+        { "id": "f", "text": "iskwela" },
+        { "id": "g", "text": "istorya" },
+        { "id": "h", "text": "luto" }
+      ],
+      "translation": "He wrote the assignment."
+    },
+    {
+      "questionId": 75,
+      "level": "Level 25",
+      "difficulty": "medium",
+      "mode": "identification",
+      "title": "Ilocano: Nature Object",
+      "description": "Choose the correct word related to nature.",
+      "question": "Adda kami iti ___ idiay bukid.",
+      "targetWord": "kayo",
+      "options": [
+        { "id": "a", "text": "kayo" },
+        { "id": "b", "text": "danum" },
+        { "id": "c", "text": "bato" },
+        { "id": "d", "text": "daga" },
+        { "id": "e", "text": "lamesa" },
+        { "id": "f", "text": "libro" },
+        { "id": "g", "text": "lampara" },
+        { "id": "h", "text": "bintana" }
+      ],
+      "translation": "We were under a tree in the mountain."
+    },
+    {
+      "questionId": 76,
+      "level": "Level 26",
+      "difficulty": "medium",
+      "mode": "identification",
+      "title": "Kapampangan: Feeling Word",
+      "description": "Choose the word expressing feeling.",
+      "question": "Makanyan yang ___ pamung makanya.",
+      "targetWord": "lugud",
+      "options": [
+        { "id": "a", "text": "galit" },
+        { "id": "b", "text": "lugud" },
+        { "id": "c", "text": "takot" },
+        { "id": "d", "text": "lungkot" },
+        { "id": "e", "text": "saya" },
+        { "id": "f", "text": "himutok" },
+        { "id": "g", "text": "pighati" },
+        { "id": "h", "text": "tuwa" }
+      ],
+      "translation": "That shows love."
+    },
+    {
+      "questionId": 77,
+      "level": "Level 27",
+      "difficulty": "medium",
+      "mode": "identification",
+      "title": "Maguindanao: Activity Word",
+      "description": "Identify the correct action word.",
+      "question": "So bata na ___ ed labas.",
+      "targetWord": "tagem",
+      "options": [
+        { "id": "a", "text": "tagem" },
+        { "id": "b", "text": "laya" },
+        { "id": "c", "text": "lakat" },
+        { "id": "d", "text": "dalagan" },
+        { "id": "e", "text": "sakay" },
+        { "id": "f", "text": "awit" },
+        { "id": "g", "text": "inom" },
+        { "id": "h", "text": "kaon" }
+      ],
+      "translation": "The child is playing outside."
+    },
+    {
+      "questionId": 78,
+      "level": "Level 28",
+      "difficulty": "medium",
+      "mode": "identification",
+      "title": "Pangasinan: Food Name",
+      "description": "Choose the correct word for food.",
+      "question": "Kanen mi ya ___.",
+      "targetWord": "kankanen",
+      "options": [
+        { "id": "a", "text": "bayabas" },
+        { "id": "b", "text": "asin" },
+        { "id": "c", "text": "kankanen" },
+        { "id": "d", "text": "sabaw" },
+        { "id": "e", "text": "tubig" },
+        { "id": "f", "text": "gatas" },
+        { "id": "g", "text": "pansit" },
+        { "id": "h", "text": "kape" }
+      ],
+      "translation": "We ate some snacks."
+    },
+    {
+      "questionId": 79,
+      "level": "Level 29",
+      "difficulty": "medium",
+      "mode": "identification",
+      "title": "Bisaya: Part of the Day",
+      "description": "Choose the correct time word.",
+      "question": "Matulog ko kada ___.",
+      "targetWord": "gabii",
+      "options": [
+        { "id": "a", "text": "buntag" },
+        { "id": "b", "text": "udto" },
+        { "id": "c", "text": "hapon" },
+        { "id": "d", "text": "gabii" },
+        { "id": "e", "text": "adlaw" },
+        { "id": "f", "text": "semana" },
+        { "id": "g", "text": "tuig" },
+        { "id": "h", "text": "buntag" }
+      ],
+      "translation": "I sleep every night."
+    },
+    {
+      "questionId": 80,
+      "level": "Level 30",
+      "difficulty": "medium",
+      "mode": "identification",
+      "title": "Bicol: Emotion or Feeling",
+      "description": "Choose the correct emotion word.",
+      "question": "Siya masyado nang ___.",
+      "targetWord": "malipay",
+      "options": [
+        { "id": "a", "text": "masubo" },
+        { "id": "b", "text": "malipay" },
+        { "id": "c", "text": "mangirit" },
+        { "id": "d", "text": "magtangis" },
+        { "id": "e", "text": "magtakbo" },
+        { "id": "f", "text": "magkanta" },
+        { "id": "g", "text": "mangita" },
+        { "id": "h", "text": "magtula" }
+      ],
+      "translation": "He is very happy now."
+    },
+    {
+      "questionId": 81,
+      "level": "Level 31",
+      "difficulty": "hard",
+      "mode": "identification",
+      "title": "Tagalog: Figurative Language",
+      "description": "Choose the idiomatic expression that best fits.",
+      "question": "Siya’y ___ sa pag-aaral—hindi sumusuko kahit mahirap.",
+      "targetWord": "nagbubuhos ng pawis",
+      "options": [
+        { "id": "a", "text": "kumakain ng apoy" },
+        { "id": "b", "text": "nagbubuhos ng pawis" },
+        { "id": "c", "text": "umaasang bula" },
+        { "id": "d", "text": "sumasayaw sa alon" },
+        { "id": "e", "text": "lumilipad sa ulap" },
+        { "id": "f", "text": "bumabangka sa dalawang ilog" },
+        { "id": "g", "text": "nagtatago sa anino" },
+        { "id": "h", "text": "tumatawid sa apoy" }
+      ],
+      "translation": "He is pouring sweat into his studies—never giving up even when it's hard."
+    },
+    {
+      "questionId": 82,
+      "level": "Level 32",
+      "difficulty": "hard",
+      "mode": "identification",
+      "title": "Cebuano: Proverb Completion",
+      "description": "Complete the saying with the right word.",
+      "question": "Ang taong ___, dali rang masuko.",
+      "targetWord": "init ug ulo",
+      "options": [
+        { "id": "a", "text": "puti og mata" },
+        { "id": "b", "text": "taas og dungog" },
+        { "id": "c", "text": "init ug ulo" },
+        { "id": "d", "text": "baga og nawong" },
+        { "id": "e", "text": "daku og tiyan" },
+        { "id": "f", "text": "gamay og pasensya" },
+        { "id": "g", "text": "way batasan" },
+        { "id": "h", "text": "maayo mohilak" }
+      ],
+      "translation": "A hot-headed person gets angry easily."
+    },
+    {
+      "questionId": 83,
+      "level": "Level 33",
+      "difficulty": "hard",
+      "mode": "identification",
+      "title": "Ilocano: Descriptive Adjective",
+      "description": "Choose the best word to describe someone proud.",
+      "question": "Daydiay nga lalaki ket ___.",
+      "targetWord": "agtaray",
+      "options": [
+        { "id": "a", "text": "agtaray" },
+        { "id": "b", "text": "agpanunot" },
+        { "id": "c", "text": "agtuytoy" },
+        { "id": "d", "text": "agayat" },
+        { "id": "e", "text": "agdaldalus" },
+        { "id": "f", "text": "agawid" },
+        { "id": "g", "text": "agbirok" },
+        { "id": "h", "text": "agbisi" }
+      ],
+      "translation": "That man is boastful."
+    },
+    {
+      "questionId": 84,
+      "level": "Level 34",
+      "difficulty": "hard",
+      "mode": "identification",
+      "title": "Bicol: Metaphorical Action",
+      "description": "Choose the metaphorical phrase that makes the sentence meaningful.",
+      "question": "Nag-___ siya kasabay kang marhay na tadhana.",
+      "targetWord": "sakay sa hangin",
+      "options": [
+        { "id": "a", "text": "sakay sa hangin" },
+        { "id": "b", "text": "tungtong sa ulap" },
+        { "id": "c", "text": "labay sa tubig" },
+        { "id": "d", "text": "lusong sa baha" },
+        { "id": "e", "text": "layag sa ulan" },
+        { "id": "f", "text": "tulay sa alapaap" },
+        { "id": "g", "text": "luto sa init" },
+        { "id": "h", "text": "lutang sa bangis" }
+      ],
+      "translation": "He rode with good fortune."
+    },
+    {
+      "questionId": 85,
+      "level": "Level 35",
+      "difficulty": "hard",
+      "mode": "identification",
+      "title": "Waray: Rare Noun",
+      "description": "Identify the seldom-used noun.",
+      "question": "Kinahanglan niya hin ___.",
+      "targetWord": "panlimbasog",
+      "options": [
+        { "id": "a", "text": "kalipay" },
+        { "id": "b", "text": "panlimbasog" },
+        { "id": "c", "text": "kusog" },
+        { "id": "d", "text": "gahum" },
+        { "id": "e", "text": "damgo" },
+        { "id": "f", "text": "pagkabuotan" },
+        { "id": "g", "text": "panalangin" },
+        { "id": "h", "text": "pasensya" }
+      ],
+      "translation": "He needs effort."
+    },
+    {
+      "questionId": 86,
+      "level": "Level 36",
+      "difficulty": "hard",
+      "mode": "identification",
+      "title": "Maguindanao: Spiritual Concept",
+      "description": "Choose the correct spiritual term.",
+      "question": "Siya nag-ampo para sa ___.",
+      "targetWord": "kapya",
+      "options": [
+        { "id": "a", "text": "kapya" },
+        { "id": "b", "text": "pananum" },
+        { "id": "c", "text": "kalilang" },
+        { "id": "d", "text": "kulintang" },
+        { "id": "e", "text": "saging" },
+        { "id": "f", "text": "pakaradi" },
+        { "id": "g", "text": "badjao" },
+        { "id": "h", "text": "bayok" }
+      ],
+      "translation": "He prayed for peace."
+    },
+    {
+      "questionId": 87,
+      "level": "Level 37",
+      "difficulty": "hard",
+      "mode": "identification",
+      "title": "Kapampangan: Philosophical Term",
+      "description": "Choose the abstract or deep word.",
+      "question": "Atin yang lalalam a ___.",
+      "targetWord": "kabaldugan",
+      "options": [
+        { "id": "a", "text": "kaluguran" },
+        { "id": "b", "text": "kabaldugan" },
+        { "id": "c", "text": "pamagmasusi" },
+        { "id": "d", "text": "lalang" },
+        { "id": "e", "text": "panyulung" },
+        { "id": "f", "text": "agyu" },
+        { "id": "g", "text": "luklukan" },
+        { "id": "h", "text": "alang-alang" }
+      ],
+      "translation": "He has a deeper meaning."
+    },
+    {
+      "questionId": 88,
+      "level": "Level 38",
+      "difficulty": "hard",
+      "mode": "identification",
+      "title": "Pangasinan: Rare Verb",
+      "description": "Choose the rare action word.",
+      "question": "Ag ___ tolay ed gabi.",
+      "targetWord": "makaras",
+      "options": [
+        { "id": "a", "text": "makaras" },
+        { "id": "b", "text": "maganap" },
+        { "id": "c", "text": "mapalaba" },
+        { "id": "d", "text": "manlangoy" },
+        { "id": "e", "text": "mapilas" },
+        { "id": "f", "text": "makilab" },
+        { "id": "g", "text": "mapungtot" },
+        { "id": "h", "text": "magiliw" }
+      ],
+      "translation": "The person rushed through the night."
+    },
+    {
+      "questionId": 89,
+      "level": "Level 39",
+      "difficulty": "hard",
+      "mode": "identification",
+      "title": "Bisaya: Old Sayings",
+      "description": "Complete this traditional line.",
+      "question": "Ang walay kahadlok, ___ sa disgrasya.",
+      "targetWord": "duol",
+      "options": [
+        { "id": "a", "text": "duol" },
+        { "id": "b", "text": "suod" },
+        { "id": "c", "text": "likay" },
+        { "id": "d", "text": "balik" },
+        { "id": "e", "text": "sayo" },
+        { "id": "f", "text": "hilom" },
+        { "id": "g", "text": "molayo" },
+        { "id": "h", "text": "hagbong" }
+      ],
+      "translation": "He who is not afraid is close to danger."
+    },
+    {
+      "questionId": 90,
+      "level": "Level 40",
+      "difficulty": "hard",
+      "mode": "identification",
+      "title": "Hiligaynon: Uncommon Object",
+      "description": "Identify the rare object.",
+      "question": "Gindala niya ang ___ sang iya lolo.",
+      "targetWord": "tangkal",
+      "options": [
+        { "id": "a", "text": "kopya" },
+        { "id": "b", "text": "tangkal" },
+        { "id": "c", "text": "sumbrero" },
+        { "id": "d", "text": "balon" },
+        { "id": "e", "text": "basket" },
+        { "id": "f", "text": "tabungos" },
+        { "id": "g", "text": "punot" },
+        { "id": "h", "text": "lukot" }
+      ],
+      "translation": "He brought his grandfather's cage."
+    },
+    {
+      "questionId": 91,
+      "level": "Level 41",
+      "difficulty": "hard",
+      "mode": "identification",
+      "title": "Tagalog: Ancient Tool",
+      "description": "Choose the old tool from the choices.",
+      "question": "Ginamit ng panday ang ___.",
+      "targetWord": "pamukpok",
+      "options": [
+        { "id": "a", "text": "pamukpok" },
+        { "id": "b", "text": "lapis" },
+        { "id": "c", "text": "martilyo" },
+        { "id": "d", "text": "kutsilyo" },
+        { "id": "e", "text": "itak" },
+        { "id": "f", "text": "palakol" },
+        { "id": "g", "text": "kawayan" },
+        { "id": "h", "text": "palu-palo" }
+      ],
+      "translation": "The blacksmith used the hammer."
+    },
+    {
+      "questionId": 92,
+      "level": "Level 42",
+      "difficulty": "hard",
+      "mode": "identification",
+      "title": "Cebuano: Traditional Clothing",
+      "description": "Choose the right term for native attire.",
+      "question": "Nagsul-ob siya og ___.",
+      "targetWord": "patadyong",
+      "options": [
+        { "id": "a", "text": "patadyong" },
+        { "id": "b", "text": "barong" },
+        { "id": "c", "text": "saya" },
+        { "id": "d", "text": "palda" },
+        { "id": "e", "text": "sinina" },
+        { "id": "f", "text": "pantalon" },
+        { "id": "g", "text": "kalo" },
+        { "id": "h", "text": "bayo" }
+      ],
+      "translation": "She wore a patadyong."
+    },
+    {
+      "questionId": 93,
+      "level": "Level 43",
+      "difficulty": "hard",
+      "mode": "identification",
+      "title": "Ilocano: Deep Emotion",
+      "description": "Identify the deep emotional word.",
+      "question": "Adda iti ___ ti pusok.",
+      "targetWord": "panagsangit",
+      "options": [
+        { "id": "a", "text": "panagsangit" },
+        { "id": "b", "text": "panagngina" },
+        { "id": "c", "text": "panagduadua" },
+        { "id": "d", "text": "panagrigrigat" },
+        { "id": "e", "text": "panagpatingga" },
+        { "id": "f", "text": "panagpanunot" },
+        { "id": "g", "text": "panagdait" },
+        { "id": "h", "text": "panagserbi" }
+      ],
+      "translation": "My heart is full of weeping."
+    },
+    {
+      "questionId": 94,
+      "level": "Level 44",
+      "difficulty": "hard",
+      "mode": "identification",
+      "title": "Bicol: Conceptual Noun",
+      "description": "Choose the abstract concept.",
+      "question": "Si lola may marhay na ___.",
+      "targetWord": "paninindugan",
+      "options": [
+        { "id": "a", "text": "paninindugan" },
+        { "id": "b", "text": "paglaom" },
+        { "id": "c", "text": "pagburukas" },
+        { "id": "d", "text": "pahayag" },
+        { "id": "e", "text": "pagkamuot" },
+        { "id": "f", "text": "kabikas" },
+        { "id": "g", "text": "panaghisgot" },
+        { "id": "h", "text": "tinampo" }
+      ],
+      "translation": "Grandma has good principles."
+    },
+    {
+      "questionId": 95,
+      "level": "Level 45",
+      "difficulty": "hard",
+      "mode": "identification",
+      "title": "Waray: Environmental Term",
+      "description": "Choose the word that relates to the environment.",
+      "question": "Iton kabubwason kinahanglan protektaran an ___.",
+      "targetWord": "kalibungan",
+      "options": [
+        { "id": "a", "text": "kinabuhi" },
+        { "id": "b", "text": "kalibungan" },
+        { "id": "c", "text": "katungod" },
+        { "id": "d", "text": "kadagatan" },
+        { "id": "e", "text": "pagkatawo" },
+        { "id": "f", "text": "kapanginano" },
+        { "id": "g", "text": "kaopayan" },
+        { "id": "h", "text": "katawhayan" }
+      ],
+      "translation": "The future requires protecting the environment."
+    },
+    {
+      "questionId": 96,
+      "level": "Level 46",
+      "difficulty": "hard",
+      "mode": "identification",
+      "title": "Maguindanao: Ethical Word",
+      "description": "Identify the term that suggests moral value.",
+      "question": "Importante ang ___.",
+      "targetWord": "kanduli",
+      "options": [
+        { "id": "a", "text": "kanduli" },
+        { "id": "b", "text": "pagari" },
+        { "id": "c", "text": "kulintang" },
+        { "id": "d", "text": "panulakan" },
+        { "id": "e", "text": "kagila" },
+        { "id": "f", "text": "lunsay" },
+        { "id": "g", "text": "ginawi" },
+        { "id": "h", "text": "padaga" }
+      ],
+      "translation": "Gratitude is important."
+    },
+    {
+      "questionId": 97,
+      "level": "Level 47",
+      "difficulty": "hard",
+      "mode": "identification",
+      "title": "Kapampangan: Rare Adjective",
+      "description": "Choose a word describing depth.",
+      "question": "Ing lalaking ita mapalyaring ___.",
+      "targetWord": "matibe",
+      "options": [
+        { "id": "a", "text": "matibe" },
+        { "id": "b", "text": "makanyan" },
+        { "id": "c", "text": "masikan" },
+        { "id": "d", "text": "mapalyaring" },
+        { "id": "e", "text": "makuyad" },
+        { "id": "f", "text": "matulid" },
+        { "id": "g", "text": "marangal" },
+        { "id": "h", "text": "mapali" }
+      ],
+      "translation": "That man may be strong."
+    },
+    {
+      "questionId": 98,
+      "level": "Level 48",
+      "difficulty": "hard",
+      "mode": "identification",
+      "title": "Pangasinan: Philosophical Expression",
+      "description": "Select the phrase that reflects wisdom.",
+      "question": "Ya panagbiag met la ya ___.",
+      "targetWord": "alikew",
+      "options": [
+        { "id": "a", "text": "alikew" },
+        { "id": "b", "text": "awan" },
+        { "id": "c", "text": "andag" },
+        { "id": "d", "text": "tangbang" },
+        { "id": "e", "text": "siled" },
+        { "id": "f", "text": "panluwes" },
+        { "id": "g", "text": "abong" },
+        { "id": "h", "text": "laktod" }
+      ],
+      "translation": "Life is just a passage."
+    },
+    {
+      "questionId": 99,
+      "level": "Level 49",
+      "difficulty": "hard",
+      "mode": "identification",
+      "title": "Bisaya: Rare Descriptive Word",
+      "description": "Choose the descriptive word that shows admiration.",
+      "question": "Siya kay ___ nga tawo.",
+      "targetWord": "mapangahason",
+      "options": [
+        { "id": "a", "text": "mapangahason" },
+        { "id": "b", "text": "matahum" },
+        { "id": "c", "text": "maanyag" },
+        { "id": "d", "text": "buotan" },
+        { "id": "e", "text": "matino" },
+        { "id": "f", "text": "matinud-anon" },
+        { "id": "g", "text": "mabination" },
+        { "id": "h", "text": "mapadayunon" }
+      ],
+      "translation": "He is a brave person."
+    },
+    {
+      "questionId": 100,
+      "level": "Level 50",
+      "difficulty": "hard",
+      "mode": "identification",
+      "title": "Hiligaynon: Deep Cultural Term",
+      "description": "Identify the term associated with cultural ritual.",
+      "question": "Ginsunod nila ang ___.",
+      "targetWord": "pamuluyag",
+      "options": [
+        { "id": "a", "text": "pamuluyag" },
+        { "id": "b", "text": "kasal" },
+        { "id": "c", "text": "pamangkot" },
+        { "id": "d", "text": "panghagad" },
+        { "id": "e", "text": "handum" },
+        { "id": "f", "text": "pagdaug" },
+        { "id": "g", "text": "pagtudlo" },
+        { "id": "h", "text": "paandam" }
+      ],
+      "translation": "They followed the courtship tradition."
+    },
+    {
+      "questionId": 101,
+      "level": "Level 1",
+      "difficulty": "easy",
+      "mode": "fillBlanks",
+      "title": "Cebuano: Morning Habit",
+      "description": "Choose the correct word to complete the morning activity.",
+      "question": "Kada buntag, mag___ ko og ngipon.",
+      "targetWord": "toothbrush",
+      "translation": "Every morning, I brush my teeth.",
+      "hint": "Used to clean your teeth."
+    },
+    {
+      "questionId": 102,
+      "level": "Level 2",
+      "difficulty": "easy",
+      "mode": "fillBlanks",
+      "title": "Ilocano: Weekend Activity",
+      "description": "Identify what the person is doing during weekends.",
+      "question": "Ag___ kami iti parke kada Sabado.",
+      "targetWord": "ay-ayam",
+      "translation": "We play at the park every Saturday.",
+      "hint": "Done for fun, especially by kids."
+    },
+    {
+      "questionId": 103,
+      "level": "Level 3",
+      "difficulty": "easy",
+      "mode": "fillBlanks",
+      "title": "Waray: Kitchen Object",
+      "description": "Fill in the kitchen-related item.",
+      "question": "Ginkuha niya an ___ ha lamisa.",
+      "targetWord": "kutsara",
+      "translation": "He/She took the spoon from the table.",
+      "hint": "Used to eat soup or rice."
+    },
+    {
+      "questionId": 104,
+      "level": "Level 4",
+      "difficulty": "easy",
+      "mode": "fillBlanks",
+      "title": "Kapampangan: School Supply",
+      "description": "Complete the sentence with a school item.",
+      "question": "Dinake yang ___ keng bag.",
+      "targetWord": "lapis",
+      "translation": "He took a pencil from the bag.",
+      "hint": "Used for writing."
+    },
+    {
+      "questionId": 105,
+      "level": "Level 5",
+      "difficulty": "easy",
+      "mode": "fillBlanks",
+      "title": "Bicol: House Chore",
+      "description": "Choose the correct word for the chore being done.",
+      "question": "Nag___ si mama kan kwarto.",
+      "targetWord": "linis",
+      "translation": "Mama cleaned the room.",
+      "hint": "To make things tidy."
+    },
+    {
+      "questionId": 106,
+      "level": "Level 6",
+      "difficulty": "easy",
+      "mode": "fillBlanks",
+      "title": "Hiligaynon: Family Member",
+      "description": "Fill in the family relationship.",
+      "question": "Ang ___ ko amo ang nagaalaga sa akon.",
+      "targetWord": "nanay",
+      "translation": "My mother takes care of me.",
+      "hint": "Female parent."
+    },
+    {
+      "questionId": 107,
+      "level": "Level 7",
+      "difficulty": "easy",
+      "mode": "fillBlanks",
+      "title": "Pangasinan: Common Fruit",
+      "description": "Provide the correct fruit mentioned in the sentence.",
+      "question": "Tinmakan na so ___.",
+      "targetWord": "mangga",
+      "translation": "He/She ate a mango.",
+      "hint": "A sweet yellow fruit."
+    },
+    {
+      "questionId": 108,
+      "level": "Level 8",
+      "difficulty": "easy",
+      "mode": "fillBlanks",
+      "title": "Maguindanao: Directional Phrase",
+      "description": "Choose the word that fits the direction shown.",
+      "question": "Nasa ___ aken libru.",
+      "targetWord": "lamesa",
+      "translation": "My book is on the table.",
+      "hint": "A piece of furniture."
+    },
+    {
+      "questionId": 109,
+      "level": "Level 9",
+      "difficulty": "easy",
+      "mode": "fillBlanks",
+      "title": "Bisaya: Animal in the Farm",
+      "description": "Identify the animal in the sentence.",
+      "question": "Ang ___ nagdagan sa uma.",
+      "targetWord": "baboy",
+      "translation": "The pig ran in the field.",
+      "hint": "A farm animal, often pink."
+    },
+    {
+      "questionId": 110,
+      "level": "Level 10",
+      "difficulty": "easy",
+      "mode": "fillBlanks",
+      "title": "Tagalog: Bedtime Item",
+      "description": "Fill in the object used at night.",
+      "question": "Kinuha ko ang ___ bago matulog.",
+      "targetWord": "kumot",
+      "translation": "I got the blanket before sleeping.",
+      "hint": "Keeps you warm in bed."
+    },
+    {
+      "questionId": 111,
+      "level": "Level 11",
+      "difficulty": "medium",
+      "mode": "fillBlanks",
+      "title": "Cebuano: Afternoon Snack",
+      "description": "Choose the correct word for the food eaten in the afternoon.",
+      "question": "Nipalit siya og ___ para sa panihapon.",
+      "targetWord": "pan",
+      "translation": "He bought bread for dinner.",
+      "hint": "A baked food."
+    },
+    {
+      "questionId": 112,
+      "level": "Level 12",
+      "difficulty": "medium",
+      "mode": "fillBlanks",
+      "title": "Ilocano: School Location",
+      "description": "Identify the place where the subject is heading.",
+      "question": "Mapanak iti ___.",
+      "targetWord": "eskuela",
+      "translation": "I’m going to school.",
+      "hint": "A place for learning."
+    },
+    {
+      "questionId": 113,
+      "level": "Level 13",
+      "difficulty": "medium",
+      "mode": "fillBlanks",
+      "title": "Waray: Household Item",
+      "description": "Choose the correct object found at home.",
+      "question": "Ibutang an baso ha ___.",
+      "targetWord": "lamisa",
+      "translation": "Put the glass on the table.",
+      "hint": "It holds things in place."
+    },
+    {
+      "questionId": 114,
+      "level": "Level 14",
+      "difficulty": "medium",
+      "mode": "fillBlanks",
+      "title": "Kapampangan: Weekend Activity",
+      "description": "Complete the activity done during weekends.",
+      "question": "Mag___ la reng anak keng sabado.",
+      "targetWord": "laru",
+      "translation": "The kids will play on Saturday.",
+      "hint": "Done for fun."
+    },
+    {
+      "questionId": 115,
+      "level": "Level 15",
+      "difficulty": "medium",
+      "mode": "fillBlanks",
+      "title": "Bicol: Market Purchase",
+      "description": "Fill in the word for the item being bought.",
+      "question": "Bumili ako nin ___ sa palengke.",
+      "targetWord": "gulay",
+      "translation": "I bought vegetables in the market.",
+      "hint": "Green and healthy."
+    },
+    {
+      "questionId": 116,
+      "level": "Level 16",
+      "difficulty": "medium",
+      "mode": "fillBlanks",
+      "title": "Hiligaynon: Morning Chore",
+      "description": "Choose the action done in the morning.",
+      "question": "Nag___ siya sang banyo.",
+      "targetWord": "limpyo",
+      "translation": "He cleaned the bathroom.",
+      "hint": "A cleaning action."
+    },
+    {
+      "questionId": 117,
+      "level": "Level 17",
+      "difficulty": "medium",
+      "mode": "fillBlanks",
+      "title": "Pangasinan: Transport Option",
+      "description": "Complete the sentence about travel.",
+      "question": "Sumakay ed ___.",
+      "targetWord": "jeep",
+      "translation": "He rode the jeepney.",
+      "hint": "A public vehicle."
+    },
+    {
+      "questionId": 118,
+      "level": "Level 18",
+      "difficulty": "medium",
+      "mode": "fillBlanks",
+      "title": "Maguindanao: Directional Instruction",
+      "description": "Select the word describing position.",
+      "question": "Ang lapis ada sa ___.",
+      "targetWord": "ibabaw",
+      "translation": "The pencil is on top.",
+      "hint": "Opposite of \"under.\""
+    },
+    {
+      "questionId": 119,
+      "level": "Level 19",
+      "difficulty": "medium",
+      "mode": "fillBlanks",
+      "title": "Bisaya: Holiday Preparation",
+      "description": "Identify what is being cooked.",
+      "question": "Nagluto siya og ___ para sa pista.",
+      "targetWord": "lechon",
+      "translation": "He cooked roasted pig for the fiesta.",
+      "hint": "A party dish."
+    },
+    {
+      "questionId": 120,
+      "level": "Level 20",
+      "difficulty": "medium",
+      "mode": "fillBlanks",
+      "title": "Tagalog: Road Incident",
+      "description": "Fill in the object involved in the incident.",
+      "question": "Nasira ang ___ sa kalsada.",
+      "targetWord": "kotse",
+      "translation": "The car broke down on the road.",
+      "hint": "A vehicle."
+    },
+    {
+      "questionId": 121,
+      "level": "Level 21",
+      "difficulty": "medium",
+      "mode": "fillBlanks",
+      "title": "Cebuano: Clothing Item",
+      "description": "Identify what the person is wearing.",
+      "question": "Nagsul-ob siya og ___.",
+      "targetWord": "sapatos",
+      "translation": "He wore shoes.",
+      "hint": "Worn on your feet."
+    },
+    {
+      "questionId": 122,
+      "level": "Level 22",
+      "difficulty": "medium",
+      "mode": "fillBlanks",
+      "title": "Ilocano: Object in the Bag",
+      "description": "Fill in the item stored in a bag.",
+      "question": "Adda ti ___ iti bag.",
+      "targetWord": "libro",
+      "translation": "There’s a book in the bag.",
+      "hint": "You read it."
+    },
+    {
+      "questionId": 123,
+      "level": "Level 23",
+      "difficulty": "medium",
+      "mode": "fillBlanks",
+      "title": "Waray: Weather Description",
+      "description": "Choose the word for the weather condition.",
+      "question": "Maupay an panahon, ___ yana.",
+      "targetWord": "maaraw",
+      "translation": "The weather is good, it’s sunny today.",
+      "hint": "Opposite of rainy."
+    },
+    {
+      "questionId": 124,
+      "level": "Level 24",
+      "difficulty": "medium",
+      "mode": "fillBlanks",
+      "title": "Kapampangan: Drink of Choice",
+      "description": "Fill in the word for the drink.",
+      "question": "Minom yang ___ keng party.",
+      "targetWord": "juice",
+      "translation": "He drank juice at the party.",
+      "hint": "A fruity drink."
+    },
+    {
+      "questionId": 125,
+      "level": "Level 25",
+      "difficulty": "medium",
+      "mode": "fillBlanks",
+      "title": "Bicol: Transportation Place",
+      "description": "Identify where transportation happens.",
+      "question": "Nagpaabot siya sa ___.",
+      "targetWord": "terminal",
+      "translation": "He waited at the terminal.",
+      "hint": "Where buses stop."
+    },
+    {
+      "questionId": 126,
+      "level": "Level 26",
+      "difficulty": "medium",
+      "mode": "fillBlanks",
+      "title": "Hiligaynon: Celebration Decoration",
+      "description": "Choose the word used in celebrations.",
+      "question": "Gintakpan ang kisame sang mga ___.",
+      "targetWord": "banderitas",
+      "translation": "They decorated the ceiling with flags.",
+      "hint": "Colorful hanging paper."
+    },
+    {
+      "questionId": 127,
+      "level": "Level 27",
+      "difficulty": "medium",
+      "mode": "fillBlanks",
+      "title": "Pangasinan: Action with Money",
+      "description": "Identify what was done with money.",
+      "question": "Inbayad na so ___.",
+      "targetWord": "kwarta",
+      "translation": "He paid the money.",
+      "hint": "Used to buy things."
+    },
+    {
+      "questionId": 128,
+      "level": "Level 28",
+      "difficulty": "medium",
+      "mode": "fillBlanks",
+      "title": "Maguindanao: Afternoon Schedule",
+      "description": "Fill in the activity done in the afternoon.",
+      "question": "Mag-___ kami mamayang hapon.",
+      "targetWord": "aral",
+      "translation": "We will study this afternoon.",
+      "hint": "Done to learn."
+    },
+    {
+      "questionId": 129,
+      "level": "Level 29",
+      "difficulty": "medium",
+      "mode": "fillBlanks",
+      "title": "Bisaya: Object Found at Night",
+      "description": "Complete the sentence with a nighttime object.",
+      "question": "Gipalong nako ang ___.",
+      "targetWord": "suga",
+      "translation": "I turned off the light.",
+      "hint": "Brightens a room."
+    },
+    {
+      "questionId": 130,
+      "level": "Level 30",
+      "difficulty": "medium",
+      "mode": "fillBlanks",
+      "title": "Tagalog: Action in the Kitchen",
+      "description": "Fill in the action done while preparing food.",
+      "question": "Si tatay ay nag___ ng ulam.",
+      "targetWord": "luto",
+      "translation": "Dad cooked the dish.",
+      "hint": "Prepares food."
+    },
+    {
+      "questionId": 131,
+      "level": "Level 31",
+      "difficulty": "hard",
+      "mode": "fillBlanks",
+      "title": "Ilocano: Hidden Belonging",
+      "description": "Identify the item placed discreetly.",
+      "question": "Inlibak ti ___ idiay salukag.",
+      "targetWord": "pitaka",
+      "translation": "I hid the wallet in the drawer.",
+      "hint": "Used to store money."
+    },
+    {
+      "questionId": 132,
+      "level": "Level 32",
+      "difficulty": "hard",
+      "mode": "fillBlanks",
+      "title": "Cebuano: Emergency Situation",
+      "description": "Complete the sentence with an emergency object.",
+      "question": "Gitawag ang ___ sa kalit nga insidente.",
+      "targetWord": "ambulansya",
+      "translation": "The ambulance was called for the sudden incident.",
+      "hint": "A rescue vehicle."
+    },
+    {
+      "questionId": 133,
+      "level": "Level 33",
+      "difficulty": "hard",
+      "mode": "fillBlanks",
+      "title": "Bicol: Daily Commitment",
+      "description": "Choose the object needed for daily prayer.",
+      "question": "Gagamiton ko an ___ kada aga.",
+      "targetWord": "rosaryo",
+      "translation": "I use the rosary every morning.",
+      "hint": "A religious item."
+    },
+    {
+      "questionId": 134,
+      "level": "Level 34",
+      "difficulty": "hard",
+      "mode": "fillBlanks",
+      "title": "Waray: Cultural Activity",
+      "description": "Fill in the word related to a local tradition.",
+      "question": "May-ada kami ___ ha pista.",
+      "targetWord": "sayaw",
+      "translation": "We have a dance during the festival.",
+      "hint": "Rhythmic movement."
+    },
+    {
+      "questionId": 135,
+      "level": "Level 35",
+      "difficulty": "hard",
+      "mode": "fillBlanks",
+      "title": "Kapampangan: Important Document",
+      "description": "Identify the document being requested.",
+      "question": "Paki-abot neng ___ keng HR.",
+      "targetWord": "resumé",
+      "translation": "Please submit the resumé to HR.",
+      "hint": "Needed for a job."
+    },
+    {
+      "questionId": 136,
+      "level": "Level 36",
+      "difficulty": "hard",
+      "mode": "fillBlanks",
+      "title": "Maguindanao: Natural Disaster",
+      "description": "Complete the term for a strong storm.",
+      "question": "May dumating na ___ kagabi.",
+      "targetWord": "bagyo",
+      "translation": "A typhoon came last night.",
+      "hint": "Heavy wind and rain."
+    },
+    {
+      "questionId": 137,
+      "level": "Level 37",
+      "difficulty": "hard",
+      "mode": "fillBlanks",
+      "title": "Hiligaynon: Transportation Emergency",
+      "description": "Identify the part of the vehicle that failed.",
+      "question": "Naguba ang ___ sang awto.",
+      "targetWord": "makina",
+      "translation": "The engine of the car broke down.",
+      "hint": "Makes the car run."
+    },
+    {
+      "questionId": 138,
+      "level": "Level 38",
+      "difficulty": "hard",
+      "mode": "fillBlanks",
+      "title": "Pangasinan: Medical Need",
+      "description": "Choose the word that refers to a healing substance.",
+      "question": "Ininom na so ___ para ed sakit na.",
+      "targetWord": "gamut",
+      "translation": "He took medicine for his illness.",
+      "hint": "Used for treatment."
+    },
+    {
+      "questionId": 139,
+      "level": "Level 39",
+      "difficulty": "hard",
+      "mode": "fillBlanks",
+      "title": "Bisaya: Family Responsibility",
+      "description": "Fill in the activity typically done for a sibling.",
+      "question": "Ako ang mag-___ sa akong manghud.",
+      "targetWord": "bantay",
+      "translation": "I will take care of my younger sibling.",
+      "hint": "A protective duty."
+    },
+    {
+      "questionId": 140,
+      "level": "Level 40",
+      "difficulty": "hard",
+      "mode": "fillBlanks",
+      "title": "Tagalog: Professional Setting",
+      "description": "Complete the sentence with an office item.",
+      "question": "Nasira ang ___ sa opisina.",
+      "targetWord": "printer",
+      "translation": "The printer in the office broke.",
+      "hint": "Used to make paper copies."
+    },
+    {
+      "questionId": 141,
+      "level": "Level 41",
+      "difficulty": "hard",
+      "mode": "fillBlanks",
+      "title": "Ilocano: Unexpected Discovery",
+      "description": "Identify the thing discovered on the road.",
+      "question": "Nakakitaak iti ___ idiay kalsada.",
+      "targetWord": "alahas",
+      "translation": "I found jewelry on the road.",
+      "hint": "Worn for beauty."
+    },
+    {
+      "questionId": 142,
+      "level": "Level 42",
+      "difficulty": "hard",
+      "mode": "fillBlanks",
+      "title": "Cebuano: Personal Accessory",
+      "description": "Choose the item worn for checking time.",
+      "question": "Nalimtan niya ang iyang ___.",
+      "targetWord": "relo",
+      "translation": "He forgot his watch.",
+      "hint": "Tells the time."
+    },
+    {
+      "questionId": 143,
+      "level": "Level 43",
+      "difficulty": "hard",
+      "mode": "fillBlanks",
+      "title": "Bicol: Community Announcement",
+      "description": "Fill in what’s being made public.",
+      "question": "Mayong ___ sa plaza buwas.",
+      "targetWord": "miting",
+      "translation": "There will be a meeting at the plaza tomorrow.",
+      "hint": "A gathering."
+    },
+    {
+      "questionId": 144,
+      "level": "Level 44",
+      "difficulty": "hard",
+      "mode": "fillBlanks",
+      "title": "Waray: Construction Task",
+      "description": "Identify the tool being used.",
+      "question": "Ginkuha niya an ___ para han proyekto.",
+      "targetWord": "martilyo",
+      "translation": "He took the hammer for the project.",
+      "hint": "Used to drive nails."
+    },
+    {
+      "questionId": 145,
+      "level": "Level 45",
+      "difficulty": "hard",
+      "mode": "fillBlanks",
+      "title": "Kapampangan: Food Preparation Tool",
+      "description": "Fill in the kitchen tool used in cooking.",
+      "question": "Gamit ne ing ___ para tadtaran deng gulay.",
+      "targetWord": "kutsilyo",
+      "translation": "He used the knife to chop vegetables.",
+      "hint": "Sharp object."
+    },
+    {
+      "questionId": 146,
+      "level": "Level 46",
+      "difficulty": "hard",
+      "mode": "fillBlanks",
+      "title": "Maguindanao: Emergency Room Visit",
+      "description": "Identify the place where the person was brought.",
+      "question": "Dinala siya sa ___.",
+      "targetWord": "ospital",
+      "translation": "He was brought to the hospital.",
+      "hint": "Place for treatment."
+    },
+    {
+      "questionId": 147,
+      "level": "Level 47",
+      "difficulty": "hard",
+      "mode": "fillBlanks",
+      "title": "Hiligaynon: Festival Preparation",
+      "description": "Choose the item hung for decoration.",
+      "question": "Ginbutang ang mga ___ sa plaza.",
+      "targetWord": "dekorasyon",
+      "translation": "They put up decorations in the plaza.",
+      "hint": "Makes a place festive."
+    },
+    {
+      "questionId": 148,
+      "level": "Level 48",
+      "difficulty": "hard",
+      "mode": "fillBlanks",
+      "title": "Pangasinan: Educational Object",
+      "description": "Identify the item brought to school.",
+      "question": "Inbalon na so ___ ed klase.",
+      "targetWord": "notebook",
+      "translation": "He brought a notebook to class.",
+      "hint": "Used for writing."
+    },
+    {
+      "questionId": 149,
+      "level": "Level 49",
+      "difficulty": "hard",
+      "mode": "fillBlanks",
+      "title": "Bisaya: Item Lost While Traveling",
+      "description": "Fill in the object that got lost.",
+      "question": "Nawala ang akong ___.",
+      "targetWord": "cellphone",
+      "translation": "I lost my cellphone.",
+      "hint": "Used to call or text."
+    },
+    {
+      "questionId": 150,
+      "level": "Level 50",
+      "difficulty": "hard",
+      "mode": "fillBlanks",
+      "title": "Tagalog: Task Delegation",
+      "description": "Choose the activity given to another person.",
+      "question": "Inutusan ko siya na mag___.",
+      "targetWord": "laba",
+      "translation": "I asked him to do the laundry.",
+      "hint": "Washing clothes."
+    }
+  ]
+}
