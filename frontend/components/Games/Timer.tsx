@@ -1,16 +1,17 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect } from "react";
 import { View, Text, StyleSheet } from "react-native";
 import { Clock } from "react-native-feather";
 import { BASE_COLORS } from "@/constant/colors";
-import useMultipleChoiceStore from "@/store/Games/useMultipleChoiceStore";
+import useQuizStore from "@/store/Games/useQuizStore";
 
 interface TimerProps {
   isRunning: boolean;
 }
 
 const Timer: React.FC<TimerProps> = ({ isRunning }) => {
-  // Get state and actions from the store
-  const { timeElapsed, updateTimeElapsed } = useMultipleChoiceStore();
+  // Get state and actions from the universal quiz store
+  const { gameState, updateTimeElapsed } = useQuizStore();
+  const { timeElapsed } = gameState;
 
   useEffect(() => {
     let interval: NodeJS.Timeout;

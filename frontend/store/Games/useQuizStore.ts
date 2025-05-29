@@ -933,11 +933,12 @@ const useQuizStore = create<QuizState>((set, get) => ({
       }));
     }
 
-    // Move to completed state after delay using state parameter
+    // FIXED: This was referring to gameStatus instead of gameState
     setTimeout(() => {
       set((state) => ({
-        gameStatus: {
-          ...state.gameStatus,
+        gameState: {
+          // FIXED: Was incorrectly referencing gameStatus
+          ...state.gameState,
           gameStatus: "completed",
         },
       }));
