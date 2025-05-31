@@ -136,7 +136,7 @@ const Identification: React.FC<IdentificationProps> = ({
         {/* Level Title */}
         <View style={gameSharedStyles.levelTitleContainer}>
           <Text style={gameSharedStyles.levelTitleText}>
-            Level {levelId} :{" "}
+            Level {levelId} -{" "}
             {currentSentence?.title ||
               currentSentence?.dialect ||
               "- Word Identification"}

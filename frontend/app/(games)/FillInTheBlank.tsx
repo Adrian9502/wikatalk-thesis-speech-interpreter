@@ -12,7 +12,7 @@ import {
 import React, { useEffect, useRef } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
 import DifficultyBadge from "@/components/Games/DifficultyBadge";
-import { Check, X, AlertCircle, X as XIcon } from "react-native-feather";
+import { Check, X, AlertCircle } from "react-native-feather";
 import { LinearGradient } from "expo-linear-gradient";
 import * as Animatable from "react-native-animatable";
 import { BASE_COLORS } from "@/constant/colors";
@@ -139,7 +139,7 @@ const FillInTheBlank: React.FC<FillInTheBlankProps> = ({
           {/* Level Title  */}
           <View style={styles.levelTitleContainer}>
             <Text style={styles.levelTitleText}>
-              Level {levelId} :{" "}
+              Level {levelId} -{" "}
               {currentExercise?.title || "- Fill in the Blanks"}
             </Text>
           </View>

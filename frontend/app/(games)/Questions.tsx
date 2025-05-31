@@ -16,6 +16,7 @@ import FillInTheBlank from "./FillInTheBlank";
 import GameInfoModal from "@/components/Games/GameInfoModal";
 import useQuizStore from "@/store/Games/useQuizStore";
 import AppLoading from "@/components/AppLoading";
+import DotsLoader from "@/components/DotLoader";
 
 const Questions = () => {
   const params = useLocalSearchParams();
@@ -153,8 +154,7 @@ const Questions = () => {
     if (!gameStarted) {
       return (
         <View style={styles.loaderContainer}>
-          <ActivityIndicator size="large" color={BASE_COLORS.blue} />
-          <Text style={styles.loadingText}>Preparing your game...</Text>
+          <DotsLoader />
         </View>
       );
     }
@@ -267,12 +267,6 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     backgroundColor: "#111B21",
-  },
-  loadingText: {
-    fontSize: 16,
-    fontFamily: "Poppins-Medium",
-    color: BASE_COLORS.white,
-    marginTop: 10,
   },
 });
 

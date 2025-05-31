@@ -933,7 +933,6 @@ const useQuizStore = create<QuizState>((set, get) => ({
       }));
     }
 
-    // FIXED: This was referring to gameStatus instead of gameState
     setTimeout(() => {
       set((state) => ({
         gameState: {
