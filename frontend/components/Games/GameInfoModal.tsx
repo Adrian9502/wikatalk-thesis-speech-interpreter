@@ -9,7 +9,13 @@ import {
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import * as Animatable from "react-native-animatable";
-import { X, Star, BookOpen, AlertTriangle } from "react-native-feather";
+import {
+  X,
+  Star,
+  BookOpen,
+  AlertTriangle,
+  Volume2,
+} from "react-native-feather";
 import { difficultyColors } from "@/constant/colors";
 
 type DifficultyLevel = keyof typeof difficultyColors;
@@ -36,21 +42,31 @@ const GameInfoModal: React.FC<GameInfoModalProps> = React.memo(
   }) => {
     // Get gradient colors for the current difficulty
     const getGradientColors = (): readonly [string, string] => {
-      // Check if the difficulty is a valid key in difficultyColors
+      // Logic for gradient colors remains the same
       if (difficulty && difficulty in difficultyColors) {
         return difficultyColors[difficulty as DifficultyLevel];
       }
-
-      // Attempt to capitalize the difficulty to match keys
       const capitalized =
         difficulty.charAt(0).toUpperCase() + difficulty.slice(1).toLowerCase();
       if (capitalized in difficultyColors) {
         return difficultyColors[capitalized as DifficultyLevel];
       }
-
-      // Default fallback - explicitly typed as readonly tuple
       return ["#2563EB", "#1E40AF"] as const;
     };
+
+    // Determine number of stars based on difficulty
+    const getStarCount = () => {
+      switch (difficulty) {
+        case "Hard":
+          return 3;
+        case "Medium":
+          return 2;
+        default:
+          return 1;
+      }
+    };
+
+    const starCount = getStarCount();
 
     // Get game mode display name
     const getGameModeName = () => {
@@ -69,20 +85,18 @@ const GameInfoModal: React.FC<GameInfoModalProps> = React.memo(
     // Determine focus area icon based on level description
     const renderFocusIcon = () => {
       const description = levelData?.description || "";
-
       if (description.includes("Grammar")) {
-        return <AlertTriangle width={16} height={16} color="#FFFFFF" />;
+        return <AlertTriangle width={18} height={18} color="#FFFFFF" />;
       } else if (description.includes("Pronunciation")) {
-        return <Star width={16} height={16} color="#FFFFFF" />;
+        return <Volume2 width={18} height={18} color="#FFFFFF" />;
       } else {
-        return <BookOpen width={16} height={16} color="#FFFFFF" />;
+        return <BookOpen width={18} height={18} color="#FFFFFF" />;
       }
     };
 
     // Determine focus area text
     const getFocusAreaText = () => {
       const description = levelData?.description || "";
-
       if (description.includes("Grammar")) {
         return "Grammar";
       } else if (description.includes("Pronunciation")) {
@@ -122,12 +136,13 @@ const GameInfoModal: React.FC<GameInfoModalProps> = React.memo(
             <LinearGradient
               colors={getGradientColors()}
               start={{ x: 0, y: 0 }}
-              end={{ x: 1, y: 1 }}
+              end={{ x: 0.8, y: 0.8 }}
               style={styles.modalContent}
             >
-              {/* Decorative elements */}
+              {/* Enhanced decorative elements */}
               <View style={styles.decorativeShape1} />
               <View style={styles.decorativeShape2} />
+              <View style={styles.decorativeShape3} />
 
               {/* Close button */}
               <TouchableOpacity
@@ -151,7 +166,7 @@ const GameInfoModal: React.FC<GameInfoModalProps> = React.memo(
                 <Text style={styles.levelTitle}>{levelData.title}</Text>
               </Animatable.View>
 
-              {/* Level badges */}
+              {/* Level badges with stars for difficulty */}
               <Animatable.View
                 animation="fadeIn"
                 duration={600}
@@ -159,6 +174,23 @@ const GameInfoModal: React.FC<GameInfoModalProps> = React.memo(
                 style={styles.badgesContainer}
               >
                 <View style={styles.difficultyBadge}>
+                  <View style={styles.starContainer}>
+                    {Array(3)
+                      .fill(0)
+                      .map((_, index) => (
+                        <Star
+                          key={index}
+                          width={16}
+                          height={16}
+                          fill={index < starCount ? "#FFC107" : "transparent"}
+                          stroke={
+                            index < starCount
+                              ? "#FFC107"
+                              : "rgba(255, 255, 255, 0.4)"
+                          }
+                        />
+                      ))}
+                  </View>
                   <Text style={styles.difficultyText}>{difficulty}</Text>
                 </View>
 
@@ -241,7 +273,7 @@ const GameInfoModal: React.FC<GameInfoModalProps> = React.memo(
 const styles = StyleSheet.create({
   overlay: {
     flex: 1,
-    backgroundColor: "rgba(0, 0, 0, 0.7)",
+    backgroundColor: "rgba(0, 0, 0, 0.75)",
     justifyContent: "center",
     alignItems: "center",
     paddingHorizontal: 20,
@@ -251,61 +283,70 @@ const styles = StyleSheet.create({
     maxWidth: 400,
     borderRadius: 24,
     overflow: "hidden",
-    elevation: 8,
+    elevation: 10,
     shadowColor: "#000",
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.4,
-    shadowRadius: 8,
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.5,
+    shadowRadius: 12,
   },
   modalContent: {
     padding: 24,
     paddingBottom: 28,
-    minHeight: 380,
+    minHeight: 400,
     position: "relative",
     overflow: "hidden",
   },
   decorativeShape1: {
     position: "absolute",
-    top: -40,
-    right: -40,
+    top: -50,
+    right: -50,
+    width: 150,
+    height: 150,
+    borderRadius: 75,
+    backgroundColor: "rgba(255, 255, 255, 0.1)",
+  },
+  decorativeShape2: {
+    position: "absolute",
+    bottom: -40,
+    left: -40,
     width: 120,
     height: 120,
     borderRadius: 60,
     backgroundColor: "rgba(255, 255, 255, 0.08)",
   },
-  decorativeShape2: {
+  decorativeShape3: {
     position: "absolute",
-    bottom: -30,
-    left: -30,
+    top: 120,
+    right: -70,
     width: 100,
     height: 100,
     borderRadius: 50,
-    backgroundColor: "rgba(255, 255, 255, 0.08)",
+    backgroundColor: "rgba(0, 0, 0, 0.1)",
   },
   closeButton: {
     position: "absolute",
     top: 16,
     right: 16,
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    backgroundColor: "rgba(0, 0, 0, 0.2)",
+    width: 38,
+    height: 38,
+    borderRadius: 19,
+    backgroundColor: "rgba(0, 0, 0, 0.3)",
     justifyContent: "center",
     alignItems: "center",
     zIndex: 10,
   },
   levelHeader: {
     alignItems: "center",
-    marginBottom: 14,
+    marginBottom: 16,
   },
   levelNumberContainer: {
     borderRadius: 16,
     paddingVertical: 8,
-    paddingHorizontal: 16,
-    backgroundColor: "rgba(255, 255, 255, 0.2)",
+    paddingHorizontal: 18,
+    backgroundColor: "rgba(255, 255, 255, 0.25)",
     justifyContent: "center",
     alignItems: "center",
-    marginBottom: 10,
+    marginBottom: 12,
   },
   levelNumber: {
     fontSize: 18,
@@ -313,7 +354,7 @@ const styles = StyleSheet.create({
     color: "#fff",
   },
   levelTitle: {
-    fontSize: 24,
+    fontSize: 26,
     fontFamily: "Poppins-Bold",
     color: "#fff",
     textAlign: "center",
@@ -321,12 +362,20 @@ const styles = StyleSheet.create({
   badgesContainer: {
     flexDirection: "row",
     justifyContent: "center",
-    marginBottom: 14,
-    gap: 12,
+    marginBottom: 16,
+    gap: 14,
+  },
+  starContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 3,
+    marginRight: 6,
   },
   difficultyBadge: {
+    flexDirection: "row",
+    alignItems: "center",
     backgroundColor: "rgba(255, 255, 255, 0.2)",
-    paddingHorizontal: 14,
+    paddingHorizontal: 12,
     paddingVertical: 6,
     borderRadius: 12,
   },
@@ -351,17 +400,17 @@ const styles = StyleSheet.create({
   },
   descriptionContainer: {
     width: "100%",
-    marginBottom: 12,
+    marginBottom: 16,
   },
   levelDescription: {
     fontSize: 16,
     fontFamily: "Poppins-Medium",
     color: "#fff",
     textAlign: "center",
-    lineHeight: 22,
+    lineHeight: 24,
   },
   gameModeContainer: {
-    marginBottom: 12,
+    marginBottom: 14,
   },
   infoRow: {
     flexDirection: "row",
@@ -379,40 +428,42 @@ const styles = StyleSheet.create({
     color: "#fff",
   },
   rulesContainer: {
-    backgroundColor: "rgba(0, 0, 0, 0.2)",
+    backgroundColor: "rgba(0, 0, 0, 0.25)",
     borderRadius: 16,
-    padding: 16,
-    marginBottom: 20,
+    padding: 18,
+    marginBottom: 22,
+    borderWidth: 1,
+    borderColor: "rgba(255, 255, 255, 0.1)",
   },
   rulesTitle: {
     fontSize: 16,
     fontFamily: "Poppins-SemiBold",
     color: "#fff",
-    marginBottom: 6,
+    marginBottom: 8,
   },
   rulesText: {
     fontSize: 14,
     fontFamily: "Poppins-Regular",
     color: "#fff",
-    lineHeight: 20,
+    lineHeight: 22,
   },
   buttonContainer: {
-    marginTop: 4,
+    marginTop: 6,
   },
   startButton: {
     backgroundColor: "#fff",
-    paddingVertical: 14,
+    paddingVertical: 16,
     borderRadius: 16,
     alignItems: "center",
     shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
+    shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.2,
-    shadowRadius: 4,
-    elevation: 3,
+    shadowRadius: 6,
+    elevation: 4,
   },
   startButtonText: {
     fontSize: 16,
-    fontFamily: "Poppins-Medium",
+    fontFamily: "Poppins-Bold",
     color: "#000",
   },
 });

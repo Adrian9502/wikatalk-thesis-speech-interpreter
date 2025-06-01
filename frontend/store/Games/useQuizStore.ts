@@ -1,6 +1,7 @@
 import { create } from "zustand";
 import axios from "axios";
 import { Keyboard } from "react-native";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 // Define the API URL using environment variable
 const API_URL = process.env.EXPO_PUBLIC_BACKEND_URL || "http://localhost:5000";
@@ -154,6 +155,41 @@ interface QuizState {
   toggleIdentificationTranslation: () => void;
 }
 
+// Cache helpers
+const CACHE_KEY_PREFIX = "quiz_data_";
+const CACHE_EXPIRY = 24 * 60 * 60 * 1000; // 24 hours
+
+const cacheData = async (key: string, data: any) => {
+  try {
+    const cacheItem = {
+      data,
+      timestamp: Date.now(),
+    };
+    await AsyncStorage.setItem(
+      `${CACHE_KEY_PREFIX}${key}`,
+      JSON.stringify(cacheItem)
+    );
+  } catch (error) {
+    console.log("Cache save error:", error);
+  }
+};
+
+const getCachedData = async (key: string) => {
+  try {
+    const cachedItem = await AsyncStorage.getItem(`${CACHE_KEY_PREFIX}${key}`);
+    if (cachedItem) {
+      const { data, timestamp } = JSON.parse(cachedItem);
+      if (Date.now() - timestamp < CACHE_EXPIRY) {
+        return data;
+      }
+    }
+    return null;
+  } catch (error) {
+    console.log("Cache retrieval error:", error);
+    return null;
+  }
+};
+
 const ensureProperFormat = (question: any): QuestionType => {
   // Ensure the question object has all needed properties
   return {
@@ -285,24 +321,43 @@ const useQuizStore = create<QuizState>((set, get) => ({
 
   // Fetch questions for a specific game mode
   fetchQuestionsByMode: async (mode: string) => {
-    // CRITICAL FIX: Check if we already have data for this mode to avoid unnecessary refetching
+    // Try to get from memory first (fastest)
     const modeQuestions = get().questions[mode as GameMode];
     if (Object.values(modeQuestions).some((diff) => diff.length > 0)) {
-      console.log(
-        `Using cached data for ${mode}, already loaded ${
-          Object.values(modeQuestions).flat().length
-        } questions`
-      );
-      return; // Use cached data
+      console.log(`Using in-memory data for ${mode}`);
+      return;
     }
 
-    let retries = 3;
-    let success = false;
-
-    set({ isLoading: true, error: null });
-
+    // Try to get from AsyncStorage cache next
+    const cacheKey = `${CACHE_KEY_PREFIX}${mode}`;
     try {
-      console.log(`Fetching ${mode} questions...`);
+      const cachedData = await AsyncStorage.getItem(cacheKey);
+      if (cachedData) {
+        const parsedData = JSON.parse(cachedData);
+        if (
+          parsedData.timestamp &&
+          Date.now() - parsedData.timestamp < CACHE_EXPIRY
+        ) {
+          console.log(`Using cached data for ${mode}`);
+          set((state) => ({
+            questions: {
+              ...state.questions,
+              [mode as GameMode]: parsedData.data,
+            },
+            isLoading: false,
+            lastFetched: parsedData.timestamp,
+          }));
+          return;
+        }
+      }
+    } catch (error) {
+      console.log("Cache error, falling back to API:", error);
+    }
+
+    // If not in cache, fetch from API
+    set({ isLoading: true, error: null });
+    try {
+      console.log(`Fetching ${mode} questions from API...`);
       const response = await axios.get(`${API_URL}/api/quiz/mode/${mode}`, {
         timeout: 10000,
       });
@@ -338,6 +393,8 @@ const useQuizStore = create<QuizState>((set, get) => ({
           lastFetched: Date.now(),
         }));
 
+        // Save to cache in the background
+        cacheData(mode, organized);
         return;
       }
     } catch (error) {
@@ -478,136 +535,226 @@ const useQuizStore = create<QuizState>((set, get) => ({
   // Game initialization
   initialize: (levelData, levelId, gameMode, difficulty = "easy") => {
     console.log(
-      `Initializing ${gameMode} game with level ${levelId} data:`,
+      `Initializing ${gameMode} level ${levelId} with data:`,
       levelData
     );
 
-    // Common initialization - explicitly set gameStatus to "idle"
+    if (!levelData) {
+      console.error("Missing levelData in initialize");
+      set({ error: "Missing level data" });
+      return;
+    }
+
+    // Common initialization - set game mode and levelId
     set((state) => ({
       gameState: {
         ...state.gameState,
         gameStatus: "idle",
-        score: 0,
-        timerRunning: false,
-        timeElapsed: 0,
+        currentMode: gameMode as GameMode,
         levelId,
-        currentMode: gameMode,
+        score: 0,
+        timeElapsed: 0,
+        timerRunning: false,
       },
+      error: null, // Clear any previous errors
     }));
 
     // Mode-specific initialization
-    if (gameMode === "multipleChoice") {
-      set({
-        multipleChoiceState: {
-          currentQuestion: levelData,
-          selectedOption: null,
-        },
-      });
-      console.log("MultipleChoice state initialized:", levelData);
-    } else if (gameMode === "fillBlanks") {
-      // Process level data into exercises format
-      const exercise = {
-        id: levelData.id || 0,
-        sentence: levelData.sentence || levelData.question || "",
-        answer: levelData.answer || levelData.targetWord || "",
-        translation: levelData.translation || "",
-        hint: levelData.hint || "",
-        title: levelData.title || `Level ${levelId}`,
-        dialect: levelData.dialect || "",
-      };
+    if (gameMode === "identification") {
+      try {
+        console.log("Initializing identification with levelData:", levelData);
 
-      set({
-        fillInTheBlankState: {
-          exercises: [exercise],
-          currentExerciseIndex: 0,
-          userAnswer: "",
-          showHint: false,
-          showTranslation: false,
-          showFeedback: false,
-          isCorrect: false,
-          attemptsLeft: 2,
-        },
-      });
-    }
-    // In the initialize function, replace the identification section:
-    else if (gameMode === "identification") {
-      console.log("Initializing identification game with data:", levelData);
+        // Create sentence object
+        const sentence = {
+          id: levelData?.id || 0,
+          sentence: levelData?.sentence || levelData?.question || "",
+          targetWord: levelData?.targetWord || "",
+          translation: levelData?.translation || "",
+          title: levelData?.title || `Level ${levelId}`,
+          dialect: levelData?.dialect || "",
+        };
 
-      // Process level data for identification
-      const sentence = {
-        id: levelData.id || 0,
-        sentence: levelData.sentence || levelData.question || "",
-        targetWord: levelData.targetWord || "",
-        translation: levelData.translation || "",
-        title: levelData.title || `Level ${levelId}`,
-        dialect: levelData.dialect || "",
-      };
+        // Process words - FIXED logic
+        let words = [];
 
-      // FIXED: Directly check if choices exists and use it
-      let words = [];
+        // Check if choices exists and is an array with items
+        if (
+          levelData?.choices &&
+          Array.isArray(levelData.choices) &&
+          levelData.choices.length > 0
+        ) {
+          console.log("Using choices array:", levelData.choices);
+          words = levelData.choices.map((choice, index) => {
+            // Handle both string and object choices
+            const textValue =
+              typeof choice === "string"
+                ? choice
+                : choice && typeof choice.text === "string"
+                ? choice.text
+                : String(choice);
 
-      // Check if choices exists and is an array
-      if (
-        levelData.choices &&
-        Array.isArray(levelData.choices) &&
-        levelData.choices.length > 0
-      ) {
-        console.log(
-          "Found choices array with",
-          levelData.choices.length,
-          "items"
-        );
-        words = levelData.choices.map((choice) => ({
-          id: choice.id || String(Math.random()),
-          original: choice.text || "",
-          clean: choice.text || "",
-          text: choice.text || "",
-        }));
+            return {
+              id: index.toString(),
+              text: textValue,
+              clean: textValue.replace(/[.,!?;:'"()\[\]{}]/g, ""),
+            };
+          });
+        }
+        // Fallback: use options array if available
+        else if (
+          levelData?.options &&
+          Array.isArray(levelData.options) &&
+          levelData.options.length > 0
+        ) {
+          console.log("Using options array as fallback:", levelData.options);
+          words = levelData.options.map((option, index) => {
+            const textValue =
+              typeof option === "string"
+                ? option
+                : option && typeof option.text === "string"
+                ? option.text
+                : String(option);
+
+            return {
+              id: index.toString(),
+              text: textValue,
+              clean: textValue.replace(/[.,!?;:'"()\[\]{}]/g, ""),
+            };
+          });
+        }
+        // Final fallback: split sentence into words
+        else if (sentence.sentence) {
+          console.log("Fallback: splitting sentence into words");
+          const sentenceWords = sentence.sentence
+            .split(/\s+/)
+            .filter((word) => word.length > 0);
+          words = sentenceWords.map((word, index) => ({
+            id: index.toString(),
+            text: word,
+            clean: word.replace(/[.,!?;:'"()\[\]{}]/g, ""),
+          }));
+        }
+
+        console.log("Processed words for identification:", words);
+
+        if (words.length === 0) {
+          throw new Error("No words available for identification game");
+        }
+
+        set({
+          identificationState: {
+            sentences: [sentence],
+            currentSentenceIndex: 0,
+            words,
+            selectedWord: null,
+            showTranslation: false,
+            feedback: null,
+          },
+        });
+
+        console.log("Identification state initialized successfully");
+      } catch (error) {
+        console.error("Error initializing identification mode:", error);
+        set({
+          error: "Failed to initialize identification game: " + error.message,
+        });
       }
-      // Fallback to options if choices doesn't exist
-      else if (
-        levelData.options &&
-        Array.isArray(levelData.options) &&
-        levelData.options.length > 0
-      ) {
-        console.log("Using options array instead of choices");
-        words = levelData.options.map((option) => ({
-          id: option.id || String(Math.random()),
-          original: option.text || "",
-          clean: option.text || "",
-          text: option.text || "",
-        }));
-      }
-
-      console.log("Processed words for identification:", words);
-
-      set({
-        identificationState: {
-          sentences: [sentence],
-          currentSentenceIndex: 0,
-          words,
-          selectedWord: null,
-          showTranslation: false,
-          feedback: null,
-        },
-      });
     }
 
-    console.log(
-      `Initialized ${gameMode} level ${levelId} with data:`,
-      levelData
-    );
+    // For fillBlanks mode
+    else if (gameMode === "fillBlanks") {
+      try {
+        console.log("Initializing fillBlanks with levelData:", levelData);
+
+        // Create exercise object
+        const exercise = {
+          id: levelData?.id || 0,
+          sentence: String(levelData?.sentence || levelData?.question || ""),
+          answer: String(levelData?.answer || levelData?.targetWord || ""),
+          translation: String(levelData?.translation || ""),
+          hint: String(levelData?.hint || ""),
+          title: String(levelData?.title || `Level ${levelId}`),
+          dialect: String(levelData?.dialect || ""),
+        };
+
+        console.log("Created fillBlanks exercise:", exercise);
+
+        if (!exercise.sentence || !exercise.answer) {
+          throw new Error(
+            "Missing sentence or answer for fill in the blank game"
+          );
+        }
+
+        set({
+          fillInTheBlankState: {
+            exercises: [exercise],
+            currentExerciseIndex: 0,
+            userAnswer: "",
+            showHint: false,
+            showTranslation: false,
+            showFeedback: false,
+            isCorrect: false,
+            attemptsLeft: 2,
+          },
+        });
+
+        console.log("FillInTheBlank state initialized successfully");
+      } catch (error) {
+        console.error("Error initializing fillBlanks mode:", error);
+        set({
+          error:
+            "Failed to initialize fill in the blank game: " + error.message,
+        });
+      }
+    }
+
+    // For multipleChoice mode
+    else if (gameMode === "multipleChoice") {
+      try {
+        console.log("Initializing multipleChoice with levelData:", levelData);
+
+        if (
+          !levelData.options ||
+          !Array.isArray(levelData.options) ||
+          levelData.options.length === 0
+        ) {
+          throw new Error("No options available for multiple choice game");
+        }
+
+        set({
+          multipleChoiceState: {
+            currentQuestion: levelData,
+            selectedOption: null,
+          },
+        });
+
+        console.log("MultipleChoice state initialized successfully");
+      } catch (error) {
+        console.error("Error initializing multipleChoice mode:", error);
+        set({
+          error: "Failed to initialize multiple choice game: " + error.message,
+        });
+      }
+    }
   },
 
   // Start game
-  startGame: () =>
+  startGame: () => {
+    console.log("Starting game...");
+    console.log("Before update - Game state:", get().gameState);
+
+    // Direct state update
     set((state) => ({
       gameState: {
         ...state.gameState,
         gameStatus: "playing",
         timerRunning: true,
       },
-    })),
+    }));
+
+    // Immediately log the new state
+    console.log("After update - Game state:", get().gameState);
+  },
 
   // Restart game
   handleRestart: () => {
@@ -686,8 +833,6 @@ const useQuizStore = create<QuizState>((set, get) => ({
 
     // Update the score in a separate update to avoid race conditions
     if (selectedOptionObj?.isCorrect) {
-      console.log("Correct answer selected!");
-      // Important: Use state parameter to ensure we're working with the latest state
       set((state) => ({
         gameState: {
           ...state.gameState,
@@ -695,7 +840,6 @@ const useQuizStore = create<QuizState>((set, get) => ({
         },
       }));
     } else {
-      console.log("Incorrect answer selected!");
       set((state) => ({
         gameState: {
           ...state.gameState,
@@ -704,7 +848,7 @@ const useQuizStore = create<QuizState>((set, get) => ({
       }));
     }
 
-    // Move to completed state after delay using state parameter for latest state
+    // Move to completed state after delay
     setTimeout(() => {
       set((state) => ({
         gameState: {
@@ -761,6 +905,7 @@ const useQuizStore = create<QuizState>((set, get) => ({
   },
 
   checkAnswer: () => {
+    const { Keyboard } = require("react-native");
     Keyboard.dismiss();
 
     const { fillInTheBlankState, gameState } = get();
@@ -769,9 +914,6 @@ const useQuizStore = create<QuizState>((set, get) => ({
     const currentExercise = exercises[currentExerciseIndex];
 
     if (!currentExercise) return;
-
-    // Don't allow checking if feedback is already shown or no attempts left
-    if (fillInTheBlankState.showFeedback || attemptsLeft <= 0) return;
 
     // Simple normalization for comparison
     const normalizedUserAnswer = userAnswer.trim().toLowerCase();
@@ -782,15 +924,9 @@ const useQuizStore = create<QuizState>((set, get) => ({
     ).toLowerCase();
 
     const correct = normalizedUserAnswer === normalizedCorrectAnswer;
+    console.log("Checking answer, isCorrect:", correct);
 
-    console.log("Checking answer:", {
-      userAnswer: normalizedUserAnswer,
-      correctAnswer: normalizedCorrectAnswer,
-      isCorrect: correct,
-      currentAttempts: attemptsLeft,
-    });
-
-    // Always decrease attempts when checking (regardless of correctness)
+    // Always decrease attempts when checking
     const newAttemptsLeft = Math.max(0, attemptsLeft - 1);
 
     // Stop the timer and show feedback immediately
@@ -816,7 +952,7 @@ const useQuizStore = create<QuizState>((set, get) => ({
         },
       }));
 
-      // Move to completed state after showing feedback
+      // Move to completed state with proper structure - INCREASED DELAY
       setTimeout(() => {
         set((state) => ({
           gameState: {
@@ -824,11 +960,10 @@ const useQuizStore = create<QuizState>((set, get) => ({
             gameStatus: "completed",
           },
         }));
-      }, 2000); // Increased delay to show feedback longer
+      }, 3000); // Increased from 2000 to 3000
     } else {
-      // For incorrect answers
       if (newAttemptsLeft <= 0) {
-        // No attempts left - move to completed after showing feedback
+        // No attempts left - move to completed state
         setTimeout(() => {
           set((state) => ({
             gameState: {
@@ -844,7 +979,7 @@ const useQuizStore = create<QuizState>((set, get) => ({
             fillInTheBlankState: {
               ...state.fillInTheBlankState,
               showFeedback: false,
-              userAnswer: "",
+              userAnswer: "", // Clear the input for retry
             },
             gameState: {
               ...state.gameState,
@@ -876,6 +1011,8 @@ const useQuizStore = create<QuizState>((set, get) => ({
     });
   },
 
+  // Fix the handleWordSelect function
+
   handleWordSelect: (wordIndex: number) => {
     const { identificationState, gameState } = get();
     const { sentences, currentSentenceIndex, words } = identificationState;
@@ -884,14 +1021,6 @@ const useQuizStore = create<QuizState>((set, get) => ({
     if (!currentSentence || wordIndex >= words.length) return;
 
     console.log("Word selected:", wordIndex, words[wordIndex]);
-
-    // Stop the timer
-    set((state) => ({
-      gameState: {
-        ...state.gameState,
-        timerRunning: false,
-      },
-    }));
 
     // Check if selected word matches target word
     const selectedWord = words[wordIndex];
@@ -907,8 +1036,13 @@ const useQuizStore = create<QuizState>((set, get) => ({
     );
     console.log("Is correct?", isCorrect);
 
-    // Update feedback and selected word index
+    // Update state with selection and stop timer
     set((state) => ({
+      gameState: {
+        ...state.gameState,
+        timerRunning: false,
+        score: isCorrect ? 1 : 0,
+      },
       identificationState: {
         ...state.identificationState,
         selectedWord: wordIndex,
@@ -916,27 +1050,11 @@ const useQuizStore = create<QuizState>((set, get) => ({
       },
     }));
 
-    // Update score if correct in a separate update to avoid race conditions
-    if (isCorrect) {
-      set((state) => ({
-        gameState: {
-          ...state.gameState,
-          score: 1, // Set to 1 for correct
-        },
-      }));
-    } else {
-      set((state) => ({
-        gameState: {
-          ...state.gameState,
-          score: 0, // Set to 0 for incorrect
-        },
-      }));
-    }
-
+    // CRITICAL FIX: Correct state structure - gameState not gameStatus
     setTimeout(() => {
       set((state) => ({
         gameState: {
-          // FIXED: Was incorrectly referencing gameStatus
+          // <-- Changed from gameStatus to gameState
           ...state.gameState,
           gameStatus: "completed",
         },

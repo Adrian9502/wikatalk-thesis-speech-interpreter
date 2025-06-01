@@ -6,8 +6,9 @@ import {
   ScrollView,
   StatusBar,
   Dimensions,
+  FlatList,
 } from "react-native";
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback, useMemo } from "react";
 import { useLocalSearchParams, router } from "expo-router";
 import {
   ArrowLeft,
@@ -17,6 +18,8 @@ import {
   CheckCircle,
   Circle,
   RefreshCw,
+  Lock,
+  Volume2,
 } from "react-native-feather";
 import { LinearGradient } from "expo-linear-gradient";
 import * as Animatable from "react-native-animatable";
@@ -84,6 +87,103 @@ const convertQuizToLevels = (gameMode, quizData) => {
   return allLevels;
 };
 
+const LevelCard = React.memo(({ level, onSelect, gradientColors }) => {
+  // Pull out needed props
+  const { id, number, title, difficulty, status, focusArea } = level;
+
+  // Determine number of stars based on difficulty
+  const getStarCount = () => {
+    switch (difficulty) {
+      case "Easy":
+        return 1;
+      case "Medium":
+        return 2;
+      case "Hard":
+        return 3;
+      default:
+        return 1;
+    }
+  };
+
+  const starCount = getStarCount();
+
+  // Render focus area icon
+  const renderFocusIcon = () => {
+    switch (focusArea) {
+      case "Grammar":
+        return (
+          <AlertTriangle width={16} height={16} color={BASE_COLORS.white} />
+        );
+      case "Vocabulary":
+        return <BookOpen width={16} height={16} color={BASE_COLORS.white} />;
+      case "Pronunciation":
+        return <Volume2 width={16} height={16} color={BASE_COLORS.white} />;
+      default:
+        return <BookOpen width={16} height={16} color={BASE_COLORS.white} />;
+    }
+  };
+
+  return (
+    <TouchableOpacity
+      style={styles.levelCard}
+      onPress={() => onSelect(level)}
+      activeOpacity={0.8}
+      disabled={status === "locked"}
+    >
+      <LinearGradient colors={gradientColors} style={styles.levelCardGradient}>
+        {/* Decorative elements */}
+        <View style={styles.decorativeShape} />
+        <View style={[styles.decorativeShape, styles.decorativeShape2]} />
+
+        {/* Card header with level number and lock status */}
+        <View style={styles.levelHeader}>
+          <View style={styles.levelNumberContainer}>
+            <Text style={styles.levelNumber}>{number}</Text>
+          </View>
+          <View style={styles.specialIconContainer}>
+            {status === "locked" ? (
+              <Lock width={18} height={18} color={BASE_COLORS.white} />
+            ) : null}
+          </View>
+        </View>
+
+        {/* Card content with title and metadata */}
+        <View style={styles.levelInfo}>
+          <Text style={styles.levelTitle}>{title}</Text>
+
+          {/* Focus area badge */}
+          <View style={styles.levelMetadataRow}>
+            <View style={styles.focusAreaBadge}>
+              {renderFocusIcon()}
+              <Text style={styles.focusAreaText}>{focusArea}</Text>
+            </View>
+          </View>
+
+          {/* Difficulty stars */}
+          <View style={styles.difficultyStarsContainer}>
+            {Array(3)
+              .fill(0)
+              .map((_, index) => (
+                <Star
+                  key={index}
+                  width={14}
+                  height={14}
+                  fill={index < starCount ? "#FFC107" : "transparent"}
+                  stroke={
+                    index < starCount ? "#FFC107" : "rgba(255, 255, 255, 0.4)"
+                  }
+                />
+              ))}
+
+            <Text style={styles.difficultyText}>{difficulty}</Text>
+          </View>
+        </View>
+      </LinearGradient>
+    </TouchableOpacity>
+  );
+});
+
+// Optimize the LevelSelection component's renderLevelCard function
 const LevelSelection = () => {
   const params = useLocalSearchParams();
   const { gameMode, gameTitle } = params;
@@ -152,36 +252,27 @@ const LevelSelection = () => {
         100
       : 0;
 
-  const handleLevelSelect = (level) => {
+  // Memoize the level select handler
+  const handleLevelSelect = useCallback((level) => {
     if (level.status === "locked") return;
     setSelectedLevel(level);
     setShowModal(true);
-  };
+  }, []);
 
   const handleStartGame = () => {
     if (!selectedLevel) return;
 
-    setIsStartingGame(true);
-
-    // Simulate loading (can be removed if not needed)
-    setTimeout(() => {
-      setIsStartingGame(false);
-      setShowModal(false);
-
-      // Navigate to Questions screen after modal is dismissed
-      setTimeout(() => {
-        router.push({
-          pathname: "/(games)/Questions",
-          params: {
-            levelId: selectedLevel.id,
-            gameMode,
-            gameTitle,
-            difficulty: selectedLevel.difficultyCategory,
-            skipModal: "true",
-          },
-        });
-      }, 300);
-    }, 1000);
+    // Navigate directly without artificial delays
+    router.push({
+      pathname: "/(games)/Questions",
+      params: {
+        levelId: selectedLevel.id,
+        gameMode,
+        gameTitle,
+        difficulty: selectedLevel.difficultyCategory,
+        skipModal: "true",
+      },
+    });
   };
 
   const handleRetry = async () => {
@@ -198,78 +289,41 @@ const LevelSelection = () => {
     router.back();
   };
 
-  const renderLevelCard = (level) => {
-    const difficultyColors = {
+  // Pre-calculate difficulty colors mapping
+  const difficultyColors = useMemo(
+    () => ({
       Easy: ["#4CAF50", "#2E7D32"],
       Medium: ["#FF9800", "#EF6C00"],
       Hard: ["#F44336", "#C62828"],
-    };
+    }),
+    []
+  );
 
-    const gradientColors = difficultyColors[level.difficulty];
-
-    const renderFocusIcon = () => {
-      switch (level.focusArea) {
-        case "Vocabulary":
-          return <BookOpen width={14} height={14} color="#FFFFFF" />;
-        case "Grammar":
-          return <AlertTriangle width={14} height={14} color="#FFFFFF" />;
-        case "Pronunciation":
-          return <Star width={14} height={14} color="#FFFFFF" />;
-        default:
-          return <BookOpen width={14} height={14} color="#FFFFFF" />;
-      }
-    };
-
-    return (
-      <Animatable.View
-        animation="fadeIn"
-        duration={500}
-        delay={level.id * 15}
-        key={level.id}
-      >
-        <TouchableOpacity
-          activeOpacity={0.8}
-          onPress={() => handleLevelSelect(level)}
-          style={styles.levelCard}
+  // Memoize renderItem function for FlatList
+  const renderItem = useCallback(
+    ({ item: level }) => {
+      const gradientColors = difficultyColors[level.difficulty];
+      return (
+        <Animatable.View
+          animation="fadeIn"
+          duration={300} // Reduce animation duration
+          delay={Math.min(level.id * 10, 300)} // Cap the delay at 300ms
+          key={level.id}
+          useNativeDriver // Use native driver for animations
         >
-          <LinearGradient
-            colors={gradientColors}
-            start={{ x: 0, y: 0 }}
-            end={{ x: 1, y: 1 }}
-            style={styles.levelCardGradient}
-          >
-            <View style={styles.decorativeShape} />
-            <View style={[styles.decorativeShape, styles.decorativeShape2]} />
+          <LevelCard
+            level={level}
+            onSelect={handleLevelSelect}
+            gradientColors={gradientColors}
+          />
+        </Animatable.View>
+      );
+    },
+    [difficultyColors, handleLevelSelect]
+  );
 
-            <View style={styles.levelHeader}>
-              <View style={styles.levelNumberContainer}>
-                <Text style={styles.levelNumber}>{level.number}</Text>
-              </View>
-              <View style={styles.specialIconContainer}>
-                {level.status === "completed" ? (
-                  <CheckCircle width={20} height={20} color="#FFFFFF" />
-                ) : (
-                  <Circle width={20} height={20} color="#FFFFFF" />
-                )}
-              </View>
-            </View>
-            <View style={styles.levelInfo}>
-              <Text style={styles.levelTitle}>{level.title}</Text>
-              <View style={styles.levelMetadataRow}>
-                <View style={styles.focusAreaBadge}>
-                  {renderFocusIcon()}
-                  <Text style={styles.focusAreaText}>{level.focusArea}</Text>
-                </View>
-                <View style={styles.difficultyBadge}>
-                  <Text style={styles.difficultyText}>{level.difficulty}</Text>
-                </View>
-              </View>
-            </View>
-          </LinearGradient>
-        </TouchableOpacity>
-      </Animatable.View>
-    );
-  };
+  // Optimize keyExtractor
+  const keyExtractor = useCallback((item) => item.id.toString(), []);
 
   const renderContent = () => {
     // Show loading state
@@ -308,14 +362,21 @@ const LevelSelection = () => {
     // Show levels grid with animations
     if (showLevels) {
       return (
-        <ScrollView
+        <FlatList
+          data={levels}
+          keyExtractor={keyExtractor}
+          renderItem={renderItem}
+          numColumns={2}
           contentContainerStyle={styles.gridScrollContent}
           showsVerticalScrollIndicator={false}
-        >
-          <View style={styles.levelGrid}>
-            {levels.map((level) => renderLevelCard(level))}
-          </View>
-        </ScrollView>
+          columnWrapperStyle={styles.columnWrapper} // Add this style for column spacing
+          initialNumToRender={6}
+          maxToRenderPerBatch={4}
+          windowSize={3}
+          removeClippedSubviews={true}
+          updateCellsBatchingPeriod={50}
+          onEndReachedThreshold={0.5}
+        />
       );
     }
 
@@ -507,27 +568,26 @@ const styles = StyleSheet.create({
   gridScrollContent: {
     paddingHorizontal: 20,
     paddingBottom: 40,
+    paddingTop: 10,
   },
-  levelGrid: {
-    flexDirection: "row",
-    flexWrap: "wrap",
+  columnWrapper: {
     justifyContent: "space-between",
     width: "100%",
   },
   levelCard: {
     width: width * 0.44,
-    height: 150,
+    height: 175,
     borderRadius: 16,
     marginBottom: 16,
     overflow: "hidden",
     shadowColor: "#000",
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.2,
-    shadowRadius: 8,
-    elevation: 6,
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.3,
+    shadowRadius: 10,
+    elevation: 8,
   },
   levelCardGradient: {
-    padding: 12,
+    padding: 12, // Increased padding
     height: "100%",
     justifyContent: "space-between",
     position: "relative",
@@ -535,33 +595,38 @@ const styles = StyleSheet.create({
   },
   decorativeShape: {
     position: "absolute",
-    top: -20,
-    right: -20,
-    width: 80,
-    height: 80,
-    borderRadius: 40,
-    backgroundColor: "rgba(255, 255, 255, 0.08)",
+    top: -25,
+    right: -25,
+    width: 100,
+    height: 100,
+    borderRadius: 50,
+    backgroundColor: "rgba(255, 255, 255, 0.1)", // More subtle
   },
   decorativeShape2: {
-    bottom: -30,
-    left: -30,
+    bottom: -35,
+    left: -35,
     top: "auto",
     right: "auto",
-    width: 60,
-    height: 60,
+    width: 80,
+    height: 80,
   },
   levelHeader: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
+    marginBottom: 4,
   },
   levelNumberContainer: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    backgroundColor: "rgba(255, 255, 255, 0.2)",
+    width: 38,
+    height: 38,
+    borderRadius: 19,
+    backgroundColor: "rgba(255, 255, 255, 0.25)", // Slightly more opaque
     justifyContent: "center",
     alignItems: "center",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 3,
   },
   levelNumber: {
     fontSize: 16,
@@ -577,7 +642,7 @@ const styles = StyleSheet.create({
   levelInfo: {
     flex: 1,
     justifyContent: "flex-start",
-    paddingTop: 6,
+    paddingTop: 4,
   },
   levelTitle: {
     fontSize: 16,
@@ -587,34 +652,34 @@ const styles = StyleSheet.create({
   },
   levelMetadataRow: {
     flexDirection: "row",
-    justifyContent: "space-between",
-    marginBottom: 4,
+    justifyContent: "flex-start", // Changed to flex-start
+    marginBottom: 8, // Increased margin
   },
   focusAreaBadge: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "rgba(0, 0, 0, 0.2)",
-    paddingHorizontal: 8,
-    paddingVertical: 3,
-    borderRadius: 10,
+    backgroundColor: "rgba(0, 0, 0, 0.25)", // Darker for better contrast
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 12,
   },
   focusAreaText: {
-    fontSize: 10,
+    fontSize: 11,
     fontFamily: "Poppins-Medium",
     color: BASE_COLORS.white,
-    marginLeft: 4,
+    marginLeft: 5,
   },
-  difficultyBadge: {
-    backgroundColor: "rgba(255, 255, 255, 0.2)",
-    paddingHorizontal: 10,
-    paddingVertical: 3,
-    borderRadius: 10,
-    marginBottom: 6,
+  difficultyStarsContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 3,
+    marginBottom: 4,
   },
   difficultyText: {
     fontSize: 12,
     fontFamily: "Poppins-SemiBold",
     color: BASE_COLORS.white,
+    marginLeft: 6,
   },
   contentArea: {
     flex: 1,

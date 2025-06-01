@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback } from "react";
+import React, { useEffect, useState, useCallback, lazy } from "react";
 import {
   View,
   ActivityIndicator,
@@ -8,15 +8,19 @@ import {
 } from "react-native";
 import { useLocalSearchParams, router } from "expo-router";
 import { BASE_COLORS } from "@/constant/colors";
+import useThemeStore from "@/store/useThemeStore";
 
-// Import game components
-import MultipleChoice from "./MultipleChoice";
-import Identification from "./Identification";
-import FillInTheBlank from "./FillInTheBlank";
+// Lazy load game components
+const MultipleChoice = lazy(() => import("./MultipleChoice"));
+const Identification = lazy(() => import("./Identification"));
+const FillInTheBlank = lazy(() => import("./FillInTheBlank"));
+
+// Import other components
 import GameInfoModal from "@/components/Games/GameInfoModal";
 import useQuizStore from "@/store/Games/useQuizStore";
 import AppLoading from "@/components/AppLoading";
 import DotsLoader from "@/components/DotLoader";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 const Questions = () => {
   const params = useLocalSearchParams();
@@ -24,10 +28,10 @@ const Questions = () => {
   const levelId = parseInt(params.levelId as string) || 1;
   const difficulty = params.difficulty as string;
   const skipModal = params.skipModal === "true";
+  const { activeTheme } = useThemeStore();
 
-  // Initialize modal as hidden if skipModal is true
+  // Simplified state management
   const [showInfoModal, setShowInfoModal] = useState(!skipModal);
-  const [gameStarted, setGameStarted] = useState(skipModal);
   const [isLoading, setIsLoading] = useState(false);
   const [showGame, setShowGame] = useState(skipModal);
 
@@ -37,37 +41,37 @@ const Questions = () => {
     getLevelData,
     isLoading: storeLoading,
     error,
+    // Add game state access
+    gameState,
   } = useQuizStore();
 
   // State for level data
   const [levelData, setLevelData] = useState(null);
   const [actualDifficulty, setActualDifficulty] = useState(difficulty);
-
-  // Add local loading state
   const [localLoading, setLocalLoading] = useState(true);
+
+  // Add a loading state check to prevent Suspense loops
+  const [gameComponentReady, setGameComponentReady] = useState(false);
 
   // Fetch questions on component mount
   useEffect(() => {
     const loadQuizData = async () => {
       setLocalLoading(true);
       try {
-        // Start with shorter timeouts
         const result = getLevelData(gameMode, levelId, difficulty);
 
         if (result) {
-          // If we have the data already, use it immediately
           if (result.foundDifficulty) {
             setLevelData(result.levelData);
             setActualDifficulty(result.foundDifficulty);
           } else {
             setLevelData(result);
           }
-          // Small delay to prevent flicker
-          setTimeout(() => setLocalLoading(false), 100);
-          return; // Exit early if we have data
+          setLocalLoading(false);
+          setGameComponentReady(true); // Mark as ready
+          return;
         }
 
-        // Only fetch from API if we don't have the data cached
         await fetchQuestionsByMode(gameMode);
 
         const updatedResult = getLevelData(gameMode, levelId, difficulty);
@@ -80,6 +84,7 @@ const Questions = () => {
           }
         }
         setLocalLoading(false);
+        setGameComponentReady(true); // Mark as ready
       } catch (error) {
         console.error("Error loading quiz data:", error);
         setLocalLoading(false);
@@ -89,24 +94,17 @@ const Questions = () => {
     loadQuizData();
   }, [gameMode, levelId, difficulty]);
 
-  // Handle game start
+  // FIXED: Simplified game start logic
   const handleStartGame = () => {
     setIsLoading(true);
 
+    // Short delay for UI feedback, then immediately show game
     setTimeout(() => {
       setIsLoading(false);
       setShowInfoModal(false);
-
-      // Show the game component after modal closes
-      setTimeout(() => {
-        setShowGame(true);
-
-        // Start the game timer/logic after a short delay to ensure smooth transition
-        setTimeout(() => {
-          setGameStarted(true);
-        }, 300);
-      }, 300);
-    }, 1000);
+      setShowGame(true);
+      // Game will auto-start via isStarted prop
+    }, 500); // Reduced from complex nested timeouts
   };
 
   // Handle modal close (go back to levels screen)
@@ -116,13 +114,18 @@ const Questions = () => {
 
   // Add memoization for better performance
   const renderGameComponent = useCallback(() => {
-    if (storeLoading) {
+    if (storeLoading || !gameComponentReady) {
       return <ActivityIndicator size="large" color={BASE_COLORS.blue} />;
     }
 
     if (error) {
       return (
-        <View style={styles.errorContainer}>
+        <View
+          style={[
+            styles.errorContainer,
+            { backgroundColor: activeTheme.backgroundColor },
+          ]}
+        >
           <Text style={styles.errorText}>{error}</Text>
           <TouchableOpacity
             style={styles.backButton}
@@ -136,7 +139,12 @@ const Questions = () => {
 
     if (!levelData) {
       return (
-        <View style={styles.errorContainer}>
+        <View
+          style={[
+            styles.errorContainer,
+            { backgroundColor: activeTheme.backgroundColor },
+          ]}
+        >
           <Text style={styles.errorText}>
             Level {levelId} not found in {difficulty} difficulty.
           </Text>
@@ -150,16 +158,7 @@ const Questions = () => {
       );
     }
 
-    // If the game hasn't started yet, show a loading indicator
-    if (!gameStarted) {
-      return (
-        <View style={styles.loaderContainer}>
-          <DotsLoader />
-        </View>
-      );
-    }
-
-    // Use a switch-case for better performance than multiple if-else
+    // Switch case for rendering components
     switch (gameMode) {
       case "multipleChoice":
         return (
@@ -167,7 +166,7 @@ const Questions = () => {
             levelId={levelId}
             levelData={levelData}
             difficulty={actualDifficulty}
-            isStarted={gameStarted}
+            isStarted={showGame}
           />
         );
       case "identification":
@@ -176,7 +175,7 @@ const Questions = () => {
             levelId={levelId}
             levelData={levelData}
             difficulty={actualDifficulty}
-            isStarted={gameStarted}
+            isStarted={showGame}
           />
         );
       case "fillBlanks":
@@ -185,7 +184,7 @@ const Questions = () => {
             levelId={levelId}
             levelData={levelData}
             difficulty={actualDifficulty}
-            isStarted={gameStarted}
+            isStarted={showGame}
           />
         );
       default:
@@ -198,17 +197,24 @@ const Questions = () => {
     gameMode,
     levelId,
     actualDifficulty,
-    gameStarted,
+    showGame,
     storeLoading,
     error,
+    gameComponentReady, // Add this dependency
   ]);
 
-  // Log when the game state changes
-  useEffect(() => {
-    if (gameStarted) {
-      console.log("Game has started:", gameMode, levelId);
-    }
-  }, [gameStarted]);
+  const StyledSuspenseLoader = () => {
+    return (
+      <SafeAreaView
+        style={[
+          styles.fullScreenLoader,
+          { backgroundColor: activeTheme.backgroundColor },
+        ]}
+      >
+        <DotsLoader />
+      </SafeAreaView>
+    );
+  };
 
   // Show loading state while fetching or initializing
   if (localLoading || storeLoading || (!showGame && !showInfoModal)) {
@@ -218,7 +224,11 @@ const Questions = () => {
   return (
     <View style={styles.container}>
       {/* Only render the game component if showGame is true */}
-      {showGame ? renderGameComponent() : null}
+      {showGame && gameComponentReady ? (
+        <React.Suspense fallback={<StyledSuspenseLoader />}>
+          {renderGameComponent()}
+        </React.Suspense>
+      ) : null}
 
       <GameInfoModal
         visible={showInfoModal}
@@ -242,7 +252,6 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     padding: 20,
-    backgroundColor: "#111B21",
   },
   errorText: {
     fontSize: 18,
@@ -266,7 +275,11 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
-    backgroundColor: "#111B21",
+  },
+  fullScreenLoader: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
   },
 });
 

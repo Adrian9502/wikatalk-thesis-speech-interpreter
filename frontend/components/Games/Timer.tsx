@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { View, Text, StyleSheet } from "react-native";
 import { Clock } from "react-native-feather";
 import { BASE_COLORS } from "@/constant/colors";
@@ -9,35 +9,54 @@ interface TimerProps {
 }
 
 const Timer: React.FC<TimerProps> = ({ isRunning }) => {
-  // Get state and actions from the universal quiz store
+  // Local state for display formatting only
+  const [displayTime, setDisplayTime] = useState("00:00");
+  // Use ref to track current time without re-renders
+  const timeRef = useRef(0);
   const { gameState, updateTimeElapsed } = useQuizStore();
   const { timeElapsed } = gameState;
+
+  // Set initial value
+  timeRef.current = timeElapsed;
 
   useEffect(() => {
     let interval: NodeJS.Timeout;
 
     if (isRunning) {
       interval = setInterval(() => {
-        updateTimeElapsed(timeElapsed + 1);
+        // Update the ref value
+        timeRef.current += 1;
+
+        // Format time for display
+        const minutes = Math.floor(timeRef.current / 60);
+        const remainingSeconds = timeRef.current % 60;
+        const formattedTime = `${minutes
+          .toString()
+          .padStart(2, "0")}:${remainingSeconds.toString().padStart(2, "0")}`;
+
+        // Update display
+        setDisplayTime(formattedTime);
+
+        // Update store less frequently (every 5 seconds)
+        if (timeRef.current % 5 === 0) {
+          updateTimeElapsed(timeRef.current);
+        }
       }, 1000);
     }
 
-    return () => clearInterval(interval);
-  }, [isRunning, timeElapsed, updateTimeElapsed]);
-
-  // Format time as MM:SS
-  const formatTime = () => {
-    const minutes = Math.floor(timeElapsed / 60);
-    const remainingSeconds = timeElapsed % 60;
-    return `${minutes.toString().padStart(2, "0")}:${remainingSeconds
-      .toString()
-      .padStart(2, "0")}`;
-  };
+    return () => {
+      if (interval) {
+        clearInterval(interval);
+        // Ensure final time is saved to store when unmounting
+        updateTimeElapsed(timeRef.current);
+      }
+    };
+  }, [isRunning, updateTimeElapsed]);
 
   return (
     <View style={styles.timerContainer}>
       <Clock width={16} height={16} color={BASE_COLORS.white} />
-      <Text style={styles.timerText}>{formatTime()}</Text>
+      <Text style={styles.timerText}>{displayTime}</Text>
     </View>
   );
 };

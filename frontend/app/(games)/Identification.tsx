@@ -18,6 +18,7 @@ import useQuizStore from "@/store/Games/useQuizStore";
 import Timer from "@/components/Games/Timer";
 import AnswerReview from "@/components/Games/AnswerReview";
 import { Header } from "@/components/Header";
+import { router } from "expo-router";
 import {
   formatTime,
   getDifficultyColors,
@@ -43,6 +44,7 @@ const Identification: React.FC<IdentificationProps> = ({
 }) => {
   // Theme store
   const { activeTheme } = useThemeStore();
+  const gameMode = "identification";
 
   // Get state and actions from the centralized store - UPDATED for useQuizStore
   const {
@@ -57,12 +59,15 @@ const Identification: React.FC<IdentificationProps> = ({
       showTranslation,
       feedback,
     },
+    // Add error state
+    error,
     // Actions
     initialize,
     startGame,
     handleRestart,
     handleWordSelect,
     toggleIdentificationTranslation: toggleTranslation,
+    setGameStatus,
   } = useQuizStore();
 
   // Current sentence
@@ -76,30 +81,27 @@ const Identification: React.FC<IdentificationProps> = ({
     return () => cleanupBackHandler();
   }, [gameStatus, timerRunning]);
 
-  // Initialize with level data
+  // Simplified initialization - no complex timeouts
   useEffect(() => {
-    console.log("Initializing Identification with data:", levelData);
-    // Pass the gameMode parameter "identification"
-    initialize(levelData, levelId, "identification", difficulty);
+    if (levelData && isStarted) {
+      console.log("Initializing identification game with data:", levelData);
 
-    // Add a short delay to ensure initialization completes before starting the game
-    if (isStarted) {
-      const timer = setTimeout(() => {
-        console.log("Starting identification game");
-        startGame();
-      }, 500);
+      // Initialize the game
+      initialize(levelData, levelId, gameMode, difficulty);
 
-      return () => clearTimeout(timer);
+      // Start immediately after initialization
+      console.log("Starting identification game");
+      startGame();
     }
-  }, [levelData, levelId, isStarted]);
+  }, [levelData, isStarted]); // SIMPLIFIED DEPENDENCIES
 
   // Get word style based on state
-  const getWordStyle = (word, index) => {
+  const getWordStyle = (word: any, index: number) => {
     const baseStyle = [
       gameSharedStyles.optionCard,
       {
         height: 60, // Fixed height, not minHeight
-        position: "relative", // Add this to ensure absolute positioning works correctly
+        position: "relative" as const, // Fix the type issue
       },
     ];
 
@@ -139,11 +141,34 @@ const Identification: React.FC<IdentificationProps> = ({
             Level {levelId} -{" "}
             {currentSentence?.title ||
               currentSentence?.dialect ||
-              "- Word Identification"}
+              "Word Identification"}
           </Text>
         </View>
 
-        {gameStatus === "playing" ? (
+        {error ? (
+          // Show error state
+          <View style={gameSharedStyles.loaderContainer}>
+            <Text
+              style={{
+                color: BASE_COLORS.white,
+                textAlign: "center",
+                marginBottom: 20,
+              }}
+            >
+              {error}
+            </Text>
+            <TouchableOpacity
+              style={{
+                backgroundColor: BASE_COLORS.blue,
+                padding: 12,
+                borderRadius: 8,
+              }}
+              onPress={() => router.back()}
+            >
+              <Text style={{ color: BASE_COLORS.white }}>Go Back</Text>
+            </TouchableOpacity>
+          </View>
+        ) : gameStatus === "playing" ? (
           <ScrollView
             showsVerticalScrollIndicator={false}
             contentContainerStyle={gameSharedStyles.contentContainer}
@@ -155,7 +180,7 @@ const Identification: React.FC<IdentificationProps> = ({
               delay={100}
               style={gameSharedStyles.statsContainer}
             >
-              {isStarted && <Timer isRunning={timerRunning} />}
+              <Timer isRunning={timerRunning} />
               <DifficultyBadge difficulty={difficulty} />
             </Animatable.View>
 
@@ -205,15 +230,19 @@ const Identification: React.FC<IdentificationProps> = ({
                         <View style={gameSharedStyles.optionContent}>
                           <View style={gameSharedStyles.optionIdContainer}>
                             <Text style={gameSharedStyles.optionId}>
-                              {(word.id || "").toUpperCase()}
+                              {index + 1}
                             </Text>
                           </View>
                           <Text style={gameSharedStyles.optionText}>
-                            {word.text || word.clean || word.original}
+                            {typeof word.text === "string"
+                              ? word.text
+                              : typeof word.clean === "string"
+                              ? word.clean
+                              : String(word.text || word.clean || "")}
                           </Text>
                         </View>
 
-                        {/* Show check/x icon if selected - FIXED to use absolute positioning */}
+                        {/* Show check/x icon if selected */}
                         {selectedWord === index && (
                           <View style={gameSharedStyles.resultIconContainer}>
                             {word.clean?.toLowerCase() ===
@@ -255,15 +284,11 @@ const Identification: React.FC<IdentificationProps> = ({
 
             {/* Translation Card */}
             {showTranslation && (
-              <Animatable.View
-                animation="fadeIn"
-                duration={300}
-                style={gameSharedStyles.translationCard}
-              >
+              <View style={gameSharedStyles.translationCard}>
                 <Text style={gameSharedStyles.translationText}>
-                  {currentSentence?.translation}
+                  {currentSentence?.translation || "Translation not available"}
                 </Text>
-              </Animatable.View>
+              </View>
             )}
           </ScrollView>
         ) : gameStatus === "completed" ? (
@@ -325,9 +350,13 @@ const Identification: React.FC<IdentificationProps> = ({
                 currentSentence?.sentence || currentSentence?.question || ""
               }
               userAnswer={
-                words[selectedWord]?.text ||
-                words[selectedWord]?.clean ||
-                "Unknown"
+                selectedWord !== null && words[selectedWord]
+                  ? typeof words[selectedWord]?.text === "string"
+                    ? words[selectedWord]?.text
+                    : typeof words[selectedWord]?.clean === "string"
+                    ? words[selectedWord]?.clean
+                    : "Unknown"
+                  : "Unknown"
               }
               isCorrect={feedback === "correct"}
             />
@@ -345,6 +374,7 @@ const Identification: React.FC<IdentificationProps> = ({
           // Default loading state when idle
           <View style={gameSharedStyles.loaderContainer}>
             <ActivityIndicator size="large" color={BASE_COLORS.blue} />
+            <Text style={styles.loadingText}>Loading game...</Text>
           </View>
         )}
       </SafeAreaView>
@@ -364,6 +394,13 @@ const styles = StyleSheet.create({
   optionWrapper: {
     width: "48%",
     marginBottom: 10,
+  },
+  loadingText: {
+    marginTop: 16,
+    fontSize: 16,
+    fontFamily: "Poppins-Medium",
+    color: BASE_COLORS.white,
+    textAlign: "center",
   },
 });
 
