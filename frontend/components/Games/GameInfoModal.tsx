@@ -1,4 +1,4 @@
-import React, { useCallback } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import {
   Modal,
   View,
@@ -40,9 +40,21 @@ const GameInfoModal: React.FC<GameInfoModalProps> = React.memo(
     isLoading = false,
     difficulty = "Easy",
   }) => {
+    // FIXED: Add internal state to track if modal should actually be visible
+    const [internalVisible, setInternalVisible] = useState(false);
+    const [hasBeenStarted, setHasBeenStarted] = useState(false);
+
+    // FIXED: Control internal visibility based on props and internal state
+    useEffect(() => {
+      if (visible && !hasBeenStarted) {
+        setInternalVisible(true);
+      } else {
+        setInternalVisible(false);
+      }
+    }, [visible, hasBeenStarted]);
+
     // Get gradient colors for the current difficulty
     const getGradientColors = (): readonly [string, string] => {
-      // Logic for gradient colors remains the same
       if (difficulty && difficulty in difficultyColors) {
         return difficultyColors[difficulty as DifficultyLevel];
       }
@@ -106,40 +118,66 @@ const GameInfoModal: React.FC<GameInfoModalProps> = React.memo(
       }
     };
 
-    // Optimize the start button handler
+    // FIXED: Enhanced start button handler
     const handleStart = useCallback(() => {
       if (isLoading) return;
+
+      console.log(
+        "GameInfoModal: Starting game, setting hasBeenStarted to true"
+      );
+      setHasBeenStarted(true);
+      setInternalVisible(false);
       onStart();
     }, [isLoading, onStart]);
 
-    // Return null early if not visible
-    if (!visible || !levelData) return null;
+    // FIXED: Enhanced close handler
+    const handleClose = useCallback(() => {
+      console.log("GameInfoModal: Closing modal");
+      setInternalVisible(false);
+      onClose();
+    }, [onClose]);
+
+    // FIXED: Return null early if conditions are not met
+    if (!levelData || !internalVisible) {
+      console.log(
+        "GameInfoModal: Not rendering - levelData:",
+        !!levelData,
+        "internalVisible:",
+        internalVisible
+      );
+      return null;
+    }
+
+    console.log(
+      "GameInfoModal: Rendering modal with internalVisible:",
+      internalVisible
+    );
 
     return (
       <Modal
-        visible={visible}
+        visible={internalVisible}
         transparent
-        animationType="fade"
-        statusBarTranslucent
-        onRequestClose={onClose}
+        animationType="none"
+        statusBarTranslucent={true}
+        onRequestClose={handleClose}
       >
         <Animatable.View
           animation="fadeIn"
-          duration={300}
+          duration={200}
           style={styles.overlay}
         >
           <Animatable.View
             animation="zoomIn"
-            duration={400}
+            duration={300}
             style={styles.modalContainer}
           >
             <LinearGradient
               colors={getGradientColors()}
-              start={{ x: 0, y: 0 }}
-              end={{ x: 0.8, y: 0.8 }}
               style={styles.modalContent}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 1 }}
             >
-              {/* Enhanced decorative elements */}
+              {/* Decorative background elements */}
               <View style={styles.decorativeShape1} />
               <View style={styles.decorativeShape2} />
               <View style={styles.decorativeShape3} />
@@ -147,8 +185,7 @@ const GameInfoModal: React.FC<GameInfoModalProps> = React.memo(
               {/* Close button */}
               <TouchableOpacity
                 style={styles.closeButton}
-                onPress={onClose}
-                activeOpacity={0.8}
+                onPress={handleClose}
               >
                 <X width={20} height={20} color="#fff" />
               </TouchableOpacity>
