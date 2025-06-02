@@ -1,40 +1,34 @@
 const mongoose = require("mongoose");
 
-const optionSchema = new mongoose.Schema({
-  id: { type: String, required: true },
-  text: { type: String, required: true },
-  isCorrect: { type: Boolean, default: false }
-});
-
 const quizQuestionSchema = new mongoose.Schema({
-  id: { type: Number, required: true },
+  id: { type: Number, required: true, unique: true },
   level: { type: String, required: true },
-  difficulty: {
-    type: String,
-    required: true,
-    enum: ["easy", "medium", "hard"]
-  },
-  mode: {
-    type: String,
-    required: true,
-    enum: ["multipleChoice", "identification", "fillBlanks"]
-  },
+  difficulty: { type: String, required: true, enum: ['easy', 'medium', 'hard'] },
+  mode: { type: String, required: true, enum: ['multipleChoice', 'identification', 'fillBlanks'] },
   title: { type: String, required: true },
-  description: { type: String },
+  description: String,
   question: { type: String, required: true },
-  options: [optionSchema],
-  targetWord: { type: String },
-  choices: [{
-    id: String,
-    text: String
-  }],
-  translation: { type: String },
-  hint: { type: String },
-  dialect: { type: String }
-}, { timestamps: true });
+  translation: String,
+  dialect: String,
+  focusArea: { type: String, enum: ['vocabulary', 'grammar', 'pronunciation'], default: 'vocabulary' }, // ADD THIS
 
-// Create a unique index on the id field
-quizQuestionSchema.index({ id: 1 }, { unique: true });
+  // Mode-specific fields
+  options: [{ 
+    id: String, 
+    text: String, 
+    isCorrect: Boolean 
+  }], // For multipleChoice
+  
+  choices: [{ 
+    id: String, 
+    text: String 
+  }], // For identification
+  
+  answer: String, // CHANGE FROM targetWord to answer
+  hint: String, // For fillBlanks
+}, {
+  timestamps: true
+});
 
 const QuizQuestion = mongoose.model("QuizQuestion", quizQuestionSchema);
 

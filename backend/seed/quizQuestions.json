@@ -13,7 +13,8 @@
         { "id": "b", "text": "Walking", "isCorrect": true },
         { "id": "c", "text": "Sleeping", "isCorrect": false },
         { "id": "d", "text": "Eating", "isCorrect": false }
-      ]
+      ],
+      "focusArea": "vocabulary"
     },
     {
       "questionId": 2,
@@ -28,7 +29,8 @@
         { "id": "b", "text": "Eating", "isCorrect": true },
         { "id": "c", "text": "Jumping", "isCorrect": false },
         { "id": "d", "text": "Washing", "isCorrect": false }
-      ]
+      ],
+      "focusArea": "vocabulary"
     },
     {
       "questionId": 3,
@@ -43,7 +45,8 @@
         { "id": "b", "text": "I’m working", "isCorrect": false },
         { "id": "c", "text": "I’m cooking", "isCorrect": false },
         { "id": "d", "text": "I’m running", "isCorrect": false }
-      ]
+      ],
+      "focusArea": "vocabulary"
     },
     {
       "questionId": 4,
@@ -58,7 +61,8 @@
         { "id": "b", "text": "He is singing", "isCorrect": true },
         { "id": "c", "text": "He is jumping", "isCorrect": false },
         { "id": "d", "text": "He is fixing", "isCorrect": false }
-      ]
+      ],
+      "focusArea": "vocabulary"
     },
     {
       "questionId": 5,
@@ -73,7 +77,8 @@
         { "id": "b", "text": "I will eat", "isCorrect": true },
         { "id": "c", "text": "I will play", "isCorrect": false },
         { "id": "d", "text": "I will run", "isCorrect": false }
-      ]
+      ],
+      "focusArea": "vocabulary"
     },
     {
       "questionId": 6,
@@ -88,7 +93,8 @@
         { "id": "b", "text": "Drink water", "isCorrect": true },
         { "id": "c", "text": "Go to school", "isCorrect": false },
         { "id": "d", "text": "Wash dishes", "isCorrect": false }
-      ]
+      ],
+      "focusArea": "vocabulary"
     },
     {
       "questionId": 7,
@@ -103,7 +109,8 @@
         { "id": "b", "text": "She has taken a bath", "isCorrect": true },
         { "id": "c", "text": "She is reading", "isCorrect": false },
         { "id": "d", "text": "She is writing", "isCorrect": false }
-      ]
+      ],
+      "focusArea": "grammar"
     },
     {
       "questionId": 8,
@@ -118,7 +125,8 @@
         { "id": "b", "text": "He is reading a book", "isCorrect": true },
         { "id": "c", "text": "He is fixing the bed", "isCorrect": false },
         { "id": "d", "text": "He is listening to music", "isCorrect": false }
-      ]
+      ],
+      "focusArea": "vocabulary"
     },
     {
       "questionId": 9,
@@ -133,7 +141,8 @@
         { "id": "b", "text": "I will take a bath later", "isCorrect": true },
         { "id": "c", "text": "I will drive later", "isCorrect": false },
         { "id": "d", "text": "I will walk outside", "isCorrect": false }
-      ]
+      ],
+      "focusArea": "vocabulary"
     },
     {
       "questionId": 10,
@@ -148,7 +157,8 @@
         { "id": "b", "text": "Father is working", "isCorrect": false },
         { "id": "c", "text": "Father is drinking coffee", "isCorrect": true },
         { "id": "d", "text": "Father is cooking rice", "isCorrect": false }
-      ]
+      ],
+      "focusArea": "vocabulary"
     },
     {
       "questionId": 11,
@@ -163,7 +173,8 @@
         { "id": "b", "text": "She is walking to school", "isCorrect": true },
         { "id": "c", "text": "She is skipping school", "isCorrect": false },
         { "id": "d", "text": "She is leaving school", "isCorrect": false }
-      ]
+      ],
+      "focusArea": "grammar"
     },
     {
       "questionId": 12,
@@ -194,7 +205,8 @@
           "text": "They are selling in the plaza",
           "isCorrect": false
         }
-      ]
+      ],
+      "focusArea": "vocabulary"
     },
     {
       "questionId": 13,
@@ -213,7 +225,8 @@
         },
         { "id": "c", "text": "She is peeling fruits", "isCorrect": false },
         { "id": "d", "text": "She is slicing meat", "isCorrect": false }
-      ]
+      ],
+      "focusArea": "vocabulary"
     },
     {
       "questionId": 14,
@@ -228,7 +241,8 @@
         { "id": "b", "text": "He is washing the dishes", "isCorrect": true },
         { "id": "c", "text": "He is cooking rice", "isCorrect": false },
         { "id": "d", "text": "He is cleaning the table", "isCorrect": false }
-      ]
+      ],
+      "focusArea": "grammar"
     },
     {
       "questionId": 15,
@@ -243,7 +257,8 @@
         { "id": "b", "text": "He is feeding the baby", "isCorrect": true },
         { "id": "c", "text": "He is selling vegetables", "isCorrect": false },
         { "id": "d", "text": "He is buying rice", "isCorrect": false }
-      ]
+      ],
+      "focusArea": "vocabulary"
     },
     {
       "questionId": 16,
@@ -266,7 +281,8 @@
         },
         { "id": "c", "text": "He is throwing bread", "isCorrect": false },
         { "id": "d", "text": "He is selling bread", "isCorrect": false }
-      ]
+      ],
+      "focusArea": "vocabulary"
     },
     {
       "questionId": 17,
@@ -281,7 +297,8 @@
         { "id": "b", "text": "He is going home", "isCorrect": true },
         { "id": "c", "text": "He is going to work", "isCorrect": false },
         { "id": "d", "text": "He is traveling", "isCorrect": false }
-      ]
+      ],
+      "focusArea": "vocabulary"
     },
     {
       "questionId": 18,
@@ -296,7 +313,8 @@
         { "id": "b", "text": "I went to the rice field", "isCorrect": true },
         { "id": "c", "text": "I built a house", "isCorrect": false },
         { "id": "d", "text": "I went to market", "isCorrect": false }
-      ]
+      ],
+      "focusArea": "vocabulary"
     },
     {
       "questionId": 19,
@@ -311,7 +329,8 @@
         { "id": "b", "text": "I read the English book", "isCorrect": true },
         { "id": "c", "text": "I bought a dictionary", "isCorrect": false },
         { "id": "d", "text": "I opened a package", "isCorrect": false }
-      ]
+      ],
+      "focusArea": "vocabulary"
     },
     {
       "questionId": 20,
@@ -326,7 +345,8 @@
         { "id": "b", "text": "He is cleaning the room", "isCorrect": true },
         { "id": "c", "text": "He is designing the room", "isCorrect": false },
         { "id": "d", "text": "He is entering the room", "isCorrect": false }
-      ]
+      ],
+      "focusArea": "grammar"
     },
     {
       "questionId": 21,
@@ -345,7 +365,8 @@
         },
         { "id": "c", "text": "She is calling her friend", "isCorrect": false },
         { "id": "d", "text": "She is ignoring her friend", "isCorrect": false }
-      ]
+      ],
+      "focusArea": "grammar"
     },
     {
       "questionId": 22,
@@ -368,7 +389,8 @@
         },
         { "id": "c", "text": "I cleaned the garden", "isCorrect": false },
         { "id": "d", "text": "I studied this morning", "isCorrect": false }
-      ]
+      ],
+      "focusArea": "vocabulary"
     },
     {
       "questionId": 23,
@@ -387,7 +409,8 @@
           "isCorrect": false
         },
         { "id": "d", "text": "He is lost at the market", "isCorrect": false }
-      ]
+      ],
+      "focusArea": "vocabulary"
     },
     {
       "questionId": 24,
@@ -410,7 +433,8 @@
         },
         { "id": "c", "text": "They are skipping dinner", "isCorrect": false },
         { "id": "d", "text": "They are cooking lunch", "isCorrect": false }
-      ]
+      ],
+      "focusArea": "grammar"
     },
     {
       "questionId": 25,
@@ -425,7 +449,8 @@
         { "id": "b", "text": "I will buy milk", "isCorrect": true },
         { "id": "c", "text": "I will boil milk", "isCorrect": false },
         { "id": "d", "text": "I will spill the milk", "isCorrect": false }
-      ]
+      ],
+      "focusArea": "vocabulary"
     },
     {
       "questionId": 26,
@@ -440,7 +465,8 @@
         { "id": "b", "text": "He talked to the teacher", "isCorrect": true },
         { "id": "c", "text": "He yelled at the teacher", "isCorrect": false },
         { "id": "d", "text": "He ignored the teacher", "isCorrect": false }
-      ]
+      ],
+      "focusArea": "vocabulary"
     },
     {
       "questionId": 27,
@@ -455,7 +481,8 @@
         { "id": "b", "text": "He went out of the house", "isCorrect": true },
         { "id": "c", "text": "He ran around the house", "isCorrect": false },
         { "id": "d", "text": "He cleaned the house", "isCorrect": false }
-      ]
+      ],
+      "focusArea": "vocabulary"
     },
     {
       "questionId": 28,
@@ -470,7 +497,8 @@
         { "id": "b", "text": "They finished class", "isCorrect": true },
         { "id": "c", "text": "They missed the exam", "isCorrect": false },
         { "id": "d", "text": "They started a fight", "isCorrect": false }
-      ]
+      ],
+      "focusArea": "grammar"
     },
     {
       "questionId": 29,
@@ -497,7 +525,8 @@
           "isCorrect": false
         },
         { "id": "d", "text": "I’ll visit work tomorrow", "isCorrect": false }
-      ]
+      ],
+      "focusArea": "grammar"
     },
     {
       "questionId": 30,
@@ -512,7 +541,8 @@
         { "id": "b", "text": "I am happy with your help", "isCorrect": true },
         { "id": "c", "text": "I am confused by your help", "isCorrect": false },
         { "id": "d", "text": "I am questioning your help", "isCorrect": false }
-      ]
+      ],
+      "focusArea": "vocabulary"
     },
     {
       "questionId": 31,
@@ -539,7 +569,8 @@
           "isCorrect": true
         },
         { "id": "d", "text": "He forgot the lecture", "isCorrect": false }
-      ]
+      ],
+      "focusArea": "grammar"
     },
     {
       "questionId": 32,
@@ -566,7 +597,8 @@
           "text": "Someone is looking for a book",
           "isCorrect": false
         }
-      ]
+      ],
+      "focusArea": "grammar"
     },
     {
       "questionId": 33,
@@ -593,7 +625,8 @@
           "isCorrect": false
         },
         { "id": "d", "text": "They fought at home", "isCorrect": false }
-      ]
+      ],
+      "focusArea": "grammar"
     },
     {
       "questionId": 34,
@@ -620,7 +653,8 @@
           "isCorrect": false
         },
         { "id": "d", "text": "He arrived late at class", "isCorrect": false }
-      ]
+      ],
+      "focusArea": "vocabulary"
     },
     {
       "questionId": 35,
@@ -643,7 +677,8 @@
         },
         { "id": "c", "text": "He failed but he studied", "isCorrect": false },
         { "id": "d", "text": "He is being forced to pass", "isCorrect": false }
-      ]
+      ],
+      "focusArea": "grammar"
     },
     {
       "questionId": 36,
@@ -670,7 +705,8 @@
           "isCorrect": false
         },
         { "id": "d", "text": "I haven’t cooked yet", "isCorrect": false }
-      ]
+      ],
+      "focusArea": "grammar"
     },
     {
       "questionId": 37,
@@ -689,7 +725,8 @@
         },
         { "id": "c", "text": "He won’t eat if he’s late", "isCorrect": false },
         { "id": "d", "text": "If he’s fast, he’ll win", "isCorrect": false }
-      ]
+      ],
+      "focusArea": "grammar"
     },
     {
       "questionId": 38,
@@ -708,7 +745,8 @@
         },
         { "id": "c", "text": "I left my friend", "isCorrect": false },
         { "id": "d", "text": "I missed the train", "isCorrect": false }
-      ]
+      ],
+      "focusArea": "vocabulary"
     },
     {
       "questionId": 39,
@@ -735,7 +773,8 @@
           "isCorrect": false
         },
         { "id": "d", "text": "I planned to avoid church", "isCorrect": false }
-      ]
+      ],
+      "focusArea": "grammar"
     },
     {
       "questionId": 40,
@@ -758,7 +797,8 @@
         },
         { "id": "c", "text": "I forgot the elder’s name", "isCorrect": false },
         { "id": "d", "text": "I rejected the instruction", "isCorrect": false }
-      ]
+      ],
+      "focusArea": "vocabulary"
     },
     {
       "questionId": 41,
@@ -773,7 +813,8 @@
         { "id": "b", "text": "He is unemployed", "isCorrect": true },
         { "id": "c", "text": "He is building a house", "isCorrect": false },
         { "id": "d", "text": "He is teaching math", "isCorrect": false }
-      ]
+      ],
+      "focusArea": "vocabulary"
     },
     {
       "questionId": 42,
@@ -804,7 +845,8 @@
           "text": "He sent money to his parents",
           "isCorrect": false
         }
-      ]
+      ],
+      "focusArea": "grammar"
     },
     {
       "questionId": 43,
@@ -823,7 +865,8 @@
         { "id": "b", "text": "Our movie is boring", "isCorrect": true },
         { "id": "c", "text": "Everyone watched our movie", "isCorrect": false },
         { "id": "d", "text": "The movie is very exciting", "isCorrect": false }
-      ]
+      ],
+      "focusArea": "vocabulary"
     },
     {
       "questionId": 44,
@@ -838,7 +881,8 @@
         { "id": "b", "text": "May I ask for help?", "isCorrect": true },
         { "id": "c", "text": "Help me now", "isCorrect": false },
         { "id": "d", "text": "You must help me", "isCorrect": false }
-      ]
+      ],
+      "focusArea": "grammar"
     },
     {
       "questionId": 45,
@@ -857,7 +901,8 @@
         },
         { "id": "c", "text": "He returned home", "isCorrect": false },
         { "id": "d", "text": "He skipped class", "isCorrect": false }
-      ]
+      ],
+      "focusArea": "grammar"
     },
     {
       "questionId": 46,
@@ -880,7 +925,8 @@
         },
         { "id": "c", "text": "I copied his idea", "isCorrect": false },
         { "id": "d", "text": "I helped him decide", "isCorrect": false }
-      ]
+      ],
+      "focusArea": "vocabulary"
     },
     {
       "questionId": 47,
@@ -903,7 +949,8 @@
           "isCorrect": false
         },
         { "id": "d", "text": "He skipped dinner", "isCorrect": false }
-      ]
+      ],
+      "focusArea": "grammar"
     },
     {
       "questionId": 48,
@@ -922,7 +969,8 @@
         },
         { "id": "c", "text": "He is repeating the words", "isCorrect": false },
         { "id": "d", "text": "He is translating it", "isCorrect": false }
-      ]
+      ],
+      "focusArea": "vocabulary"
     },
     {
       "questionId": 49,
@@ -941,7 +989,8 @@
         },
         { "id": "c", "text": "He listens to Maria", "isCorrect": false },
         { "id": "d", "text": "He admires Maria", "isCorrect": false }
-      ]
+      ],
+      "focusArea": "grammar"
     },
     {
       "questionId": 50,
@@ -960,7 +1009,8 @@
           "isCorrect": true
         },
         { "id": "d", "text": "Courage brings confusion", "isCorrect": false }
-      ]
+      ],
+      "focusArea": "vocabulary"
     },
     {
       "questionId": 51,
@@ -970,7 +1020,7 @@
       "title": "Kapampangan: Family Role",
       "description": "Choose the correct word for a family member.",
       "question": "I Maria ang ___ nang Juan.",
-      "targetWord": "indu",
+      "answer": "indu",
       "options": [
         { "id": "a", "text": "tatang" },
         { "id": "b", "text": "anak" },
@@ -981,7 +1031,8 @@
         { "id": "g", "text": "asawa" },
         { "id": "h", "text": "pamangkin" }
       ],
-      "translation": "Maria is Juan’s mother."
+      "translation": "Maria is Juan’s mother.",
+      "focusArea": "vocabulary"
     },
     {
       "questionId": 52,
@@ -991,7 +1042,7 @@
       "title": "Cebuano: Weather Identification",
       "description": "Choose the correct word related to weather.",
       "question": "Nag-ulan og kusog nga ___.",
-      "targetWord": "tubig",
+      "answer": "tubig",
       "options": [
         { "id": "a", "text": "kahoy" },
         { "id": "b", "text": "tubig" },
@@ -1002,7 +1053,8 @@
         { "id": "g", "text": "ulap" },
         { "id": "h", "text": "payong" }
       ],
-      "translation": "Heavy water is pouring (It's raining heavily)."
+      "translation": "Heavy water is pouring (It's raining heavily).",
+      "focusArea": "vocabulary"
     },
     {
       "questionId": 53,
@@ -1012,7 +1064,7 @@
       "title": "Ilocano: House Object",
       "description": "Choose the correct item found in the house.",
       "question": "Itugotmo ti ___ idiay kwarto.",
-      "targetWord": "silya",
+      "answer": "silya",
       "options": [
         { "id": "a", "text": "lampara" },
         { "id": "b", "text": "silya" },
@@ -1023,7 +1075,8 @@
         { "id": "g", "text": "libro" },
         { "id": "h", "text": "kurtina" }
       ],
-      "translation": "Bring the chair to the room."
+      "translation": "Bring the chair to the room.",
+      "focusArea": "vocabulary"
     },
     {
       "questionId": 54,
@@ -1033,7 +1086,7 @@
       "title": "Tagalog: Food Word",
       "description": "Choose the correct word related to food.",
       "question": "Kumain siya ng ___.",
-      "targetWord": "kanin",
+      "answer": "kanin",
       "options": [
         { "id": "a", "text": "upuan" },
         { "id": "b", "text": "sapatos" },
@@ -1044,7 +1097,8 @@
         { "id": "g", "text": "ilaw" },
         { "id": "h", "text": "bag" }
       ],
-      "translation": "He ate rice."
+      "translation": "He ate rice.",
+      "focusArea": "vocabulary"
     },
     {
       "questionId": 55,
@@ -1054,7 +1108,7 @@
       "title": "Waray: Daily Routine",
       "description": "Choose the correct word for daily routine.",
       "question": "Nag-aalmusal ako kada ___.",
-      "targetWord": "aga",
+      "answer": "aga",
       "options": [
         { "id": "a", "text": "hapon" },
         { "id": "b", "text": "gabi" },
@@ -1065,7 +1119,8 @@
         { "id": "g", "text": "ulan" },
         { "id": "h", "text": "adlaw" }
       ],
-      "translation": "I eat breakfast every morning."
+      "translation": "I eat breakfast every morning.",
+      "focusArea": "vocabulary"
     },
     {
       "questionId": 56,
@@ -1075,7 +1130,7 @@
       "title": "Hiligaynon: Action Verb",
       "description": "Choose the correct action verb for the sentence.",
       "question": "Hiya nag-___ han irimnan.",
-      "targetWord": "inom",
+      "answer": "inom",
       "options": [
         { "id": "a", "text": "luto" },
         { "id": "b", "text": "kaon" },
@@ -1086,7 +1141,8 @@
         { "id": "g", "text": "himo" },
         { "id": "h", "text": "lingkod" }
       ],
-      "translation": "He drank at the store."
+      "translation": "He drank at the store.",
+      "focusArea": "vocabulary"
     },
     {
       "questionId": 57,
@@ -1096,7 +1152,7 @@
       "title": "Bicol: School Vocabulary",
       "description": "Choose the appropriate word used in school.",
       "question": "Ang ___ amo ang ginahalinan sang mga libro.",
-      "targetWord": "librarya",
+      "answer": "librarya",
       "options": [
         { "id": "a", "text": "kwarto" },
         { "id": "b", "text": "librarya" },
@@ -1107,7 +1163,8 @@
         { "id": "g", "text": "papel" },
         { "id": "h", "text": "lapis" }
       ],
-      "translation": "The library is where books come from."
+      "translation": "The library is where books come from.",
+      "focusArea": "vocabulary"
     },
     {
       "questionId": 58,
@@ -1117,7 +1174,7 @@
       "title": "Pangasinan: Object in the Kitchen",
       "description": "Choose the correct kitchen item.",
       "question": "Gamit na ___ sa pagluto.",
-      "targetWord": "kawa",
+      "answer": "kawa",
       "options": [
         { "id": "a", "text": "kawa" },
         { "id": "b", "text": "payong" },
@@ -1128,7 +1185,8 @@
         { "id": "g", "text": "silya" },
         { "id": "h", "text": "ilaw" }
       ],
-      "translation": "Use the pan for cooking."
+      "translation": "Use the pan for cooking.",
+      "focusArea": "vocabulary"
     },
     {
       "questionId": 59,
@@ -1138,7 +1196,7 @@
       "title": "Maguindanao: House Location",
       "description": "Choose the correct word that refers to a location in the house.",
       "question": "So sala et ___ ed bale.",
-      "targetWord": "abong",
+      "answer": "abong",
       "options": [
         { "id": "a", "text": "abong" },
         { "id": "b", "text": "tanap" },
@@ -1149,7 +1207,8 @@
         { "id": "g", "text": "payong" },
         { "id": "h", "text": "sayan" }
       ],
-      "translation": "The living room is inside the house."
+      "translation": "The living room is inside the house.",
+      "focusArea": "vocabulary"
     },
     {
       "questionId": 60,
@@ -1159,7 +1218,7 @@
       "title": "Bisaya: Clothing Word",
       "description": "Choose the correct clothing item.",
       "question": "Nagbisti siya og ___.",
-      "targetWord": "sinina",
+      "answer": "sinina",
       "options": [
         { "id": "a", "text": "sinina" },
         { "id": "b", "text": "lapis" },
@@ -1170,7 +1229,8 @@
         { "id": "g", "text": "libro" },
         { "id": "h", "text": "sapatos" }
       ],
-      "translation": "He wore clothes."
+      "translation": "He wore clothes.",
+      "focusArea": "vocabulary"
     },
     {
       "questionId": 61,
@@ -1180,7 +1240,7 @@
       "title": "Tagalog: Nature Term",
       "description": "Choose the correct word related to nature.",
       "question": "Ang mga bata ay naglalaro sa tabi ng ___.",
-      "targetWord": "ilog",
+      "answer": "ilog",
       "options": [
         { "id": "a", "text": "mesa" },
         { "id": "b", "text": "ilog" },
@@ -1190,7 +1250,9 @@
         { "id": "f", "text": "aso" },
         { "id": "g", "text": "kotse" },
         { "id": "h", "text": "paaralan" }
-      ]
+      ],
+      "translation": "The children are playing by the river.",
+      "focusArea": "vocabulary"
     },
     {
       "questionId": 62,
@@ -1200,7 +1262,7 @@
       "title": "Cebuano: Animal Identification",
       "description": "Choose the correct animal name.",
       "question": "Ang ___ misinggit og kusog.",
-      "targetWord": "iro",
+      "answer": "iro",
       "options": [
         { "id": "a", "text": "iro" },
         { "id": "b", "text": "isda" },
@@ -1210,7 +1272,9 @@
         { "id": "f", "text": "sinina" },
         { "id": "g", "text": "bayabas" },
         { "id": "h", "text": "lapis" }
-      ]
+      ],
+      "translation": "The dog barked loudly.",
+      "focusArea": "vocabulary"
     },
     {
       "questionId": 63,
@@ -1220,7 +1284,7 @@
       "title": "Ilocano: Time Expression",
       "description": "Choose the correct time-related word.",
       "question": "Agsang-atak kada ___.",
-      "targetWord": "bigat",
+      "answer": "bigat",
       "options": [
         { "id": "a", "text": "bigat" },
         { "id": "b", "text": "rabii" },
@@ -1230,7 +1294,9 @@
         { "id": "f", "text": "lamesa" },
         { "id": "g", "text": "balay" },
         { "id": "h", "text": "libro" }
-      ]
+      ],
+      "translation": "I will arrive in the morning.",
+      "focusArea": "vocabulary"
     },
     {
       "questionId": 64,
@@ -1240,7 +1306,7 @@
       "title": "Kapampangan: Household Item",
       "description": "Identify the correct item found at home.",
       "question": "Pakidalang yang ___ king kwartu.",
-      "targetWord": "kutson",
+      "answer": "kutson",
       "options": [
         { "id": "a", "text": "lamesa" },
         { "id": "b", "text": "kutson" },
@@ -1250,7 +1316,9 @@
         { "id": "f", "text": "kurtina" },
         { "id": "g", "text": "radyo" },
         { "id": "h", "text": "kutsara" }
-      ]
+      ],
+      "translation": "Please bring the mattress to the room.",
+      "focusArea": "vocabulary"
     },
     {
       "questionId": 65,
@@ -1260,7 +1328,7 @@
       "title": "Waray: Place Word",
       "description": "Choose the correct place noun.",
       "question": "Adto hiya ha ___.",
-      "targetWord": "merkado",
+      "answer": "merkado",
       "options": [
         { "id": "a", "text": "balay" },
         { "id": "b", "text": "merkado" },
@@ -1270,7 +1338,9 @@
         { "id": "f", "text": "tubig" },
         { "id": "g", "text": "lapis" },
         { "id": "h", "text": "libro" }
-      ]
+      ],
+      "translation": "He/She went to the market.",
+      "focusArea": "vocabulary"
     },
     {
       "questionId": 66,
@@ -1280,7 +1350,7 @@
       "title": "Hiligaynon: Action Verb",
       "description": "Identify the correct action verb.",
       "question": "Gusto ko mag-___ sang tubig.",
-      "targetWord": "inom",
+      "answer": "inom",
       "options": [
         { "id": "a", "text": "kaon" },
         { "id": "b", "text": "inom" },
@@ -1290,7 +1360,9 @@
         { "id": "f", "text": "siling" },
         { "id": "g", "text": "lingkod" },
         { "id": "h", "text": "tan-aw" }
-      ]
+      ],
+      "translation": "I want to drink water.",
+      "focusArea": "vocabulary"
     },
     {
       "questionId": 67,
@@ -1300,7 +1372,7 @@
       "title": "Maguindanao: Emotion Word",
       "description": "Choose the correct word expressing emotion.",
       "question": "Siya na ___ sa giyera.",
-      "targetWord": "hadlok",
+      "answer": "hadlok",
       "options": [
         { "id": "a", "text": "rido" },
         { "id": "b", "text": "hadlok" },
@@ -1310,7 +1382,9 @@
         { "id": "f", "text": "ilok" },
         { "id": "g", "text": "kalipay" },
         { "id": "h", "text": "palad" }
-      ]
+      ],
+      "translation": "He/She is already afraid of the war.",
+      "focusArea": "vocabulary"
     },
     {
       "questionId": 68,
@@ -1320,7 +1394,7 @@
       "title": "Pangasinan: Tool Word",
       "description": "Choose the word related to a tool.",
       "question": "Gamitin mo ya ___ ed pagpaayos.",
-      "targetWord": "martilyo",
+      "answer": "martilyo",
       "options": [
         { "id": "a", "text": "kutsilyo" },
         { "id": "b", "text": "libro" },
@@ -1330,7 +1404,9 @@
         { "id": "f", "text": "lamesa" },
         { "id": "g", "text": "lapis" },
         { "id": "h", "text": "silya" }
-      ]
+      ],
+      "translation": "He/She is already afraid of the war.",
+      "focusArea": "vocabulary"
     },
     {
       "questionId": 69,
@@ -1340,7 +1416,7 @@
       "title": "Bisaya: Transportation Word",
       "description": "Choose the correct vehicle name.",
       "question": "Nagsakay sila og ___.",
-      "targetWord": "jeep",
+      "answer": "jeep",
       "options": [
         { "id": "a", "text": "jeep" },
         { "id": "b", "text": "lamesa" },
@@ -1350,7 +1426,9 @@
         { "id": "f", "text": "kape" },
         { "id": "g", "text": "bangko" },
         { "id": "h", "text": "papel" }
-      ]
+      ],
+      "translation": "They rode a vehicle.",
+      "focusArea": "vocabulary"
     },
     {
       "questionId": 70,
@@ -1360,7 +1438,7 @@
       "title": "Bicol: Occupation",
       "description": "Choose the correct profession.",
       "question": "Ang ___ nagtutokdo sa mga estudyante.",
-      "targetWord": "maestro",
+      "answer": "maestro",
       "options": [
         { "id": "a", "text": "maestro" },
         { "id": "b", "text": "pulis" },
@@ -1370,7 +1448,9 @@
         { "id": "f", "text": "drayber" },
         { "id": "g", "text": "mananayaw" },
         { "id": "h", "text": "tindera" }
-      ]
+      ],
+      "translation": "The teacher teaches the students.",
+      "focusArea": "vocabulary"
     },
     {
       "questionId": 71,
@@ -1380,7 +1460,7 @@
       "title": "Tagalog: Location Inside a House",
       "description": "Choose the correct location word.",
       "question": "Nasa ___ ang remote.",
-      "targetWord": "mesa",
+      "answer": "mesa",
       "options": [
         { "id": "a", "text": "mesa" },
         { "id": "b", "text": "bintana" },
@@ -1391,7 +1471,8 @@
         { "id": "g", "text": "ilaw" },
         { "id": "h", "text": "kurtina" }
       ],
-      "translation": "The remote is on the table."
+      "translation": "The remote is on the table.",
+      "focusArea": "vocabulary"
     },
     {
       "questionId": 72,
@@ -1401,7 +1482,7 @@
       "title": "Cebuano: Time of Day",
       "description": "Choose the time-related word.",
       "question": "Molakaw ko kada ___.",
-      "targetWord": "buntag",
+      "answer": "buntag",
       "options": [
         { "id": "a", "text": "buntag" },
         { "id": "b", "text": "udto" },
@@ -1412,7 +1493,8 @@
         { "id": "g", "text": "tuig" },
         { "id": "h", "text": "daplin" }
       ],
-      "translation": "I leave every morning."
+      "translation": "I leave every morning.",
+      "focusArea": "vocabulary"
     },
     {
       "questionId": 73,
@@ -1422,7 +1504,7 @@
       "title": "Hiligaynon: Part of the Body",
       "description": "Choose the body part mentioned.",
       "question": "Nagmasakit ang akon ___.",
-      "targetWord": "tiyan",
+      "answer": "tiyan",
       "options": [
         { "id": "a", "text": "tiyan" },
         { "id": "b", "text": "ulo" },
@@ -1433,7 +1515,8 @@
         { "id": "g", "text": "ilong" },
         { "id": "h", "text": "dunggan" }
       ],
-      "translation": "My stomach hurts."
+      "translation": "My stomach hurts.",
+      "focusArea": "vocabulary"
     },
     {
       "questionId": 74,
@@ -1443,7 +1526,7 @@
       "title": "Waray: Action in School",
       "description": "Choose the correct classroom-related action.",
       "question": "Nag___ hiya han assignment.",
-      "targetWord": "surat",
+      "answer": "surat",
       "options": [
         { "id": "a", "text": "basa" },
         { "id": "b", "text": "surat" },
@@ -1454,7 +1537,8 @@
         { "id": "g", "text": "istorya" },
         { "id": "h", "text": "luto" }
       ],
-      "translation": "He wrote the assignment."
+      "translation": "He wrote the assignment.",
+      "focusArea": "vocabulary"
     },
     {
       "questionId": 75,
@@ -1464,7 +1548,7 @@
       "title": "Ilocano: Nature Object",
       "description": "Choose the correct word related to nature.",
       "question": "Adda kami iti ___ idiay bukid.",
-      "targetWord": "kayo",
+      "answer": "kayo",
       "options": [
         { "id": "a", "text": "kayo" },
         { "id": "b", "text": "danum" },
@@ -1475,7 +1559,8 @@
         { "id": "g", "text": "lampara" },
         { "id": "h", "text": "bintana" }
       ],
-      "translation": "We were under a tree in the mountain."
+      "translation": "We were under a tree in the mountain.",
+      "focusArea": "vocabulary"
     },
     {
       "questionId": 76,
@@ -1485,7 +1570,7 @@
       "title": "Kapampangan: Feeling Word",
       "description": "Choose the word expressing feeling.",
       "question": "Makanyan yang ___ pamung makanya.",
-      "targetWord": "lugud",
+      "answer": "lugud",
       "options": [
         { "id": "a", "text": "galit" },
         { "id": "b", "text": "lugud" },
@@ -1496,7 +1581,8 @@
         { "id": "g", "text": "pighati" },
         { "id": "h", "text": "tuwa" }
       ],
-      "translation": "That shows love."
+      "translation": "That shows love.",
+      "focusArea": "vocabulary"
     },
     {
       "questionId": 77,
@@ -1506,7 +1592,7 @@
       "title": "Maguindanao: Activity Word",
       "description": "Identify the correct action word.",
       "question": "So bata na ___ ed labas.",
-      "targetWord": "tagem",
+      "answer": "tagem",
       "options": [
         { "id": "a", "text": "tagem" },
         { "id": "b", "text": "laya" },
@@ -1517,7 +1603,8 @@
         { "id": "g", "text": "inom" },
         { "id": "h", "text": "kaon" }
       ],
-      "translation": "The child is playing outside."
+      "translation": "The child is playing outside.",
+      "focusArea": "vocabulary"
     },
     {
       "questionId": 78,
@@ -1527,7 +1614,7 @@
       "title": "Pangasinan: Food Name",
       "description": "Choose the correct word for food.",
       "question": "Kanen mi ya ___.",
-      "targetWord": "kankanen",
+      "answer": "kankanen",
       "options": [
         { "id": "a", "text": "bayabas" },
         { "id": "b", "text": "asin" },
@@ -1538,7 +1625,8 @@
         { "id": "g", "text": "pansit" },
         { "id": "h", "text": "kape" }
       ],
-      "translation": "We ate some snacks."
+      "translation": "We ate some snacks.",
+      "focusArea": "vocabulary"
     },
     {
       "questionId": 79,
@@ -1548,7 +1636,7 @@
       "title": "Bisaya: Part of the Day",
       "description": "Choose the correct time word.",
       "question": "Matulog ko kada ___.",
-      "targetWord": "gabii",
+      "answer": "gabii",
       "options": [
         { "id": "a", "text": "buntag" },
         { "id": "b", "text": "udto" },
@@ -1559,7 +1647,8 @@
         { "id": "g", "text": "tuig" },
         { "id": "h", "text": "buntag" }
       ],
-      "translation": "I sleep every night."
+      "translation": "I sleep every night.",
+      "focusArea": "vocabulary"
     },
     {
       "questionId": 80,
@@ -1569,7 +1658,7 @@
       "title": "Bicol: Emotion or Feeling",
       "description": "Choose the correct emotion word.",
       "question": "Siya masyado nang ___.",
-      "targetWord": "malipay",
+      "answer": "malipay",
       "options": [
         { "id": "a", "text": "masubo" },
         { "id": "b", "text": "malipay" },
@@ -1580,7 +1669,8 @@
         { "id": "g", "text": "mangita" },
         { "id": "h", "text": "magtula" }
       ],
-      "translation": "He is very happy now."
+      "translation": "He is very happy now.",
+      "focusArea": "vocabulary"
     },
     {
       "questionId": 81,
@@ -1590,7 +1680,7 @@
       "title": "Tagalog: Figurative Language",
       "description": "Choose the idiomatic expression that best fits.",
       "question": "Siya’y ___ sa pag-aaral—hindi sumusuko kahit mahirap.",
-      "targetWord": "nagbubuhos ng pawis",
+      "answer": "nagbubuhos ng pawis",
       "options": [
         { "id": "a", "text": "kumakain ng apoy" },
         { "id": "b", "text": "nagbubuhos ng pawis" },
@@ -1601,7 +1691,8 @@
         { "id": "g", "text": "nagtatago sa anino" },
         { "id": "h", "text": "tumatawid sa apoy" }
       ],
-      "translation": "He is pouring sweat into his studies—never giving up even when it's hard."
+      "translation": "He is pouring sweat into his studies—never giving up even when it's hard.",
+      "focusArea": "vocabulary"
     },
     {
       "questionId": 82,
@@ -1611,7 +1702,7 @@
       "title": "Cebuano: Proverb Completion",
       "description": "Complete the saying with the right word.",
       "question": "Ang taong ___, dali rang masuko.",
-      "targetWord": "init ug ulo",
+      "answer": "init ug ulo",
       "options": [
         { "id": "a", "text": "puti og mata" },
         { "id": "b", "text": "taas og dungog" },
@@ -1622,7 +1713,8 @@
         { "id": "g", "text": "way batasan" },
         { "id": "h", "text": "maayo mohilak" }
       ],
-      "translation": "A hot-headed person gets angry easily."
+      "translation": "A hot-headed person gets angry easily.",
+      "focusArea": "vocabulary"
     },
     {
       "questionId": 83,
@@ -1632,7 +1724,7 @@
       "title": "Ilocano: Descriptive Adjective",
       "description": "Choose the best word to describe someone proud.",
       "question": "Daydiay nga lalaki ket ___.",
-      "targetWord": "agtaray",
+      "answer": "agtaray",
       "options": [
         { "id": "a", "text": "agtaray" },
         { "id": "b", "text": "agpanunot" },
@@ -1643,7 +1735,8 @@
         { "id": "g", "text": "agbirok" },
         { "id": "h", "text": "agbisi" }
       ],
-      "translation": "That man is boastful."
+      "translation": "That man is boastful.",
+      "focusArea": "vocabulary"
     },
     {
       "questionId": 84,
@@ -1653,7 +1746,7 @@
       "title": "Bicol: Metaphorical Action",
       "description": "Choose the metaphorical phrase that makes the sentence meaningful.",
       "question": "Nag-___ siya kasabay kang marhay na tadhana.",
-      "targetWord": "sakay sa hangin",
+      "answer": "sakay sa hangin",
       "options": [
         { "id": "a", "text": "sakay sa hangin" },
         { "id": "b", "text": "tungtong sa ulap" },
@@ -1664,7 +1757,8 @@
         { "id": "g", "text": "luto sa init" },
         { "id": "h", "text": "lutang sa bangis" }
       ],
-      "translation": "He rode with good fortune."
+      "translation": "He rode with good fortune.",
+      "focusArea": "vocabulary"
     },
     {
       "questionId": 85,
@@ -1674,7 +1768,7 @@
       "title": "Waray: Rare Noun",
       "description": "Identify the seldom-used noun.",
       "question": "Kinahanglan niya hin ___.",
-      "targetWord": "panlimbasog",
+      "answer": "panlimbasog",
       "options": [
         { "id": "a", "text": "kalipay" },
         { "id": "b", "text": "panlimbasog" },
@@ -1685,7 +1779,8 @@
         { "id": "g", "text": "panalangin" },
         { "id": "h", "text": "pasensya" }
       ],
-      "translation": "He needs effort."
+      "translation": "He needs effort.",
+      "focusArea": "vocabulary"
     },
     {
       "questionId": 86,
@@ -1695,7 +1790,7 @@
       "title": "Maguindanao: Spiritual Concept",
       "description": "Choose the correct spiritual term.",
       "question": "Siya nag-ampo para sa ___.",
-      "targetWord": "kapya",
+      "answer": "kapya",
       "options": [
         { "id": "a", "text": "kapya" },
         { "id": "b", "text": "pananum" },
@@ -1706,7 +1801,8 @@
         { "id": "g", "text": "badjao" },
         { "id": "h", "text": "bayok" }
       ],
-      "translation": "He prayed for peace."
+      "translation": "He prayed for peace.",
+      "focusArea": "vocabulary"
     },
     {
       "questionId": 87,
@@ -1716,7 +1812,7 @@
       "title": "Kapampangan: Philosophical Term",
       "description": "Choose the abstract or deep word.",
       "question": "Atin yang lalalam a ___.",
-      "targetWord": "kabaldugan",
+      "answer": "kabaldugan",
       "options": [
         { "id": "a", "text": "kaluguran" },
         { "id": "b", "text": "kabaldugan" },
@@ -1727,7 +1823,8 @@
         { "id": "g", "text": "luklukan" },
         { "id": "h", "text": "alang-alang" }
       ],
-      "translation": "He has a deeper meaning."
+      "translation": "He has a deeper meaning.",
+      "focusArea": "vocabulary"
     },
     {
       "questionId": 88,
@@ -1737,7 +1834,7 @@
       "title": "Pangasinan: Rare Verb",
       "description": "Choose the rare action word.",
       "question": "Ag ___ tolay ed gabi.",
-      "targetWord": "makaras",
+      "answer": "makaras",
       "options": [
         { "id": "a", "text": "makaras" },
         { "id": "b", "text": "maganap" },
@@ -1748,7 +1845,8 @@
         { "id": "g", "text": "mapungtot" },
         { "id": "h", "text": "magiliw" }
       ],
-      "translation": "The person rushed through the night."
+      "translation": "The person rushed through the night.",
+      "focusArea": "vocabulary"
     },
     {
       "questionId": 89,
@@ -1758,7 +1856,7 @@
       "title": "Bisaya: Old Sayings",
       "description": "Complete this traditional line.",
       "question": "Ang walay kahadlok, ___ sa disgrasya.",
-      "targetWord": "duol",
+      "answer": "duol",
       "options": [
         { "id": "a", "text": "duol" },
         { "id": "b", "text": "suod" },
@@ -1769,7 +1867,8 @@
         { "id": "g", "text": "molayo" },
         { "id": "h", "text": "hagbong" }
       ],
-      "translation": "He who is not afraid is close to danger."
+      "translation": "He who is not afraid is close to danger.",
+      "focusArea": "vocabulary"
     },
     {
       "questionId": 90,
@@ -1779,7 +1878,7 @@
       "title": "Hiligaynon: Uncommon Object",
       "description": "Identify the rare object.",
       "question": "Gindala niya ang ___ sang iya lolo.",
-      "targetWord": "tangkal",
+      "answer": "tangkal",
       "options": [
         { "id": "a", "text": "kopya" },
         { "id": "b", "text": "tangkal" },
@@ -1790,7 +1889,8 @@
         { "id": "g", "text": "punot" },
         { "id": "h", "text": "lukot" }
       ],
-      "translation": "He brought his grandfather's cage."
+      "translation": "He brought his grandfather's cage.",
+      "focusArea": "vocabulary"
     },
     {
       "questionId": 91,
@@ -1800,7 +1900,7 @@
       "title": "Tagalog: Ancient Tool",
       "description": "Choose the old tool from the choices.",
       "question": "Ginamit ng panday ang ___.",
-      "targetWord": "pamukpok",
+      "answer": "pamukpok",
       "options": [
         { "id": "a", "text": "pamukpok" },
         { "id": "b", "text": "lapis" },
@@ -1811,7 +1911,8 @@
         { "id": "g", "text": "kawayan" },
         { "id": "h", "text": "palu-palo" }
       ],
-      "translation": "The blacksmith used the hammer."
+      "translation": "The blacksmith used the hammer.",
+      "focusArea": "vocabulary"
     },
     {
       "questionId": 92,
@@ -1821,7 +1922,7 @@
       "title": "Cebuano: Traditional Clothing",
       "description": "Choose the right term for native attire.",
       "question": "Nagsul-ob siya og ___.",
-      "targetWord": "patadyong",
+      "answer": "patadyong",
       "options": [
         { "id": "a", "text": "patadyong" },
         { "id": "b", "text": "barong" },
@@ -1832,7 +1933,8 @@
         { "id": "g", "text": "kalo" },
         { "id": "h", "text": "bayo" }
       ],
-      "translation": "She wore a patadyong."
+      "translation": "She wore a patadyong.",
+      "focusArea": "vocabulary"
     },
     {
       "questionId": 93,
@@ -1842,7 +1944,7 @@
       "title": "Ilocano: Deep Emotion",
       "description": "Identify the deep emotional word.",
       "question": "Adda iti ___ ti pusok.",
-      "targetWord": "panagsangit",
+      "answer": "panagsangit",
       "options": [
         { "id": "a", "text": "panagsangit" },
         { "id": "b", "text": "panagngina" },
@@ -1853,7 +1955,8 @@
         { "id": "g", "text": "panagdait" },
         { "id": "h", "text": "panagserbi" }
       ],
-      "translation": "My heart is full of weeping."
+      "translation": "My heart is full of weeping.",
+      "focusArea": "vocabulary"
     },
     {
       "questionId": 94,
@@ -1863,7 +1966,7 @@
       "title": "Bicol: Conceptual Noun",
       "description": "Choose the abstract concept.",
       "question": "Si lola may marhay na ___.",
-      "targetWord": "paninindugan",
+      "answer": "paninindugan",
       "options": [
         { "id": "a", "text": "paninindugan" },
         { "id": "b", "text": "paglaom" },
@@ -1874,7 +1977,8 @@
         { "id": "g", "text": "panaghisgot" },
         { "id": "h", "text": "tinampo" }
       ],
-      "translation": "Grandma has good principles."
+      "translation": "Grandma has good principles.",
+      "focusArea": "vocabulary"
     },
     {
       "questionId": 95,
@@ -1884,7 +1988,7 @@
       "title": "Waray: Environmental Term",
       "description": "Choose the word that relates to the environment.",
       "question": "Iton kabubwason kinahanglan protektaran an ___.",
-      "targetWord": "kalibungan",
+      "answer": "kalibungan",
       "options": [
         { "id": "a", "text": "kinabuhi" },
         { "id": "b", "text": "kalibungan" },
@@ -1895,7 +1999,8 @@
         { "id": "g", "text": "kaopayan" },
         { "id": "h", "text": "katawhayan" }
       ],
-      "translation": "The future requires protecting the environment."
+      "translation": "The future requires protecting the environment.",
+      "focusArea": "vocabulary"
     },
     {
       "questionId": 96,
@@ -1905,7 +2010,7 @@
       "title": "Maguindanao: Ethical Word",
       "description": "Identify the term that suggests moral value.",
       "question": "Importante ang ___.",
-      "targetWord": "kanduli",
+      "answer": "kanduli",
       "options": [
         { "id": "a", "text": "kanduli" },
         { "id": "b", "text": "pagari" },
@@ -1916,7 +2021,8 @@
         { "id": "g", "text": "ginawi" },
         { "id": "h", "text": "padaga" }
       ],
-      "translation": "Gratitude is important."
+      "translation": "Gratitude is important.",
+      "focusArea": "vocabulary"
     },
     {
       "questionId": 97,
@@ -1926,7 +2032,7 @@
       "title": "Kapampangan: Rare Adjective",
       "description": "Choose a word describing depth.",
       "question": "Ing lalaking ita mapalyaring ___.",
-      "targetWord": "matibe",
+      "answer": "matibe",
       "options": [
         { "id": "a", "text": "matibe" },
         { "id": "b", "text": "makanyan" },
@@ -1937,7 +2043,8 @@
         { "id": "g", "text": "marangal" },
         { "id": "h", "text": "mapali" }
       ],
-      "translation": "That man may be strong."
+      "translation": "That man may be strong.",
+      "focusArea": "vocabulary"
     },
     {
       "questionId": 98,
@@ -1947,7 +2054,7 @@
       "title": "Pangasinan: Philosophical Expression",
       "description": "Select the phrase that reflects wisdom.",
       "question": "Ya panagbiag met la ya ___.",
-      "targetWord": "alikew",
+      "answer": "alikew",
       "options": [
         { "id": "a", "text": "alikew" },
         { "id": "b", "text": "awan" },
@@ -1958,7 +2065,8 @@
         { "id": "g", "text": "abong" },
         { "id": "h", "text": "laktod" }
       ],
-      "translation": "Life is just a passage."
+      "translation": "Life is just a passage.",
+      "focusArea": "vocabulary"
     },
     {
       "questionId": 99,
@@ -1968,7 +2076,7 @@
       "title": "Bisaya: Rare Descriptive Word",
       "description": "Choose the descriptive word that shows admiration.",
       "question": "Siya kay ___ nga tawo.",
-      "targetWord": "mapangahason",
+      "answer": "mapangahason",
       "options": [
         { "id": "a", "text": "mapangahason" },
         { "id": "b", "text": "matahum" },
@@ -1979,7 +2087,8 @@
         { "id": "g", "text": "mabination" },
         { "id": "h", "text": "mapadayunon" }
       ],
-      "translation": "He is a brave person."
+      "translation": "He is a brave person.",
+      "focusArea": "vocabulary"
     },
     {
       "questionId": 100,
@@ -1989,7 +2098,7 @@
       "title": "Hiligaynon: Deep Cultural Term",
       "description": "Identify the term associated with cultural ritual.",
       "question": "Ginsunod nila ang ___.",
-      "targetWord": "pamuluyag",
+      "answer": "pamuluyag",
       "options": [
         { "id": "a", "text": "pamuluyag" },
         { "id": "b", "text": "kasal" },
@@ -2000,8 +2109,10 @@
         { "id": "g", "text": "pagtudlo" },
         { "id": "h", "text": "paandam" }
       ],
-      "translation": "They followed the courtship tradition."
+      "translation": "They followed the courtship tradition.",
+      "focusArea": "vocabulary"
     },
+
     {
       "questionId": 101,
       "level": "Level 1",
@@ -2010,9 +2121,10 @@
       "title": "Cebuano: Morning Habit",
       "description": "Choose the correct word to complete the morning activity.",
       "question": "Kada buntag, mag___ ko og ngipon.",
-      "targetWord": "toothbrush",
+      "answer": "toothbrush",
       "translation": "Every morning, I brush my teeth.",
-      "hint": "Used to clean your teeth."
+      "hint": "Used to clean your teeth.",
+      "focusArea": "vocabulary"
     },
     {
       "questionId": 102,
@@ -2022,9 +2134,10 @@
       "title": "Ilocano: Weekend Activity",
       "description": "Identify what the person is doing during weekends.",
       "question": "Ag___ kami iti parke kada Sabado.",
-      "targetWord": "ay-ayam",
+      "answer": "ay-ayam",
       "translation": "We play at the park every Saturday.",
-      "hint": "Done for fun, especially by kids."
+      "hint": "Done for fun, especially by kids.",
+      "focusArea": "vocabulary"
     },
     {
       "questionId": 103,
@@ -2034,9 +2147,10 @@
       "title": "Waray: Kitchen Object",
       "description": "Fill in the kitchen-related item.",
       "question": "Ginkuha niya an ___ ha lamisa.",
-      "targetWord": "kutsara",
+      "answer": "kutsara",
       "translation": "He/She took the spoon from the table.",
-      "hint": "Used to eat soup or rice."
+      "hint": "Used to eat soup or rice.",
+      "focusArea": "vocabulary"
     },
     {
       "questionId": 104,
@@ -2046,9 +2160,10 @@
       "title": "Kapampangan: School Supply",
       "description": "Complete the sentence with a school item.",
       "question": "Dinake yang ___ keng bag.",
-      "targetWord": "lapis",
+      "answer": "lapis",
       "translation": "He took a pencil from the bag.",
-      "hint": "Used for writing."
+      "hint": "Used for writing.",
+      "focusArea": "vocabulary"
     },
     {
       "questionId": 105,
@@ -2058,9 +2173,10 @@
       "title": "Bicol: House Chore",
       "description": "Choose the correct word for the chore being done.",
       "question": "Nag___ si mama kan kwarto.",
-      "targetWord": "linis",
+      "answer": "linis",
       "translation": "Mama cleaned the room.",
-      "hint": "To make things tidy."
+      "hint": "To make things tidy.",
+      "focusArea": "vocabulary"
     },
     {
       "questionId": 106,
@@ -2070,9 +2186,10 @@
       "title": "Hiligaynon: Family Member",
       "description": "Fill in the family relationship.",
       "question": "Ang ___ ko amo ang nagaalaga sa akon.",
-      "targetWord": "nanay",
+      "answer": "nanay",
       "translation": "My mother takes care of me.",
-      "hint": "Female parent."
+      "hint": "Female parent.",
+      "focusArea": "vocabulary"
     },
     {
       "questionId": 107,
@@ -2082,9 +2199,10 @@
       "title": "Pangasinan: Common Fruit",
       "description": "Provide the correct fruit mentioned in the sentence.",
       "question": "Tinmakan na so ___.",
-      "targetWord": "mangga",
+      "answer": "mangga",
       "translation": "He/She ate a mango.",
-      "hint": "A sweet yellow fruit."
+      "hint": "A sweet yellow fruit.",
+      "focusArea": "vocabulary"
     },
     {
       "questionId": 108,
@@ -2094,9 +2212,10 @@
       "title": "Maguindanao: Directional Phrase",
       "description": "Choose the word that fits the direction shown.",
       "question": "Nasa ___ aken libru.",
-      "targetWord": "lamesa",
+      "answer": "lamesa",
       "translation": "My book is on the table.",
-      "hint": "A piece of furniture."
+      "hint": "A piece of furniture.",
+      "focusArea": "vocabulary"
     },
     {
       "questionId": 109,
@@ -2106,9 +2225,10 @@
       "title": "Bisaya: Animal in the Farm",
       "description": "Identify the animal in the sentence.",
       "question": "Ang ___ nagdagan sa uma.",
-      "targetWord": "baboy",
+      "answer": "baboy",
       "translation": "The pig ran in the field.",
-      "hint": "A farm animal, often pink."
+      "hint": "A farm animal, often pink.",
+      "focusArea": "vocabulary"
     },
     {
       "questionId": 110,
@@ -2118,9 +2238,10 @@
       "title": "Tagalog: Bedtime Item",
       "description": "Fill in the object used at night.",
       "question": "Kinuha ko ang ___ bago matulog.",
-      "targetWord": "kumot",
+      "answer": "kumot",
       "translation": "I got the blanket before sleeping.",
-      "hint": "Keeps you warm in bed."
+      "hint": "Keeps you warm in bed.",
+      "focusArea": "vocabulary"
     },
     {
       "questionId": 111,
@@ -2130,9 +2251,10 @@
       "title": "Cebuano: Afternoon Snack",
       "description": "Choose the correct word for the food eaten in the afternoon.",
       "question": "Nipalit siya og ___ para sa panihapon.",
-      "targetWord": "pan",
+      "answer": "pan",
       "translation": "He bought bread for dinner.",
-      "hint": "A baked food."
+      "hint": "A baked food.",
+      "focusArea": "vocabulary"
     },
     {
       "questionId": 112,
@@ -2142,9 +2264,10 @@
       "title": "Ilocano: School Location",
       "description": "Identify the place where the subject is heading.",
       "question": "Mapanak iti ___.",
-      "targetWord": "eskuela",
+      "answer": "eskuela",
       "translation": "I’m going to school.",
-      "hint": "A place for learning."
+      "hint": "A place for learning.",
+      "focusArea": "vocabulary"
     },
     {
       "questionId": 113,
@@ -2154,9 +2277,10 @@
       "title": "Waray: Household Item",
       "description": "Choose the correct object found at home.",
       "question": "Ibutang an baso ha ___.",
-      "targetWord": "lamisa",
+      "answer": "lamisa",
       "translation": "Put the glass on the table.",
-      "hint": "It holds things in place."
+      "hint": "It holds things in place.",
+      "focusArea": "vocabulary"
     },
     {
       "questionId": 114,
@@ -2166,9 +2290,10 @@
       "title": "Kapampangan: Weekend Activity",
       "description": "Complete the activity done during weekends.",
       "question": "Mag___ la reng anak keng sabado.",
-      "targetWord": "laru",
+      "answer": "laru",
       "translation": "The kids will play on Saturday.",
-      "hint": "Done for fun."
+      "hint": "Done for fun.",
+      "focusArea": "vocabulary"
     },
     {
       "questionId": 115,
@@ -2178,9 +2303,10 @@
       "title": "Bicol: Market Purchase",
       "description": "Fill in the word for the item being bought.",
       "question": "Bumili ako nin ___ sa palengke.",
-      "targetWord": "gulay",
+      "answer": "gulay",
       "translation": "I bought vegetables in the market.",
-      "hint": "Green and healthy."
+      "hint": "Green and healthy.",
+      "focusArea": "vocabulary"
     },
     {
       "questionId": 116,
@@ -2190,9 +2316,10 @@
       "title": "Hiligaynon: Morning Chore",
       "description": "Choose the action done in the morning.",
       "question": "Nag___ siya sang banyo.",
-      "targetWord": "limpyo",
+      "answer": "limpyo",
       "translation": "He cleaned the bathroom.",
-      "hint": "A cleaning action."
+      "hint": "A cleaning action.",
+      "focusArea": "vocabulary"
     },
     {
       "questionId": 117,
@@ -2202,9 +2329,10 @@
       "title": "Pangasinan: Transport Option",
       "description": "Complete the sentence about travel.",
       "question": "Sumakay ed ___.",
-      "targetWord": "jeep",
+      "answer": "jeep",
       "translation": "He rode the jeepney.",
-      "hint": "A public vehicle."
+      "hint": "A public vehicle.",
+      "focusArea": "vocabulary"
     },
     {
       "questionId": 118,
@@ -2214,9 +2342,10 @@
       "title": "Maguindanao: Directional Instruction",
       "description": "Select the word describing position.",
       "question": "Ang lapis ada sa ___.",
-      "targetWord": "ibabaw",
+      "answer": "ibabaw",
       "translation": "The pencil is on top.",
-      "hint": "Opposite of \"under.\""
+      "hint": "Opposite of \"under.\"",
+      "focusArea": "vocabulary"
     },
     {
       "questionId": 119,
@@ -2226,9 +2355,10 @@
       "title": "Bisaya: Holiday Preparation",
       "description": "Identify what is being cooked.",
       "question": "Nagluto siya og ___ para sa pista.",
-      "targetWord": "lechon",
+      "answer": "lechon",
       "translation": "He cooked roasted pig for the fiesta.",
-      "hint": "A party dish."
+      "hint": "A party dish.",
+      "focusArea": "vocabulary"
     },
     {
       "questionId": 120,
@@ -2238,9 +2368,10 @@
       "title": "Tagalog: Road Incident",
       "description": "Fill in the object involved in the incident.",
       "question": "Nasira ang ___ sa kalsada.",
-      "targetWord": "kotse",
+      "answer": "kotse",
       "translation": "The car broke down on the road.",
-      "hint": "A vehicle."
+      "hint": "A vehicle.",
+      "focusArea": "vocabulary"
     },
     {
       "questionId": 121,
@@ -2250,9 +2381,10 @@
       "title": "Cebuano: Clothing Item",
       "description": "Identify what the person is wearing.",
       "question": "Nagsul-ob siya og ___.",
-      "targetWord": "sapatos",
+      "answer": "sapatos",
       "translation": "He wore shoes.",
-      "hint": "Worn on your feet."
+      "hint": "Worn on your feet.",
+      "focusArea": "vocabulary"
     },
     {
       "questionId": 122,
@@ -2262,9 +2394,10 @@
       "title": "Ilocano: Object in the Bag",
       "description": "Fill in the item stored in a bag.",
       "question": "Adda ti ___ iti bag.",
-      "targetWord": "libro",
+      "answer": "libro",
       "translation": "There’s a book in the bag.",
-      "hint": "You read it."
+      "hint": "You read it.",
+      "focusArea": "vocabulary"
     },
     {
       "questionId": 123,
@@ -2274,7 +2407,7 @@
       "title": "Waray: Weather Description",
       "description": "Choose the word for the weather condition.",
       "question": "Maupay an panahon, ___ yana.",
-      "targetWord": "maaraw",
+      "answer": "maaraw",
       "translation": "The weather is good, it’s sunny today.",
       "hint": "Opposite of rainy."
     },
@@ -2286,9 +2419,10 @@
       "title": "Kapampangan: Drink of Choice",
       "description": "Fill in the word for the drink.",
       "question": "Minom yang ___ keng party.",
-      "targetWord": "juice",
+      "answer": "juice",
       "translation": "He drank juice at the party.",
-      "hint": "A fruity drink."
+      "hint": "A fruity drink.",
+      "focusArea": "vocabulary"
     },
     {
       "questionId": 125,
@@ -2298,9 +2432,10 @@
       "title": "Bicol: Transportation Place",
       "description": "Identify where transportation happens.",
       "question": "Nagpaabot siya sa ___.",
-      "targetWord": "terminal",
+      "answer": "terminal",
       "translation": "He waited at the terminal.",
-      "hint": "Where buses stop."
+      "hint": "Where buses stop.",
+      "focusArea": "vocabulary"
     },
     {
       "questionId": 126,
@@ -2310,9 +2445,10 @@
       "title": "Hiligaynon: Celebration Decoration",
       "description": "Choose the word used in celebrations.",
       "question": "Gintakpan ang kisame sang mga ___.",
-      "targetWord": "banderitas",
+      "answer": "banderitas",
       "translation": "They decorated the ceiling with flags.",
-      "hint": "Colorful hanging paper."
+      "hint": "Colorful hanging paper.",
+      "focusArea": "vocabulary"
     },
     {
       "questionId": 127,
@@ -2322,9 +2458,10 @@
       "title": "Pangasinan: Action with Money",
       "description": "Identify what was done with money.",
       "question": "Inbayad na so ___.",
-      "targetWord": "kwarta",
+      "answer": "kwarta",
       "translation": "He paid the money.",
-      "hint": "Used to buy things."
+      "hint": "Used to buy things.",
+      "focusArea": "vocabulary"
     },
     {
       "questionId": 128,
@@ -2334,9 +2471,10 @@
       "title": "Maguindanao: Afternoon Schedule",
       "description": "Fill in the activity done in the afternoon.",
       "question": "Mag-___ kami mamayang hapon.",
-      "targetWord": "aral",
+      "answer": "aral",
       "translation": "We will study this afternoon.",
-      "hint": "Done to learn."
+      "hint": "Done to learn.",
+      "focusArea": "vocabulary"
     },
     {
       "questionId": 129,
@@ -2346,9 +2484,10 @@
       "title": "Bisaya: Object Found at Night",
       "description": "Complete the sentence with a nighttime object.",
       "question": "Gipalong nako ang ___.",
-      "targetWord": "suga",
+      "answer": "suga",
       "translation": "I turned off the light.",
-      "hint": "Brightens a room."
+      "hint": "Brightens a room.",
+      "focusArea": "vocabulary"
     },
     {
       "questionId": 130,
@@ -2358,9 +2497,10 @@
       "title": "Tagalog: Action in the Kitchen",
       "description": "Fill in the action done while preparing food.",
       "question": "Si tatay ay nag___ ng ulam.",
-      "targetWord": "luto",
+      "answer": "luto",
       "translation": "Dad cooked the dish.",
-      "hint": "Prepares food."
+      "hint": "Prepares food.",
+      "focusArea": "vocabulary"
     },
     {
       "questionId": 131,
@@ -2370,9 +2510,10 @@
       "title": "Ilocano: Hidden Belonging",
       "description": "Identify the item placed discreetly.",
       "question": "Inlibak ti ___ idiay salukag.",
-      "targetWord": "pitaka",
+      "answer": "pitaka",
       "translation": "I hid the wallet in the drawer.",
-      "hint": "Used to store money."
+      "hint": "Used to store money.",
+      "focusArea": "vocabulary"
     },
     {
       "questionId": 132,
@@ -2382,9 +2523,10 @@
       "title": "Cebuano: Emergency Situation",
       "description": "Complete the sentence with an emergency object.",
       "question": "Gitawag ang ___ sa kalit nga insidente.",
-      "targetWord": "ambulansya",
+      "answer": "ambulansya",
       "translation": "The ambulance was called for the sudden incident.",
-      "hint": "A rescue vehicle."
+      "hint": "A rescue vehicle.",
+      "focusArea": "vocabulary"
     },
     {
       "questionId": 133,
@@ -2394,9 +2536,10 @@
       "title": "Bicol: Daily Commitment",
       "description": "Choose the object needed for daily prayer.",
       "question": "Gagamiton ko an ___ kada aga.",
-      "targetWord": "rosaryo",
+      "answer": "rosaryo",
       "translation": "I use the rosary every morning.",
-      "hint": "A religious item."
+      "hint": "A religious item.",
+      "focusArea": "vocabulary"
     },
     {
       "questionId": 134,
@@ -2406,9 +2549,10 @@
       "title": "Waray: Cultural Activity",
       "description": "Fill in the word related to a local tradition.",
       "question": "May-ada kami ___ ha pista.",
-      "targetWord": "sayaw",
+      "answer": "sayaw",
       "translation": "We have a dance during the festival.",
-      "hint": "Rhythmic movement."
+      "hint": "Rhythmic movement.",
+      "focusArea": "vocabulary"
     },
     {
       "questionId": 135,
@@ -2418,9 +2562,10 @@
       "title": "Kapampangan: Important Document",
       "description": "Identify the document being requested.",
       "question": "Paki-abot neng ___ keng HR.",
-      "targetWord": "resumé",
+      "answer": "resumé",
       "translation": "Please submit the resumé to HR.",
-      "hint": "Needed for a job."
+      "hint": "Needed for a job.",
+      "focusArea": "vocabulary"
     },
     {
       "questionId": 136,
@@ -2430,9 +2575,10 @@
       "title": "Maguindanao: Natural Disaster",
       "description": "Complete the term for a strong storm.",
       "question": "May dumating na ___ kagabi.",
-      "targetWord": "bagyo",
+      "answer": "bagyo",
       "translation": "A typhoon came last night.",
-      "hint": "Heavy wind and rain."
+      "hint": "Heavy wind and rain.",
+      "focusArea": "vocabulary"
     },
     {
       "questionId": 137,
@@ -2442,9 +2588,10 @@
       "title": "Hiligaynon: Transportation Emergency",
       "description": "Identify the part of the vehicle that failed.",
       "question": "Naguba ang ___ sang awto.",
-      "targetWord": "makina",
+      "answer": "makina",
       "translation": "The engine of the car broke down.",
-      "hint": "Makes the car run."
+      "hint": "Makes the car run.",
+      "focusArea": "vocabulary"
     },
     {
       "questionId": 138,
@@ -2454,9 +2601,10 @@
       "title": "Pangasinan: Medical Need",
       "description": "Choose the word that refers to a healing substance.",
       "question": "Ininom na so ___ para ed sakit na.",
-      "targetWord": "gamut",
+      "answer": "gamut",
       "translation": "He took medicine for his illness.",
-      "hint": "Used for treatment."
+      "hint": "Used for treatment.",
+      "focusArea": "vocabulary"
     },
     {
       "questionId": 139,
@@ -2466,9 +2614,10 @@
       "title": "Bisaya: Family Responsibility",
       "description": "Fill in the activity typically done for a sibling.",
       "question": "Ako ang mag-___ sa akong manghud.",
-      "targetWord": "bantay",
+      "answer": "bantay",
       "translation": "I will take care of my younger sibling.",
-      "hint": "A protective duty."
+      "hint": "A protective duty.",
+      "focusArea": "vocabulary"
     },
     {
       "questionId": 140,
@@ -2478,9 +2627,10 @@
       "title": "Tagalog: Professional Setting",
       "description": "Complete the sentence with an office item.",
       "question": "Nasira ang ___ sa opisina.",
-      "targetWord": "printer",
+      "answer": "printer",
       "translation": "The printer in the office broke.",
-      "hint": "Used to make paper copies."
+      "hint": "Used to make paper copies.",
+      "focusArea": "vocabulary"
     },
     {
       "questionId": 141,
@@ -2490,9 +2640,10 @@
       "title": "Ilocano: Unexpected Discovery",
       "description": "Identify the thing discovered on the road.",
       "question": "Nakakitaak iti ___ idiay kalsada.",
-      "targetWord": "alahas",
+      "answer": "alahas",
       "translation": "I found jewelry on the road.",
-      "hint": "Worn for beauty."
+      "hint": "Worn for beauty.",
+      "focusArea": "vocabulary"
     },
     {
       "questionId": 142,
@@ -2502,9 +2653,10 @@
       "title": "Cebuano: Personal Accessory",
       "description": "Choose the item worn for checking time.",
       "question": "Nalimtan niya ang iyang ___.",
-      "targetWord": "relo",
+      "answer": "relo",
       "translation": "He forgot his watch.",
-      "hint": "Tells the time."
+      "hint": "Tells the time.",
+      "focusArea": "vocabulary"
     },
     {
       "questionId": 143,
@@ -2514,9 +2666,10 @@
       "title": "Bicol: Community Announcement",
       "description": "Fill in what’s being made public.",
       "question": "Mayong ___ sa plaza buwas.",
-      "targetWord": "miting",
+      "answer": "miting",
       "translation": "There will be a meeting at the plaza tomorrow.",
-      "hint": "A gathering."
+      "hint": "A gathering.",
+      "focusArea": "vocabulary"
     },
     {
       "questionId": 144,
@@ -2526,9 +2679,10 @@
       "title": "Waray: Construction Task",
       "description": "Identify the tool being used.",
       "question": "Ginkuha niya an ___ para han proyekto.",
-      "targetWord": "martilyo",
+      "answer": "martilyo",
       "translation": "He took the hammer for the project.",
-      "hint": "Used to drive nails."
+      "hint": "Used to drive nails.",
+      "focusArea": "vocabulary"
     },
     {
       "questionId": 145,
@@ -2538,9 +2692,10 @@
       "title": "Kapampangan: Food Preparation Tool",
       "description": "Fill in the kitchen tool used in cooking.",
       "question": "Gamit ne ing ___ para tadtaran deng gulay.",
-      "targetWord": "kutsilyo",
+      "answer": "kutsilyo",
       "translation": "He used the knife to chop vegetables.",
-      "hint": "Sharp object."
+      "hint": "Sharp object.",
+      "focusArea": "vocabulary"
     },
     {
       "questionId": 146,
@@ -2550,9 +2705,10 @@
       "title": "Maguindanao: Emergency Room Visit",
       "description": "Identify the place where the person was brought.",
       "question": "Dinala siya sa ___.",
-      "targetWord": "ospital",
+      "answer": "ospital",
       "translation": "He was brought to the hospital.",
-      "hint": "Place for treatment."
+      "hint": "Place for treatment.",
+      "focusArea": "vocabulary"
     },
     {
       "questionId": 147,
@@ -2562,9 +2718,10 @@
       "title": "Hiligaynon: Festival Preparation",
       "description": "Choose the item hung for decoration.",
       "question": "Ginbutang ang mga ___ sa plaza.",
-      "targetWord": "dekorasyon",
+      "answer": "dekorasyon",
       "translation": "They put up decorations in the plaza.",
-      "hint": "Makes a place festive."
+      "hint": "Makes a place festive.",
+      "focusArea": "vocabulary"
     },
     {
       "questionId": 148,
@@ -2574,9 +2731,10 @@
       "title": "Pangasinan: Educational Object",
       "description": "Identify the item brought to school.",
       "question": "Inbalon na so ___ ed klase.",
-      "targetWord": "notebook",
+      "answer": "notebook",
       "translation": "He brought a notebook to class.",
-      "hint": "Used for writing."
+      "hint": "Used for writing.",
+      "focusArea": "vocabulary"
     },
     {
       "questionId": 149,
@@ -2586,9 +2744,10 @@
       "title": "Bisaya: Item Lost While Traveling",
       "description": "Fill in the object that got lost.",
       "question": "Nawala ang akong ___.",
-      "targetWord": "cellphone",
+      "answer": "cellphone",
       "translation": "I lost my cellphone.",
-      "hint": "Used to call or text."
+      "hint": "Used to call or text.",
+      "focusArea": "vocabulary"
     },
     {
       "questionId": 150,
@@ -2598,9 +2757,10 @@
       "title": "Tagalog: Task Delegation",
       "description": "Choose the activity given to another person.",
       "question": "Inutusan ko siya na mag___.",
-      "targetWord": "laba",
+      "answer": "laba",
       "translation": "I asked him to do the laundry.",
-      "hint": "Washing clothes."
+      "hint": "Washing clothes.",
+      "focusArea": "vocabulary"
     }
   ]
 }

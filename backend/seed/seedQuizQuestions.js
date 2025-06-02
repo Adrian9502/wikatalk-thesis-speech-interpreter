@@ -26,7 +26,8 @@ const transformQuestions = (questionsArray) => {
       description: question.description,
       question: question.question,
       translation: question.translation,
-      dialect: question.dialect
+      dialect: question.dialect,
+      focusArea: question.focusArea || "vocabulary", // ADD THIS LINE
     };
 
     // Add mode-specific properties
@@ -35,12 +36,14 @@ const transformQuestions = (questionsArray) => {
     }
 
     if (question.mode === "identification") {
-      transformedQuestion.targetWord = question.targetWord;
-      transformedQuestion.choices = question.options || [];
+      // UPDATED: Use answer instead of targetWord
+      transformedQuestion.answer = question.answer || question.targetWord;
+      transformedQuestion.choices = question.choices || question.options || [];
     }
 
     if (question.mode === "fillBlanks") {
-      transformedQuestion.targetWord = question.targetWord;
+      // UPDATED: Use answer instead of targetWord
+      transformedQuestion.answer = question.answer || question.targetWord;
       transformedQuestion.hint = question.hint;
     }
 
