@@ -8,7 +8,6 @@ import {
   TextInput,
   KeyboardAvoidingView,
   Platform,
-  ActivityIndicator,
 } from "react-native";
 import React, { useEffect, useRef, useCallback, useMemo } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -27,6 +26,7 @@ import { formatTime, getDifficultyColors } from "@/utils/gameUtils";
 import { setupBackButtonHandler } from "@/utils/gameUtils";
 import DecorativeCircles from "@/components/Games/DecorativeCircles";
 import GameNavigation from "@/components/Games/GameNavigation";
+import DotsLoader from "@/components/DotLoader";
 
 interface FillInTheBlankProps {
   levelId: number;
@@ -79,8 +79,6 @@ const FillInTheBlank: React.FC<FillInTheBlankProps> = ({
     formatSentence,
     setTimerRunning,
     setTimeElapsed,
-    // Add error access
-    error,
   } = useQuizStore();
 
   // Current exercise
@@ -107,7 +105,7 @@ const FillInTheBlank: React.FC<FillInTheBlankProps> = ({
       console.log("Starting fillBlanks game");
       startGame();
     }
-  }, [levelData, isStarted]); // SIMPLIFIED DEPENDENCIES - remove initialize, startGame, etc.
+  }, [levelData, isStarted]);
 
   // Stop timer when answer is checked
   useEffect(() => {
@@ -385,8 +383,7 @@ const FillInTheBlank: React.FC<FillInTheBlankProps> = ({
           ) : (
             // Default loading state when idle
             <View style={gameSharedStyles.loaderContainer}>
-              <ActivityIndicator size="large" color={BASE_COLORS.blue} />
-              <Text style={styles.loadingText}>Loading exercise...</Text>
+              <DotsLoader />
             </View>
           )}
         </SafeAreaView>

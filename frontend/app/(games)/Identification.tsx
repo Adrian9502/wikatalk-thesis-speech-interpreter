@@ -28,6 +28,7 @@ import DifficultyBadge from "@/components/Games/DifficultyBadge";
 import DecorativeCircles from "@/components/Games/DecorativeCircles";
 import GameNavigation from "@/components/Games/GameNavigation";
 import gameSharedStyles from "@/styles/gamesSharedStyles";
+import DotsLoader from "@/components/DotLoader";
 
 interface IdentificationProps {
   levelId: number;
@@ -371,10 +372,8 @@ const Identification: React.FC<IdentificationProps> = ({
             />
           </ScrollView>
         ) : (
-          // Default loading state when idle
           <View style={gameSharedStyles.loaderContainer}>
-            <ActivityIndicator size="large" color={BASE_COLORS.blue} />
-            <Text style={styles.loadingText}>Loading game...</Text>
+            <DotsLoader />
           </View>
         )}
       </SafeAreaView>
@@ -384,7 +383,6 @@ const Identification: React.FC<IdentificationProps> = ({
 
 // Only component-specific styles that differ from shared styles
 const styles = StyleSheet.create({
-  // Identification specific: two-column layout for word options
   twoColumnContainer: {
     flexDirection: "row",
     flexWrap: "wrap",

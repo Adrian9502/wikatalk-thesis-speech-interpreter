@@ -22,6 +22,7 @@ interface QuestionBase {
   question: string;
   translation?: string;
   dialect?: string;
+  focusArea?: "vocabulary" | "grammar" | "pronunciation";
 }
 
 interface MultipleChoiceQuestion extends QuestionBase {
@@ -33,16 +34,15 @@ interface MultipleChoiceQuestion extends QuestionBase {
 }
 
 interface IdentificationQuestion extends QuestionBase {
-  targetWord: string;
+  answer: string;
   choices?: string[];
   sentence: string;
 }
 
 interface FillInTheBlankQuestion extends QuestionBase {
-  targetWord: string;
+  answer: string;
   hint?: string;
   sentence: string;
-  answer: string;
 }
 
 type QuestionType =
@@ -101,7 +101,7 @@ interface QuizState {
   isLoading: boolean;
   error: string | null;
   lastFetched: number;
-
+  clearCache?: () => void;
   // Common game state
   gameState: CommonGameState;
 
@@ -198,6 +198,7 @@ const ensureProperFormat = (question: any): QuestionType => {
     translation: question.translation || "",
     description: question.description || "",
     dialect: question.dialect || "",
+    focusArea: question.focusArea || "vocabulary",
   } as QuestionType;
 };
 
@@ -248,6 +249,39 @@ const useQuizStore = create<QuizState>((set, get) => ({
     selectedWord: null,
     showTranslation: false,
     feedback: null,
+  },
+
+  // Clear cache
+  clearCache: async () => {
+    console.log("Clearing quiz data cache...");
+    try {
+      // Get all keys from AsyncStorage
+      const keys = await AsyncStorage.getAllKeys();
+
+      // Filter only quiz data cache keys
+      const quizCacheKeys = keys.filter((key) =>
+        key.startsWith(CACHE_KEY_PREFIX)
+      );
+
+      if (quizCacheKeys.length > 0) {
+        // Remove all quiz cache keys
+        await AsyncStorage.multiRemove(quizCacheKeys);
+        console.log(
+          `Successfully cleared ${quizCacheKeys.length} cache items:`,
+          quizCacheKeys
+        );
+      } else {
+        console.log("No quiz cache found to clear");
+      }
+
+      // Also reset the lastFetched timestamp to force a fresh fetch
+      set({ lastFetched: 0 });
+
+      return true;
+    } catch (error) {
+      console.error("Error clearing cache:", error);
+      return false;
+    }
   },
 
   // Data fetching actions (keep your existing implementations)
@@ -568,13 +602,13 @@ const useQuizStore = create<QuizState>((set, get) => ({
         const sentence = {
           id: levelData?.id || 0,
           sentence: levelData?.sentence || levelData?.question || "",
-          targetWord: levelData?.targetWord || "",
+          answer: levelData?.answer || levelData?.targetWord || "",
           translation: levelData?.translation || "",
           title: levelData?.title || `Level ${levelId}`,
           dialect: levelData?.dialect || "",
+          focusArea: levelData?.focusArea || "vocabulary",
         };
 
-        // Process words - FIXED logic
         let words = [];
 
         // Check if choices exists and is an array with items
@@ -670,11 +704,12 @@ const useQuizStore = create<QuizState>((set, get) => ({
         const exercise = {
           id: levelData?.id || 0,
           sentence: String(levelData?.sentence || levelData?.question || ""),
-          answer: String(levelData?.answer || levelData?.targetWord || ""),
+          answer: String(levelData?.answer || levelData?.targetWord || ""), // Use answer with targetWord fallback
           translation: String(levelData?.translation || ""),
           hint: String(levelData?.hint || ""),
           title: String(levelData?.title || `Level ${levelId}`),
           dialect: String(levelData?.dialect || ""),
+          focusArea: String(levelData?.focusArea || "vocabulary"), // Add focusArea
         };
 
         console.log("Created fillBlanks exercise:", exercise);
@@ -713,17 +748,23 @@ const useQuizStore = create<QuizState>((set, get) => ({
       try {
         console.log("Initializing multipleChoice with levelData:", levelData);
 
+        // Ensure focusArea is included
+        const questionWithFocusArea = {
+          ...levelData,
+          focusArea: levelData.focusArea || "vocabulary",
+        };
+
         if (
-          !levelData.options ||
-          !Array.isArray(levelData.options) ||
-          levelData.options.length === 0
+          !questionWithFocusArea.options ||
+          !Array.isArray(questionWithFocusArea.options) ||
+          questionWithFocusArea.options.length === 0
         ) {
           throw new Error("No options available for multiple choice game");
         }
 
         set({
           multipleChoiceState: {
-            currentQuestion: levelData,
+            currentQuestion: questionWithFocusArea,
             selectedOption: null,
           },
         });
@@ -884,6 +925,7 @@ const useQuizStore = create<QuizState>((set, get) => ({
       },
     })),
 
+  // Update formatSentence method
   formatSentence: () => {
     const { fillInTheBlankState } = get();
     const { exercises, currentExerciseIndex } = fillInTheBlankState;
@@ -891,19 +933,19 @@ const useQuizStore = create<QuizState>((set, get) => ({
 
     if (!currentExercise || !currentExercise.sentence) return "";
 
-    // Make sure targetWord/answer exists before trying to replace it
-    const targetWord =
-      currentExercise.targetWord || currentExercise.answer || "";
+    // Make sure answer exists before trying to replace it
+    const answer = currentExercise.answer || "";
 
-    if (!targetWord) return currentExercise.sentence;
+    if (!answer) return currentExercise.sentence;
 
-    // Replace the target word with underscores of equal length
+    // Replace the answer with underscores of equal length
     return currentExercise.sentence.replace(
-      new RegExp(targetWord, "gi"),
-      "_".repeat(targetWord.length)
+      new RegExp(answer, "gi"),
+      "_".repeat(answer.length)
     );
   },
 
+  // Update checkAnswer method
   checkAnswer: () => {
     const { Keyboard } = require("react-native");
     Keyboard.dismiss();
@@ -918,9 +960,7 @@ const useQuizStore = create<QuizState>((set, get) => ({
     // Simple normalization for comparison
     const normalizedUserAnswer = userAnswer.trim().toLowerCase();
     const normalizedCorrectAnswer = (
-      currentExercise.answer ||
-      currentExercise.targetWord ||
-      ""
+      currentExercise.answer || ""
     ).toLowerCase();
 
     const correct = normalizedUserAnswer === normalizedCorrectAnswer;
@@ -1011,8 +1051,6 @@ const useQuizStore = create<QuizState>((set, get) => ({
     });
   },
 
-  // Fix the handleWordSelect function
-
   handleWordSelect: (wordIndex: number) => {
     const { identificationState, gameState } = get();
     const { sentences, currentSentenceIndex, words } = identificationState;
@@ -1026,13 +1064,13 @@ const useQuizStore = create<QuizState>((set, get) => ({
     const selectedWord = words[wordIndex];
     const isCorrect =
       selectedWord?.clean?.toLowerCase() ===
-      currentSentence.targetWord?.toLowerCase();
+      currentSentence.answer?.toLowerCase(); // Changed from targetWord to answer
 
     console.log(
       "Selected word:",
       selectedWord?.clean,
-      "Target word:",
-      currentSentence.targetWord
+      "Answer:",
+      currentSentence.answer // Changed from targetWord to answer
     );
     console.log("Is correct?", isCorrect);
 

@@ -94,31 +94,48 @@ const GameInfoModal: React.FC<GameInfoModalProps> = React.memo(
       }
     };
 
-    // Determine focus area icon based on level description
+    // Determine focus area icon based on focusArea property with fallback to description
     const renderFocusIcon = () => {
-      const description = levelData?.description || "";
-      if (description.includes("Grammar")) {
-        return <AlertTriangle width={18} height={18} color="#FFFFFF" />;
-      } else if (description.includes("Pronunciation")) {
+      const focusArea = levelData?.focusArea?.toLowerCase() || "";
+
+      if (focusArea === "grammar" && focusArea === "vocabulary") {
+        return <BookOpen width={18} height={18} color="#FFFFFF" />;
+      } else if (focusArea === "pronunciation") {
         return <Volume2 width={18} height={18} color="#FFFFFF" />;
       } else {
-        return <BookOpen width={18} height={18} color="#FFFFFF" />;
+        // Fallback to description-based logic for backward compatibility
+        const description = levelData?.description || "";
+        if (description.includes("Grammar")) {
+          return <AlertTriangle width={18} height={18} color="#FFFFFF" />;
+        } else if (description.includes("Pronunciation")) {
+          return <Volume2 width={18} height={18} color="#FFFFFF" />;
+        } else {
+          return <BookOpen width={18} height={18} color="#FFFFFF" />;
+        }
       }
     };
 
-    // Determine focus area text
+    // Determine focus area text from focusArea property with fallback
     const getFocusAreaText = () => {
-      const description = levelData?.description || "";
-      if (description.includes("Grammar")) {
-        return "Grammar";
-      } else if (description.includes("Pronunciation")) {
-        return "Pronunciation";
+      const focusArea = levelData?.focusArea || "";
+
+      if (focusArea) {
+        // Capitalize first letter
+        return focusArea.charAt(0).toUpperCase() + focusArea.slice(1);
       } else {
-        return "Vocabulary";
+        // Fallback to description-based logic
+        const description = levelData?.description || "";
+        if (description.includes("Grammar")) {
+          return "Grammar";
+        } else if (description.includes("Pronunciation")) {
+          return "Pronunciation";
+        } else {
+          return "Vocabulary";
+        }
       }
     };
 
-    // FIXED: Enhanced start button handler
+    // Enhanced start button handler
     const handleStart = useCallback(() => {
       if (isLoading) return;
 
@@ -130,14 +147,13 @@ const GameInfoModal: React.FC<GameInfoModalProps> = React.memo(
       onStart();
     }, [isLoading, onStart]);
 
-    // FIXED: Enhanced close handler
     const handleClose = useCallback(() => {
       console.log("GameInfoModal: Closing modal");
       setInternalVisible(false);
       onClose();
     }, [onClose]);
 
-    // FIXED: Return null early if conditions are not met
+    //  Return null early if conditions are not met
     if (!levelData || !internalVisible) {
       console.log(
         "GameInfoModal: Not rendering - levelData:",
@@ -411,7 +427,7 @@ const styles = StyleSheet.create({
   difficultyBadge: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "rgba(255, 255, 255, 0.2)",
+    backgroundColor: "rgba(0, 0, 0, 0.2)",
     paddingHorizontal: 12,
     paddingVertical: 6,
     borderRadius: 12,

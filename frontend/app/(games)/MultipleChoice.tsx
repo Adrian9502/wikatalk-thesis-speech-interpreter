@@ -5,7 +5,6 @@ import {
   View,
   ScrollView,
   StatusBar,
-  ActivityIndicator,
 } from "react-native";
 import React, { useEffect } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -24,6 +23,7 @@ import { formatTime, getDifficultyColors } from "@/utils/gameUtils";
 import { setupBackButtonHandler } from "@/utils/gameUtils";
 import DecorativeCircles from "@/components/Games/DecorativeCircles";
 import GameNavigation from "@/components/Games/GameNavigation";
+import DotsLoader from "@/components/DotLoader";
 
 interface MultipleChoiceProps {
   levelId: number;
@@ -295,7 +295,7 @@ const MultipleChoice: React.FC<MultipleChoiceProps> = ({
         ) : (
           // Default loading state when idle
           <View style={gameSharedStyles.loaderContainer}>
-            <ActivityIndicator size="large" color={BASE_COLORS.blue} />
+            <DotsLoader />
           </View>
         )}
       </SafeAreaView>

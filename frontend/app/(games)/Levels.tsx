@@ -3,7 +3,6 @@ import {
   Text,
   View,
   TouchableOpacity,
-  ScrollView,
   StatusBar,
   Dimensions,
   FlatList,
@@ -15,8 +14,6 @@ import {
   Star,
   BookOpen,
   AlertTriangle,
-  CheckCircle,
-  Circle,
   RefreshCw,
   Lock,
   Volume2,
@@ -68,9 +65,12 @@ const convertQuizToLevels = (gameMode, quizData) => {
         difficulty: difficulty.charAt(0).toUpperCase() + difficulty.slice(1),
         status: status, // No more "locked" status
         stars: status === "completed" ? 3 : Math.floor(Math.random() * 3),
-        focusArea: item.description?.includes("Grammar")
+        // Use the focusArea property with fallback to description-based logic
+        focusArea: item.focusArea
+          ? item.focusArea.charAt(0).toUpperCase() + item.focusArea.slice(1)
+          : item.description?.includes("grammar")
           ? "Grammar"
-          : item.description?.includes("Pronunciation")
+          : item.description?.includes("pronunciation")
           ? "Pronunciation"
           : "Vocabulary",
         questionData: item,
@@ -110,13 +110,13 @@ const LevelCard = React.memo(({ level, onSelect, gradientColors }) => {
   // Render focus area icon
   const renderFocusIcon = () => {
     switch (focusArea) {
-      case "Grammar":
+      case "grammar":
         return (
           <AlertTriangle width={16} height={16} color={BASE_COLORS.white} />
         );
-      case "Vocabulary":
+      case "vocabulary":
         return <BookOpen width={16} height={16} color={BASE_COLORS.white} />;
-      case "Pronunciation":
+      case "pronunciation":
         return <Volume2 width={16} height={16} color={BASE_COLORS.white} />;
       default:
         return <BookOpen width={16} height={16} color={BASE_COLORS.white} />;
@@ -149,7 +149,13 @@ const LevelCard = React.memo(({ level, onSelect, gradientColors }) => {
 
         {/* Card content with title and metadata */}
         <View style={styles.levelInfo}>
-          <Text style={styles.levelTitle}>{title}</Text>
+          <Text
+            style={styles.levelTitle}
+            numberOfLines={2}
+            ellipsizeMode="tail"
+          >
+            {title}
+          </Text>
 
           {/* Focus area badge */}
           <View style={styles.levelMetadataRow}>
@@ -174,7 +180,6 @@ const LevelCard = React.memo(({ level, onSelect, gradientColors }) => {
                   }
                 />
               ))}
-
             <Text style={styles.difficultyText}>{difficulty}</Text>
           </View>
         </View>
@@ -183,7 +188,6 @@ const LevelCard = React.memo(({ level, onSelect, gradientColors }) => {
   );
 });
 
-// Optimize the LevelSelection component's renderLevelCard function
 const LevelSelection = () => {
   const params = useLocalSearchParams();
   const { gameMode, gameTitle } = params;
@@ -204,6 +208,10 @@ const LevelSelection = () => {
     const fetchData = async () => {
       if (gameMode) {
         try {
+          // Remove cache clearing for now
+          // Uncomment this line if you want to clear cache before fetching
+          // await clearCache();
+
           await fetchQuestionsByMode(gameMode);
         } catch (error) {
           console.error("Error fetching questions:", error);
@@ -587,7 +595,7 @@ const styles = StyleSheet.create({
     elevation: 8,
   },
   levelCardGradient: {
-    padding: 12, // Increased padding
+    padding: 12,
     height: "100%",
     justifyContent: "space-between",
     position: "relative",
@@ -649,16 +657,18 @@ const styles = StyleSheet.create({
     marginBottom: 8,
     fontFamily: "Poppins-SemiBold",
     color: BASE_COLORS.white,
+    lineHeight: 20,
+    height: 40,
   },
   levelMetadataRow: {
     flexDirection: "row",
-    justifyContent: "flex-start", // Changed to flex-start
-    marginBottom: 8, // Increased margin
+    justifyContent: "flex-start",
+    marginBottom: 8,
   },
   focusAreaBadge: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "rgba(0, 0, 0, 0.25)", // Darker for better contrast
+    backgroundColor: "rgba(0, 0, 0, 0.25)",
     paddingHorizontal: 10,
     paddingVertical: 4,
     borderRadius: 12,
@@ -691,13 +701,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
   },
-  loadingText: {
-    marginTop: 16,
-    fontSize: 16,
-    fontFamily: "Poppins-Medium",
-    color: BASE_COLORS.white,
-    textAlign: "center",
-  },
+
   // Error state styles
   errorContainer: {
     flex: 1,
