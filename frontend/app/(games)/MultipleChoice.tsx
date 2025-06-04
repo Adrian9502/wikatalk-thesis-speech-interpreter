@@ -1,5 +1,4 @@
 import {
-  StyleSheet,
   Text,
   TouchableOpacity,
   View,
@@ -24,7 +23,7 @@ import { setupBackButtonHandler } from "@/utils/gameUtils";
 import DecorativeCircles from "@/components/Games/DecorativeCircles";
 import GameNavigation from "@/components/Games/GameNavigation";
 import DotsLoader from "@/components/DotLoader";
-
+import styles from "@/styles/games/multipleChoice.styles";
 interface MultipleChoiceProps {
   levelId: number;
   levelData: any;
@@ -303,13 +302,5 @@ const MultipleChoice: React.FC<MultipleChoiceProps> = ({
     </View>
   );
 };
-
-// Only component-specific styles that differ from shared styles
-const styles = StyleSheet.create({
-  // Multiple choice specific: single column layout with gaps
-  multipleChoiceOptions: {
-    gap: 14,
-  },
-});
 
 export default MultipleChoice;

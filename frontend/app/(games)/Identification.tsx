@@ -25,6 +25,7 @@ import DecorativeCircles from "@/components/Games/DecorativeCircles";
 import GameNavigation from "@/components/Games/GameNavigation";
 import gameSharedStyles from "@/styles/gamesSharedStyles";
 import DotsLoader from "@/components/DotLoader";
+import styles from "@/styles/games/identification.styles";
 
 const formatTime = (seconds: number): string => {
   const minutes = Math.floor(seconds / 60);
@@ -383,26 +384,5 @@ const Identification: React.FC<IdentificationProps> = ({
     </View>
   );
 };
-
-// Only component-specific styles that differ from shared styles
-const styles = StyleSheet.create({
-  twoColumnContainer: {
-    flexDirection: "row",
-    flexWrap: "wrap",
-    justifyContent: "space-between",
-    gap: 10,
-  },
-  optionWrapper: {
-    width: "48%",
-    marginBottom: 10,
-  },
-  loadingText: {
-    marginTop: 16,
-    fontSize: 16,
-    fontFamily: "Poppins-Medium",
-    color: BASE_COLORS.white,
-    textAlign: "center",
-  },
-});
 
 export default Identification;

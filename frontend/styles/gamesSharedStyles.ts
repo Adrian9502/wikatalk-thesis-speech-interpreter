@@ -342,7 +342,13 @@ export const gameSharedStyles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
   },
-
+  loadingText: {
+    marginTop: 16,
+    fontSize: 16,
+    fontFamily: "Poppins-Medium",
+    color: BASE_COLORS.white,
+    textAlign: "center",
+  },
   // Component-specific shared styles
   optionLetter: {
     width: 30,
