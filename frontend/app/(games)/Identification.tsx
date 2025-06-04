@@ -26,6 +26,13 @@ import GameNavigation from "@/components/Games/GameNavigation";
 import gameSharedStyles from "@/styles/gamesSharedStyles";
 import DotsLoader from "@/components/DotLoader";
 
+const formatTime = (seconds: number): string => {
+  const minutes = Math.floor(seconds / 60);
+  const remainingSeconds = seconds % 60;
+  return `${minutes.toString().padStart(2, "0")}:${remainingSeconds
+    .toString()
+    .padStart(2, "0")}`;
+};
 interface IdentificationProps {
   levelId: number;
   levelData: any;
@@ -43,7 +50,6 @@ const Identification: React.FC<IdentificationProps> = ({
   const { activeTheme } = useThemeStore();
   const gameMode = "identification";
 
-  // Get state and actions from the centralized store - UPDATED for useQuizStore
   const {
     // Common game state
     gameState: { score, gameStatus, timerRunning, timeElapsed },
@@ -64,7 +70,6 @@ const Identification: React.FC<IdentificationProps> = ({
     handleRestart,
     handleWordSelect,
     toggleIdentificationTranslation: toggleTranslation,
-    setGameStatus,
   } = useQuizStore();
 
   // Current sentence
@@ -90,7 +95,7 @@ const Identification: React.FC<IdentificationProps> = ({
       console.log("Starting identification game");
       startGame();
     }
-  }, [levelData, isStarted]); // SIMPLIFIED DEPENDENCIES
+  }, [levelData, isStarted]);
 
   // Add helper function for getWordStyle with proper logic
   const getWordStyle = (word: any, index: number) => {
@@ -102,11 +107,8 @@ const Identification: React.FC<IdentificationProps> = ({
       },
     ];
 
-    // Only apply highlight styles if a word has been selected
     if (selectedWord !== null) {
-      // This is the word the user selected
       if (selectedWord === index) {
-        // Check if the selected word matches the correct answer
         const isCorrect =
           word.clean?.toLowerCase() === currentSentence?.answer?.toLowerCase();
 
@@ -114,26 +116,9 @@ const Identification: React.FC<IdentificationProps> = ({
           ? [...baseStyle, gameSharedStyles.correctOption]
           : [...baseStyle, gameSharedStyles.incorrectOption];
       }
-      // This is the correct word (highlight it if user selected wrong)
-      else if (
-        selectedWord !== index && // Not the selected word
-        word.clean?.toLowerCase() === currentSentence?.answer?.toLowerCase() // But is the correct answer
-      ) {
-        // Highlight the correct answer with a different style to show user what was correct
-        return [...baseStyle, gameSharedStyles.correctOption];
-      }
     }
 
     return baseStyle;
-  };
-
-  // Add this utility function at the top of your file (after imports)
-  const formatTime = (seconds: number): string => {
-    const minutes = Math.floor(seconds / 60);
-    const remainingSeconds = seconds % 60;
-    return `${minutes.toString().padStart(2, "0")}:${remainingSeconds
-      .toString()
-      .padStart(2, "0")}`;
   };
 
   return (
