@@ -1058,41 +1058,34 @@ const useQuizStore = create<QuizState>((set, get) => ({
 
     if (!currentSentence || wordIndex >= words.length) return;
 
-    console.log("Word selected:", wordIndex, words[wordIndex]);
+    // If a word is already selected, don't do anything
+    if (identificationState.selectedWord !== null) return;
 
-    // Check if selected word matches target word
     const selectedWord = words[wordIndex];
+    // Use answer field with fallback to targetWord for backward compatibility
     const isCorrect =
       selectedWord?.clean?.toLowerCase() ===
-      currentSentence.answer?.toLowerCase(); // Changed from targetWord to answer
+      (currentSentence?.answer || currentSentence?.targetWord)?.toLowerCase();
 
-    console.log(
-      "Selected word:",
-      selectedWord?.clean,
-      "Answer:",
-      currentSentence.answer // Changed from targetWord to answer
-    );
-    console.log("Is correct?", isCorrect);
-
-    // Update state with selection and stop timer
-    set((state) => ({
+    // Update selection, feedback and timer in one batch to avoid flicker
+    set({
       gameState: {
-        ...state.gameState,
+        ...gameState,
         timerRunning: false,
+        // Set score directly in the first update to avoid race conditions
         score: isCorrect ? 1 : 0,
       },
       identificationState: {
-        ...state.identificationState,
+        ...identificationState,
         selectedWord: wordIndex,
         feedback: isCorrect ? "correct" : "incorrect",
       },
-    }));
+    });
 
-    // CRITICAL FIX: Correct state structure - gameState not gameStatus
+    // Move to completed state after delay
     setTimeout(() => {
       set((state) => ({
         gameState: {
-          // <-- Changed from gameStatus to gameState
           ...state.gameState,
           gameStatus: "completed",
         },

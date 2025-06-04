@@ -369,6 +369,7 @@ const FillInTheBlank: React.FC<FillInTheBlankProps> = ({
                 question={exercises[0]?.sentence || "No question available"}
                 userAnswer={userAnswer || "(No answer provided)"}
                 isCorrect={score > 0}
+                timeElapsed={timeElapsed}
               />
 
               {/* Navigation buttons */}

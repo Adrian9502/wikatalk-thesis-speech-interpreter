@@ -281,6 +281,7 @@ const MultipleChoice: React.FC<MultipleChoiceProps> = ({
                 currentQuestion?.options?.find((o) => o.id === selectedOption)
                   ?.isCorrect || false
               }
+              timeElapsed={timeElapsed}
             />
 
             {/* Navigation buttons */}

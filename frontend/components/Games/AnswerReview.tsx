@@ -9,6 +9,7 @@ interface AnswerReviewProps {
   question: string;
   userAnswer: string;
   isCorrect: boolean;
+  timeElapsed?: number;
   animation?: string;
   duration?: number;
   delay?: number;
@@ -16,10 +17,20 @@ interface AnswerReviewProps {
   answerLabel?: string;
 }
 
+// Format time helper function
+const formatTime = (seconds: number): string => {
+  const minutes = Math.floor(seconds / 60);
+  const remainingSeconds = seconds % 60;
+  return `${minutes.toString().padStart(2, "0")}:${remainingSeconds
+    .toString()
+    .padStart(2, "0")}`;
+};
+
 const AnswerReview: React.FC<AnswerReviewProps> = ({
   question,
   userAnswer,
   isCorrect,
+  timeElapsed,
   animation = "fadeInUp",
   duration = 700,
   delay = 300,
@@ -70,6 +81,14 @@ const AnswerReview: React.FC<AnswerReviewProps> = ({
             </Text>
           </View>
         </View>
+
+        {/* Time Taken Section  */}
+        {timeElapsed !== undefined && (
+          <View style={styles.reviewSection}>
+            <Text style={styles.reviewSectionTitle}>Time Taken:</Text>
+            <Text style={styles.reviewTimeText}>{formatTime(timeElapsed)}</Text>
+          </View>
+        )}
       </View>
     </Animatable.View>
   );
@@ -77,6 +96,12 @@ const AnswerReview: React.FC<AnswerReviewProps> = ({
 
 const styles = StyleSheet.create({
   ...gameSharedStyles,
+  reviewTimeText: {
+    fontSize: 15,
+    fontFamily: "Poppins-Medium",
+    color: BASE_COLORS.white,
+    marginTop: 4,
+  },
 });
 
 export default AnswerReview;

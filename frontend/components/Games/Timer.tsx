@@ -13,11 +13,15 @@ const Timer: React.FC<TimerProps> = ({ isRunning }) => {
   const [displayTime, setDisplayTime] = useState("00:00");
   // Use ref to track current time without re-renders
   const timeRef = useRef(0);
+  const updateTimeRef = useRef(null);
   const { gameState, updateTimeElapsed } = useQuizStore();
   const { timeElapsed } = gameState;
 
-  // Set initial value
-  timeRef.current = timeElapsed;
+  // Initialize timer value only once on mount
+  useEffect(() => {
+    timeRef.current = timeElapsed;
+    updateTimeRef.current = updateTimeElapsed;
+  }, []);
 
   useEffect(() => {
     let interval: NodeJS.Timeout;
@@ -37,9 +41,9 @@ const Timer: React.FC<TimerProps> = ({ isRunning }) => {
         // Update display
         setDisplayTime(formattedTime);
 
-        // Update store less frequently (every 5 seconds)
-        if (timeRef.current % 5 === 0) {
-          updateTimeElapsed(timeRef.current);
+        // Only update store every 3 seconds to reduce renders
+        if (timeRef.current % 3 === 0) {
+          updateTimeRef.current(timeRef.current);
         }
       }, 1000);
     }
@@ -48,10 +52,23 @@ const Timer: React.FC<TimerProps> = ({ isRunning }) => {
       if (interval) {
         clearInterval(interval);
         // Ensure final time is saved to store when unmounting
-        updateTimeElapsed(timeRef.current);
+        updateTimeRef.current(timeRef.current);
       }
     };
-  }, [isRunning, updateTimeElapsed]);
+  }, [isRunning]);
+
+  // Update display when timeElapsed changes externally
+  useEffect(() => {
+    if (timeElapsed !== timeRef.current) {
+      timeRef.current = timeElapsed;
+      const minutes = Math.floor(timeElapsed / 60);
+      const remainingSeconds = timeElapsed % 60;
+      const formattedTime = `${minutes
+        .toString()
+        .padStart(2, "0")}:${remainingSeconds.toString().padStart(2, "0")}`;
+      setDisplayTime(formattedTime);
+    }
+  }, [timeElapsed]);
 
   return (
     <View style={styles.timerContainer}>
@@ -78,4 +95,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default Timer;
+export default React.memo(Timer);

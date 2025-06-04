@@ -19,11 +19,7 @@ import Timer from "@/components/Games/Timer";
 import AnswerReview from "@/components/Games/AnswerReview";
 import { Header } from "@/components/Header";
 import { router } from "expo-router";
-import {
-  formatTime,
-  getDifficultyColors,
-  setupBackButtonHandler,
-} from "@/utils/gameUtils";
+import { getDifficultyColors, setupBackButtonHandler } from "@/utils/gameUtils";
 import DifficultyBadge from "@/components/Games/DifficultyBadge";
 import DecorativeCircles from "@/components/Games/DecorativeCircles";
 import GameNavigation from "@/components/Games/GameNavigation";
@@ -96,26 +92,48 @@ const Identification: React.FC<IdentificationProps> = ({
     }
   }, [levelData, isStarted]); // SIMPLIFIED DEPENDENCIES
 
-  // Get word style based on state
+  // Add helper function for getWordStyle with proper logic
   const getWordStyle = (word: any, index: number) => {
     const baseStyle = [
       gameSharedStyles.optionCard,
       {
-        height: 60, // Fixed height, not minHeight
-        position: "relative" as const, // Fix the type issue
+        height: 60, // Fixed height
+        position: "relative" as const,
       },
     ];
 
-    if (selectedWord === index) {
-      const isCorrect =
-        word.clean?.toLowerCase() ===
-        currentSentence?.targetWord?.toLowerCase();
-      return isCorrect
-        ? [...baseStyle, gameSharedStyles.correctOption]
-        : [...baseStyle, gameSharedStyles.incorrectOption];
+    // Only apply highlight styles if a word has been selected
+    if (selectedWord !== null) {
+      // This is the word the user selected
+      if (selectedWord === index) {
+        // Check if the selected word matches the correct answer
+        const isCorrect =
+          word.clean?.toLowerCase() === currentSentence?.answer?.toLowerCase();
+
+        return isCorrect
+          ? [...baseStyle, gameSharedStyles.correctOption]
+          : [...baseStyle, gameSharedStyles.incorrectOption];
+      }
+      // This is the correct word (highlight it if user selected wrong)
+      else if (
+        selectedWord !== index && // Not the selected word
+        word.clean?.toLowerCase() === currentSentence?.answer?.toLowerCase() // But is the correct answer
+      ) {
+        // Highlight the correct answer with a different style to show user what was correct
+        return [...baseStyle, gameSharedStyles.correctOption];
+      }
     }
 
     return baseStyle;
+  };
+
+  // Add this utility function at the top of your file (after imports)
+  const formatTime = (seconds: number): string => {
+    const minutes = Math.floor(seconds / 60);
+    const remainingSeconds = seconds % 60;
+    return `${minutes.toString().padStart(2, "0")}:${remainingSeconds
+      .toString()
+      .padStart(2, "0")}`;
   };
 
   return (
@@ -247,7 +265,7 @@ const Identification: React.FC<IdentificationProps> = ({
                         {selectedWord === index && (
                           <View style={gameSharedStyles.resultIconContainer}>
                             {word.clean?.toLowerCase() ===
-                            currentSentence?.targetWord?.toLowerCase() ? (
+                            currentSentence?.answer?.toLowerCase() ? (
                               <Check
                                 width={18}
                                 height={18}
@@ -312,7 +330,6 @@ const Identification: React.FC<IdentificationProps> = ({
               <DifficultyBadge difficulty={difficulty} />
             </Animatable.View>
 
-            {/* Completion Card */}
             <Animatable.View
               animation="fadeInUp"
               duration={700}
@@ -335,12 +352,12 @@ const Identification: React.FC<IdentificationProps> = ({
                   )}
                 </View>
                 <Text style={gameSharedStyles.completionTitle}>
-                  {score > 0 ? "Level Completed!" : "Try Again!"}
+                  {score > 0 ? "Correct!" : "Try Again!"}
                 </Text>
                 <Text style={gameSharedStyles.completionMessage}>
                   {score > 0
-                    ? `Great job! You answered correctly.`
-                    : `Your answer was incorrect. Keep practicing to improve.`}
+                    ? "You identified the correct word."
+                    : "You didn't identify the correct word. Keep practicing!"}
                 </Text>
               </LinearGradient>
             </Animatable.View>
@@ -360,6 +377,7 @@ const Identification: React.FC<IdentificationProps> = ({
                   : "Unknown"
               }
               isCorrect={feedback === "correct"}
+              timeElapsed={timeElapsed}
             />
 
             {/* Navigation */}

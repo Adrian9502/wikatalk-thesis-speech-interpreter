@@ -10,18 +10,12 @@ import {
 import { useLocalSearchParams, router } from "expo-router";
 import { BASE_COLORS } from "@/constant/colors";
 import useThemeStore from "@/store/useThemeStore";
-
-// Direct imports instead of lazy loading
 import MultipleChoice from "./MultipleChoice";
 import Identification from "./Identification";
 import FillInTheBlank from "./FillInTheBlank";
-
-// Import other components
 import GameInfoModal from "@/components/Games/GameInfoModal";
 import useQuizStore from "@/store/Games/useQuizStore";
 import AppLoading from "@/components/AppLoading";
-import DotsLoader from "@/components/DotLoader";
-import { SafeAreaView } from "react-native-safe-area-context";
 
 const Questions = () => {
   const params = useLocalSearchParams();
@@ -31,11 +25,10 @@ const Questions = () => {
   const skipModal = params.skipModal === "true";
   const { activeTheme } = useThemeStore();
 
-  // Add ref to track if component is mounting for the first time
-  const isInitialMount = useRef(true);
+  // App state reference
   const appState = useRef(AppState.currentState);
 
-  // FIXED: Use ref to track current modal state for AppState handler
+  // Modal state with ref for AppState handler
   const modalStateRef = useRef({
     showInfoModal: !skipModal,
     showGame: skipModal,
@@ -43,15 +36,12 @@ const Questions = () => {
     hasStarted: skipModal,
   });
 
-  // FIXED: Better state management to prevent duplicate modals
-  const [modalState, setModalState] = useState(() => {
-    return modalStateRef.current;
-  });
-
-  // Update ref whenever modalState changes
-  useEffect(() => {
-    modalStateRef.current = modalState;
-  }, [modalState]);
+  // State for the component
+  const [modalState, setModalState] = useState(() => modalStateRef.current);
+  const [levelData, setLevelData] = useState(null);
+  const [actualDifficulty, setActualDifficulty] = useState(difficulty);
+  const [localLoading, setLocalLoading] = useState(true);
+  const [gameComponentReady, setGameComponentReady] = useState(false);
 
   // Get quiz store methods
   const {
@@ -59,34 +49,25 @@ const Questions = () => {
     getLevelData,
     isLoading: storeLoading,
     error,
-    gameState,
   } = useQuizStore();
 
-  // State for level data
-  const [levelData, setLevelData] = useState(null);
-  const [actualDifficulty, setActualDifficulty] = useState(difficulty);
-  const [localLoading, setLocalLoading] = useState(true);
-  const [gameComponentReady, setGameComponentReady] = useState(false);
+  // Update ref whenever modalState changes
+  useEffect(() => {
+    modalStateRef.current = modalState;
+    // Log state changes - this is now safely inside a hook
+    if (__DEV__) {
+      console.log("Modal state updated:", modalState);
+    }
+  }, [modalState]);
 
-  // FIXED: Handle app state changes to prevent duplicate modals
+  // Handle app state changes
   useEffect(() => {
     const handleAppStateChange = (nextAppState: string) => {
-      console.log("App state changed:", appState.current, "->", nextAppState);
-
       if (
         appState.current.match(/inactive|background/) &&
         nextAppState === "active"
       ) {
-        // App came back to foreground
-        console.log("App returned to foreground");
-        console.log(
-          "Current modal state when returning:",
-          modalStateRef.current
-        );
-
-        // If game has already started, ensure modal is hidden and game is shown
         if (modalStateRef.current.hasStarted) {
-          console.log("Game already started, hiding modal and showing game");
           setModalState({
             showInfoModal: false,
             showGame: true,
@@ -95,7 +76,6 @@ const Questions = () => {
           });
         }
       }
-
       appState.current = nextAppState;
     };
 
@@ -105,7 +85,7 @@ const Questions = () => {
     );
 
     return () => subscription?.remove();
-  }, []); // Remove dependency on modalState.hasStarted
+  }, []);
 
   // Fetch questions on component mount
   useEffect(() => {
@@ -146,43 +126,33 @@ const Questions = () => {
     };
 
     loadQuizData();
-  }, [gameMode, levelId, difficulty]);
+  }, [gameMode, levelId, difficulty, getLevelData, fetchQuestionsByMode]);
 
-  // FIXED: Improved game start logic with proper state management
+  // Game start handler
   const handleStartGame = useCallback(() => {
-    console.log("Starting game - current modal state:", modalState);
-
-    // Prevent multiple calls
-    if (modalState.isLoading || modalState.hasStarted) {
-      console.log("Game start prevented - already loading or started");
-      return;
-    }
+    if (modalState.isLoading || modalState.hasStarted) return;
 
     setModalState((prev) => ({
       ...prev,
       isLoading: true,
     }));
 
-    // Short delay for UI feedback
     setTimeout(() => {
-      const newState = {
+      setModalState({
         showInfoModal: false,
         showGame: true,
         isLoading: false,
-        hasStarted: true, // Mark as started
-      };
-      setModalState(newState);
-      console.log("Game started successfully with state:", newState);
+        hasStarted: true,
+      });
     }, 500);
-  }, [modalState]);
+  }, [modalState.isLoading, modalState.hasStarted]);
 
-  // Handle modal close (go back to levels screen)
+  // Modal close handler
   const handleCloseModal = useCallback(() => {
-    console.log("Closing modal");
     router.back();
   }, []);
 
-  // Add memoization for better performance
+  // Render game component based on mode
   const renderGameComponent = useCallback(() => {
     if (storeLoading || !gameComponentReady) {
       return <ActivityIndicator size="large" color={BASE_COLORS.blue} />;
@@ -228,7 +198,6 @@ const Questions = () => {
       );
     }
 
-    // Switch case for rendering components
     switch (gameMode) {
       case "multipleChoice":
         return (
@@ -270,9 +239,11 @@ const Questions = () => {
     storeLoading,
     error,
     gameComponentReady,
+    activeTheme.backgroundColor,
+    difficulty,
   ]);
 
-  // Show loading state while fetching or initializing
+  // Loading state check - AFTER all hooks are defined
   if (
     localLoading ||
     storeLoading ||
@@ -281,14 +252,11 @@ const Questions = () => {
     return <AppLoading />;
   }
 
-  console.log("Rendering Questions with modal state:", modalState);
-
+  // Main render - No more hooks after this point
   return (
     <View style={styles.container}>
-      {/* Only render the game component if showGame is true */}
       {modalState.showGame ? renderGameComponent() : null}
 
-      {/* FIXED: Better modal visibility control - only show if game hasn't started */}
       <GameInfoModal
         visible={modalState.showInfoModal && !modalState.hasStarted}
         onClose={handleCloseModal}
