@@ -12,11 +12,9 @@ import { useLocalSearchParams, router } from "expo-router";
 import {
   ArrowLeft,
   Star,
-  BookOpen,
   AlertTriangle,
   RefreshCw,
   Lock,
-  Volume2,
 } from "react-native-feather";
 import { LinearGradient } from "expo-linear-gradient";
 import * as Animatable from "react-native-animatable";
@@ -24,10 +22,10 @@ import useThemeStore from "@/store/useThemeStore";
 import { BASE_COLORS } from "@/constant/colors";
 import { SafeAreaView } from "react-native-safe-area-context";
 import GameInfoModal from "@/components/games/GameInfoModal";
-import useQuizStore from "@/store/Games/useQuizStore";
+import useQuizStore from "@/store/games/useQuizStore";
 import DotsLoader from "@/components/DotLoader";
 import { LevelData, QuizQuestions } from "@/types/gameTypes";
-import { renderFocusIcon } from "@/utils/Games/renderFocusIcon";
+import { renderFocusIcon } from "@/utils/games/renderFocusIcon";
 
 // Update convertQuizToLevels to handle type safety
 const convertQuizToLevels = (

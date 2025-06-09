@@ -6,7 +6,7 @@ import TeamMemberCard from "@/components/settings/about/TeamMembersCard";
 import { Header } from "@/components/Header";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { StatusBar } from "react-native";
-import teamMembers from "@/utils/About/teamMembers";
+import teamMembers from "@/utils/about/teamMembers";
 const About: React.FC = () => {
   const { activeTheme } = useThemeStore();
   const dynamicStyles = getGlobalStyles(activeTheme.backgroundColor);

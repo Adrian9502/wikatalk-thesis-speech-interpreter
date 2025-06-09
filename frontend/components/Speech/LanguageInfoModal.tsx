@@ -13,7 +13,7 @@ import getLanguageBackground from "@/utils/getLanguageBackground";
 import { LANGUAGE_INFO } from "@/constant/languages";
 import useThemeStore from "@/store/useThemeStore";
 import SectionRenderer from "@/components/speech/languageInfoModal/SectionRenderer";
-import { createSections } from "@/utils/Speech/LanguageInfoModal/languageInfoSection";
+import { createSections } from "@/utils/speech/languageInfoSection";
 
 interface LanguageInfoModalProps {
   visible: boolean;

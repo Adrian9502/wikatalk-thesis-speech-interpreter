@@ -3,7 +3,7 @@ import { View, Text, StyleSheet } from "react-native";
 import { Feather } from "@expo/vector-icons";
 import { BASE_COLORS, TITLE_COLORS } from "@/constant/colors";
 import { TabType } from "@/types/types";
-import { getTabIcon } from "@/utils/Recent/getTabIcon";
+import { getTabIcon } from "@/utils/recent/getTabIcon";
 import useThemeStore from "@/store/useThemeStore";
 
 interface EmptyStateProps {

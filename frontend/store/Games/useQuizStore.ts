@@ -1,6 +1,5 @@
 import { create } from "zustand";
 import axios from "axios";
-import { Keyboard } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 // Define the API URL using environment variable

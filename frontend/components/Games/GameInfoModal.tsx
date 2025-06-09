@@ -15,7 +15,7 @@ import {
   renderFocusIcon,
   getFocusAreaText,
   getGameModeName,
-} from "@/utils/Games/renderFocusIcon";
+} from "@/utils/games/renderFocusIcon";
 
 type DifficultyLevel = keyof typeof difficultyColors;
 

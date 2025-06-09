@@ -16,9 +16,9 @@ import { ChevronDown, ChevronUp, Search, X } from "react-native-feather";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import useThemeStore from "@/store/useThemeStore";
 import { BASE_COLORS } from "@/constant/colors";
-import faqItems from "@/utils/HelpAndFAQ/faqItems";
+import faqItems from "@/utils/helpAndFAQ/faqItems";
 import { FAQItem } from "@/types/faqItems";
-import categories from "@/utils/HelpAndFAQ/categories";
+import categories from "@/utils/helpAndFAQ/categories";
 import ContactSupportModal from "@/components/helpAndFAQ/ContactSupportModal";
 import { Header } from "@/components/Header";
 const HelpFAQ = () => {

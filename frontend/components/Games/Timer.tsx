@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState } from "react";
 import { View, Text, StyleSheet } from "react-native";
 import { Clock } from "react-native-feather";
 import { BASE_COLORS } from "@/constant/colors";
-import useQuizStore from "@/store/Games/useQuizStore";
+import useQuizStore from "@/store/games/useQuizStore";
 
 interface TimerProps {
   isRunning: boolean;

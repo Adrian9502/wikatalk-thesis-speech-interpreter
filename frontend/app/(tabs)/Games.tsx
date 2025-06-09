@@ -18,7 +18,7 @@ import WordOfDayModal from "@/components/games/WordOfDayModal";
 import * as Animatable from "react-native-animatable";
 import { LinearGradient } from "expo-linear-gradient";
 import { GameRoute } from "@/types/gameTypes";
-import gameOptions from "@/utils/Games/gameOptions";
+import gameOptions from "@/utils/games/gameOptions";
 
 const Games = () => {
   // Theme store
