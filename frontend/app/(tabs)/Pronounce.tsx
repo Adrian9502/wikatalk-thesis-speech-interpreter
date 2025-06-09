@@ -18,11 +18,11 @@ import {
 import AppLoading from "@/components/AppLoading";
 
 // Import components
-import PronunciationCard from "@/components/Pronunciation/PronunciationCard";
-import SearchBar from "@/components/Pronunciation/SearchBar";
-import LanguageDropdown from "@/components/Pronunciation/LanguageDropdown";
-import EmptyState from "@/components/Pronunciation/EmptyState";
-import ErrorState from "@/components/Pronunciation/ErrorState";
+import PronunciationCard from "@/components/pronunciation/PronunciationCard";
+import SearchBar from "@/components/pronunciation/SearchBar";
+import LanguageDropdown from "@/components/pronunciation/LanguageDropdown";
+import EmptyState from "@/components/pronunciation/EmptyState";
+import ErrorState from "@/components/pronunciation/ErrorState";
 
 // Import styles and types
 import { pronunciationStyles } from "@/styles/pronunciationStyles";

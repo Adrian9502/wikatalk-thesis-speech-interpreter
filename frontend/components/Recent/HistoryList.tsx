@@ -1,8 +1,8 @@
 import React from "react";
 import { View, StyleSheet } from "react-native";
 import { HistoryItemType, TabType } from "@/types/types";
-import EmptyHistory from "@/components/Recent/EmptyHistory";
-import HistoryItem from "@/components/Recent/HistoryItem";
+import EmptyHistory from "@/components/recent/EmptyHistory";
+import HistoryItem from "@/components/recent/HistoryItem";
 
 interface HistoryListProps {
   items: HistoryItemType[];

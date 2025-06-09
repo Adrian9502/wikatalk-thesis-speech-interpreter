@@ -14,7 +14,7 @@ import { router } from "expo-router";
 import { Calendar, Volume2 } from "react-native-feather";
 import { BASE_COLORS } from "@/constant/colors";
 import { usePronunciationStore } from "@/store/usePronunciationStore";
-import WordOfDayModal from "@/components/Games/WordOfDayModal";
+import WordOfDayModal from "@/components/games/WordOfDayModal";
 import * as Animatable from "react-native-animatable";
 import { LinearGradient } from "expo-linear-gradient";
 import { GameRoute } from "@/types/gamesTypes";

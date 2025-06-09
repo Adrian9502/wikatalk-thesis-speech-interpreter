@@ -1,10 +1,10 @@
 import React from "react";
 import { Modal, View, Text, ScrollView } from "react-native";
 import { useProfileForm } from "@/hooks/useProfileForm";
-import { ProfilePictureSection } from "@/components/AccountDetails/ProfilePictureSection";
-import { BasicInfoForm } from "@/components/AccountDetails/BasicInfoForm";
-import { PasswordSection } from "@/components/AccountDetails/PasswordSection";
-import { ModalFooter } from "@/components/AccountDetails/ModalFooter";
+import { ProfilePictureSection } from "@/components/accountDetails/ProfilePictureSection";
+import { BasicInfoForm } from "@/components/accountDetails/BasicInfoForm";
+import { PasswordSection } from "@/components/accountDetails/PasswordSection";
+import { ModalFooter } from "@/components/accountDetails/ModalFooter";
 import styles from "@/styles/editProfileStyles";
 import { UserDataTypes } from "@/types/types";
 

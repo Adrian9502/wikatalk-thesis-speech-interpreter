@@ -17,9 +17,9 @@ import { BASE_COLORS } from "@/constant/colors";
 import { useScanTranslateStore } from "@/store/useScanTranslateStore";
 import { useImageProcessing } from "@/hooks/useImageProcessing";
 import DotsLoader from "@/components/DotLoader";
-import LanguageSelector from "@/components/Scan/LanguageSelector";
-import TextDisplay from "@/components/Scan/TextDisplay";
-import CameraControls from "@/components/Scan/CameraControls";
+import LanguageSelector from "@/components/scan/LanguageSelector";
+import TextDisplay from "@/components/scan/TextDisplay";
+import CameraControls from "@/components/scan/CameraControls";
 import useThemeStore from "@/store/useThemeStore";
 import { getGlobalStyles } from "@/styles/globalStyles";
 // Define types for the state and hook returns

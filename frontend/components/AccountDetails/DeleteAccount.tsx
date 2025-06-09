@@ -4,7 +4,7 @@ import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
 import { useAuth } from "@/context/AuthContext";
-import Button from "@/components/AccountDetails/Button";
+import Button from "@/components/accountDetails/Button";
 import FormInput from "@/components/FormInput";
 import { AlertCircle, AlertTriangle, KeyRound, X } from "lucide-react-native";
 import useThemeStore from "@/store/useThemeStore";

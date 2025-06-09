@@ -14,9 +14,9 @@ import {
   SectionTitle,
   SettingItemComponent,
   LogoutButton,
-} from "@/components/Settings/SettingsRenderer";
+} from "@/components/settings/SettingsRenderer";
 import { router } from "expo-router";
-import ContactSupportModal from "@/components/HelpAndFAQ/ContactSupportModal";
+import ContactSupportModal from "@/components/helpAndFAQ/ContactSupportModal";
 
 // Types
 type SettingItemWithToggle = {

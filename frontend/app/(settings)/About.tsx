@@ -2,7 +2,7 @@ import { StyleSheet, Text, View, ScrollView } from "react-native";
 import React from "react";
 import { getGlobalStyles } from "@/styles/globalStyles";
 import useThemeStore from "@/store/useThemeStore";
-import TeamMemberCard from "@/components/Settings/About/TeamMembersCard";
+import TeamMemberCard from "@/components/settings/about/TeamMembersCard";
 import { Header } from "@/components/Header";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { StatusBar } from "react-native";

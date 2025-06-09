@@ -19,7 +19,7 @@ import { BASE_COLORS } from "@/constant/colors";
 import faqItems from "@/utils/HelpAndFAQ/faqItems";
 import { FAQItem } from "@/types/faqItems";
 import categories from "@/utils/HelpAndFAQ/categories";
-import ContactSupportModal from "@/components/HelpAndFAQ/ContactSupportModal";
+import ContactSupportModal from "@/components/helpAndFAQ/ContactSupportModal";
 import { Header } from "@/components/Header";
 const HelpFAQ = () => {
   // Get the dynamic styles based on the current theme

@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import { View, StyleSheet, Animated } from "react-native";
 import useThemeStore from "@/store/useThemeStore";
-import * as ThemeRenderers from "@/components/Settings/ThemeSelectorRenderers";
+import * as ThemeRenderers from "@/components/settings/ThemeSelectorRenderers";
 import { ThemeOption } from "@/types/types";
 
 // Category types to organize themes

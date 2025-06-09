@@ -6,7 +6,7 @@ import {
   Keyboard,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import TranslateSection from "@/components/Translate/TranslateSection";
+import TranslateSection from "@/components/translate/TranslateSection";
 import {
   useTranslateStore,
   debouncedTranslate,

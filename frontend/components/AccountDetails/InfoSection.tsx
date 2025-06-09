@@ -2,12 +2,12 @@ import React from "react";
 import { View } from "react-native";
 import { User, Mail, Calendar, Shield } from "react-native-feather";
 import { formatDate } from "@/utils/formatDate";
-import { UserData } from "@/types/types";
-import { InfoItem } from "@/components/AccountDetails/InfoItem";
+import { UserDataTypes } from "@/types/types";
+import { InfoItem } from "@/components/accountDetails/InfoItem";
 import styles from "@/styles/accountDetailsStyles";
 
 type InfoSectionProps = {
-  userData: UserData;
+  userData: UserDataTypes;
   theme: any;
 };
 

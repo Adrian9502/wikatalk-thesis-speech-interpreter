@@ -7,21 +7,21 @@ import {
 } from "react-native";
 import React, { useEffect } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
-import DifficultyBadge from "@/components/Games/DifficultyBadge";
+import DifficultyBadge from "@/components/games/DifficultyBadge";
 import { Check, X } from "react-native-feather";
 import { LinearGradient } from "expo-linear-gradient";
 import * as Animatable from "react-native-animatable";
 import { BASE_COLORS } from "@/constant/colors";
 import useThemeStore from "@/store/useThemeStore";
-import Timer from "@/components/Games/Timer";
+import Timer from "@/components/games/Timer";
 import useQuizStore from "@/store/Games/useQuizStore";
 import { Header } from "@/components/Header";
-import AnswerReview from "@/components/Games/AnswerReview";
+import AnswerReview from "@/components/games/AnswerReview";
 import gameSharedStyles from "@/styles/gamesSharedStyles";
 import { formatTime, getDifficultyColors } from "@/utils/gameUtils";
 import { setupBackButtonHandler } from "@/utils/gameUtils";
-import DecorativeCircles from "@/components/Games/DecorativeCircles";
-import GameNavigation from "@/components/Games/GameNavigation";
+import DecorativeCircles from "@/components/games/DecorativeCircles";
+import GameNavigation from "@/components/games/GameNavigation";
 import DotsLoader from "@/components/DotLoader";
 import styles from "@/styles/games/multipleChoice.styles";
 interface MultipleChoiceProps {

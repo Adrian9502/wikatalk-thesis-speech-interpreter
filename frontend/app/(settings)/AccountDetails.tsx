@@ -7,10 +7,10 @@ import useThemeStore from "@/store/useThemeStore";
 import { getGlobalStyles } from "@/styles/globalStyles";
 import DotsLoader from "@/components/DotLoader";
 
-import { ProfileCard } from "@/components/AccountDetails/ProfileCard";
-import { InfoSection } from "@/components/AccountDetails/InfoSection";
-import { SettingsSection } from "@/components/AccountDetails/SettingsSection";
-import { DangerSection } from "@/components/AccountDetails/DangerSection";
+import { ProfileCard } from "@/components/accountDetails/ProfileCard";
+import { InfoSection } from "@/components/accountDetails/InfoSection";
+import { SettingsSection } from "@/components/accountDetails/SettingsSection";
+import { DangerSection } from "@/components/accountDetails/DangerSection";
 import { Header } from "@/components/Header";
 import styles from "@/styles/accountDetailsStyles";
 

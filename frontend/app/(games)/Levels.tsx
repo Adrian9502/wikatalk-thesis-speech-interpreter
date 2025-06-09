@@ -23,7 +23,7 @@ import * as Animatable from "react-native-animatable";
 import useThemeStore from "@/store/useThemeStore";
 import { BASE_COLORS } from "@/constant/colors";
 import { SafeAreaView } from "react-native-safe-area-context";
-import GameInfoModal from "@/components/Games/GameInfoModal";
+import GameInfoModal from "@/components/games/GameInfoModal";
 import useQuizStore from "@/store/Games/useQuizStore";
 import DotsLoader from "@/components/DotLoader";
 

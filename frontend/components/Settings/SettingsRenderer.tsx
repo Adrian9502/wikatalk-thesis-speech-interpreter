@@ -1,11 +1,11 @@
 import React, { useState } from "react";
 import { View, Text, Image, TouchableOpacity, StyleSheet } from "react-native";
 import { Feather } from "@expo/vector-icons";
-import SettingItem from "@/components/Settings/SettingItem";
-import ThemeSelector from "@/components/Settings/ThemeSelector";
+import SettingItem from "@/components/settings/SettingItem";
+import ThemeSelector from "@/components/settings/ThemeSelector";
 import { BASE_COLORS, TITLE_COLORS } from "@/constant/colors";
 import { FeatherIconName } from "@/types/types";
-import ProfilePictureModal from "../AccountDetails/ProfilePictureModal";
+import ProfilePictureModal from "../accountDetails/ProfilePictureModal";
 
 // Types
 type SettingItemWithToggle = {

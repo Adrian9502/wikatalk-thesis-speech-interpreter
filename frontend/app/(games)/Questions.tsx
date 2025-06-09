@@ -13,7 +13,7 @@ import useThemeStore from "@/store/useThemeStore";
 import MultipleChoice from "./MultipleChoice";
 import Identification from "./Identification";
 import FillInTheBlank from "./FillInTheBlank";
-import GameInfoModal from "@/components/Games/GameInfoModal";
+import GameInfoModal from "@/components/games/GameInfoModal";
 import useQuizStore from "@/store/Games/useQuizStore";
 import AppLoading from "@/components/AppLoading";
 
