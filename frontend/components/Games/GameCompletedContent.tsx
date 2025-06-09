@@ -9,6 +9,7 @@ import AnswerReview from "@/components/games/AnswerReview";
 import GameNavigation from "@/components/games/GameNavigation";
 import { formatTime } from "@/utils/gameUtils";
 import gameSharedStyles from "@/styles/gamesSharedStyles";
+import { GameMode } from "@/types/gameTypes";
 
 interface GameCompletedContentProps {
   score: number;
@@ -18,7 +19,7 @@ interface GameCompletedContentProps {
   userAnswer: string;
   isCorrect: boolean;
   levelId: number;
-  gameMode: string;
+  gameMode: GameMode | string;
   gameTitle: string;
   onRestart: () => void;
   completedMessage?: string;

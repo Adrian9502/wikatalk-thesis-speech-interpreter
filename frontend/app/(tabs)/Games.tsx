@@ -17,7 +17,7 @@ import { usePronunciationStore } from "@/store/usePronunciationStore";
 import WordOfDayModal from "@/components/games/WordOfDayModal";
 import * as Animatable from "react-native-animatable";
 import { LinearGradient } from "expo-linear-gradient";
-import { GameRoute } from "@/types/gamesTypes";
+import { GameRoute } from "@/types/gameTypes";
 import gameOptions from "@/utils/Games/gameOptions";
 
 const Games = () => {

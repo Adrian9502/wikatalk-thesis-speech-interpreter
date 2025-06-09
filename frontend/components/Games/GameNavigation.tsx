@@ -5,10 +5,11 @@ import { ArrowRight } from "react-native-feather";
 import { LinearGradient } from "expo-linear-gradient";
 import { BASE_COLORS, gameModeNavigationColors } from "@/constant/colors";
 import gameSharedStyles from "@/styles/gamesSharedStyles";
+import { GameMode } from "@/types/gameTypes";
 
 interface GameNavigationProps {
   levelId: number;
-  gameMode: "identification" | "multipleChoice" | "fillBlanks";
+  gameMode: GameMode | string;
   gameTitle: string;
   difficulty: string;
   onRestart: () => void;

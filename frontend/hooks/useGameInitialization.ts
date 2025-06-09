@@ -1,5 +1,6 @@
 import { useEffect } from "react";
 import { setupBackButtonHandler } from "@/utils/gameUtils";
+import { GameMode, GameStatus } from "@/types/gameTypes";
 
 export function useGameInitialization(
   levelData: any,
@@ -14,7 +15,10 @@ export function useGameInitialization(
 ) {
   // Handle back button
   useEffect(() => {
-    const cleanupBackHandler = setupBackButtonHandler(gameStatus, timerRunning);
+    const cleanupBackHandler = setupBackButtonHandler(
+      gameStatus as GameStatus,
+      timerRunning
+    );
     return () => cleanupBackHandler();
   }, [gameStatus, timerRunning]);
 
@@ -34,5 +38,13 @@ export function useGameInitialization(
 
       return () => clearTimeout(timer);
     }
-  }, [levelData, isStarted, levelId, gameMode, difficulty]);
+  }, [
+    levelData,
+    isStarted,
+    levelId,
+    gameMode,
+    difficulty,
+    initialize,
+    startGame,
+  ]);
 }

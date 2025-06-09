@@ -133,8 +133,8 @@ interface QuizState {
   initialize: (
     levelData: any,
     levelId: number,
-    gameMode: GameMode,
-    difficulty?: string
+    gameMode: string, // Change from GameMode to string for flexibility
+    difficulty: string
   ) => void;
   startGame: () => void;
   handleRestart: () => void;
@@ -568,18 +568,14 @@ const useQuizStore = create<QuizState>((set, get) => ({
 
   // Game initialization
   initialize: (levelData, levelId, gameMode, difficulty = "easy") => {
+    const difficultyValue = difficulty || "easy";
     console.log(
       `Initializing ${gameMode} level ${levelId} with data:`,
-      levelData
+      levelData,
+      `difficulty: ${difficultyValue}`
     );
 
-    if (!levelData) {
-      console.error("Missing levelData in initialize");
-      set({ error: "Missing level data" });
-      return;
-    }
-
-    // Common initialization - set game mode and levelId
+    // Cast gameMode to GameMode where needed
     set((state) => ({
       gameState: {
         ...state.gameState,
@@ -619,7 +615,8 @@ const useQuizStore = create<QuizState>((set, get) => ({
           levelData.choices.length > 0
         ) {
           console.log("Using choices array:", levelData.choices);
-          words = levelData.choices.map((choice, index) => {
+          // Update choice mapping
+          words = levelData.choices.map((choice: any, index: number) => {
             // Handle both string and object choices
             const textValue =
               typeof choice === "string"
@@ -642,7 +639,8 @@ const useQuizStore = create<QuizState>((set, get) => ({
           levelData.options.length > 0
         ) {
           console.log("Using options array as fallback:", levelData.options);
-          words = levelData.options.map((option, index) => {
+          // Update option mapping
+          words = levelData.options.map((option: any, index: number) => {
             const textValue =
               typeof option === "string"
                 ? option
@@ -662,8 +660,9 @@ const useQuizStore = create<QuizState>((set, get) => ({
           console.log("Fallback: splitting sentence into words");
           const sentenceWords = sentence.sentence
             .split(/\s+/)
-            .filter((word) => word.length > 0);
-          words = sentenceWords.map((word, index) => ({
+            .filter((word: string) => word.length > 0);
+          // Update word mapping in fallback
+          words = sentenceWords.map((word: string, index: number) => ({
             id: index.toString(),
             text: word,
             clean: word.replace(/[.,!?;:'"()\[\]{}]/g, ""),
@@ -688,7 +687,7 @@ const useQuizStore = create<QuizState>((set, get) => ({
         });
 
         console.log("Identification state initialized successfully");
-      } catch (error) {
+      } catch (error: any) {
         console.error("Error initializing identification mode:", error);
         set({
           error: "Failed to initialize identification game: " + error.message,
@@ -736,7 +735,7 @@ const useQuizStore = create<QuizState>((set, get) => ({
         });
 
         console.log("FillInTheBlank state initialized successfully");
-      } catch (error) {
+      } catch (error: any) {
         console.error("Error initializing fillBlanks mode:", error);
         set({
           error:
@@ -773,7 +772,7 @@ const useQuizStore = create<QuizState>((set, get) => ({
         });
 
         console.log("MultipleChoice state initialized successfully");
-      } catch (error) {
+      } catch (error: any) {
         console.error("Error initializing multipleChoice mode:", error);
         set({
           error: "Failed to initialize multiple choice game: " + error.message,
@@ -999,7 +998,6 @@ const useQuizStore = create<QuizState>((set, get) => ({
       setTimeout(() => {
         set((state) => ({
           gameState: {
-            // Fixed: using gameState instead of gameStatus
             ...state.gameState,
             gameStatus: "completed",
           },
@@ -1011,7 +1009,6 @@ const useQuizStore = create<QuizState>((set, get) => ({
         setTimeout(() => {
           set((state) => ({
             gameState: {
-              // Fixed: using gameState instead of gameStatus
               ...state.gameState,
               gameStatus: "completed",
             },
@@ -1027,7 +1024,6 @@ const useQuizStore = create<QuizState>((set, get) => ({
               userAnswer: "", // Clear the input for retry
             },
             gameState: {
-              // Fixed: using gameState instead of gameStatus
               ...state.gameState,
               timerRunning: true, // Resume timer for next attempt
             },

@@ -1,10 +1,10 @@
 import { BackHandler, ToastAndroid, Platform } from "react-native";
 import { router } from "expo-router";
 import { BASE_COLORS } from "@/constant/colors";
+import { GameStatus } from "@/types/gameTypes";
 
 // Type definitions
 export type GameMode = "identification" | "multipleChoice" | "fillBlanks";
-export type GameStatus = "playing" | "completed";
 export type DifficultyLevel = "easy" | "medium" | "hard";
 
 /**

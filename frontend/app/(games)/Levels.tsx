@@ -26,76 +26,96 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import GameInfoModal from "@/components/games/GameInfoModal";
 import useQuizStore from "@/store/Games/useQuizStore";
 import DotsLoader from "@/components/DotLoader";
+import { LevelData, QuizQuestions } from "@/types/gameTypes";
+import { renderFocusIcon } from "@/utils/Games/renderFocusIcon";
 
-const convertQuizToLevels = (gameMode, quizData) => {
-  console.log(
-    `Attempting to convert ${gameMode} data: ${
-      quizData
-        ? `Has ${gameMode} key: ${!!quizData[gameMode]}`
-        : "No quizData provided"
-    }`
-  );
+// Update convertQuizToLevels to handle type safety
+const convertQuizToLevels = (
+  gameMode: string,
+  quizData: QuizQuestions
+): LevelData[] => {
+  console.log(`Attempting to convert ${gameMode} data`);
 
-  if (!quizData[gameMode]) return [];
+  // Ensure gameMode is a string, not an array
+  const safeGameMode =
+    typeof gameMode === "string" ? gameMode : String(gameMode);
 
-  const difficulties = Object.keys(quizData[gameMode]);
-  console.log(`Found difficulties for ${gameMode}:`, difficulties);
+  // Check if the gameMode exists in quizData
+  if (!quizData[safeGameMode]) return [];
+
+  // Get difficulties and ensure they're strings
+  const difficulties = Object.keys(quizData[safeGameMode]);
+  console.log(`Found difficulties for ${safeGameMode}:`, difficulties);
 
   // First, collect all questions from all difficulties
-  let allQuestions = [];
+  let allQuestions: any[] = [];
 
-  difficulties.forEach((difficulty) => {
-    const difficultyQuestions = quizData[gameMode][difficulty] || [];
+  difficulties.forEach((difficulty: string | any) => {
+    // Ensure difficulty is a string, not an array
+    const difficultyKey =
+      typeof difficulty === "string"
+        ? difficulty
+        : Array.isArray(difficulty) && difficulty.length > 0
+        ? String(difficulty[0])
+        : "easy";
+
+    // Access the questions using the safe string key
+    const difficultyQuestions = quizData[safeGameMode][difficultyKey] || [];
     console.log(
-      `${gameMode}/${difficulty}: ${difficultyQuestions.length} questions`
+      `${safeGameMode}/${difficultyKey}: ${difficultyQuestions.length} questions`
     );
 
     // Add all questions with their difficulty
-    difficultyQuestions.forEach((question) => {
+    difficultyQuestions.forEach((question: any) => {
       allQuestions.push({
         ...question,
-        difficultyCategory: difficulty,
+        difficultyCategory: difficultyKey,
       });
     });
   });
 
   // Sort all questions by their questionId or id
-  allQuestions.sort((a, b) => {
+  allQuestions.sort((a: any, b: any) => {
     const idA = a.questionId || a.id || 0;
     const idB = b.questionId || b.id || 0;
     return idA - idB;
   });
 
   // Now map the sorted questions to level objects
-  const allLevels = allQuestions.map((item, index) => {
-    // Make all levels either completed or current
-    const status = index < 3 ? "completed" : "current";
+  const allLevels: LevelData[] = allQuestions.map(
+    (item: any, index: number) => {
+      // Make all levels either completed or current
+      const status = index < 3 ? "completed" : "current";
 
-    // Create a level with the proper id and number
-    const level = {
-      id: item.questionId || item.id,
-      number: item.questionId || item.id, // Numeric for sorting/reference
-      levelString: item.level || `Level ${item.questionId || item.id}`, // Use the level string from quiz question
-      title: item.title || `Level ${item.questionId || item.id}`,
-      description: item.description || "Practice your skills",
-      difficulty:
-        item.difficultyCategory.charAt(0).toUpperCase() +
-        item.difficultyCategory.slice(1),
-      status: status,
-      stars: status === "completed" ? 3 : Math.floor(Math.random() * 3),
-      focusArea: item.focusArea
-        ? item.focusArea.charAt(0).toUpperCase() + item.focusArea.slice(1)
-        : item.description?.includes("grammar")
-        ? "Grammar"
-        : item.description?.includes("pronunciation")
-        ? "Pronunciation"
-        : "Vocabulary",
-      questionData: item,
-      difficultyCategory: item.difficultyCategory,
-    };
+      // Create a level with the proper id and number
+      const level: LevelData = {
+        id: item.questionId || item.id || index + 1,
+        number: item.questionId || item.id || index + 1,
+        levelString:
+          item.level || `Level ${item.questionId || item.id || index + 1}`,
+        title: item.title || `Level ${item.questionId || item.id || index + 1}`,
+        description: item.description || "Practice your skills",
+        difficulty:
+          typeof item.difficultyCategory === "string"
+            ? item.difficultyCategory.charAt(0).toUpperCase() +
+              item.difficultyCategory.slice(1)
+            : "Easy",
+        status: status as "completed" | "current" | "locked",
+        stars: status === "completed" ? 3 : Math.floor(Math.random() * 3),
+        focusArea: item.focusArea
+          ? item.focusArea.charAt(0).toUpperCase() + item.focusArea.slice(1)
+          : item.description?.includes("grammar")
+          ? "Grammar"
+          : item.description?.includes("pronunciation")
+          ? "Pronunciation"
+          : "Vocabulary",
+        questionData: item,
+        difficultyCategory: item.difficultyCategory || "easy",
+      };
 
-    return level;
-  });
+      return level;
+    }
+  );
 
   console.log(
     `Converted ${allLevels.length} levels for ${gameMode} in proper order`
@@ -103,120 +123,122 @@ const convertQuizToLevels = (gameMode, quizData) => {
   return allLevels;
 };
 
-const LevelCard = React.memo(({ level, onSelect, gradientColors }) => {
-  // Pull out needed props
-  const { levelString, title, difficulty, status, focusArea } = level;
+// Fix LevelCard interface
+interface LevelCardProps {
+  level: LevelData;
+  onSelect: (level: LevelData) => void;
+  gradientColors: readonly [string, string];
+}
 
-  // Determine number of stars based on difficulty
-  const getStarCount = () => {
-    switch (difficulty) {
-      case "Easy":
-        return 1;
-      case "Medium":
-        return 2;
-      case "Hard":
-        return 3;
-      default:
-        return 1;
-    }
-  };
+const LevelCard = React.memo(
+  ({ level, onSelect, gradientColors }: LevelCardProps) => {
+    // Pull out needed props with type assertion to handle possible undefined
+    const {
+      levelString = "",
+      title = "",
+      difficulty = "Easy",
+      status = "current",
+      focusArea = "Vocabulary",
+    } = level || {};
 
-  const starCount = getStarCount();
+    // Determine number of stars based on difficulty
+    const getStarCount = () => {
+      if (typeof difficulty !== "string") return 1;
 
-  // Render focus area icon
-  const renderFocusIcon = () => {
-    switch (focusArea) {
-      case "grammar":
-        return (
-          <AlertTriangle width={16} height={16} color={BASE_COLORS.white} />
-        );
-      case "vocabulary":
-        return <BookOpen width={16} height={16} color={BASE_COLORS.white} />;
-      case "pronunciation":
-        return <Volume2 width={16} height={16} color={BASE_COLORS.white} />;
-      default:
-        return <BookOpen width={16} height={16} color={BASE_COLORS.white} />;
-    }
-  };
+      switch (difficulty) {
+        case "Hard":
+          return 3;
+        case "Medium":
+          return 2;
+        default:
+          return 1;
+      }
+    };
 
-  return (
-    <TouchableOpacity
-      style={styles.levelCard}
-      onPress={() => onSelect(level)}
-      activeOpacity={0.8}
-      disabled={status === "locked"}
-    >
-      <LinearGradient colors={gradientColors} style={styles.levelCardGradient}>
-        {/* Decorative elements */}
-        <View style={styles.decorativeShape} />
-        <View style={[styles.decorativeShape, styles.decorativeShape2]} />
+    const starCount = getStarCount();
 
-        {/* Card header with level number and lock status */}
-        <View style={styles.levelHeader}>
-          <View style={styles.levelNumberContainer}>
-            <Text style={styles.levelNumber}>
-              {levelString.replace(/^Level\s+/, "")}
-            </Text>
-          </View>
-          <View style={styles.specialIconContainer}>
-            {status === "locked" ? (
-              <Lock width={18} height={18} color={BASE_COLORS.white} />
-            ) : null}
-          </View>
-        </View>
+    return (
+      <TouchableOpacity
+        style={styles.levelCard}
+        onPress={() => onSelect(level)}
+        activeOpacity={0.8}
+        disabled={status === "locked"}
+      >
+        <LinearGradient
+          colors={gradientColors}
+          style={styles.levelCardGradient}
+        >
+          {/* Decorative elements */}
+          <View style={styles.decorativeShape} />
+          <View style={[styles.decorativeShape, styles.decorativeShape2]} />
 
-        {/* Card content with title and metadata */}
-        <View style={styles.levelInfo}>
-          <Text
-            style={styles.levelTitle}
-            numberOfLines={2}
-            ellipsizeMode="tail"
-          >
-            {title}
-          </Text>
-
-          {/* Focus area badge */}
-          <View style={styles.levelMetadataRow}>
-            <View style={styles.focusAreaBadge}>
-              {renderFocusIcon()}
-              <Text style={styles.focusAreaText}>{focusArea}</Text>
+          {/* Card header with level number and lock status */}
+          <View style={styles.levelHeader}>
+            <View style={styles.levelNumberContainer}>
+              <Text style={styles.levelNumber}>
+                {levelString.replace(/^Level\s+/, "")}
+              </Text>
+            </View>
+            <View style={styles.specialIconContainer}>
+              {status === "locked" ? (
+                <Lock width={18} height={18} color={BASE_COLORS.white} />
+              ) : null}
             </View>
           </View>
 
-          {/* Difficulty stars */}
-          <View style={styles.difficultyStarsContainer}>
-            {Array(3)
-              .fill(0)
-              .map((_, index) => (
-                <Star
-                  key={index}
-                  width={14}
-                  height={14}
-                  fill={index < starCount ? "#FFC107" : "transparent"}
-                  stroke={
-                    index < starCount ? "#FFC107" : "rgba(255, 255, 255, 0.4)"
-                  }
-                />
-              ))}
-            <Text style={styles.difficultyText}>{difficulty}</Text>
+          {/* Card content with title and metadata */}
+          <View style={styles.levelInfo}>
+            <Text
+              style={styles.levelTitle}
+              numberOfLines={2}
+              ellipsizeMode="tail"
+            >
+              {title}
+            </Text>
+
+            {/* Focus area badge */}
+            <View style={styles.levelMetadataRow}>
+              <View style={styles.focusAreaBadge}>
+                {renderFocusIcon(focusArea)}
+                <Text style={styles.focusAreaText}>{focusArea}</Text>
+              </View>
+            </View>
+
+            {/* Difficulty stars */}
+            <View style={styles.difficultyStarsContainer}>
+              {Array(3)
+                .fill(0)
+                .map((_, index) => (
+                  <Star
+                    key={index}
+                    width={14}
+                    height={14}
+                    fill={index < starCount ? "#FFC107" : "transparent"}
+                    stroke={
+                      index < starCount ? "#FFC107" : "rgba(255, 255, 255, 0.4)"
+                    }
+                  />
+                ))}
+              <Text style={styles.difficultyText}>{difficulty}</Text>
+            </View>
           </View>
-        </View>
-      </LinearGradient>
-    </TouchableOpacity>
-  );
-});
+        </LinearGradient>
+      </TouchableOpacity>
+    );
+  }
+);
 
 const LevelSelection = () => {
   const params = useLocalSearchParams();
   const { gameMode, gameTitle } = params;
-  const [levels, setLevels] = useState([]);
+  const [levels, setLevels] = useState<LevelData[]>([]);
   const { activeTheme } = useThemeStore();
 
   // Get quiz store methods - only use store's loading and error states
   const { fetchQuestionsByMode, questions, isLoading, error } = useQuizStore();
 
   // Modal state variables
-  const [selectedLevel, setSelectedLevel] = useState(null);
+  const [selectedLevel, setSelectedLevel] = useState<LevelData | null>(null);
   const [showModal, setShowModal] = useState(false);
   const [showLevels, setShowLevels] = useState(false);
 
@@ -230,7 +252,7 @@ const LevelSelection = () => {
 
           // await clearCache();
 
-          await fetchQuestionsByMode(gameMode);
+          await fetchQuestionsByMode(gameMode as string);
         } catch (error) {
           console.error("Error fetching questions:", error);
         }
@@ -246,14 +268,26 @@ const LevelSelection = () => {
       try {
         console.log(
           "Processing questions for levels:",
-          questions[gameMode]
-            ? Object.keys(questions[gameMode]).map(
-                (diff) => `${diff}: ${questions[gameMode][diff]?.length || 0}`
-              )
+          questions[gameMode as string]
+            ? Object.keys(questions[gameMode as string]).map((diff) => {
+                // Need to cast the array to any[] to avoid 'never' type errors
+                const questionArray = questions[gameMode as string][
+                  diff
+                ] as any[];
+                return `${diff}: ${questionArray?.length || 0}`;
+              })
             : "No questions data"
         );
 
-        const currentLevels = convertQuizToLevels(gameMode, questions);
+        // Then ensure gameMode is always a string
+        const safeGameMode =
+          typeof gameMode === "string" ? gameMode : String(gameMode);
+
+        // Convert the questions data safely - add type assertion to avoid 'never' issues
+        const currentLevels = convertQuizToLevels(
+          safeGameMode,
+          questions as QuizQuestions
+        );
         console.log(`Setting ${currentLevels.length} levels for UI`);
         setLevels(currentLevels);
 
@@ -278,24 +312,30 @@ const LevelSelection = () => {
         100
       : 0;
 
-  // Memoize the level select handler
-  const handleLevelSelect = useCallback((level) => {
+  // Memoize the level select handler with immediate execution priority
+  const handleLevelSelect = useCallback((level: LevelData) => {
     if (level.status === "locked") return;
-    setSelectedLevel(level);
-    setShowModal(true);
+
+    // Use requestAnimationFrame to prioritize UI update
+    requestAnimationFrame(() => {
+      setSelectedLevel(level);
+      setShowModal(true);
+    });
   }, []);
 
   const handleStartGame = () => {
     if (!selectedLevel) return;
 
-    // Navigate directly without artificial delays
     router.push({
       pathname: "/(games)/Questions",
       params: {
         levelId: selectedLevel.id,
-        gameMode,
+        gameMode: typeof gameMode === "string" ? gameMode : String(gameMode),
         gameTitle,
-        difficulty: selectedLevel.difficultyCategory,
+        difficulty:
+          typeof selectedLevel.difficultyCategory === "string"
+            ? selectedLevel.difficultyCategory
+            : "easy",
         skipModal: "true",
       },
     });
@@ -304,7 +344,9 @@ const LevelSelection = () => {
   const handleRetry = async () => {
     if (gameMode) {
       try {
-        await fetchQuestionsByMode(gameMode);
+        await fetchQuestionsByMode(
+          typeof gameMode === "string" ? gameMode : String(gameMode)
+        );
       } catch (error) {
         console.error("Error retrying fetch:", error);
       }
@@ -324,23 +366,39 @@ const LevelSelection = () => {
     }),
     []
   );
-
+  const handleCloseModal = () => {
+    setShowModal(false);
+  };
   // Memoize renderItem function for FlatList
   const renderItem = useCallback(
-    ({ item: level }) => {
-      const gradientColors = difficultyColors[level.difficulty];
+    ({ item: level }: { item: LevelData }) => {
+      // Ensure difficulty is a string, not an array
+      const levelDifficulty =
+        typeof level.difficulty === "string" ? level.difficulty : "Easy";
+
+      // Safely get gradient colors and ensure it's a tuple with 2 elements
+      const colorsArray =
+        difficultyColors[levelDifficulty as keyof typeof difficultyColors] ||
+        difficultyColors.Easy;
+
+      // Create a safe tuple that's guaranteed to have 2 elements
+      const safeGradientColors: readonly [string, string] = [
+        colorsArray[0] || "#4CAF50",
+        colorsArray[1] || "#2E7D32",
+      ];
+
       return (
         <Animatable.View
           animation="fadeIn"
-          duration={300} // Reduce animation duration
-          delay={Math.min(level.id * 10, 300)} // Cap the delay at 300ms
+          duration={300}
+          delay={Math.min(level.id * 10, 300)}
           key={level.id}
-          useNativeDriver // Use native driver for animations
+          useNativeDriver
         >
           <LevelCard
             level={level}
             onSelect={handleLevelSelect}
-            gradientColors={gradientColors}
+            gradientColors={safeGradientColors}
           />
         </Animatable.View>
       );
@@ -348,8 +406,8 @@ const LevelSelection = () => {
     [difficultyColors, handleLevelSelect]
   );
 
-  // Optimize keyExtractor
-  const keyExtractor = useCallback((item) => item.id.toString(), []);
+  // Update FlatList state and key extractor
+  const keyExtractor = useCallback((item: LevelData) => item.id.toString(), []);
 
   const renderContent = () => {
     // Show loading state
@@ -393,15 +451,9 @@ const LevelSelection = () => {
           keyExtractor={keyExtractor}
           renderItem={renderItem}
           numColumns={2}
+          columnWrapperStyle={styles.columnWrapper}
           contentContainerStyle={styles.gridScrollContent}
           showsVerticalScrollIndicator={false}
-          columnWrapperStyle={styles.columnWrapper} // Add this style for column spacing
-          initialNumToRender={6}
-          maxToRenderPerBatch={4}
-          windowSize={3}
-          removeClippedSubviews={true}
-          updateCellsBatchingPeriod={50}
-          onEndReachedThreshold={0.5}
         />
       );
     }
@@ -479,11 +531,18 @@ const LevelSelection = () => {
         {selectedLevel && (
           <GameInfoModal
             visible={showModal}
-            onClose={() => setShowModal(false)}
+            onClose={handleCloseModal}
             onStart={handleStartGame}
             levelData={selectedLevel.questionData}
-            gameMode={gameMode as string}
-            difficulty={selectedLevel.difficulty}
+            gameMode={
+              typeof gameMode === "string" ? gameMode : String(gameMode)
+            }
+            isLoading={isLoading}
+            difficulty={
+              typeof selectedLevel.difficultyCategory === "string"
+                ? selectedLevel.difficultyCategory
+                : "easy"
+            }
           />
         )}
       </SafeAreaView>

@@ -9,14 +9,13 @@ import {
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import * as Animatable from "react-native-animatable";
-import {
-  X,
-  Star,
-  BookOpen,
-  AlertTriangle,
-  Volume2,
-} from "react-native-feather";
+import { X, Star } from "react-native-feather";
 import { difficultyColors } from "@/constant/colors";
+import {
+  renderFocusIcon,
+  getFocusAreaText,
+  getGameModeName,
+} from "@/utils/Games/renderFocusIcon";
 
 type DifficultyLevel = keyof typeof difficultyColors;
 
@@ -40,18 +39,15 @@ const GameInfoModal: React.FC<GameInfoModalProps> = React.memo(
     isLoading = false,
     difficulty = "Easy",
   }) => {
-    // FIXED: Add internal state to track if modal should actually be visible
-    const [internalVisible, setInternalVisible] = useState(false);
+    // Simplified state management - remove the internal visible state
     const [hasBeenStarted, setHasBeenStarted] = useState(false);
 
-    // FIXED: Control internal visibility based on props and internal state
+    // Reset the hasBeenStarted state when modal is closed
     useEffect(() => {
-      if (visible && !hasBeenStarted) {
-        setInternalVisible(true);
-      } else {
-        setInternalVisible(false);
+      if (!visible) {
+        setHasBeenStarted(false);
       }
-    }, [visible, hasBeenStarted]);
+    }, [visible]);
 
     // Get gradient colors for the current difficulty
     const getGradientColors = (): readonly [string, string] => {
@@ -80,111 +76,36 @@ const GameInfoModal: React.FC<GameInfoModalProps> = React.memo(
 
     const starCount = getStarCount();
 
-    // Get game mode display name
-    const getGameModeName = () => {
-      switch (gameMode) {
-        case "multipleChoice":
-          return "Multiple Choice";
-        case "identification":
-          return "Word Identification";
-        case "fillBlanks":
-          return "Fill in the Blanks";
-        default:
-          return gameMode;
-      }
-    };
-
-    // Determine focus area icon based on focusArea property with fallback to description
-    const renderFocusIcon = () => {
-      const focusArea = levelData?.focusArea?.toLowerCase() || "";
-
-      if (focusArea === "grammar" && focusArea === "vocabulary") {
-        return <BookOpen width={18} height={18} color="#FFFFFF" />;
-      } else if (focusArea === "pronunciation") {
-        return <Volume2 width={18} height={18} color="#FFFFFF" />;
-      } else {
-        // Fallback to description-based logic for backward compatibility
-        const description = levelData?.description || "";
-        if (description.includes("Grammar")) {
-          return <AlertTriangle width={18} height={18} color="#FFFFFF" />;
-        } else if (description.includes("Pronunciation")) {
-          return <Volume2 width={18} height={18} color="#FFFFFF" />;
-        } else {
-          return <BookOpen width={18} height={18} color="#FFFFFF" />;
-        }
-      }
-    };
-
-    // Determine focus area text from focusArea property with fallback
-    const getFocusAreaText = () => {
-      const focusArea = levelData?.focusArea || "";
-
-      if (focusArea) {
-        // Capitalize first letter
-        return focusArea.charAt(0).toUpperCase() + focusArea.slice(1);
-      } else {
-        // Fallback to description-based logic
-        const description = levelData?.description || "";
-        if (description.includes("Grammar")) {
-          return "Grammar";
-        } else if (description.includes("Pronunciation")) {
-          return "Pronunciation";
-        } else {
-          return "Vocabulary";
-        }
-      }
-    };
-
     // Enhanced start button handler
     const handleStart = useCallback(() => {
       if (isLoading) return;
 
-      console.log(
-        "GameInfoModal: Starting game, setting hasBeenStarted to true"
-      );
+      // Set started flag and call the onStart handler
       setHasBeenStarted(true);
-      setInternalVisible(false);
       onStart();
     }, [isLoading, onStart]);
 
-    const handleClose = useCallback(() => {
-      console.log("GameInfoModal: Closing modal");
-      setInternalVisible(false);
-      onClose();
-    }, [onClose]);
-
-    //  Return null early if conditions are not met
-    if (!levelData || !internalVisible) {
-      console.log(
-        "GameInfoModal: Not rendering - levelData:",
-        !!levelData,
-        "internalVisible:",
-        internalVisible
-      );
+    // If modal shouldn't be visible or we don't have level data, return null
+    if (!visible || !levelData || hasBeenStarted) {
       return null;
     }
 
-    console.log(
-      "GameInfoModal: Rendering modal with internalVisible:",
-      internalVisible
-    );
-
     return (
       <Modal
-        visible={internalVisible}
+        visible={visible}
         transparent
-        animationType="none"
+        animationType="fade" // Change to "fade" for faster appearance
         statusBarTranslucent={true}
-        onRequestClose={handleClose}
+        onRequestClose={onClose}
       >
         <Animatable.View
           animation="fadeIn"
-          duration={200}
+          duration={150} // Reduce animation duration
           style={styles.overlay}
         >
           <Animatable.View
             animation="zoomIn"
-            duration={300}
+            duration={200} // Reduce animation duration
             style={styles.modalContainer}
           >
             <LinearGradient
@@ -199,10 +120,7 @@ const GameInfoModal: React.FC<GameInfoModalProps> = React.memo(
               <View style={styles.decorativeShape3} />
 
               {/* Close button */}
-              <TouchableOpacity
-                style={styles.closeButton}
-                onPress={handleClose}
-              >
+              <TouchableOpacity style={styles.closeButton} onPress={onClose}>
                 <X width={20} height={20} color="#fff" />
               </TouchableOpacity>
 
@@ -250,8 +168,10 @@ const GameInfoModal: React.FC<GameInfoModalProps> = React.memo(
                 </View>
 
                 <View style={styles.focusAreaBadge}>
-                  {renderFocusIcon()}
-                  <Text style={styles.focusAreaText}>{getFocusAreaText()}</Text>
+                  {renderFocusIcon(levelData.focusArea)}
+                  <Text style={styles.focusAreaText}>
+                    {getFocusAreaText(levelData.focusArea)}
+                  </Text>
                 </View>
               </Animatable.View>
 
@@ -276,7 +196,9 @@ const GameInfoModal: React.FC<GameInfoModalProps> = React.memo(
               >
                 <View style={styles.infoRow}>
                   <Text style={styles.infoLabel}>Game Mode:</Text>
-                  <Text style={styles.infoValue}>{getGameModeName()}</Text>
+                  <Text style={styles.infoValue}>
+                    {getGameModeName(gameMode)}
+                  </Text>
                 </View>
               </Animatable.View>
 
@@ -300,8 +222,8 @@ const GameInfoModal: React.FC<GameInfoModalProps> = React.memo(
               {/* Start button */}
               <Animatable.View
                 animation="fadeInUp"
-                duration={600}
-                delay={400}
+                duration={200} // Reduce animation duration
+                delay={100} // Reduce delay
                 style={styles.buttonContainer}
               >
                 <TouchableOpacity

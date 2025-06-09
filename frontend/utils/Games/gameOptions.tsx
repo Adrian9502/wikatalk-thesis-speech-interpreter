@@ -1,5 +1,5 @@
 import { BASE_COLORS } from "@/constant/colors";
-import { GameRoute } from "@/types/gamesTypes";
+import { GameRoute } from "@/types/gameTypes";
 import { Zap, AlignCenter, Edit3 } from "react-native-feather";
 
 interface GameOption {

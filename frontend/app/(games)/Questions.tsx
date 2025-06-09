@@ -1,11 +1,12 @@
 import React, { useEffect, useState, useCallback, useRef } from "react";
 import {
+  AppState,
+  AppStateStatus,
   View,
   ActivityIndicator,
-  StyleSheet,
   Text,
   TouchableOpacity,
-  AppState,
+  StyleSheet,
 } from "react-native";
 import { useLocalSearchParams, router } from "expo-router";
 import { BASE_COLORS } from "@/constant/colors";
@@ -62,7 +63,7 @@ const Questions = () => {
 
   // Handle app state changes
   useEffect(() => {
-    const handleAppStateChange = (nextAppState: string) => {
+    const handleAppStateChange = (nextAppState: AppStateStatus) => {
       if (
         appState.current.match(/inactive|background/) &&
         nextAppState === "active"
