@@ -75,7 +75,7 @@ const Identification: React.FC<IdentificationProps> = ({
 
   // Current sentence
   const currentSentence = sentences[currentSentenceIndex];
-
+  const currentItem = currentSentence;
   useEffect(() => {
     // Set up the back handler
     const cleanupBackHandler = setupBackButtonHandler(gameStatus, timerRunning);
@@ -143,10 +143,7 @@ const Identification: React.FC<IdentificationProps> = ({
         {/* Level Title */}
         <View style={gameSharedStyles.levelTitleContainer}>
           <Text style={gameSharedStyles.levelTitleText}>
-            Level {levelId} -{" "}
-            {currentSentence?.title ||
-              currentSentence?.dialect ||
-              "Word Identification"}
+            {currentItem?.level} - {currentItem?.title || "Word Identification"}
           </Text>
         </View>
 

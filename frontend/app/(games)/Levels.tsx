@@ -27,7 +27,6 @@ import GameInfoModal from "@/components/games/GameInfoModal";
 import useQuizStore from "@/store/Games/useQuizStore";
 import DotsLoader from "@/components/DotLoader";
 
-// Update the convertQuizToLevels function to fix level numbering
 const convertQuizToLevels = (gameMode, quizData) => {
   console.log(
     `Attempting to convert ${gameMode} data: ${
@@ -42,54 +41,71 @@ const convertQuizToLevels = (gameMode, quizData) => {
   const difficulties = Object.keys(quizData[gameMode]);
   console.log(`Found difficulties for ${gameMode}:`, difficulties);
 
-  let allLevels = [];
-  let levelNumber = 1; // Start numbering from 1 for each game mode
+  // First, collect all questions from all difficulties
+  let allQuestions = [];
 
-  difficulties.forEach((difficulty, diffIndex) => {
+  difficulties.forEach((difficulty) => {
     const difficultyQuestions = quizData[gameMode][difficulty] || [];
     console.log(
       `${gameMode}/${difficulty}: ${difficultyQuestions.length} questions`
     );
 
-    const levelsFromDifficulty = difficultyQuestions.map((item, index) => {
-      const overallIndex = diffIndex * 5 + index;
-      // Make all levels either completed or current, never locked
-      const status = overallIndex < 3 ? "completed" : "current";
-
-      // Create a level with sequential numbering
-      const level = {
-        id: item.id, // Keep original ID for internal reference
-        number: levelNumber++, // Use sequential number starting from 1
-        title: item.title || `Level ${levelNumber - 1}`, // Use level number in title if none provided
-        description: item.description || "Practice your skills",
-        difficulty: difficulty.charAt(0).toUpperCase() + difficulty.slice(1),
-        status: status, // No more "locked" status
-        stars: status === "completed" ? 3 : Math.floor(Math.random() * 3),
-        // Use the focusArea property with fallback to description-based logic
-        focusArea: item.focusArea
-          ? item.focusArea.charAt(0).toUpperCase() + item.focusArea.slice(1)
-          : item.description?.includes("grammar")
-          ? "Grammar"
-          : item.description?.includes("pronunciation")
-          ? "Pronunciation"
-          : "Vocabulary",
-        questionData: item,
+    // Add all questions with their difficulty
+    difficultyQuestions.forEach((question) => {
+      allQuestions.push({
+        ...question,
         difficultyCategory: difficulty,
-      };
-
-      return level;
+      });
     });
-
-    allLevels = [...allLevels, ...levelsFromDifficulty];
   });
 
-  console.log(`Converted ${allLevels.length} levels for ${gameMode}`);
+  // Sort all questions by their questionId or id
+  allQuestions.sort((a, b) => {
+    const idA = a.questionId || a.id || 0;
+    const idB = b.questionId || b.id || 0;
+    return idA - idB;
+  });
+
+  // Now map the sorted questions to level objects
+  const allLevels = allQuestions.map((item, index) => {
+    // Make all levels either completed or current
+    const status = index < 3 ? "completed" : "current";
+
+    // Create a level with the proper id and number
+    const level = {
+      id: item.questionId || item.id,
+      number: item.questionId || item.id, // Numeric for sorting/reference
+      levelString: item.level || `Level ${item.questionId || item.id}`, // Use the level string from quiz question
+      title: item.title || `Level ${item.questionId || item.id}`,
+      description: item.description || "Practice your skills",
+      difficulty:
+        item.difficultyCategory.charAt(0).toUpperCase() +
+        item.difficultyCategory.slice(1),
+      status: status,
+      stars: status === "completed" ? 3 : Math.floor(Math.random() * 3),
+      focusArea: item.focusArea
+        ? item.focusArea.charAt(0).toUpperCase() + item.focusArea.slice(1)
+        : item.description?.includes("grammar")
+        ? "Grammar"
+        : item.description?.includes("pronunciation")
+        ? "Pronunciation"
+        : "Vocabulary",
+      questionData: item,
+      difficultyCategory: item.difficultyCategory,
+    };
+
+    return level;
+  });
+
+  console.log(
+    `Converted ${allLevels.length} levels for ${gameMode} in proper order`
+  );
   return allLevels;
 };
 
 const LevelCard = React.memo(({ level, onSelect, gradientColors }) => {
   // Pull out needed props
-  const { id, number, title, difficulty, status, focusArea } = level;
+  const { levelString, title, difficulty, status, focusArea } = level;
 
   // Determine number of stars based on difficulty
   const getStarCount = () => {
@@ -138,7 +154,9 @@ const LevelCard = React.memo(({ level, onSelect, gradientColors }) => {
         {/* Card header with level number and lock status */}
         <View style={styles.levelHeader}>
           <View style={styles.levelNumberContainer}>
-            <Text style={styles.levelNumber}>{number}</Text>
+            <Text style={styles.levelNumber}>
+              {levelString.replace(/^Level\s+/, "")}
+            </Text>
           </View>
           <View style={styles.specialIconContainer}>
             {status === "locked" ? (

@@ -143,14 +143,18 @@ const FillInTheBlank: React.FC<FillInTheBlankProps> = ({
           {/* Level Title */}
           <View style={gameSharedStyles.levelTitleContainer}>
             <Text style={gameSharedStyles.levelTitleText}>
-              Level {levelId} - {currentExercise?.title || "Fill in the Blank"}
+              {currentExercise?.level} -{" "}
+              {currentExercise?.title || "Fill in the Blank"}
             </Text>
           </View>
 
           {gameStatus === "playing" ? (
             <ScrollView
               showsVerticalScrollIndicator={false}
-              contentContainerStyle={[styles.contentContainer, { flexGrow: 1 }]}
+              contentContainerStyle={[
+                gameSharedStyles.contentContainer,
+                { flexGrow: 1 },
+              ]}
               keyboardShouldPersistTaps="handled"
               keyboardDismissMode="on-drag"
             >

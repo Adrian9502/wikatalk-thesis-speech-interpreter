@@ -214,7 +214,9 @@ const GameInfoModal: React.FC<GameInfoModalProps> = React.memo(
                 style={styles.levelHeader}
               >
                 <View style={styles.levelNumberContainer}>
-                  <Text style={styles.levelNumber}>Level {levelData.id}</Text>
+                  <Text style={styles.levelNumber}>
+                    {levelData.level || `Level ${levelData.id}`}
+                  </Text>
                 </View>
                 <Text style={styles.levelTitle}>{levelData.title}</Text>
               </Animatable.View>

@@ -598,9 +598,10 @@ const useQuizStore = create<QuizState>((set, get) => ({
       try {
         console.log("Initializing identification with levelData:", levelData);
 
-        // Create sentence object
+        // Create sentence object with level field
         const sentence = {
           id: levelData?.id || 0,
+          level: levelData?.level || `Level ${levelId}`, // Ensure level is set
           sentence: levelData?.sentence || levelData?.question || "",
           answer: levelData?.answer || levelData?.targetWord || "",
           translation: levelData?.translation || "",
@@ -700,16 +701,17 @@ const useQuizStore = create<QuizState>((set, get) => ({
       try {
         console.log("Initializing fillBlanks with levelData:", levelData);
 
-        // Create exercise object
+        // Create exercise object with level field
         const exercise = {
           id: levelData?.id || 0,
+          level: levelData?.level || `Level ${levelId}`, // Ensure level is set
           sentence: String(levelData?.sentence || levelData?.question || ""),
-          answer: String(levelData?.answer || levelData?.targetWord || ""), // Use answer with targetWord fallback
+          answer: String(levelData?.answer || levelData?.targetWord || ""),
           translation: String(levelData?.translation || ""),
           hint: String(levelData?.hint || ""),
           title: String(levelData?.title || `Level ${levelId}`),
           dialect: String(levelData?.dialect || ""),
-          focusArea: String(levelData?.focusArea || "vocabulary"), // Add focusArea
+          focusArea: String(levelData?.focusArea || "vocabulary"),
         };
 
         console.log("Created fillBlanks exercise:", exercise);
@@ -748,10 +750,11 @@ const useQuizStore = create<QuizState>((set, get) => ({
       try {
         console.log("Initializing multipleChoice with levelData:", levelData);
 
-        // Ensure focusArea is included
+        // Ensure focusArea and level are included
         const questionWithFocusArea = {
           ...levelData,
           focusArea: levelData.focusArea || "vocabulary",
+          level: levelData.level || `Level ${levelId}`, // Ensure level is properly set
         };
 
         if (
@@ -992,7 +995,7 @@ const useQuizStore = create<QuizState>((set, get) => ({
         },
       }));
 
-      // Move to completed state with proper structure - INCREASED DELAY
+      // Move to completed state with proper structure - FIXED!
       setTimeout(() => {
         set((state) => ({
           gameState: {
@@ -1000,10 +1003,9 @@ const useQuizStore = create<QuizState>((set, get) => ({
             gameStatus: "completed",
           },
         }));
-      }, 3000); // Increased from 2000 to 3000
+      }, 3000);
     } else {
       if (newAttemptsLeft <= 0) {
-        // No attempts left - move to completed state
         setTimeout(() => {
           set((state) => ({
             gameState: {
@@ -1013,7 +1015,7 @@ const useQuizStore = create<QuizState>((set, get) => ({
           }));
         }, 2500);
       } else {
-        // Still have attempts - hide feedback after delay to allow retry
+        // Still have attempts - hide feedback after delay to allow retry - FIXED!
         setTimeout(() => {
           set((state) => ({
             fillInTheBlankState: {
@@ -1022,6 +1024,7 @@ const useQuizStore = create<QuizState>((set, get) => ({
               userAnswer: "", // Clear the input for retry
             },
             gameState: {
+              // FIXED: was incorrectly "gameStatus"
               ...state.gameState,
               timerRunning: true, // Resume timer for next attempt
             },

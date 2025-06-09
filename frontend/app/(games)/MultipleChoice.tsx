@@ -114,8 +114,8 @@ const MultipleChoice: React.FC<MultipleChoiceProps> = ({
         {/* Level Title - outside game status condition */}
         <View style={gameSharedStyles.levelTitleContainer}>
           <Text style={gameSharedStyles.levelTitleText}>
-            Level {levelId} -{" "}
-            {currentQuestion?.title || "- Multiple Choice Quiz"}
+            {currentQuestion?.level} -{" "}
+            {currentQuestion?.title || "Multiple Choice Quiz"}
           </Text>
         </View>
 
