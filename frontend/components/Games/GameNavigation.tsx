@@ -80,9 +80,7 @@ const GameNavigation: React.FC<GameNavigationProps> = ({
           onPress={handleNextLevel}
           activeOpacity={0.8}
         >
-          <Text style={gameSharedStyles.navButtonText}>
-            Next Level (Level {numericLevelId + 1})
-          </Text>
+          <Text style={gameSharedStyles.navButtonText}>Next Level</Text>
           <ArrowRight width={16} height={16} color={BASE_COLORS.white} />
         </TouchableOpacity>
 

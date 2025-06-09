@@ -995,27 +995,30 @@ const useQuizStore = create<QuizState>((set, get) => ({
         },
       }));
 
-      // Move to completed state with proper structure - FIXED!
+      // Move to completed state with proper structure
       setTimeout(() => {
         set((state) => ({
           gameState: {
+            // Fixed: using gameState instead of gameStatus
             ...state.gameState,
             gameStatus: "completed",
           },
         }));
-      }, 3000);
+      }, 2000);
     } else {
       if (newAttemptsLeft <= 0) {
+        // No attempts left - move to completed state
         setTimeout(() => {
           set((state) => ({
             gameState: {
+              // Fixed: using gameState instead of gameStatus
               ...state.gameState,
               gameStatus: "completed",
             },
           }));
-        }, 2500);
+        }, 2000);
       } else {
-        // Still have attempts - hide feedback after delay to allow retry - FIXED!
+        // Still have attempts - hide feedback after delay to allow retry
         setTimeout(() => {
           set((state) => ({
             fillInTheBlankState: {
@@ -1024,12 +1027,12 @@ const useQuizStore = create<QuizState>((set, get) => ({
               userAnswer: "", // Clear the input for retry
             },
             gameState: {
-              // FIXED: was incorrectly "gameStatus"
+              // Fixed: using gameState instead of gameStatus
               ...state.gameState,
               timerRunning: true, // Resume timer for next attempt
             },
           }));
-        }, 2000);
+        }, 1500);
       }
     }
   },

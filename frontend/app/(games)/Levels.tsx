@@ -218,7 +218,6 @@ const LevelSelection = () => {
   // Modal state variables
   const [selectedLevel, setSelectedLevel] = useState(null);
   const [showModal, setShowModal] = useState(false);
-  const [isStartingGame, setIsStartingGame] = useState(false);
   const [showLevels, setShowLevels] = useState(false);
 
   // Fetch level data when component mounts
@@ -227,7 +226,8 @@ const LevelSelection = () => {
       if (gameMode) {
         try {
           // Remove cache clearing for now
-          // Uncomment this line if you want to clear cache before fetching
+          // Uncomment line below if you want to clear cache before fetching
+
           // await clearCache();
 
           await fetchQuestionsByMode(gameMode);
@@ -483,7 +483,6 @@ const LevelSelection = () => {
             onStart={handleStartGame}
             levelData={selectedLevel.questionData}
             gameMode={gameMode as string}
-            isLoading={isStartingGame}
             difficulty={selectedLevel.difficulty}
           />
         )}

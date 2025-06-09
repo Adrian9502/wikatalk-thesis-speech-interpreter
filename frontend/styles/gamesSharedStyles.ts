@@ -284,11 +284,13 @@ export const gameSharedStyles = StyleSheet.create({
   optionCard: {
     backgroundColor: "rgba(255, 255, 255, 0.15)",
     padding: 16,
+    flex: 1,
     borderRadius: 16,
     position: "relative",
     overflow: "hidden",
     borderWidth: 1,
     borderColor: "rgba(255, 255, 255, 0.1)",
+    minHeight: 60,
   },
   optionContent: {
     flexDirection: "row",
@@ -315,6 +317,7 @@ export const gameSharedStyles = StyleSheet.create({
     color: BASE_COLORS.white,
     flex: 1,
     lineHeight: 22,
+    flexWrap: "wrap", // Ensure text wraps
   },
   correctOption: {
     backgroundColor: "rgba(34, 197, 94, 0.2)",
