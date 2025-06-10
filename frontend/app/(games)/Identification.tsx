@@ -262,10 +262,6 @@ const Identification: React.FC<IdentificationProps> = ({
           gameMode="identification"
           gameTitle="Word Identification"
           onRestart={handleRestart}
-          successTitle="Correct!"
-          failTitle="Try Again!"
-          completedMessage="You identified the correct word."
-          failedMessage="You didn't identify the correct word. Keep practicing!"
         />
       )}
     </GameContainer>

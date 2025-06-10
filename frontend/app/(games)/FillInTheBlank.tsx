@@ -238,7 +238,7 @@ const FillInTheBlank: React.FC<FillInTheBlankProps> = ({
             )}
           </View>
           <Text style={styles.feedbackText}>
-            {isCorrect ? "Correct!" : "Incorrect. Try again!"}
+            {isCorrect ? "Level Completed!" : "Incorrect. Try again!"}
           </Text>
         </View>
       )}

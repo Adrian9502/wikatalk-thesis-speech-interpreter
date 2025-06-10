@@ -26,6 +26,7 @@ import useQuizStore from "@/store/games/useQuizStore";
 import DotsLoader from "@/components/DotLoader";
 import { LevelData, QuizQuestions } from "@/types/gameTypes";
 import { renderFocusIcon } from "@/utils/games/renderFocusIcon";
+import { getStarCount, formatDifficulty } from "@/utils/games/difficultyUtils";
 
 // Update convertQuizToLevels to handle type safety
 const convertQuizToLevels = (
@@ -139,21 +140,7 @@ const LevelCard = React.memo(
       focusArea = "Vocabulary",
     } = level || {};
 
-    // Determine number of stars based on difficulty
-    const getStarCount = () => {
-      if (typeof difficulty !== "string") return 1;
-
-      switch (difficulty) {
-        case "Hard":
-          return 3;
-        case "Medium":
-          return 2;
-        default:
-          return 1;
-      }
-    };
-
-    const starCount = getStarCount();
+    const starCount = getStarCount(difficulty);
 
     return (
       <TouchableOpacity
@@ -217,7 +204,9 @@ const LevelCard = React.memo(
                     }
                   />
                 ))}
-              <Text style={styles.difficultyText}>{difficulty}</Text>
+              <Text style={styles.difficultyText}>
+                {formatDifficulty(difficulty)}
+              </Text>
             </View>
           </View>
         </LinearGradient>
@@ -536,11 +525,7 @@ const LevelSelection = () => {
               typeof gameMode === "string" ? gameMode : String(gameMode)
             }
             isLoading={isLoading}
-            difficulty={
-              typeof selectedLevel.difficultyCategory === "string"
-                ? selectedLevel.difficultyCategory
-                : "easy"
-            }
+            difficulty={selectedLevel.difficultyCategory}
           />
         )}
       </SafeAreaView>

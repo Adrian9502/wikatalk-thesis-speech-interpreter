@@ -16,6 +16,7 @@ import {
   getFocusAreaText,
   getGameModeName,
 } from "@/utils/games/renderFocusIcon";
+import { formatDifficulty, getStarCount } from "@/utils/games/difficultyUtils";
 
 type DifficultyLevel = keyof typeof difficultyColors;
 
@@ -39,6 +40,9 @@ const GameInfoModal: React.FC<GameInfoModalProps> = React.memo(
     isLoading = false,
     difficulty = "Easy",
   }) => {
+    // Get starCount using the utility function
+    const starCount = getStarCount(difficulty);
+
     // Simplified state management - remove the internal visible state
     const [hasBeenStarted, setHasBeenStarted] = useState(false);
 
@@ -61,20 +65,6 @@ const GameInfoModal: React.FC<GameInfoModalProps> = React.memo(
       }
       return ["#2563EB", "#1E40AF"] as const;
     };
-
-    // Determine number of stars based on difficulty
-    const getStarCount = () => {
-      switch (difficulty) {
-        case "Hard":
-          return 3;
-        case "Medium":
-          return 2;
-        default:
-          return 1;
-      }
-    };
-
-    const starCount = getStarCount();
 
     // Enhanced start button handler
     const handleStart = useCallback(() => {
@@ -164,7 +154,9 @@ const GameInfoModal: React.FC<GameInfoModalProps> = React.memo(
                         />
                       ))}
                   </View>
-                  <Text style={styles.difficultyText}>{difficulty}</Text>
+                  <Text style={styles.difficultyText}>
+                    {formatDifficulty(difficulty)}
+                  </Text>
                 </View>
 
                 <View style={styles.focusAreaBadge}>

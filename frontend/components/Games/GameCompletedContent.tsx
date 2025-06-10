@@ -22,8 +22,6 @@ interface GameCompletedContentProps {
   gameMode: GameMode | string;
   gameTitle: string;
   onRestart: () => void;
-  completedMessage?: string;
-  failedMessage?: string;
   successTitle?: string;
   failTitle?: string;
 }
@@ -39,10 +37,6 @@ const GameCompletedContent: React.FC<GameCompletedContentProps> = ({
   gameMode,
   gameTitle,
   onRestart,
-  completedMessage = "Great job! You answered correctly.",
-  failedMessage = "Your answer was incorrect. Keep practicing to improve.",
-  successTitle = "Level Completed!",
-  failTitle = "Try Again!",
 }) => {
   return (
     <ScrollView
@@ -87,10 +81,12 @@ const GameCompletedContent: React.FC<GameCompletedContentProps> = ({
             )}
           </View>
           <Text style={gameSharedStyles.completionTitle}>
-            {score > 0 ? successTitle : failTitle}
+            {score > 0 ? "Level Completed!" : "Try Again!"}
           </Text>
           <Text style={gameSharedStyles.completionMessage}>
-            {score > 0 ? completedMessage : failedMessage}
+            {score > 0
+              ? "Great job! You answered correctly."
+              : "Your answer was incorrect. Keep practicing to improve."}
           </Text>
         </LinearGradient>
       </Animatable.View>
