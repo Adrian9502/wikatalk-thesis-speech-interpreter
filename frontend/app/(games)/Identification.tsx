@@ -63,28 +63,6 @@ const Identification: React.FC<IdentificationProps> = ({
     timerRunning
   );
 
-  // Word styling helper
-  const getWordStyle = (word: any, index: number) => {
-    const baseStyle = [
-      gameSharedStyles.optionCard,
-      {
-        minHeight: 60,
-        position: "relative" as const,
-      },
-    ];
-
-    if (selectedWord !== null && selectedWord === index) {
-      const isCorrect =
-        word.clean?.toLowerCase() === currentSentence?.answer?.toLowerCase();
-
-      return isCorrect
-        ? [...baseStyle, gameSharedStyles.correctOption]
-        : [...baseStyle, gameSharedStyles.incorrectOption];
-    }
-
-    return baseStyle;
-  };
-
   // Calculate selected answer for review
   const selectedAnswerText =
     selectedWord !== null && words[selectedWord]

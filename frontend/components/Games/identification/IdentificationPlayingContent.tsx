@@ -7,6 +7,7 @@ import { BASE_COLORS } from "@/constant/colors";
 import { getDifficultyColors } from "@/utils/gameUtils";
 import gameSharedStyles from "@/styles/gamesSharedStyles";
 import styles from "@/styles/games/identification.styles";
+import { getWordStyle } from "@/utils/games/optionStyles";
 
 interface IdentificationPlayingContentProps {
   difficulty: string;
@@ -31,28 +32,6 @@ const IdentificationPlayingContent: React.FC<
   toggleTranslation,
   handleWordSelect,
 }) => {
-  // Word styling helper
-  const getWordStyle = (word: any, index: number) => {
-    const baseStyle = [
-      gameSharedStyles.optionCard,
-      {
-        minHeight: 60,
-        position: "relative" as const,
-      },
-    ];
-
-    if (selectedWord !== null && selectedWord === index) {
-      const isCorrect =
-        word.clean?.toLowerCase() === currentSentence?.answer?.toLowerCase();
-
-      return isCorrect
-        ? [...baseStyle, gameSharedStyles.correctOption]
-        : [...baseStyle, gameSharedStyles.incorrectOption];
-    }
-
-    return baseStyle;
-  };
-
   return (
     <>
       {/* Question Card */}
@@ -94,7 +73,12 @@ const IdentificationPlayingContent: React.FC<
                 style={styles.optionWrapper}
               >
                 <TouchableOpacity
-                  style={getWordStyle(word, index)}
+                  style={getWordStyle({
+                    isSelected: selectedWord !== null && selectedWord === index,
+                    isCorrect:
+                      word.clean?.toLowerCase() ===
+                      currentSentence?.answer?.toLowerCase(),
+                  })}
                   onPress={() => handleWordSelect(index)}
                   disabled={selectedWord !== null}
                   activeOpacity={0.9}

@@ -7,6 +7,7 @@ import { BASE_COLORS } from "@/constant/colors";
 import { getDifficultyColors } from "@/utils/gameUtils";
 import gameSharedStyles from "@/styles/gamesSharedStyles";
 import styles from "@/styles/games/multipleChoice.styles";
+import { getOptionStyle } from "@/utils/games/optionStyles";
 
 // Define an interface for the option object
 interface Option {
@@ -40,19 +41,6 @@ const MultipleChoicePlayingContent: React.FC<
   handleOptionSelect,
   isStarted = true,
 }) => {
-  // Option styling helper function
-  const getOptionStyle = (id: string, isCorrect: boolean) => {
-    const baseStyle = gameSharedStyles.optionCard;
-
-    if (selectedOption === id) {
-      // This option was selected
-      return isCorrect
-        ? [baseStyle, gameSharedStyles.correctOption]
-        : [baseStyle, gameSharedStyles.incorrectOption];
-    }
-    return baseStyle;
-  };
-
   return (
     <>
       {/* Question Card */}
@@ -93,7 +81,10 @@ const MultipleChoicePlayingContent: React.FC<
               delay={300 + index * 100}
             >
               <TouchableOpacity
-                style={getOptionStyle(option.id, option.isCorrect)}
+                style={getOptionStyle({
+                  isSelected: selectedOption === option.id,
+                  isCorrect: option.isCorrect,
+                })}
                 onPress={() => handleOptionSelect(option.id)}
                 disabled={selectedOption !== null || !isStarted}
                 activeOpacity={0.9}
