@@ -54,7 +54,7 @@ const Games = () => {
 
   const handleGamePress = (gameId: string, gameTitle: string) => {
     router.push({
-      pathname: "/(games)/Levels",
+      pathname: "/(games)/LevelSelection",
       params: {
         gameMode: gameId,
         gameTitle: gameTitle,

@@ -27,7 +27,7 @@ const GameNavigation: React.FC<GameNavigationProps> = ({
 
   const handleBackToLevels = () => {
     router.replace({
-      pathname: "/(games)/Levels",
+      pathname: "/(games)/LevelSelection",
       params: {
         gameMode,
         gameTitle,
@@ -62,7 +62,7 @@ const GameNavigation: React.FC<GameNavigationProps> = ({
     newGameTitle: string
   ) => {
     router.replace({
-      pathname: "/(games)/Levels",
+      pathname: "/(games)/LevelSelection",
       params: {
         gameMode: newGameMode,
         gameTitle: newGameTitle,
