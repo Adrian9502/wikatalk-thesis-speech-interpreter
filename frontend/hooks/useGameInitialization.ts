@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 import { setupBackButtonHandler } from "@/utils/gameUtils";
-import { GameMode, GameStatus } from "@/types/gameTypes";
+import { GameStatus } from "@/types/gameTypes";
 
 export function useGameInitialization(
   levelData: any,

@@ -1,5 +1,5 @@
 import React from "react";
-import { View, StatusBar, ScrollView, Text, StyleSheet } from "react-native";
+import { View, StatusBar, Text } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Header } from "@/components/Header";
 import DecorativeCircles from "@/components/games/DecorativeCircles";

@@ -1,13 +1,8 @@
 import React from "react";
 import { View, Text, TouchableOpacity } from "react-native";
-import { Check, X } from "react-native-feather";
-import { LinearGradient } from "expo-linear-gradient";
-import * as Animatable from "react-native-animatable";
 import { BASE_COLORS } from "@/constant/colors";
 import useQuizStore from "@/store/games/useQuizStore";
-import { getDifficultyColors } from "@/utils/gameUtils";
 import gameSharedStyles from "@/styles/gamesSharedStyles";
-import styles from "@/styles/games/identification.styles";
 import GameContainer from "@/components/games/GameContainer";
 import GamePlayingContent from "@/components/games/GamePlayingContent";
 import GameCompletedContent from "@/components/games/GameCompletedContent";
