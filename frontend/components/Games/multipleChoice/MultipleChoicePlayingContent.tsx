@@ -122,4 +122,4 @@ const MultipleChoicePlayingContent: React.FC<
   );
 };
 
-export default MultipleChoicePlayingContent;
+export default React.memo(MultipleChoicePlayingContent);

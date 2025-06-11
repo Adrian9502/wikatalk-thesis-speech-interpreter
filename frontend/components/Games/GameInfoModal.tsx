@@ -83,18 +83,18 @@ const GameInfoModal: React.FC<GameInfoModalProps> = React.memo(
       <Modal
         visible={visible}
         transparent
-        animationType="fade" // Change to "fade" for faster appearance
+        animationType="fade"
         statusBarTranslucent={true}
         onRequestClose={onClose}
       >
         <Animatable.View
           animation="fadeIn"
-          duration={150} // Reduce animation duration
+          duration={150}
           style={styles.overlay}
         >
           <Animatable.View
             animation="zoomIn"
-            duration={200} // Reduce animation duration
+            duration={200}
             style={styles.modalContainer}
           >
             <LinearGradient

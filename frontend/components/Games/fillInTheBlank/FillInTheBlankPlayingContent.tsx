@@ -183,4 +183,4 @@ const FillInTheBlankPlayingContent: React.FC<RenderPlayingContentProps> = ({
   );
 };
 
-export default FillInTheBlankPlayingContent;
+export default React.memo(FillInTheBlankPlayingContent);

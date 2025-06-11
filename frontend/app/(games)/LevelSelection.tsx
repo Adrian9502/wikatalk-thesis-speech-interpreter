@@ -114,6 +114,30 @@ const LevelSelection = () => {
     [difficultyColors, handleLevelSelect]
   );
 
+  // Preload game content for faster response
+  const preloadGameModal = useMemo(() => {
+    if (levels.length > 0) {
+      // Create an invisible prerendered modal
+      return (
+        <View style={{ position: "absolute", opacity: 0, width: 1, height: 1 }}>
+          <GameInfoModal
+            visible={false}
+            onClose={() => {}}
+            onStart={() => {}}
+            levelData={levels[0]?.questionData || {}}
+            gameMode={
+              typeof gameMode === "string" ? gameMode : String(gameMode)
+            }
+            isLoading={false}
+            difficulty="easy"
+          />
+        </View>
+      );
+    }
+
+    return null;
+  }, [levels.length > 0]);
+
   // Update FlatList state and key extractor
   const keyExtractor = useCallback((item: LevelData) => item.id.toString(), []);
 
@@ -161,16 +185,18 @@ const LevelSelection = () => {
           renderItem={renderItem}
           numColumns={2}
           columnWrapperStyle={styles.columnWrapper}
-          contentContainerStyle={[styles.gridScrollContent]}
-          showsVerticalScrollIndicator={true}
-          // Optimizations
-          windowSize={21}
+          contentContainerStyle={[
+            styles.gridScrollContent,
+            { paddingBottom: 5 },
+          ]}
+          showsVerticalScrollIndicator={false}
+          windowSize={7}
           maxToRenderPerBatch={5}
-          removeClippedSubviews={false}
+          removeClippedSubviews={true}
           maintainVisibleContentPosition={{ minIndexForVisible: 0 }}
-          // These help with immediate response
-          initialNumToRender={10}
-          updateCellsBatchingPeriod={50}
+          initialNumToRender={8}
+          updateCellsBatchingPeriod={16} // For 60fps updates
+          shouldItemUpdate={(prev, next) => prev.item.id !== next.item.id}
         />
       );
     }
@@ -225,6 +251,7 @@ const LevelSelection = () => {
           isLoading={isLoading}
           difficulty={selectedLevel?.difficultyCategory || "easy"}
         />
+        {preloadGameModal}
       </SafeAreaView>
     </View>
   );

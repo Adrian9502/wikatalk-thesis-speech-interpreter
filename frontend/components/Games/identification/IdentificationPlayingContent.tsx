@@ -144,4 +144,4 @@ const IdentificationPlayingContent: React.FC<
   );
 };
 
-export default IdentificationPlayingContent;
+export default React.memo(IdentificationPlayingContent);

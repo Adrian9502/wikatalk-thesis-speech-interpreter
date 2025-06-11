@@ -4,6 +4,7 @@ import * as Animatable from "react-native-animatable";
 import { Check, X } from "react-native-feather";
 import { BASE_COLORS } from "@/constant/colors";
 import gameSharedStyles from "@/styles/gamesSharedStyles";
+import { formatTime } from "@/utils/gameUtils";
 
 interface AnswerReviewProps {
   question: string;
@@ -16,15 +17,6 @@ interface AnswerReviewProps {
   questionLabel?: string;
   answerLabel?: string;
 }
-
-// Format time helper function
-const formatTime = (seconds: number): string => {
-  const minutes = Math.floor(seconds / 60);
-  const remainingSeconds = seconds % 60;
-  return `${minutes.toString().padStart(2, "0")}:${remainingSeconds
-    .toString()
-    .padStart(2, "0")}`;
-};
 
 const AnswerReview: React.FC<AnswerReviewProps> = ({
   question,

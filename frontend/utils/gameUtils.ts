@@ -49,12 +49,19 @@ export const handleCustomBackPress = (
 };
 
 /**
- * Format seconds to mm:ss format
+ * Format seconds to mm:ss.xx format (with exactly 2 decimal places)
  */
 export const formatTime = (seconds: number): string => {
   const mins = Math.floor(seconds / 60);
-  const secs = seconds % 60;
-  return `${mins}:${secs.toString().padStart(2, "0")}`;
+  const secs = Math.floor(seconds % 60);
+
+  // Format to exactly 2 decimal places, handling JavaScript floating point precision
+  const centiseconds = Math.round((seconds % 1) * 100);
+
+  // Ensure two-digit formatting for seconds and centiseconds
+  return `${mins}:${secs.toString().padStart(2, "0")}.${centiseconds
+    .toString()
+    .padStart(2, "0")}`;
 };
 
 /**

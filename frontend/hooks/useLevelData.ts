@@ -67,10 +67,10 @@ export const useLevelData = (gameMode: string | string[] | undefined) => {
   // Level selection handler
   const handleLevelSelect = useCallback((level: LevelData) => {
     if (level.status === "locked") return;
-
-    // Use immediate state updates instead of requestAnimationFrame
-    setSelectedLevel(level);
-    setShowModal(true);
+    requestAnimationFrame(() => {
+      setSelectedLevel(level);
+      setShowModal(true);
+    });
   }, []);
 
   const handleCloseModal = useCallback(() => {

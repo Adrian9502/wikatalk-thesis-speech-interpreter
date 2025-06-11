@@ -14,39 +14,41 @@ interface GamePlayingContentProps {
   gameStatus?: "idle" | "ready" | "playing" | "completed";
 }
 
-const GamePlayingContent: React.FC<GamePlayingContentProps> = ({
-  timerRunning,
-  difficulty,
-  focusArea = "Vocabulary",
-  children,
-  isStarted = true,
-}) => {
-  return (
-    <ScrollView
-      showsVerticalScrollIndicator={false}
-      contentContainerStyle={gameSharedStyles.contentContainer}
-      keyboardShouldPersistTaps="handled"
-    >
-      {/* Stats Container */}
-      <Animatable.View
-        animation="fadeIn"
-        duration={600}
-        delay={100}
-        style={gameSharedStyles.statsContainer}
+const GamePlayingContent: React.FC<GamePlayingContentProps> = React.memo(
+  ({
+    timerRunning,
+    difficulty,
+    focusArea = "Vocabulary",
+    children,
+    isStarted = true,
+  }) => {
+    return (
+      <ScrollView
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={gameSharedStyles.contentContainer}
+        keyboardShouldPersistTaps="handled"
       >
-        {/* Timer on left */}
-        {isStarted && <Timer isRunning={timerRunning} />}
+        {/* Stats Container */}
+        <Animatable.View
+          animation="fadeIn"
+          duration={600}
+          delay={100}
+          style={gameSharedStyles.statsContainer}
+        >
+          {/* Timer on left */}
+          {isStarted && <Timer isRunning={timerRunning} />}
 
-        {/* Badges on right */}
-        <View style={gameSharedStyles.badgesContainer}>
-          <DifficultyBadge difficulty={difficulty} />
-          <FocusAreaBadge focusArea={focusArea} />
-        </View>
-      </Animatable.View>
+          {/* Badges on right */}
+          <View style={gameSharedStyles.badgesContainer}>
+            <DifficultyBadge difficulty={difficulty} />
+            <FocusAreaBadge focusArea={focusArea} />
+          </View>
+        </Animatable.View>
 
-      {children}
-    </ScrollView>
-  );
-};
+        {children}
+      </ScrollView>
+    );
+  }
+);
 
 export default GamePlayingContent;

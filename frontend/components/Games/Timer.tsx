@@ -23,39 +23,39 @@ const Timer: React.FC<TimerProps> = ({ isRunning }) => {
     updateTimeRef.current = updateTimeElapsed;
   }, []);
 
+  // Use requestAnimationFrame instead of setInterval for smoother updates
   useEffect(() => {
-    let interval: NodeJS.Timeout;
+    let animFrameId: number;
 
     if (isRunning) {
-      interval = setInterval(() => {
-        // Update the ref value
-        timeRef.current += 1;
+      const startTime = Date.now();
 
-        // Format time for display
-        const minutes = Math.floor(timeRef.current / 60);
-        const remainingSeconds = timeRef.current % 60;
-        const formattedTime = `${minutes
+      const updateTimer = () => {
+        const elapsed = (Date.now() - startTime) / 1000;
+        timeRef.current = timeElapsed + elapsed;
+
+        // Handle minutes properly, even if they exceed 60
+        const totalMinutes = Math.floor(timeRef.current / 60);
+        const seconds = Math.floor(timeRef.current % 60);
+        const centiseconds = Math.round((timeRef.current % 1) * 100);
+
+        const formattedTime = `${totalMinutes}:${seconds
           .toString()
-          .padStart(2, "0")}:${remainingSeconds.toString().padStart(2, "0")}`;
+          .padStart(2, "0")}.${centiseconds.toString().padStart(2, "0")}`;
 
-        // Update display
         setDisplayTime(formattedTime);
-
-        // Only update store every 3 seconds to reduce renders
-        if (timeRef.current % 3 === 0) {
-          updateTimeRef.current(timeRef.current);
-        }
-      }, 1000);
+        animFrameId = requestAnimationFrame(updateTimer);
+      };
+      animFrameId = requestAnimationFrame(updateTimer);
     }
 
     return () => {
-      if (interval) {
-        clearInterval(interval);
-        // Ensure final time is saved to store when unmounting
+      if (animFrameId) {
+        cancelAnimationFrame(animFrameId);
         updateTimeRef.current(timeRef.current);
       }
     };
-  }, [isRunning]);
+  }, [isRunning, timeElapsed]);
 
   // Update display when timeElapsed changes externally
   useEffect(() => {

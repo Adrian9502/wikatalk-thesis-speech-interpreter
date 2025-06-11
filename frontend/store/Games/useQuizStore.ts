@@ -782,20 +782,16 @@ const useQuizStore = create<QuizState>((set, get) => ({
 
   // Start game
   startGame: () => {
-    console.log("Starting game...");
-    console.log("Before update - Game state:", get().gameState);
-
-    // Direct state update
+    // Set game status to playing immediately with one update
     set((state) => ({
       gameState: {
         ...state.gameState,
         gameStatus: "playing",
         timerRunning: true,
+        // Initialize with a small value to prevent 0:00 times
+        timeElapsed: 0.1,
       },
     }));
-
-    // Immediately log the new state
-    console.log("After update - Game state:", get().gameState);
   },
 
   // Restart game
@@ -854,41 +850,24 @@ const useQuizStore = create<QuizState>((set, get) => ({
     // If already selected, don't do anything
     if (selectedOption) return;
 
-    console.log("Processing option selection:", optionId);
+    // Find the selected option ahead of time
+    const selectedOptionObj = currentQuestion?.options.find(
+      (option) => option.id === optionId
+    );
+    const isCorrect = !!selectedOptionObj?.isCorrect;
 
-    // First update the selected option and stop the timer
+    // Do a single batch update instead of multiple updates
     set({
       gameState: {
         ...gameState,
         timerRunning: false,
+        score: isCorrect ? 1 : 0, // Set score immediately
       },
       multipleChoiceState: {
         ...multipleChoiceState,
         selectedOption: optionId,
       },
     });
-
-    // Find the selected option
-    const selectedOptionObj = currentQuestion?.options.find(
-      (option) => option.id === optionId
-    );
-
-    // Update the score in a separate update to avoid race conditions
-    if (selectedOptionObj?.isCorrect) {
-      set((state) => ({
-        gameState: {
-          ...state.gameState,
-          score: 1, // Set to 1 for correct
-        },
-      }));
-    } else {
-      set((state) => ({
-        gameState: {
-          ...state.gameState,
-          score: 0, // Set to 0 for incorrect
-        },
-      }));
-    }
 
     // Move to completed state after delay
     setTimeout(() => {
@@ -898,7 +877,7 @@ const useQuizStore = create<QuizState>((set, get) => ({
           gameStatus: "completed",
         },
       }));
-    }, 1500);
+    }, 1000); // Reduced from 1500ms
   },
 
   // FILL IN THE BLANK ACTIONS
