@@ -1,10 +1,11 @@
 import React from "react";
-import { ScrollView, View, Text } from "react-native";
+import { ScrollView, View, Text, StyleSheet } from "react-native";
 import * as Animatable from "react-native-animatable";
 import { LinearGradient } from "expo-linear-gradient";
 import { Check, X } from "react-native-feather";
 import { BASE_COLORS } from "@/constant/colors";
 import DifficultyBadge from "@/components/games/DifficultyBadge";
+import FocusAreaBadge from "@/components/games/FocusAreaBadge";
 import AnswerReview from "@/components/games/AnswerReview";
 import GameNavigation from "@/components/games/GameNavigation";
 import { formatTime } from "@/utils/gameUtils";
@@ -22,6 +23,7 @@ interface GameCompletedContentProps {
   gameMode: GameMode | string;
   gameTitle: string;
   onRestart: () => void;
+  focusArea?: string; // Add this prop
   successTitle?: string;
   failTitle?: string;
 }
@@ -37,6 +39,7 @@ const GameCompletedContent: React.FC<GameCompletedContentProps> = ({
   gameMode,
   gameTitle,
   onRestart,
+  focusArea = "Vocabulary",
 }) => {
   return (
     <ScrollView
@@ -55,7 +58,12 @@ const GameCompletedContent: React.FC<GameCompletedContentProps> = ({
             Time: {formatTime(timeElapsed)}
           </Text>
         </View>
-        <DifficultyBadge difficulty={difficulty} />
+
+        {/* Add badges container */}
+        <View style={gameSharedStyles.badgesContainer}>
+          <DifficultyBadge difficulty={difficulty} />
+          <FocusAreaBadge focusArea={focusArea} />
+        </View>
       </Animatable.View>
 
       {/* Completion Message with conditional color */}

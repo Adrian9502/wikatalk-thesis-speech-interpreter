@@ -14,19 +14,19 @@ const DifficultyBadge: React.FC<DifficultyBadgeProps> = ({
     <View style={styles.difficultyBadge}>
       {difficulty === "medium" && (
         <>
-          <Star width={14} height={14} color={BASE_COLORS.white} />
-          <Star width={14} height={14} color={BASE_COLORS.white} />
+          <Star width={13} height={13} color={BASE_COLORS.white} />
+          <Star width={13} height={13} color={BASE_COLORS.white} />
         </>
       )}
       {difficulty === "hard" && (
         <>
-          <Star width={14} height={14} color={BASE_COLORS.white} />
-          <Star width={14} height={14} color={BASE_COLORS.white} />
-          <Star width={14} height={14} color={BASE_COLORS.white} />
+          <Star width={13} height={13} color={BASE_COLORS.white} />
+          <Star width={13} height={13} color={BASE_COLORS.white} />
+          <Star width={13} height={13} color={BASE_COLORS.white} />
         </>
       )}
       {(difficulty === "easy" || !difficulty) && (
-        <Star width={14} height={14} color={BASE_COLORS.white} />
+        <Star width={13} height={13} color={BASE_COLORS.white} />
       )}
       <Text style={styles.difficultyText}>
         {difficulty
@@ -41,15 +41,17 @@ const styles = StyleSheet.create({
   difficultyBadge: {
     flexDirection: "row",
     alignItems: "center",
+    justifyContent: "center",
     backgroundColor: "rgba(255, 255, 255, 0.15)",
     paddingHorizontal: 14,
     paddingVertical: 8,
-    borderRadius: 12,
+    borderRadius: 16,
     gap: 6,
   },
   difficultyText: {
-    fontSize: 14,
-    fontFamily: "Poppins-SemiBold",
+    marginTop: 4,
+    fontSize: 12,
+    fontFamily: "Poppins-Medium",
     color: BASE_COLORS.white,
   },
 });

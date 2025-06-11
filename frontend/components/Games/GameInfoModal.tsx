@@ -17,7 +17,6 @@ import {
   getGameModeName,
 } from "@/utils/games/renderFocusIcon";
 import { formatDifficulty, getStarCount } from "@/utils/games/difficultyUtils";
-
 type DifficultyLevel = keyof typeof difficultyColors;
 
 interface GameInfoModalProps {

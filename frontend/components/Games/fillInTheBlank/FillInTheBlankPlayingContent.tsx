@@ -12,8 +12,6 @@ import * as Animatable from "react-native-animatable";
 import { BASE_COLORS } from "@/constant/colors";
 import { getDifficultyColors } from "@/utils/gameUtils";
 import styles from "@/styles/games/fillInTheBlank.styles";
-import Timer from "@/components/games/Timer";
-import DifficultyBadge from "@/components/games/DifficultyBadge";
 import gameSharedStyles from "@/styles/gamesSharedStyles";
 
 interface RenderPlayingContentProps {
@@ -36,7 +34,6 @@ interface RenderPlayingContentProps {
 const FillInTheBlankPlayingContent: React.FC<RenderPlayingContentProps> = ({
   difficulty,
   levelData,
-  timerRunning,
   userAnswer,
   showHint,
   showTranslation,
@@ -62,17 +59,6 @@ const FillInTheBlankPlayingContent: React.FC<RenderPlayingContentProps> = ({
       keyboardShouldPersistTaps="handled"
       keyboardDismissMode="on-drag"
     >
-      {/* Stats Container */}
-      <Animatable.View
-        animation="fadeIn"
-        duration={600}
-        delay={100}
-        style={gameSharedStyles.statsContainer}
-      >
-        <Timer isRunning={timerRunning} />
-        <DifficultyBadge difficulty={difficulty} />
-      </Animatable.View>
-
       {/* Attempts Display */}
       <View style={styles.attemptsContainer}>
         <Text style={styles.attemptsText}>

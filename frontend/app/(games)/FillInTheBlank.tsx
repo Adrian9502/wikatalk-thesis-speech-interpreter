@@ -5,6 +5,7 @@ import GameContainer from "@/components/games/GameContainer";
 import GameCompletedContent from "@/components/games/GameCompletedContent";
 import { useGameInitialization } from "@/hooks/useGameInitialization";
 import FillInTheBlankPlayingContent from "@/components/games/fillInTheBlank/FillInTheBlankPlayingContent";
+import GamePlayingContent from "@/components/games/GamePlayingContent";
 
 interface FillInTheBlankProps {
   levelId: number;
@@ -45,6 +46,9 @@ const FillInTheBlank: React.FC<FillInTheBlankProps> = ({
   // Current exercise
   const currentExercise = exercises[currentExerciseIndex];
   const gameMode = "fillBlanks";
+
+  const focusArea =
+    currentExercise?.focusArea || levelData?.focusArea || "Vocabulary";
 
   // Initialize game
   useGameInitialization(
@@ -89,22 +93,30 @@ const FillInTheBlank: React.FC<FillInTheBlankProps> = ({
         gameStatus={gameStatus}
       >
         {gameStatus === "playing" ? (
-          <FillInTheBlankPlayingContent
-            difficulty={difficulty}
-            levelData={levelData}
+          <GamePlayingContent
             timerRunning={timerRunning}
-            userAnswer={userAnswer}
-            showHint={showHint}
-            showTranslation={showTranslation}
-            showFeedback={showFeedback}
-            isCorrect={isCorrect}
-            attemptsLeft={attemptsLeft}
-            currentExercise={currentExercise}
-            setUserAnswer={setUserAnswer}
-            toggleHint={memoizedToggleHint}
-            toggleTranslation={memoizedToggleTranslation}
-            checkAnswer={checkAnswer}
-          />
+            difficulty={difficulty}
+            focusArea={focusArea}
+            isStarted={isStarted}
+            gameStatus={gameStatus}
+          >
+            <FillInTheBlankPlayingContent
+              difficulty={difficulty}
+              levelData={levelData}
+              timerRunning={timerRunning}
+              userAnswer={userAnswer}
+              showHint={showHint}
+              showTranslation={showTranslation}
+              showFeedback={showFeedback}
+              isCorrect={isCorrect}
+              attemptsLeft={attemptsLeft}
+              currentExercise={currentExercise}
+              setUserAnswer={setUserAnswer}
+              toggleHint={memoizedToggleHint}
+              toggleTranslation={memoizedToggleTranslation}
+              checkAnswer={checkAnswer}
+            />
+          </GamePlayingContent>
         ) : (
           <GameCompletedContent
             score={score}

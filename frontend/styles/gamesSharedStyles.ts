@@ -43,7 +43,10 @@ export const gameSharedStyles = StyleSheet.create({
     borderRadius: 80,
     backgroundColor: `${BASE_COLORS.success}15`,
   },
-
+  badgesContainer: {
+    flexDirection: "row",
+    gap: 8,
+  },
   // Stats container styles
   statsContainer: {
     flexDirection: "row",

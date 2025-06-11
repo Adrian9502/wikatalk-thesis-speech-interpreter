@@ -57,6 +57,8 @@ const Identification: React.FC<IdentificationProps> = ({
     gameStatus,
     timerRunning
   );
+  const focusArea =
+    currentSentence?.focusArea || levelData?.focusArea || "Vocabulary";
 
   // Calculate selected answer for review
   const selectedAnswerText =
@@ -111,7 +113,13 @@ const Identification: React.FC<IdentificationProps> = ({
       gameStatus={gameStatus}
     >
       {gameStatus === "playing" ? (
-        <GamePlayingContent timerRunning={timerRunning} difficulty={difficulty}>
+        <GamePlayingContent
+          timerRunning={timerRunning}
+          difficulty={difficulty}
+          focusArea={focusArea}
+          isStarted={isStarted}
+          gameStatus={gameStatus}
+        >
           <IdentificationPlayingContent
             difficulty={difficulty}
             levelData={levelData}

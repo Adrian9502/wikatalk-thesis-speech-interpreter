@@ -44,6 +44,8 @@ const MultipleChoice: React.FC<MultipleChoiceProps> = ({
     gameStatus,
     timerRunning
   );
+  const focusArea =
+    currentQuestion?.focusArea || levelData?.focusArea || "Vocabulary";
 
   // Calculate correct answer for review
   const selectedAnswerText =
@@ -67,6 +69,8 @@ const MultipleChoice: React.FC<MultipleChoiceProps> = ({
           timerRunning={timerRunning}
           difficulty={difficulty}
           isStarted={isStarted}
+          focusArea={focusArea}
+          gameStatus={gameStatus}
         >
           <MultipleChoicePlayingContent
             difficulty={difficulty}
