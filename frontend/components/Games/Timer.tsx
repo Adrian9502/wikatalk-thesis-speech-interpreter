@@ -82,16 +82,17 @@ const styles = StyleSheet.create({
   timerContainer: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "rgba(0, 0, 0, 0.2)",
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 12,
+    backgroundColor: "rgba(255, 255, 255, 0.15)",
+    paddingHorizontal: 14,
+    paddingVertical: 8,
+    borderRadius: 16,
+    gap: 6,
   },
   timerText: {
     fontSize: 14,
-    fontFamily: "Poppins-Medium",
     color: BASE_COLORS.white,
-    marginLeft: 6,
+    fontFamily: "Poppins-Medium",
+    width: 57,
   },
 });
 
