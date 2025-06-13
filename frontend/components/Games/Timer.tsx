@@ -31,19 +31,29 @@ const Timer: React.FC<TimerProps> = ({ isRunning }) => {
       const startTime = Date.now();
 
       const updateTimer = () => {
-        const elapsed = (Date.now() - startTime) / 1000;
-        timeRef.current = timeElapsed + elapsed;
+        try {
+          const elapsed = (Date.now() - startTime) / 1000;
+          timeRef.current = timeElapsed + elapsed;
 
-        // Handle minutes properly, even if they exceed 60
-        const totalMinutes = Math.floor(timeRef.current / 60);
-        const seconds = Math.floor(timeRef.current % 60);
-        const centiseconds = Math.round((timeRef.current % 1) * 100);
+          // Format with hours:minutes:seconds.centiseconds
+          const hours = Math.floor(timeRef.current / 3600);
+          const minutes = Math.floor((timeRef.current % 3600) / 60);
+          const seconds = Math.floor(timeRef.current % 60);
+          const centiseconds = Math.round((timeRef.current % 1) * 100);
 
-        const formattedTime = `${totalMinutes}:${seconds
-          .toString()
-          .padStart(2, "0")}.${centiseconds.toString().padStart(2, "0")}`;
+          const formattedTime = `${hours}:${minutes
+            .toString()
+            .padStart(2, "0")}:${seconds
+            .toString()
+            .padStart(2, "0")}.${centiseconds.toString().padStart(2, "0")}`;
 
-        setDisplayTime(formattedTime);
+          setDisplayTime(formattedTime);
+        } catch (error) {
+          console.error("Timer formatting error:", error);
+          // Use a fallback format if there's an error
+          setDisplayTime("0:00:00.00");
+        }
+
         animFrameId = requestAnimationFrame(updateTimer);
       };
       animFrameId = requestAnimationFrame(updateTimer);

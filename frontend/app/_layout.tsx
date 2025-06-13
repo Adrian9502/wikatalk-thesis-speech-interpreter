@@ -15,6 +15,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { InteractionManager } from "react-native";
 import { useSplashStore } from "@/store/useSplashStore";
 import { GoogleSignin } from "@react-native-google-signin/google-signin";
+import { initializeToken } from "@/lib/authTokenManager";
 
 // Prevent the splash screen from auto-hiding
 SplashScreen.preventAutoHideAsync();
@@ -67,8 +68,12 @@ const RootLayout = () => {
 
   // Manually check for token as early as possible
   useEffect(() => {
-    const checkToken = async () => {
+    const initializeApp = async () => {
       try {
+        // Initialize token first
+        await initializeToken();
+
+        // Then check token
         const token = await AsyncStorage.getItem("userToken");
         setHasToken(!!token);
         setManuallyCheckedToken(true);
@@ -79,7 +84,7 @@ const RootLayout = () => {
       }
     };
 
-    checkToken();
+    initializeApp();
   }, []);
 
   // Add force timeout to prevent infinite loading

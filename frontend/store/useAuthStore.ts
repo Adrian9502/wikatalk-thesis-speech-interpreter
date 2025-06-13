@@ -9,6 +9,7 @@ import useThemeStore from "./useThemeStore";
 import { setToken } from "@/lib/authTokenManager";
 import { useTranslateStore } from "./useTranslateStore";
 import { GoogleSignin } from "@react-native-google-signin/google-signin";
+import useCoinsStore from "./games/useCoinsStore";
 // API URL from environment
 const API_URL = `${process.env.EXPO_PUBLIC_BACKEND_URL}`;
 
@@ -560,6 +561,8 @@ export const useAuthStore = create<AuthState>()(
 
         try {
           useThemeStore.getState().resetToDefaultTheme();
+          // Reset coins store state
+          useCoinsStore.getState().resetState();
 
           // Sign out from Google first
           try {

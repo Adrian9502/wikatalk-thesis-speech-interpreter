@@ -17,8 +17,10 @@ import { usePronunciationStore } from "@/store/usePronunciationStore";
 import WordOfDayModal from "@/components/games/WordOfDayModal";
 import * as Animatable from "react-native-animatable";
 import { LinearGradient } from "expo-linear-gradient";
-import { GameRoute } from "@/types/gameTypes";
 import gameOptions from "@/utils/games/gameOptions";
+import useCoinsStore from "@/store/games/useCoinsStore";
+import DailyRewardsModal from "@/components/games/rewards/DailyRewardsModal";
+import CoinsDisplay from "@/components/games/rewards/CoinsDisplay";
 
 const Games = () => {
   // Theme store
@@ -35,6 +37,17 @@ const Games = () => {
     fetchPronunciations,
     pronunciationData,
   } = usePronunciationStore();
+
+  // Coins store for daily rewards
+  const {
+    fetchCoinsBalance,
+    isDailyRewardsModalVisible,
+    showDailyRewardsModal,
+    hideDailyRewardsModal,
+    checkDailyReward,
+    isDailyRewardAvailable,
+  } = useCoinsStore();
+
   const [wordOfDayModalVisible, setWordOfDayModalVisible] = useState(false);
 
   useEffect(() => {
@@ -47,8 +60,9 @@ const Games = () => {
       if (!wordOfTheDay) {
         getWordOfTheDay();
       }
+      await fetchCoinsBalance();
+      await checkDailyReward();
     };
-
     loadData();
   }, []);
 
@@ -85,6 +99,7 @@ const Games = () => {
               Select a game to improve your skills
             </Text>
           </View>
+          <CoinsDisplay onPress={showDailyRewardsModal} />
         </Animatable.View>
 
         <ScrollView
@@ -235,6 +250,11 @@ const Games = () => {
             isLoading={isAudioLoading && isWordOfDayPlaying}
           />
         )}
+        {/* Daily reward modal popup */}
+        <DailyRewardsModal
+          visible={isDailyRewardsModalVisible}
+          onClose={hideDailyRewardsModal}
+        />
       </SafeAreaView>
     </View>
   );

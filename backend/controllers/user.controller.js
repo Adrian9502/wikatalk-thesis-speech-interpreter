@@ -18,10 +18,22 @@ cloudinary.config({
 
 // Generate JWT Token
 const generateToken = (id) => {
-  return jwt.sign({ id }, process.env.JWT_SECRET, {
-    expiresIn: "30d",
-  });
+  if (!process.env.JWT_SECRET) {
+    console.error("JWT_SECRET is not defined in environment variables");
+    throw new Error("Server configuration error");
+  }
+  
+  try {
+    const token = jwt.sign({ id }, process.env.JWT_SECRET, {
+      expiresIn: "30d",
+    });
+    return token;
+  } catch (error) {
+    console.error("Error generating token:", error);
+    throw error;
+  }
 };
+
 // Generate 6-digit verification code
 const generateVerificationCode = () => {
   return Math.floor(100000 + Math.random() * 900000).toString();
@@ -387,7 +399,7 @@ exports.forgotPassword = async (req, res) => {
       // Log the attempt but don't expose this to the client
       console.log(`Password reset attempted for non-existent email: ${email}`);
 
-      // Optional: You can simulate the processing time here
+      // Optional: you can simulate the processing time here
       // to make timing attacks more difficult
       await new Promise((resolve) => setTimeout(resolve, 200));
     }

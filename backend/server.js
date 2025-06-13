@@ -28,12 +28,14 @@ const translationRoutes = require("./routes/translation.routes");
 const themeRoutes = require("./routes/theme.routes");
 const pronunciationRoutes = require("./routes/pronunciation.routes");
 const quizRoutes = require("./routes/quiz.routes");
+const rewardsRoutes = require("./routes/rewards.routes");
 
 app.use("/api/users", userRoutes);
 app.use("/api/translations", translationRoutes);
 app.use("/api/users/theme", themeRoutes);
 app.use("/api/pronunciations", pronunciationRoutes);
 app.use("/api/quiz", quizRoutes);
+app.use("/api/rewards", rewardsRoutes);
 
 // Explicitly listen on all network interfaces
 const PORT = process.env.PORT || 5000;
