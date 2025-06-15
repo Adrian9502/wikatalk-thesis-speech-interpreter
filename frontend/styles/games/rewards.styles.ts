@@ -228,6 +228,7 @@ export const rewardStyles = StyleSheet.create({
   balanceCard: {
     flexDirection: "row",
     alignItems: "center",
+    justifyContent: "center",
     backgroundColor: "rgba(255, 255, 255, 0.1)",
     borderRadius: 16,
     padding: 12,
