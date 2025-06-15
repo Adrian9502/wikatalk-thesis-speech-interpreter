@@ -66,6 +66,22 @@ const Games = () => {
     loadData();
   }, []);
 
+  // Prefetch rewards data when the Games screen loads
+  useEffect(() => {
+    const prefetchRewardsData = async () => {
+      try {
+        // Fetch in background, don't await
+        fetchCoinsBalance();
+        checkDailyReward();
+      } catch (err) {
+        // Silently handle errors, don't block UI
+        console.log("Background prefetch error:", err);
+      }
+    };
+
+    prefetchRewardsData();
+  }, []);
+
   const handleGamePress = (gameId: string, gameTitle: string) => {
     router.push({
       pathname: "/(games)/LevelSelection",
@@ -75,6 +91,12 @@ const Games = () => {
         levelId: "1",
       },
     });
+  };
+
+  // When showing the modal, don't use the store's function directly
+  const openRewardsModal = () => {
+    // Show the modal immediately, data should already be loaded
+    showDailyRewardsModal();
   };
 
   return (
@@ -99,7 +121,7 @@ const Games = () => {
               Select a game to improve your skills
             </Text>
           </View>
-          <CoinsDisplay onPress={showDailyRewardsModal} />
+          <CoinsDisplay onPress={openRewardsModal} />
         </Animatable.View>
 
         <ScrollView

@@ -61,6 +61,8 @@ const useCoinsStore = create<CoinsState>((set, get) => ({
 
   // Reset function to clear state when user logs out
   resetState: () => {
+    console.log("Resetting rewards state");
+
     // Clear all state related to rewards
     set({
       coins: 0,
