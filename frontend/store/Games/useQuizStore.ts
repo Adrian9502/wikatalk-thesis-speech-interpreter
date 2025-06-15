@@ -1,6 +1,8 @@
 import { create } from "zustand";
 import axios from "axios";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { UserProgress } from "@/types/userProgress";
+import { getToken } from "@/lib/authTokenManager";
 
 // Define the API URL using environment variable
 const API_URL = process.env.EXPO_PUBLIC_BACKEND_URL || "http://localhost:5000";
@@ -103,7 +105,9 @@ interface QuizState {
   clearCache?: () => void;
   // Common game state
   gameState: CommonGameState;
-
+  userProgress: UserProgress | null;
+  setUserProgress: (progress: UserProgress | null) => void;
+  updateUserProgress: (timeSpent: number, completed?: boolean) => Promise<void>;
   // Mode-specific states
   multipleChoiceState: MultipleChoiceState;
   fillInTheBlankState: FillInTheBlankState;
@@ -240,6 +244,34 @@ const useQuizStore = create<QuizState>((set, get) => ({
     attemptsLeft: 2,
   },
 
+  userProgress: null,
+  setUserProgress: (progress) => set({ userProgress: progress }),
+
+  updateUserProgress: async (timeSpent, completed) => {
+    try {
+      const { gameState } = get();
+      const { levelId } = gameState;
+
+      const token = getToken();
+      if (!token) return;
+
+      const response = await axios.post(
+        `${API_URL}/api/userprogress/${levelId}`,
+        { timeSpent, completed },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      if (response.data.success) {
+        set({ userProgress: response.data.progress });
+      }
+    } catch (error) {
+      console.error("Error updating user progress:", error);
+    }
+  },
   // Initial identification state
   identificationState: {
     sentences: [],

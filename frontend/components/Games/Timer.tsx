@@ -6,79 +6,97 @@ import useQuizStore from "@/store/games/useQuizStore";
 
 interface TimerProps {
   isRunning: boolean;
+  initialTime?: number;
 }
 
-const Timer: React.FC<TimerProps> = ({ isRunning }) => {
+const Timer: React.FC<TimerProps> = ({ isRunning, initialTime = 0 }) => {
   // Local state for display formatting only
-  const [displayTime, setDisplayTime] = useState("00:00");
-  // Use ref to track current time without re-renders
-  const timeRef = useRef(0);
-  const updateTimeRef = useRef(null);
-  const { gameState, updateTimeElapsed } = useQuizStore();
-  const { timeElapsed } = gameState;
+  const [displayTime, setDisplayTime] = useState("00:00.00");
 
-  // Initialize timer value only once on mount
+  // Use refs to avoid re-renders
+  const timeRef = useRef(initialTime);
+  const lastUpdateTimeRef = useRef(Date.now());
+  const isRunningRef = useRef(isRunning);
+  const animFrameIdRef = useRef<number | null>(null);
+  const storeTimeRef = useRef(0);
+
+  // Get store actions but don't subscribe to updates
+  const updateTimeElapsed = useQuizStore.getState().updateTimeElapsed;
+
+  // Format time helper function
+  const formatAndDisplayTime = (time: number) => {
+    try {
+      const minutes = Math.floor(time / 60);
+      const seconds = Math.floor(time % 60);
+      const centiseconds = Math.round((time % 1) * 100);
+
+      setDisplayTime(
+        `${minutes.toString().padStart(2, "0")}:${seconds
+          .toString()
+          .padStart(2, "0")}.${centiseconds.toString().padStart(2, "0")}`
+      );
+    } catch (error) {
+      console.error("Timer formatting error:", error);
+      setDisplayTime("00:00.00");
+    }
+  };
+
+  // Initialize on mount with initialTime
   useEffect(() => {
-    timeRef.current = timeElapsed;
-    updateTimeRef.current = updateTimeElapsed;
+    timeRef.current = initialTime || 0;
+    storeTimeRef.current = initialTime || 0;
+    formatAndDisplayTime(initialTime || 0);
+
+    return () => {
+      if (animFrameIdRef.current) {
+        cancelAnimationFrame(animFrameIdRef.current);
+        updateTimeElapsed(timeRef.current);
+      }
+    };
   }, []);
 
-  // Use requestAnimationFrame instead of setInterval for smoother updates
+  // Handle running state changes
   useEffect(() => {
-    let animFrameId: number;
+    isRunningRef.current = isRunning;
 
     if (isRunning) {
-      const startTime = Date.now();
+      lastUpdateTimeRef.current = Date.now();
 
-      const updateTimer = () => {
-        try {
-          const elapsed = (Date.now() - startTime) / 1000;
-          timeRef.current = timeElapsed + elapsed;
+      if (!animFrameIdRef.current) {
+        const updateTimer = () => {
+          if (!isRunningRef.current) return;
 
-          // Format with hours:minutes:seconds.centiseconds
-          const hours = Math.floor(timeRef.current / 3600);
-          const minutes = Math.floor((timeRef.current % 3600) / 60);
-          const seconds = Math.floor(timeRef.current % 60);
-          const centiseconds = Math.round((timeRef.current % 1) * 100);
+          const now = Date.now();
+          const elapsed = (now - lastUpdateTimeRef.current) / 1000;
+          timeRef.current += elapsed;
+          lastUpdateTimeRef.current = now;
 
-          const formattedTime = `${hours}:${minutes
-            .toString()
-            .padStart(2, "0")}:${seconds
-            .toString()
-            .padStart(2, "0")}.${centiseconds.toString().padStart(2, "0")}`;
+          formatAndDisplayTime(timeRef.current);
 
-          setDisplayTime(formattedTime);
-        } catch (error) {
-          console.error("Timer formatting error:", error);
-          // Use a fallback format if there's an error
-          setDisplayTime("0:00:00.00");
-        }
+          // Only update store every 1 second to avoid excessive updates
+          if (Math.floor(timeRef.current) > Math.floor(storeTimeRef.current)) {
+            updateTimeElapsed(timeRef.current);
+            storeTimeRef.current = timeRef.current;
+          }
 
-        animFrameId = requestAnimationFrame(updateTimer);
-      };
-      animFrameId = requestAnimationFrame(updateTimer);
+          animFrameIdRef.current = requestAnimationFrame(updateTimer);
+        };
+
+        animFrameIdRef.current = requestAnimationFrame(updateTimer);
+      }
+    } else if (animFrameIdRef.current) {
+      cancelAnimationFrame(animFrameIdRef.current);
+      animFrameIdRef.current = null;
+      updateTimeElapsed(timeRef.current);
     }
 
     return () => {
-      if (animFrameId) {
-        cancelAnimationFrame(animFrameId);
-        updateTimeRef.current(timeRef.current);
+      if (animFrameIdRef.current) {
+        cancelAnimationFrame(animFrameIdRef.current);
+        animFrameIdRef.current = null;
       }
     };
-  }, [isRunning, timeElapsed]);
-
-  // Update display when timeElapsed changes externally
-  useEffect(() => {
-    if (timeElapsed !== timeRef.current) {
-      timeRef.current = timeElapsed;
-      const minutes = Math.floor(timeElapsed / 60);
-      const remainingSeconds = timeElapsed % 60;
-      const formattedTime = `${minutes
-        .toString()
-        .padStart(2, "0")}:${remainingSeconds.toString().padStart(2, "0")}`;
-      setDisplayTime(formattedTime);
-    }
-  }, [timeElapsed]);
+  }, [isRunning]);
 
   return (
     <View style={styles.timerContainer}>
@@ -102,7 +120,7 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: BASE_COLORS.white,
     fontFamily: "Poppins-Medium",
-    width: 57,
+    width: 80,
   },
 });
 

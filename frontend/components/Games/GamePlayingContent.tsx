@@ -5,6 +5,7 @@ import Timer from "@/components/games/Timer";
 import DifficultyBadge from "@/components/games/DifficultyBadge";
 import FocusAreaBadge from "@/components/games/FocusAreaBadge";
 import gameSharedStyles from "@/styles/gamesSharedStyles";
+
 interface GamePlayingContentProps {
   timerRunning: boolean;
   difficulty: string;
@@ -12,6 +13,7 @@ interface GamePlayingContentProps {
   children: React.ReactNode;
   isStarted?: boolean;
   gameStatus?: "idle" | "ready" | "playing" | "completed";
+  initialTime?: number; // Add this prop
 }
 
 const GamePlayingContent: React.FC<GamePlayingContentProps> = React.memo(
@@ -21,6 +23,7 @@ const GamePlayingContent: React.FC<GamePlayingContentProps> = React.memo(
     focusArea = "Vocabulary",
     children,
     isStarted = true,
+    initialTime = 0, // Default to 0
   }) => {
     return (
       <ScrollView
@@ -35,8 +38,8 @@ const GamePlayingContent: React.FC<GamePlayingContentProps> = React.memo(
           delay={100}
           style={gameSharedStyles.statsContainer}
         >
-          {/* Timer on left */}
-          {isStarted && <Timer isRunning={timerRunning} />}
+          {/* Timer on left - pass initialTime */}
+          {isStarted && <Timer isRunning={timerRunning} initialTime={initialTime} />}
 
           {/* Badges on right */}
           <View style={gameSharedStyles.badgesContainer}>

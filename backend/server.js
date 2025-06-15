@@ -2,24 +2,32 @@ const express = require("express");
 const cors = require("cors");
 const bodyParser = require("body-parser");
 const connectDB = require("./config/db");
+const debugMiddleware = require("./middleware/debug.middleware");
 
 require("dotenv").config();
 
 const app = express();
 
-// Middleware
-app.use(cors());
+// CORS should be first
+app.use(
+  cors({
+    origin: "*",
+    methods: ["GET", "POST", "PUT", "DELETE"],
+    allowedHeaders: ["Content-Type", "Authorization"],
+    credentials: true,
+  })
+);
+
+// Then body parsers
 app.use(bodyParser.json({ limit: "50mb" }));
 app.use(bodyParser.urlencoded({ extended: true, limit: "50mb" }));
+
+// Debug middleware for development
+app.use(debugMiddleware);
 
 // Connect to MongoDB
 connectDB().catch((err) => {
   console.error("Failed to connect to MongoDB on startup:", err);
-});
-
-// Base route
-app.get("/", (req, res) => {
-  res.send("WikaTalk API is running");
 });
 
 // Import routes
@@ -29,22 +37,14 @@ const themeRoutes = require("./routes/theme.routes");
 const pronunciationRoutes = require("./routes/pronunciation.routes");
 const quizRoutes = require("./routes/quiz.routes");
 const rewardsRoutes = require("./routes/rewards.routes");
+const userProgressRoutes = require("./routes/userProgress.routes");
 
-app.use("/api/users", userRoutes);
-app.use("/api/translations", translationRoutes);
-app.use("/api/users/theme", themeRoutes);
-app.use("/api/pronunciations", pronunciationRoutes);
-app.use("/api/quiz", quizRoutes);
-app.use("/api/rewards", rewardsRoutes);
-
-// Explicitly listen on all network interfaces
-const PORT = process.env.PORT || 5000;
-const server = app.listen(PORT, "0.0.0.0", () => {
-  console.log(`Server running on port ${PORT}`);
-  console.log(`Server available on local network at http://192.168.18.82:${PORT}`);
+// Base route
+app.get("/", (req, res) => {
+  res.send("WikaTalk API is running");
 });
 
-// Add a more robust debug endpoint
+// Test endpoint
 app.get("/api/test", (req, res) => {
   res.json({
     status: "success",
@@ -53,28 +53,30 @@ app.get("/api/test", (req, res) => {
     endpoints: {
       quiz: "/api/quiz",
       users: "/api/users",
+      userProgress: "/api/userprogress",
     },
   });
 });
 
-// Add proper CORS handling for mobile apps
-app.use(
-  cors({
-    origin: "*", // In production you'd restrict this
-    methods: ["GET", "POST", "PUT", "DELETE"],
-    allowedHeaders: ["Content-Type", "Authorization"],
-    credentials: true,
-  })
-);
+// API routes 
+app.use("/api/users", userRoutes);
+app.use("/api/translations", translationRoutes);
+app.use("/api/users/theme", themeRoutes);
+app.use("/api/pronunciations", pronunciationRoutes);
+app.use("/api/quiz", quizRoutes);
+app.use("/api/rewards", rewardsRoutes);
+app.use("/api/userprogress", userProgressRoutes);
 
-// Add a small delay before processing requests (can help mobile connections)
-app.use((req, res, next) => {
-  setTimeout(next, 0);
+// Explicitly listen on all network interfaces
+const PORT = process.env.PORT || 5000;
+const server = app.listen(PORT, "0.0.0.0", () => {
+  console.log(`Server running on port ${PORT}`);
+  console.log(`Server available on local network at http://192.168.18.82:${PORT}`);
 });
 
-// Error handling middleware
+// Error handling middleware 
 app.use((err, req, res, next) => {
-  console.error(err.stack);
+  console.error(`[ERROR] ${err.stack}`);
   res.status(500).json({
     success: false,
     message: "Something went wrong on the server",
@@ -82,11 +84,13 @@ app.use((err, req, res, next) => {
   });
 });
 
-// Handle undefined routes
+// Handle undefined routes 
 app.use("*", (req, res) => {
+  console.log(`[NOT FOUND] ${req.method} ${req.originalUrl}`);
   res.status(404).json({
     success: false,
     message: "API endpoint not found",
+    path: req.originalUrl,
   });
 });
 

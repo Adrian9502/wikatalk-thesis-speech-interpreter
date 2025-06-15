@@ -1,6 +1,7 @@
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { setupBackButtonHandler } from "@/utils/gameUtils";
 import { GameStatus } from "@/types/gameTypes";
+import useQuizStore from "@/store/games/useQuizStore";
 
 export function useGameInitialization(
   levelData: any,
@@ -11,8 +12,12 @@ export function useGameInitialization(
   initialize: (data: any, id: number, mode: string, diff: string) => void,
   startGame: () => void,
   gameStatus: string,
-  timerRunning: boolean
+  timerRunning: boolean,
+  initialTime: number = 0 // Added this parameter for previous time
 ) {
+  // Track initialization to prevent repeated calls
+  const isInitializedRef = useRef(false);
+
   // Handle back button
   useEffect(() => {
     const cleanupBackHandler = setupBackButtonHandler(
@@ -24,27 +29,24 @@ export function useGameInitialization(
 
   // Initialize and start game
   useEffect(() => {
-    if (levelData && isStarted) {
-      console.log(`Initializing ${gameMode} game with data:`, levelData);
+    // Only initialize once per component instance
+    if (!isInitializedRef.current) {
+      console.log(`[useGameInitialization] Initializing ${gameMode} at level ${levelId}`);
 
-      // Initialize the game
+      // Initialize game data
       initialize(levelData, levelId, gameMode, difficulty);
+      isInitializedRef.current = true;
 
-      // Add a small delay to ensure initialization completes
-      const timer = setTimeout(() => {
-        console.log(`Starting ${gameMode} game`);
-        startGame();
-      }, 100);
-
-      return () => clearTimeout(timer);
+      // Set initial elapsed time if provided
+      if (initialTime > 0) {
+        console.log(`[useGameInitialization] Setting initial time: ${initialTime}s`);
+        useQuizStore.getState().setTimeElapsed(initialTime);
+      }
     }
-  }, [
-    levelData,
-    isStarted,
-    levelId,
-    gameMode,
-    difficulty,
-    initialize,
-    startGame,
-  ]);
+
+    // Only start game if it's not already playing and isStarted is true
+    if (isStarted && gameStatus === "idle") {
+      startGame();
+    }
+  }, [isStarted, gameStatus]);
 }
