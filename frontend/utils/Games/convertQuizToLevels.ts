@@ -55,7 +55,7 @@ export const convertQuizToLevels = (
   const allLevels: LevelData[] = allQuestions.map(
     (item: any, index: number) => {
       // Make all levels either completed or current
-      const status = index < 3 ? "completed" : "current";
+      const status = "current";
 
       // Create a level with the proper id and number
       const level: LevelData = {

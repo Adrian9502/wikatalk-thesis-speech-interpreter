@@ -17,6 +17,8 @@ import {
   getGameModeName,
 } from "@/utils/games/renderFocusIcon";
 import { formatDifficulty, getStarCount } from "@/utils/games/difficultyUtils";
+import modalSharedStyles from "@/styles/games/modalSharedStyles";
+
 type DifficultyLevel = keyof typeof difficultyColors;
 
 interface GameInfoModalProps {
@@ -42,7 +44,7 @@ const GameInfoModal: React.FC<GameInfoModalProps> = React.memo(
     // Get starCount using the utility function
     const starCount = getStarCount(difficulty);
 
-    // Simplified state management - remove the internal visible state
+    // Simplified state management
     const [hasBeenStarted, setHasBeenStarted] = useState(false);
 
     // Reset the hasBeenStarted state when modal is closed
@@ -68,8 +70,6 @@ const GameInfoModal: React.FC<GameInfoModalProps> = React.memo(
     // Enhanced start button handler
     const handleStart = useCallback(() => {
       if (isLoading) return;
-
-      // Set started flag and call the onStart handler
       setHasBeenStarted(true);
       onStart();
     }, [isLoading, onStart]);
@@ -90,26 +90,29 @@ const GameInfoModal: React.FC<GameInfoModalProps> = React.memo(
         <Animatable.View
           animation="fadeIn"
           duration={150}
-          style={styles.overlay}
+          style={modalSharedStyles.overlay}
         >
           <Animatable.View
             animation="zoomIn"
             duration={200}
-            style={styles.modalContainer}
+            style={modalSharedStyles.modalContainer}
           >
             <LinearGradient
               colors={getGradientColors()}
-              style={styles.modalContent}
+              style={[modalSharedStyles.modalContent, styles.extendedContent]}
               start={{ x: 0, y: 0 }}
               end={{ x: 1, y: 1 }}
             >
               {/* Decorative background elements */}
-              <View style={styles.decorativeShape1} />
-              <View style={styles.decorativeShape2} />
+              <View style={modalSharedStyles.decorativeShape1} />
+              <View style={modalSharedStyles.decorativeShape2} />
               <View style={styles.decorativeShape3} />
 
               {/* Close button */}
-              <TouchableOpacity style={styles.closeButton} onPress={onClose}>
+              <TouchableOpacity
+                onPress={onClose}
+                style={modalSharedStyles.closeButton}
+              >
                 <X width={20} height={20} color="#fff" />
               </TouchableOpacity>
 
@@ -118,25 +121,27 @@ const GameInfoModal: React.FC<GameInfoModalProps> = React.memo(
                 animation="fadeInDown"
                 duration={600}
                 delay={100}
-                style={styles.levelHeader}
+                style={modalSharedStyles.levelHeader}
               >
-                <View style={styles.levelNumberContainer}>
-                  <Text style={styles.levelNumber}>
+                <View style={modalSharedStyles.levelNumberContainer}>
+                  <Text style={modalSharedStyles.levelNumber}>
                     {levelData.level || `Level ${levelData.id}`}
                   </Text>
                 </View>
-                <Text style={styles.levelTitle}>{levelData.title}</Text>
+                <Text style={modalSharedStyles.levelTitle}>
+                  {levelData.title}
+                </Text>
               </Animatable.View>
 
-              {/* Level badges with stars for difficulty */}
+              {/* Badges with difficulty stars and focus area */}
               <Animatable.View
                 animation="fadeIn"
                 duration={600}
                 delay={200}
-                style={styles.badgesContainer}
+                style={modalSharedStyles.badgesContainer}
               >
-                <View style={styles.difficultyBadge}>
-                  <View style={styles.starContainer}>
+                <View style={modalSharedStyles.difficultyBadge}>
+                  <View style={modalSharedStyles.starContainer}>
                     {Array(3)
                       .fill(0)
                       .map((_, index) => (
@@ -153,14 +158,14 @@ const GameInfoModal: React.FC<GameInfoModalProps> = React.memo(
                         />
                       ))}
                   </View>
-                  <Text style={styles.difficultyText}>
+                  <Text style={modalSharedStyles.difficultyText}>
                     {formatDifficulty(difficulty)}
                   </Text>
                 </View>
 
-                <View style={styles.focusAreaBadge}>
+                <View style={modalSharedStyles.focusAreaBadge}>
                   {renderFocusIcon(levelData.focusArea)}
-                  <Text style={styles.focusAreaText}>
+                  <Text style={modalSharedStyles.focusAreaText}>
                     {getFocusAreaText(levelData.focusArea)}
                   </Text>
                 </View>
@@ -213,8 +218,8 @@ const GameInfoModal: React.FC<GameInfoModalProps> = React.memo(
               {/* Start button */}
               <Animatable.View
                 animation="fadeInUp"
-                duration={200} // Reduce animation duration
-                delay={100} // Reduce delay
+                duration={200}
+                delay={100}
                 style={styles.buttonContainer}
               >
                 <TouchableOpacity
@@ -238,49 +243,10 @@ const GameInfoModal: React.FC<GameInfoModalProps> = React.memo(
   }
 );
 
+// Keep only the specific styles for this component
 const styles = StyleSheet.create({
-  overlay: {
-    flex: 1,
-    backgroundColor: "rgba(0, 0, 0, 0.75)",
-    justifyContent: "center",
-    alignItems: "center",
-    paddingHorizontal: 20,
-  },
-  modalContainer: {
-    width: "100%",
-    maxWidth: 400,
-    borderRadius: 24,
-    overflow: "hidden",
-    elevation: 10,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.5,
-    shadowRadius: 12,
-  },
-  modalContent: {
-    padding: 24,
+  extendedContent: {
     paddingBottom: 28,
-    minHeight: 400,
-    position: "relative",
-    overflow: "hidden",
-  },
-  decorativeShape1: {
-    position: "absolute",
-    top: -50,
-    right: -50,
-    width: 150,
-    height: 150,
-    borderRadius: 75,
-    backgroundColor: "rgba(255, 255, 255, 0.1)",
-  },
-  decorativeShape2: {
-    position: "absolute",
-    bottom: -40,
-    left: -40,
-    width: 120,
-    height: 120,
-    borderRadius: 60,
-    backgroundColor: "rgba(255, 255, 255, 0.08)",
   },
   decorativeShape3: {
     position: "absolute",
@@ -290,81 +256,6 @@ const styles = StyleSheet.create({
     height: 100,
     borderRadius: 50,
     backgroundColor: "rgba(0, 0, 0, 0.1)",
-  },
-  closeButton: {
-    position: "absolute",
-    top: 16,
-    right: 16,
-    width: 38,
-    height: 38,
-    borderRadius: 19,
-    backgroundColor: "rgba(0, 0, 0, 0.3)",
-    justifyContent: "center",
-    alignItems: "center",
-    zIndex: 10,
-  },
-  levelHeader: {
-    alignItems: "center",
-    marginBottom: 16,
-  },
-  levelNumberContainer: {
-    borderRadius: 16,
-    paddingVertical: 8,
-    paddingHorizontal: 18,
-    backgroundColor: "rgba(255, 255, 255, 0.25)",
-    justifyContent: "center",
-    alignItems: "center",
-    marginBottom: 12,
-  },
-  levelNumber: {
-    fontSize: 18,
-    fontFamily: "Poppins-Bold",
-    color: "#fff",
-  },
-  levelTitle: {
-    fontSize: 26,
-    fontFamily: "Poppins-Bold",
-    color: "#fff",
-    textAlign: "center",
-  },
-  badgesContainer: {
-    flexDirection: "row",
-    justifyContent: "center",
-    marginBottom: 16,
-    gap: 14,
-  },
-  starContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 3,
-    marginRight: 6,
-  },
-  difficultyBadge: {
-    flexDirection: "row",
-    alignItems: "center",
-    backgroundColor: "rgba(0, 0, 0, 0.2)",
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 12,
-  },
-  difficultyText: {
-    fontSize: 14,
-    fontFamily: "Poppins-SemiBold",
-    color: "#fff",
-  },
-  focusAreaBadge: {
-    flexDirection: "row",
-    alignItems: "center",
-    backgroundColor: "rgba(0, 0, 0, 0.2)",
-    paddingHorizontal: 14,
-    paddingVertical: 6,
-    borderRadius: 12,
-  },
-  focusAreaText: {
-    fontSize: 14,
-    fontFamily: "Poppins-Medium",
-    color: "#fff",
-    marginLeft: 6,
   },
   descriptionContainer: {
     width: "100%",

@@ -2,7 +2,7 @@ const mongoose = require("mongoose");
 
 const attemptSchema = new mongoose.Schema({
   quizId: {
-    type: mongoose.Schema.Types.Mixed, // Changed from ObjectId to Mixed to support numeric IDs
+    type: mongoose.Schema.Types.Mixed,
     required: true
   },
   timeSpent: {
@@ -12,6 +12,18 @@ const attemptSchema = new mongoose.Schema({
   attemptDate: {
     type: Date,
     default: Date.now
+  },
+  isCorrect: {
+    type: Boolean, 
+    default: false
+  },
+  cumulativeTime: {
+    type: Number,
+    default: 0,  // Total time up to this attempt
+  },
+  attemptNumber: {
+    type: Number,
+    default: 1
   }
 }, { _id: false });
 
@@ -38,6 +50,10 @@ const userProgressSchema = new mongoose.Schema({
     default: false
   },
   totalTimeSpent: {
+    type: Number,
+    default: 0
+  },
+  lastAttemptTime: {  // Add this new field
     type: Number,
     default: 0
   },

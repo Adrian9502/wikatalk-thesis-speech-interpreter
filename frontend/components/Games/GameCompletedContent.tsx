@@ -1,5 +1,5 @@
 import React from "react";
-import { ScrollView, View, Text, StyleSheet } from "react-native";
+import { ScrollView, View, Text } from "react-native";
 import * as Animatable from "react-native-animatable";
 import { LinearGradient } from "expo-linear-gradient";
 import { Check, X } from "react-native-feather";
@@ -23,7 +23,7 @@ interface GameCompletedContentProps {
   gameMode: GameMode | string;
   gameTitle: string;
   onRestart: () => void;
-  focusArea?: string; // Add this prop
+  focusArea?: string;
   successTitle?: string;
   failTitle?: string;
 }
@@ -107,7 +107,7 @@ const GameCompletedContent: React.FC<GameCompletedContentProps> = ({
         timeElapsed={timeElapsed}
       />
 
-      {/* Navigation buttons */}
+      {/* Navigation buttons - USE THE PROPER COMPONENT */}
       <GameNavigation
         levelId={levelId}
         gameMode={gameMode}

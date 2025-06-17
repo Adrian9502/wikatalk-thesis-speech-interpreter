@@ -1,6 +1,6 @@
 import React from "react";
 import { Text, View, TouchableOpacity } from "react-native";
-import { Star, Lock } from "react-native-feather";
+import { Star, Lock, Check } from "react-native-feather";
 import { LinearGradient } from "expo-linear-gradient";
 import { BASE_COLORS } from "@/constant/colors";
 import { LevelData } from "@/types/gameTypes";
@@ -31,24 +31,44 @@ const LevelCard = React.memo(
       <TouchableOpacity
         style={styles.levelCard}
         onPress={() => onSelect(level)}
-        activeOpacity={0.8}
+        activeOpacity={0.7}
         disabled={status === "locked"}
       >
         <LinearGradient
           colors={gradientColors}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 1 }}
           style={styles.levelCardGradient}
         >
           {/* Decorative elements */}
           <View style={styles.decorativeShape} />
           <View style={[styles.decorativeShape, styles.decorativeShape2]} />
 
-          {/* Card header with level number and lock status */}
+          {/* Completed State Enhancements */}
+          {status === "completed" && (
+            <>
+              {/* Improved Banner */}
+              <View style={styles.completedBannerContainer}>
+                <View style={styles.completedBanner}>
+                  <Text style={styles.completedBannerText}>COMPLETED</Text>
+                </View>
+              </View>
+
+              <View style={styles.completedCheckContainer}>
+                <Check width={14} height={14} color="#FFFFFF" strokeWidth={3} />
+              </View>
+            </>
+          )}
+
+          {/* Level number */}
           <View style={styles.levelHeader}>
             <View style={styles.levelNumberContainer}>
               <Text style={styles.levelNumber}>
                 {levelString.replace(/^Level\s+/, "")}
               </Text>
             </View>
+
+            {/* Status indicators */}
             <View style={styles.specialIconContainer}>
               {status === "locked" ? (
                 <Lock width={18} height={18} color={BASE_COLORS.white} />
@@ -56,13 +76,9 @@ const LevelCard = React.memo(
             </View>
           </View>
 
-          {/* Card content with title and metadata */}
+          {/* Level details */}
           <View style={styles.levelInfo}>
-            <Text
-              style={styles.levelTitle}
-              numberOfLines={2}
-              ellipsizeMode="tail"
-            >
+            <Text style={styles.levelTitle} numberOfLines={2}>
               {title}
             </Text>
 
@@ -74,7 +90,7 @@ const LevelCard = React.memo(
               </View>
             </View>
 
-            {/* Difficulty stars */}
+            {/* Difficulty stars - Enhanced for completed state */}
             <View style={styles.difficultyStarsContainer}>
               {Array(3)
                 .fill(0)

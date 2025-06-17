@@ -108,10 +108,10 @@ router.post("/:quizId", protect, async (req, res) => {
     console.log("[PROGRESS] Route handler triggered for POST /:quizId");
     const userId = req.user._id;
     let { quizId } = req.params;
-    const { timeSpent, completed } = req.body;
+    const { timeSpent, completed, isCorrect } = req.body; 
 
     console.log("[PROGRESS] Updating progress for quiz:", quizId);
-    console.log("[PROGRESS] Time spent:", timeSpent, "Completed:", completed);
+    console.log("[PROGRESS] Time spent:", timeSpent, "Completed:", completed, "Is correct:", isCorrect);
 
     // Handle numeric ID format with prefix
     if (quizId.startsWith('n-')) {
@@ -140,17 +140,28 @@ router.post("/:quizId", protect, async (req, res) => {
       const timeSpentNum = parseFloat(timeSpent);
 
       if (!isNaN(timeSpentNum)) {
+        // Track attempt numbers and cumulative time
+        const attemptNumber = progress.attempts.length + 1;
+        const previousTimeSpent = progress.totalTimeSpent || 0;
+        
+        // Create the new attempt record
         const newAttempt = {
           quizId,
           timeSpent: timeSpentNum,
-          attemptDate: new Date()
+          attemptDate: new Date(),
+          isCorrect: isCorrect || false,
+          attemptNumber: attemptNumber,
+          cumulativeTime: timeSpentNum  // This is the TOTAL time, not just this attempt
         };
 
         progress.attempts.push(newAttempt);
-        progress.totalTimeSpent = (progress.totalTimeSpent || 0) + timeSpentNum;
+        
+        // Store original time in database - this should be the absolute time, not a difference
+        progress.totalTimeSpent = timeSpentNum; 
+        progress.lastAttemptTime = timeSpentNum;
         progress.lastAttemptDate = new Date();
 
-        console.log("[PROGRESS] Added attempt with time:", timeSpentNum);
+        console.log("[PROGRESS] Added attempt with time:", timeSpentNum, "isCorrect:", isCorrect);
       }
     }
 
