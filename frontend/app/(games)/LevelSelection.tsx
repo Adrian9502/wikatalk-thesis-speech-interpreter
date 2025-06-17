@@ -1,6 +1,6 @@
 import { Text, View, FlatList, StatusBar } from "react-native";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
-import { useLocalSearchParams, router } from "expo-router";
+import { useLocalSearchParams, router, useFocusEffect } from "expo-router";
 import { AlertTriangle, RefreshCw } from "react-native-feather";
 import * as Animatable from "react-native-animatable";
 import { TouchableOpacity } from "react-native";
@@ -8,6 +8,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import useThemeStore from "@/store/useThemeStore";
 import { BASE_COLORS } from "@/constant/colors";
 import GameInfoModal from "@/components/games/GameInfoModal";
+import LevelReviewModal from "@/components/games/LevelReviewModal";
 import DotsLoader from "@/components/DotLoader";
 import { LevelData } from "@/types/gameTypes";
 import LevelCard from "@/components/games/levels/LevelCard";
@@ -28,21 +29,36 @@ const LevelSelection = () => {
     isLoading,
     error,
     completionPercentage,
-    selectedLevel,
-    showModal,
-    handleLevelSelect,
-    handleCloseModal,
     handleRetry,
+    refreshLevels, // Add this new function
   } = useLevelData(gameMode);
 
+  // Local state for modal handling
+  const [selectedLevel, setSelectedLevel] = useState<LevelData | null>(null);
+  const [showGameModal, setShowGameModal] = useState(false);
+  const [showReviewModal, setShowReviewModal] = useState(false);
   const [preloadedModal, setPreloadedModal] = useState(false);
 
-  // Preload the modal when levels are available
+  // CRITICAL FIX: Refresh levels when screen comes into focus
+  useFocusEffect(
+    useCallback(() => {
+      console.log('[LevelSelection] Screen focused, refreshing levels...');
+      
+      // Small delay to ensure any pending progress updates have completed
+      const refreshTimeout = setTimeout(() => {
+        refreshLevels();
+      }, 300);
+
+      return () => clearTimeout(refreshTimeout);
+    }, [refreshLevels])
+  );
+
+  // Preload the modal when levels are available (only once)
   useEffect(() => {
     if (levels.length > 0 && !preloadedModal) {
       setPreloadedModal(true);
     }
-  }, [levels, preloadedModal]);
+  }, [levels.length > 0, preloadedModal]);
 
   // Navigation handlers
   const handleBack = useCallback(() => {
@@ -67,7 +83,41 @@ const LevelSelection = () => {
     });
   }, [selectedLevel, gameMode, gameTitle]);
 
-  // Pre-calculate difficulty colors mapping
+  // FIXED: Level select handler to check completion status
+  const handleLevelSelectWithCompletion = useCallback((level: LevelData) => {
+    if (level.status === "locked") {
+      console.log(`[LevelSelection] Level ${level.id} is locked`);
+      return;
+    }
+
+    console.log(`[LevelSelection] Level ${level.id} selected, status: ${level.status}`);
+    setSelectedLevel(level);
+
+    if (level.status === "completed") {
+      console.log(`[LevelSelection] Opening review modal for completed level ${level.id}`);
+      setShowReviewModal(true);
+      setShowGameModal(false);
+    } else {
+      console.log(`[LevelSelection] Opening game modal for level ${level.id}`);
+      setShowGameModal(true);
+      setShowReviewModal(false);
+    }
+  }, []);
+
+  // Close handlers for both modals
+  const handleCloseGameModal = useCallback(() => {
+    console.log(`[LevelSelection] Closing game modal`);
+    setShowGameModal(false);
+    setSelectedLevel(null);
+  }, []);
+
+  const handleCloseReviewModal = useCallback(() => {
+    console.log(`[LevelSelection] Closing review modal`);
+    setShowReviewModal(false);
+    setSelectedLevel(null);
+  }, []);
+
+  // Memoize difficulty colors
   const difficultyColors = useMemo(
     () => ({
       Easy: ["#4CAF50", "#2E7D32"],
@@ -77,19 +127,16 @@ const LevelSelection = () => {
     []
   );
 
-  // Memoize renderItem function for FlatList
+  // Memoize renderItem function
   const renderItem = useCallback(
     ({ item: level }: { item: LevelData }) => {
-      // Ensure difficulty is a string, not an array
       const levelDifficulty =
         typeof level.difficulty === "string" ? level.difficulty : "Easy";
 
-      // Safely get gradient colors and ensure it's a tuple with 2 elements
       const colorsArray =
         difficultyColors[levelDifficulty as keyof typeof difficultyColors] ||
         difficultyColors.Easy;
 
-      // Create a safe tuple that's guaranteed to have 2 elements
       const safeGradientColors: readonly [string, string] = [
         colorsArray[0] || "#4CAF50",
         colorsArray[1] || "#2E7D32",
@@ -105,45 +152,19 @@ const LevelSelection = () => {
         >
           <LevelCard
             level={level}
-            onSelect={handleLevelSelect}
+            onSelect={handleLevelSelectWithCompletion}
             gradientColors={safeGradientColors}
           />
         </Animatable.View>
       );
     },
-    [difficultyColors, handleLevelSelect]
+    [difficultyColors, handleLevelSelectWithCompletion]
   );
 
-  // Preload game content for faster response
-  const preloadGameModal = useMemo(() => {
-    if (levels.length > 0) {
-      // Create an invisible prerendered modal
-      return (
-        <View style={{ position: "absolute", opacity: 0, width: 1, height: 1 }}>
-          <GameInfoModal
-            visible={false}
-            onClose={() => {}}
-            onStart={() => {}}
-            levelData={levels[0]?.questionData || {}}
-            gameMode={
-              typeof gameMode === "string" ? gameMode : String(gameMode)
-            }
-            isLoading={false}
-            difficulty="easy"
-          />
-        </View>
-      );
-    }
-
-    return null;
-  }, [levels.length > 0]);
-
-  // Update FlatList state and key extractor
   const keyExtractor = useCallback((item: LevelData) => item.id.toString(), []);
 
-  // Content rendering based on state
+  // Content rendering
   const renderContent = useCallback(() => {
-    // Show loading state
     if (isLoading) {
       return (
         <View style={styles.loaderContainer}>
@@ -152,7 +173,6 @@ const LevelSelection = () => {
       );
     }
 
-    // Show error state
     if (error) {
       return (
         <View style={styles.errorContainer}>
@@ -167,7 +187,6 @@ const LevelSelection = () => {
       );
     }
 
-    // Show loading state while preparing animations
     if (levels.length > 0 && !showLevels) {
       return (
         <View style={styles.loaderContainer}>
@@ -176,7 +195,6 @@ const LevelSelection = () => {
       );
     }
 
-    // Show levels grid with animations
     if (showLevels) {
       return (
         <FlatList
@@ -195,13 +213,12 @@ const LevelSelection = () => {
           removeClippedSubviews={true}
           maintainVisibleContentPosition={{ minIndexForVisible: 0 }}
           initialNumToRender={8}
-          updateCellsBatchingPeriod={16} // For 60fps updates
+          updateCellsBatchingPeriod={16}
           shouldItemUpdate={(prev, next) => prev.item.id !== next.item.id}
         />
       );
     }
 
-    // Fallback empty state
     return (
       <View style={styles.loaderContainer}>
         <DotsLoader />
@@ -210,7 +227,7 @@ const LevelSelection = () => {
   }, [
     isLoading,
     error,
-    levels,
+    levels.length,
     showLevels,
     handleRetry,
     keyExtractor,
@@ -241,17 +258,28 @@ const LevelSelection = () => {
         {/* Content Area */}
         <View style={styles.contentArea}>{renderContent()}</View>
 
-        {/* GameInfoModal - Always mounted but hidden until needed */}
+        {/* Game Info Modal - For non-completed levels */}
         <GameInfoModal
-          visible={showModal && selectedLevel !== null}
-          onClose={handleCloseModal}
+          visible={showGameModal && selectedLevel !== null && selectedLevel.status !== "completed"}
+          onClose={handleCloseGameModal}
           onStart={handleStartGame}
           levelData={selectedLevel?.questionData || levels[0]?.questionData}
           gameMode={typeof gameMode === "string" ? gameMode : String(gameMode)}
           isLoading={isLoading}
           difficulty={selectedLevel?.difficultyCategory || "easy"}
         />
-        {preloadGameModal}
+
+        {/* Level Review Modal - For completed levels */}
+        <LevelReviewModal
+          visible={showReviewModal && selectedLevel !== null && selectedLevel.status === "completed"}
+          onClose={handleCloseReviewModal}
+          level={selectedLevel}
+          gradientColors={
+            selectedLevel
+              ? (difficultyColors[selectedLevel.difficulty as keyof typeof difficultyColors] || difficultyColors.Easy)
+              : difficultyColors.Easy
+          }
+        />
       </SafeAreaView>
     </View>
   );

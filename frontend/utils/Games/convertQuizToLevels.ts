@@ -2,9 +2,10 @@ import { LevelData, QuizQuestions } from "@/types/gameTypes";
 
 export const convertQuizToLevels = (
   gameMode: string,
-  quizData: QuizQuestions
+  quizData: QuizQuestions,
+  userProgressData: any[] = [] // Add progress data parameter
 ): LevelData[] => {
-  console.log(`Attempting to convert ${gameMode} data`);
+  console.log(`Attempting to convert ${gameMode} data with progress integration`);
 
   // Ensure gameMode is a string, not an array
   const safeGameMode =
@@ -51,27 +52,47 @@ export const convertQuizToLevels = (
     return idA - idB;
   });
 
+  // Helper function to determine level status based on progress
+  const getLevelStatus = (questionId: number): "completed" | "current" | "locked" => {
+    // Check if this level has been completed in user progress
+    const levelProgress = userProgressData.find(progress => {
+      // Handle both string and number quiz IDs
+      const progressQuizId = typeof progress.quizId === 'string' 
+        ? parseInt(progress.quizId) 
+        : progress.quizId;
+      return progressQuizId === questionId && progress.completed;
+    });
+
+    if (levelProgress) {
+      console.log(`Level ${questionId} marked as completed based on progress`);
+      return "completed";
+    }
+
+    // For now, make all non-completed levels current (unlocked)
+    // You can add lock logic here based on your requirements
+    return "current";
+  };
+
   // Now map the sorted questions to level objects
   const allLevels: LevelData[] = allQuestions.map(
     (item: any, index: number) => {
-      // Make all levels either completed or current
-      const status = "current";
+      const questionId = item.questionId || item.id || index + 1;
+      const levelStatus = getLevelStatus(questionId);
 
       // Create a level with the proper id and number
       const level: LevelData = {
-        id: item.questionId || item.id || index + 1,
-        number: item.questionId || item.id || index + 1,
-        levelString:
-          item.level || `Level ${item.questionId || item.id || index + 1}`,
-        title: item.title || `Level ${item.questionId || item.id || index + 1}`,
+        id: questionId,
+        number: questionId,
+        levelString: item.level || `Level ${questionId}`,
+        title: item.title || `Level ${questionId}`,
         description: item.description || "Practice your skills",
         difficulty:
           typeof item.difficultyCategory === "string"
             ? item.difficultyCategory.charAt(0).toUpperCase() +
               item.difficultyCategory.slice(1)
             : "Easy",
-        status: status as "completed" | "current" | "locked",
-        stars: status === "completed" ? 3 : Math.floor(Math.random() * 3),
+        status: levelStatus, // Use dynamic status based on progress
+        stars: levelStatus === "completed" ? 3 : Math.floor(Math.random() * 3),
         focusArea: item.focusArea
           ? item.focusArea.charAt(0).toUpperCase() + item.focusArea.slice(1)
           : item.description?.includes("grammar")
@@ -88,7 +109,7 @@ export const convertQuizToLevels = (
   );
 
   console.log(
-    `Converted ${allLevels.length} levels for ${gameMode} in proper order`
+    `Converted ${allLevels.length} levels for ${gameMode} with ${allLevels.filter(l => l.status === 'completed').length} completed levels`
   );
   return allLevels;
 };
