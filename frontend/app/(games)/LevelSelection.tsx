@@ -1,5 +1,5 @@
 import { Text, View, FlatList, StatusBar } from "react-native";
-import React, { useCallback, useEffect, useMemo, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useState, useRef } from "react";
 import { useLocalSearchParams, router, useFocusEffect } from "expo-router";
 import { AlertTriangle, RefreshCw } from "react-native-feather";
 import * as Animatable from "react-native-animatable";
@@ -30,7 +30,7 @@ const LevelSelection = () => {
     error,
     completionPercentage,
     handleRetry,
-    refreshLevels, // Add this new function
+    refreshLevels,
   } = useLevelData(gameMode);
 
   // Local state for modal handling
@@ -39,18 +39,36 @@ const LevelSelection = () => {
   const [showReviewModal, setShowReviewModal] = useState(false);
   const [preloadedModal, setPreloadedModal] = useState(false);
 
-  // CRITICAL FIX: Refresh levels when screen comes into focus
+  // PERFORMANCE FIX: Use refs to prevent unnecessary refreshes
+  const lastRefreshTimeRef = useRef(0);
+  const isRefreshingRef = useRef(false);
+
+  // PERFORMANCE FIX: Throttled refresh function
+  const throttledRefreshLevels = useCallback(async () => {
+    const now = Date.now();
+    
+    // Only refresh if it's been at least 2 seconds since last refresh
+    if (now - lastRefreshTimeRef.current < 2000 || isRefreshingRef.current) {
+      console.log('[LevelSelection] Skipping refresh - too recent or already in progress');
+      return;
+    }
+
+    isRefreshingRef.current = true;
+    lastRefreshTimeRef.current = now;
+    
+    try {
+      await refreshLevels();
+    } finally {
+      isRefreshingRef.current = false;
+    }
+  }, [refreshLevels]);
+
+  // PERFORMANCE FIX: Optimized focus effect with throttling
   useFocusEffect(
     useCallback(() => {
-      console.log('[LevelSelection] Screen focused, refreshing levels...');
-      
-      // Small delay to ensure any pending progress updates have completed
-      const refreshTimeout = setTimeout(() => {
-        refreshLevels();
-      }, 300);
-
-      return () => clearTimeout(refreshTimeout);
-    }, [refreshLevels])
+      console.log('[LevelSelection] Screen focused, throttled refresh...');
+      throttledRefreshLevels();
+    }, [throttledRefreshLevels])
   );
 
   // Preload the modal when levels are available (only once)
@@ -83,7 +101,7 @@ const LevelSelection = () => {
     });
   }, [selectedLevel, gameMode, gameTitle]);
 
-  // FIXED: Level select handler to check completion status
+  // PERFORMANCE FIX: Level select handler
   const handleLevelSelectWithCompletion = useCallback((level: LevelData) => {
     if (level.status === "locked") {
       console.log(`[LevelSelection] Level ${level.id} is locked`);
@@ -117,17 +135,22 @@ const LevelSelection = () => {
     setSelectedLevel(null);
   }, []);
 
-  // Memoize difficulty colors
+  // PERFORMANCE FIX: Stable difficulty colors
   const difficultyColors = useMemo(
     () => ({
-      Easy: ["#4CAF50", "#2E7D32"],
-      Medium: ["#FF9800", "#EF6C00"],
-      Hard: ["#F44336", "#C62828"],
+      Easy: ["#4CAF50", "#2E7D32"] as const,
+      Medium: ["#FF9800", "#EF6C00"] as const,
+      Hard: ["#F44336", "#C62828"] as const,
     }),
     []
   );
 
-  // Memoize renderItem function
+  // PERFORMANCE FIX: Memoized level status hash for stable comparison
+  const levelStatusHash = useMemo(() => {
+    return levels.map(l => `${l.id}-${l.status}`).join(',');
+  }, [levels]);
+
+  // PERFORMANCE FIX: Memoized renderItem with stable comparison
   const renderItem = useCallback(
     ({ item: level }: { item: LevelData }) => {
       const levelDifficulty =
@@ -142,26 +165,37 @@ const LevelSelection = () => {
         colorsArray[1] || "#2E7D32",
       ];
 
+      // PERFORMANCE FIX: Only log Level 1 status changes, not every render
+      if (level.id === 1) {
+        const currentStatus = level.status;
+        const lastStatus = renderItem.lastLevel1Status;
+        
+        if (currentStatus !== lastStatus) {
+          console.log(`[LevelSelection] Level 1 status changed: ${lastStatus} -> ${currentStatus}`);
+          renderItem.lastLevel1Status = currentStatus;
+        }
+      }
+
       return (
-        <Animatable.View
-          animation="fadeIn"
-          duration={300}
-          delay={Math.min(level.id * 10, 300)}
-          key={level.id}
-          useNativeDriver
-        >
-          <LevelCard
-            level={level}
-            onSelect={handleLevelSelectWithCompletion}
-            gradientColors={safeGradientColors}
-          />
-        </Animatable.View>
+        <LevelCard
+          level={level}
+          onSelect={handleLevelSelectWithCompletion}
+          gradientColors={safeGradientColors}
+        />
       );
     },
     [difficultyColors, handleLevelSelectWithCompletion]
   );
 
-  const keyExtractor = useCallback((item: LevelData) => item.id.toString(), []);
+  // PERFORMANCE FIX: Stable keyExtractor
+  const keyExtractor = useCallback((item: LevelData) => `level-${item.id}`, []);
+
+  // PERFORMANCE FIX: Memoized FlatList getItemLayout
+  const getItemLayout = useCallback((data: any, index: number) => ({
+    length: 180, // Approximate item height
+    offset: 180 * Math.floor(index / 2), // For 2 columns
+    index,
+  }), []);
 
   // Content rendering
   const renderContent = useCallback(() => {
@@ -208,13 +242,20 @@ const LevelSelection = () => {
             { paddingBottom: 5 },
           ]}
           showsVerticalScrollIndicator={false}
-          windowSize={7}
-          maxToRenderPerBatch={5}
+          
+          // PERFORMANCE OPTIMIZATIONS:
+          windowSize={3}                    // Reduced from 5
+          maxToRenderPerBatch={6}          // Optimized for 2 columns
+          initialNumToRender={8}           // Show 4 rows initially
           removeClippedSubviews={true}
-          maintainVisibleContentPosition={{ minIndexForVisible: 0 }}
-          initialNumToRender={8}
-          updateCellsBatchingPeriod={16}
-          shouldItemUpdate={(prev, next) => prev.item.id !== next.item.id}
+          updateCellsBatchingPeriod={100}  // Increased to reduce updates
+          getItemLayout={getItemLayout}
+          
+          // PERFORMANCE FIX: Use stable extraData
+          extraData={levelStatusHash}
+          
+          // PERFORMANCE FIX: Optimized shouldComponentUpdate equivalent
+          onViewableItemsChanged={undefined} // Disable if not needed
         />
       );
     }
@@ -227,11 +268,13 @@ const LevelSelection = () => {
   }, [
     isLoading,
     error,
-    levels.length,
+    levels,
     showLevels,
     handleRetry,
     keyExtractor,
     renderItem,
+    levelStatusHash,
+    getItemLayout,
   ]);
 
   return (

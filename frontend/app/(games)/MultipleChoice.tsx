@@ -20,13 +20,12 @@ const MultipleChoice: React.FC<MultipleChoiceProps> = ({
   difficulty = "easy",
   isStarted = false,
 }) => {
-  // Add the user progress hook
-  const { progress, updateProgress, fetchProgress } = useUserProgress(
-    // Use questionId from levelData if available, otherwise use levelId
+  // Get user progress
+  const { progress, updateProgress, refreshProgress } = useUserProgress(
     levelData?.questionId || levelId
   );
 
-  // Get state and actions from the centralized store
+  // Get quiz store state and actions
   const {
     gameState: { score, gameStatus, timerRunning, timeElapsed },
     multipleChoiceState: { selectedOption, currentQuestion },
@@ -35,45 +34,85 @@ const MultipleChoice: React.FC<MultipleChoiceProps> = ({
     handleRestart,
     handleOptionSelect,
     setTimeElapsed,
+    setTimerRunning,
   } = useQuizStore();
 
   // Set initial time from progress when component mounts
   useEffect(() => {
-    if (progress && progress.totalTimeSpent > 0) {
+    if (progress && !Array.isArray(progress) && progress.totalTimeSpent > 0) {
+      console.log(
+        `[MultipleChoice] Setting initial time from progress: ${progress.totalTimeSpent}`
+      );
       setTimeElapsed(progress.totalTimeSpent);
+    } else {
+      console.log(`[MultipleChoice] Resetting timer to 0`);
+      setTimeElapsed(0);
     }
-  }, [progress]);
+  }, [progress, setTimeElapsed]);
 
-  // Custom option select handler with progress tracking
+  // ENHANCED: Option selection handler with progress tracking and completion
   const handleOptionSelectWithProgress = async (optionId: string) => {
-    // First get the option details
-    const selectedOptionObj = currentQuestion?.options.find(
-      (option) => option.id === optionId
-    );
-    const isCorrect = !!selectedOptionObj?.isCorrect;
+    try {
+      console.log(`[MultipleChoice] Option selected: ${optionId}`);
 
-    // Call the original handler
-    handleOptionSelect(optionId);
+      // 1. Stop the timer and capture current time
+      setTimerRunning(false);
+      const currentTime = timeElapsed;
+      console.log(`[MultipleChoice] Time captured: ${currentTime}`);
 
-    // Update progress with current time and completion status
-    await updateProgress(timeElapsed, isCorrect);
+      // 2. Get if the answer is correct
+      const isCorrect = !!currentQuestion?.options.find(
+        (option) => option.id === optionId && option.isCorrect
+      );
+
+      // 3. Call the option select handler in quiz store
+      handleOptionSelect(optionId);
+
+      // 4. CRITICAL FIX: Update progress with completion status immediately
+      console.log(
+        `[MultipleChoice] Updating progress - Time: ${currentTime}, Correct: ${isCorrect}, Completed: ${isCorrect}`
+      );
+
+      const updatedProgress = await updateProgress(
+        currentTime,
+        isCorrect,
+        isCorrect
+      );
+
+      // 5. If level was completed, force a global progress refresh
+      if (isCorrect && updatedProgress) {
+        console.log(
+          `[MultipleChoice] Level ${levelId} completed successfully! Refreshing global progress...`
+        );
+
+        // Force refresh global progress immediately
+        setTimeout(async () => {
+          await refreshProgress();
+          console.log(
+            `[MultipleChoice] Global progress refreshed after completion`
+          );
+        }, 200);
+      }
+    } catch (error) {
+      console.error("[MultipleChoice] Error in option selection:", error);
+    }
   };
 
-  // Custom restart handler that preserves time
+  // Restart handler with progress sync
   const handleRestartWithProgress = async () => {
-    // Call original restart
     handleRestart();
 
-    // Refetch progress to ensure we have latest data
-    const latestProgress = await fetchProgress();
-
-    // Set timer to continue from where they left off
-    if (latestProgress && latestProgress.totalTimeSpent > 0) {
-      setTimeElapsed(latestProgress.totalTimeSpent);
+    // Reset timer to continue from where they left off if they have progress
+    if (progress && !Array.isArray(progress) && progress.totalTimeSpent > 0) {
+      setTimeElapsed(progress.totalTimeSpent);
+    } else {
+      setTimeElapsed(0);
     }
+
+    console.log(`[MultipleChoice] Restarting game`);
   };
 
-  // Initialize the game with common hook and pass initial time
+  // Initialize game
   useGameInitialization(
     levelData,
     levelId,
@@ -84,15 +123,15 @@ const MultipleChoice: React.FC<MultipleChoiceProps> = ({
     startGame,
     gameStatus,
     timerRunning,
-    progress?.totalTimeSpent // Pass the total time spent
+    progress && !Array.isArray(progress) ? progress.totalTimeSpent : 0
   );
+
+  // Game content configuration
   const focusArea =
     currentQuestion?.focusArea || levelData?.focusArea || "Vocabulary";
-
-  // Calculate correct answer for review
-  const selectedAnswerText =
-    currentQuestion?.options?.find((o) => o.id === selectedOption)?.text || "";
-
+  const selectedAnswerText = currentQuestion?.options?.find(
+    (o) => o.id === selectedOption
+  )?.text || "";
   const isSelectedCorrect =
     currentQuestion?.options?.find((o) => o.id === selectedOption)?.isCorrect ||
     false;
@@ -113,14 +152,16 @@ const MultipleChoice: React.FC<MultipleChoiceProps> = ({
           isStarted={isStarted}
           focusArea={focusArea}
           gameStatus={gameStatus}
-          initialTime={progress?.totalTimeSpent}
+          initialTime={
+            progress && !Array.isArray(progress) ? progress.totalTimeSpent : 0
+          }
         >
           <MultipleChoicePlayingContent
             difficulty={difficulty}
             levelData={levelData}
             currentQuestion={currentQuestion}
             selectedOption={selectedOption}
-            handleOptionSelect={handleOptionSelectWithProgress} // Use new handler
+            handleOptionSelect={handleOptionSelectWithProgress}
             isStarted={isStarted}
           />
         </GamePlayingContent>
@@ -135,7 +176,8 @@ const MultipleChoice: React.FC<MultipleChoiceProps> = ({
           levelId={levelId}
           gameMode="multipleChoice"
           gameTitle="Multiple Choice"
-          onRestart={handleRestartWithProgress} // Use custom handler
+          onRestart={handleRestartWithProgress}
+          focusArea={focusArea}
         />
       )}
     </GameContainer>

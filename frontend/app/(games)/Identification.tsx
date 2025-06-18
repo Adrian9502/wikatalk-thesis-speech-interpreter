@@ -25,7 +25,7 @@ const Identification: React.FC<IdentificationProps> = ({
   isStarted = false,
 }) => {
   // user progress hook
-  const { progress, updateProgress, fetchProgress } = useUserProgress(
+  const { progress, updateProgress, refreshProgress } = useUserProgress(
     levelData?.questionId || levelId
   );
 
@@ -46,48 +46,79 @@ const Identification: React.FC<IdentificationProps> = ({
     handleWordSelect,
     toggleIdentificationTranslation: toggleTranslation,
     setTimeElapsed,
+    setTimerRunning,
   } = useQuizStore();
 
   // Set initial time from progress when component mounts
   useEffect(() => {
-    if (progress && progress.totalTimeSpent > 0) {
+    if (progress && !Array.isArray(progress) && progress.totalTimeSpent > 0) {
+      console.log(
+        `[Identification] Setting initial time from progress: ${progress.totalTimeSpent}`
+      );
       setTimeElapsed(progress.totalTimeSpent);
+    } else {
+      console.log(`[Identification] Resetting timer to 0`);
+      setTimeElapsed(0);
     }
-  }, [progress]);
+  }, [progress, setTimeElapsed]);
 
-  // Custom word select handler with progress tracking
+  // ENHANCED: Word selection handler with progress tracking and completion
   const handleWordSelectWithProgress = async (wordIndex: number) => {
-    // Call the original handler
-    handleWordSelect(wordIndex);
+    try {
+      console.log(`[Identification] Word selected at index: ${wordIndex}`);
 
-    // Get if the answer is correct
-    const isCorrect =
-      words[wordIndex]?.clean?.toLowerCase() ===
-      sentences[currentSentenceIndex]?.answer?.toLowerCase();
+      // 1. Stop the timer and capture current time
+      setTimerRunning(false);
+      const currentTime = timeElapsed;
+      console.log(`[Identification] Time captured: ${currentTime}`);
 
-    // Update progress with current time and completion status
-    await updateProgress(timeElapsed, isCorrect);
+      // 2. Get if the answer is correct
+      const isCorrect =
+        words[wordIndex]?.clean?.toLowerCase() ===
+        sentences[currentSentenceIndex]?.answer?.toLowerCase();
+
+      // 3. Call the word select handler in quiz store
+      handleWordSelect(wordIndex);
+
+      // 4. CRITICAL FIX: Update progress with completion status
+      const updatedProgress = await updateProgress(currentTime, isCorrect, isCorrect);
+
+      // 5. If level was completed, force refresh global progress
+      if (isCorrect && updatedProgress) {
+        console.log(
+          `[Identification] Level ${levelId} completed successfully!`,
+          updatedProgress
+        );
+
+        setTimeout(async () => {
+          await refreshProgress();
+          console.log(`[Identification] Global progress refreshed after completion`);
+        }, 200);
+      }
+    } catch (error) {
+      console.error("[Identification] Error in word selection:", error);
+    }
   };
 
-  // Custom restart handler that preserves time
+  // Restart handler with progress sync
   const handleRestartWithProgress = async () => {
-    // Call original restart
     handleRestart();
 
-    // Refetch progress to ensure we have latest data
-    const latestProgress = await fetchProgress();
-
-    // Set timer to continue from where they left off
-    if (latestProgress && latestProgress.totalTimeSpent > 0) {
-      setTimeElapsed(latestProgress.totalTimeSpent);
+    // Reset timer to continue from where they left off if they have progress
+    if (progress && !Array.isArray(progress) && progress.totalTimeSpent > 0) {
+      setTimeElapsed(progress.totalTimeSpent);
+    } else {
+      setTimeElapsed(0);
     }
+
+    console.log(`[Identification] Restarting game`);
   };
 
   // Current sentence and game mode
   const currentSentence = sentences[currentSentenceIndex];
   const gameMode = "identification";
 
-  // Initialize game with progress time
+  // Initialize game
   useGameInitialization(
     levelData,
     levelId,
@@ -98,11 +129,10 @@ const Identification: React.FC<IdentificationProps> = ({
     startGame,
     gameStatus,
     timerRunning,
-    progress?.totalTimeSpent // Pass the total time spent
+    progress && !Array.isArray(progress) ? progress.totalTimeSpent : 0
   );
 
-  const focusArea =
-    currentSentence?.focusArea || levelData?.focusArea || "Vocabulary";
+  const focusArea = currentSentence?.focusArea || levelData?.focusArea || "Vocabulary";
 
   // Calculate selected answer for review
   const selectedAnswerText =
@@ -114,6 +144,7 @@ const Identification: React.FC<IdentificationProps> = ({
         : "Unknown"
       : "Unknown";
 
+  // Error state handling
   if (error) {
     return (
       <GameContainer
@@ -163,7 +194,7 @@ const Identification: React.FC<IdentificationProps> = ({
           focusArea={focusArea}
           isStarted={isStarted}
           gameStatus={gameStatus}
-          initialTime={progress?.totalTimeSpent}
+          initialTime={progress && !Array.isArray(progress) ? progress.totalTimeSpent : 0}
         >
           <IdentificationPlayingContent
             difficulty={difficulty}
@@ -173,7 +204,7 @@ const Identification: React.FC<IdentificationProps> = ({
             selectedWord={selectedWord}
             showTranslation={showTranslation}
             toggleTranslation={toggleTranslation}
-            handleWordSelect={handleWordSelectWithProgress} // Use new handler
+            handleWordSelect={handleWordSelectWithProgress}
           />
         </GamePlayingContent>
       ) : (
@@ -189,7 +220,8 @@ const Identification: React.FC<IdentificationProps> = ({
           levelId={levelId}
           gameMode="identification"
           gameTitle="Word Identification"
-          onRestart={handleRestartWithProgress} // Use new handler
+          onRestart={handleRestartWithProgress}
+          focusArea={focusArea}
         />
       )}
     </GameContainer>

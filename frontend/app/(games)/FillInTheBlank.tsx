@@ -22,11 +22,11 @@ const FillInTheBlank: React.FC<FillInTheBlankProps> = ({
   isStarted = false,
 }) => {
   // User progress hook
-  const { progress, updateProgress, fetchProgress } = useUserProgress(
+  const { progress, updateProgress, refreshProgress } = useUserProgress(
     levelData?.questionId || levelId
   );
 
-  // Get state and actions from the centralized store
+  // Get quiz store state and actions
   const {
     gameState: { score, gameStatus, timerRunning, timeElapsed },
     fillInTheBlankState: {
@@ -52,48 +52,84 @@ const FillInTheBlank: React.FC<FillInTheBlankProps> = ({
 
   // Set initial time from progress when component mounts
   useEffect(() => {
-    if (progress && progress.totalTimeSpent > 0) {
+    if (progress && !Array.isArray(progress) && progress.totalTimeSpent > 0) {
+      console.log(
+        `[FillInTheBlank] Setting initial time from progress: ${progress.totalTimeSpent}`
+      );
       setTimeElapsed(progress.totalTimeSpent);
+    } else {
+      console.log(`[FillInTheBlank] Resetting timer to 0`);
+      setTimeElapsed(0);
     }
-  }, [progress]);
+  }, [progress, setTimeElapsed]);
 
-  // Custom answer check handler with progress tracking
+  // ENHANCED: Check answer handler with progress tracking and completion
   const checkAnswerWithProgress = async () => {
-    // Call the original handler
-    checkAnswer();
+    try {
+      console.log(`[FillInTheBlank] Checking answer: ${userAnswer}`);
 
-    // Only update progress if feedback is shown (answer has been submitted)
-    // We need to use a timeout because the showFeedback state updates after checkAnswer() is called
-    setTimeout(async () => {
-      const currentState = useQuizStore.getState().fillInTheBlankState;
-      if (currentState.showFeedback) {
-        await updateProgress(timeElapsed, currentState.isCorrect);
-      }
-    }, 100);
+      // 1. Stop the timer and capture current time
+      setTimerRunning(false);
+      const currentTime = timeElapsed;
+      console.log(`[FillInTheBlank] Time captured: ${currentTime}`);
+
+      // 2. Call the check answer handler in quiz store
+      checkAnswer();
+
+      // 3. Update the user progress in backend
+      // We need to use setTimeout because isCorrect state updates after checkAnswer
+      setTimeout(async () => {
+        const currentState = useQuizStore.getState().fillInTheBlankState;
+        if (currentState.showFeedback) {
+          const updatedProgress = await updateProgress(
+            currentTime,
+            currentState.isCorrect,
+            currentState.isCorrect
+          );
+
+          // If level was completed, refresh global progress
+          if (currentState.isCorrect && updatedProgress) {
+            console.log(
+              `[FillInTheBlank] Level ${levelId} completed successfully!`,
+              updatedProgress
+            );
+
+            setTimeout(async () => {
+              await refreshProgress();
+              console.log(
+                `[FillInTheBlank] Global progress refreshed after completion`
+              );
+            }, 200);
+          }
+        }
+      }, 100);
+    } catch (error) {
+      console.error("[FillInTheBlank] Error in answer check:", error);
+    }
   };
 
-  // Custom restart handler that preserves time
+  // Restart handler with progress sync
   const handleRestartWithProgress = async () => {
-    // Call original restart
     handleRestart();
 
-    // Refetch progress to ensure we have latest data
-    const latestProgress = await fetchProgress();
-
-    // Set timer to continue from where they left off
-    if (latestProgress && latestProgress.totalTimeSpent > 0) {
-      setTimeElapsed(latestProgress.totalTimeSpent);
+    // Reset timer to continue from where they left off if they have progress
+    if (progress && !Array.isArray(progress) && progress.totalTimeSpent > 0) {
+      setTimeElapsed(progress.totalTimeSpent);
+    } else {
+      setTimeElapsed(0);
     }
+
+    console.log(`[FillInTheBlank] Restarting game`);
   };
 
-  // Current exercise
+  // Current exercise and game mode
   const currentExercise = exercises[currentExerciseIndex];
   const gameMode = "fillBlanks";
 
   const focusArea =
     currentExercise?.focusArea || levelData?.focusArea || "Vocabulary";
 
-  // Initialize game with progress time
+  // Initialize game
   useGameInitialization(
     levelData,
     levelId,
@@ -104,7 +140,7 @@ const FillInTheBlank: React.FC<FillInTheBlankProps> = ({
     startGame,
     gameStatus,
     timerRunning,
-    progress?.totalTimeSpent // Pass the total time spent
+    progress && !Array.isArray(progress) ? progress.totalTimeSpent : 0
   );
 
   // Stop timer when answer is checked
@@ -143,7 +179,9 @@ const FillInTheBlank: React.FC<FillInTheBlankProps> = ({
             focusArea={focusArea}
             isStarted={isStarted}
             gameStatus={gameStatus}
-            initialTime={progress?.totalTimeSpent}
+            initialTime={
+              progress && !Array.isArray(progress) ? progress.totalTimeSpent : 0
+            }
           >
             <FillInTheBlankPlayingContent
               difficulty={difficulty}
@@ -159,7 +197,7 @@ const FillInTheBlank: React.FC<FillInTheBlankProps> = ({
               setUserAnswer={setUserAnswer}
               toggleHint={memoizedToggleHint}
               toggleTranslation={memoizedToggleTranslation}
-              checkAnswer={checkAnswerWithProgress} // Use new handler
+              checkAnswer={checkAnswerWithProgress}
             />
           </GamePlayingContent>
         ) : (
@@ -173,7 +211,8 @@ const FillInTheBlank: React.FC<FillInTheBlankProps> = ({
             levelId={levelId}
             gameMode="fillBlanks"
             gameTitle="Fill in the Blank"
-            onRestart={handleRestartWithProgress} // Use new handler
+            onRestart={handleRestartWithProgress}
+            focusArea={focusArea}
           />
         )}
       </GameContainer>

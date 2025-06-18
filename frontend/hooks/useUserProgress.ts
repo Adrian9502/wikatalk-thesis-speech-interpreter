@@ -62,7 +62,7 @@ export const useUserProgress = (quizId: string | number | "global") => {
 
       // Handle global progress fetch
       if (quizId === "global") {
-        console.log(`[useUserProgress] Fetching all progress`);
+        console.log(`[useUserProgress] Fetching all progress (force: ${forceRefresh})`);
 
         const response = await axios({
           method: "get",
@@ -94,7 +94,7 @@ export const useUserProgress = (quizId: string | number | "global") => {
 
       // Normal case - specific quiz ID
       const formattedId = formatQuizId(quizId);
-      console.log(`[useUserProgress] Fetching progress for: ${formattedId}`);
+      console.log(`[useUserProgress] Fetching progress for: ${formattedId} (force: ${forceRefresh})`);
 
       const response = await axios({
         method: "get",
@@ -135,7 +135,7 @@ export const useUserProgress = (quizId: string | number | "global") => {
     }
   }, [quizId, formatQuizId, createDefaultProgress]);
 
-  // ENHANCED: Update progress function with cache invalidation
+  // ENHANCED: Update progress function with immediate cache update
   const updateProgress = useCallback(async (
     timeSpent: number,
     completed?: boolean,
@@ -175,18 +175,35 @@ export const useUserProgress = (quizId: string | number | "global") => {
         const currentCacheKey = String(quizId);
         progressCacheRef.current[currentCacheKey] = updatedProgress;
         
-        // CRITICAL FIX: Invalidate global cache to force refresh
-        delete progressCacheRef.current["global"];
-        
-        // If this was a completion, trigger a global progress refresh
+        // CRITICAL FIX: If this was a completion, immediately update global cache
         if (completed && isCorrect) {
-          console.log(`[useUserProgress] Level completed! Refreshing global progress cache`);
-          setTimeout(() => {
-            // Force refresh global progress after a short delay
-            if (progressCacheRef.current["global"]) {
-              delete progressCacheRef.current["global"];
+          console.log(`[useUserProgress] Level completed! Force refreshing global cache...`);
+          
+          // Invalidate global cache
+          delete progressCacheRef.current["global"];
+          
+          // IMMEDIATE GLOBAL REFRESH: Fetch updated global data right away
+          try {
+            const globalToken = getToken();
+            if (globalToken) {
+              const globalResponse = await axios({
+                method: "get",
+                url: `${API_URL}/api/userprogress`,
+                headers: {
+                  Authorization: `Bearer ${globalToken}`,
+                  "Content-Type": "application/json",
+                },
+                timeout: 5000,
+              });
+
+              if (globalResponse.data.success) {
+                console.log(`[useUserProgress] Immediately updated global cache with latest completion`);
+                progressCacheRef.current["global"] = globalResponse.data.progressEntries;
+              }
             }
-          }, 100);
+          } catch (globalError) {
+            console.warn(`[useUserProgress] Failed to immediately refresh global cache:`, globalError);
+          }
         }
         
         return updatedProgress;

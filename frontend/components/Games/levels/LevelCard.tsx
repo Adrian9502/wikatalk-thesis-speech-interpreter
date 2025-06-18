@@ -1,4 +1,4 @@
-import React from "react";
+import React,{useRef,useEffect} from "react";
 import { Text, View, TouchableOpacity } from "react-native";
 import { Star, Lock, Check } from "react-native-feather";
 import { LinearGradient } from "expo-linear-gradient";
@@ -14,8 +14,9 @@ interface LevelCardProps {
   gradientColors: readonly [string, string];
 }
 
-const LevelCard = React.memo(
-  ({ level, onSelect, gradientColors }: LevelCardProps) => {
+
+const LevelCard: React.FC<LevelCardProps> = React.memo(
+  ({ level, onSelect, gradientColors }) => {
     // Pull out needed props with type assertion to handle possible undefined
     const {
       levelString = "",
@@ -26,6 +27,13 @@ const LevelCard = React.memo(
     } = level || {};
 
     const starCount = getStarCount(difficulty);
+    const renderCount = useRef(0);
+    useEffect(() => {
+      renderCount.current += 1;
+      if (renderCount.current > 5) {
+        console.warn(`[PERFORMANCE] LevelSelection rendered ${renderCount.current} times - investigate!`);
+      }
+    });
 
     return (
       <TouchableOpacity
@@ -114,12 +122,14 @@ const LevelCard = React.memo(
       </TouchableOpacity>
     );
   },
-  // Ensure the memo comparison function is optimized:
+  // PERFORMANCE FIX: Enhanced memo comparison
   (prevProps, nextProps) => {
     return (
       prevProps.level.id === nextProps.level.id &&
+      prevProps.level.status === nextProps.level.status &&
+      prevProps.level.title === nextProps.level.title &&
       prevProps.gradientColors[0] === nextProps.gradientColors[0] &&
-      prevProps.level.status === nextProps.level.status
+      prevProps.gradientColors[1] === nextProps.gradientColors[1]
     );
   }
 );

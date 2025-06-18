@@ -11,22 +11,23 @@ export const useLevelData = (gameMode: string | string[] | undefined) => {
   const { fetchQuestionsByMode, questions, isLoading, error } = useQuizStore();
   const { progress: globalProgress, refreshProgress } = useUserProgress("global");
   
-  // OPTIMIZED: Use refs to prevent unnecessary re-renders
+  // PERFORMANCE FIX: More efficient refs
   const hasInitializedRef = useRef(false);
   const lastGameModeRef = useRef<string | undefined>();
   const lastProgressHashRef = useRef<string>("");
   const levelsRef = useRef<LevelData[]>([]);
+  const isProcessingRef = useRef(false);
 
-  // OPTIMIZED: Create a hash of progress to detect actual changes
+  // PERFORMANCE FIX: Optimized progress hash
   const getProgressHash = useCallback((progress: any[]): string => {
     if (!Array.isArray(progress)) return "";
     return progress
-      .map(p => `${p.quizId}-${p.completed}-${p.lastAttemptDate}`)
+      .map(p => `${p.quizId}-${p.completed}-${p.totalTimeSpent}`)
       .sort()
       .join("|");
   }, []);
 
-  // OPTIMIZED: Debounced fetch function
+  // PERFORMANCE FIX: Debounced fetch function
   const fetchData = useCallback(async () => {
     if (!gameMode || hasInitializedRef.current) return;
     
@@ -50,9 +51,9 @@ export const useLevelData = (gameMode: string | string[] | undefined) => {
     fetchData();
   }, [fetchData]);
 
-  // OPTIMIZED: Process levels only when there are actual changes
+  // PERFORMANCE FIX: Throttled level processing
   useEffect(() => {
-    if (!gameMode || !questions) return;
+    if (!gameMode || !questions || isProcessingRef.current) return;
     
     const progressArray = Array.isArray(globalProgress) ? globalProgress : [];
     const currentProgressHash = getProgressHash(progressArray);
@@ -62,10 +63,12 @@ export const useLevelData = (gameMode: string | string[] | undefined) => {
     const hasNoLevels = levelsRef.current.length === 0;
     
     if (hasNoLevels || hasProgressChanged) {
+      isProcessingRef.current = true;
+      
       try {
         const safeGameMode = typeof gameMode === "string" ? gameMode : String(gameMode);
         
-        console.log(`[useLevelData] Processing levels for ${safeGameMode} with ${progressArray.length} progress entries`);
+        console.log(`[useLevelData] Processing levels for ${safeGameMode} (hash changed: ${hasProgressChanged})`);
         
         const currentLevels = convertQuizToLevels(
           safeGameMode,
@@ -73,8 +76,14 @@ export const useLevelData = (gameMode: string | string[] | undefined) => {
           progressArray
         );
         
-        // OPTIMIZED: Only update if levels actually changed
-        if (JSON.stringify(currentLevels) !== JSON.stringify(levelsRef.current)) {
+        // PERFORMANCE FIX: More efficient comparison
+        const statusChanges = currentLevels.filter((newLevel, index) => {
+          const oldLevel = levelsRef.current[index];
+          return !oldLevel || oldLevel.status !== newLevel.status;
+        });
+                            
+        if (statusChanges.length > 0 || hasNoLevels) {
+          console.log(`[useLevelData] ${statusChanges.length} level status changes detected`);
           setLevels(currentLevels);
           levelsRef.current = currentLevels;
           lastProgressHashRef.current = currentProgressHash;
@@ -83,20 +92,33 @@ export const useLevelData = (gameMode: string | string[] | undefined) => {
           if (currentLevels.length > 0) {
             setTimeout(() => setShowLevels(true), 100);
           }
+        } else {
+          console.log(`[useLevelData] No level status changes detected`);
         }
       } catch (error) {
         console.error("Error converting levels:", error);
         setLevels([]);
         setShowLevels(false);
+      } finally {
+        isProcessingRef.current = false;
       }
     }
   }, [gameMode, questions, globalProgress, getProgressHash]);
 
-  // OPTIMIZED: Throttled refresh function
+  // PERFORMANCE FIX: Throttled refresh function
   const refreshLevels = useCallback(async () => {
+    if (isProcessingRef.current) {
+      console.log(`[useLevelData] Skipping refresh - already processing`);
+      return;
+    }
+    
     console.log(`[useLevelData] Manually refreshing levels`);
     try {
+      // Force refresh the global progress
       await refreshProgress();
+      
+      // Reset the hash to force level reprocessing
+      lastProgressHashRef.current = "";
     } catch (error) {
       console.error("Error refreshing levels:", error);
     }

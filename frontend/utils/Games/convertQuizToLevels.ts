@@ -3,9 +3,9 @@ import { LevelData, QuizQuestions } from "@/types/gameTypes";
 export const convertQuizToLevels = (
   gameMode: string,
   quizData: QuizQuestions,
-  userProgressData: any[] = [] // Add progress data parameter
+  userProgressData: any[] = []
 ): LevelData[] => {
-  console.log(`Attempting to convert ${gameMode} data with progress integration`);
+  console.log(`[convertQuizToLevels] Converting ${gameMode} data with ${userProgressData.length} progress entries`);
 
   // Ensure gameMode is a string, not an array
   const safeGameMode =
@@ -52,24 +52,40 @@ export const convertQuizToLevels = (
     return idA - idB;
   });
 
-  // Helper function to determine level status based on progress
+  // ENHANCED: Helper function to determine level status based on progress
   const getLevelStatus = (questionId: number): "completed" | "current" | "locked" => {
     // Check if this level has been completed in user progress
     const levelProgress = userProgressData.find(progress => {
-      // Handle both string and number quiz IDs
-      const progressQuizId = typeof progress.quizId === 'string' 
-        ? parseInt(progress.quizId) 
-        : progress.quizId;
-      return progressQuizId === questionId && progress.completed;
+      // Handle both string and number quiz IDs with proper parsing
+      let progressQuizId: number;
+      
+      if (typeof progress.quizId === 'string') {
+        // Remove any prefix and parse to number
+        const cleanId = progress.quizId.replace(/^n-/, '');
+        progressQuizId = parseInt(cleanId, 10);
+      } else {
+        progressQuizId = progress.quizId;
+      }
+      
+      const isMatched = progressQuizId === questionId && progress.completed === true;
+      
+      if (isMatched) {
+        console.log(`[convertQuizToLevels] Level ${questionId} marked as COMPLETED based on progress:`, {
+          progressQuizId,
+          questionId,
+          completed: progress.completed,
+          attempts: progress.attempts?.length || 0
+        });
+      }
+      
+      return isMatched;
     });
 
     if (levelProgress) {
-      console.log(`Level ${questionId} marked as completed based on progress`);
       return "completed";
     }
 
     // For now, make all non-completed levels current (unlocked)
-    // You can add lock logic here based on your requirements
     return "current";
   };
 
@@ -108,8 +124,14 @@ export const convertQuizToLevels = (
     }
   );
 
-  console.log(
-    `Converted ${allLevels.length} levels for ${gameMode} with ${allLevels.filter(l => l.status === 'completed').length} completed levels`
-  );
+  const completedCount = allLevels.filter(l => l.status === 'completed').length;
+  console.log(`[convertQuizToLevels] Converted ${allLevels.length} levels for ${gameMode} with ${completedCount} completed levels`);
+  
+  // Debug: Log completed levels for troubleshooting
+  if (completedCount > 0) {
+    const completedLevels = allLevels.filter(l => l.status === 'completed');
+    console.log('[convertQuizToLevels] Completed levels:', completedLevels.map(l => ({ id: l.id, status: l.status, title: l.title })));
+  }
+  
   return allLevels;
 };
