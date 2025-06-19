@@ -69,3 +69,11 @@ export interface QuizQuestions {
   fillBlanks: { [key in Difficulty]: FillInTheBlankQuestion[] };
   [key: string]: { [key: string]: any[] };
 }
+
+// Level review modal
+export interface StatItem {
+  icon: React.ReactNode;
+  label: string;
+  value: string;
+  subValue?: string;
+}

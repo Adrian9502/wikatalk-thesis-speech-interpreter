@@ -75,7 +75,7 @@ export const modalSharedStyles = StyleSheet.create({
     backgroundColor: "rgba(255, 255, 255, 0.25)",
     justifyContent: "center",
     alignItems: "center",
-    marginBottom: 12,
+    marginBottom: 8,
   },
   levelNumber: {
     fontSize: 18,
@@ -83,7 +83,7 @@ export const modalSharedStyles = StyleSheet.create({
     color: "#fff",
   },
   levelTitle: {
-    fontSize: 24,
+    fontSize: 23,
     fontFamily: "Poppins-Bold",
     color: "#fff",
     textAlign: "center",
@@ -91,6 +91,16 @@ export const modalSharedStyles = StyleSheet.create({
   },
 
   // Badges
+  completedBadge: {
+    flexDirection: "row",
+    alignItems: "center",
+    borderWidth: 1,
+    borderColor: "rgba(36, 192, 57, 0.79)",
+    backgroundColor: "rgba(36, 192, 57, 0.55)",
+    paddingVertical: 6,
+    paddingHorizontal: 12,
+    borderRadius: 16,
+  },
   badgesContainer: {
     flexDirection: "row",
     justifyContent: "center",
@@ -106,26 +116,26 @@ export const modalSharedStyles = StyleSheet.create({
   difficultyBadge: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "rgba(0, 0, 0, 0.2)",
+    backgroundColor: "rgba(255, 255, 255, 0.2)",
     paddingHorizontal: 12,
     paddingVertical: 6,
-    borderRadius: 12,
+    borderRadius: 16,
   },
   difficultyText: {
-    fontSize: 14,
+    fontSize: 12,
     fontFamily: "Poppins-SemiBold",
     color: "#fff",
   },
   focusAreaBadge: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "rgba(0, 0, 0, 0.2)",
+    backgroundColor: "rgba(255, 255, 255, 0.2)",
     paddingHorizontal: 14,
     paddingVertical: 6,
-    borderRadius: 12,
+    borderRadius: 16,
   },
   focusAreaText: {
-    fontSize: 14,
+    fontSize: 12,
     fontFamily: "Poppins-Medium",
     color: "#fff",
     marginLeft: 6,
@@ -153,35 +163,10 @@ export const modalSharedStyles = StyleSheet.create({
     lineHeight: 22,
   },
 
-  // Completed States
-  completedBadge: {
-    flexDirection: "row",
-    alignItems: "center",
-    backgroundColor: "rgba(76, 175, 80, 0.9)",
-    paddingVertical: 6,
-    paddingHorizontal: 12,
-    borderRadius: 16,
-    marginBottom: 12,
-  },
-  completedText: {
-    color: "#fff",
-    fontFamily: "Poppins-SemiBold",
-    fontSize: 14,
-    marginLeft: 6,
-  },
-  checkmarkContainer: {
-    width: 24,
-    height: 24,
-    borderRadius: 12,
-    backgroundColor: "rgba(255, 255, 255, 0.2)",
-    justifyContent: "center",
-    alignItems: "center",
-  },
-
   // Action Buttons
   actionButton: {
     backgroundColor: "rgba(255, 255, 255, 0.15)",
-    borderRadius: 12,
+    borderRadius: 16,
     paddingVertical: 16,
     alignItems: "center",
     marginTop: 16,
@@ -204,6 +189,26 @@ export const modalSharedStyles = StyleSheet.create({
     fontFamily: "Poppins-Medium",
     marginTop: 12,
     fontSize: 14,
+  },
+
+  // Close and Start button
+  startAndCloseButton: {
+    borderWidth: 1,
+    backgroundColor: "rgba(255,255,255,0.9)",
+    borderColor: "rgb(255,255,255)",
+    paddingVertical: 8,
+    borderRadius: 16,
+    alignItems: "center",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.2,
+    shadowRadius: 6,
+    elevation: 4,
+  },
+  startAndCloseText: {
+    fontSize: 15,
+    fontFamily: "Poppins-Bold",
+    color: "#000",
   },
 });
 

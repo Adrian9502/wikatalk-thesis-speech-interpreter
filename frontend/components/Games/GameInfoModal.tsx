@@ -223,7 +223,7 @@ const GameInfoModal: React.FC<GameInfoModalProps> = React.memo(
                 style={styles.buttonContainer}
               >
                 <TouchableOpacity
-                  style={styles.startButton}
+                  style={modalSharedStyles.startAndCloseButton}
                   onPress={handleStart}
                   disabled={isLoading}
                   activeOpacity={0.8}
@@ -231,7 +231,9 @@ const GameInfoModal: React.FC<GameInfoModalProps> = React.memo(
                   {isLoading ? (
                     <ActivityIndicator size="small" color="#000" />
                   ) : (
-                    <Text style={styles.startButtonText}>START LEVEL</Text>
+                    <Text style={modalSharedStyles.startAndCloseText}>
+                      START LEVEL
+                    </Text>
                   )}
                 </TouchableOpacity>
               </Animatable.View>
@@ -308,22 +310,6 @@ const styles = StyleSheet.create({
   },
   buttonContainer: {
     marginTop: 6,
-  },
-  startButton: {
-    backgroundColor: "#fff",
-    paddingVertical: 16,
-    borderRadius: 16,
-    alignItems: "center",
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.2,
-    shadowRadius: 6,
-    elevation: 4,
-  },
-  startButtonText: {
-    fontSize: 16,
-    fontFamily: "Poppins-Bold",
-    color: "#000",
   },
 });
 
