@@ -69,7 +69,6 @@ export const levelStyles = StyleSheet.create({
   },
   progressContainer: {
     paddingHorizontal: 20,
-    marginBottom: 20,
   },
   progressBarContainer: {
     marginBottom: 10,
@@ -315,21 +314,16 @@ export const levelStyles = StyleSheet.create({
   filterContainer: {
     flexDirection: "row",
     justifyContent: "center",
-    paddingHorizontal: 20,
-    paddingVertical: 10,
+    padding: 10,
     gap: 10,
   },
   filterButton: {
     paddingHorizontal: 16,
     paddingVertical: 8,
-    borderRadius: 20,
+    borderRadius: 16,
     backgroundColor: "rgba(255, 255, 255, 0.1)",
     borderWidth: 1,
     borderColor: "rgba(255, 255, 255, 0.15)",
-  },
-  activeFilter: {
-    backgroundColor: BASE_COLORS.blue,
-    borderColor: BASE_COLORS.blue,
   },
   filterText: {
     color: "rgba(255, 255, 255, 0.8)",

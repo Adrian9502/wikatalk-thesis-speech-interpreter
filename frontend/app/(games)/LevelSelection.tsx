@@ -5,55 +5,30 @@ import React, {
   useState,
   useRef,
 } from "react";
-import { Text, View, StatusBar, RefreshControl } from "react-native";
-import { FlashList } from "@shopify/flash-list";
+import { View, StatusBar } from "react-native";
 import { useLocalSearchParams, router, useFocusEffect } from "expo-router";
-import { AlertTriangle, RefreshCw } from "react-native-feather";
-import * as Animatable from "react-native-animatable";
-import { TouchableOpacity } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
 import * as Haptics from "expo-haptics";
-import ErrorBoundary from "react-native-error-boundary";
+import { SafeAreaView } from "react-native-safe-area-context";
 import useThemeStore from "@/store/useThemeStore";
-import { BASE_COLORS } from "@/constant/colors";
 import GameInfoModal from "@/components/games/GameInfoModal";
 import LevelReviewModal from "@/components/games/LevelReviewModal";
-import DotsLoader from "@/components/DotLoader";
 import { LevelData } from "@/types/gameTypes";
-import LevelCard from "@/components/games/levels/LevelCard";
 import LevelHeader from "@/components/games/levels/LevelHeader";
 import LevelProgressBar from "@/components/games/levels/LevelProgressBar";
 import { levelStyles as styles } from "@/styles/games/levels.styles";
 import { useLevelData } from "@/hooks/useLevelData";
-
-// Error fallback component
-const ErrorFallback = ({
-  error,
-  resetError,
-}: {
-  error: Error;
-  resetError: () => void;
-}) => (
-  <View style={styles.errorContainer}>
-    <AlertTriangle width={48} height={48} color={BASE_COLORS.error} />
-    <Text style={styles.errorTitle}>Something went wrong</Text>
-    <Text style={styles.errorMessage}>{error.message}</Text>
-    <TouchableOpacity onPress={resetError} style={styles.retryButton}>
-      <RefreshCw width={20} height={20} color={BASE_COLORS.white} />
-      <Text style={styles.retryButtonText}>Try Again</Text>
-    </TouchableOpacity>
-  </View>
-);
-
-// Empty state component
-const EmptyState = () => (
-  <View style={styles.emptyContainer}>
-    <Text style={styles.emptyTitle}>No Levels Available</Text>
-    <Text style={styles.emptyMessage}>Check back later for new content</Text>
-  </View>
-);
+import { difficultyColors } from "@/constant/colors";
+// Components
+import ErrorState from "@/components/games/levels/ErrorState";
+import EmptyState from "@/components/games/levels/EmptyState";
+import LevelGrid from "@/components/games/levels/LevelGrid";
+import FilterBar from "@/components/games/levels/FilterBar";
+import AppLoading from "@/components/AppLoading";
 
 const LevelSelection = () => {
+  // Component error state
+  const [componentError, setComponentError] = useState<Error | null>(null);
+
   const params = useLocalSearchParams();
   const { gameMode, gameTitle } = params;
   const { activeTheme } = useThemeStore();
@@ -92,8 +67,6 @@ const LevelSelection = () => {
       return levels.filter((level) => level.status === "completed");
     if (activeFilter === "current")
       return levels.filter((level) => level.status === "current");
-    if (activeFilter === "locked")
-      return levels.filter((level) => level.status === "locked");
     return levels;
   }, [levels, activeFilter]);
 
@@ -199,235 +172,72 @@ const LevelSelection = () => {
     setSelectedLevel(null);
   }, []);
 
-  // Stable difficulty colors
-  const difficultyColors = useMemo(
-    () => ({
-      Easy: ["#4CAF50", "#2E7D32"] as const,
-      Medium: ["#FF9800", "#EF6C00"] as const,
-      Hard: ["#F44336", "#C62828"] as const,
-    }),
-    []
-  );
+  // Try to reset error when retrying
+  const handleErrorReset = useCallback(() => {
+    setComponentError(null);
+  }, []);
 
-  // Memoized level status hash for stable comparison
-  const levelStatusHash = useMemo(() => {
-    return filteredLevels.map((l) => `${l.id}-${l.status}`).join(",");
-  }, [filteredLevels]);
-
-  // Memoized renderItem with stable comparison
-  const renderItem = useCallback(
-    ({ item: level, index }: { item: LevelData; index: number }) => {
-      const levelDifficulty =
-        typeof level.difficulty === "string" ? level.difficulty : "Easy";
-
-      const colorsArray =
-        difficultyColors[levelDifficulty as keyof typeof difficultyColors] ||
-        difficultyColors.Easy;
-
-      const isEvenIndex = index % 2 === 0;
-
-      const itemStyle = {
-        marginRight: isEvenIndex ? 8 : 0,
-        marginLeft: isEvenIndex ? 0 : 8,
-      };
-
-      const safeGradientColors: readonly [string, string] = [
-        colorsArray[0] || "#4CAF50",
-        colorsArray[1] || "#2E7D32",
-      ];
-
-      return (
-        <View style={itemStyle}>
-          <LevelCard
-            level={level}
-            onSelect={handleLevelSelectWithCompletion}
-            gradientColors={safeGradientColors}
-            accessible={true}
-            accessibilityLabel={`Level ${level.number}: ${level.title}`}
-            accessibilityHint={
-              level.status === "locked"
-                ? "This level is locked"
-                : "Tap to view level details"
-            }
-          />
-        </View>
-      );
-    },
-    [difficultyColors, handleLevelSelectWithCompletion]
-  );
-
-  // PERFORMANCE FIX: Stable keyExtractor
-  const keyExtractor = useCallback((item: LevelData) => `level-${item.id}`, []);
-
-  // PERFORMANCE FIX: Memoized FlatList getItemLayout
-  const getItemLayout = useCallback(
-    (data: any, index: number) => ({
-      length: 180, // Approximate item height
-      offset: 180 * Math.floor(index / 2), // For 2 columns
-      index,
-    }),
-    []
-  );
-
-  // Filter bar component
-  const FilterBar = useCallback(
-    () => (
-      <Animatable.View
-        animation="fadeIn"
-        duration={500}
-        style={styles.filterContainer}
-      >
-        <TouchableOpacity
-          style={[
-            styles.filterButton,
-            activeFilter === "all" && styles.activeFilter,
-          ]}
-          onPress={() => setActiveFilter("all")}
-          accessible={true}
-          accessibilityLabel="Show all levels"
-          accessibilityRole="button"
-        >
-          <Text
-            style={[
-              styles.filterText,
-              activeFilter === "all" && styles.activeFilterText,
-            ]}
-          >
-            All
-          </Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={[
-            styles.filterButton,
-            activeFilter === "completed" && styles.activeFilter,
-          ]}
-          onPress={() => setActiveFilter("completed")}
-          accessible={true}
-          accessibilityLabel="Show completed levels"
-          accessibilityRole="button"
-        >
-          <Text
-            style={[
-              styles.filterText,
-              activeFilter === "completed" && styles.activeFilterText,
-            ]}
-          >
-            Completed
-          </Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={[
-            styles.filterButton,
-            activeFilter === "current" && styles.activeFilter,
-          ]}
-          onPress={() => setActiveFilter("current")}
-          accessible={true}
-          accessibilityLabel="Show current levels"
-          accessibilityRole="button"
-        >
-          <Text
-            style={[
-              styles.filterText,
-              activeFilter === "current" && styles.activeFilterText,
-            ]}
-          >
-            Current
-          </Text>
-        </TouchableOpacity>
-      </Animatable.View>
-    ),
-    [activeFilter]
-  );
-
-  // Content rendering
+  // Render content with proper components
   const renderContent = useCallback(() => {
-    if (isLoading) {
-      return (
-        <View style={styles.loaderContainer}>
-          <DotsLoader />
-        </View>
-      );
+    // First check for component error
+    if (componentError) {
+      return <ErrorState error={componentError} onRetry={handleErrorReset} />;
     }
 
+    // Then check for API error
     if (error) {
-      return (
-        <View style={styles.errorContainer}>
-          <AlertTriangle width={48} height={48} color={BASE_COLORS.error} />
-          <Text style={styles.errorTitle}>Unable to Load Levels</Text>
-          <Text style={styles.errorMessage}>{error}</Text>
-          <TouchableOpacity onPress={handleRetry} style={styles.retryButton}>
-            <RefreshCw width={20} height={20} color={BASE_COLORS.white} />
-            <Text style={styles.retryButtonText}>Try Again</Text>
-          </TouchableOpacity>
-        </View>
-      );
+      return <ErrorState error={new Error(error)} onRetry={handleRetry} />;
     }
 
-    if (levels.length > 0 && !showLevels) {
-      return (
-        <View style={styles.loaderContainer}>
-          <DotsLoader />
-        </View>
-      );
+    // Check for loading states
+    if (isLoading || (levels.length > 0 && !showLevels)) {
+      return <AppLoading />;
     }
 
+    // Render content when loaded
     if (showLevels) {
       return (
         <>
-          <FilterBar />
+          <FilterBar
+            activeFilter={activeFilter}
+            setActiveFilter={setActiveFilter}
+          />
           {filteredLevels.length === 0 ? (
             <EmptyState />
           ) : (
-            <FlashList
-              data={filteredLevels}
-              keyExtractor={keyExtractor}
-              renderItem={renderItem}
-              numColumns={2}
-              contentContainerStyle={styles.gridScrollContent}
-              showsVerticalScrollIndicator={false}
-              removeClippedSubviews={true}
-              extraData={levelStatusHash}
-              refreshControl={
-                <RefreshControl
-                  refreshing={isRefreshing}
-                  onRefresh={throttledRefreshLevels}
-                  colors={[BASE_COLORS.blue, BASE_COLORS.orange]}
-                  tintColor={BASE_COLORS.blue}
-                />
-              }
-              estimatedItemSize={180}
+            <LevelGrid
+              levels={filteredLevels}
+              isRefreshing={isRefreshing}
+              onRefresh={throttledRefreshLevels}
+              onSelectLevel={handleLevelSelectWithCompletion}
+              difficultyColors={difficultyColors}
             />
           )}
         </>
       );
     }
 
-    return (
-      <View style={styles.loaderContainer}>
-        <DotsLoader />
-      </View>
-    );
+    // Fallback loading state
+    return <AppLoading />;
   }, [
-    isLoading,
+    componentError,
     error,
+    isLoading,
     levels,
     showLevels,
     filteredLevels,
-    handleRetry,
-    keyExtractor,
-    renderItem,
-    levelStatusHash,
-    getItemLayout,
+    activeFilter,
     isRefreshing,
     throttledRefreshLevels,
-    FilterBar,
+    handleLevelSelectWithCompletion,
+    difficultyColors,
+    handleRetry,
+    handleErrorReset,
   ]);
 
-  return (
-    <ErrorBoundary
-      FallbackComponent={ErrorFallback}
-      onError={(error) => console.log("[LevelSelection] Error caught:", error)}
-    >
+  // Main render with try/catch for error handling
+  try {
+    return (
       <View
         style={[
           styles.container,
@@ -487,8 +297,33 @@ const LevelSelection = () => {
           />
         </SafeAreaView>
       </View>
-    </ErrorBoundary>
-  );
+    );
+  } catch (err) {
+    // Set the error and render a simplified error view
+    const error = err instanceof Error ? err : new Error(String(err));
+    console.error("[LevelSelection] Caught error:", error);
+
+    if (!componentError) {
+      setComponentError(error);
+    }
+
+    return (
+      <View
+        style={[
+          styles.container,
+          { backgroundColor: activeTheme.backgroundColor },
+        ]}
+      >
+        <StatusBar barStyle="light-content" />
+        <SafeAreaView style={styles.safeArea}>
+          <LevelHeader title={gameTitle} onBack={handleBack} />
+          <View style={styles.contentArea}>
+            <ErrorState error={error} onRetry={handleErrorReset} />
+          </View>
+        </SafeAreaView>
+      </View>
+    );
+  }
 };
 
 export default LevelSelection;
