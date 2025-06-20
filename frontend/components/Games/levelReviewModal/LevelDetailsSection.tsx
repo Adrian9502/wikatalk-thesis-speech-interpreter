@@ -23,10 +23,6 @@ const LevelDetailsSection: React.FC<LevelDetailsSectionProps> = ({
   isLoading,
   error,
 }) => {
-  if (isLoading) {
-    return <View style={styles.sectionContainer}></View>;
-  }
-
   if (error) {
     return (
       <View style={styles.errorContainer}>
@@ -39,22 +35,17 @@ const LevelDetailsSection: React.FC<LevelDetailsSectionProps> = ({
     );
   }
 
-  if (!details) {
-    return (
-      <View style={styles.noDataContainer}>
-        <Text style={styles.noDataText}>No details available</Text>
-      </View>
-    );
-  }
-
   return (
     <>
       {/* Question section */}
       <View style={styles.sectionContainer}>
-        <Text style={styles.loadingText}>Loading details...</Text>
         <Text style={styles.sectionLabel}>Question</Text>
         <View style={styles.questionContainer}>
-          <Text style={styles.questionText}>{details.question}</Text>
+          {isLoading ? (
+            <ActivityIndicator size="small" color="#fff" />
+          ) : (
+            <Text style={styles.questionText}>{details?.question}</Text>
+          )}
         </View>
       </View>
 
@@ -62,10 +53,18 @@ const LevelDetailsSection: React.FC<LevelDetailsSectionProps> = ({
       <View style={styles.sectionContainer}>
         <Text style={styles.sectionLabel}>Correct Answer</Text>
         <View style={styles.answerContainer}>
-          <Text style={styles.answerText}>{details.answer}</Text>
-          <View style={styles.checkMarkContainer}>
-            <Check width={16} height={16} color="#fff" />
-          </View>
+          {isLoading ? (
+            <>
+              <ActivityIndicator size="small" color="#fff" />
+            </>
+          ) : (
+            <View style={styles.answerSection}>
+              <Text style={styles.answerText}>{details?.answer}</Text>
+              <View style={styles.checkMarkContainer}>
+                <Check width={16} height={16} color="#fff" />
+              </View>
+            </View>
+          )}
         </View>
       </View>
     </>
@@ -129,6 +128,8 @@ const styles = StyleSheet.create({
     borderColor: "rgba(255, 255, 255, 0.20)",
     backgroundColor: "rgba(255, 255, 255, 0.15)",
     borderRadius: 16,
+    alignItems: "center",
+    justifyContent: "center",
     padding: 16,
     minHeight: 50,
   },
@@ -146,16 +147,21 @@ const styles = StyleSheet.create({
     padding: 16,
     flexDirection: "row",
     alignItems: "center",
-    justifyContent: "space-between",
+    justifyContent: "center",
     minHeight: 50,
+  },
+  answerSection: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 8,
   },
   answerText: {
     fontSize: 15,
     fontFamily: "Poppins-Medium",
     color: "#fff",
-    flex: 1,
-    marginRight: 12,
     lineHeight: 22,
+    textAlign: "center",
   },
   checkMarkContainer: {
     width: 28,

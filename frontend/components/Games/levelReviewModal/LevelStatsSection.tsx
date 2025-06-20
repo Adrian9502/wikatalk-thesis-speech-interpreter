@@ -1,9 +1,7 @@
 import React from "react";
-import { View, StyleSheet } from "react-native";
+import { View, Text, StyleSheet, ActivityIndicator } from "react-native";
 import { Clock, Calendar, Target, Award } from "react-native-feather";
 import { formatTime } from "@/utils/gameUtils";
-import { StatItem } from "@/types/gameTypes";
-import StatBox from "@/components/games/levelReviewModal/StatBox";
 
 interface CompletedLevelDetails {
   question: string;
@@ -17,70 +15,141 @@ interface CompletedLevelDetails {
 
 interface LevelStatsSectionProps {
   details: CompletedLevelDetails | null;
+  isLoading?: boolean;
 }
 
-const LevelStatsSection: React.FC<LevelStatsSectionProps> = ({ details }) => {
-  if (!details) return null;
-
-  const shortDate = details.completedDate.split(",")[0];
+const LevelStatsSection: React.FC<LevelStatsSectionProps> = ({
+  details,
+  isLoading = false,
+}) => {
+  // Calculate values for when data is available
+  const shortDate = details?.completedDate?.split(",")[0] || "";
   const successRate =
-    details.totalAttempts > 0
+    details && details.totalAttempts > 0
       ? Math.round((details.correctAttempts / details.totalAttempts) * 100)
       : 100;
-  const showSubValues = details.totalAttempts > 1;
-
-  const stats: StatItem[][] = [
-    [
-      {
-        icon: <Clock width={18} height={18} color="#fff" strokeWidth={2} />,
-        label: "Time Spent",
-        value: formatTime(details.timeSpent || 0),
-      },
-      {
-        icon: <Calendar width={18} height={18} color="#fff" strokeWidth={2} />,
-        label: "Completed",
-        value: shortDate,
-      },
-    ],
-    [
-      {
-        icon: <Target width={18} height={18} color="#fff" strokeWidth={2} />,
-        label: "Total Attempts",
-        value: details.totalAttempts.toString(),
-      },
-      {
-        icon: <Award width={18} height={18} color="#fff" strokeWidth={2} />,
-        label: "Success Rate",
-        value: `${successRate}%`,
-        subValue: showSubValues
-          ? `${details.correctAttempts}/${details.totalAttempts}`
-          : undefined,
-      },
-    ],
-  ];
 
   return (
     <View style={styles.container}>
-      {stats.map((row, rowIndex) => (
-        <View key={rowIndex} style={styles.statsGrid}>
-          {row.map((stat, statIndex) => (
-            <StatBox key={statIndex} {...stat} />
-          ))}
+      {/* First Row - Time and Date */}
+      <View style={styles.statsGrid}>
+        {/* Time spent */}
+        <View style={styles.statBox}>
+          <Clock width={20} height={20} color="#fff" strokeWidth={2} />
+          <Text style={styles.statLabel}>Time Spent</Text>
+          {isLoading ? (
+            <ActivityIndicator
+              size="small"
+              color="#fff"
+              style={styles.loadingIndicator}
+            />
+          ) : (
+            <Text style={styles.statValue}>
+              {details ? formatTime(details.timeSpent || 0) : "--"}
+            </Text>
+          )}
         </View>
-      ))}
+
+        {/* Completion date */}
+        <View style={styles.statBox}>
+          <Calendar width={20} height={20} color="#fff" strokeWidth={2} />
+          <Text style={styles.statLabel}>Completed</Text>
+          {isLoading ? (
+            <ActivityIndicator
+              size="small"
+              color="#fff"
+              style={styles.loadingIndicator}
+            />
+          ) : (
+            <Text style={styles.statValue} numberOfLines={2}>
+              {shortDate || "--"}
+            </Text>
+          )}
+        </View>
+      </View>
+
+      {/* Second Row - Attempts and Success Rate */}
+      <View style={styles.statsGrid}>
+        {/* Total attempts */}
+        <View style={styles.statBox}>
+          <Target width={20} height={20} color="#fff" strokeWidth={2} />
+          <Text style={styles.statLabel}>Attempts</Text>
+          {isLoading ? (
+            <ActivityIndicator
+              size="small"
+              color="#fff"
+              style={styles.loadingIndicator}
+            />
+          ) : (
+            <>
+              <Text style={styles.statValue}>
+                {details?.totalAttempts || "--"}
+              </Text>
+            </>
+          )}
+        </View>
+
+        {/* Success rate */}
+        <View style={styles.statBox}>
+          <Award width={20} height={20} color="#fff" strokeWidth={2} />
+          <Text style={styles.statLabel}>Success Rate</Text>
+          {isLoading ? (
+            <ActivityIndicator
+              size="small"
+              color="#fff"
+              style={styles.loadingIndicator}
+            />
+          ) : (
+            <>
+              <Text style={styles.statValue}>
+                {details ? `${successRate}%` : "--"}
+              </Text>
+            </>
+          )}
+        </View>
+      </View>
     </View>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
-    marginBottom: 12,
+    minHeight: 200,
   },
   statsGrid: {
     flexDirection: "row",
     justifyContent: "space-between",
-    marginBottom: 12,
+    marginBottom: 16,
     gap: 12,
+  },
+  statBox: {
+    flex: 1,
+    borderWidth: 1,
+    borderColor: "rgba(255, 255, 255, 0.2)",
+    backgroundColor: "rgba(255, 255, 255, 0.1)",
+    borderRadius: 16,
+    padding: 12,
+    alignItems: "center",
+    justifyContent: "center",
+    minHeight: 100,
+  },
+  statLabel: {
+    fontSize: 12,
+    fontFamily: "Poppins-Medium",
+    color: "rgba(255, 255, 255, 0.7)",
+    marginTop: 8,
+    textAlign: "center",
+  },
+  statValue: {
+    fontSize: 15,
+    fontFamily: "Poppins-SemiBold",
+    color: "#fff",
+    marginTop: 4,
+    textAlign: "center",
+  },
+  // Loading indicator spacing
+  loadingIndicator: {
+    marginTop: 4,
   },
 });
 

@@ -17,8 +17,6 @@ import LevelHeader from "@/components/games/levelReviewModal/LevelHeader";
 import LevelDetailsSection from "@/components/games/levelReviewModal/LevelDetailsSection";
 import LevelStatsSection from "@/components/games/levelReviewModal/LevelStatsSection";
 
-const { height: screenHeight } = Dimensions.get("window");
-
 interface LevelReviewModalProps {
   visible: boolean;
   onClose: () => void;
@@ -76,12 +74,15 @@ const LevelReviewModal: React.FC<LevelReviewModalProps> = ({
             {/* Fixed Header Section */}
             <LevelHeader level={level} />
 
+            {/* Pass isLoading to both sections */}
             <LevelDetailsSection
               details={details}
               isLoading={isLoading}
               error={error}
             />
-            <LevelStatsSection details={details} />
+
+            {/* IMPORTANT: Pass isLoading prop here too */}
+            <LevelStatsSection details={details} isLoading={isLoading} />
 
             {/* Fixed Continue Button */}
             <TouchableOpacity
@@ -107,7 +108,7 @@ const styles = StyleSheet.create({
   },
   modalContent: {
     padding: 20,
-    minHeight: 200,
+    minHeight: 500,
   },
 });
 
