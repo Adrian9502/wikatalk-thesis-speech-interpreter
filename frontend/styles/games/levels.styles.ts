@@ -102,8 +102,8 @@ export const levelStyles = StyleSheet.create({
   },
   gridScrollContent: {
     paddingHorizontal: 20,
-    paddingBottom: 80, // Increased to fix scrolling issues
     paddingTop: 10,
+    paddingBottom: 5,
   },
   columnWrapper: {
     justifyContent: "space-between",
@@ -293,7 +293,7 @@ export const levelStyles = StyleSheet.create({
   completedBannerText: {
     fontSize: 10,
     fontFamily: "Poppins-Bold",
-    color: "#FFFFFF", // White text for better contrast
+    color: "#FFFFFF",
     textAlign: "center",
     letterSpacing: 0.8,
     textShadowColor: "rgba(0, 0, 0, 0.3)",
@@ -311,5 +311,52 @@ export const levelStyles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     zIndex: 10,
+  },
+  filterContainer: {
+    flexDirection: "row",
+    justifyContent: "center",
+    paddingHorizontal: 20,
+    paddingVertical: 10,
+    gap: 10,
+  },
+  filterButton: {
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderRadius: 20,
+    backgroundColor: "rgba(255, 255, 255, 0.1)",
+    borderWidth: 1,
+    borderColor: "rgba(255, 255, 255, 0.15)",
+  },
+  activeFilter: {
+    backgroundColor: BASE_COLORS.blue,
+    borderColor: BASE_COLORS.blue,
+  },
+  filterText: {
+    color: "rgba(255, 255, 255, 0.8)",
+    fontFamily: "Poppins-Medium",
+    fontSize: 13,
+  },
+  activeFilterText: {
+    color: "#FFFFFF",
+  },
+  emptyContainer: {
+    flex: 1,
+    alignItems: "center",
+    justifyContent: "center",
+    paddingHorizontal: 30,
+    paddingTop: 50,
+  },
+  emptyTitle: {
+    fontSize: 18,
+    fontFamily: "Poppins-SemiBold",
+    color: BASE_COLORS.white,
+    marginBottom: 8,
+  },
+  emptyMessage: {
+    fontSize: 14,
+    fontFamily: "Poppins-Regular",
+    color: BASE_COLORS.white,
+    opacity: 0.7,
+    textAlign: "center",
   },
 });

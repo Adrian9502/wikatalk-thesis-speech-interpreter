@@ -1,4 +1,4 @@
-import React,{useRef,useEffect} from "react";
+import React, { useRef, useEffect } from "react";
 import { Text, View, TouchableOpacity } from "react-native";
 import { Star, Lock, Check } from "react-native-feather";
 import { LinearGradient } from "expo-linear-gradient";
@@ -12,8 +12,10 @@ interface LevelCardProps {
   level: LevelData;
   onSelect: (level: LevelData) => void;
   gradientColors: readonly [string, string];
+  accessible?: boolean;
+  accessibilityLabel?: string;
+  accessibilityHint?: string;
 }
-
 
 const LevelCard: React.FC<LevelCardProps> = React.memo(
   ({ level, onSelect, gradientColors }) => {
@@ -29,10 +31,12 @@ const LevelCard: React.FC<LevelCardProps> = React.memo(
     const starCount = getStarCount(difficulty);
     const renderCount = useRef(0);
     useEffect(() => {
-      renderCount.current += 1;
-      if (renderCount.current > 5) {
-        console.warn(`[PERFORMANCE] LevelSelection rendered ${renderCount.current} times - investigate!`);
-      }
+      renderCount.current += 1;
+      if (renderCount.current > 5) {
+        console.warn(
+          `[PERFORMANCE] LevelSelection rendered ${renderCount.current} times - investigate!`
+        );
+      }
     });
 
     return (
