@@ -161,6 +161,8 @@ const Index = () => {
 
   // handle sign in or sign up
   const handleSubmit = () => {
+    // Dismiss keyboard before submitting
+    Keyboard.dismiss();
     if (activeTab === "signin") {
       signIn.handleSubmit(handleSignIn)();
     } else {
