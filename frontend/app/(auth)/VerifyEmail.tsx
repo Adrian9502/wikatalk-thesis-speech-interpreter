@@ -30,12 +30,11 @@ interface VerificationFormData {
 
 const VerifyEmail: React.FC = () => {
   const { activeTheme } = useThemeStore();
-
-  // Get the dynamic styles based on the current theme
   const dynamicStyles = getGlobalStyles(activeTheme.backgroundColor);
 
   const [countdown, setCountdown] = useState<number>(30);
   const [resendDisabled, setResendDisabled] = useState<boolean>(true);
+  const [resendLoading, setResendLoading] = useState<boolean>(false);
   const {
     verifyEmail,
     isLoading,
@@ -79,40 +78,30 @@ const VerifyEmail: React.FC = () => {
   }, []);
 
   const handleResendCode = async () => {
-    if (resendDisabled) return;
+    if (resendDisabled || resendLoading) return;
 
     try {
-      clearFormMessage();
+      setResendLoading(true);
+      // No need to call clearFormMessage(), it's now handled in the store
       const result = await resendVerificationEmail();
       if (result.success) {
         console.log("✅ Success! Verification email resent");
-        setFormMessage("Verification code resent successfully", "success");
         // Start the countdown timer
         setCountdown(30);
       }
     } catch (error) {
       console.error("Failed to resend verification code:", error);
-      setFormMessage(
-        "Failed to resend verification code. Please try again.",
-        "error"
-      );
+    } finally {
+      setResendLoading(false);
     }
   };
 
   const handleVerification = async (data: VerificationFormData) => {
     console.log("Verifying code:", data.verificationCode);
     clearFormMessage();
-    try {
-      const result = await verifyEmail(data.verificationCode);
 
-      if (result.success) {
-        console.log("✅ Verification successful!");
-        // Use InteractionManager to ensure UI is ready
-        InteractionManager.runAfterInteractions(() => {
-          // Use replace instead of push to prevent going back
-          router.replace("/(tabs)/Speech");
-        });
-      }
+    try {
+      await verifyEmail(data.verificationCode);
     } catch (error: any) {
       console.error("Failed to verify code:", error);
       const message =
@@ -124,15 +113,10 @@ const VerifyEmail: React.FC = () => {
 
   const handleGoBack = async () => {
     try {
-      // clear both storage and state
+      // The navigation happens inside clearStorage
       await clearStorage();
-
-      InteractionManager.runAfterInteractions(() => {
-        router.replace("/");
-      });
     } catch (error) {
       console.error("Error returning to home:", error);
-      setFormMessage("Error returning to home", "error");
     }
   };
 
@@ -181,7 +165,7 @@ const VerifyEmail: React.FC = () => {
                 {formMessage && (
                   <FormMessage
                     message={formMessage.text}
-                    type={"error"}
+                    type={formMessage.type}
                     onDismiss={clearFormMessage}
                   />
                 )}
@@ -221,18 +205,22 @@ const VerifyEmail: React.FC = () => {
                 <Pressable
                   style={[
                     styles.resendButton,
-                    resendDisabled && styles.resendButtonDisabled,
+                    (resendDisabled || resendLoading) &&
+                      styles.resendButtonDisabled,
                   ]}
                   onPress={handleResendCode}
-                  disabled={resendDisabled}
+                  disabled={resendDisabled || resendLoading}
                 >
                   <Text
                     style={[
                       styles.resendButtonText,
-                      resendDisabled && styles.resendDisabledText,
+                      (resendDisabled || resendLoading) &&
+                        styles.resendDisabledText,
                     ]}
                   >
-                    {resendDisabled
+                    {resendLoading
+                      ? "Resending code..."
+                      : resendDisabled
                       ? `Resend Code (${countdown}s)`
                       : "Resend Code"}
                   </Text>
@@ -356,12 +344,12 @@ const styles = StyleSheet.create({
     fontFamily: "Poppins-Regular",
   },
   resendDisabledText: {
-    color: "#9CA3AF",
+    color: "#777d87",
   },
   goBackText: {
     fontSize: 12,
     fontFamily: "Poppins-Regular",
-    color: "#9CA3AF",
+    color: "#777d87",
     marginTop: 16,
     textAlign: "center",
   },

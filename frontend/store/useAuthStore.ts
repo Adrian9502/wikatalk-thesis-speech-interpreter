@@ -232,14 +232,18 @@ export const useAuthStore = create<AuthState>()(
           // Test API connection
           await testAPIConnection();
 
-          // Get stored data
-          const [storedToken, storedUserData] = await Promise.all([
-            AsyncStorage.getItem("userToken"),
-            AsyncStorage.getItem("userData"),
-          ]);
+          // Get stored data - add tempUserData
+          const [storedToken, storedUserData, tempUserData] = await Promise.all(
+            [
+              AsyncStorage.getItem("userToken"),
+              AsyncStorage.getItem("userData"),
+              AsyncStorage.getItem("tempUserData"),
+            ]
+          );
 
           console.log("Stored token exists:", !!storedToken);
           console.log("Stored user data exists:", !!storedUserData);
+          console.log("Temp user data exists:", !!tempUserData);
 
           // Handle normal login flow
           if (storedToken && storedUserData) {
@@ -273,6 +277,22 @@ export const useAuthStore = create<AuthState>()(
             } catch (error) {
               console.error("Error checking verification:", error);
               // Don't log out automatically on network error
+            }
+          }
+          // Handle registration verification flow
+          else if (tempUserData) {
+            try {
+              const parsedTempData = JSON.parse(tempUserData);
+              set({
+                userData: parsedTempData,
+                userToken: null,
+                isAppReady: true,
+              });
+              console.log("Verification flow detected, loaded temp user data");
+            } catch (error) {
+              console.error("Error parsing temp user data:", error);
+              // Clear the corrupted data
+              await AsyncStorage.removeItem("tempUserData");
             }
           } else {
             console.log("No stored auth data found");
@@ -695,15 +715,17 @@ export const useAuthStore = create<AuthState>()(
             setupAxiosDefaults(token);
             setToken(token);
             set({ userToken: token, userData: user });
+
             showToast({
               type: "success",
               title: "Verification Success!",
               description: response.message || "Email verified successfully!",
             });
 
-            setTimeout(() => {
+            // Handle navigation here instead of in component
+            InteractionManager.runAfterInteractions(() => {
               router.replace("/(tabs)/Speech");
-            }, 1000);
+            });
 
             return { success: true };
           }
@@ -715,7 +737,7 @@ export const useAuthStore = create<AuthState>()(
         } catch (error: any) {
           const message =
             error.response?.data?.message || "Verification failed";
-          get().setFormMessage(message);
+          get().setFormMessage(message, "error");
           return { success: false, message };
         } finally {
           set({ isLoading: false });
@@ -725,16 +747,60 @@ export const useAuthStore = create<AuthState>()(
       // Resend verification email
       resendVerificationEmail: async () => {
         const { userData } = get();
+        
+        // Clear any existing form messages first
+        get().clearFormMessage();
+
+        if (!userData?.email) {
+          get().setFormMessage("Email information is missing. Please register again.", "error");
+          showToast({
+            type: "error",
+            title: "Error",
+            description: "Email information is missing. Please register again.",
+          });
+          return { success: false, message: "Missing email information" };
+        }
 
         try {
+          // Log for debugging
+          console.log(
+            "Sending resend request with token:",
+            userData?.tempToken?.substring(0, 15) + "..."
+          );
+
           const response = await axios.post(
             `${API_URL}/api/users/resend-verification-code`,
             {
               email: userData?.email,
+              fullName: userData?.fullName,
+              tempToken: userData?.tempToken,
             }
           );
 
           if (response.data.success) {
+            // If there's a new token, update it in storage
+            if (response.data.data?.tempToken) {
+              // Create a properly typed UserData object with the correct order of spreading
+              const updatedUserData: UserData = {
+                ...(userData || {}), // Spread existing data first
+                fullName: userData?.fullName || "", // Then override required fields
+                email: userData?.email || "",
+                tempToken: response.data.data.tempToken, // Add the new token
+              };
+
+              // Update in state and storage
+              set({ userData: updatedUserData });
+              await AsyncStorage.setItem(
+                "tempUserData",
+                JSON.stringify(updatedUserData)
+              );
+
+              console.log("Updated tempToken in storage successfully");
+            }
+
+            // Set form message for success
+            get().setFormMessage("Verification code resent successfully", "success");
+            
             showToast({
               type: "success",
               title: "Verification Email Sent!",
@@ -742,6 +808,9 @@ export const useAuthStore = create<AuthState>()(
             });
             return { success: true };
           } else {
+            // Set form message for error
+            get().setFormMessage(response.data.message || "Failed to resend verification code", "error");
+            
             showToast({
               type: "error",
               title: "Verification Send Error",
@@ -750,15 +819,40 @@ export const useAuthStore = create<AuthState>()(
             return { success: false, message: response.data.message };
           }
         } catch (error: any) {
-          const message =
-            error.response?.data?.message ||
-            "Failed to send verification email";
-          showToast({
-            type: "error",
-            title: "Error",
-            description: message,
-          });
-          return { success: false, message };
+          console.error("Resend verification error:", error);
+          
+          // Set form message for error
+          get().setFormMessage("Failed to resend verification code. Please try again.", "error");
+
+          // Handle token expiration more gracefully
+          if (
+            error.response?.status === 400 &&
+            error.response?.data?.message?.includes("expired")
+          ) {
+            // Clear tempToken and redirect to registration
+            router.replace("/");
+            showToast({
+              type: "error",
+              title: "Session Expired",
+              description:
+                "Your verification session has expired. Please register again.",
+            });
+          } else {
+            showToast({
+              type: "error",
+              title: "Error",
+              description:
+                error.response?.data?.message ||
+                "Failed to send verification email",
+            });
+          }
+
+          return {
+            success: false,
+            message:
+              error.response?.data?.message ||
+              "Failed to send verification email",
+          };
         }
       },
 
@@ -934,15 +1028,33 @@ export const useAuthStore = create<AuthState>()(
       },
 
       // Clear all storage
-      clearStorage: async () => {
+      clearStorage: async (navigateAfterClear = true) => {
         try {
           await AsyncStorage.clear();
           set({ userToken: null, userData: null });
           setupAxiosDefaults(null);
           console.log("✅ AsyncStorage cleared successfully!");
+          
+          if (navigateAfterClear) {
+            // Handle navigation here
+            InteractionManager.runAfterInteractions(() => {
+              router.replace("/");
+            });
+          }
+          
           return { success: true };
         } catch (error) {
           console.error("❌ Error clearing AsyncStorage:", error);
+          
+          // Show error toast if navigation would have happened
+          if (navigateAfterClear) {
+            showToast({
+              type: "error",
+              title: "Error",
+              description: "Error returning to home screen"
+            });
+          }
+          
           return { success: false, message: "Error clearing storage" };
         }
       },

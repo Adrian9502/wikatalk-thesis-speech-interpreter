@@ -344,22 +344,105 @@ exports.verifyEmail = async (req, res) => {
 
 exports.resendVerificationCode = async (req, res) => {
   try {
-    const { fullName, email } = req.body;
+    const { email, fullName } = req.body;
+    const { tempToken } = req.body;
 
-    // Generate new verification code
-    const verificationCode = generateVerificationCode();
-
-    // Send verification email
-    await sendVerificationEmail({ email, fullName, verificationCode });
-
-    res.json({
-      success: true,
-      message: "Verification code sent successfully",
-    });
+    // First try to find an existing registered user
+    const existingUser = await User.findOne({ email });
+    
+    if (existingUser) {
+      // Handle existing user as before...
+      const verificationCode = generateVerificationCode();
+      existingUser.verificationCode = verificationCode;
+      existingUser.verificationCodeExpires = new Date(Date.now() + 30 * 60000); // 30 minutes
+      await existingUser.save();
+      
+      await sendVerificationEmail({ email, fullName, verificationCode });
+      
+      return res.json({
+        success: true,
+        message: "Verification code sent successfully"
+      });
+    }
+    
+    // No existing user, check if we have a tempToken (registration flow)
+    if (tempToken) {
+      try {
+        // Try to verify the token
+        const decoded = jwt.verify(tempToken, process.env.JWT_SECRET);
+        
+        // Create a new verification code
+        const verificationCode = generateVerificationCode();
+        
+        // Remove existing exp and iat claims to avoid conflicts
+        const { exp, iat, ...tokenDataWithoutExpiry } = decoded;
+        
+        // Create new token with updated verification code and fresh expiration
+        const newTempToken = jwt.sign(
+          {
+            ...tokenDataWithoutExpiry,
+            verificationCode,
+            verificationCodeExpires: new Date(Date.now() + 30 * 60000)
+          },
+          process.env.JWT_SECRET,
+          { expiresIn: "30m" }
+        );
+        
+        // Send verification email with new code
+        await sendVerificationEmail({ email, fullName, verificationCode });
+        
+        return res.json({
+          success: true,
+          message: "Verification code sent successfully",
+          data: { tempToken: newTempToken }
+        });
+      } catch (error) {
+        console.error("Token verification failed:", error);
+        
+        // If token is expired, create a new registration token for the user
+        if (error.name === 'TokenExpiredError' && email && fullName) {
+          const verificationCode = generateVerificationCode();
+          
+          // Create a fresh token with minimal data
+          const newTempToken = jwt.sign(
+            {
+              email,
+              fullName,
+              verificationCode,
+              verificationCodeExpires: new Date(Date.now() + 30 * 60000)
+            },
+            process.env.JWT_SECRET,
+            { expiresIn: "30m" }
+          );
+          
+          // Send verification email with new code
+          await sendVerificationEmail({ email, fullName, verificationCode });
+          
+          return res.json({
+            success: true,
+            message: "Your session expired, but we've sent a new verification code",
+            data: { tempToken: newTempToken }
+          });
+        }
+        
+        // If not an expiration issue or missing data, return error
+        return res.status(400).json({
+          success: false,
+          message: "Your verification session has expired. Please register again."
+        });
+      }
+    } else {
+      // No existing user and no tempToken provided
+      return res.status(400).json({
+        success: false,
+        message: "Missing required information to resend verification code"
+      });
+    }
   } catch (error) {
+    console.error("Error in resendVerificationCode:", error);
     res.status(500).json({
       success: false,
-      message: error.message,
+      message: error.message || "Failed to resend verification code"
     });
   }
 };
