@@ -56,15 +56,17 @@ export const userService = {
   },
 
   // Verify account deletion code
-  verifyDeletionCode: async (code: string) => {
-    const response = await authApi.post("/api/users/verify-deletion", { code });
+  verifyDeletionCode: async (verificationCode: string) => {
+    const response = await authApi.post("/api/users/verify-deletion", {
+      verificationCode,
+    });
     return response.data;
   },
 
   // Delete account
-  deleteAccount: async (code: string) => {
+  deleteAccount: async (deletionToken: string) => {
     const response = await authApi.delete("/api/users/delete-account", {
-      data: { code },
+      data: { deletionToken },
     });
     return response.data;
   },

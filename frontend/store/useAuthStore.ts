@@ -10,6 +10,7 @@ import { setToken } from "@/lib/authTokenManager";
 import { useTranslateStore } from "./useTranslateStore";
 import { GoogleSignin } from "@react-native-google-signin/google-signin";
 import useCoinsStore from "./games/useCoinsStore";
+import { authService } from "@/services/api";
 // API URL from environment
 const API_URL = `${process.env.EXPO_PUBLIC_BACKEND_URL}`;
 
@@ -24,6 +25,7 @@ interface UserData {
   isVerified?: boolean;
   updatedAt?: string;
   tempToken?: string;
+  authProvider?: string;
 }
 
 interface AuthResponse {
@@ -299,20 +301,22 @@ export const useAuthStore = create<AuthState>()(
         set({ isLoading: true, error: null });
 
         try {
-          const response = await axios.post(`${API_URL}/api/users/register`, {
+          const userData = {
             fullName,
             username,
             email,
             password,
             confirmPassword,
-          });
+          };
 
-          if (response.data.success) {
+          const response = await authService.register(userData);
+
+          if (response.success) {
             get().clearFormMessage();
             const tempUserData = {
-              email: response.data.data.email,
-              fullName: response.data.data.fullName,
-              tempToken: response.data.data.tempToken,
+              email: response.data?.email || email,
+              fullName: response.data?.fullName || fullName,
+              tempToken: response.data?.tempToken || "",
               isVerified: false,
             };
 
@@ -326,14 +330,16 @@ export const useAuthStore = create<AuthState>()(
             showToast({
               type: "success",
               title: "Verify your email",
-              description: response.data.message,
+              description:
+                response.message ||
+                "Verification email sent. Please check your inbox.",
             });
 
             router.push("/(auth)/VerifyEmail");
             return { success: true };
           }
 
-          throw new Error(response.data.message || "Registration failed");
+          throw new Error(response.message || "Registration failed");
         } catch (error: any) {
           get().clearFormMessage();
           const message =
@@ -358,12 +364,18 @@ export const useAuthStore = create<AuthState>()(
           // Clear existing tokens
           await AsyncStorage.multiRemove(["userToken", "userData"]);
 
-          const response = await axios.post(`${API_URL}/api/users/login`, {
+          const response = await authService.login({
             usernameOrEmail,
             password,
           });
 
-          const { token, ...user } = response.data.data;
+          if (!response.success) {
+            throw new Error(response.message || "Login failed");
+          }
+
+          const token =
+            response.token || (response.data && response.data.token) || "";
+          const user = response.user || response.data || {};
 
           // Handle unverified user
           if (user.isVerified === false) {
@@ -388,32 +400,28 @@ export const useAuthStore = create<AuthState>()(
           }
 
           // Handle successful login
-          if (response.data.success) {
-            await Promise.all([
-              AsyncStorage.setItem("userToken", token),
-              AsyncStorage.setItem("userData", JSON.stringify(user)),
-            ]);
-            get().setFormMessage("Login successful!", "success");
+          await Promise.all([
+            AsyncStorage.setItem("userToken", token),
+            AsyncStorage.setItem("userData", JSON.stringify(user)),
+          ]);
+          get().setFormMessage("Login successful!", "success");
 
-            setupAxiosDefaults(token);
-            setToken(token); // Update the token manager
-            set({ userToken: token, userData: user });
-            setTimeout(() => {
-              get().getUserProfile();
-            }, 500);
-            // After successful login, sync the theme
-            const themeStore = useThemeStore.getState();
-            await themeStore.syncThemeWithServer();
-            InteractionManager.runAfterInteractions(() => {
-              router.replace("/(tabs)/Speech");
-            });
+          setupAxiosDefaults(token);
+          setToken(token); // Update the token manager
+          set({ userToken: token, userData: user });
+          setTimeout(() => {
+            get().getUserProfile();
+          }, 500);
+          // After successful login, sync the theme
+          const themeStore = useThemeStore.getState();
+          await themeStore.syncThemeWithServer();
+          InteractionManager.runAfterInteractions(() => {
+            router.replace("/(tabs)/Speech");
+          });
 
-            return { success: true };
-          }
-
-          throw new Error(response.data.message || "Login failed");
+          return { success: true };
         } catch (error: any) {
-          const message = error.response?.data?.message || "Login failed";
+          const message = error.message || "Login failed";
           set({ error: message });
           get().setFormMessage(message, "error");
           return { success: false, message };
@@ -430,20 +438,22 @@ export const useAuthStore = create<AuthState>()(
 
         try {
           // Call backend API to authenticate with Google
-          const response = await axios.post(
-            `${API_URL}/api/users/login/google`,
-            {
-              idToken,
-              name,
-              email,
-              photo,
-            }
-          );
+          const response = await authService.loginWithGoogle(idToken, {
+            name,
+            email,
+            photo,
+          });
 
-          if (response.data.success) {
-            const { token, ...userData } = response.data.data;
+          if (response.success) {
+            const token = response.data?.token || idToken;
+            const userData = response.data || {
+              fullName: name,
+              email: email,
+              profilePicture: photo || "",
+              isVerified: true,
+            };
+
             // Store user data and token
-
             await Promise.all([
               AsyncStorage.setItem("userToken", token),
               AsyncStorage.setItem(
@@ -474,21 +484,21 @@ export const useAuthStore = create<AuthState>()(
               isAppReady: true,
             });
 
-            const themeStore = useThemeStore.getState(); // Wait for theme sync to complete
-            await themeStore.syncThemeWithServer(); // Show success toast
+            const themeStore = useThemeStore.getState();
+            await themeStore.syncThemeWithServer();
 
             showToast({
               type: "success",
               title: "Signed in with Google Successful!",
               description: `Welcome, ${name}!`,
             });
-            // Delay navigation to ensure theme is applied and toast is visible
+
             setTimeout(() => {
               router.replace("/(tabs)/Speech");
             }, 300);
             return { success: true };
           }
-          throw new Error(response.data.message || "Google login failed");
+          throw new Error(response.message || "Google login failed");
         } catch (error: any) {
           console.log("Google login error:", error);
 
@@ -517,7 +527,7 @@ export const useAuthStore = create<AuthState>()(
               userData: googleUserData,
               isAppReady: true,
             });
-            // Add this line to sync theme in the fallback case too
+
             const themeStore = useThemeStore.getState();
             await themeStore.syncThemeWithServer();
 
@@ -656,18 +666,23 @@ export const useAuthStore = create<AuthState>()(
             return { success: false, message: "Invalid session" };
           }
 
-          const response = await axios.post(
-            `${API_URL}/api/users/verify-email`,
-            {
-              email: userData?.email,
-              verificationCode,
-              tempToken,
-            }
-          );
+          const verifyData = {
+            email: userData?.email,
+            verificationCode,
+            tempToken,
+          };
 
-          if (response.data.success) {
+          const response = await authService.verifyEmail(verifyData);
+
+          if (response.success) {
             get().clearFormMessage();
-            const { token, user } = response.data;
+
+            // Safely extract token and user data with fallbacks
+            const token = response.data?.token || "";
+            const user = response.data || {
+              email: userData?.email || "",
+              fullName: userData?.fullName || "",
+            };
 
             // Clear old data and set new data
             await Promise.all([
@@ -683,7 +698,7 @@ export const useAuthStore = create<AuthState>()(
             showToast({
               type: "success",
               title: "Verification Success!",
-              description: response.data.message,
+              description: response.message || "Email verified successfully!",
             });
 
             setTimeout(() => {
@@ -693,7 +708,10 @@ export const useAuthStore = create<AuthState>()(
             return { success: true };
           }
 
-          return { success: false, message: response.data.message };
+          return {
+            success: false,
+            message: response.message || "Verification failed",
+          };
         } catch (error: any) {
           const message =
             error.response?.data?.message || "Verification failed";
@@ -749,13 +767,10 @@ export const useAuthStore = create<AuthState>()(
         set({ isLoading: true });
 
         try {
-          const response = await axios.post(
-            `${API_URL}/api/users/forgot-password`,
-            { email }
-          );
+          const response = await authService.forgotPassword({ email });
 
-          if (response.data.success) {
-            get().setFormMessage(response.data.message, "success");
+          if (response.success) {
+            get().setFormMessage(response.message, "success");
             await Promise.all([
               AsyncStorage.setItem("resetEmailAddress", email),
               AsyncStorage.setItem("isResetPasswordFlow", "true"),
@@ -763,12 +778,11 @@ export const useAuthStore = create<AuthState>()(
 
             return { success: true };
           } else {
-            get().setFormMessage(response.data.message, "error");
-            return { success: false, message: response.data.message };
+            get().setFormMessage(response.message, "error");
+            return { success: false, message: response.message };
           }
         } catch (error: any) {
-          const message =
-            error.response?.data?.message || "Failed to process your request";
+          const message = error.message || "Failed to process your request";
           get().setFormMessage(message, "error");
 
           return { success: false, message };
@@ -782,23 +796,22 @@ export const useAuthStore = create<AuthState>()(
         set({ isLoading: true });
 
         try {
-          const response = await axios.post(
-            `${API_URL}/api/users/verify-reset-code`,
-            {
-              email,
-              verificationCode,
-            }
+          const response = await authService.verifyResetCode(
+            email,
+            verificationCode
           );
 
-          if (response.data.success) {
+          if (response.success) {
+            const resetToken =
+              response.resetToken || response.data?.resetToken || "";
             await Promise.all([
-              AsyncStorage.setItem("resetToken", response.data.resetToken),
+              AsyncStorage.setItem("resetToken", resetToken),
               AsyncStorage.setItem("isResetPasswordFlow", "true"),
             ]);
             showToast({
               type: "success",
               title: "Verification Successful",
-              description: response.data.message,
+              description: response.message,
             });
 
             setTimeout(() => {
@@ -807,17 +820,16 @@ export const useAuthStore = create<AuthState>()(
 
             return {
               success: true,
-              token: response.data.resetToken,
+              token: response.resetToken,
             };
           } else {
-            const errorMessage = response.data.message || "Verification failed";
+            const errorMessage = response.message || "Verification failed";
             get().setFormMessage(errorMessage, "error");
 
             return { success: false, message: errorMessage };
           }
         } catch (error: any) {
-          const message =
-            error.response?.data?.message || "Verification failed";
+          const message = error.message || "Verification failed";
           get().setFormMessage(message, "error");
           return { success: false, message };
         } finally {
@@ -830,15 +842,9 @@ export const useAuthStore = create<AuthState>()(
         set({ isLoading: true });
 
         try {
-          const response = await axios.post(
-            `${API_URL}/api/users/reset-password`,
-            {
-              token,
-              newPassword,
-            }
-          );
+          const response = await authService.resetPassword(token, newPassword);
 
-          const { success, message } = response.data;
+          const { success, message } = response;
 
           showToast({
             type: success ? "success" : "error",
@@ -855,8 +861,7 @@ export const useAuthStore = create<AuthState>()(
 
           return { success: false, message };
         } catch (error: any) {
-          const message =
-            error.response?.data?.message || "Password reset failed";
+          const message = error.message || "Password reset failed";
           get().setFormMessage(message, "error");
 
           return { success: false, message };
@@ -870,22 +875,12 @@ export const useAuthStore = create<AuthState>()(
         set({ isLoading: true });
 
         try {
-          const token = get().userToken;
-          if (!token) {
-            throw new Error("Authentication token not found");
-          }
-
-          const response = await axios.put(
-            `${API_URL}/api/users/change-password`,
-            { currentPassword, newPassword },
-            {
-              headers: {
-                Authorization: `Bearer ${token}`,
-              },
-            }
+          const response = await authService.changePassword(
+            currentPassword,
+            newPassword
           );
 
-          if (response.data.success) {
+          if (response.success) {
             showToast({
               type: "success",
               title: "Password Updated",
@@ -893,23 +888,11 @@ export const useAuthStore = create<AuthState>()(
             });
             return { success: true };
           } else {
-            throw new Error(
-              response.data.message || "Failed to change password"
-            );
+            throw new Error(response.message || "Failed to change password");
           }
         } catch (error: any) {
           console.error("Password change error:", error);
-          const message =
-            error.response?.data?.message ||
-            error.message ||
-            "Failed to change password";
-
-          // showToast({
-          //   type: "error",
-          //   title: "Password Change Failed",
-          //   description: message,
-          // });
-
+          const message = error.message || "Failed to change password";
           return { success: false, message };
         } finally {
           set({ isLoading: false });
@@ -919,28 +902,13 @@ export const useAuthStore = create<AuthState>()(
       // Validate current password using debounce
       validateCurrentPassword: async (password: string) => {
         try {
-          const token = get().userToken;
-          if (!token) {
-            throw new Error("Authentication token not found");
-          }
-
-          const response = await axios.post(
-            `${API_URL}/api/users/validate-password`,
-            { currentPassword: password },
-            {
-              headers: {
-                Authorization: `Bearer ${token}`,
-              },
-            }
-          );
-
+          const response = await authService.validatePassword(password);
           return {
-            success: response.data.success,
-            message: response.data.message,
+            success: response.success,
+            message: response.message,
           };
         } catch (error: any) {
-          const message =
-            error.response?.data?.message || "Failed to validate password";
+          const message = error.message || "Failed to validate password";
           return { success: false, message };
         }
       },
@@ -1090,18 +1058,15 @@ export const useAuthStore = create<AuthState>()(
       requestAccountDeletion: async () => {
         set({ isLoading: true });
         try {
-          const response = await axios.post(
-            `${API_URL}/api/users/request-deletion`
-          );
-          if (response.data.success) {
-            return { success: true, message: response.data.message };
+          const response = await authService.requestAccountDeletion();
+          if (response.success) {
+            return { success: true, message: response.message };
           }
           throw new Error(
-            response.data.message || "Failed to request account deletion"
+            response.message || "Failed to request account deletion"
           );
         } catch (error: any) {
-          const message =
-            error.response?.data?.message || "Failed to process request";
+          const message = error.message || "Failed to process request";
           // Pass through rate limiting info from the backend
           return {
             success: false,
@@ -1119,45 +1084,37 @@ export const useAuthStore = create<AuthState>()(
         set({ isLoading: true });
 
         try {
-          const response = await axios.post(
-            `${API_URL}/api/users/verify-deletion`,
-            { verificationCode }
+          const response = await authService.verifyDeletionCode(
+            verificationCode
           );
 
-          if (response.data.success) {
-            await AsyncStorage.setItem(
-              "deletionToken",
-              response.data.deletionToken
-            );
+          if (response.success) {
+            const deletionToken =
+              response.deletionToken || response.data?.deletionToken || "";
+            await AsyncStorage.setItem("deletionToken", deletionToken);
             return {
               success: true,
-              deletionToken: response.data.deletionToken,
+              deletionToken,
             };
           }
 
-          throw new Error(response.data.message || "Verification failed");
+          throw new Error(response.message || "Verification failed");
         } catch (error: any) {
-          const message =
-            error.response?.data?.message || "Verification failed";
+          const message = error.message || "Verification failed";
           return { success: false, message };
         } finally {
           set({ isLoading: false });
         }
       },
 
-      // Delete account with token
+      // Delete account
       deleteAccount: async (deletionToken: string) => {
         set({ isLoading: true });
 
         try {
-          const response = await axios.delete(
-            `${API_URL}/api/users/delete-account`,
-            {
-              data: { deletionToken },
-            }
-          );
+          const response = await authService.deleteAccount(deletionToken);
 
-          if (response.data.success) {
+          if (response.success) {
             // Clear local storage and state
             await get().clearStorage();
 
@@ -1175,10 +1132,9 @@ export const useAuthStore = create<AuthState>()(
             return { success: true };
           }
 
-          throw new Error(response.data.message || "Failed to delete account");
+          throw new Error(response.message || "Failed to delete account");
         } catch (error: any) {
-          const message =
-            error.response?.data?.message || "Failed to delete account";
+          const message = error.message || "Failed to delete account";
           showToast({
             type: "error",
             title: "Deletion Failed",

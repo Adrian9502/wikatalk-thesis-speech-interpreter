@@ -33,6 +33,7 @@ export const createApi = (withAuth = true): AxiosInstance => {
         if (
           error.response &&
           error.response.status === 401 &&
+          // Exclude history endpoints from redirecting to login
           !error.config.url.includes("/translations")
         ) {
           // Only redirect for critical auth failures, not for history
@@ -42,6 +43,18 @@ export const createApi = (withAuth = true): AxiosInstance => {
       }
     );
   }
+
+  // Add general error message extraction for all API instances
+  api.interceptors.response.use(
+    (response) => response,
+    (error) => {
+      // Extract the error message from the response if available
+      if (error.response && error.response.data && error.response.data.message) {
+        error.message = error.response.data.message;
+      }
+      return Promise.reject(error);
+    }
+  );
 
   return api;
 };
