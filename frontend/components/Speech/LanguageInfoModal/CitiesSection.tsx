@@ -75,7 +75,7 @@ const styles = StyleSheet.create({
     flexWrap: "wrap",
   },
   tag: {
-    borderRadius: 12,
+    borderRadius: 16,
     paddingHorizontal: 14,
     paddingVertical: 8,
     marginRight: 8,

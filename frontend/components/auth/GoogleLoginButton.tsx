@@ -64,20 +64,20 @@ const styles = StyleSheet.create({
   googleButton: {
     width: "100%",
     height: 45,
-    backgroundColor: "#FFFFFF", // White background for Google's guidelines
-    borderRadius: 8,
+    backgroundColor: "#FFFFFF",
+    borderRadius: 16,
     flexDirection: "row",
     justifyContent: "center",
     alignItems: "center",
     paddingHorizontal: 16,
     borderWidth: 1,
-    borderColor: "#DADCE0", // Light border per Google guidelines
+    borderColor: "#DADCE0",
   },
   iconContainer: {
     marginRight: 12,
   },
   buttonText: {
-    color: "#757575", // Dark grey text per Google guidelines
+    color: "#757575",
     fontSize: 14,
     fontFamily: "Poppins-Regular",
   },

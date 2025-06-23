@@ -276,7 +276,7 @@ const styles = StyleSheet.create({
   permissionButton: {
     padding: 14,
     backgroundColor: BASE_COLORS.lightBlue,
-    borderRadius: 8,
+    borderRadius: 16,
   },
   permissionButtonText: {
     color: BASE_COLORS.blue,

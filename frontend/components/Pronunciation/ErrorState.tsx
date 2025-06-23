@@ -45,7 +45,7 @@ const styles = StyleSheet.create({
     backgroundColor: BASE_COLORS.blue,
     paddingHorizontal: 24,
     paddingVertical: 12,
-    borderRadius: 12,
+    borderRadius: 16,
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.1,

@@ -132,7 +132,7 @@ const styles = StyleSheet.create({
     width: "90%",
     maxWidth: 500,
     backgroundColor: "#fff",
-    borderRadius: 8,
+    borderRadius: 16,
     overflow: "hidden",
   },
   modalHeader: {
@@ -183,7 +183,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     padding: 16,
-    borderRadius: 12,
+    borderRadius: 16,
     width: 90,
     height: 90,
     ...Platform.select({

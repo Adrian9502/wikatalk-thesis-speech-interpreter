@@ -31,7 +31,7 @@ export const Header = ({
   };
 
   return (
-    <View style={styles.headerContainer}>
+    <View style={[styles.headerContainer]}>
       {!hideBack ? (
         <TouchableOpacity
           style={[

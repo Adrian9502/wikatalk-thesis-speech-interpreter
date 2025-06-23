@@ -284,7 +284,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     backgroundColor: "#F0F8FF",
-    borderRadius: 8,
+    borderRadius: 12,
     padding: 12,
     marginBottom: 16,
     borderWidth: 1,
@@ -297,7 +297,7 @@ const styles = StyleSheet.create({
   },
   noteContainer: {
     backgroundColor: "#F0F8FF",
-    borderRadius: 8,
+    borderRadius: 12,
     padding: 12,
     marginBottom: 16,
     borderWidth: 1,
@@ -316,10 +316,10 @@ const styles = StyleSheet.create({
   },
   submitButton: {
     backgroundColor: TITLE_COLORS.customRed,
-    paddingVertical: 12,
+    paddingVertical: 8,
     alignItems: "center",
     justifyContent: "center",
-    borderRadius: 8,
+    borderRadius: 16,
   },
   buttonContent: {
     flexDirection: "row",

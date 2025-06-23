@@ -106,7 +106,10 @@ const SocialLogin = () => {
     <>
       <View style={styles.dividerContainer}>
         <View
-          style={[styles.dividerLine, { backgroundColor: BASE_COLORS.blue }]}
+          style={[
+            styles.dividerLine,
+            { backgroundColor: BASE_COLORS.placeholderText },
+          ]}
         />
         <Text
           style={[styles.dividerText, { color: BASE_COLORS.placeholderText }]}
@@ -114,7 +117,10 @@ const SocialLogin = () => {
           OR
         </Text>
         <View
-          style={[styles.dividerLine, { backgroundColor: BASE_COLORS.blue }]}
+          style={[
+            styles.dividerLine,
+            { backgroundColor: BASE_COLORS.placeholderText },
+          ]}
         />
       </View>
 

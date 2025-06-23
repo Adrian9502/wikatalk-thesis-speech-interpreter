@@ -38,7 +38,7 @@ const AuthTabs: React.FC<AuthTabsProps> = ({
             styles.tabButtonText,
             activeTab === "signin"
               ? [styles.activeTabText, { color: TITLE_COLORS.customYellow }]
-              : [styles.inactiveTabText, { color: BASE_COLORS.blue }],
+              : { color: BASE_COLORS.blue },
           ]}
         >
           Sign In
@@ -55,7 +55,7 @@ const AuthTabs: React.FC<AuthTabsProps> = ({
             styles.tabButtonText,
             activeTab === "signin"
               ? [styles.activeTabText, { color: BASE_COLORS.blue }]
-              : [styles.inactiveTabText, { color: TITLE_COLORS.customYellow }],
+              : { color: TITLE_COLORS.customYellow },
           ]}
         >
           Sign Up
@@ -70,7 +70,7 @@ const AuthTabs: React.FC<AuthTabsProps> = ({
           width: "50%",
           height: "100%",
           backgroundColor: TITLE_COLORS.customBlue,
-          borderRadius: 10,
+          borderRadius: 16,
           opacity: 0.9,
           zIndex: 0,
           left: tabIndicatorLeft,
@@ -86,7 +86,7 @@ const styles = StyleSheet.create({
     width: "100%",
     position: "relative",
     marginBottom: 16,
-    borderRadius: 8,
+    borderRadius: 16,
     overflow: "hidden",
   },
   tabButton: {
@@ -102,7 +102,6 @@ const styles = StyleSheet.create({
   activeTabText: {
     fontFamily: "Poppins-Medium",
   },
-  inactiveTabText: {},
 });
 
 export default AuthTabs;

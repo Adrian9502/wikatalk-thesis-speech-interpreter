@@ -33,10 +33,10 @@ const styles = StyleSheet.create({
   },
   switchText: {
     fontSize: 12,
-    fontFamily: "Poppins-Medium",
+    fontFamily: "Poppins-Regular",
   },
   switchButtonText: {
-    fontFamily: "Poppins-SemiBold",
+    fontFamily: "Poppins-Regular",
     fontSize: 13,
     marginLeft: 4,
   },

@@ -31,13 +31,13 @@ export const DangerSection = () => {
 
 const styles = StyleSheet.create({
   container: {
-    borderRadius: 12,
+    borderRadius: 16,
     marginBottom: 20,
   },
   warningContainer: {
     flexDirection: "row",
     backgroundColor: "#f2f0f0",
-    borderRadius: 8,
+    borderRadius: 12,
     padding: 12,
     marginVertical: 16,
     alignItems: "flex-start",

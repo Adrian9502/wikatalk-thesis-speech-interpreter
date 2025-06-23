@@ -205,7 +205,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
   },
   dropdownList: {
-    borderRadius: 8,
+    borderRadius: 12,
     borderWidth: 1,
     backgroundColor: BASE_COLORS.white,
     shadowColor: "#000",

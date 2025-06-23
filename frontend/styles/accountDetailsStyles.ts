@@ -3,8 +3,7 @@ import { BASE_COLORS } from "@/constant/colors";
 
 export default StyleSheet.create({
   headerContainer: {
-    paddingTop: 16,
-    paddingBottom: 16,
+    paddingVertical: 16,
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
@@ -28,7 +27,6 @@ export default StyleSheet.create({
     fontFamily: "Poppins-Medium",
     color: BASE_COLORS.white,
   },
-
   avatarImage: {
     width: "100%",
     height: "100%",
@@ -97,7 +95,7 @@ export default StyleSheet.create({
   infoIconContainer: {
     width: 36,
     height: 36,
-    borderRadius: 12,
+    borderRadius: 16,
     justifyContent: "center",
     alignItems: "center",
     marginRight: 12,
@@ -128,7 +126,7 @@ export default StyleSheet.create({
   settingIconContainer: {
     width: 36,
     height: 36,
-    borderRadius: 12,
+    borderRadius: 16,
     justifyContent: "center",
     alignItems: "center",
     marginRight: 16,

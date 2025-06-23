@@ -72,7 +72,7 @@ const styles = StyleSheet.create({
   modalContainer: {
     width: "80%",
     backgroundColor: BASE_COLORS.white,
-    borderRadius: 20,
+    borderRadius: 16,
     padding: 24,
     alignItems: "center",
     shadowColor: "#000",
@@ -111,9 +111,9 @@ const styles = StyleSheet.create({
     gap: 12,
   },
   modalButton: {
-    paddingVertical: 12,
-    paddingHorizontal: 16,
-    borderRadius: 8,
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+    borderRadius: 16,
     minWidth: 120,
     alignItems: "center",
     justifyContent: "center",

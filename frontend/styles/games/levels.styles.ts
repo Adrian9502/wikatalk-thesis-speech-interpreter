@@ -305,7 +305,7 @@ export const levelStyles = StyleSheet.create({
     right: 8,
     width: 24,
     height: 24,
-    borderRadius: 12,
+    borderRadius: 16,
     backgroundColor: "#4CAF50",
     justifyContent: "center",
     alignItems: "center",

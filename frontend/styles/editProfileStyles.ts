@@ -108,7 +108,7 @@ export default StyleSheet.create({
   },
   saveButton: {
     paddingVertical: 8,
-    borderRadius: 12,
+    borderRadius: 16,
     alignItems: "center",
     justifyContent: "center",
     marginTop: 8,
@@ -120,11 +120,9 @@ export default StyleSheet.create({
   },
   cancelButton: {
     paddingVertical: 12,
-    borderRadius: 8,
     alignItems: "center",
     justifyContent: "center",
     marginTop: 8,
-    marginBottom: 16,
   },
   cancelButtonText: {
     fontSize: 13,
@@ -156,7 +154,7 @@ export default StyleSheet.create({
   googleUserInfoContainer: {
     flexDirection: "row",
     backgroundColor: "#f2f0f0",
-    borderRadius: 8,
+    borderRadius: 16,
     padding: 12,
     marginVertical: 16,
     alignItems: "flex-start",

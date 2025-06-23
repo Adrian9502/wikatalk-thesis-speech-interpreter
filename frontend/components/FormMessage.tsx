@@ -72,7 +72,7 @@ const FormMessage: React.FC<FormMessageProps> = ({
 
 const styles = StyleSheet.create({
   container: {
-    borderRadius: 8,
+    borderRadius: 12,
     marginBottom: 16,
     padding: 12,
     flexDirection: "row",

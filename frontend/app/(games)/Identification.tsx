@@ -81,7 +81,11 @@ const Identification: React.FC<IdentificationProps> = ({
       handleWordSelect(wordIndex);
 
       // 4. CRITICAL FIX: Update progress with completion status
-      const updatedProgress = await updateProgress(currentTime, isCorrect, isCorrect);
+      const updatedProgress = await updateProgress(
+        currentTime,
+        isCorrect,
+        isCorrect
+      );
 
       // 5. If level was completed, force refresh global progress
       if (isCorrect && updatedProgress) {
@@ -92,7 +96,9 @@ const Identification: React.FC<IdentificationProps> = ({
 
         setTimeout(async () => {
           await refreshProgress();
-          console.log(`[Identification] Global progress refreshed after completion`);
+          console.log(
+            `[Identification] Global progress refreshed after completion`
+          );
         }, 200);
       }
     } catch (error) {
@@ -132,7 +138,8 @@ const Identification: React.FC<IdentificationProps> = ({
     progress && !Array.isArray(progress) ? progress.totalTimeSpent : 0
   );
 
-  const focusArea = currentSentence?.focusArea || levelData?.focusArea || "Vocabulary";
+  const focusArea =
+    currentSentence?.focusArea || levelData?.focusArea || "Vocabulary";
 
   // Calculate selected answer for review
   const selectedAnswerText =
@@ -168,7 +175,7 @@ const Identification: React.FC<IdentificationProps> = ({
             style={{
               backgroundColor: BASE_COLORS.blue,
               padding: 12,
-              borderRadius: 8,
+              borderRadius: 16,
             }}
             onPress={() => router.back()}
           >
@@ -194,7 +201,9 @@ const Identification: React.FC<IdentificationProps> = ({
           focusArea={focusArea}
           isStarted={isStarted}
           gameStatus={gameStatus}
-          initialTime={progress && !Array.isArray(progress) ? progress.totalTimeSpent : 0}
+          initialTime={
+            progress && !Array.isArray(progress) ? progress.totalTimeSpent : 0
+          }
         >
           <IdentificationPlayingContent
             difficulty={difficulty}

@@ -21,7 +21,7 @@ import { FAQItem } from "@/types/faqItems";
 import categories from "@/utils/helpAndFAQ/categories";
 import ContactSupportModal from "@/components/helpAndFAQ/ContactSupportModal";
 import { Header } from "@/components/Header";
-import { globalStyles } from "@/styles/globalStyles";
+
 const HelpFAQ = () => {
   // Get the dynamic styles based on the current theme
   const { activeTheme } = useThemeStore();
@@ -64,7 +64,6 @@ const HelpFAQ = () => {
         <SafeAreaView
           style={[
             styles.safeArea,
-            globalStyles.container,
             { backgroundColor: activeTheme.backgroundColor },
           ]}
         >
@@ -72,7 +71,9 @@ const HelpFAQ = () => {
             backgroundColor={activeTheme.backgroundColor}
             barStyle="light-content"
           />
-          <Header title="Help & FAQ" />
+          <View style={styles.headerContainer}>
+            <Header title="Help & FAQ" />
+          </View>
           <View style={styles.searchContainer}>
             <View style={[styles.searchBar]}>
               <Search
@@ -240,6 +241,9 @@ const styles = StyleSheet.create({
     flex: 1,
     paddingTop: Platform.OS === "android" ? StatusBar.currentHeight : 0,
   },
+  headerContainer: {
+    paddingHorizontal: 20,
+  },
   container: {
     marginTop: 32,
     flex: 1,
@@ -277,8 +281,8 @@ const styles = StyleSheet.create({
   searchBar: {
     flexDirection: "row",
     alignItems: "center",
-    borderRadius: 8,
-    paddingHorizontal: 12,
+    borderRadius: 16,
+    paddingHorizontal: 16,
     backgroundColor: "#ffffff",
   },
   clearButton: {
@@ -286,7 +290,6 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
   },
-
   searchIcon: {
     marginRight: 8,
   },
@@ -297,7 +300,7 @@ const styles = StyleSheet.create({
     fontFamily: "Poppins-Regular",
   },
   categoryContainer: {
-    borderRadius: 8,
+    borderRadius: 16,
     overflow: "hidden",
     marginHorizontal: 16,
     marginBottom: 16,
@@ -376,12 +379,12 @@ const styles = StyleSheet.create({
   contactButton: {
     paddingVertical: 8,
     paddingHorizontal: 16,
-    borderRadius: 8,
+    borderRadius: 16,
   },
   contactButtonText: {
     fontFamily: "Poppins-Regular",
     color: "#ffffff",
-    fontSize: 13,
+    fontSize: 14,
   },
 });
 

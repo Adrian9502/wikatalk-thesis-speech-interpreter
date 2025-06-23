@@ -254,7 +254,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     backgroundColor: "#F0F8FF",
-    borderRadius: 8,
+    borderRadius: 12,
     padding: 12,
     marginBottom: 12,
     borderWidth: 1,
@@ -267,7 +267,7 @@ const styles = StyleSheet.create({
   },
   buttonContainer: {
     width: "100%",
-    borderRadius: 8,
+    borderRadius: 16,
     overflow: "hidden",
     marginVertical: 16,
     shadowColor: "#000",
@@ -281,7 +281,7 @@ const styles = StyleSheet.create({
     paddingVertical: 11,
     alignItems: "center",
     justifyContent: "center",
-    borderRadius: 8,
+    borderRadius: 16,
   },
   buttonContentContainer: {
     flexDirection: "row",

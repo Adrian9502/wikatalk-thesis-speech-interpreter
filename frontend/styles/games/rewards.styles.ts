@@ -78,13 +78,13 @@ export const rewardStyles = StyleSheet.create({
     backgroundColor: "#4CAF50",
     paddingHorizontal: 8,
     paddingVertical: 4,
-    borderRadius: 12,
+    borderRadius: 16,
   },
   claimedBadge: {
     backgroundColor: "rgba(255,255,255,0.3)",
     paddingHorizontal: 8,
     paddingVertical: 4,
-    borderRadius: 12,
+    borderRadius: 16,
   },
   badgeText: {
     fontSize: 11,
