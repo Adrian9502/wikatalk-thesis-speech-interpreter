@@ -21,6 +21,7 @@ import { FAQItem } from "@/types/faqItems";
 import categories from "@/utils/helpAndFAQ/categories";
 import ContactSupportModal from "@/components/helpAndFAQ/ContactSupportModal";
 import { Header } from "@/components/Header";
+import { globalStyles } from "@/styles/globalStyles";
 const HelpFAQ = () => {
   // Get the dynamic styles based on the current theme
   const { activeTheme } = useThemeStore();
@@ -63,6 +64,7 @@ const HelpFAQ = () => {
         <SafeAreaView
           style={[
             styles.safeArea,
+            globalStyles.container,
             { backgroundColor: activeTheme.backgroundColor },
           ]}
         >
