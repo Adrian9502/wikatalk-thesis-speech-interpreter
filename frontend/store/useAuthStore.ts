@@ -6,13 +6,11 @@ import { AppState, AppStateStatus, InteractionManager } from "react-native";
 import { router } from "expo-router";
 import { showToast } from "@/lib/showToast";
 import useThemeStore from "./useThemeStore";
-import { setToken } from "@/lib/authTokenManager";
+import { getToken, setToken } from "@/lib/authTokenManager";
 import { useTranslateStore } from "./useTranslateStore";
 import { GoogleSignin } from "@react-native-google-signin/google-signin";
 import useCoinsStore from "./games/useCoinsStore";
-import { authService } from "@/services/api";
-// API URL from environment
-const API_URL = `${process.env.EXPO_PUBLIC_BACKEND_URL}`;
+import { authService, testAPIConnection } from "@/services/api";
 
 // Types
 interface UserData {
@@ -140,18 +138,6 @@ const setupAxiosDefaults = (token: string | null) => {
   );
 };
 
-// Test API connection
-const testAPIConnection = async () => {
-  try {
-    const response = await axios.get(`${API_URL}`);
-    console.log("API test successful:", response.data);
-  } catch (error: any) {
-    console.error("API test failed:", error.message);
-    console.error("Request URL:", error.config?.url);
-    console.error("Request method:", error.config?.method);
-  }
-};
-
 // Constants
 const INACTIVE_TIMEOUT = 10 * 60 * 1000; // 10 minutes
 
@@ -265,12 +251,12 @@ export const useAuthStore = create<AuthState>()(
 
             // Optionally verify with backend, but don't block UI
             try {
-              const response = await axios.post(
-                `${API_URL}/api/users/check-verification`,
-                { email: userData.email }
+              // Replace direct axios call with authService
+              const response = await authService.checkVerification(
+                userData.email
               );
 
-              if (!response.data.success || !response.data.isVerified) {
+              if (!response.success || !response.isVerified) {
                 console.log("User verification failed, logging out");
                 await get().logout();
               }
@@ -638,11 +624,11 @@ export const useAuthStore = create<AuthState>()(
       // Get user profile
       getUserProfile: async () => {
         try {
-          const response = await axios.get(`${API_URL}/api/users/profile`);
+          const response = await authService.getUserProfile();
 
-          if (response.data.success) {
-            // Update local userData with fresh data from server, including new fields
-            const updatedUserData = response.data.data;
+          if (response.success) {
+            // Update local userData with fresh data from server
+            const updatedUserData = response.data;
 
             // Save to storage
             await AsyncStorage.setItem(
@@ -747,12 +733,15 @@ export const useAuthStore = create<AuthState>()(
       // Resend verification email
       resendVerificationEmail: async () => {
         const { userData } = get();
-        
+
         // Clear any existing form messages first
         get().clearFormMessage();
 
         if (!userData?.email) {
-          get().setFormMessage("Email information is missing. Please register again.", "error");
+          get().setFormMessage(
+            "Email information is missing. Please register again.",
+            "error"
+          );
           showToast({
             type: "error",
             title: "Error",
@@ -762,30 +751,22 @@ export const useAuthStore = create<AuthState>()(
         }
 
         try {
-          // Log for debugging
-          console.log(
-            "Sending resend request with token:",
-            userData?.tempToken?.substring(0, 15) + "..."
+          // Use authService instead of direct axios call
+          const response = await authService.resendVerification(
+            userData.email,
+            userData?.fullName,
+            userData?.tempToken
           );
 
-          const response = await axios.post(
-            `${API_URL}/api/users/resend-verification-code`,
-            {
-              email: userData?.email,
-              fullName: userData?.fullName,
-              tempToken: userData?.tempToken,
-            }
-          );
-
-          if (response.data.success) {
+          if (response.success) {
             // If there's a new token, update it in storage
-            if (response.data.data?.tempToken) {
-              // Create a properly typed UserData object with the correct order of spreading
+            if (response.data?.tempToken) {
+              // Create a properly typed UserData object
               const updatedUserData: UserData = {
                 ...(userData || {}), // Spread existing data first
-                fullName: userData?.fullName || "", // Then override required fields
+                fullName: userData?.fullName || "",
                 email: userData?.email || "",
-                tempToken: response.data.data.tempToken, // Add the new token
+                tempToken: response.data.tempToken, // Add the new token
               };
 
               // Update in state and storage
@@ -799,8 +780,11 @@ export const useAuthStore = create<AuthState>()(
             }
 
             // Set form message for success
-            get().setFormMessage("Verification code resent successfully", "success");
-            
+            get().setFormMessage(
+              "Verification code resent successfully",
+              "success"
+            );
+
             showToast({
               type: "success",
               title: "Verification Email Sent!",
@@ -809,8 +793,11 @@ export const useAuthStore = create<AuthState>()(
             return { success: true };
           } else {
             // Set form message for error
-            get().setFormMessage(response.data.message || "Failed to resend verification code", "error");
-            
+            get().setFormMessage(
+              response.data.message || "Failed to resend verification code",
+              "error"
+            );
+
             showToast({
               type: "error",
               title: "Verification Send Error",
@@ -820,9 +807,12 @@ export const useAuthStore = create<AuthState>()(
           }
         } catch (error: any) {
           console.error("Resend verification error:", error);
-          
+
           // Set form message for error
-          get().setFormMessage("Failed to resend verification code. Please try again.", "error");
+          get().setFormMessage(
+            "Failed to resend verification code. Please try again.",
+            "error"
+          );
 
           // Handle token expiration more gracefully
           if (
@@ -1031,30 +1021,29 @@ export const useAuthStore = create<AuthState>()(
       clearStorage: async (navigateAfterClear = true) => {
         try {
           await AsyncStorage.clear();
-          set({ userToken: null, userData: null });
+          set({ userToken: null, userData: null, formMessage: null }); // Clear form message too
           setupAxiosDefaults(null);
           console.log("✅ AsyncStorage cleared successfully!");
-          
+
           if (navigateAfterClear) {
             // Handle navigation here
             InteractionManager.runAfterInteractions(() => {
               router.replace("/");
             });
           }
-          
+
           return { success: true };
         } catch (error) {
           console.error("❌ Error clearing AsyncStorage:", error);
-          
-          // Show error toast if navigation would have happened
+
           if (navigateAfterClear) {
             showToast({
               type: "error",
               title: "Error",
-              description: "Error returning to home screen"
+              description: "Error returning to home screen",
             });
           }
-          
+
           return { success: false, message: "Error clearing storage" };
         }
       },
@@ -1069,70 +1058,52 @@ export const useAuthStore = create<AuthState>()(
             updatedUserData.profilePicture &&
             updatedUserData.profilePicture.startsWith("data:image")
           ) {
-            const token = get().userToken;
-            if (!token) {
-              throw new Error("No authentication token found");
-            }
-
-            // Upload the profile picture
-            const picResponse = await axios.put(
-              `${API_URL}/api/users/profile-picture`,
-              { imageBase64: updatedUserData.profilePicture },
-              {
-                headers: {
-                  Authorization: `Bearer ${token}`,
-                  "Content-Type": "application/json",
-                },
-              }
-            );
-
-            if (picResponse.data.success) {
-              // Update user data with the new picture URL from Cloudinary
-              const updatedUser = picResponse.data.data;
-
-              // Save to storage
-              await AsyncStorage.setItem(
-                "userData",
-                JSON.stringify(updatedUser)
+            try {
+              // Use authService.updateProfilePicture instead of direct axios
+              const picResponse = await authService.updateProfilePicture(
+                updatedUserData.profilePicture
               );
 
-              // Update state
-              set({ userData: updatedUser });
+              if (picResponse.success) {
+                // Update user data with the new picture URL from Cloudinary
+                const updatedUser = picResponse.data;
 
-              // Remove profilePicture from updatedUserData since it's already processed
-              delete updatedUserData.profilePicture;
+                // Save to storage
+                await AsyncStorage.setItem(
+                  "userData",
+                  JSON.stringify(updatedUser)
+                );
 
-              // If only the profile picture was being updated, return now
-              if (Object.keys(updatedUserData).length === 0) {
-                return { success: true, data: updatedUser };
+                // Update state
+                set({ userData: updatedUser });
+
+                // Remove profilePicture from updatedUserData since it's already processed
+                delete updatedUserData.profilePicture;
+
+                // If only the profile picture was being updated, return now
+                if (Object.keys(updatedUserData).length === 0) {
+                  return { success: true, data: updatedUser };
+                }
+              } else {
+                throw new Error(
+                  picResponse.message || "Failed to update profile picture"
+                );
               }
-            } else {
-              throw new Error(
-                picResponse.data.message || "Failed to update profile picture"
-              );
+            } catch (error: any) {
+              throw error; // Pass the error up to be handled by the outer catch
             }
           }
 
           // Process other profile fields if they exist
           if (Object.keys(updatedUserData).length > 0) {
-            const token = get().userToken;
-            if (!token) {
-              throw new Error("No authentication token found");
-            }
-
-            const response = await axios.put(
-              `${API_URL}/api/users/profile`,
-              updatedUserData,
-              {
-                headers: {
-                  Authorization: `Bearer ${token}`,
-                },
-              }
+            // Use authService.updateUserProfile instead of direct axios
+            const response = await authService.updateUserProfile(
+              updatedUserData
             );
 
-            if (response.data.success) {
+            if (response.success) {
               // Update state with server response
-              const updatedUser = response.data.data;
+              const updatedUser = response.data;
 
               // Update in state
               set({ userData: updatedUser });
@@ -1145,9 +1116,7 @@ export const useAuthStore = create<AuthState>()(
 
               return { success: true, data: updatedUser };
             } else {
-              throw new Error(
-                response.data.message || "Failed to update profile"
-              );
+              throw new Error(response.message || "Failed to update profile");
             }
           }
 

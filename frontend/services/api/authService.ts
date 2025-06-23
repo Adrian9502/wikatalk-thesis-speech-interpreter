@@ -83,6 +83,17 @@ export const authService = {
   // Verify email with code
   verifyEmail: async (data: VerifyEmailRequest) => {
     const response = await api.post("/api/users/verify-email", data);
+
+    // Log the response structure for debugging
+    console.log("Verify email response structure:", 
+      JSON.stringify({
+        success: response.data.success,
+        hasToken: !!response.data.token,
+        hasDataToken: !!(response.data.data && response.data.data.token),
+        responseKeys: Object.keys(response.data)
+      })
+    );
+
     return response.data;
   },
 
@@ -109,9 +120,11 @@ export const authService = {
   },
 
   // Resend verification code
-  resendVerification: async (email: string) => {
+  resendVerification: async (email: string, fullName?: string, tempToken?: string) => {
     const response = await api.post("/api/users/resend-verification-code", {
       email,
+      fullName,
+      tempToken,
     });
     return response.data;
   },
@@ -155,6 +168,26 @@ export const authService = {
   deleteAccount: async (deletionToken: string) => {
     const response = await authApi.delete("/api/users/delete-account", {
       data: { deletionToken },
+    });
+    return response.data;
+  },
+
+  // Get user profile
+  getUserProfile: async () => {
+    const response = await authApi.get("/api/users/profile");
+    return response.data;
+  },
+
+  // Update user profile
+  updateUserProfile: async (updatedUserData: any) => {
+    const response = await authApi.put("/api/users/profile", updatedUserData);
+    return response.data;
+  },
+
+  // Update profile picture
+  updateProfilePicture: async (imageBase64: string) => {
+    const response = await authApi.put("/api/users/profile-picture", {
+      imageBase64,
     });
     return response.data;
   },

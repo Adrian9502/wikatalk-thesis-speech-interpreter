@@ -1,9 +1,24 @@
 import axios, { AxiosInstance, InternalAxiosRequestConfig } from "axios";
 import { getToken } from "@/lib/authTokenManager";
 import { router } from "expo-router";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const BACKEND_URL: string =
   process.env.EXPO_PUBLIC_BACKEND_URL || "http://localhost:5000";
+
+// check if the backend is set
+export const testAPIConnection = async (): Promise<boolean> => {
+  try {
+    const response = await axios.get(`${BACKEND_URL}`);
+    console.log("API test successful:", response.data);
+    return true;
+  } catch (error: any) {
+    console.error("API test failed:", error.message);
+    console.error("Request URL:", error.config?.url);
+    console.error("Request method:", error.config?.method);
+    return false;
+  }
+};
 
 export const createApi = (withAuth = true): AxiosInstance => {
   const api: AxiosInstance = axios.create({
@@ -49,7 +64,11 @@ export const createApi = (withAuth = true): AxiosInstance => {
     (response) => response,
     (error) => {
       // Extract the error message from the response if available
-      if (error.response && error.response.data && error.response.data.message) {
+      if (
+        error.response &&
+        error.response.data &&
+        error.response.data.message
+      ) {
         error.message = error.response.data.message;
       }
       return Promise.reject(error);
