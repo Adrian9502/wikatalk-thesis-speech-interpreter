@@ -18,8 +18,29 @@ export const setToken = (token: string | null) => {
     axios.defaults.headers.common["Authorization"] = `Bearer ${token}`;
     console.log("Token set in axios headers");
   } else {
-    delete axios.defaults.headers.common["Authorization"];
-    console.log("Token removed from axios headers");
+    // Don't clear the token during verification flow - modify this to use an
+    // immediately invoked async function instead of direct AsyncStorage access
+    (async () => {
+      try {
+        const tempData = await AsyncStorage.getItem("tempUserData");
+        // Use proper boolean check with the string result
+        const inVerificationFlow = tempData !== null;
+
+        if (inVerificationFlow) {
+          // We're in verification flow - don't clear the token
+          console.log("Prevented token removal during verification flow");
+          return;
+        }
+
+        // Otherwise proceed with token removal
+        delete axios.defaults.headers.common["Authorization"];
+        console.log("Token removed from axios headers");
+      } catch (err) {
+        // If we can't check, proceed with normal token removal
+        delete axios.defaults.headers.common["Authorization"];
+        console.log("Token removed from axios headers (error path)");
+      }
+    })();
   }
 };
 
@@ -66,5 +87,6 @@ export const initializeToken = async (): Promise<void> => {
 // Check token validity
 export const isTokenValid = (token: string): boolean => {
   // Simple format check (JWT has 3 parts separated by dots)
-  return token && token.split(".").length === 3;
+  if (!token) return false;
+  return token.split(".").length === 3;
 };

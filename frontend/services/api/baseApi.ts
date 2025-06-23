@@ -57,12 +57,7 @@ export const createApi = (withAuth = true): AxiosInstance => {
             const tempData = await AsyncStorage.getItem("tempUserData");
             const userToken = await AsyncStorage.getItem("userToken");
 
-            // Get the current path
-            const currentPath = router.canGoBack()
-              ? router.getCurrentOptions().path
-              : null;
-
-            console.log("Auth error on path:", currentPath);
+            console.log("Auth error detected");
 
             if (!tempData && !userToken) {
               // Only redirect if not in verification flow and no valid token
