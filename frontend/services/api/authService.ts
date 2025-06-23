@@ -84,17 +84,17 @@ export const authService = {
   verifyEmail: async (data: VerifyEmailRequest) => {
     const response = await api.post("/api/users/verify-email", data);
 
-    // Log the response structure for debugging
-    console.log("Verify email response structure:", 
-      JSON.stringify({
-        success: response.data.success,
-        hasToken: !!response.data.token,
-        hasDataToken: !!(response.data.data && response.data.data.token),
-        responseKeys: Object.keys(response.data)
-      })
-    );
+    // Enhanced logging to help diagnose token issues
+    const responseData = response.data;
+    console.log("Verification response details:", {
+      success: responseData.success,
+      hasRootToken: !!responseData.token,
+      hasDataToken: !!(responseData.data && responseData.data.token),
+      tokenLength: responseData.token ? responseData.token.length : 0,
+      statusCode: response.status,
+    });
 
-    return response.data;
+    return responseData;
   },
 
   // Password reset functionality

@@ -44,15 +44,37 @@ export const createApi = (withAuth = true): AxiosInstance => {
     // Handle auth errors
     api.interceptors.response.use(
       (response) => response,
-      (error) => {
+      async (error) => {
+        // Only handle 401 errors for specific cases
         if (
           error.response &&
           error.response.status === 401 &&
-          // Exclude history endpoints from redirecting to login
-          !error.config.url.includes("/translations")
+          !error.config.url.includes("/translations") &&
+          !error.config.url.includes("/verify-email")
         ) {
-          // Only redirect for critical auth failures, not for history
-          router.replace("/");
+          try {
+            // Check if we're in verification flow before redirecting
+            const tempData = await AsyncStorage.getItem("tempUserData");
+            const userToken = await AsyncStorage.getItem("userToken");
+
+            // Get the current path
+            const currentPath = router.canGoBack()
+              ? router.getCurrentOptions().path
+              : null;
+
+            console.log("Auth error on path:", currentPath);
+
+            if (!tempData && !userToken) {
+              // Only redirect if not in verification flow and no valid token
+              console.log("Unauthorized and no valid session - redirecting to login");
+              router.replace("/");
+            } else {
+              // Otherwise just log the error but don't redirect
+              console.log("Auth error but valid session exists - not redirecting");
+            }
+          } catch (e) {
+            console.error("Error checking auth state:", e);
+          }
         }
         return Promise.reject(error);
       }

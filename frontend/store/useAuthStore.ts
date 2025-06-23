@@ -624,6 +624,21 @@ export const useAuthStore = create<AuthState>()(
       // Get user profile
       getUserProfile: async () => {
         try {
+          // Verify token exists before making request
+          const token = getToken();
+          if (!token) {
+            console.error("No token available for getUserProfile");
+
+            // Try to recover token from storage
+            const storedToken = await AsyncStorage.getItem("userToken");
+            if (storedToken) {
+              console.log("Recovered token from storage");
+              setToken(storedToken);
+            } else {
+              return undefined;
+            }
+          }
+
           const response = await authService.getUserProfile();
 
           if (response.success) {
@@ -683,24 +698,48 @@ export const useAuthStore = create<AuthState>()(
           if (response.success) {
             get().clearFormMessage();
 
-            // Safely extract token and user data with fallbacks
-            const token = response.data?.token || "";
+            // FIX: Extract token from both possible locations
+            const token =
+              response.token || (response.data && response.data.token) || "";
+
+            // Debug log to help diagnose token extraction
+            console.log(
+              "Verification token extracted, length:",
+              token?.length || 0
+            );
+
+            if (!token) {
+              console.error("No token found in verification response!");
+              console.log(
+                "Response structure:",
+                JSON.stringify({
+                  hasRootToken: !!response.token,
+                  hasDataToken: !!(response.data && response.data.token),
+                  responseKeys: Object.keys(response),
+                })
+              );
+            }
+
             const user = response.data || {
               email: userData?.email || "",
               fullName: userData?.fullName || "",
             };
 
-            // Clear old data and set new data
+            // IMPORTANT: First set token in memory before clearing storage
+            setToken(token); // Update the token manager first
+            setupAxiosDefaults(token); // Then update axios defaults
+
+            // Update zustand state
+            set({ userToken: token, userData: user });
+
+            // Finally update storage
             await Promise.all([
-              AsyncStorage.removeItem("tempUserData"),
-              AsyncStorage.removeItem("tempToken"),
               AsyncStorage.setItem("userToken", token),
               AsyncStorage.setItem("userData", JSON.stringify(user)),
+              // Only remove temp data after new data is set
+              AsyncStorage.removeItem("tempUserData"),
+              AsyncStorage.removeItem("tempToken"),
             ]);
-
-            setupAxiosDefaults(token);
-            setToken(token);
-            set({ userToken: token, userData: user });
 
             showToast({
               type: "success",

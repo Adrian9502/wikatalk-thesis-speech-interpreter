@@ -5,6 +5,12 @@ import axios from "axios";
 let currentToken: string | null = null;
 
 export const setToken = (token: string | null) => {
+  // Log detailed token information for debugging
+  console.log(
+    "Setting token:",
+    token ? `${token.substring(0, 10)}...` : "null"
+  );
+
   currentToken = token;
 
   // Update axios defaults when token changes
@@ -37,6 +43,20 @@ export const initializeToken = async (): Promise<void> => {
 
       setToken(token);
       console.log("Token initialized from storage");
+    } else {
+      // If no token in storage, check temp token for verification flow
+      const tempData = await AsyncStorage.getItem("tempUserData");
+      if (tempData) {
+        try {
+          const parsedData = JSON.parse(tempData);
+          if (parsedData.tempToken) {
+            console.log("Using tempToken for verification flow");
+            setToken(parsedData.tempToken);
+          }
+        } catch (e) {
+          console.error("Error parsing temp user data:", e);
+        }
+      }
     }
   } catch (error) {
     console.error("Failed to initialize token:", error);
