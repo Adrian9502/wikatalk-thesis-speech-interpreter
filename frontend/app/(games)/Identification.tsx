@@ -1,7 +1,7 @@
 import React, { useEffect } from "react";
 import { View, Text, TouchableOpacity } from "react-native";
 import { BASE_COLORS } from "@/constant/colors";
-import useQuizStore from "@/store/games/useQuizStore";
+import useGameStore from "@/store/games/useGameStore";
 import gameSharedStyles from "@/styles/gamesSharedStyles";
 import GameContainer from "@/components/games/GameContainer";
 import GamePlayingContent from "@/components/games/GamePlayingContent";
@@ -47,7 +47,7 @@ const Identification: React.FC<IdentificationProps> = ({
     toggleIdentificationTranslation: toggleTranslation,
     setTimeElapsed,
     setTimerRunning,
-  } = useQuizStore();
+  } = useGameStore();
 
   // Set initial time from progress when component mounts
   useEffect(() => {

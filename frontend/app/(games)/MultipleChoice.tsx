@@ -1,5 +1,5 @@
 import React, { useEffect } from "react";
-import useQuizStore from "@/store/games/useQuizStore";
+import useGameStore from "@/store/games/useGameStore";
 import GameContainer from "@/components/games/GameContainer";
 import GamePlayingContent from "@/components/games/GamePlayingContent";
 import GameCompletedContent from "@/components/games/GameCompletedContent";
@@ -35,7 +35,7 @@ const MultipleChoice: React.FC<MultipleChoiceProps> = ({
     handleOptionSelect,
     setTimeElapsed,
     setTimerRunning,
-  } = useQuizStore();
+  } = useGameStore();
 
   // Set initial time from progress when component mounts
   useEffect(() => {
@@ -129,9 +129,8 @@ const MultipleChoice: React.FC<MultipleChoiceProps> = ({
   // Game content configuration
   const focusArea =
     currentQuestion?.focusArea || levelData?.focusArea || "Vocabulary";
-  const selectedAnswerText = currentQuestion?.options?.find(
-    (o) => o.id === selectedOption
-  )?.text || "";
+  const selectedAnswerText =
+    currentQuestion?.options?.find((o) => o.id === selectedOption)?.text || "";
   const isSelectedCorrect =
     currentQuestion?.options?.find((o) => o.id === selectedOption)?.isCorrect ||
     false;

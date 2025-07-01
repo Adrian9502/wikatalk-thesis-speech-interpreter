@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect } from "react";
 import { KeyboardAvoidingView, Platform } from "react-native";
-import useQuizStore from "@/store/games/useQuizStore";
+import useGameStore from "@/store/games/useGameStore";
 import GameContainer from "@/components/games/GameContainer";
 import GameCompletedContent from "@/components/games/GameCompletedContent";
 import { useGameInitialization } from "@/hooks/useGameInitialization";
@@ -48,7 +48,7 @@ const FillInTheBlank: React.FC<FillInTheBlankProps> = ({
     checkAnswer,
     setTimerRunning,
     setTimeElapsed,
-  } = useQuizStore();
+  } = useGameStore();
 
   // Set initial time from progress when component mounts
   useEffect(() => {
@@ -79,7 +79,7 @@ const FillInTheBlank: React.FC<FillInTheBlankProps> = ({
       // 3. Update the user progress in backend
       // We need to use setTimeout because isCorrect state updates after checkAnswer
       setTimeout(async () => {
-        const currentState = useQuizStore.getState().fillInTheBlankState;
+        const currentState = useGameStore.getState().fillInTheBlankState;
         if (currentState.showFeedback) {
           const updatedProgress = await updateProgress(
             currentTime,

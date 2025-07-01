@@ -15,7 +15,7 @@ import MultipleChoice from "./MultipleChoice";
 import Identification from "./Identification";
 import FillInTheBlank from "./FillInTheBlank";
 import GameInfoModal from "@/components/games/GameInfoModal";
-import useQuizStore from "@/store/games/useQuizStore";
+import useGameStore from "@/store/games/useGameStore";
 import AppLoading from "@/components/AppLoading";
 
 const Questions = () => {
@@ -50,7 +50,7 @@ const Questions = () => {
     getLevelData,
     isLoading: storeLoading,
     error,
-  } = useQuizStore();
+  } = useGameStore();
 
   // Update ref whenever modalState changes
   useEffect(() => {

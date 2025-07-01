@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from "react";
-import useQuizStore from "@/store/games/useQuizStore";
+import useGameStore from "@/store/games/useGameStore";
 import { LevelData, QuizQuestions } from "@/types/gameTypes";
 import { convertQuizToLevels } from "@/utils/games/convertQuizToLevels";
 import { useUserProgress } from "@/hooks/useUserProgress";
@@ -8,9 +8,10 @@ export const useLevelData = (gameMode: string | string[] | undefined) => {
   const [levels, setLevels] = useState<LevelData[]>([]);
   const [showLevels, setShowLevels] = useState(false);
 
-  const { fetchQuestionsByMode, questions, isLoading, error } = useQuizStore();
-  const { progress: globalProgress, refreshProgress } = useUserProgress("global");
-  
+  const { fetchQuestionsByMode, questions, isLoading, error } = useGameStore();
+  const { progress: globalProgress, refreshProgress } =
+    useUserProgress("global");
+
   // PERFORMANCE FIX: More efficient refs
   const hasInitializedRef = useRef(false);
   const lastGameModeRef = useRef<string | undefined>();
@@ -22,7 +23,7 @@ export const useLevelData = (gameMode: string | string[] | undefined) => {
   const getProgressHash = useCallback((progress: any[]): string => {
     if (!Array.isArray(progress)) return "";
     return progress
-      .map(p => `${p.quizId}-${p.completed}-${p.totalTimeSpent}`)
+      .map((p) => `${p.quizId}-${p.completed}-${p.totalTimeSpent}`)
       .sort()
       .join("|");
   }, []);
@@ -30,16 +31,17 @@ export const useLevelData = (gameMode: string | string[] | undefined) => {
   // PERFORMANCE FIX: Debounced fetch function
   const fetchData = useCallback(async () => {
     if (!gameMode || hasInitializedRef.current) return;
-    
-    const safeGameMode = typeof gameMode === "string" ? gameMode : String(gameMode);
-    
+
+    const safeGameMode =
+      typeof gameMode === "string" ? gameMode : String(gameMode);
+
     if (lastGameModeRef.current === safeGameMode) return;
-    
+
     try {
       console.log(`[useLevelData] Fetching data for ${safeGameMode}`);
       lastGameModeRef.current = safeGameMode;
       hasInitializedRef.current = true;
-      
+
       await fetchQuestionsByMode(safeGameMode);
     } catch (error) {
       console.error("Error fetching questions:", error);
@@ -54,36 +56,42 @@ export const useLevelData = (gameMode: string | string[] | undefined) => {
   // PERFORMANCE FIX: Throttled level processing
   useEffect(() => {
     if (!gameMode || !questions || isProcessingRef.current) return;
-    
+
     const progressArray = Array.isArray(globalProgress) ? globalProgress : [];
     const currentProgressHash = getProgressHash(progressArray);
-    
+
     // Only process if there are actual changes
-    const hasProgressChanged = currentProgressHash !== lastProgressHashRef.current;
+    const hasProgressChanged =
+      currentProgressHash !== lastProgressHashRef.current;
     const hasNoLevels = levelsRef.current.length === 0;
-    
+
     if (hasNoLevels || hasProgressChanged) {
       isProcessingRef.current = true;
-      
+
       try {
-        const safeGameMode = typeof gameMode === "string" ? gameMode : String(gameMode);
-        
-        console.log(`[useLevelData] Processing levels for ${safeGameMode} (hash changed: ${hasProgressChanged})`);
-        
+        const safeGameMode =
+          typeof gameMode === "string" ? gameMode : String(gameMode);
+
+        console.log(
+          `[useLevelData] Processing levels for ${safeGameMode} (hash changed: ${hasProgressChanged})`
+        );
+
         const currentLevels = convertQuizToLevels(
           safeGameMode,
           questions as QuizQuestions,
           progressArray
         );
-        
+
         // PERFORMANCE FIX: More efficient comparison
         const statusChanges = currentLevels.filter((newLevel, index) => {
           const oldLevel = levelsRef.current[index];
           return !oldLevel || oldLevel.status !== newLevel.status;
         });
-                            
+
         if (statusChanges.length > 0 || hasNoLevels) {
-          console.log(`[useLevelData] ${statusChanges.length} level status changes detected`);
+          console.log(
+            `[useLevelData] ${statusChanges.length} level status changes detected`
+          );
           setLevels(currentLevels);
           levelsRef.current = currentLevels;
           lastProgressHashRef.current = currentProgressHash;
@@ -111,12 +119,12 @@ export const useLevelData = (gameMode: string | string[] | undefined) => {
       console.log(`[useLevelData] Skipping refresh - already processing`);
       return;
     }
-    
+
     console.log(`[useLevelData] Manually refreshing levels`);
     try {
       // Force refresh the global progress
       await refreshProgress();
-      
+
       // Reset the hash to force level reprocessing
       lastProgressHashRef.current = "";
     } catch (error) {
@@ -124,16 +132,19 @@ export const useLevelData = (gameMode: string | string[] | undefined) => {
     }
   }, [refreshProgress]);
 
-  const completionPercentage = levels.length > 0
-    ? (levels.filter((l) => l.status === "completed").length / levels.length) * 100
-    : 0;
+  const completionPercentage =
+    levels.length > 0
+      ? (levels.filter((l) => l.status === "completed").length /
+          levels.length) *
+        100
+      : 0;
 
   const handleRetry = useCallback(async () => {
     if (gameMode) {
       try {
         hasInitializedRef.current = false;
         lastGameModeRef.current = undefined;
-        
+
         await fetchQuestionsByMode(
           typeof gameMode === "string" ? gameMode : String(gameMode)
         );

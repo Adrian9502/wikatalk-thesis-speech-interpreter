@@ -1,7 +1,7 @@
 import { useEffect, useRef } from "react";
 import { setupBackButtonHandler } from "@/utils/gameUtils";
 import { GameStatus } from "@/types/gameTypes";
-import useQuizStore from "@/store/games/useQuizStore";
+import useGameStore from "@/store/games/useGameStore";
 
 export function useGameInitialization(
   levelData: any,
@@ -31,7 +31,9 @@ export function useGameInitialization(
   useEffect(() => {
     // Only initialize once per component instance
     if (!isInitializedRef.current) {
-      console.log(`[useGameInitialization] Initializing ${gameMode} at level ${levelId}`);
+      console.log(
+        `[useGameInitialization] Initializing ${gameMode} at level ${levelId}`
+      );
 
       // Initialize game data
       initialize(levelData, levelId, gameMode, difficulty);
@@ -39,8 +41,10 @@ export function useGameInitialization(
 
       // Set initial elapsed time if provided
       if (initialTime > 0) {
-        console.log(`[useGameInitialization] Setting initial time: ${initialTime}s`);
-        useQuizStore.getState().setTimeElapsed(initialTime);
+        console.log(
+          `[useGameInitialization] Setting initial time: ${initialTime}s`
+        );
+        useGameStore.getState().setTimeElapsed(initialTime);
       }
     }
 

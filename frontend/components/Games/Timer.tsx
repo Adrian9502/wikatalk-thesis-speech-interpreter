@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState } from "react";
 import { View, Text, StyleSheet } from "react-native";
 import { Clock } from "react-native-feather";
 import { BASE_COLORS } from "@/constant/colors";
-import useQuizStore from "@/store/games/useQuizStore";
+import useGameStore from "@/store/games/useGameStore";
 
 interface TimerProps {
   isRunning: boolean;
@@ -21,7 +21,7 @@ const Timer: React.FC<TimerProps> = ({ isRunning, initialTime = 0 }) => {
   const storeTimeRef = useRef(0);
 
   // Get store actions but don't subscribe to updates
-  const updateTimeElapsed = useQuizStore.getState().updateTimeElapsed;
+  const updateTimeElapsed = useGameStore.getState().updateTimeElapsed;
 
   // Format time helper function
   const formatAndDisplayTime = (time: number) => {

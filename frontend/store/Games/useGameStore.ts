@@ -205,7 +205,7 @@ const ensureProperFormat = (question: any): QuestionType => {
   } as QuestionType;
 };
 
-const useQuizStore = create<QuizState>((set, get) => ({
+const useGameStore = create<QuizState>((set, get) => ({
   // Initial data state
   questions: {
     multipleChoice: { easy: [], medium: [], hard: [] },
@@ -1115,4 +1115,4 @@ const useQuizStore = create<QuizState>((set, get) => ({
   },
 }));
 
-export default useQuizStore;
+export default useGameStore;
