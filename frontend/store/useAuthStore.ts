@@ -451,7 +451,16 @@ export const useAuthStore = create<AuthState>()(
           });
 
           if (response.success) {
-            const token = response.data?.token || idToken;
+            // Use the backend token
+            const token = response.data?.token;
+
+            if (!token) {
+              throw new Error("No backend token received from server");
+            }
+
+            await AsyncStorage.setItem("userToken", token);
+            setToken(token);
+
             const userData = response.data || {
               fullName: name,
               email: email,
@@ -476,7 +485,7 @@ export const useAuthStore = create<AuthState>()(
 
             // Set token in axios and token manager
             setupAxiosDefaults(token);
-            setToken(token); // Update state
+            setToken(token);
             set({
               userToken: token,
               userData: {
@@ -508,55 +517,22 @@ export const useAuthStore = create<AuthState>()(
         } catch (error: any) {
           console.log("Google login error:", error);
 
-          // Fall back to direct login if backend fails
-          try {
-            // Store Google user data directly
-            const googleUserData = {
-              fullName: name,
-              email: email,
-              profilePicture: photo || "",
-              isVerified: true,
-            };
+          // DON'T FALL BACK TO STORING GOOGLE TOKEN
+          // Just show the error and let user try again
+          const message =
+            error.response?.data?.message ||
+            error.message ||
+            "Google login failed";
+          set({ error: message });
+          get().setFormMessage(message, "error");
 
-            await Promise.all([
-              AsyncStorage.setItem("userData", JSON.stringify(googleUserData)),
-              AsyncStorage.setItem("userToken", idToken),
-            ]);
+          showToast({
+            type: "error",
+            title: "Google Sign-In Failed",
+            description: "Please check your internet connection and try again.",
+          });
 
-            // Set token in axios and token manager
-            setupAxiosDefaults(idToken);
-            setToken(idToken);
-
-            // Update state
-            set({
-              userToken: idToken,
-              userData: googleUserData,
-              isAppReady: true,
-            });
-
-            const themeStore = useThemeStore.getState();
-            await themeStore.syncThemeWithServer();
-
-            showToast({
-              type: "success",
-              title: "Signed in with Google",
-              description: `Welcome, ${name}!`,
-            });
-
-            // Navigate to main app
-            setTimeout(() => {
-              router.replace("/(tabs)/Speech");
-            }, 300);
-            return { success: true };
-          } catch (fallbackError) {
-            const message =
-              error.response?.data?.message ||
-              error.message ||
-              "Google login failed";
-            set({ error: message });
-            get().setFormMessage(message, "error");
-            return { success: false, message };
-          }
+          return { success: false, message };
         } finally {
           set({ isLoading: false });
         }
