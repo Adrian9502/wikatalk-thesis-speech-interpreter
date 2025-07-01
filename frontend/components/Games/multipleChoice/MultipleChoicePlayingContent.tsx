@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { Text, TouchableOpacity, View } from "react-native";
 import { Check, X } from "react-native-feather";
 import { LinearGradient } from "expo-linear-gradient";
@@ -61,7 +61,7 @@ const MultipleChoicePlayingContent: React.FC<
           style={gameSharedStyles.questionGradient}
         >
           <Text style={gameSharedStyles.questionText}>
-            {currentQuestion?.question}
+            {safeTextRender(currentQuestion?.question)}
           </Text>
         </LinearGradient>
       </Animatable.View>
@@ -74,50 +74,65 @@ const MultipleChoicePlayingContent: React.FC<
         ]}
       >
         {currentQuestion?.options &&
-          currentQuestion.options.map((option: Option, index: number) => (
-            <Animatable.View
-              key={option.id}
-              animation="fadeInUp"
-              duration={600}
-              delay={300 + index * 100}
-            >
-              <TouchableOpacity
-                style={getOptionStyle({
-                  isSelected: selectedOption === option.id,
-                  isCorrect: option.isCorrect,
-                })}
-                onPress={() => handleOptionSelect(option.id)}
-                disabled={selectedOption !== null || !isStarted}
-                activeOpacity={0.9}
+          currentQuestion.options.map((option: Option, index: number) => {
+            // Debug log each option
+            console.log(`[MultipleChoicePlayingContent] Option ${index}:`, {
+              id: option.id,
+              text: option.text,
+              textType: typeof option.text,
+              isCorrect: option.isCorrect,
+            });
+
+            return (
+              <Animatable.View
+                key={option.id}
+                animation="fadeInUp"
+                duration={600}
+                delay={300 + index * 100}
               >
-                <View style={gameSharedStyles.optionContent}>
-                  <View
-                    style={[
-                      gameSharedStyles.optionIdContainer,
-                      { alignSelf: "flex-start" },
-                    ]}
-                  >
-                    <Text style={gameSharedStyles.optionId}>
-                      {option.id.toUpperCase()}
+                <TouchableOpacity
+                  style={getOptionStyle({
+                    isSelected: selectedOption === option.id,
+                    isCorrect: option.isCorrect,
+                  })}
+                  onPress={() => handleOptionSelect(option.id)}
+                  disabled={selectedOption !== null || !isStarted}
+                  activeOpacity={0.9}
+                >
+                  <View style={gameSharedStyles.optionContent}>
+                    <View
+                      style={[
+                        gameSharedStyles.optionIdContainer,
+                        { alignSelf: "flex-start" },
+                      ]}
+                    >
+                      <Text style={gameSharedStyles.optionId}>
+                        {option.id.toUpperCase()}
+                      </Text>
+                    </View>
+                    <Text style={gameSharedStyles.optionText} numberOfLines={0}>
+                      {safeTextRender(option.text)}
                     </Text>
                   </View>
-                  <Text style={gameSharedStyles.optionText} numberOfLines={0}>
-                    {safeTextRender(option.text)}
-                  </Text>
-                </View>
 
-                {selectedOption === option.id && (
-                  <View style={gameSharedStyles.resultIconContainer}>
-                    {option.isCorrect ? (
-                      <Check width={18} height={18} color={BASE_COLORS.white} />
-                    ) : (
-                      <X width={18} height={18} color={BASE_COLORS.white} />
-                    )}
-                  </View>
-                )}
-              </TouchableOpacity>
-            </Animatable.View>
-          ))}
+                  {/* Show check/x icon if selected */}
+                  {selectedOption === option.id && (
+                    <View style={gameSharedStyles.resultIconContainer}>
+                      {option.isCorrect ? (
+                        <Check
+                          width={18}
+                          height={18}
+                          color={BASE_COLORS.white}
+                        />
+                      ) : (
+                        <X width={18} height={18} color={BASE_COLORS.white} />
+                      )}
+                    </View>
+                  )}
+                </TouchableOpacity>
+              </Animatable.View>
+            );
+          })}
       </View>
     </>
   );

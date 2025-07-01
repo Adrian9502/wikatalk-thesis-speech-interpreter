@@ -45,7 +45,6 @@ const Games = () => {
     showDailyRewardsModal,
     hideDailyRewardsModal,
     checkDailyReward,
-    isDailyRewardAvailable,
   } = useCoinsStore();
 
   const [wordOfDayModalVisible, setWordOfDayModalVisible] = useState(false);

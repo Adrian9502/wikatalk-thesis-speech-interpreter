@@ -195,14 +195,79 @@ const getCachedData = async (key: string) => {
 
 const ensureProperFormat = (question: any): QuestionType => {
   // Ensure the question object has all needed properties
-  return {
+  const baseQuestion = {
     ...question,
-    difficulty: question.difficulty?.toLowerCase() || "easy",
+    id: question.id || question.questionId || 0,
+    questionId: question.questionId || question.id || 0,
+    difficulty: (question.difficulty?.toLowerCase() || "easy") as Difficulty,
+    mode: question.mode as GameMode,
+    level: question.level || `Level ${question.id || question.questionId || 1}`,
+    title: question.title || `Level ${question.id || question.questionId || 1}`,
+    question: question.question || question.sentence || "",
     translation: question.translation || "",
     description: question.description || "",
     dialect: question.dialect || "",
     focusArea: question.focusArea || "vocabulary",
-  } as QuestionType;
+  };
+
+  // Handle mode-specific formatting
+  if (question.mode === "multipleChoice") {
+    return {
+      ...baseQuestion,
+      options: question.options?.map((opt: any, index: number) => ({
+        id: opt.id || String.fromCharCode(65 + index), // A, B, C, D
+        text: typeof opt.text === 'string' ? opt.text : String(opt.text || ''),
+        isCorrect: opt.isCorrect || false,
+        _id: opt._id
+      })) || []
+    } as MultipleChoiceQuestion;
+  } else if (question.mode === "identification") {
+    return {
+      ...baseQuestion,
+      sentence: question.sentence || question.question || "",
+      answer: question.answer || question.targetWord || "",
+      choices: question.choices || question.options || []
+    } as IdentificationQuestion;
+  } else if (question.mode === "fillBlanks") {
+    return {
+      ...baseQuestion,
+      sentence: question.sentence || question.question || "",
+      answer: question.answer || question.targetWord || "",
+      hint: question.hint || ""
+    } as FillInTheBlankQuestion;
+  }
+
+  return baseQuestion as QuestionType;
+};
+
+// Add this debug function near the top of the file
+const debugLevelData = (gameMode: string, data: any) => {
+  console.log(`[DEBUG] ${gameMode} level data structure:`, {
+    gameMode,
+    hasData: !!data,
+    dataType: typeof data,
+    keys: data ? Object.keys(data) : [],
+    sampleData: data ? JSON.stringify(data).substring(0, 200) + "..." : "null",
+  });
+
+  if (data && typeof data === "object") {
+    Object.keys(data).forEach((difficulty) => {
+      const levels = data[difficulty];
+      console.log(`[DEBUG] ${gameMode}.${difficulty}:`, {
+        count: Array.isArray(levels) ? levels.length : 0,
+        isArray: Array.isArray(levels),
+        firstItem:
+          levels && levels[0]
+            ? {
+                id: levels[0].id,
+                questionId: levels[0].questionId,
+                title: levels[0].title,
+                hasOptions: !!levels[0].options,
+              }
+            : null,
+      });
+    });
+  }
 };
 
 const useGameStore = create<QuizState>((set, get) => ({
@@ -386,86 +451,73 @@ const useGameStore = create<QuizState>((set, get) => ({
 
   // Fetch questions for a specific game mode
   fetchQuestionsByMode: async (mode: string) => {
-    // Try to get from memory first (fastest)
-    const modeQuestions = get().questions[mode as GameMode];
-    if (Object.values(modeQuestions).some((diff) => diff.length > 0)) {
-      console.log(`Using in-memory data for ${mode}`);
-      return;
-    }
+    const currentTime = Date.now();
 
-    // Try to get from AsyncStorage cache next
-    const cacheKey = `${CACHE_KEY_PREFIX}${mode}`;
     try {
-      const cachedData = await AsyncStorage.getItem(cacheKey);
-      if (cachedData) {
-        const parsedData = JSON.parse(cachedData);
-        if (
-          parsedData.timestamp &&
-          Date.now() - parsedData.timestamp < CACHE_EXPIRY
-        ) {
-          console.log(`Using cached data for ${mode}`);
-          set((state) => ({
-            questions: {
-              ...state.questions,
-              [mode as GameMode]: parsedData.data,
-            },
-            isLoading: false,
-            lastFetched: parsedData.timestamp,
-          }));
-          return;
-        }
-      }
-    } catch (error) {
-      console.log("Cache error, falling back to API:", error);
-    }
+      console.log(`[fetchQuestionsByMode] Starting fetch for mode: ${mode}`);
+      set({ isLoading: true, error: null });
 
-    // If not in cache, fetch from API
-    set({ isLoading: true, error: null });
-    try {
-      console.log(`Fetching ${mode} questions from API...`);
-      const response = await axios.get(`${API_URL}/api/quiz/mode/${mode}`, {
-        timeout: 10000,
+      const response = await axios.get(`${API_URL}/api/quiz/mode/${mode}`);
+      console.log(`[fetchQuestionsByMode] API Response for ${mode}:`, {
+        status: response.status,
+        dataLength: response.data?.length || 0,
+        sampleData: response.data?.[0] || null,
       });
 
-      if (response.status === 200) {
-        const questionsData = response.data;
-        console.log(`Got ${questionsData.length} questions for ${mode}`);
-
-        // Process and format the data
-        const organized = {
-          easy: [] as any[],
-          medium: [] as any[],
-          hard: [] as any[],
+      if (
+        response.status === 200 &&
+        response.data &&
+        Array.isArray(response.data)
+      ) {
+        // Process the response data with proper typing
+        const processedData: {
+          easy: QuestionType[];
+          medium: QuestionType[];
+          hard: QuestionType[];
+        } = {
+          easy: [],
+          medium: [],
+          hard: [],
         };
 
-        questionsData.forEach((q: QuestionType) => {
-          // Format the question to ensure proper types
-          const formattedQuestion = ensureProperFormat(q);
-
-          const difficulty = (formattedQuestion.difficulty?.toLowerCase() ||
-            "easy") as Difficulty;
-          if (organized[difficulty]) {
-            organized[difficulty].push(formattedQuestion);
+        response.data.forEach((item: any) => {
+          // Ensure proper formatting of the question
+          const formattedQuestion: QuestionType = ensureProperFormat(item);
+          const difficulty = (formattedQuestion.difficulty || "easy").toLowerCase() as Difficulty;
+          
+          if (processedData[difficulty]) {
+            processedData[difficulty].push(formattedQuestion);
+          } else {
+            console.warn(
+              `[fetchQuestionsByMode] Unknown difficulty: ${difficulty} for item:`,
+              item
+            );
+            processedData.easy.push(formattedQuestion); // Default to easy
           }
         });
+
+        // Debug the processed data
+        debugLevelData(mode, processedData);
 
         set((state) => ({
           questions: {
             ...state.questions,
-            [mode as GameMode]: organized,
+            [mode]: processedData,
           },
+          lastFetched: currentTime,
           isLoading: false,
-          lastFetched: Date.now(),
         }));
 
-        // Save to cache in the background
-        cacheData(mode, organized);
-        return;
+        console.log(
+          `[fetchQuestionsByMode] Successfully processed ${response.data.length} items for ${mode}`
+        );
+      } else {
+        throw new Error(`Invalid response format for ${mode}`);
       }
-    } catch (error) {
-      console.error(`Error fetching ${mode} questions:`, error);
+    } catch (error: any) {
+      console.error(`[fetchQuestionsByMode] Error fetching ${mode}:`, error);
       set({
-        error: `Failed to fetch ${mode} questions.`,
+        error: `Failed to fetch ${mode} questions: ${error.message}`,
         isLoading: false,
       });
     }

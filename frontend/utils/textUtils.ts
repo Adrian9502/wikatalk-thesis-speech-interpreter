@@ -6,11 +6,19 @@ export const safeTextRender = (text: any): string => {
     return '';
   }
   if (typeof text === 'object') {
-    // If it's an object, try to extract a text property or stringify it
+    // If it's an object with a text property
     if (text.text && typeof text.text === 'string') {
       return text.text;
     }
-    // As a last resort, stringify the object (though this might not be ideal)
+    // If it's an object with other string properties
+    if (text.label && typeof text.label === 'string') {
+      return text.label;
+    }
+    if (text.value && typeof text.value === 'string') {
+      return text.value;
+    }
+    // Last resort - stringify but log warning
+    console.warn('safeTextRender: Converting object to string:', text);
     return JSON.stringify(text);
   }
   return String(text);

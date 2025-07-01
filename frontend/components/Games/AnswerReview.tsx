@@ -5,10 +5,11 @@ import { Check, X } from "react-native-feather";
 import { BASE_COLORS } from "@/constant/colors";
 import gameSharedStyles from "@/styles/gamesSharedStyles";
 import { formatTime } from "@/utils/gameUtils";
+import { safeTextRender } from "@/utils/textUtils";
 
 interface AnswerReviewProps {
-  question: string;
-  userAnswer: string;
+  question: string | any;
+  userAnswer: string | any;
   isCorrect: boolean;
   timeElapsed?: number;
   animation?: string;
@@ -42,7 +43,9 @@ const AnswerReview: React.FC<AnswerReviewProps> = ({
         {/* Question Section */}
         <View style={styles.reviewSection}>
           <Text style={styles.reviewSectionTitle}>{questionLabel}</Text>
-          <Text style={styles.reviewQuestionText}>{question}</Text>
+          <Text style={styles.reviewQuestionText}>
+            {safeTextRender(question)}
+          </Text>
         </View>
 
         {/* Answer Section */}
@@ -69,7 +72,7 @@ const AnswerReview: React.FC<AnswerReviewProps> = ({
                   : styles.incorrectAnswerText,
               ]}
             >
-              {userAnswer || "(No answer provided)"}
+              {safeTextRender(userAnswer) || "(No answer provided)"}
             </Text>
           </View>
         </View>

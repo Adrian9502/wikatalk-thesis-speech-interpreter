@@ -16,9 +16,30 @@ router.get("/", async (req, res) => {
 router.get("/mode/:mode", async (req, res) => {
   try {
     const { mode } = req.params;
-    const questions = await QuizQuestion.find({ mode });
+    console.log(`[API] Fetching all questions for mode: ${mode}`);
+    
+    // Get all questions for this mode
+    const questions = await QuizQuestion.find({ mode }).sort({ id: 1, questionId: 1 });
+    
+    console.log(`[API] Found ${questions.length} questions for ${mode}`);
+    
+    // Log sample data for debugging
+    if (questions.length > 0) {
+      console.log(`[API] Sample question structure:`, {
+        id: questions[0].id,
+        questionId: questions[0].questionId,
+        title: questions[0].title,
+        difficulty: questions[0].difficulty,
+        mode: questions[0].mode,
+        hasOptions: !!questions[0].options,
+        optionsCount: questions[0].options?.length || 0,
+        sampleOption: questions[0].options?.[0] || null
+      });
+    }
+    
     res.json(questions);
   } catch (err) {
+    console.error(`[API] Error fetching questions for ${mode}:`, err);
     res.status(500).json({ message: err.message });
   }
 });
@@ -57,10 +78,28 @@ router.get("/level/:id/mode/:mode", async (req, res) => {
 router.get("/levels/:mode", async (req, res) => {
   try {
     const { mode } = req.params;
-    // Just get the ids, difficulties, and titles for level selection
-    const questions = await QuizQuestion.find({ mode }).select('id level difficulty title');
+    console.log(`[API] Fetching levels for mode: ${mode}`);
+    
+    // Get all questions for this mode
+    const questions = await QuizQuestion.find({ mode });
+    
+    console.log(`[API] Found ${questions.length} questions for ${mode}`);
+    
+    // Log sample data for debugging
+    if (questions.length > 0) {
+      console.log(`[API] Sample question structure:`, {
+        id: questions[0].id,
+        title: questions[0].title,
+        difficulty: questions[0].difficulty,
+        hasOptions: !!questions[0].options,
+        optionsCount: questions[0].options?.length || 0,
+        sampleOption: questions[0].options?.[0] || null
+      });
+    }
+    
     res.json(questions);
   } catch (err) {
+    console.error(`[API] Error fetching levels for ${mode}:`, err);
     res.status(500).json({ message: err.message });
   }
 });
