@@ -3,10 +3,7 @@ import axios from "axios";
 import * as Speech from "expo-speech";
 import { DIALECTS } from "@/constant/languages";
 import { debounce } from "lodash";
-
-// Define the API URL
-const API_URL = process.env.EXPO_PUBLIC_BACKEND_URL || "http://localhost:5000";
-
+import { pronunciationService } from "@/services/api";
 // Define the types
 interface TranslationEntry {
   translation: string;
@@ -83,8 +80,7 @@ export const usePronunciationStore = create<PronunciationState>((set, get) => ({
   fetchPronunciations: async () => {
     set({ isLoading: true, error: null });
     try {
-      const response = await axios.get(`${API_URL}/api/pronunciations`);
-      const data = response.data;
+      const data = await pronunciationService.getAllPronunciations();
 
       set({
         pronunciationData: data,

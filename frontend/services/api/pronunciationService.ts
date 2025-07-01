@@ -1,43 +1,26 @@
 import { authApi } from "./baseApi";
 
-export interface PronunciationData {
-  _id: string;
+export interface PronunciationDataItem {
   english: string;
-  translation: string;
-  language: string;
-  audioUrl: string;
-  tags: string[];
-  category: string;
+  translations: {
+    [language: string]: {
+      translation: string;
+      pronunciation: string;
+    };
+  };
 }
 
 export interface WordOfTheDayResponse {
   success: boolean;
-  word: PronunciationData;
+  word: PronunciationDataItem;
 }
 
 export const pronunciationService = {
-  // Get all pronunciations
-  getAllPronunciations: async () => {
-    const response = await authApi.get<{ pronunciations: PronunciationData[] }>(
+  getAllPronunciations: async (): Promise<PronunciationDataItem[]> => {
+    const response = await authApi.get<PronunciationDataItem[]>(
       "/api/pronunciations"
     );
-    return response.data.pronunciations;
-  },
-
-  // Get pronunciations by language
-  getByLanguage: async (language: string) => {
-    const response = await authApi.get<{ pronunciations: PronunciationData[] }>(
-      `/api/pronunciations/language/${language}`
-    );
-    return response.data.pronunciations;
-  },
-
-  // Get pronunciations by category
-  getByCategory: async (category: string) => {
-    const response = await authApi.get<{ pronunciations: PronunciationData[] }>(
-      `/api/pronunciations/category/${category}`
-    );
-    return response.data.pronunciations;
+    return response.data;
   },
 
   // Get word of the day
