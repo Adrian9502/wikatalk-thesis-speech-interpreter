@@ -8,6 +8,7 @@ import { getDifficultyColors } from "@/utils/gameUtils";
 import gameSharedStyles from "@/styles/gamesSharedStyles";
 import styles from "@/styles/games/multipleChoice.styles";
 import { getOptionStyle } from "@/utils/games/optionStyles";
+import { safeTextRender } from "@/utils/textUtils";
 
 // Define an interface for the option object
 interface Option {
@@ -101,7 +102,7 @@ const MultipleChoicePlayingContent: React.FC<
                     </Text>
                   </View>
                   <Text style={gameSharedStyles.optionText} numberOfLines={0}>
-                    {option.text}
+                    {safeTextRender(option.text)}
                   </Text>
                 </View>
 

@@ -8,6 +8,7 @@ import { getDifficultyColors } from "@/utils/gameUtils";
 import gameSharedStyles from "@/styles/gamesSharedStyles";
 import styles from "@/styles/games/identification.styles";
 import { getWordStyle } from "@/utils/games/optionStyles";
+import { safeTextRender } from "@/utils/textUtils";
 
 interface IdentificationPlayingContentProps {
   difficulty: string;
@@ -88,11 +89,7 @@ const IdentificationPlayingContent: React.FC<
                       <Text style={gameSharedStyles.optionId}>{index + 1}</Text>
                     </View>
                     <Text style={gameSharedStyles.optionText} numberOfLines={0}>
-                      {typeof word.text === "string"
-                        ? word.text
-                        : typeof word.clean === "string"
-                        ? word.clean
-                        : String(word.text || word.clean || "")}
+                      {safeTextRender(word.text)}
                     </Text>
                   </View>
 
