@@ -6,8 +6,7 @@ import { getGlobalStyles } from "@/styles/globalStyles";
 import { BASE_COLORS } from "@/constant/colors";
 import WordOfDayModal from "@/components/games/WordOfDayModal";
 import DailyRewardsModal from "@/components/games/rewards/DailyRewardsModal";
-import GameProgressModal from "@/components/games/GameProgressModal";
-
+import GameProgressModal from "@/components/games/GameProgressModal/index";
 // Component imports
 import BackgroundEffects from "@/components/games/dashboard/BackgroundEffects";
 import DashboardHeader from "@/components/games/dashboard/DashboardHeader";
