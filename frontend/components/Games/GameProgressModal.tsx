@@ -22,6 +22,7 @@ import {
 import { formatTime } from "@/utils/gameUtils";
 import { useUserProgress } from "@/hooks/useUserProgress";
 import useGameStore from "@/store/games/useGameStore";
+import { getQuizCountByDifficulty } from "@/utils/quizCountUtils";
 
 interface GameProgressModalProps {
   visible: boolean;
@@ -96,6 +97,7 @@ const GameProgressModal: React.FC<GameProgressModalProps> = ({
     }
   }, [visible, globalProgress, gameMode, questions]);
 
+  // Update the calculateEnhancedProgress function
   const calculateEnhancedProgress = () => {
     console.log(
       `[GameProgressModal] Calculating enhanced progress for ${gameMode}`
@@ -121,11 +123,11 @@ const GameProgressModal: React.FC<GameProgressModalProps> = ({
         "hard",
       ];
 
-      // Expected counts based on your specification
+      // UPDATED: Use utility functions instead of hardcoded counts
       const expectedCounts = {
-        easy: 10,
-        medium: 20,
-        hard: 20,
+        easy: getQuizCountByDifficulty(gameMode, "easy"),
+        medium: getQuizCountByDifficulty(gameMode, "medium"),
+        hard: getQuizCountByDifficulty(gameMode, "hard"),
       };
 
       console.log(`[GameProgressModal] Mode questions structure:`, {
@@ -133,6 +135,8 @@ const GameProgressModal: React.FC<GameProgressModalProps> = ({
         medium: modeQuestions.medium?.length || 0,
         hard: modeQuestions.hard?.length || 0,
       });
+
+      console.log(`[GameProgressModal] Expected counts:`, expectedCounts);
 
       // Calculate progress for each difficulty
       const difficultyBreakdown: DifficultyProgress[] = difficulties.map(
@@ -623,21 +627,6 @@ const GameProgressModal: React.FC<GameProgressModalProps> = ({
                         </View>
                       </View>
                     )}
-
-                  {/* Motivational Message */}
-                  <View style={styles.section}>
-                    <View style={styles.motivationCard}>
-                      <Text style={styles.motivationText}>
-                        {progressData.overallCompletionRate === 100
-                          ? "🏆 Congratulations! You've mastered this game mode!"
-                          : progressData.overallCompletionRate >= 70
-                          ? "🎯 Excellent progress! You're almost there!"
-                          : progressData.overallCompletionRate >= 30
-                          ? "💪 Good work! Keep practicing to improve!"
-                          : "🚀 Great start! Every expert was once a beginner!"}
-                      </Text>
-                    </View>
-                  </View>
                 </>
               ) : (
                 <View style={styles.noDataContainer}>
@@ -959,20 +948,6 @@ const styles = StyleSheet.create({
     color: "rgba(255, 255, 255, 0.6)",
     textAlign: "center",
     marginTop: 8,
-  },
-  motivationCard: {
-    backgroundColor: "rgba(255, 215, 0, 0.2)",
-    borderRadius: 12,
-    padding: 16,
-    borderWidth: 1,
-    borderColor: "rgba(255, 215, 0, 0.3)",
-  },
-  motivationText: {
-    fontSize: 14,
-    fontFamily: "Poppins-Medium",
-    color: "#fff",
-    textAlign: "center",
-    lineHeight: 20,
   },
 });
 

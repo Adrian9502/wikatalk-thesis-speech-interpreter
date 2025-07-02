@@ -5,7 +5,6 @@ export const detectGameModeFromQuizId = (
 ): string | null => {
   const { questions } = useGameStore.getState();
 
-  // Convert to number if string (handle both "123" and "n-123" formats)
   let numericId: number;
   if (typeof quizId === "string") {
     const cleanId = quizId.replace(/^n-/, "");
@@ -14,31 +13,35 @@ export const detectGameModeFromQuizId = (
     numericId = quizId;
   }
 
-  console.log(`[detectGameModeFromQuizId] Looking for quiz ID: ${numericId}`);
+  // Only log in development and reduce frequency
+  const shouldLog = __DEV__ && Math.random() < 0.1; // Log only 10% of calls
+  if (shouldLog) {
+    console.log(`[detectGameModeFromQuizId] Looking for quiz ID: ${numericId}`);
+  }
 
-  // Check each game mode for this quiz ID
   for (const [mode, difficulties] of Object.entries(questions)) {
+    if (!difficulties || typeof difficulties !== 'object') continue;
+    
     for (const [difficulty, questionList] of Object.entries(difficulties)) {
+      if (!Array.isArray(questionList)) continue;
+      
       const found = questionList.some((q: any) => {
         const qId = q.id || q.questionId;
-        const match = qId === numericId;
-        if (match) {
-          console.log(
-            `[detectGameModeFromQuizId] Found quiz ${numericId} in ${mode}.${difficulty}`
-          );
-        }
-        return match;
+        return qId === numericId;
       });
 
       if (found) {
+        if (shouldLog) {
+          console.log(`[detectGameModeFromQuizId] Found quiz ${numericId} in ${mode}.${difficulty}`);
+        }
         return mode;
       }
     }
   }
 
-  console.warn(
-    `[detectGameModeFromQuizId] Could not find game mode for quiz ID: ${numericId}`
-  );
+  if (shouldLog) {
+    console.warn(`[detectGameModeFromQuizId] Could not find game mode for quiz ID: ${numericId}`);
+  }
   return null;
 };
 
@@ -64,7 +67,7 @@ export const categorizeProgressByGameMode = (progressEntries: any[]) => {
     if (gameMode && categorized[gameMode]) {
       categorized[gameMode].push({
         ...entry,
-        gameMode,
+        gameMode, // Add the detected game mode to the entry
       });
       console.log(`[categorizeProgressByGameMode] Added entry to ${gameMode}`);
     } else {
@@ -83,4 +86,22 @@ export const categorizeProgressByGameMode = (progressEntries: any[]) => {
   });
 
   return categorized;
+};
+
+// NEW: Helper function to get progress for a specific game mode
+export const getGameModeProgressCount = (
+  progressEntries: any[],
+  gameMode: string
+) => {
+  if (!Array.isArray(progressEntries)) return { completed: 0, total: 0 };
+
+  const gameModeEntries = progressEntries.filter((entry: any) => {
+    const detectedMode = detectGameModeFromQuizId(entry.quizId);
+    return detectedMode === gameMode;
+  });
+
+  return {
+    completed: gameModeEntries.filter((entry) => entry.completed).length,
+    total: gameModeEntries.length,
+  };
 };

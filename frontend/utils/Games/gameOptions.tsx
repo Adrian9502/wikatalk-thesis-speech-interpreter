@@ -21,7 +21,7 @@ const gameOptions: GameOption[] = [
     icon: <Zap width={28} height={28} color={BASE_COLORS.white} />,
     color: BASE_COLORS.blue,
     gradientColors: ["#2563EB", "#1E40AF"],
-    description: "Test your knowledge with fun multiple-choice questions",
+    description: "Choose the correct answer from given options",
     animation: "bounceIn",
     delay: 100,
     difficulty: "Beginner",
