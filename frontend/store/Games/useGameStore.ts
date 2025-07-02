@@ -156,6 +156,9 @@ interface QuizState {
   // Identification actions
   handleWordSelect: (wordIndex: number) => void;
   toggleIdentificationTranslation: () => void;
+
+  // Ensure questions are loaded
+  ensureQuestionsLoaded: () => Promise<boolean>;
 }
 
 // Cache helpers
@@ -355,71 +358,71 @@ const useGameStore = create<QuizState>((set, get) => ({
   // Data fetching actions (keep your existing implementations)
   fetchQuestions: async () => {
     const cacheKey = "all_questions";
-    
+
     try {
       set({ isLoading: true, error: null });
-      
+
       // Try to get cached data first
       const cachedData = await getCachedData(cacheKey);
       if (cachedData) {
         console.log("[fetchQuestions] Using cached data for all questions");
         const now = Date.now();
-        
+
         set({
           questions: cachedData,
           isLoading: false,
           lastFetched: now,
         });
-        
+
         return; // Exit early with cached data
       }
 
-    // If no cache, fetch from API
-    console.log("[fetchQuestions] No cache found, fetching from API");
-    const response = await axios.get(`${API_URL}/api/quiz`);
+      // If no cache, fetch from API
+      console.log("[fetchQuestions] No cache found, fetching from API");
+      const response = await axios.get(`${API_URL}/api/quiz`);
 
-    if (response.status === 200) {
-      const questionsData = response.data;
+      if (response.status === 200) {
+        const questionsData = response.data;
 
-      // Organize by mode and difficulty
-      const organizedQuestions = {
-        multipleChoice: { easy: [], medium: [], hard: [] },
-        identification: { easy: [], medium: [], hard: [] },
-        fillBlanks: { easy: [], medium: [], hard: [] },
-      } as QuizQuestions;
+        // Organize by mode and difficulty
+        const organizedQuestions = {
+          multipleChoice: { easy: [], medium: [], hard: [] },
+          identification: { easy: [], medium: [], hard: [] },
+          fillBlanks: { easy: [], medium: [], hard: [] },
+        } as QuizQuestions;
 
-      questionsData.forEach((q: QuestionType) => {
-        const mode = q.mode;
-        const difficulty = (q.difficulty?.toLowerCase() ||
-          "easy") as Difficulty;
+        questionsData.forEach((q: QuestionType) => {
+          const mode = q.mode;
+          const difficulty = (q.difficulty?.toLowerCase() ||
+            "easy") as Difficulty;
 
-        if (
-          organizedQuestions[mode] &&
-          organizedQuestions[mode][difficulty]
-        ) {
-          organizedQuestions[mode][difficulty].push(q as any);
-        }
-      });
+          if (
+            organizedQuestions[mode] &&
+            organizedQuestions[mode][difficulty]
+          ) {
+            organizedQuestions[mode][difficulty].push(q as any);
+          }
+        });
 
-      // Cache the organized data
-      await cacheData(cacheKey, organizedQuestions);
-      console.log("[fetchQuestions] Cached organized questions data");
+        // Cache the organized data
+        await cacheData(cacheKey, organizedQuestions);
+        console.log("[fetchQuestions] Cached organized questions data");
 
-      const now = Date.now();
+        const now = Date.now();
+        set({
+          questions: organizedQuestions,
+          isLoading: false,
+          lastFetched: now,
+        });
+      }
+    } catch (error) {
+      console.error("Error fetching quiz questions:", error);
       set({
-        questions: organizedQuestions,
+        error: "Failed to fetch quiz questions. Please try again later.",
         isLoading: false,
-        lastFetched: now,
       });
     }
-  } catch (error) {
-    console.error("Error fetching quiz questions:", error);
-    set({
-      error: "Failed to fetch quiz questions. Please try again later.",
-      isLoading: false,
-    });
-  }
-},
+  },
 
   // Test connection to the backend
   testConnection: async () => {
@@ -447,7 +450,7 @@ const useGameStore = create<QuizState>((set, get) => ({
       const cachedData = await getCachedData(cacheKey);
       if (cachedData) {
         console.log(`[fetchQuestionsByMode] Using cached data for ${mode}`);
-        
+
         set((state) => ({
           questions: {
             ...state.questions,
@@ -456,14 +459,16 @@ const useGameStore = create<QuizState>((set, get) => ({
           lastFetched: currentTime,
           isLoading: false,
         }));
-        
+
         return; // Exit early with cached data
       }
 
       // If no cache, fetch from API
-      console.log(`[fetchQuestionsByMode] No cache found, fetching from API for ${mode}`);
+      console.log(
+        `[fetchQuestionsByMode] No cache found, fetching from API for ${mode}`
+      );
       const response = await axios.get(`${API_URL}/api/quiz/mode/${mode}`);
-      
+
       console.log(`[fetchQuestionsByMode] API Response for ${mode}:`, {
         status: response.status,
         dataLength: response.data?.length || 0,
@@ -489,8 +494,10 @@ const useGameStore = create<QuizState>((set, get) => ({
         response.data.forEach((item: any) => {
           // Ensure proper formatting of the question
           const formattedQuestion: QuestionType = ensureProperFormat(item);
-          const difficulty = (formattedQuestion.difficulty || "easy").toLowerCase() as Difficulty;
-          
+          const difficulty = (
+            formattedQuestion.difficulty || "easy"
+          ).toLowerCase() as Difficulty;
+
           if (processedData[difficulty]) {
             processedData[difficulty].push(formattedQuestion);
           } else {
@@ -536,31 +543,37 @@ const useGameStore = create<QuizState>((set, get) => ({
   // Fetch a specific question by level and mode
   fetchQuestionsByLevelAndMode: async (level: number, mode: string) => {
     const cacheKey = `level_${level}_mode_${mode}`;
-    
+
     try {
       set({ isLoading: true, error: null });
-      
+
       // Try to get cached data first
       const cachedData = await getCachedData(cacheKey);
       if (cachedData) {
-        console.log(`[fetchQuestionsByLevelAndMode] Using cached data for level ${level}, mode ${mode}`);
+        console.log(
+          `[fetchQuestionsByLevelAndMode] Using cached data for level ${level}, mode ${mode}`
+        );
         set({ isLoading: false });
         return cachedData as QuestionType;
       }
 
       // If no cache, fetch from API
-      console.log(`[fetchQuestionsByLevelAndMode] No cache found, fetching from API for level ${level}, mode ${mode}`);
+      console.log(
+        `[fetchQuestionsByLevelAndMode] No cache found, fetching from API for level ${level}, mode ${mode}`
+      );
       const response = await axios.get(
         `${API_URL}/api/quiz/level/${level}/mode/${mode}`
       );
 
       if (response.status === 200 && response.data) {
         const formattedData = ensureProperFormat(response.data);
-        
+
         // Cache the data
         await cacheData(cacheKey, formattedData);
-        console.log(`[fetchQuestionsByLevelAndMode] Cached data for level ${level}, mode ${mode}`);
-        
+        console.log(
+          `[fetchQuestionsByLevelAndMode] Cached data for level ${level}, mode ${mode}`
+        );
+
         set({ isLoading: false });
         return formattedData;
       } else {
@@ -1192,6 +1205,32 @@ const useGameStore = create<QuizState>((set, get) => ({
         showTranslation: !state.identificationState.showTranslation,
       },
     }));
+  },
+
+  // Ensure questions are loaded
+  ensureQuestionsLoaded: async () => {
+    const { questions, fetchQuestionsByMode } = get();
+
+    // Check if any questions are loaded
+    const hasQuestions = Object.values(questions).some((gameMode) =>
+      Object.values(gameMode).some(
+        (difficulty) => Array.isArray(difficulty) && difficulty.length > 0
+      )
+    );
+
+    if (!hasQuestions) {
+      console.log(
+        "[useGameStore] No questions loaded, fetching all game modes..."
+      );
+      // Load questions for all game modes
+      await Promise.all([
+        fetchQuestionsByMode("multipleChoice"),
+        fetchQuestionsByMode("identification"),
+        fetchQuestionsByMode("fillBlanks"),
+      ]);
+    }
+
+    return true;
   },
 }));
 

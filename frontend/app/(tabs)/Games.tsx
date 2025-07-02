@@ -21,6 +21,10 @@ import gameOptions from "@/utils/games/gameOptions";
 import useCoinsStore from "@/store/games/useCoinsStore";
 import DailyRewardsModal from "@/components/games/rewards/DailyRewardsModal";
 import CoinsDisplay from "@/components/games/rewards/CoinsDisplay";
+import GameProgressModal from "@/components/games/GameProgressModal";
+import GameProgressButton from "@/components/games/GameProgressButton";
+import { useUserProgress } from "@/hooks/useUserProgress";
+import useGameStore from "@/store/games/useGameStore";
 
 const Games = () => {
   // Theme store
@@ -48,6 +52,11 @@ const Games = () => {
   } = useCoinsStore();
 
   const [wordOfDayModalVisible, setWordOfDayModalVisible] = useState(false);
+  const [progressModal, setProgressModal] = useState({
+    visible: false,
+    gameMode: "",
+    gameTitle: "",
+  });
 
   useEffect(() => {
     const loadData = async () => {
@@ -98,6 +107,54 @@ const Games = () => {
     showDailyRewardsModal();
   };
 
+  const { progress: globalProgress } = useUserProgress("global");
+
+  const getGameModeProgress = (gameMode: string) => {
+    if (!Array.isArray(globalProgress)) return { completed: 0, total: 0 };
+
+    const gameModeEntries = globalProgress.filter(
+      (entry: any) => entry.gameMode === gameMode || entry.mode === gameMode
+    );
+
+    return {
+      completed: gameModeEntries.filter((entry) => entry.completed).length,
+      total: gameModeEntries.length,
+    };
+  };
+
+  const handleProgressPress = async (gameMode: string, gameTitle: string) => {
+    try {
+      // Ensure questions are loaded before opening modal
+      const { ensureQuestionsLoaded } = useGameStore.getState();
+      await ensureQuestionsLoaded();
+
+      setProgressModal({
+        visible: true,
+        gameMode,
+        gameTitle,
+      });
+    } catch (error) {
+      console.error(
+        "[Games] Error loading questions for progress modal:",
+        error
+      );
+      // Still open the modal, but it might show limited data
+      setProgressModal({
+        visible: true,
+        gameMode,
+        gameTitle,
+      });
+    }
+  };
+
+  const closeProgressModal = () => {
+    setProgressModal({
+      visible: false,
+      gameMode: "",
+      gameTitle: "",
+    });
+  };
+
   return (
     <View
       style={[styles.wrapper, { backgroundColor: activeTheme.backgroundColor }]}
@@ -141,7 +198,7 @@ const Games = () => {
               </Text>
             </View>
             <TouchableOpacity
-              style={styles.wordOfDayCard}
+              style={styles.wordOfTheDayCard}
               activeOpacity={0.8}
               onPress={() => setWordOfDayModalVisible(true)}
             >
@@ -203,60 +260,77 @@ const Games = () => {
             </Text>
           </Animatable.View>
 
-          {/* Game cards - Redesigned to be more compact but not too small */}
+          {/* Game cards - Updated to include progress buttons */}
           <View style={styles.gamesContainer}>
-            {gameOptions.map((game) => (
-              <Animatable.View
-                key={game.id}
-                animation={game.animation}
-                delay={game.delay}
-                duration={800}
-              >
-                <TouchableOpacity
-                  style={styles.gameCard}
-                  activeOpacity={0.7}
-                  onPress={() => handleGamePress(game.id, game.title)}
-                >
-                  <LinearGradient
-                    colors={game.gradientColors}
-                    start={{ x: 0, y: 0 }}
-                    end={{ x: 1, y: 1 }}
-                    style={styles.gameCardGradient}
-                  >
-                    <View style={styles.gameCardContent}>
-                      <View style={styles.gameIconContainer}>{game.icon}</View>
-                      <View style={styles.gameTextContainer}>
-                        <Text style={styles.gameCardTitle}>{game.title}</Text>
-                        <Text
-                          style={styles.gameCardDescription}
-                          numberOfLines={2}
-                        >
-                          {game.description}
-                        </Text>
+            {gameOptions.map((game) => {
+              const progress = getGameModeProgress(game.id);
 
-                        {/* Difficulty and Play button */}
-                        <View style={styles.gameCardActions}>
-                          <View style={styles.difficultyBadge}>
-                            <Text style={styles.difficultyText}>
-                              {game.difficulty}
-                            </Text>
-                          </View>
-                          <TouchableOpacity
-                            style={[
-                              styles.playButton,
-                              { backgroundColor: game.color },
-                            ]}
-                            onPress={() => handleGamePress(game.id, game.title)}
+              return (
+                <Animatable.View
+                  key={game.id}
+                  animation={game.animation}
+                  delay={game.delay}
+                  duration={800}
+                >
+                  <TouchableOpacity
+                    style={styles.gameCard}
+                    activeOpacity={0.7}
+                    onPress={() => handleGamePress(game.id, game.title)}
+                  >
+                    <LinearGradient
+                      colors={game.gradientColors}
+                      start={{ x: 0, y: 0 }}
+                      end={{ x: 1, y: 1 }}
+                      style={styles.gameCardGradient}
+                    >
+                      <View style={styles.gameCardContent}>
+                        <View style={styles.gameIconContainer}>
+                          {game.icon}
+                        </View>
+                        <View style={styles.gameTextContainer}>
+                          <Text style={styles.gameCardTitle}>{game.title}</Text>
+                          <Text
+                            style={styles.gameCardDescription}
+                            numberOfLines={2}
                           >
-                            <Text style={styles.playButtonText}>PLAY</Text>
-                          </TouchableOpacity>
+                            {game.description}
+                          </Text>
+
+                          {/* Difficulty, Progress, and Play button */}
+                          <View style={styles.gameCardActions}>
+                            <View style={styles.difficultyBadge}>
+                              <Text style={styles.difficultyText}>
+                                {game.difficulty}
+                              </Text>
+                            </View>
+
+                            <GameProgressButton
+                              onPress={() =>
+                                handleProgressPress(game.id, game.title)
+                              }
+                              completedLevels={progress.completed}
+                              totalLevels={progress.total}
+                            />
+
+                            <TouchableOpacity
+                              style={[
+                                styles.playButton,
+                                { backgroundColor: game.color },
+                              ]}
+                              onPress={() =>
+                                handleGamePress(game.id, game.title)
+                              }
+                            >
+                              <Text style={styles.playButtonText}>PLAY</Text>
+                            </TouchableOpacity>
+                          </View>
                         </View>
                       </View>
-                    </View>
-                  </LinearGradient>
-                </TouchableOpacity>
-              </Animatable.View>
-            ))}
+                    </LinearGradient>
+                  </TouchableOpacity>
+                </Animatable.View>
+              );
+            })}
           </View>
         </ScrollView>
 
@@ -275,6 +349,13 @@ const Games = () => {
         <DailyRewardsModal
           visible={isDailyRewardsModalVisible}
           onClose={hideDailyRewardsModal}
+        />
+        {/* Progress Modal */}
+        <GameProgressModal
+          visible={progressModal.visible}
+          onClose={closeProgressModal}
+          gameMode={progressModal.gameMode}
+          gameTitle={progressModal.gameTitle}
         />
       </SafeAreaView>
     </View>
@@ -360,7 +441,7 @@ const styles = StyleSheet.create({
     color: BASE_COLORS.white,
     opacity: 0.7,
   },
-  wordOfDayCard: {
+  wordOfTheDayCard: {
     borderRadius: 16,
     overflow: "hidden",
     height: 140,
@@ -521,29 +602,33 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
+    marginTop: 12,
+    gap: 8,
   },
   difficultyBadge: {
-    backgroundColor: "rgba(0, 0, 0, 0.2)",
-    paddingHorizontal: 10,
+    backgroundColor: "rgba(255, 255, 255, 0.2)",
+    paddingHorizontal: 8,
     paddingVertical: 4,
-    borderRadius: 10,
+    borderRadius: 12,
+    flex: 1,
   },
   difficultyText: {
-    fontSize: 11,
+    fontSize: 10,
     fontFamily: "Poppins-Medium",
     color: BASE_COLORS.white,
+    textAlign: "center",
   },
   playButton: {
-    paddingHorizontal: 16,
+    paddingHorizontal: 12,
     paddingVertical: 6,
-    borderRadius: 10,
-    justifyContent: "center",
-    alignItems: "center",
+    borderRadius: 12,
+    flex: 1,
   },
   playButtonText: {
-    fontSize: 12,
+    fontSize: 10,
     fontFamily: "Poppins-Bold",
     color: BASE_COLORS.white,
+    textAlign: "center",
   },
 });
 
