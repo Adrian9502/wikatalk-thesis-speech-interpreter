@@ -1,616 +1,176 @@
-import {
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View,
-  ScrollView,
-  Dimensions,
-} from "react-native";
-import React, { useEffect, useState, useMemo, useCallback } from "react";
+import React, { useEffect, useState } from "react";
+import { StyleSheet, View, ScrollView, Dimensions } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 import useThemeStore from "@/store/useThemeStore";
 import { getGlobalStyles } from "@/styles/globalStyles";
-import { SafeAreaView } from "react-native-safe-area-context";
-import { router } from "expo-router";
-import {
-  Calendar,
-  Volume2,
-  Play,
-  TrendingUp,
-  Star,
-  Target,
-  Award,
-} from "react-native-feather";
 import { BASE_COLORS } from "@/constant/colors";
-import { usePronunciationStore } from "@/store/usePronunciationStore";
 import WordOfDayModal from "@/components/games/WordOfDayModal";
-import * as Animatable from "react-native-animatable";
-import { LinearGradient } from "expo-linear-gradient";
-import gameOptions from "@/utils/games/gameOptions";
-import useCoinsStore from "@/store/games/useCoinsStore";
 import DailyRewardsModal from "@/components/games/rewards/DailyRewardsModal";
-import CoinsDisplay from "@/components/games/rewards/CoinsDisplay";
 import GameProgressModal from "@/components/games/GameProgressModal";
-import { useUserProgress } from "@/hooks/useUserProgress";
-import useGameStore from "@/store/games/useGameStore";
-import { detectGameModeFromQuizId } from "@/utils/gameProgressUtils";
-import {
-  getTotalQuizCount,
-  getQuizCountByMode,
-  getAllQuizCounts,
-  areAnyQuestionsLoaded,
-} from "@/utils/quizCountUtils";
+
+// Component imports
+import BackgroundEffects from "@/components/games/dashboard/BackgroundEffects";
+import DashboardHeader from "@/components/games/dashboard/DashboardHeader";
+import WordOfDayCard from "@/components/games/dashboard/WordOfDayCard";
+import GamesList from "@/components/games/dashboard/GamesList";
+import ProgressStats from "@/components/games/dashboard/ProgressStats";
+import LoadingIndicator from "@/components/games/common/LoadingIndicator";
+import ErrorDisplay from "@/components/games/common/ErrorDisplay";
+
+// Custom hooks
+import useGameDashboard from "@/hooks/games/useGameDashboard";
+import { useComponentLoadTime } from "@/utils/performanceMonitor";
 
 const Games = () => {
+  // Performance monitoring for development
+  const finishLoadTracking = useComponentLoadTime("Games");
+
   // Theme store
   const { activeTheme } = useThemeStore();
   const dynamicStyles = getGlobalStyles(activeTheme.backgroundColor);
 
-  // Word of the Day state and functions
+  // Track loading and error states
+  const [isInitializing, setIsInitializing] = useState(true);
+  const [hasError, setHasError] = useState(false);
+
+  // Custom hook for all dashboard logic
   const {
+    // Word of day state
     wordOfTheDay,
+    wordOfDayModalVisible,
     isWordOfDayPlaying,
     isAudioLoading,
-    getWordOfTheDay,
+    setWordOfDayModalVisible,
     playWordOfDayAudio,
-    fetchPronunciations,
-    pronunciationData,
-  } = usePronunciationStore();
 
-  // Coins store for daily rewards
-  const {
-    fetchCoinsBalance,
+    // Rewards state
     isDailyRewardsModalVisible,
-    showDailyRewardsModal,
     hideDailyRewardsModal,
-    checkDailyReward,
-  } = useCoinsStore();
+    openRewardsModal,
 
-  const [wordOfDayModalVisible, setWordOfDayModalVisible] = useState(false);
-  const [progressModal, setProgressModal] = useState({
-    visible: false,
-    gameMode: "",
-    gameTitle: "",
-  });
+    // Progress state
+    progressModal,
+    closeProgressModal,
 
-  // MOVED: globalProgress declaration must come before useMemo that uses it
-  const { progress: globalProgress } = useUserProgress("global");
+    // Game-related handlers
+    handleGamePress,
+    handleProgressPress,
 
+    // Progress data
+    totalCompletedCount,
+    totalQuizCount,
+    getGameModeProgress,
+
+    // Add error retry handler
+    retryDataLoading,
+  } = useGameDashboard();
+
+  // Track initial loading
   useEffect(() => {
-    const loadData = async () => {
-      if (pronunciationData.length === 0) {
-        await fetchPronunciations();
-      }
-      if (!wordOfTheDay) {
-        getWordOfTheDay();
-      }
-      await fetchCoinsBalance();
-      await checkDailyReward();
-    };
-    loadData();
+    // Set a timeout to show loading indicator for at least 500ms
+    const timer = setTimeout(() => {
+      setIsInitializing(false);
+      // Report performance when done loading
+      if (finishLoadTracking) finishLoadTracking();
+    }, 500);
+
+    return () => clearTimeout(timer);
   }, []);
 
+  // Handle error state
   useEffect(() => {
-    const prefetchRewardsData = async () => {
-      try {
-        fetchCoinsBalance();
-        checkDailyReward();
-      } catch (err) {
-        console.log("Background prefetch error:", err);
-      }
-    };
-    prefetchRewardsData();
-  }, []);
-
-  // Ensure questions are loaded on component mount
-  useEffect(() => {
-    const loadInitialData = async () => {
-      try {
-        const { ensureQuestionsLoaded, questions } = useGameStore.getState();
-
-        // Check if questions are already loaded
-        const hasQuestions = Object.values(questions).some((gameMode) =>
-          Object.values(gameMode).some(
-            (difficulty) => Array.isArray(difficulty) && difficulty.length > 0
-          )
-        );
-
-        if (!hasQuestions) {
-          console.log("[Games] No questions found, forcing load...");
-          await ensureQuestionsLoaded();
-
-          // Verify questions were loaded
-          const { questions: updatedQuestions } = useGameStore.getState();
-          console.log("[Games] Questions after loading:", {
-            multipleChoice: updatedQuestions.multipleChoice.easy?.length || 0,
-            identification: updatedQuestions.identification.easy?.length || 0,
-            fillBlanks: updatedQuestions.fillBlanks.easy?.length || 0,
-          });
-        } else {
-          console.log("[Games] Questions already loaded");
-        }
-      } catch (error) {
-        console.error("[Games] Error loading questions:", error);
-      }
-    };
-
-    loadInitialData();
-  }, []);
-
-  // MEMOIZED: Game mode progress calculation
-  const gameProgress = useMemo(() => {
-    if (!Array.isArray(globalProgress)) {
-      return {
-        multipleChoice: {
-          completed: 0,
-          total: getQuizCountByMode("multipleChoice"),
-        },
-        identification: {
-          completed: 0,
-          total: getQuizCountByMode("identification"),
-        },
-        fillBlanks: {
-          completed: 0,
-          total: getQuizCountByMode("fillBlanks"),
-        },
-      };
+    if (!wordOfTheDay && !isInitializing) {
+      setHasError(true);
+    } else {
+      setHasError(false);
     }
+  }, [wordOfTheDay, isInitializing]);
 
-    console.log("[Games] Calculating progress for all modes...");
+  // Handle retry
+  const handleRetry = () => {
+    setIsInitializing(true);
+    setHasError(false);
 
-    // Get quiz counts from utility functions
-    const totals = getAllQuizCounts();
-
-    console.log("[Games] Quiz totals from utility:", totals);
-
-    const results = {
-      multipleChoice: {
-        completed: 0,
-        total: totals.multipleChoice,
-      },
-      identification: {
-        completed: 0,
-        total: totals.identification,
-      },
-      fillBlanks: {
-        completed: 0,
-        total: totals.fillBlanks,
-      },
-    };
-
-    // Group progress entries by game mode
-    const progressByMode: { [key: string]: any[] } = {
-      multipleChoice: [],
-      identification: [],
-      fillBlanks: [],
-    };
-
-    globalProgress.forEach((entry: any) => {
-      const detectedMode = detectGameModeFromQuizId(entry.quizId);
-      if (detectedMode && progressByMode[detectedMode]) {
-        progressByMode[detectedMode].push(entry);
-      }
+    // Call retry handler from hook
+    retryDataLoading().finally(() => {
+      setIsInitializing(false);
     });
+  };
 
-    // Calculate completed count for each mode
-    Object.keys(results).forEach((mode) => {
-      const modeEntries = progressByMode[mode] || [];
-      results[mode as keyof typeof results].completed = modeEntries.filter(
-        (entry) => entry.completed
-      ).length;
-    });
-
-    console.log("[Games] Progress calculated:", results);
-
-    // If all totals are 0, questions might not be loaded - try to trigger loading
-    if (!areAnyQuestionsLoaded()) {
-      console.warn("[Games] No questions loaded - attempting to load");
-      const { ensureQuestionsLoaded } = useGameStore.getState();
-      ensureQuestionsLoaded().then(() => {
-        console.log("[Games] Attempted to reload questions");
-      });
-    }
-
-    return results;
-  }, [globalProgress]);
-
-  // OPTIMIZED: Get progress for specific game mode
-  const getGameModeProgress = useCallback(
-    (gameMode: string) => {
-      return (
-        gameProgress[gameMode as keyof typeof gameProgress] || {
-          completed: 0,
-          total: 50,
-        }
-      );
-    },
-    [gameProgress]
-  );
-
-  // MEMOIZED: Total completed count across all modes
-  const totalCompletedCount = useMemo(() => {
-    return Object.values(gameProgress).reduce(
-      (sum, mode) => sum + mode.completed,
-      0
+  // Render loading state
+  if (isInitializing) {
+    return (
+      <View
+        style={[
+          styles.wrapper,
+          { backgroundColor: activeTheme.backgroundColor },
+        ]}
+      >
+        <BackgroundEffects />
+        <SafeAreaView style={[dynamicStyles.container, styles.container]}>
+          <LoadingIndicator message="Loading your gaming dashboard..." />
+        </SafeAreaView>
+      </View>
     );
-  }, [gameProgress]);
+  }
 
-  // MEMOIZED: Total quiz count
-  const totalQuizCount = useMemo(() => {
-    return getTotalQuizCount();
-  }, []); // No dependencies needed since function handles the logic
+  // Render error state
+  if (hasError) {
+    return (
+      <View
+        style={[
+          styles.wrapper,
+          { backgroundColor: activeTheme.backgroundColor },
+        ]}
+      >
+        <BackgroundEffects />
+        <SafeAreaView style={[dynamicStyles.container, styles.container]}>
+          <ErrorDisplay
+            message="Unable to load game data. Please check your connection and try again."
+            onRetry={handleRetry}
+          />
+        </SafeAreaView>
+      </View>
+    );
+  }
 
-  const handleGamePress = (gameId: string, gameTitle: string) => {
-    router.push({
-      pathname: "/(games)/LevelSelection",
-      params: {
-        gameMode: gameId,
-        gameTitle: gameTitle,
-        levelId: "1",
-      },
-    });
-  };
-
-  const openRewardsModal = () => {
-    showDailyRewardsModal();
-  };
-
-  const handleProgressPress = async (gameMode: string, gameTitle: string) => {
-    try {
-      const { ensureQuestionsLoaded } = useGameStore.getState();
-      await ensureQuestionsLoaded();
-
-      setProgressModal({
-        visible: true,
-        gameMode,
-        gameTitle,
-      });
-    } catch (error) {
-      console.error(
-        "[Games] Error loading questions for progress modal:",
-        error
-      );
-      setProgressModal({
-        visible: true,
-        gameMode,
-        gameTitle,
-      });
-    }
-  };
-
-  const closeProgressModal = () => {
-    setProgressModal({
-      visible: false,
-      gameMode: "",
-      gameTitle: "",
-    });
-  };
-
-  // Add this function to get completed count from all modes
-  const getCompletedCount = () => {
-    if (!Array.isArray(globalProgress)) return 0;
-    return globalProgress.filter((p) => p.completed).length;
-  };
-
-  // DEBUGGING: Add temporary debug log to see what globalProgress contains
-  useEffect(() => {
-    if (globalProgress) {
-      console.log("[Games] Debug - globalProgress:", {
-        isArray: Array.isArray(globalProgress),
-        length: Array.isArray(globalProgress) ? globalProgress.length : "N/A",
-        sample: Array.isArray(globalProgress)
-          ? globalProgress[0]
-          : globalProgress,
-      });
-    }
-  }, [globalProgress]);
-
+  // Render main content (unchanged)
   return (
     <View
       style={[styles.wrapper, { backgroundColor: activeTheme.backgroundColor }]}
     >
-      {/* Enhanced Background with Multiple Layers */}
-      <View style={styles.backgroundLayer1} />
-      <View style={styles.backgroundLayer2} />
-      <View style={styles.backgroundLayer3} />
-      <View style={styles.backgroundLayer4} />
-
-      {/* Floating Particles Effect */}
-      <Animatable.View
-        animation="pulse"
-        iterationCount="infinite"
-        duration={4000}
-        style={styles.floatingParticle1}
-      />
-      <Animatable.View
-        animation="pulse"
-        iterationCount="infinite"
-        duration={3000}
-        style={styles.floatingParticle2}
-      />
-      <Animatable.View
-        animation="pulse"
-        iterationCount="infinite"
-        duration={5000}
-        style={styles.floatingParticle3}
-      />
+      {/* Background elements */}
+      <BackgroundEffects />
 
       <SafeAreaView style={[dynamicStyles.container, styles.container]}>
-        {/* Enhanced Header with Welcome Message */}
-        <Animatable.View
-          animation="fadeInDown"
-          duration={1000}
-          style={styles.headerSection}
-        >
-          <View style={styles.welcomeContainer}>
-            <Text style={styles.welcomeText}>Welcome back!</Text>
-            <Text style={styles.mainTitle}>Game Challenges</Text>
-            <Text style={styles.subtitle}>
-              Choose your adventure and level up your skills
-            </Text>
-          </View>
-          <Animatable.View animation="bounceIn" delay={500}>
-            <CoinsDisplay onPress={openRewardsModal} />
-          </Animatable.View>
-        </Animatable.View>
+        {/* Dashboard header with welcome message and coins */}
+        <DashboardHeader onCoinsPress={openRewardsModal} />
 
         <ScrollView
           showsVerticalScrollIndicator={false}
           contentContainerStyle={styles.scrollContent}
         >
-          {/* Enhanced Word of the Day Section */}
-          <Animatable.View
-            animation="fadeInUp"
-            duration={1000}
-            delay={200}
-            style={styles.featuredSection}
-          >
-            <View style={styles.sectionHeader}>
-              <View style={styles.sectionTitleRow}>
-                <Star width={20} height={20} color="#FFD700" />
-                <Text style={styles.sectionMainTitle}>Word of the Day</Text>
-              </View>
-              <Text style={styles.sectionSubtitle}>
-                Expand your vocabulary daily
-              </Text>
-            </View>
+          {/* Word of the Day card */}
+          <WordOfDayCard
+            wordOfTheDay={wordOfTheDay}
+            isPlaying={isWordOfDayPlaying}
+            isLoading={isAudioLoading && isWordOfDayPlaying}
+            onCardPress={() => setWordOfDayModalVisible(true)}
+            onPlayPress={playWordOfDayAudio}
+          />
 
-            <TouchableOpacity
-              style={styles.wordOfTheDayCard}
-              activeOpacity={0.9}
-              onPress={() => setWordOfDayModalVisible(true)}
-            >
-              <LinearGradient
-                colors={["#667eea", "#764ba2"]}
-                start={{ x: 0, y: 0 }}
-                end={{ x: 1, y: 1 }}
-                style={styles.wordCardGradient}
-              >
-                {/* Enhanced Decorative Elements */}
-                <View style={styles.wordDecoPattern1} />
-                <View style={styles.wordDecoPattern2} />
-                <View style={styles.wordDecoPattern3} />
+          {/* Game modes list */}
+          <GamesList
+            getGameModeProgress={getGameModeProgress}
+            onGamePress={handleGamePress}
+            onProgressPress={handleProgressPress}
+          />
 
-                <View style={styles.wordCardHeader}>
-                  <View style={styles.wordBadge}>
-                    <Calendar width={14} height={14} color="#667eea" />
-                    <Text style={styles.wordBadgeText}>TODAY'S WORD</Text>
-                  </View>
-                  <TouchableOpacity
-                    style={styles.playButton}
-                    onPress={playWordOfDayAudio}
-                  >
-                    {isAudioLoading && isWordOfDayPlaying ? (
-                      <Animatable.View
-                        animation="rotate"
-                        iterationCount="infinite"
-                        duration={1000}
-                      >
-                        <Volume2 width={16} height={16} color="#667eea" />
-                      </Animatable.View>
-                    ) : (
-                      <Volume2 width={16} height={16} color="#667eea" />
-                    )}
-                  </TouchableOpacity>
-                </View>
-
-                <View style={styles.wordContent}>
-                  <Text style={styles.wordMainText}>
-                    {wordOfTheDay ? wordOfTheDay.english : "Loading..."}
-                  </Text>
-                  <Text style={styles.wordTranslation}>
-                    {wordOfTheDay && wordOfTheDay.translation
-                      ? wordOfTheDay.translation
-                      : "Discovering meaning..."}
-                  </Text>
-                </View>
-
-                <View style={styles.wordCardFooter}>
-                  <Text style={styles.exploreText}>Tap to explore more</Text>
-                  <View style={styles.arrowContainer}>
-                    <Text style={styles.arrow}>→</Text>
-                  </View>
-                </View>
-              </LinearGradient>
-            </TouchableOpacity>
-          </Animatable.View>
-
-          {/* Enhanced Games Grid Section */}
-          <Animatable.View
-            animation="fadeInUp"
-            duration={1000}
-            delay={400}
-            style={styles.gamesSection}
-          >
-            <View style={styles.sectionHeader}>
-              <View style={styles.sectionTitleRow}>
-                <Target width={20} height={20} color="#4CAF50" />
-                <Text style={styles.sectionMainTitle}>Game Modes</Text>
-              </View>
-              <Text style={styles.sectionSubtitle}>
-                Master different skills through interactive challenges
-              </Text>
-            </View>
-
-            <View style={styles.gamesGrid}>
-              {gameOptions.map((game, index) => {
-                const progress = getGameModeProgress(game.id);
-                const completionPercentage =
-                  progress.total > 0
-                    ? Math.round((progress.completed / progress.total) * 100)
-                    : 0;
-
-                return (
-                  <Animatable.View
-                    key={game.id}
-                    animation="fadeInUp"
-                    delay={600 + index * 100}
-                    duration={800}
-                    style={styles.gameCardWrapper}
-                  >
-                    <View style={styles.gameCard}>
-                      <LinearGradient
-                        colors={game.gradientColors}
-                        start={{ x: 0, y: 0 }}
-                        end={{ x: 1, y: 1 }}
-                        style={styles.gameCardGradient}
-                      >
-                        {/* Difficulty Badge */}
-                        <View style={styles.difficultyBadge}>
-                          <Text style={styles.difficultyText}>
-                            {game.difficulty}
-                          </Text>
-                        </View>
-
-                        {/* Game Header */}
-                        <View style={styles.gameHeader}>
-                          <View style={styles.gameIconContainer}>
-                            <View style={styles.gameIconBg}>{game.icon}</View>
-                          </View>
-                          <View style={styles.gameInfo}>
-                            <Text style={styles.gameTitle} numberOfLines={1}>
-                              {game.title}
-                            </Text>
-                            <Text
-                              style={styles.gameDescription}
-                              numberOfLines={1}
-                            >
-                              {game.description}
-                            </Text>
-                          </View>
-                        </View>
-
-                        {/* Stats Row */}
-                        <View style={styles.gameStatsRow}>
-                          <View style={styles.statItem}>
-                            <Text style={styles.statValue}>
-                              {progress.completed}
-                            </Text>
-                            <Text style={styles.statLabel}>Completed</Text>
-                          </View>
-                          <View style={styles.statDivider} />
-                          <View style={styles.statItem}>
-                            <Text style={styles.statValue}>
-                              {completionPercentage}%
-                            </Text>
-                            <Text style={styles.statLabel}>Progress</Text>
-                          </View>
-                        </View>
-
-                        {/* Action Buttons */}
-                        <View style={styles.gameActionsRow}>
-                          <TouchableOpacity
-                            style={styles.progressBtn}
-                            onPress={() =>
-                              handleProgressPress(game.id, game.title)
-                            }
-                          >
-                            <TrendingUp width={14} height={14} color="#fff" />
-                            <Text style={styles.progressBtnText}>
-                              View Progress
-                            </Text>
-                          </TouchableOpacity>
-
-                          <TouchableOpacity
-                            style={[
-                              styles.playBtn,
-                              { backgroundColor: game.color },
-                            ]}
-                            onPress={() => handleGamePress(game.id, game.title)}
-                          >
-                            <Play width={14} height={14} color="#fff" />
-                            <Text style={styles.playBtnText}>PLAY</Text>
-                          </TouchableOpacity>
-                        </View>
-
-                        <View style={styles.gameDecoShape1} />
-                        <View style={styles.gameDecoShape2} />
-                      </LinearGradient>
-                    </View>
-                  </Animatable.View>
-                );
-              })}
-            </View>
-          </Animatable.View>
-
-          {/* Progress Summary - Optimized */}
-          <Animatable.View
-            animation="fadeInUp"
-            duration={1000}
-            delay={800}
-            style={styles.quickStatsSection}
-          >
-            <View style={styles.sectionHeader}>
-              <View style={styles.sectionTitleRow}>
-                <Award width={20} height={20} color="#FF6B6B" />
-                <Text style={styles.sectionMainTitle}>Your Progress</Text>
-              </View>
-              <Text style={styles.sectionSubtitle}>
-                Track your completion across all game modes
-              </Text>
-            </View>
-
-            <View style={styles.statsGrid}>
-              <View style={styles.quickStatCard}>
-                <LinearGradient
-                  colors={["#FF6B6B", "#FF8E8E"]}
-                  style={styles.statCardGradient}
-                >
-                  <View style={styles.statIconContainer}>
-                    <Target width={24} height={24} color="#fff" />
-                  </View>
-                  <Text style={styles.statNumber}>{totalCompletedCount}</Text>
-                  <Text style={styles.statText}>Levels Completed</Text>
-                </LinearGradient>
-              </View>
-
-              <View style={styles.quickStatCard}>
-                <LinearGradient
-                  colors={["#4ECDC4", "#44A08D"]}
-                  style={styles.statCardGradient}
-                >
-                  <View style={styles.statIconContainer}>
-                    <Award width={24} height={24} color="#fff" />
-                  </View>
-                  <Text style={styles.statNumber}>{totalQuizCount}</Text>
-                  <Text style={styles.statText}>Total Quizzes</Text>
-                </LinearGradient>
-              </View>
-            </View>
-
-            <Animatable.View
-              animation="fadeIn"
-              delay={1000}
-              style={styles.progressSummaryContainer}
-            >
-              <Text style={styles.progressSummaryText}>
-                {totalCompletedCount === 0
-                  ? `Start playing to track your progress! ${totalQuizCount} quizzes available`
-                  : `${Math.round(
-                      (totalCompletedCount / totalQuizCount) * 100
-                    )}% completion rate across all game modes (${totalCompletedCount}/${totalQuizCount})`}
-              </Text>
-            </Animatable.View>
-          </Animatable.View>
+          {/* Progress Summary section */}
+          <ProgressStats
+            totalCompletedCount={totalCompletedCount}
+            totalQuizCount={totalQuizCount}
+          />
         </ScrollView>
 
         {/* Modals */}
@@ -641,6 +201,7 @@ const Games = () => {
   );
 };
 
+// Keeping all styles exactly as they were
 const { height } = Dimensions.get("window");
 
 const styles = StyleSheet.create({

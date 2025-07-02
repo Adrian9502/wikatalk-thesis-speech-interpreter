@@ -77,3 +77,31 @@ export interface StatItem {
   value: string;
   subValue?: string;
 }
+
+export interface WordOfTheDay {
+  english: string;
+  translation: string;
+  dialect?: string;
+  pronunciation?: string;
+}
+
+export interface GameModeProgress {
+  completed: number;
+  total: number;
+}
+
+// Add/modify the GameOption interface to handle readonly gradientColors
+export interface GameOption {
+  id: string;
+  title: string;
+  description: string;
+  difficulty: string;
+  color: string;
+  gradientColors: readonly string[]; // Changed from string[] to readonly string[]
+  icon: React.ReactNode;
+}
+
+export interface ProgressStats {
+  totalCompletedCount: number;
+  totalQuizCount: number;
+}
