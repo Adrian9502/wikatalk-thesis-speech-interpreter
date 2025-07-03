@@ -219,10 +219,13 @@ export default function useGameDashboard() {
     );
   }, [gameProgress]);
 
+  // Get questions directly from store for dependency tracking
+  const { questions } = useGameStore();
+
   // MEMOIZED: Total quiz count
   const totalQuizCount = useMemo(() => {
     return getTotalQuizCount();
-  }, []);
+  }, [questions]); // <-- Add questions as dependency
 
   // Game event handlers
   const handleGamePress = useCallback((gameId: string, gameTitle: string) => {

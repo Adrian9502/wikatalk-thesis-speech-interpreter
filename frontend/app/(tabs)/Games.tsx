@@ -19,6 +19,7 @@ import ErrorDisplay from "@/components/games/common/ErrorDisplay";
 import useGameDashboard from "@/hooks/games/useGameDashboard";
 import { useComponentLoadTime } from "@/utils/performanceMonitor";
 import AppLoading from "@/components/AppLoading";
+import useGameStore from "@/store/games/useGameStore";
 
 const Games = () => {
   // Performance monitoring for development
@@ -71,7 +72,12 @@ const Games = () => {
 
   // Track when data becomes available
   useEffect(() => {
-    if (wordOfTheDay) {
+    const { questions } = useGameStore.getState();
+    const hasQuestions = Object.values(questions).some((mode) =>
+      Object.values(mode).some((diff) => Array.isArray(diff) && diff.length > 0)
+    );
+
+    if (wordOfTheDay && hasQuestions) {
       setDataReady(true);
     }
   }, [wordOfTheDay]);

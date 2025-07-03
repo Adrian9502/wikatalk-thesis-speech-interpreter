@@ -5,6 +5,10 @@ import useGameStore from "@/store/games/useGameStore";
  */
 export const getTotalQuizCount = (): number => {
   const { questions } = useGameStore.getState();
+  console.log(
+    "[getTotalQuizCount] Current questions state:",
+    JSON.stringify(questions, null, 2).substring(0, 200) + "..."
+  );
   let totalCount = 0;
 
   Object.entries(questions).forEach(([gameMode, difficulties]) => {
@@ -47,26 +51,37 @@ export const getQuizCountByMode = (mode: string): number => {
 /**
  * Get quiz count for a specific difficulty in a game mode
  */
-export const getQuizCountByDifficulty = (mode: string, difficulty: string): number => {
+export const getQuizCountByDifficulty = (
+  mode: string,
+  difficulty: string
+): number => {
   const { questions } = useGameStore.getState();
   const modeQuestions = questions[mode];
 
   if (!modeQuestions || typeof modeQuestions !== "object") {
-    console.log(`[getQuizCountByDifficulty] No questions found for mode: ${mode}`);
+    console.log(
+      `[getQuizCountByDifficulty] No questions found for mode: ${mode}`
+    );
     return 0;
   }
 
   const difficultyQuestions = modeQuestions[difficulty];
-  const count = Array.isArray(difficultyQuestions) ? difficultyQuestions.length : 0;
+  const count = Array.isArray(difficultyQuestions)
+    ? difficultyQuestions.length
+    : 0;
 
-  console.log(`[getQuizCountByDifficulty] Quiz count for ${mode}.${difficulty}: ${count}`);
+  console.log(
+    `[getQuizCountByDifficulty] Quiz count for ${mode}.${difficulty}: ${count}`
+  );
   return count;
 };
 
 /**
  * Get quiz counts for all difficulties in a specific game mode
  */
-export const getQuizCountsByDifficulty = (mode: string): {
+export const getQuizCountsByDifficulty = (
+  mode: string
+): {
   easy: number;
   medium: number;
   hard: number;
@@ -76,13 +91,17 @@ export const getQuizCountsByDifficulty = (mode: string): {
   const modeQuestions = questions[mode];
 
   if (!modeQuestions || typeof modeQuestions !== "object") {
-    console.log(`[getQuizCountsByDifficulty] No questions found for mode: ${mode}`);
+    console.log(
+      `[getQuizCountsByDifficulty] No questions found for mode: ${mode}`
+    );
     return { easy: 0, medium: 0, hard: 0, total: 0 };
   }
 
   const counts = {
     easy: Array.isArray(modeQuestions.easy) ? modeQuestions.easy.length : 0,
-    medium: Array.isArray(modeQuestions.medium) ? modeQuestions.medium.length : 0,
+    medium: Array.isArray(modeQuestions.medium)
+      ? modeQuestions.medium.length
+      : 0,
     hard: Array.isArray(modeQuestions.hard) ? modeQuestions.hard.length : 0,
     total: 0,
   };
@@ -109,7 +128,8 @@ export const getAllQuizCounts = (): {
     total: 0,
   };
 
-  counts.total = counts.multipleChoice + counts.identification + counts.fillBlanks;
+  counts.total =
+    counts.multipleChoice + counts.identification + counts.fillBlanks;
 
   console.log(`[getAllQuizCounts] All quiz counts:`, counts);
   return counts;
@@ -130,7 +150,9 @@ export const areQuestionsLoadedForMode = (mode: string): boolean => {
     (difficulty) => Array.isArray(difficulty) && difficulty.length > 0
   );
 
-  console.log(`[areQuestionsLoadedForMode] Questions loaded for ${mode}: ${hasQuestions}`);
+  console.log(
+    `[areQuestionsLoadedForMode] Questions loaded for ${mode}: ${hasQuestions}`
+  );
   return hasQuestions;
 };
 
@@ -166,9 +188,10 @@ export const getDetailedQuizBreakdown = (): {
     grandTotal: 0,
   };
 
-  breakdown.grandTotal = breakdown.multipleChoice.total + 
-                        breakdown.identification.total + 
-                        breakdown.fillBlanks.total;
+  breakdown.grandTotal =
+    breakdown.multipleChoice.total +
+    breakdown.identification.total +
+    breakdown.fillBlanks.total;
 
   console.log(`[getDetailedQuizBreakdown] Detailed breakdown:`, breakdown);
   return breakdown;
