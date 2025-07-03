@@ -62,12 +62,31 @@ const LevelSelection = () => {
 
   // Filtered levels based on active filter
   const filteredLevels = useMemo(() => {
-    if (activeFilter === "all") return levels;
-    if (activeFilter === "completed")
-      return levels.filter((level) => level.status === "completed");
-    if (activeFilter === "current")
-      return levels.filter((level) => level.status === "current");
-    return levels;
+    let filtered = levels;
+
+    // Status filters
+    if (activeFilter === "completed") {
+      filtered = filtered.filter((level) => level.status === "completed");
+    } else if (activeFilter === "current") {
+      filtered = filtered.filter((level) => level.status === "current");
+    } else if (activeFilter === "easy") {
+      filtered = filtered.filter(
+        (level) =>
+          level.difficulty === "Easy" || level.difficultyCategory === "easy"
+      );
+    } else if (activeFilter === "medium") {
+      filtered = filtered.filter(
+        (level) =>
+          level.difficulty === "Medium" || level.difficultyCategory === "medium"
+      );
+    } else if (activeFilter === "hard") {
+      filtered = filtered.filter(
+        (level) =>
+          level.difficulty === "Hard" || level.difficultyCategory === "hard"
+      );
+    }
+
+    return filtered;
   }, [levels, activeFilter]);
 
   // PERFORMANCE FIX: Throttled refresh function

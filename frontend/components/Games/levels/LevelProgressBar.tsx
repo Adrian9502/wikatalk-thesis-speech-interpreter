@@ -16,20 +16,33 @@ const LevelProgressBar: React.FC<LevelProgressBarProps> = ({ percentage }) => {
       delay={100}
       style={styles.progressContainer}
     >
-      <View style={styles.progressBarContainer}>
-        <View style={styles.progressLabels}>
-          <Text style={styles.progressLabel}>Course Progress</Text>
-          <Text style={styles.progressPercentage}>
-            {Math.round(percentage)}%
-          </Text>
+      {/* Progress header with more game-like styling */}
+      <View style={styles.progressHeader}>
+        <View style={styles.progressLabelContainer}>
+          <Text style={styles.progressLabel}>Level Progress</Text>
+          <Animatable.View
+            animation={percentage === 100 ? "pulse" : undefined}
+            iterationCount="infinite"
+            style={styles.percentageBadge}
+          >
+            <Text style={styles.progressPercentage}>
+              {Math.round(percentage)}%
+            </Text>
+          </Animatable.View>
         </View>
+      </View>
+
+      {/* Enhanced progress bar without animations */}
+      <View style={styles.progressBarContainer}>
         <View style={styles.progressBar}>
-          <LinearGradient
-            colors={["#8BC34A", "#4CAF50"]}
-            start={{ x: 0, y: 0 }}
-            end={{ x: 1, y: 0 }}
-            style={[styles.progressFill, { width: `${percentage}%` }]}
-          />
+          <View style={styles.progressBarBackground}>
+            <LinearGradient
+              colors={["#8BC34A", "#4CAF50"]}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 0 }}
+              style={[styles.progressFill, { width: `${percentage}%` }]}
+            />
+          </View>
         </View>
       </View>
     </Animatable.View>

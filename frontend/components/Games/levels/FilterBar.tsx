@@ -1,5 +1,5 @@
 import React from "react";
-import { Text, TouchableOpacity } from "react-native";
+import { Text, TouchableOpacity, View, ScrollView } from "react-native";
 import * as Animatable from "react-native-animatable";
 import { levelStyles as styles } from "@/styles/games/levels.styles";
 import useThemeStore from "@/store/useThemeStore";
@@ -14,75 +14,71 @@ const FilterBar: React.FC<FilterBarProps> = ({
   setActiveFilter,
 }) => {
   const { activeTheme } = useThemeStore();
+
+  const renderFilterButton = (
+    filter: string,
+    label: string,
+    icon?: React.ReactNode
+  ) => {
+    const isActive = activeFilter === filter;
+
+    return (
+      <TouchableOpacity
+        style={[
+          styles.filterButton,
+          isActive && {
+            backgroundColor: activeTheme.tabActiveColor,
+            borderColor: `${activeTheme.tabActiveColor}50`,
+            shadowColor: activeTheme.tabActiveColor,
+            shadowOffset: { width: 0, height: 2 },
+            shadowOpacity: 0.5,
+            shadowRadius: 5,
+            elevation: 5,
+          },
+        ]}
+        onPress={() => setActiveFilter(filter)}
+        accessible={true}
+        accessibilityLabel={`Show ${filter} levels`}
+        accessibilityRole="button"
+      >
+        {icon && <View style={styles.filterIconContainer}>{icon}</View>}
+        <Text style={[styles.filterText, isActive && styles.activeFilterText]}>
+          {label}
+        </Text>
+      </TouchableOpacity>
+    );
+  };
+
+  // Simplified difficulty filter - just text, no stars
+  const renderDifficultyFilter = (difficulty: string) => {
+    // Capitalize the first letter of the difficulty
+    const label = difficulty.charAt(0).toUpperCase() + difficulty.slice(1);
+
+    // Just render the button with text, no icon/stars
+    return renderFilterButton(difficulty, label);
+  };
+
   return (
     <Animatable.View
-      animation="fadeIn"
+      animation="fadeInDown"
       duration={500}
       style={styles.filterContainer}
     >
-      <TouchableOpacity
-        style={[
-          styles.filterButton,
-          activeFilter === "all" && {
-            backgroundColor: activeTheme.tabActiveColor,
-          },
-        ]}
-        onPress={() => setActiveFilter("all")}
-        accessible={true}
-        accessibilityLabel="Show all levels"
-        accessibilityRole="button"
+      <ScrollView
+        horizontal
+        showsHorizontalScrollIndicator={false}
+        contentContainerStyle={styles.filterScrollContent}
       >
-        <Text
-          style={[
-            styles.filterText,
-            activeFilter === "all" && styles.activeFilterText,
-          ]}
-        >
-          All
-        </Text>
-      </TouchableOpacity>
-      <TouchableOpacity
-        style={[
-          styles.filterButton,
-          activeFilter === "completed" && {
-            backgroundColor: activeTheme.tabActiveColor,
-          },
-        ]}
-        onPress={() => setActiveFilter("completed")}
-        accessible={true}
-        accessibilityLabel="Show completed levels"
-        accessibilityRole="button"
-      >
-        <Text
-          style={[
-            styles.filterText,
-            activeFilter === "completed" && styles.activeFilterText,
-          ]}
-        >
-          Completed
-        </Text>
-      </TouchableOpacity>
-      <TouchableOpacity
-        style={[
-          styles.filterButton,
-          activeFilter === "current" && {
-            backgroundColor: activeTheme.tabActiveColor,
-          },
-        ]}
-        onPress={() => setActiveFilter("current")}
-        accessible={true}
-        accessibilityLabel="Show current levels"
-        accessibilityRole="button"
-      >
-        <Text
-          style={[
-            styles.filterText,
-            activeFilter === "current" && styles.activeFilterText,
-          ]}
-        >
-          Current
-        </Text>
-      </TouchableOpacity>
+        {/* Status filters */}
+        {renderFilterButton("all", "All Levels")}
+        {renderFilterButton("completed", "Finished")}
+        {renderFilterButton("current", "In Progress")}
+
+        {/* Difficulty filters */}
+        {renderDifficultyFilter("easy")}
+        {renderDifficultyFilter("medium")}
+        {renderDifficultyFilter("hard")}
+      </ScrollView>
     </Animatable.View>
   );
 };

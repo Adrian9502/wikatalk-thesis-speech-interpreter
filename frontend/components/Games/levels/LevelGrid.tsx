@@ -1,12 +1,12 @@
 import React, { useCallback, useMemo } from "react";
-import { View, RefreshControl } from "react-native";
+import { View, RefreshControl, Dimensions } from "react-native";
 import { FlashList } from "@shopify/flash-list";
-import * as Haptics from "expo-haptics";
 import { BASE_COLORS } from "@/constant/colors";
 import { LevelData } from "@/types/gameTypes";
 import { levelStyles as styles } from "@/styles/games/levels.styles";
 import LevelCard from "@/components/games/levels/LevelCard";
-import { getStarCount, formatDifficulty } from "@/utils/games/difficultyUtils";
+
+const { height } = Dimensions.get("window");
 
 interface LevelGridProps {
   levels: LevelData[];
@@ -66,6 +66,7 @@ const LevelGrid: React.FC<LevelGridProps> = ({
                 ? "This level is locked"
                 : "Tap to view level details"
             }
+            index={index}
           />
         </View>
       );
@@ -73,26 +74,30 @@ const LevelGrid: React.FC<LevelGridProps> = ({
     [difficultyColors, onSelectLevel]
   );
 
+  const listHeight = height - 280; // Adjust this value based on your layout
+
   return (
-    <FlashList
-      data={levels}
-      keyExtractor={keyExtractor}
-      renderItem={renderItem}
-      numColumns={2}
-      contentContainerStyle={styles.gridScrollContent}
-      showsVerticalScrollIndicator={false}
-      removeClippedSubviews={true}
-      extraData={levelStatusHash}
-      refreshControl={
-        <RefreshControl
-          refreshing={isRefreshing}
-          onRefresh={onRefresh}
-          colors={[BASE_COLORS.blue, BASE_COLORS.orange]}
-          tintColor={BASE_COLORS.blue}
-        />
-      }
-      estimatedItemSize={180}
-    />
+    <View style={[styles.levelGridContainer, { height: listHeight }]}>
+      <FlashList
+        data={levels}
+        keyExtractor={keyExtractor}
+        renderItem={renderItem}
+        numColumns={2}
+        contentContainerStyle={styles.gridScrollContent}
+        showsVerticalScrollIndicator={false}
+        removeClippedSubviews={true}
+        extraData={levelStatusHash}
+        refreshControl={
+          <RefreshControl
+            refreshing={isRefreshing}
+            onRefresh={onRefresh}
+            colors={[BASE_COLORS.blue, BASE_COLORS.orange]}
+            tintColor={BASE_COLORS.blue}
+          />
+        }
+        estimatedItemSize={190}
+      />
+    </View>
   );
 };
 
