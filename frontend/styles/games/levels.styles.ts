@@ -371,7 +371,7 @@ export const levelStyles = StyleSheet.create({
   levelCard: {
     width: width * 0.44,
     height: 190,
-    borderRadius: 16,
+    borderRadius: 24,
     marginBottom: 16,
     overflow: "hidden",
     shadowColor: "#000",
@@ -382,7 +382,7 @@ export const levelStyles = StyleSheet.create({
     position: "relative",
   },
   levelCardGradient: {
-    padding: 14,
+    padding: 15,
     height: "100%",
     justifyContent: "space-between",
     position: "relative",

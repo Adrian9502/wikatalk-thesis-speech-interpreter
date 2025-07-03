@@ -2,6 +2,7 @@ import React from "react";
 import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { TrendingUp, Play } from "react-native-feather";
+import { GAME_GRADIENTS } from "@/constant/gameConstants";
 
 interface GameCardProps {
   game: any;
@@ -11,93 +12,98 @@ interface GameCardProps {
   onProgressPress: () => void;
 }
 
-const GameCard = React.memo(({
-  game,
-  progress,
-  completionPercentage,
-  onGamePress,
-  onProgressPress
-}: GameCardProps) => {
-  return (
-    <View style={styles.gameCard}>
-      <LinearGradient
-        colors={game.gradientColors}
-        start={{ x: 0, y: 0 }}
-        end={{ x: 1, y: 1 }}
-        style={styles.gameCardGradient}
-      >
-        {/* Difficulty Badge */}
-        <View style={styles.difficultyBadge}>
-          <Text style={styles.difficultyText}>
-            {game.difficulty}
-          </Text>
-        </View>
+const GameCard = React.memo(
+  ({
+    game,
+    progress,
+    completionPercentage,
+    onGamePress,
+    onProgressPress,
+  }: GameCardProps) => {
+    // Get the consistent gradient colors from the same source as GameProgressModal
+    const getCardGradientColors = () => {
+      // Use the same constants as the modal
+      switch (game.id) {
+        case "multipleChoice":
+          return GAME_GRADIENTS.multipleChoice;
+        case "identification":
+          return GAME_GRADIENTS.identification;
+        case "fillBlanks":
+          return GAME_GRADIENTS.fillBlanks;
+        default:
+          return game.gradientColors; // Fallback to the original colors if needed
+      }
+    };
 
-        {/* Game Header */}
-        <View style={styles.gameHeader}>
-          <View style={styles.gameIconContainer}>
-            <View style={styles.gameIconBg}>{game.icon}</View>
+    const gradientColors = getCardGradientColors();
+
+    return (
+      <View style={styles.gameCard}>
+        <LinearGradient
+          colors={gradientColors}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 1 }}
+          style={styles.gameCardGradient}
+        >
+          {/* Difficulty Badge */}
+          <View style={styles.difficultyBadge}>
+            <Text style={styles.difficultyText}>{game.difficulty}</Text>
           </View>
-          <View style={styles.gameInfo}>
-            <Text style={styles.gameTitle} numberOfLines={1}>
-              {game.title}
-            </Text>
-            <Text
-              style={styles.gameDescription}
-              numberOfLines={1}
+
+          {/* Game Header */}
+          <View style={styles.gameHeader}>
+            <View style={styles.gameIconContainer}>
+              <View style={styles.gameIconBg}>{game.icon}</View>
+            </View>
+            <View style={styles.gameInfo}>
+              <Text style={styles.gameTitle} numberOfLines={1}>
+                {game.title}
+              </Text>
+              <Text style={styles.gameDescription} numberOfLines={1}>
+                {game.description}
+              </Text>
+            </View>
+          </View>
+
+          {/* Stats Row */}
+          <View style={styles.gameStatsRow}>
+            <View style={styles.statItem}>
+              <Text style={styles.statValue}>{progress.completed}</Text>
+              <Text style={styles.statLabel}>Completed</Text>
+            </View>
+            <View style={styles.statDivider} />
+            <View style={styles.statItem}>
+              <Text style={styles.statValue}>{completionPercentage}%</Text>
+              <Text style={styles.statLabel}>Progress</Text>
+            </View>
+          </View>
+
+          {/* Action Buttons */}
+          <View style={styles.gameActionsRow}>
+            <TouchableOpacity
+              style={styles.progressBtn}
+              onPress={onProgressPress}
             >
-              {game.description}
-            </Text>
+              <TrendingUp width={14} height={14} color="#fff" />
+              <Text style={styles.progressBtnText}>View Progress</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={[styles.playBtn, { backgroundColor: game.color }]}
+              onPress={onGamePress}
+            >
+              <Play width={14} height={14} color="#fff" />
+              <Text style={styles.playBtnText}>PLAY</Text>
+            </TouchableOpacity>
           </View>
-        </View>
 
-        {/* Stats Row */}
-        <View style={styles.gameStatsRow}>
-          <View style={styles.statItem}>
-            <Text style={styles.statValue}>
-              {progress.completed}
-            </Text>
-            <Text style={styles.statLabel}>Completed</Text>
-          </View>
-          <View style={styles.statDivider} />
-          <View style={styles.statItem}>
-            <Text style={styles.statValue}>
-              {completionPercentage}%
-            </Text>
-            <Text style={styles.statLabel}>Progress</Text>
-          </View>
-        </View>
-
-        {/* Action Buttons */}
-        <View style={styles.gameActionsRow}>
-          <TouchableOpacity
-            style={styles.progressBtn}
-            onPress={onProgressPress}
-          >
-            <TrendingUp width={14} height={14} color="#fff" />
-            <Text style={styles.progressBtnText}>
-              View Progress
-            </Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            style={[
-              styles.playBtn,
-              { backgroundColor: game.color },
-            ]}
-            onPress={onGamePress}
-          >
-            <Play width={14} height={14} color="#fff" />
-            <Text style={styles.playBtnText}>PLAY</Text>
-          </TouchableOpacity>
-        </View>
-
-        <View style={styles.gameDecoShape1} />
-        <View style={styles.gameDecoShape2} />
-      </LinearGradient>
-    </View>
-  );
-});
+          <View style={styles.gameDecoShape1} />
+          <View style={styles.gameDecoShape2} />
+        </LinearGradient>
+      </View>
+    );
+  }
+);
 
 const styles = StyleSheet.create({
   gameCard: {
@@ -248,5 +254,5 @@ const styles = StyleSheet.create({
   },
 });
 
-GameCard.displayName = 'GameCard';
+GameCard.displayName = "GameCard";
 export default GameCard;

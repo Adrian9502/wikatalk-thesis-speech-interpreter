@@ -82,9 +82,9 @@ export const getPositionalColors = (
 };
 
 export const difficultyColors = {
-  Easy: ["#4CAF50", "#2E7D32"] as const,
-  Medium: ["#FF9800", "#EF6C00"] as const,
-  Hard: ["#F44336", "#C62828"] as const,
+  Easy: ["#22C216", "#007F3B"] as const,
+  Medium: ["#FF8E2B", "#B52A00"] as const,
+  Hard: ["#FF2919", "#B80D5F"] as const,
 };
 
 // Game mode navigation

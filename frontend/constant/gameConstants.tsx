@@ -48,6 +48,6 @@ export const GAME_COLORS = {
 
 export const GAME_GRADIENTS = {
   [GAME_MODES.MULTIPLE_CHOICE]: ["#4361EE", "#3A0CA3"] as const,
-  [GAME_MODES.IDENTIFICATION]: ["#F72585", "#7209B7"] as const,
+  [GAME_MODES.IDENTIFICATION]: ["#e01f78", "#6a03ad"] as const,
   [GAME_MODES.FILL_BLANKS]: ["#4CAF50", "#2E7D32"] as const,
 };

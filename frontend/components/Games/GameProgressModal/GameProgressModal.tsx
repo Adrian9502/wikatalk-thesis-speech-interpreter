@@ -15,6 +15,7 @@ import { formatTime } from "@/utils/gameUtils";
 import { useUserProgress } from "@/hooks/useUserProgress";
 import useGameStore from "@/store/games/useGameStore";
 import { getQuizCountByDifficulty } from "@/utils/quizCountUtils";
+import { GAME_GRADIENTS } from "@/constant/gameConstants";
 
 // Import component types
 import {
@@ -68,6 +69,25 @@ const GameProgressModal: React.FC<GameProgressModalProps> = ({
         return "⭐";
     }
   }, []);
+
+  // Get the gradient colors for the current game mode
+  const getGradientColors = useCallback((): [string, string] => {
+    // Default gradient if the game mode isn't found
+    const defaultGradient: [string, string] = ["#3B4DA3", "#251D79"];
+
+    if (!gameMode) return defaultGradient;
+
+    switch (gameMode) {
+      case "multipleChoice":
+        return GAME_GRADIENTS.multipleChoice as [string, string];
+      case "identification":
+        return GAME_GRADIENTS.identification as [string, string];
+      case "fillBlanks":
+        return GAME_GRADIENTS.fillBlanks as [string, string];
+      default:
+        return defaultGradient;
+    }
+  }, [gameMode]);
 
   // Memoized calculation function
   const calculateEnhancedProgress = useCallback(() => {
@@ -447,6 +467,9 @@ const GameProgressModal: React.FC<GameProgressModalProps> = ({
   // Don't render anything if the modal isn't visible to save resources
   if (!visible) return null;
 
+  // Get the current gradient colors
+  const gradientColors = getGradientColors();
+
   return (
     <Modal
       visible={visible}
@@ -463,7 +486,7 @@ const GameProgressModal: React.FC<GameProgressModalProps> = ({
           useNativeDriver={true}
         >
           <LinearGradient
-            colors={["#3B4DA3", "#251D79"]}
+            colors={gradientColors}
             start={{ x: 0, y: 0 }}
             end={{ x: 1, y: 1 }}
             style={styles.gradientBackground}
@@ -476,14 +499,14 @@ const GameProgressModal: React.FC<GameProgressModalProps> = ({
                 onPress={onClose}
                 activeOpacity={0.7}
               >
-                <X width={18} height={18} color="#FFF" />
+                <X width={16} height={16} color="#FFF" />
               </TouchableOpacity>
             </View>
 
             <ScrollView
               style={styles.content}
               showsVerticalScrollIndicator={false}
-              removeClippedSubviews={true} // Optimize for off-screen content
+              removeClippedSubviews={true}
             >
               {modalContent}
             </ScrollView>
@@ -529,8 +552,8 @@ const styles = StyleSheet.create({
   closeButton: {
     position: "absolute",
     right: 0,
-    padding: 8,
-    backgroundColor: "rgba(0,0,0,0.2)",
+    padding: 6,
+    backgroundColor: "rgba(0,0,0,0.1)",
     borderRadius: 20,
   },
   content: {
