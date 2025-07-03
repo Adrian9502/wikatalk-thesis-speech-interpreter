@@ -70,13 +70,13 @@ const GamesList = React.memo(
 
 const styles = StyleSheet.create({
   gamesSection: {
-    marginBottom: 40,
+    marginBottom: 8,
   },
   gamesGrid: {
     width: "100%",
   },
   gameCardWrapper: {
-    marginBottom: 16,
+    marginBottom: 26,
   },
 });
 
