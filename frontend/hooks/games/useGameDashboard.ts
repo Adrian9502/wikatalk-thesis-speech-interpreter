@@ -46,6 +46,7 @@ export default function useGameDashboard() {
   const [pronunciationError, setPronunciationError] = useState<string | null>(
     null
   );
+  const [isLoading, setIsLoading] = useState(true);
 
   // Pronunciation store for Word of the Day
   const {
@@ -102,6 +103,7 @@ export default function useGameDashboard() {
   // Ensure questions are loaded on component mount
   useEffect(() => {
     const loadInitialData = async () => {
+      setIsLoading(true);
       try {
         const { ensureQuestionsLoaded, questions } = useGameStore.getState();
 
@@ -120,6 +122,8 @@ export default function useGameDashboard() {
         }
       } catch (error) {
         console.error("[Games] Error loading questions:", error);
+      } finally {
+        setIsLoading(false);
       }
     };
 
@@ -306,23 +310,42 @@ export default function useGameDashboard() {
     checkDailyReward,
   ]);
 
-  // Modify your initialization code to handle async getWordOfTheDay
+  // Modify your initialization code
   useEffect(() => {
     const initializeData = async () => {
+      setIsLoading(true);
       try {
-        await fetchPronunciations();
-        await getWordOfTheDay();
-        await fetchCoinsBalance();
-        await checkDailyReward();
+        // Track all promises to ensure they all complete before marking loading as done
+        const promises = [];
+
+        // Add each operation to our promise array
+        if (pronunciationData.length === 0) {
+          promises.push(fetchPronunciations());
+        }
+
+        if (!wordOfTheDay) {
+          promises.push(getWordOfTheDay());
+        }
+
+        promises.push(fetchCoinsBalance());
+        promises.push(checkDailyReward());
 
         // Ensure questions are loaded
         const { ensureQuestionsLoaded } = useGameStore.getState();
-        await ensureQuestionsLoaded();
+        promises.push(ensureQuestionsLoaded());
+
+        // Wait for ALL promises to complete
+        await Promise.all(promises);
       } catch (error) {
         console.error("[Games] Error initializing data:", error);
         setPronunciationError(
           error instanceof Error ? error.message : "Failed to load data"
         );
+      } finally {
+        // Add slight delay to ensure state updates are processed
+        setTimeout(() => {
+          setIsLoading(false);
+        }, 100);
       }
     };
 
@@ -332,6 +355,8 @@ export default function useGameDashboard() {
     getWordOfTheDay,
     fetchCoinsBalance,
     checkDailyReward,
+    pronunciationData,
+    wordOfTheDay,
   ]);
 
   return {
@@ -367,5 +392,8 @@ export default function useGameDashboard() {
 
     // Add error state
     pronunciationError,
+
+    // Loading state
+    isLoading,
   };
 }

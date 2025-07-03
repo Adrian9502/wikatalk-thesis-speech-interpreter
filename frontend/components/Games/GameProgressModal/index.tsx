@@ -332,7 +332,7 @@ const GameProgressModal: React.FC<GameProgressModalProps> = ({
     if (isLoading) {
       return (
         <View style={styles.loadingContainer}>
-          <DotsLoader />
+          <ActivityIndicator size={"small"} color={"#fff"} />
           <Text style={styles.loadingText}>Loading progress...</Text>
         </View>
       );

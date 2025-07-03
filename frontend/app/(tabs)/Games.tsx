@@ -13,12 +13,12 @@ import DashboardHeader from "@/components/games/dashboard/DashboardHeader";
 import WordOfDayCard from "@/components/games/dashboard/WordOfDayCard";
 import GamesList from "@/components/games/dashboard/GamesList";
 import ProgressStats from "@/components/games/dashboard/ProgressStats";
-import LoadingIndicator from "@/components/games/common/LoadingIndicator";
 import ErrorDisplay from "@/components/games/common/ErrorDisplay";
 
 // Custom hooks
 import useGameDashboard from "@/hooks/games/useGameDashboard";
 import { useComponentLoadTime } from "@/utils/performanceMonitor";
+import AppLoading from "@/components/AppLoading";
 
 const Games = () => {
   // Performance monitoring for development
@@ -31,6 +31,8 @@ const Games = () => {
   // Track loading and error states
   const [isInitializing, setIsInitializing] = useState(true);
   const [hasError, setHasError] = useState(false);
+  // Add a data readiness tracker
+  const [dataReady, setDataReady] = useState(false);
 
   // Custom hook for all dashboard logic
   const {
@@ -62,28 +64,51 @@ const Games = () => {
 
     // Add error retry handler
     retryDataLoading,
+
+    // Add loading state from hook
+    isLoading,
   } = useGameDashboard();
 
-  // Track initial loading
+  // Track when data becomes available
   useEffect(() => {
-    // Set a timeout to show loading indicator for at least 500ms
+    if (wordOfTheDay) {
+      setDataReady(true);
+    }
+  }, [wordOfTheDay]);
+
+  // IMPROVED: Coordinated loading state management
+  useEffect(() => {
+    // Only mark initialization complete when:
+    // 1. We've waited at least 500ms (for visual consistency)
+    // 2. The data loading process has completed
+    // 3. AND our data is actually ready
     const timer = setTimeout(() => {
-      setIsInitializing(false);
-      // Report performance when done loading
-      if (finishLoadTracking) finishLoadTracking();
+      if (!isLoading && dataReady) {
+        setIsInitializing(false);
+        if (finishLoadTracking) finishLoadTracking();
+      }
     }, 500);
 
     return () => clearTimeout(timer);
-  }, []);
+  }, [isLoading, dataReady, finishLoadTracking]);
 
-  // Handle error state
+  // IMPROVED: Error detection logic with delay
   useEffect(() => {
-    if (!wordOfTheDay && !isInitializing) {
-      setHasError(true);
-    } else {
+    // Only check for errors after we've stopped loading but data isn't ready after a reasonable time
+    if (!isInitializing && !isLoading && !dataReady) {
+      // Add a small delay before showing error to avoid flicker
+      const errorTimer = setTimeout(() => {
+        if (!dataReady && !isLoading) {
+          setHasError(true);
+        }
+      }, 300); // Small delay to ensure data isn't about to arrive
+
+      return () => clearTimeout(errorTimer);
+    } else if (dataReady) {
+      // If data becomes ready, make sure to clear error state
       setHasError(false);
     }
-  }, [wordOfTheDay, isInitializing]);
+  }, [isInitializing, isLoading, dataReady]);
 
   // Handle retry
   const handleRetry = () => {
@@ -98,19 +123,7 @@ const Games = () => {
 
   // Render loading state
   if (isInitializing) {
-    return (
-      <View
-        style={[
-          styles.wrapper,
-          { backgroundColor: activeTheme.backgroundColor },
-        ]}
-      >
-        <BackgroundEffects />
-        <SafeAreaView style={[dynamicStyles.container, styles.container]}>
-          <LoadingIndicator message="Loading your gaming dashboard..." />
-        </SafeAreaView>
-      </View>
-    );
+    return <AppLoading />;
   }
 
   // Render error state
