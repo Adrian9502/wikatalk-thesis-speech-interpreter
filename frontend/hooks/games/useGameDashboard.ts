@@ -43,8 +43,10 @@ interface GameResults {
  */
 export default function useGameDashboard() {
   // Add state for pronunciation error
-  const [pronunciationError, setPronunciationError] = useState<string | null>(null);
-  
+  const [pronunciationError, setPronunciationError] = useState<string | null>(
+    null
+  );
+
   // Pronunciation store for Word of the Day
   const {
     wordOfTheDay,
@@ -234,29 +236,32 @@ export default function useGameDashboard() {
     showDailyRewardsModal();
   }, [showDailyRewardsModal]);
 
-  const handleProgressPress = useCallback(async (gameMode: string, gameTitle: string) => {
-    try {
-      const { ensureQuestionsLoaded } = useGameStore.getState();
-      await ensureQuestionsLoaded();
+  const handleProgressPress = useCallback(
+    async (gameMode: string, gameTitle: string) => {
+      try {
+        const { ensureQuestionsLoaded } = useGameStore.getState();
+        await ensureQuestionsLoaded();
 
-      setProgressModal({
-        visible: true,
-        gameMode,
-        gameTitle,
-      });
-    } catch (error) {
-      console.error(
-        "[Games] Error loading questions for progress modal:",
-        error
-      );
-      // Show modal anyway even if there's an error
-      setProgressModal({
-        visible: true,
-        gameMode,
-        gameTitle,
-      });
-    }
-  }, []);
+        setProgressModal({
+          visible: true,
+          gameMode,
+          gameTitle,
+        });
+      } catch (error) {
+        console.error(
+          "[Games] Error loading questions for progress modal:",
+          error
+        );
+        // Show modal anyway even if there's an error
+        setProgressModal({
+          visible: true,
+          gameMode,
+          gameTitle,
+        });
+      }
+    },
+    []
+  );
 
   const closeProgressModal = useCallback(() => {
     setProgressModal({
@@ -289,9 +294,39 @@ export default function useGameDashboard() {
       return true;
     } catch (error: unknown) {
       console.error("[Games] Retry failed:", error);
-      setPronunciationError(error instanceof Error ? error.message : "Failed to load data");
+      setPronunciationError(
+        error instanceof Error ? error.message : "Failed to load data"
+      );
       return false;
     }
+  }, [
+    fetchPronunciations,
+    getWordOfTheDay,
+    fetchCoinsBalance,
+    checkDailyReward,
+  ]);
+
+  // Modify your initialization code to handle async getWordOfTheDay
+  useEffect(() => {
+    const initializeData = async () => {
+      try {
+        await fetchPronunciations();
+        await getWordOfTheDay();
+        await fetchCoinsBalance();
+        await checkDailyReward();
+
+        // Ensure questions are loaded
+        const { ensureQuestionsLoaded } = useGameStore.getState();
+        await ensureQuestionsLoaded();
+      } catch (error) {
+        console.error("[Games] Error initializing data:", error);
+        setPronunciationError(
+          error instanceof Error ? error.message : "Failed to load data"
+        );
+      }
+    };
+
+    initializeData();
   }, [
     fetchPronunciations,
     getWordOfTheDay,
@@ -329,7 +364,7 @@ export default function useGameDashboard() {
 
     // Retry function
     retryDataLoading,
-    
+
     // Add error state
     pronunciationError,
   };

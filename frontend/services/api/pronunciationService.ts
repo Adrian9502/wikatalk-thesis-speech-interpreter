@@ -12,7 +12,13 @@ export interface PronunciationDataItem {
 
 export interface WordOfTheDayResponse {
   success: boolean;
-  word: PronunciationDataItem;
+  word: {
+    english: string;
+    translation: string;
+    pronunciation: string;
+    language: string;
+    date?: string;
+  };
 }
 
 export const pronunciationService = {
@@ -26,7 +32,7 @@ export const pronunciationService = {
   // Get word of the day
   getWordOfTheDay: async () => {
     const response = await authApi.get<WordOfTheDayResponse>(
-      "/api/pronunciations/word-of-day"
+      "/api/word-of-day"
     );
     return response.data;
   },

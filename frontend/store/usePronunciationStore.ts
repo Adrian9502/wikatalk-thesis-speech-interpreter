@@ -159,32 +159,60 @@ export const usePronunciationStore = create<PronunciationState>((set, get) => ({
     set({ currentPlayingIndex: null });
   },
 
-  getWordOfTheDay: () => {
-    const { pronunciationData } = get();
+  getWordOfTheDay: async () => {
+    try {
+      set({ isLoading: true, error: null });
 
-    if (pronunciationData.length === 0) {
-      return;
+      // Get word from API
+      const response = await pronunciationService.getWordOfTheDay();
+
+      if (response.success) {
+        set({
+          wordOfTheDay: {
+            english: response.word.english,
+            translation: response.word.translation,
+            pronunciation: response.word.pronunciation,
+            language: response.word.language,
+          },
+          isLoading: false,
+        });
+      } else {
+        throw new Error("Failed to get word of the day");
+      }
+    } catch (error: any) {
+      console.error("Error getting word of the day:", error);
+
+      // Fallback to local generation if API fails
+      const { pronunciationData } = get();
+      if (pronunciationData.length > 0) {
+        const randomIndex = Math.floor(
+          Math.random() * pronunciationData.length
+        );
+        const randomWord = pronunciationData[randomIndex];
+        const languages = Object.keys(randomWord.translations);
+        const randomLanguage =
+          languages[Math.floor(Math.random() * languages.length)];
+        const translationData = randomWord.translations[randomLanguage];
+        const formattedLanguage =
+          randomLanguage.charAt(0).toUpperCase() + randomLanguage.slice(1);
+
+        set({
+          wordOfTheDay: {
+            english: randomWord.english,
+            translation: translationData.translation,
+            pronunciation: translationData.pronunciation,
+            language: formattedLanguage,
+          },
+          isLoading: false,
+          error: "Using local fallback: " + (error?.message || "Unknown error"),
+        });
+      } else {
+        set({
+          error: error?.message || "Failed to get word of the day",
+          isLoading: false,
+        });
+      }
     }
-
-    const randomIndex = Math.floor(Math.random() * pronunciationData.length);
-    const randomWord = pronunciationData[randomIndex];
-
-    const languages = Object.keys(randomWord.translations);
-    const randomLanguage =
-      languages[Math.floor(Math.random() * languages.length)];
-    const translationData = randomWord.translations[randomLanguage];
-
-    const formattedLanguage =
-      randomLanguage.charAt(0).toUpperCase() + randomLanguage.slice(1);
-
-    set({
-      wordOfTheDay: {
-        english: randomWord.english,
-        translation: translationData.translation,
-        pronunciation: translationData.pronunciation,
-        language: formattedLanguage,
-      },
-    });
   },
 
   playWordOfDayAudio: async () => {

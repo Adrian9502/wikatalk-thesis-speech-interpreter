@@ -38,7 +38,7 @@ const pronunciationRoutes = require("./routes/pronunciation.routes");
 const quizRoutes = require("./routes/quiz.routes");
 const rewardsRoutes = require("./routes/rewards.routes");
 const userProgressRoutes = require("./routes/userProgress.routes");
-
+const wordOfDayRoutes = require("./routes/wordOfDay.routes")
 // Base route
 app.get("/", (req, res) => {
   res.send("WikaTalk API is running");
@@ -66,6 +66,7 @@ app.use("/api/pronunciations", pronunciationRoutes);
 app.use("/api/quiz", quizRoutes);
 app.use("/api/rewards", rewardsRoutes);
 app.use("/api/userprogress", userProgressRoutes);
+app.use("/api/word-of-day", wordOfDayRoutes);
 
 // Explicitly listen on all network interfaces
 const PORT = process.env.PORT || 5000;

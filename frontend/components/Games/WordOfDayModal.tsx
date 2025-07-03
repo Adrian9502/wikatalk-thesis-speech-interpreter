@@ -6,7 +6,6 @@ import {
   TouchableOpacity,
   ActivityIndicator,
 } from "react-native";
-import { BASE_COLORS } from "@/constant/colors";
 import { X, Calendar } from "react-native-feather";
 import * as Animatable from "react-native-animatable";
 import { LinearGradient } from "expo-linear-gradient";
