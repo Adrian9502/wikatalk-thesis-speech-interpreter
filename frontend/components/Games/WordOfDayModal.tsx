@@ -1,4 +1,4 @@
-import React, { useRef, useEffect } from "react";
+import React, { useRef, useEffect, memo } from "react";
 import {
   Modal,
   View,
@@ -9,7 +9,7 @@ import {
 import { BASE_COLORS } from "@/constant/colors";
 import { X, Calendar } from "react-native-feather";
 import * as Animatable from "react-native-animatable";
-import useThemeStore from "@/store/useThemeStore";
+import { LinearGradient } from "expo-linear-gradient";
 import LottieView from "lottie-react-native";
 import styles from "@/styles/wordOfDayStyles";
 
@@ -36,175 +36,168 @@ const WordOfDayModal: React.FC<WordOfDayModalProps> = ({
   isPlaying,
   isLoading,
 }) => {
-  const { activeTheme } = useThemeStore();
   const lottieRef = useRef<LottieView>(null);
 
-  // Force animation to play/stop based on isPlaying state
+  // Manage animation state
   useEffect(() => {
-    // Give time for component to fully mount
+    if (!lottieRef.current) return;
+
     const timer = setTimeout(() => {
-      if (lottieRef.current) {
+      try {
         if (isPlaying) {
-          // Start from beginning when playing
-          lottieRef.current.reset();
-          lottieRef.current.play();
+          lottieRef.current?.play();
         } else {
-          // Pause and go to the last frame to show the complete waveform
-          lottieRef.current.pause();
-
-          // Get the source JSON to determine animation duration/frames
-          const animationData = require("@/assets/animations/audiowaves-animation.json");
-          const totalFrames = animationData.op || 60; // Default to 60 if not specified
-
-          // Go to the last frame (or a specific frame that looks good)
-          lottieRef.current.play(totalFrames - 1, totalFrames - 1);
+          lottieRef.current?.pause();
         }
+      } catch (error) {
+        console.log("Lottie animation error:", error);
       }
-    }, 100);
+    }, 50);
 
     return () => clearTimeout(timer);
   }, [isPlaying]);
 
-  useEffect(() => {
-    // Set animation to last frame on initial render
-    const timer = setTimeout(() => {
-      if (lottieRef.current && !isPlaying) {
-        const animationData = require("@/assets/animations/audiowaves-animation.json");
-        const totalFrames = animationData.op || 60;
-        lottieRef.current.play(totalFrames - 1, totalFrames - 1);
-      }
-    }, 200);
-
-    return () => clearTimeout(timer);
-  }, []);
-  if (!word) return null;
+  if (!word || !visible) return null;
 
   return (
     <Modal
       visible={visible}
       transparent
-      animationType="none"
+      animationType="fade"
       statusBarTranslucent={true}
       onRequestClose={onClose}
     >
-      <Animatable.View animation="fadeIn" duration={200} style={styles.overlay}>
+      <Animatable.View animation="fadeIn" duration={300} style={styles.overlay}>
         <Animatable.View
           animation="zoomIn"
-          duration={300}
-          style={[
-            styles.modalContainer,
-            { backgroundColor: activeTheme.backgroundColor },
-          ]}
+          duration={400}
+          style={styles.modalContainer}
         >
-          {/* Decorative Background Elements */}
-          <View style={styles.decorativeCircle1} />
-          <View style={styles.decorativeCircle2} />
-
-          {/* Close Button - Positioned Absolutely */}
-          <TouchableOpacity style={styles.closeButton} onPress={onClose}>
-            <X width={20} height={20} color={BASE_COLORS.white} />
-          </TouchableOpacity>
-
-          {/* Header Section */}
-          <View style={styles.headerSection}>
-            <View style={styles.calendarIconContainer}>
-              <Calendar width={24} height={24} color={BASE_COLORS.white} />
-            </View>
-            <Text style={styles.headerTitle}>Word of the Day</Text>
-          </View>
-
-          {/* Main Content Card */}
-          <Animatable.View
-            animation="fadeInUp"
-            delay={150}
-            duration={300}
-            style={styles.wordCard}
+          <LinearGradient
+            colors={["#667eea", "#764ba2"]}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 1 }}
+            style={styles.gradientBackground}
           >
-            {/* Language Badge */}
-            <View style={styles.languageBadge}>
-              <Text style={styles.languageText}>{word.language}</Text>
-            </View>
-
-            {/* Word Section */}
-            <Animatable.Text
-              animation="fadeIn"
-              delay={250}
-              style={styles.wordText}
-            >
-              {word.english}
-            </Animatable.Text>
-
-            {/* Translation Section with Line */}
-            <View style={styles.translationContainer}>
-              <View style={styles.dividerLine} />
-              <Animatable.Text
-                animation="fadeIn"
-                delay={350}
-                style={styles.translationText}
-              >
-                {word.translation}
-              </Animatable.Text>
-            </View>
-
-            {/* Pronunciation Section */}
-            <View style={styles.pronunciationContainer}>
-              <Text style={styles.pronunciationText}>{word.pronunciation}</Text>
-            </View>
-          </Animatable.View>
-
-          {/* Audio Player Section */}
-          <Animatable.View
-            animation="fadeInUp"
-            delay={400}
-            style={styles.audioContainer}
-          >
+            {/* Close Button */}
             <TouchableOpacity
-              style={[styles.playButton, isPlaying && styles.playButtonActive]}
-              onPress={onPlayPress}
-              disabled={isLoading}
+              style={styles.closeButton}
+              onPress={onClose}
               activeOpacity={0.7}
             >
-              {isLoading ? (
-                <ActivityIndicator size="small" color={BASE_COLORS.white} />
-              ) : (
-                <View style={styles.lottieContainer}>
-                  <LottieView
-                    ref={lottieRef}
-                    source={require("@/assets/animations/audiowaves-animation.json")}
-                    style={styles.lottieAnimation}
-                    loop={true}
-                    speed={1}
-                    autoPlay={false}
-                  />
-                </View>
-              )}
+              <X width={17} height={17} color="#FFF" />
             </TouchableOpacity>
 
-            <View style={styles.audioTextContainer}>
-              <Text style={styles.audioLabelText}>
-                {isLoading
-                  ? "Loading audio..."
-                  : isPlaying
-                  ? "Playing pronunciation"
-                  : "Tap to hear pronunciation"}
-              </Text>
+            {/* Header Section */}
+            <View style={styles.headerSection}>
+              <View style={styles.calendarIconContainer}>
+                <Calendar width={24} height={24} color="#FFF" />
+              </View>
+              <Text style={styles.headerTitle}>Word of the Day</Text>
             </View>
-          </Animatable.View>
 
-          {/* Note Section */}
-          <Animatable.View
-            animation="fadeIn"
-            delay={500}
-            style={styles.noteContainer}
-          >
-            <Text style={styles.noteText}>
-              New word every day to enhance your vocabulary
-            </Text>
-          </Animatable.View>
+            {/* Main Word Card */}
+            <Animatable.View
+              animation="fadeInUp"
+              delay={150}
+              duration={400}
+              style={styles.wordCard}
+            >
+              {/* Language Badge */}
+              <View style={styles.languageBadge}>
+                <Text style={styles.languageText}>{word.language}</Text>
+              </View>
+
+              {/* Word Section */}
+              <Animatable.Text
+                animation="fadeIn"
+                delay={250}
+                style={styles.wordText}
+              >
+                {word.english}
+              </Animatable.Text>
+
+              {/* Translation Section */}
+              <View style={styles.translationContainer}>
+                <View style={styles.dividerLine} />
+                <Animatable.Text
+                  animation="fadeIn"
+                  delay={350}
+                  style={styles.translationText}
+                >
+                  {word.translation}
+                </Animatable.Text>
+              </View>
+
+              {/* Pronunciation Section */}
+              <View style={styles.pronunciationContainer}>
+                <Text style={styles.pronunciationText}>
+                  {word.pronunciation}
+                </Text>
+              </View>
+            </Animatable.View>
+
+            {/* Audio Player Section */}
+            <Animatable.View
+              animation="fadeInUp"
+              delay={400}
+              style={styles.audioContainer}
+            >
+              <TouchableOpacity
+                style={[
+                  styles.playButton,
+                  isPlaying && styles.playButtonActive,
+                ]}
+                onPress={onPlayPress}
+                disabled={isLoading}
+                activeOpacity={0.7}
+              >
+                {isLoading ? (
+                  <ActivityIndicator size="small" color="#FFF" />
+                ) : (
+                  <View style={styles.lottieContainer}>
+                    <LottieView
+                      ref={lottieRef}
+                      source={require("@/assets/animations/audiowaves-animation.json")}
+                      style={styles.lottieAnimation}
+                      loop={isPlaying}
+                      speed={1}
+                      autoPlay={isPlaying}
+                      resizeMode="contain"
+                      onAnimationFinish={() =>
+                        console.log("Animation finished")
+                      }
+                    />
+                  </View>
+                )}
+              </TouchableOpacity>
+
+              <View style={styles.audioTextContainer}>
+                <Text style={styles.audioLabelText}>
+                  {isLoading
+                    ? "Loading audio..."
+                    : isPlaying
+                    ? "Playing pronunciation"
+                    : "Tap to hear pronunciation"}
+                </Text>
+              </View>
+            </Animatable.View>
+
+            {/* Footer Note */}
+            <Animatable.View
+              animation="fadeIn"
+              delay={500}
+              style={styles.noteContainer}
+            >
+              <Text style={styles.noteText}>
+                New word every day to enhance your vocabulary
+              </Text>
+            </Animatable.View>
+          </LinearGradient>
         </Animatable.View>
       </Animatable.View>
     </Modal>
   );
 };
 
-export default WordOfDayModal;
+export default memo(WordOfDayModal);
