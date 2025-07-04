@@ -1,15 +1,7 @@
-import React, { useEffect } from "react";
-import {
-  Modal,
-  View,
-  TouchableOpacity,
-  StyleSheet,
-  Text,
-  Dimensions,
-} from "react-native";
+import React from "react";
+import { Modal, View, TouchableOpacity, StyleSheet, Text } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import * as Animatable from "react-native-animatable";
-import { X } from "react-native-feather";
 import { LevelData } from "@/types/gameTypes";
 import modalSharedStyles from "@/styles/games/modalSharedStyles";
 import { useLevelDetails } from "@/hooks/useLevelDetails";
@@ -63,28 +55,17 @@ const LevelReviewModal: React.FC<LevelReviewModalProps> = ({
             <View style={modalSharedStyles.decorativeShape1} />
             <View style={modalSharedStyles.decorativeShape2} />
 
-            {/* Close button */}
-            <TouchableOpacity
-              onPress={onClose}
-              style={modalSharedStyles.closeButton}
-            >
-              <X width={20} height={20} color="#fff" />
-            </TouchableOpacity>
-
             {/* Fixed Header Section */}
             <LevelHeader level={level} />
 
-            {/* Pass isLoading to both sections */}
             <LevelDetailsSection
               details={details}
               isLoading={isLoading}
               error={error}
             />
 
-            {/* IMPORTANT: Pass isLoading prop here too */}
             <LevelStatsSection details={details} isLoading={isLoading} />
 
-            {/* Fixed Continue Button */}
             <TouchableOpacity
               style={modalSharedStyles.startAndCloseButton}
               onPress={onClose}

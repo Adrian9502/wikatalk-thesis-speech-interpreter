@@ -31,7 +31,7 @@ interface GameInfoModalProps {
   difficulty?: string;
 }
 
-const GameInfoModal: React.FC<GameInfoModalProps> = React.memo(
+const LevelInfoModal: React.FC<GameInfoModalProps> = React.memo(
   ({
     visible,
     onClose,
@@ -289,7 +289,7 @@ const styles = StyleSheet.create({
     color: "#fff",
   },
   rulesContainer: {
-    backgroundColor: "rgba(0, 0, 0, 0.25)",
+    backgroundColor: "rgba(255, 255, 255, 0.2)",
     borderRadius: 16,
     padding: 18,
     marginBottom: 22,
@@ -313,4 +313,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default GameInfoModal;
+export default LevelInfoModal;

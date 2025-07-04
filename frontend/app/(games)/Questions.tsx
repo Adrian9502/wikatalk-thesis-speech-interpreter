@@ -14,7 +14,7 @@ import useThemeStore from "@/store/useThemeStore";
 import MultipleChoice from "./MultipleChoice";
 import Identification from "./Identification";
 import FillInTheBlank from "./FillInTheBlank";
-import GameInfoModal from "@/components/games/GameInfoModal";
+import LevelInfoModal from "@/components/games/levels/LevelInfoModal";
 import useGameStore from "@/store/games/useGameStore";
 import AppLoading from "@/components/AppLoading";
 
@@ -258,7 +258,7 @@ const Questions = () => {
     <View style={styles.container}>
       {modalState.showGame ? renderGameComponent() : null}
 
-      <GameInfoModal
+      <LevelInfoModal
         visible={modalState.showInfoModal && !modalState.hasStarted}
         onClose={handleCloseModal}
         onStart={handleStartGame}

@@ -10,8 +10,8 @@ import { useLocalSearchParams, router, useFocusEffect } from "expo-router";
 import * as Haptics from "expo-haptics";
 import { SafeAreaView } from "react-native-safe-area-context";
 import useThemeStore from "@/store/useThemeStore";
-import GameInfoModal from "@/components/games/GameInfoModal";
-import LevelReviewModal from "@/components/games/LevelReviewModal";
+import LevelInfoModal from "@/components/games/levels/LevelInfoModal";
+import LevelReviewModal from "@/components/games/levels/LevelReviewModal";
 import { LevelData } from "@/types/gameTypes";
 import LevelHeader from "@/components/games/levels/LevelHeader";
 import LevelProgressBar from "@/components/games/levels/LevelProgressBar";
@@ -280,8 +280,8 @@ const LevelSelection = () => {
           {/* Content Area */}
           <View style={styles.contentArea}>{renderContent()}</View>
 
-          {/* Game Info Modal - For non-completed levels */}
-          <GameInfoModal
+          {/* Level Info Modal - For non-completed levels */}
+          <LevelInfoModal
             visible={
               showGameModal &&
               selectedLevel !== null &&

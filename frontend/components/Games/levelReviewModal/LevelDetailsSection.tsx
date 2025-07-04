@@ -58,12 +58,7 @@ const LevelDetailsSection: React.FC<LevelDetailsSectionProps> = ({
               <ActivityIndicator size="small" color="#fff" />
             </>
           ) : (
-            <View style={styles.answerSection}>
-              <Text style={styles.answerText}>{details?.answer}</Text>
-              <View style={styles.checkMarkContainer}>
-                <Check width={16} height={16} color="#fff" />
-              </View>
-            </View>
+            <Text style={styles.answerText}>{details?.answer}</Text>
           )}
         </View>
       </View>
@@ -144,34 +139,16 @@ const styles = StyleSheet.create({
     borderColor: "rgba(255, 255, 255, 0.20)",
     backgroundColor: "rgba(255, 255, 255, 0.15)",
     borderRadius: 16,
-    padding: 16,
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
     minHeight: 50,
-  },
-  answerSection: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    gap: 8,
   },
   answerText: {
     fontSize: 15,
     fontFamily: "Poppins-Medium",
     color: "#fff",
     lineHeight: 22,
-    textAlign: "center",
-  },
-  checkMarkContainer: {
-    width: 28,
-    height: 28,
-    borderRadius: 14,
-    borderWidth: 1,
-    borderColor: "rgba(36, 192, 57, 0.79)",
-    backgroundColor: "rgba(36, 192, 57, 0.55)",
-    justifyContent: "center",
-    alignItems: "center",
   },
 });
 

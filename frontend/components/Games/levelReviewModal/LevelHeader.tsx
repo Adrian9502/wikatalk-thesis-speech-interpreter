@@ -60,7 +60,7 @@ const LevelHeader: React.FC<LevelHeaderProps> = ({ level }) => {
       <View style={styles.completedBadgeContainer}>
         <View style={modalSharedStyles.completedBadge}>
           <Check width={18} height={18} color="#fff" />
-          <Text style={styles.completedText}>Level Completed!</Text>
+          <Text style={styles.completedText}>Level Finished!</Text>
         </View>
       </View>
     </>
