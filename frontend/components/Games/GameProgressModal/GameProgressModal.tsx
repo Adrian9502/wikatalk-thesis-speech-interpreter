@@ -12,16 +12,12 @@ import { LinearGradient } from "expo-linear-gradient";
 import * as Animatable from "react-native-animatable";
 import { X, Clock, Target, Award, PlayCircle } from "react-native-feather";
 import { formatTime } from "@/utils/gameUtils";
-import { useUserProgress } from "@/hooks/useUserProgress";
-import useGameStore from "@/store/games/useGameStore";
-import { getQuizCountByDifficulty } from "@/utils/quizCountUtils";
+import useProgressStore from "@/store/games/useProgressStore";
 import { GAME_GRADIENTS } from "@/constant/gameConstants";
 
 // Import component types
 import {
   GameProgressModalProps,
-  DifficultyProgress,
-  LevelProgress,
   EnhancedGameModeProgress,
 } from "@/types/gameProgressTypes";
 
@@ -29,7 +25,6 @@ import {
 import DifficultyCard from "./DifficultyCard";
 import RecentAttempt from "./RecentAttempt";
 import StatBox from "./StatBox";
-import DotsLoader from "@/components/DotLoader";
 
 const GameProgressModal: React.FC<GameProgressModalProps> = ({
   visible,
@@ -39,9 +34,10 @@ const GameProgressModal: React.FC<GameProgressModalProps> = ({
 }) => {
   const [progressData, setProgressData] =
     useState<EnhancedGameModeProgress | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
-  const { progress: globalProgress } = useUserProgress("global");
-  const { questions } = useGameStore();
+
+  // Subscribe to progress updates using lastUpdated
+  const { getEnhancedGameProgress, isLoading, lastUpdated } =
+    useProgressStore();
 
   // Memoize helper functions to prevent recreation on each render
   const getDifficultyColor = useCallback((diff: string): string => {
@@ -89,263 +85,36 @@ const GameProgressModal: React.FC<GameProgressModalProps> = ({
     }
   }, [gameMode]);
 
-  // Memoized calculation function
-  const calculateEnhancedProgress = useCallback(() => {
-    if (!Array.isArray(globalProgress) || !questions[gameMode]) {
-      setProgressData(null);
-      setIsLoading(false);
-      return;
-    }
-
-    try {
-      // Get all questions for this game mode
-      const modeQuestions = questions[gameMode];
-      const difficulties: ("easy" | "medium" | "hard")[] = [
-        "easy",
-        "medium",
-        "hard",
-      ];
-
-      const expectedCounts = {
-        easy: getQuizCountByDifficulty(gameMode, "easy"),
-        medium: getQuizCountByDifficulty(gameMode, "medium"),
-        hard: getQuizCountByDifficulty(gameMode, "hard"),
-      };
-
-      // Calculate progress for each difficulty
-      const difficultyBreakdown: DifficultyProgress[] = difficulties.map(
-        (difficulty) => {
-          const difficultyQuestions = modeQuestions[difficulty] || [];
-          const totalLevels = Math.max(
-            difficultyQuestions.length,
-            expectedCounts[difficulty]
-          );
-
-          // Find progress entries for this difficulty
-          const difficultyProgress = globalProgress.filter((entry) => {
-            // Find the question that matches this progress entry
-            const question = difficultyQuestions.find(
-              (q) =>
-                String(q.id) === String(entry.quizId) ||
-                String(q.questionId) === String(entry.quizId)
-            );
-            return !!question;
-          });
-
-          // Calculate level-by-level progress
-          const levels: LevelProgress[] = difficultyQuestions.map(
-            (question) => {
-              const questionId = String(question.id || question.questionId);
-              const levelProgress = difficultyProgress.find(
-                (p) => String(p.quizId) === questionId
-              );
-
-              const attempts = levelProgress?.attempts || [];
-              const totalAttempts = attempts.length;
-              const correctAttempts = attempts.filter(
-                (a: any) => a.isCorrect
-              ).length;
-              const totalTimeSpent = levelProgress?.totalTimeSpent || 0;
-              const bestTime =
-                attempts.length > 0
-                  ? Math.min(
-                      ...attempts
-                        .map((a: any) => a.timeSpent || 0)
-                        .filter((t) => t > 0)
-                    )
-                  : 0;
-
-              // Extract level number and create better title
-              const levelString = question.level || `Level ${questionId}`;
-              const levelTitle = question.title || "Untitled";
-              const displayTitle = `${levelString}: ${levelTitle}`;
-
-              return {
-                levelId: questionId,
-                difficulty,
-                title: displayTitle,
-                isCompleted: levelProgress?.completed || false,
-                totalAttempts,
-                correctAttempts,
-                totalTimeSpent,
-                bestTime,
-                lastAttemptDate: levelProgress?.lastAttemptDate,
-                recentAttempts: attempts.slice(0, 3),
-              };
-            }
-          );
-
-          // Add placeholder levels for missing questions
-          const missingCount = Math.max(
-            0,
-            expectedCounts[difficulty] - difficultyQuestions.length
-          );
-          for (let i = 0; i < missingCount; i++) {
-            const levelNumber = difficultyQuestions.length + i + 1;
-            levels.push({
-              levelId: `placeholder_${difficulty}_${levelNumber}`,
-              difficulty,
-              title: `Level ${levelNumber}: Coming Soon`,
-              isCompleted: false,
-              totalAttempts: 0,
-              correctAttempts: 0,
-              totalTimeSpent: 0,
-              bestTime: 0,
-              recentAttempts: [],
-            });
-          }
-
-          // Calculate difficulty statistics
-          const completedLevels = levels.filter((l) => l.isCompleted).length;
-          const totalAttempts = levels.reduce(
-            (sum, l) => sum + l.totalAttempts,
-            0
-          );
-          const correctAttempts = levels.reduce(
-            (sum, l) => sum + l.correctAttempts,
-            0
-          );
-          const totalTimeSpent = levels.reduce(
-            (sum, l) => sum + l.totalTimeSpent,
-            0
-          );
-          const completionRate =
-            totalLevels > 0 ? (completedLevels / totalLevels) * 100 : 0;
-          const averageScore =
-            totalAttempts > 0 ? (correctAttempts / totalAttempts) * 100 : 0;
-
-          const allTimes = levels
-            .flatMap((l) => l.recentAttempts.map((a: any) => a.timeSpent || 0))
-            .filter((t) => t > 0);
-          const bestTime = allTimes.length > 0 ? Math.min(...allTimes) : 0;
-          const worstTime = allTimes.length > 0 ? Math.max(...allTimes) : 0;
-
-          return {
-            difficulty,
-            totalLevels,
-            completedLevels,
-            totalAttempts,
-            correctAttempts,
-            totalTimeSpent,
-            completionRate,
-            averageScore,
-            bestTime,
-            worstTime,
-            levels,
-          };
-        }
-      );
-
-      // Calculate overall statistics
-      const totalLevels = difficultyBreakdown.reduce(
-        (sum, d) => sum + d.totalLevels,
-        0
-      );
-      const completedLevels = difficultyBreakdown.reduce(
-        (sum, d) => sum + d.completedLevels,
-        0
-      );
-      const totalAttempts = difficultyBreakdown.reduce(
-        (sum, d) => sum + d.totalAttempts,
-        0
-      );
-      const correctAttempts = difficultyBreakdown.reduce(
-        (sum, d) => sum + d.correctAttempts,
-        0
-      );
-      const totalTimeSpent = difficultyBreakdown.reduce(
-        (sum, d) => sum + d.totalTimeSpent,
-        0
-      );
-      const overallCompletionRate =
-        totalLevels > 0 ? (completedLevels / totalLevels) * 100 : 0;
-      const overallAverageScore =
-        totalAttempts > 0 ? (correctAttempts / totalAttempts) * 100 : 0;
-
-      const allTimes = difficultyBreakdown
-        .flatMap((d) =>
-          d.levels.flatMap((l) =>
-            l.recentAttempts.map((a: any) => a.timeSpent || 0)
-          )
-        )
-        .filter((t) => t > 0);
-      const bestTime = allTimes.length > 0 ? Math.min(...allTimes) : 0;
-      const worstTime = allTimes.length > 0 ? Math.max(...allTimes) : 0;
-
-      // Collect recent attempts from all difficulties
-      const recentAttempts = difficultyBreakdown
-        .flatMap((d) =>
-          d.levels.flatMap((l) =>
-            l.recentAttempts.map((a) => ({
-              ...a,
-              levelId: l.levelId,
-              levelTitle: l.title,
-              difficulty: d.difficulty,
-            }))
-          )
-        )
-        .sort(
-          (a, b) =>
-            new Date(b.attemptDate).getTime() -
-            new Date(a.attemptDate).getTime()
-        )
-        .slice(0, 10);
-
-      const finalProgressData: EnhancedGameModeProgress = {
-        totalLevels,
-        completedLevels,
-        totalTimeSpent,
-        totalAttempts,
-        correctAttempts,
-        overallCompletionRate,
-        overallAverageScore,
-        bestTime,
-        worstTime,
-        difficultyBreakdown,
-        recentAttempts,
-      };
-
-      setProgressData(finalProgressData);
-      setIsLoading(false);
-    } catch (error) {
-      if (__DEV__) {
-        console.error(
-          `[GameProgressModal] Error calculating enhanced progress:`,
-          error
-        );
-      }
-      setProgressData(null);
-      setIsLoading(false);
-    }
-  }, [globalProgress, questions, gameMode]);
-
-  // Optimize effect by properly cleaning up and handling visibility changes
+  // Fetch enhanced progress data when modal becomes visible or when progress updates
   useEffect(() => {
     let isMounted = true;
-    let calculationTimer: NodeJS.Timeout;
 
-    if (visible && globalProgress && questions) {
-      setIsLoading(true);
-      // Slight delay to allow UI to render loading state first
-      calculationTimer = setTimeout(() => {
+    const fetchData = async () => {
+      if (!visible || !gameMode) return;
+
+      try {
+        console.log(`[GameProgressModal] Refreshing data for ${gameMode}`);
+        const enhancedData = await getEnhancedGameProgress(gameMode);
+
         if (isMounted) {
-          calculateEnhancedProgress();
+          setProgressData(enhancedData);
+          console.log(`[GameProgressModal] Data refreshed for ${gameMode}`);
         }
-      }, 50);
-    } else if (!visible) {
-      // Clear data when modal is hidden to free memory
-      setProgressData(null);
-      setIsLoading(false);
-    }
-
-    // Cleanup function
-    return () => {
-      isMounted = false;
-      if (calculationTimer) {
-        clearTimeout(calculationTimer);
+      } catch (error) {
+        console.error("Failed to load progress data:", error);
       }
     };
-  }, [visible, globalProgress, gameMode, questions, calculateEnhancedProgress]);
+
+    fetchData();
+
+    return () => {
+      isMounted = false;
+      // Clear data when modal is hidden to free memory
+      if (!visible) {
+        setProgressData(null);
+      }
+    };
+  }, [visible, gameMode, getEnhancedGameProgress, lastUpdated]); // Added lastUpdated dependency
 
   // Memoized content sections to prevent unnecessary re-renders
   const modalContent = useMemo(() => {
@@ -487,26 +256,19 @@ const GameProgressModal: React.FC<GameProgressModalProps> = ({
         >
           <LinearGradient
             colors={gradientColors}
+            style={styles.gradientBackground}
             start={{ x: 0, y: 0 }}
             end={{ x: 1, y: 1 }}
-            style={styles.gradientBackground}
           >
-            {/* Header */}
             <View style={styles.header}>
               <Text style={styles.title}>{gameTitle} Progress</Text>
-              <TouchableOpacity
-                style={styles.closeButton}
-                onPress={onClose}
-                activeOpacity={0.7}
-              >
-                <X width={16} height={16} color="#FFF" />
+              <TouchableOpacity style={styles.closeButton} onPress={onClose}>
+                <X width={20} height={20} color="#FFF" />
               </TouchableOpacity>
             </View>
-
             <ScrollView
               style={styles.content}
               showsVerticalScrollIndicator={false}
-              removeClippedSubviews={true}
             >
               {modalContent}
             </ScrollView>

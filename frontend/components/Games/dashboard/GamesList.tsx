@@ -5,25 +5,18 @@ import { Target } from "react-native-feather";
 import { SectionHeader } from "@/components/games/common/AnimatedSection";
 import GameCard from "./GameCard";
 import gameOptions from "@/utils/games/gameOptions";
-import { GameOption, GameModeProgress } from "@/types/gameTypes";
+import { GameOption } from "@/types/gameTypes";
 
 interface GamesListProps {
-  getGameModeProgress: (gameMode: string) => GameModeProgress;
   onGamePress: (gameId: string, gameTitle: string) => void;
   onProgressPress: (gameId: string, gameTitle: string) => void;
 }
 
 const GamesList = React.memo(
-  ({ getGameModeProgress, onGamePress, onProgressPress }: GamesListProps) => {
+  ({ onGamePress, onProgressPress }: GamesListProps) => {
     // Render game card function
     const renderGameCard = useCallback(
       (item: GameOption, index: number) => {
-        const progress = getGameModeProgress(item.id);
-        const completionPercentage =
-          progress.total > 0
-            ? Math.round((progress.completed / progress.total) * 100)
-            : 0;
-
         return (
           <Animatable.View
             key={item.id}
@@ -35,15 +28,13 @@ const GamesList = React.memo(
           >
             <GameCard
               game={item}
-              progress={progress}
-              completionPercentage={completionPercentage}
               onGamePress={() => onGamePress(item.id, item.title)}
               onProgressPress={() => onProgressPress(item.id, item.title)}
             />
           </Animatable.View>
         );
       },
-      [getGameModeProgress, onGamePress, onProgressPress]
+      [onGamePress, onProgressPress]
     );
 
     return (

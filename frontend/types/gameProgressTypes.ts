@@ -5,8 +5,13 @@ export interface GameProgressModalProps {
   gameTitle: string;
 }
 
+export interface GameModeProgress {
+  completed: number;
+  total: number;
+}
+
 export interface DifficultyProgress {
-  difficulty: "easy" | "medium" | "hard";
+  difficulty: string;
   totalLevels: number;
   completedLevels: number;
   totalAttempts: number;
@@ -20,16 +25,24 @@ export interface DifficultyProgress {
 }
 
 export interface LevelProgress {
-  levelId: string;
-  difficulty: "easy" | "medium" | "hard";
+  levelId: number | string;
   title: string;
   isCompleted: boolean;
   totalAttempts: number;
   correctAttempts: number;
   totalTimeSpent: number;
-  bestTime: number;
-  lastAttemptDate?: string;
-  recentAttempts: any[];
+  lastAttemptDate: string | null;
+  recentAttempts: AttemptInfo[];
+}
+
+export interface AttemptInfo {
+  attemptDate: string;
+  isCorrect: boolean;
+  timeSpent: number;
+  attemptNumber: number;
+  levelId?: number | string;
+  levelTitle?: string;
+  difficulty?: string;
 }
 
 export interface EnhancedGameModeProgress {
@@ -43,5 +56,9 @@ export interface EnhancedGameModeProgress {
   bestTime: number;
   worstTime: number;
   difficultyBreakdown: DifficultyProgress[];
-  recentAttempts: any[];
+  recentAttempts: (AttemptInfo & {
+    levelId: number | string;
+    levelTitle: string;
+    difficulty: string;
+  })[];
 }

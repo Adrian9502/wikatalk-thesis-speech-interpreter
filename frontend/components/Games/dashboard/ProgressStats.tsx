@@ -1,19 +1,25 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { View, Text, StyleSheet } from "react-native";
 import * as Animatable from "react-native-animatable";
 import { LinearGradient } from "expo-linear-gradient";
 import { Target, Award } from "react-native-feather";
 import { SectionHeader } from "@/components/games/common/AnimatedSection";
+import useProgressStore from "@/store/games/useProgressStore";
 
-interface ProgressStatsProps {
-  totalCompletedCount: number;
-  totalQuizCount: number;
-}
+const ProgressStats = React.memo(() => {
+  // Get progress data from the centralized store with lastUpdated
+  const { totalCompletedCount, totalQuizCount, lastUpdated } =
+    useProgressStore();
 
-const ProgressStats = React.memo(({
-  totalCompletedCount,
-  totalQuizCount
-}: ProgressStatsProps) => {
+  // Log updates to help with debugging
+  useEffect(() => {
+    console.log("[ProgressStats] Progress updated:", {
+      totalCompletedCount,
+      totalQuizCount,
+      timestamp: new Date(lastUpdated).toISOString(),
+    });
+  }, [totalCompletedCount, totalQuizCount, lastUpdated]);
+
   return (
     <Animatable.View
       animation="fadeInUp"
@@ -134,5 +140,5 @@ const styles = StyleSheet.create({
   },
 });
 
-ProgressStats.displayName = 'ProgressStats';
+ProgressStats.displayName = "ProgressStats";
 export default ProgressStats;

@@ -1,45 +1,13 @@
-import { useState, useEffect, useMemo, useCallback } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { router } from "expo-router";
 import { usePronunciationStore } from "@/store/usePronunciationStore";
 import useCoinsStore from "@/store/games/useCoinsStore";
 import useGameStore from "@/store/games/useGameStore";
-import { useUserProgress } from "@/hooks/useUserProgress";
-import {
-  getTotalQuizCount,
-  getQuizCountByMode,
-  getAllQuizCounts,
-  areAnyQuestionsLoaded,
-} from "@/utils/quizCountUtils";
-import { detectGameModeFromQuizId } from "@/utils/gameProgressUtils";
-import { GameModeProgress } from "@/types/gameTypes";
-
-// Define a type for the progress entries
-interface ProgressEntry {
-  quizId: string | number;
-  completed: boolean;
-  totalTimeSpent?: number;
-  attempts?: any[];
-  [key: string]: any;
-}
-
-// Define a type for game progress mapping
-interface GameProgressMap {
-  multipleChoice: ProgressEntry[];
-  identification: ProgressEntry[];
-  fillBlanks: ProgressEntry[];
-  [key: string]: ProgressEntry[];
-}
-
-// Define a type for game results
-interface GameResults {
-  multipleChoice: GameModeProgress;
-  identification: GameModeProgress;
-  fillBlanks: GameModeProgress;
-  [key: string]: GameModeProgress;
-}
+import { areAnyQuestionsLoaded } from "@/utils/quizCountUtils";
 
 /**
  * Custom hook to manage the Games dashboard state and logic
+ * Note: All progress logic has been moved to useProgressStore
  */
 export default function useGameDashboard() {
   // Add state for pronunciation error
@@ -70,14 +38,6 @@ export default function useGameDashboard() {
 
   // Modal visibility states
   const [wordOfDayModalVisible, setWordOfDayModalVisible] = useState(false);
-  const [progressModal, setProgressModal] = useState({
-    visible: false,
-    gameMode: "",
-    gameTitle: "",
-  });
-
-  // Global progress from user progress hook
-  const { progress: globalProgress } = useUserProgress("global");
 
   // Initial data loading
   useEffect(() => {
@@ -125,103 +85,6 @@ export default function useGameDashboard() {
     loadInitialData();
   }, []); // Empty dependency array
 
-  // MEMOIZED: Game mode progress calculation
-  const gameProgress = useMemo(() => {
-    if (!Array.isArray(globalProgress)) {
-      return {
-        multipleChoice: {
-          completed: 0,
-          total: getQuizCountByMode("multipleChoice"),
-        },
-        identification: {
-          completed: 0,
-          total: getQuizCountByMode("identification"),
-        },
-        fillBlanks: {
-          completed: 0,
-          total: getQuizCountByMode("fillBlanks"),
-        },
-      } as GameResults;
-    }
-
-    // Get quiz counts from utility functions
-    const totals = getAllQuizCounts();
-
-    const results: GameResults = {
-      multipleChoice: {
-        completed: 0,
-        total: totals.multipleChoice,
-      },
-      identification: {
-        completed: 0,
-        total: totals.identification,
-      },
-      fillBlanks: {
-        completed: 0,
-        total: totals.fillBlanks,
-      },
-    };
-
-    // Group progress entries by game mode
-    const progressByMode: GameProgressMap = {
-      multipleChoice: [],
-      identification: [],
-      fillBlanks: [],
-    };
-
-    (globalProgress as ProgressEntry[]).forEach((entry) => {
-      const detectedMode = detectGameModeFromQuizId(entry.quizId);
-      if (detectedMode && progressByMode[detectedMode]) {
-        progressByMode[detectedMode].push(entry);
-      }
-    });
-
-    // Calculate completed count for each mode
-    Object.keys(results).forEach((mode) => {
-      const modeEntries = progressByMode[mode] || [];
-      results[mode].completed = modeEntries.filter(
-        (entry) => entry.completed
-      ).length;
-    });
-
-    // If all totals are 0, questions might not be loaded - try to trigger loading
-    if (!areAnyQuestionsLoaded()) {
-      const { ensureQuestionsLoaded } = useGameStore.getState();
-      ensureQuestionsLoaded();
-    }
-
-    return results;
-  }, [globalProgress]);
-
-  // OPTIMIZED: Get progress for specific game mode
-  const getGameModeProgress = useCallback(
-    (gameMode: string): GameModeProgress => {
-      return (
-        gameProgress[gameMode as keyof GameResults] || {
-          completed: 0,
-          total: 50,
-        }
-      );
-    },
-    [gameProgress]
-  );
-
-  // MEMOIZED: Total completed count across all modes
-  const totalCompletedCount = useMemo(() => {
-    return Object.values(gameProgress).reduce(
-      (sum, mode) => sum + mode.completed,
-      0
-    );
-  }, [gameProgress]);
-
-  // Get questions directly from store for dependency tracking
-  const { questions } = useGameStore();
-
-  // MEMOIZED: Total quiz count
-  const totalQuizCount = useMemo(() => {
-    return getTotalQuizCount();
-  }, [questions]); // <-- Add questions as dependency
-
   // Game event handlers
   const handleGamePress = useCallback((gameId: string, gameTitle: string) => {
     router.push({
@@ -237,41 +100,6 @@ export default function useGameDashboard() {
   const openRewardsModal = useCallback(() => {
     showDailyRewardsModal();
   }, [showDailyRewardsModal]);
-
-  const handleProgressPress = useCallback(
-    async (gameMode: string, gameTitle: string) => {
-      try {
-        const { ensureQuestionsLoaded } = useGameStore.getState();
-        await ensureQuestionsLoaded();
-
-        setProgressModal({
-          visible: true,
-          gameMode,
-          gameTitle,
-        });
-      } catch (error) {
-        console.error(
-          "[Games] Error loading questions for progress modal:",
-          error
-        );
-        // Show modal anyway even if there's an error
-        setProgressModal({
-          visible: true,
-          gameMode,
-          gameTitle,
-        });
-      }
-    },
-    []
-  );
-
-  const closeProgressModal = useCallback(() => {
-    setProgressModal({
-      visible: false,
-      gameMode: "",
-      gameTitle: "",
-    });
-  }, []);
 
   // Add retry function
   const retryDataLoading = useCallback(async () => {
@@ -372,18 +200,8 @@ export default function useGameDashboard() {
     hideDailyRewardsModal,
     openRewardsModal,
 
-    // Progress state
-    progressModal,
-    closeProgressModal,
-
     // Game-related handlers
     handleGamePress,
-    handleProgressPress,
-
-    // Progress data
-    totalCompletedCount,
-    totalQuizCount,
-    getGameModeProgress,
 
     // Retry function
     retryDataLoading,

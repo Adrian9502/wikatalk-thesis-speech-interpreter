@@ -1,25 +1,40 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { TrendingUp, Play } from "react-native-feather";
 import { GAME_GRADIENTS } from "@/constant/gameConstants";
+import useProgressStore from "@/store/games/useProgressStore";
 
 interface GameCardProps {
   game: any;
-  progress: { completed: number; total: number };
-  completionPercentage: number;
   onGamePress: () => void;
   onProgressPress: () => void;
 }
 
 const GameCard = React.memo(
-  ({
-    game,
-    progress,
-    completionPercentage,
-    onGamePress,
-    onProgressPress,
-  }: GameCardProps) => {
+  ({ game, onGamePress, onProgressPress }: GameCardProps) => {
+    // Get progress data from the centralized store with lastUpdated to trigger re-renders
+    const { getGameModeProgress, lastUpdated } = useProgressStore();
+    const [progress, setProgress] = useState({ completed: 0, total: 0 });
+
+    // Add this effect to re-fetch progress when lastUpdated changes
+    useEffect(() => {
+      const currentProgress = getGameModeProgress(game.id);
+      setProgress(currentProgress);
+
+      console.log(
+        `[GameCard] ${game.id} progress updated:`,
+        currentProgress,
+        `at ${new Date(lastUpdated).toISOString()}`
+      );
+    }, [getGameModeProgress, game.id, lastUpdated]);
+
+    // Calculate completion percentage
+    const completionPercentage =
+      progress.total > 0
+        ? Math.round((progress.completed / progress.total) * 100)
+        : 0;
+
     // Get the consistent gradient colors from the same source as GameProgressModal
     const getCardGradientColors = () => {
       // Use the same constants as the modal
