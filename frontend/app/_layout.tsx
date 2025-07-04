@@ -78,6 +78,20 @@ const RootLayout = () => {
         setHasToken(!!token);
         setManuallyCheckedToken(true);
         console.log("Manual token check complete, token exists:", !!token);
+
+        // If we have a token, start preloading game data in parallel
+        if (token) {
+          useSplashStore
+            .getState()
+            .preloadGameData()
+            .then((success) => {
+              console.log(
+                `[Layout] Game data preloading ${
+                  success ? "successful" : "failed"
+                }`
+              );
+            });
+        }
       } catch (e) {
         console.error("Error checking token:", e);
         setManuallyCheckedToken(true);

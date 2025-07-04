@@ -1,11 +1,13 @@
-import React, { useRef, useEffect } from "react";
-import { View, StyleSheet } from "react-native";
+import React, { useRef, useEffect, useState } from "react";
+import { View, StyleSheet, Text } from "react-native";
 import LottieView from "lottie-react-native";
 import * as SplashScreen from "expo-splash-screen";
 import AppLoading from "@/components/AppLoading";
+import { useSplashStore } from "@/store/useSplashStore";
 
 const SplashAnimation: React.FC = () => {
   const animationRef = useRef<LottieView>(null);
+  const gameDataPreloaded = useSplashStore((state) => state.gameDataPreloaded);
 
   useEffect(() => {
     // Hide the native splash screen
@@ -18,9 +20,15 @@ const SplashAnimation: React.FC = () => {
       }, 100);
     }
 
-    // Return cleanup function
+    // Show loading progress messages
+    let counter = 0;
+    const interval = setInterval(() => {
+      counter++;
+    }, 1500);
+
     return () => {
       console.log("Splash animation unmounted");
+      clearInterval(interval);
     };
   }, []);
 

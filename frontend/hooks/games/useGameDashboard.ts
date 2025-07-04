@@ -4,6 +4,7 @@ import { usePronunciationStore } from "@/store/usePronunciationStore";
 import useCoinsStore from "@/store/games/useCoinsStore";
 import useGameStore from "@/store/games/useGameStore";
 import { areAnyQuestionsLoaded } from "@/utils/quizCountUtils";
+import { isGameDataPreloaded } from "@/store/useSplashStore";
 
 /**
  * Custom hook to manage the Games dashboard state and logic
@@ -39,20 +40,25 @@ export default function useGameDashboard() {
   // Modal visibility states
   const [wordOfDayModalVisible, setWordOfDayModalVisible] = useState(false);
 
-  // Initial data loading
+  // Initial data loading - check if data already preloaded
   useEffect(() => {
     const loadData = async () => {
-      // Load pronunciation data if needed
+      // Skip loading if data was preloaded during startup
+      if (isGameDataPreloaded()) {
+        console.log("[useGameDashboard] Using preloaded data");
+        setIsLoading(false);
+        return;
+      }
+
+      // Otherwise load normally
       if (pronunciationData.length === 0) {
         await fetchPronunciations();
       }
 
-      // Get word of the day if needed
       if (!wordOfTheDay) {
         getWordOfTheDay();
       }
 
-      // Load coins and check daily rewards
       await fetchCoinsBalance();
       await checkDailyReward();
     };
@@ -60,15 +66,18 @@ export default function useGameDashboard() {
     loadData();
   }, []);
 
-  // Ensure questions are loaded on component mount
+  // Ensure questions are loaded - check if already preloaded
   useEffect(() => {
     const loadInitialData = async () => {
+      // Skip if data was preloaded during app startup
+      if (isGameDataPreloaded()) {
+        setIsLoading(false);
+        return;
+      }
+
       try {
         setIsLoading(true);
-
-        // Check if questions are already loaded
         const hasQuestions = areAnyQuestionsLoaded();
-
         if (!hasQuestions) {
           console.log("[Games] No questions found, loading...");
           const { ensureQuestionsLoaded } = useGameStore.getState();
@@ -81,7 +90,6 @@ export default function useGameDashboard() {
       }
     };
 
-    // Only run once on mount
     loadInitialData();
   }, []); // Empty dependency array
 

@@ -23,6 +23,7 @@ import { useComponentLoadTime } from "@/utils/performanceMonitor";
 import AppLoading from "@/components/AppLoading";
 import useProgressStore from "@/store/games/useProgressStore";
 import useGameStore from "@/store/games/useGameStore";
+import { isGameDataPreloaded } from "@/store/useSplashStore";
 
 const Games = () => {
   // Performance monitoring for development
@@ -75,13 +76,25 @@ const Games = () => {
   // Combined loading state
   const isLoading = progressLoading || dashboardLoading;
 
-  // Initialize progress data
+  // Initialize progress data - check if already preloaded
   useEffect(() => {
-    fetchProgress();
+    if (!isGameDataPreloaded()) {
+      console.log("[Games] Data not preloaded, fetching now");
+      fetchProgress();
+    } else {
+      console.log("[Games] Using preloaded game data");
+      // Still mark data as ready
+      setDataReady(true);
+    }
   }, [fetchProgress]);
 
-  // Track when data becomes available
+  // Track when data becomes available - simplify the check if preloaded
   useEffect(() => {
+    if (isGameDataPreloaded()) {
+      setDataReady(true);
+      return;
+    }
+
     const { questions } = useGameStore.getState();
     const hasQuestions = Object.values(questions).some((mode) =>
       Object.values(mode).some((diff) => Array.isArray(diff) && diff.length > 0)
@@ -94,10 +107,17 @@ const Games = () => {
 
   // IMPROVED: Coordinated loading state management
   useEffect(() => {
-    // Only mark initialization complete when:
-    // 1. We've waited at least 500ms (for visual consistency)
-    // 2. The data loading process has completed
-    // 3. AND our data is actually ready
+    // If data is preloaded, make initialization quicker
+    if (isGameDataPreloaded()) {
+      const timer = setTimeout(() => {
+        setIsInitializing(false);
+        if (finishLoadTracking) finishLoadTracking();
+      }, 100); // Much shorter delay if data is preloaded
+
+      return () => clearTimeout(timer);
+    }
+
+    // Original behavior for non-preloaded data
     const timer = setTimeout(() => {
       if (!isLoading && dataReady) {
         setIsInitializing(false);
