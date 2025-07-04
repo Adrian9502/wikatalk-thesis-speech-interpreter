@@ -97,7 +97,6 @@ export interface GameOption {
   description: string;
   difficulty: string;
   color: string;
-  gradientColors: readonly string[]; // Changed from string[] to readonly string[]
   icon: React.ReactNode;
 }
 
