@@ -103,22 +103,16 @@ export default function useGameDashboard() {
   // Ensure questions are loaded on component mount
   useEffect(() => {
     const loadInitialData = async () => {
-      setIsLoading(true);
       try {
-        const { ensureQuestionsLoaded, questions } = useGameStore.getState();
+        setIsLoading(true);
 
         // Check if questions are already loaded
-        const hasQuestions = Object.values(questions).some((gameMode) =>
-          Object.values(gameMode).some(
-            (difficulty) => Array.isArray(difficulty) && difficulty.length > 0
-          )
-        );
+        const hasQuestions = areAnyQuestionsLoaded();
 
         if (!hasQuestions) {
-          console.log("[Games] No questions found, forcing load...");
+          console.log("[Games] No questions found, loading...");
+          const { ensureQuestionsLoaded } = useGameStore.getState();
           await ensureQuestionsLoaded();
-        } else {
-          console.log("[Games] Questions already loaded");
         }
       } catch (error) {
         console.error("[Games] Error loading questions:", error);
@@ -127,8 +121,9 @@ export default function useGameDashboard() {
       }
     };
 
+    // Only run once on mount
     loadInitialData();
-  }, []);
+  }, []); // Empty dependency array
 
   // MEMOIZED: Game mode progress calculation
   const gameProgress = useMemo(() => {
