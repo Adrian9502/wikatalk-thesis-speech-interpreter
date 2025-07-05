@@ -1,4 +1,10 @@
-import React, { useState, useEffect, useCallback, useMemo } from "react";
+import React, {
+  useState,
+  useEffect,
+  useCallback,
+  useMemo,
+  useRef,
+} from "react";
 import {
   Modal,
   View,
@@ -7,6 +13,7 @@ import {
   ScrollView,
   ActivityIndicator,
   StyleSheet,
+  InteractionManager,
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import * as Animatable from "react-native-animatable";
@@ -14,6 +21,7 @@ import { X, Clock, Target, Award, PlayCircle } from "react-native-feather";
 import { formatTime } from "@/utils/gameUtils";
 import useProgressStore from "@/store/games/useProgressStore";
 import { GAME_GRADIENTS } from "@/constant/gameConstants";
+import { isProgressDataPrecomputed } from "@/store/useSplashStore";
 
 // Import component types
 import {
@@ -25,6 +33,7 @@ import {
 import DifficultyCard from "./DifficultyCard";
 import RecentAttempt from "./RecentAttempt";
 import StatBox from "./StatBox";
+import DotsLoader from "@/components/DotLoader";
 
 const GameProgressModal: React.FC<GameProgressModalProps> = ({
   visible,
@@ -32,14 +41,124 @@ const GameProgressModal: React.FC<GameProgressModalProps> = ({
   gameMode,
   gameTitle,
 }) => {
+  // Optimized state management
   const [progressData, setProgressData] =
     useState<EnhancedGameModeProgress | null>(null);
+  const [isDataLoading, setIsDataLoading] = useState(false);
+  const [hasError, setHasError] = useState(false);
+  const [contentReady, setContentReady] = useState(false);
 
-  // Subscribe to progress updates using lastUpdated
-  const { getEnhancedGameProgress, isLoading, lastUpdated } =
-    useProgressStore();
+  // Animation refs for better control
+  const overlayRef = useRef<Animatable.View>(null);
+  const modalRef = useRef<Animatable.View>(null);
 
-  // Memoize helper functions to prevent recreation on each render
+  const { getEnhancedGameProgress } = useProgressStore();
+
+  // Ultra-fast data loading - synchronous when possible
+  useEffect(() => {
+    if (!visible || !gameMode) {
+      // Reset all states when modal closes
+      setProgressData(null);
+      setIsDataLoading(false);
+      setHasError(false);
+      setContentReady(false);
+      return;
+    }
+
+    // Load data synchronously when possible
+    const loadData = () => {
+      const startTime = Date.now();
+
+      try {
+        // Priority 1: Check precomputed data (synchronous)
+        if (isProgressDataPrecomputed()) {
+          const { enhancedProgress } = useProgressStore.getState();
+          const precomputedData = enhancedProgress[gameMode];
+
+          if (precomputedData) {
+            const loadTime = Date.now() - startTime;
+            console.log(
+              `[GameProgressModal] Precomputed data loaded for ${gameMode} in ${loadTime}ms`
+            );
+
+            // Set data immediately
+            setProgressData(precomputedData);
+            setIsDataLoading(false);
+            setHasError(false);
+
+            // Use InteractionManager to set content ready after animations
+            InteractionManager.runAfterInteractions(() => {
+              setContentReady(true);
+            });
+            return;
+          }
+        }
+
+        // Priority 2: Check store cache (synchronous)
+        const { enhancedProgress } = useProgressStore.getState();
+        const cachedData = enhancedProgress[gameMode];
+
+        if (cachedData) {
+          const loadTime = Date.now() - startTime;
+          console.log(
+            `[GameProgressModal] Cached data loaded for ${gameMode} in ${loadTime}ms`
+          );
+
+          setProgressData(cachedData);
+          setIsDataLoading(false);
+          setHasError(false);
+
+          InteractionManager.runAfterInteractions(() => {
+            setContentReady(true);
+          });
+          return;
+        }
+
+        // Priority 3: Need to load data (asynchronous - rare case)
+        console.log(
+          `[GameProgressModal] Loading fresh data for ${gameMode}...`
+        );
+        setIsDataLoading(true);
+        setHasError(false);
+
+        // Load asynchronously
+        getEnhancedGameProgress(gameMode)
+          .then((data) => {
+            const loadTime = Date.now() - startTime;
+            console.log(
+              `[GameProgressModal] Fresh data loaded for ${gameMode} in ${loadTime}ms`
+            );
+
+            setProgressData(data);
+            setIsDataLoading(false);
+            setHasError(!data);
+
+            InteractionManager.runAfterInteractions(() => {
+              setContentReady(true);
+            });
+          })
+          .catch((error) => {
+            console.error(
+              `[GameProgressModal] Error loading data for ${gameMode}:`,
+              error
+            );
+            setIsDataLoading(false);
+            setHasError(true);
+            setContentReady(true);
+          });
+      } catch (error) {
+        console.error(`[GameProgressModal] Sync error:`, error);
+        setIsDataLoading(false);
+        setHasError(true);
+        setContentReady(true);
+      }
+    };
+
+    // Execute immediately
+    loadData();
+  }, [visible, gameMode, getEnhancedGameProgress]);
+
+  // Optimized helper functions - stable references
   const getDifficultyColor = useCallback((diff: string): string => {
     switch (diff) {
       case "easy":
@@ -66,11 +185,9 @@ const GameProgressModal: React.FC<GameProgressModalProps> = ({
     }
   }, []);
 
-  // Get the gradient colors for the current game mode
-  const getGradientColors = useCallback((): [string, string] => {
-    // Default gradient if the game mode isn't found
+  // Memoized gradient colors
+  const gradientColors = useMemo((): [string, string] => {
     const defaultGradient: [string, string] = ["#3B4DA3", "#251D79"];
-
     if (!gameMode) return defaultGradient;
 
     switch (gameMode) {
@@ -85,63 +202,53 @@ const GameProgressModal: React.FC<GameProgressModalProps> = ({
     }
   }, [gameMode]);
 
-  // Fetch enhanced progress data when modal becomes visible or when progress updates
-  useEffect(() => {
-    let isMounted = true;
+  // Optimized close handler
+  const handleClose = useCallback(() => {
+    // Animate out smoothly
+    if (overlayRef.current && modalRef.current) {
+      onClose();
+    } else {
+      onClose();
+    }
+  }, [onClose]);
 
-    const fetchData = async () => {
-      if (!visible || !gameMode) return;
+  const laoding = true;
 
-      try {
-        console.log(`[GameProgressModal] Refreshing data for ${gameMode}`);
-        const enhancedData = await getEnhancedGameProgress(gameMode);
-
-        if (isMounted) {
-          setProgressData(enhancedData);
-          console.log(`[GameProgressModal] Data refreshed for ${gameMode}`);
-        }
-      } catch (error) {
-        console.error("Failed to load progress data:", error);
-      }
-    };
-
-    fetchData();
-
-    return () => {
-      isMounted = false;
-      // Clear data when modal is hidden to free memory
-      if (!visible) {
-        setProgressData(null);
-      }
-    };
-  }, [visible, gameMode, getEnhancedGameProgress, lastUpdated]); // Added lastUpdated dependency
-
-  // Memoized content sections to prevent unnecessary re-renders
-  const modalContent = useMemo(() => {
-    if (isLoading) {
+  // Content renderer - memoized and optimized
+  const renderContent = useCallback(() => {
+    // Quick loading state for rare cases
+    // isDataLoading && !progressData
+    if ((isDataLoading && !progressData) || !contentReady) {
       return (
-        <View style={styles.loadingContainer}>
-          <ActivityIndicator size={"small"} color={"#fff"} />
-          <Text style={styles.loadingText}>Loading progress...</Text>
+        <View style={styles.quickLoadingContainer}>
+          <ActivityIndicator size="small" color="#fff" />
         </View>
       );
     }
 
-    if (!progressData) {
+    // Error state
+    if (hasError || !progressData) {
       return (
-        <View style={styles.noDataContainer}>
-          <Text style={styles.noDataText}>
-            No progress data available for this game mode.
+        <View style={styles.errorContainer}>
+          <Target width={32} height={32} color="rgba(255,255,255,0.6)" />
+          <Text style={styles.errorText}>
+            {hasError
+              ? "Failed to load progress data"
+              : "No progress data available"}
           </Text>
-          <Text style={styles.noDataSubtext}>
-            Start playing to see your statistics!
+          <Text style={styles.errorSubtext}>
+            {hasError
+              ? "Please try again later"
+              : "Start playing to see your statistics!"}
           </Text>
         </View>
       );
     }
+
+    // Main content - render only when ready
 
     return (
-      <>
+      <Animatable.View animation="fadeIn" duration={300} useNativeDriver={true}>
         {/* Overall Progress Summary */}
         <View style={styles.summaryCard}>
           <View style={styles.summaryHeader}>
@@ -229,26 +336,38 @@ const GameProgressModal: React.FC<GameProgressModalProps> = ({
               </View>
             </View>
           )}
-      </>
+      </Animatable.View>
     );
-  }, [isLoading, progressData, getDifficultyColor, getDifficultyStars]);
+  }, [
+    isDataLoading,
+    progressData,
+    hasError,
+    contentReady,
+    getDifficultyColor,
+    getDifficultyStars,
+  ]);
 
-  // Don't render anything if the modal isn't visible to save resources
+  // Don't render if not visible
   if (!visible) return null;
-
-  // Get the current gradient colors
-  const gradientColors = getGradientColors();
 
   return (
     <Modal
       visible={visible}
       transparent
-      statusBarTranslucent={true}
       animationType="fade"
-      onRequestClose={onClose}
+      statusBarTranslucent={true}
+      onRequestClose={handleClose}
+      hardwareAccelerated={true}
     >
-      <View style={styles.overlay}>
+      <Animatable.View
+        ref={overlayRef}
+        animation="fadeIn"
+        duration={300}
+        style={styles.overlay}
+        useNativeDriver={true}
+      >
         <Animatable.View
+          ref={modalRef}
           animation="zoomIn"
           duration={300}
           style={styles.modalContainer}
@@ -260,21 +379,32 @@ const GameProgressModal: React.FC<GameProgressModalProps> = ({
             start={{ x: 0, y: 0 }}
             end={{ x: 1, y: 1 }}
           >
+            {/* Header - always visible for immediate feedback */}
             <View style={styles.header}>
               <Text style={styles.title}>{gameTitle} Progress</Text>
-              <TouchableOpacity style={styles.closeButton} onPress={onClose}>
+              <TouchableOpacity
+                style={styles.closeButton}
+                onPress={handleClose}
+                hitSlop={{ top: 15, bottom: 15, left: 15, right: 15 }}
+                activeOpacity={0.7}
+              >
                 <X width={20} height={20} color="#FFF" />
               </TouchableOpacity>
             </View>
+
+            {/* Content */}
             <ScrollView
               style={styles.content}
               showsVerticalScrollIndicator={false}
+              contentContainerStyle={styles.scrollContent}
+              removeClippedSubviews={false}
+              keyboardShouldPersistTaps="handled"
             >
-              {modalContent}
+              {renderContent()}
             </ScrollView>
           </LinearGradient>
         </Animatable.View>
-      </View>
+      </Animatable.View>
     </Modal>
   );
 };
@@ -288,10 +418,14 @@ const styles = StyleSheet.create({
   },
   modalContainer: {
     width: "90%",
-    flex: 1,
-    maxHeight: "70%",
+    height: "60%",
     borderRadius: 16,
     overflow: "hidden",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 10 },
+    shadowOpacity: 0.3,
+    shadowRadius: 20,
+    elevation: 15,
   },
   gradientBackground: {
     flex: 1,
@@ -309,31 +443,66 @@ const styles = StyleSheet.create({
     fontFamily: "Poppins-SemiBold",
     color: "#FFF",
     textAlign: "center",
-    marginLeft: 8,
   },
   closeButton: {
     position: "absolute",
     right: 0,
-    padding: 6,
-    backgroundColor: "rgba(0,0,0,0.1)",
+    padding: 8,
+    backgroundColor: "rgba(0,0,0,0.2)",
     borderRadius: 20,
   },
   content: {
     flex: 1,
   },
-  loadingContainer: {
+  scrollContent: {
+    flexGrow: 1,
+    paddingBottom: 10,
+  },
+
+  // Quick loading state
+  quickLoadingContainer: {
+    marginTop: 100,
+    alignItems: "center",
+    justifyContent: "center",
+    paddingVertical: 30,
+    gap: 12,
+  },
+  quickLoadingText: {
+    fontSize: 14,
+    fontFamily: "Poppins-Medium",
+    color: "rgba(255, 255, 255, 0.8)",
+  },
+
+  // Preparing state
+  preparingContainer: {
     alignItems: "center",
     justifyContent: "center",
     paddingVertical: 40,
-    minHeight: 200,
-    marginTop: 170,
   },
-  loadingText: {
-    fontSize: 13,
-    fontFamily: "Poppins-Regular",
+
+  // Error state
+  errorContainer: {
+    alignItems: "center",
+    justifyContent: "center",
+    paddingVertical: 60,
+    paddingHorizontal: 20,
+  },
+  errorText: {
+    fontSize: 16,
+    fontFamily: "Poppins-Medium",
     color: "#fff",
-    marginTop: 10,
+    textAlign: "center",
+    marginTop: 16,
+    marginBottom: 8,
   },
+  errorSubtext: {
+    fontSize: 14,
+    fontFamily: "Poppins-Regular",
+    color: "rgba(255, 255, 255, 0.6)",
+    textAlign: "center",
+  },
+
+  // Content styles
   summaryCard: {
     backgroundColor: "rgba(255, 255, 255, 0.15)",
     borderRadius: 16,
@@ -406,24 +575,6 @@ const styles = StyleSheet.create({
   },
   attemptsContainer: {
     gap: 8,
-  },
-  noDataContainer: {
-    alignItems: "center",
-    justifyContent: "center",
-    paddingVertical: 40,
-  },
-  noDataText: {
-    fontSize: 16,
-    fontFamily: "Poppins-Medium",
-    color: "#fff",
-    textAlign: "center",
-  },
-  noDataSubtext: {
-    fontSize: 14,
-    fontFamily: "Poppins-Regular",
-    color: "rgba(255, 255, 255, 0.6)",
-    textAlign: "center",
-    marginTop: 8,
   },
 });
 

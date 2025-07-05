@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import { StyleSheet, View, ScrollView, Dimensions } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useFocusEffect } from "@react-navigation/native";
@@ -23,7 +23,7 @@ import { useComponentLoadTime } from "@/utils/performanceMonitor";
 import AppLoading from "@/components/AppLoading";
 import useProgressStore from "@/store/games/useProgressStore";
 import useGameStore from "@/store/games/useGameStore";
-import { isGameDataPreloaded } from "@/store/useSplashStore";
+import { isAllDataReady } from "@/store/useSplashStore";
 
 const Games = () => {
   // Performance monitoring for development
@@ -76,21 +76,20 @@ const Games = () => {
   // Combined loading state
   const isLoading = progressLoading || dashboardLoading;
 
-  // Initialize progress data - check if already preloaded
+  // Initialize progress data - check if all data is ready
   useEffect(() => {
-    if (!isGameDataPreloaded()) {
-      console.log("[Games] Data not preloaded, fetching now");
+    if (!isAllDataReady()) {
+      console.log("[Games] Data not fully precomputed, fetching now");
       fetchProgress();
     } else {
-      console.log("[Games] Using preloaded game data");
-      // Still mark data as ready
+      console.log("[Games] Using fully precomputed game and progress data");
       setDataReady(true);
     }
   }, [fetchProgress]);
 
-  // Track when data becomes available - simplify the check if preloaded
+  // Track when data becomes available
   useEffect(() => {
-    if (isGameDataPreloaded()) {
+    if (isAllDataReady()) {
       setDataReady(true);
       return;
     }
@@ -108,7 +107,7 @@ const Games = () => {
   // IMPROVED: Coordinated loading state management
   useEffect(() => {
     // If data is preloaded, make initialization quicker
-    if (isGameDataPreloaded()) {
+    if (isAllDataReady()) {
       const timer = setTimeout(() => {
         setIsInitializing(false);
         if (finishLoadTracking) finishLoadTracking();
@@ -167,10 +166,14 @@ const Games = () => {
     });
   };
 
-  // Handler for progress button in game cards
-  const handleProgressPress = (gameId: string, gameTitle: string) => {
-    openProgressModal(gameId, gameTitle);
-  };
+  // Ultra-optimized progress handler - instant response
+  const handleProgressPress = useCallback(
+    (gameId: string, gameTitle: string) => {
+      // Open modal IMMEDIATELY without any delay or requestAnimationFrame
+      openProgressModal(gameId, gameTitle);
+    },
+    [openProgressModal]
+  );
 
   // Render loading state
   if (isInitializing) {
@@ -209,12 +212,7 @@ const Games = () => {
         {/* Dashboard header with welcome message and coins */}
         <DashboardHeader
           onCoinsPress={openRewardsModal}
-          onRefresh={() => {
-            // Add a manual refresh function
-            console.log("[Games] Manual refresh requested");
-            fetchProgress(true);
-            useProgressStore.getState().clearCache();
-          }}
+          // Remove onRefresh prop since DashboardHeader doesn't use it
         />
 
         <ScrollView

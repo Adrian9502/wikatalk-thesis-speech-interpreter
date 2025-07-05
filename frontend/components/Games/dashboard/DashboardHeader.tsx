@@ -6,6 +6,7 @@ import CoinsDisplay from "@/components/games/rewards/CoinsDisplay";
 
 interface DashboardHeaderProps {
   onCoinsPress: () => void;
+  onRefresh?: () => void; // Add this optional prop
 }
 
 const DashboardHeader = React.memo(({ onCoinsPress }: DashboardHeaderProps) => {

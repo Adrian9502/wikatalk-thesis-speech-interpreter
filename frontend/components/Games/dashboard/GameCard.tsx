@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect } from "react";
 import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { TrendingUp, Play } from "react-native-feather";
@@ -13,27 +13,31 @@ interface GameCardProps {
 
 const GameCard = React.memo(
   ({ game, onGamePress, onProgressPress }: GameCardProps) => {
-    // Get progress data from the centralized store with lastUpdated to trigger re-renders
     const { getGameModeProgress, lastUpdated } = useProgressStore();
-    const [progress, setProgress] = useState({ completed: 0, total: 0 });
 
-    // Add this effect to re-fetch progress when lastUpdated changes
+    // Get progress data for this game mode
+    const progress = getGameModeProgress(game.id);
+
+    // Log when progress updates for this specific game card
     useEffect(() => {
-      const currentProgress = getGameModeProgress(game.id);
-      setProgress(currentProgress);
-
       console.log(
         `[GameCard] ${game.id} progress updated:`,
-        currentProgress,
+        { completed: progress.completed, total: progress.total },
         `at ${new Date(lastUpdated).toISOString()}`
       );
-    }, [getGameModeProgress, game.id, lastUpdated]);
+    }, [progress.completed, progress.total, game.id, lastUpdated]);
 
     // Calculate completion percentage
     const completionPercentage =
       progress.total > 0
         ? Math.round((progress.completed / progress.total) * 100)
         : 0;
+
+    // Ultra-fast progress press handler
+    const handleProgressPress = useCallback(() => {
+      // Call immediately without any async operations
+      onProgressPress();
+    }, [onProgressPress]);
 
     // Get the consistent gradient colors from the same source as GameProgressModal
     const getCardGradientColors = () => {
@@ -97,7 +101,9 @@ const GameCard = React.memo(
           <View style={styles.gameActionsRow}>
             <TouchableOpacity
               style={styles.progressBtn}
-              onPress={onProgressPress}
+              onPress={handleProgressPress}
+              activeOpacity={0.7} // Better touch feedback
+              delayPressIn={0} // Immediate response
             >
               <TrendingUp width={14} height={14} color="#fff" />
               <Text style={styles.progressBtnText}>View Progress</Text>
@@ -184,6 +190,9 @@ const styles = StyleSheet.create({
     backgroundColor: "rgba(255, 255, 255, 0.2)",
     borderWidth: 1,
     borderColor: "rgba(255, 255, 255, 0.3)",
+  },
+  progressBtnLoading: {
+    backgroundColor: "rgba(255, 255, 255, 0.3)",
   },
   progressBtnText: {
     fontSize: 12,

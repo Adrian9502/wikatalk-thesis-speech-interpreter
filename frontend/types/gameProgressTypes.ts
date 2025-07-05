@@ -10,6 +10,17 @@ export interface GameModeProgress {
   total: number;
 }
 
+export interface LevelProgress {
+  levelId: number | string;
+  title: string;
+  isCompleted: boolean;
+  totalAttempts: number;
+  correctAttempts: number;
+  totalTimeSpent: number;
+  lastAttemptDate: string | null;
+  recentAttempts: AttemptInfo[];
+}
+
 export interface DifficultyProgress {
   difficulty: string;
   totalLevels: number;
@@ -22,17 +33,6 @@ export interface DifficultyProgress {
   bestTime: number;
   worstTime: number;
   levels: LevelProgress[];
-}
-
-export interface LevelProgress {
-  levelId: number | string;
-  title: string;
-  isCompleted: boolean;
-  totalAttempts: number;
-  correctAttempts: number;
-  totalTimeSpent: number;
-  lastAttemptDate: string | null;
-  recentAttempts: AttemptInfo[];
 }
 
 export interface AttemptInfo {

@@ -185,6 +185,240 @@ const calculateGameProgress = (globalProgress: any[] | null) => {
   };
 };
 
+// Add memoization to prevent recalculation
+const enhancedProgressCache = new Map<string, EnhancedGameModeProgress>();
+
+// Add this helper for chunked processing
+const processInChunks = <T, R>(
+  items: T[],
+  processor: (item: T) => R,
+  chunkSize: number = 10
+): Promise<R[]> => {
+  return new Promise((resolve) => {
+    const results: R[] = [];
+    let currentIndex = 0;
+
+    const processChunk = () => {
+      const endIndex = Math.min(currentIndex + chunkSize, items.length);
+
+      for (let i = currentIndex; i < endIndex; i++) {
+        results.push(processor(items[i]));
+      }
+
+      currentIndex = endIndex;
+
+      if (currentIndex < items.length) {
+        // Use setTimeout to yield control back to the UI thread
+        setTimeout(processChunk, 0);
+      } else {
+        resolve(results);
+      }
+    };
+
+    processChunk();
+  });
+};
+
+// Replace the calculateEnhancedProgress function with this fixed version:
+
+// Add proper types for the interface
+interface DifficultyStats {
+  completedLevels: number;
+  totalAttempts: number;
+  correctAttempts: number;
+  totalTimeSpent: number;
+}
+
+interface LevelProgress {
+  levelId: string;
+  title: string;
+  isCompleted: boolean;
+  totalAttempts: number;
+  correctAttempts: number;
+  totalTimeSpent: number;
+  lastAttemptDate: string | null;
+  recentAttempts: any[];
+}
+
+interface DifficultyProgress {
+  difficulty: string;
+  totalLevels: number;
+  completedLevels: number;
+  totalAttempts: number;
+  correctAttempts: number;
+  totalTimeSpent: number;
+  completionRate: number;
+  averageScore: number;
+  bestTime: number;
+  worstTime: number;
+  levels: LevelProgress[];
+}
+
+// Optimized calculateEnhancedProgress function with proper types
+async function calculateEnhancedProgress(
+  gameMode: string,
+  progress: any[]
+): Promise<EnhancedGameModeProgress | null> {
+  try {
+    const { questions } = useGameStore.getState();
+
+    if (!Array.isArray(progress) || !questions[gameMode]) {
+      return null;
+    }
+
+    // Create progress map for O(1) lookups
+    const progressMap = new Map(
+      progress.map((entry) => [String(entry.quizId), entry])
+    );
+
+    const modeQuestions = questions[gameMode];
+    const difficulties: ("easy" | "medium" | "hard")[] = [
+      "easy",
+      "medium",
+      "hard",
+    ]; // Fix readonly issue
+
+    // Pre-calculate question counts
+    const questionCounts = difficulties.reduce((acc, diff) => {
+      acc[diff] = Array.isArray(modeQuestions[diff])
+        ? modeQuestions[diff].length
+        : 0;
+      return acc;
+    }, {} as Record<string, number>);
+
+    // Process difficulties in chunks to avoid blocking - fix typing
+    const difficultyBreakdown = await processInChunks<
+      "easy" | "medium" | "hard",
+      DifficultyProgress
+    >(
+      difficulties,
+      (difficulty: "easy" | "medium" | "hard"): DifficultyProgress => {
+        const difficultyQuestions = modeQuestions[difficulty] || [];
+        const totalLevels = Math.max(
+          difficultyQuestions.length,
+          questionCounts[difficulty]
+        );
+
+        // Process levels efficiently
+        const levels: LevelProgress[] = difficultyQuestions.map(
+          (question: any) => {
+            const questionId = String(question.id || question.questionId);
+            const levelProgress = progressMap.get(questionId);
+
+            if (!levelProgress) {
+              return {
+                levelId: questionId,
+                title: `${question.level || `Level ${questionId}`}: ${
+                  question.title || "Untitled"
+                }`,
+                isCompleted: false,
+                totalAttempts: 0,
+                correctAttempts: 0,
+                totalTimeSpent: 0,
+                lastAttemptDate: null,
+                recentAttempts: [],
+              };
+            }
+
+            const attempts = levelProgress.attempts || [];
+            return {
+              levelId: questionId,
+              title: `${question.level || `Level ${questionId}`}: ${
+                question.title || "Untitled"
+              }`,
+              isCompleted: levelProgress.completed || false,
+              totalAttempts: attempts.length,
+              correctAttempts: attempts.filter((a: any) => a.isCorrect).length,
+              totalTimeSpent: levelProgress.totalTimeSpent || 0,
+              lastAttemptDate: levelProgress.lastAttemptDate,
+              recentAttempts: attempts.slice(0, 3),
+            };
+          }
+        );
+
+        // Calculate stats efficiently - fix typing
+        const stats: DifficultyStats = levels.reduce(
+          (acc: DifficultyStats, level: LevelProgress) => {
+            if (level.isCompleted) acc.completedLevels++;
+            acc.totalAttempts += level.totalAttempts;
+            acc.correctAttempts += level.correctAttempts;
+            acc.totalTimeSpent += level.totalTimeSpent;
+            return acc;
+          },
+          {
+            completedLevels: 0,
+            totalAttempts: 0,
+            correctAttempts: 0,
+            totalTimeSpent: 0,
+          }
+        );
+
+        return {
+          difficulty,
+          totalLevels,
+          ...stats,
+          completionRate:
+            totalLevels > 0 ? (stats.completedLevels / totalLevels) * 100 : 0,
+          averageScore:
+            stats.totalAttempts > 0
+              ? (stats.correctAttempts / stats.totalAttempts) * 100
+              : 0,
+          bestTime: 0,
+          worstTime: 0,
+          levels,
+        };
+      },
+      2 // Process 2 difficulties at a time
+    );
+
+    // Calculate overall stats - fix typing
+    interface OverallStats {
+      totalLevels: number;
+      completedLevels: number;
+      totalAttempts: number;
+      correctAttempts: number;
+      totalTimeSpent: number;
+    }
+
+    const overallStats: OverallStats = difficultyBreakdown.reduce(
+      (acc: OverallStats, diff: DifficultyProgress) => {
+        acc.totalLevels += diff.totalLevels;
+        acc.completedLevels += diff.completedLevels;
+        acc.totalAttempts += diff.totalAttempts;
+        acc.correctAttempts += diff.correctAttempts;
+        acc.totalTimeSpent += diff.totalTimeSpent;
+        return acc;
+      },
+      {
+        totalLevels: 0,
+        completedLevels: 0,
+        totalAttempts: 0,
+        correctAttempts: 0,
+        totalTimeSpent: 0,
+      }
+    );
+
+    return {
+      ...overallStats,
+      overallCompletionRate:
+        overallStats.totalLevels > 0
+          ? (overallStats.completedLevels / overallStats.totalLevels) * 100
+          : 0,
+      overallAverageScore:
+        overallStats.totalAttempts > 0
+          ? (overallStats.correctAttempts / overallStats.totalAttempts) * 100
+          : 0,
+      bestTime: 0,
+      worstTime: 0,
+      difficultyBreakdown,
+      recentAttempts: [],
+    };
+  } catch (error) {
+    console.error(`Error calculating enhanced progress:`, error);
+    return null;
+  }
+}
+
 const useProgressStore = create<ProgressState>((set, get) => ({
   // Initial state
   progress: null,
@@ -383,70 +617,61 @@ const useProgressStore = create<ProgressState>((set, get) => ({
   getEnhancedGameProgress: async (
     gameMode: string
   ): Promise<EnhancedGameModeProgress | null> => {
-    // Check if we already have the enhanced progress calculated
-    const { enhancedProgress } = get();
-    if (enhancedProgress[gameMode] && !get().isLoading) {
+    const { enhancedProgress, lastUpdated } = get();
+
+    // Return cached data if available
+    const cacheKey = `${gameMode}-${lastUpdated}`;
+    if (enhancedProgressCache.has(cacheKey)) {
+      return enhancedProgressCache.get(cacheKey)!;
+    }
+
+    // Check store cache
+    if (enhancedProgress[gameMode]) {
+      enhancedProgressCache.set(cacheKey, enhancedProgress[gameMode]);
       return enhancedProgress[gameMode];
     }
 
-    // Ensure we have the latest progress data
-    set({ isLoading: true });
-    const progress = await get().fetchProgress();
+    try {
+      const progress = get().progress;
+      if (!progress) {
+        return null;
+      }
 
-    if (!progress) {
-      set({ isLoading: false });
+      // Use async calculation
+      const enhancedData = await calculateEnhancedProgress(gameMode, progress);
+
+      // Cache the result
+      if (enhancedData) {
+        enhancedProgressCache.set(cacheKey, enhancedData);
+      }
+
+      // Update store
+      set((state) => ({
+        enhancedProgress: {
+          ...state.enhancedProgress,
+          [gameMode]: enhancedData,
+        },
+      }));
+
+      return enhancedData;
+    } catch (error) {
+      console.error("Error calculating enhanced progress:", error);
       return null;
     }
-
-    // Calculate enhanced progress (implementation details in original file)
-    // This is a placeholder for the actual implementation
-    const enhancedData = calculateEnhancedProgress(gameMode, progress);
-
-    // Update state with the new enhanced progress
-    set((state) => ({
-      isLoading: false,
-      enhancedProgress: {
-        ...state.enhancedProgress,
-        [gameMode]: enhancedData,
-      },
-    }));
-
-    return enhancedData;
   },
 
   // Modal management functions
   openProgressModal: async (gameMode: string, gameTitle: string) => {
-    try {
-      set({ isLoading: true });
+    set({
+      progressModal: {
+        visible: true,
+        gameMode,
+        gameTitle,
+      },
+    });
 
-      // Ensure questions are loaded
-      const { ensureQuestionsLoaded } = useGameStore.getState();
-      await ensureQuestionsLoaded();
-
-      // Load enhanced progress data for this game mode
-      await get().getEnhancedGameProgress(gameMode);
-
-      // Show the modal
-      set({
-        progressModal: {
-          visible: true,
-          gameMode,
-          gameTitle,
-        },
-        isLoading: false,
-      });
-    } catch (error) {
-      console.error("Error opening progress modal:", error);
-      // Show modal anyway even if there's an error
-      set({
-        progressModal: {
-          visible: true,
-          gameMode,
-          gameTitle,
-        },
-        isLoading: false,
-      });
-    }
+    // Return a resolved promise for consistency
+    return Promise.resolve();
   },
 
   closeProgressModal: () => {
@@ -471,239 +696,5 @@ const useProgressStore = create<ProgressState>((set, get) => ({
   // Timestamp for last update
   lastUpdated: Date.now(),
 }));
-
-// Replace the placeholder implementation with this proper one
-function calculateEnhancedProgress(
-  gameMode: string,
-  progress: any[]
-): EnhancedGameModeProgress | null {
-  try {
-    const { questions } = useGameStore.getState();
-
-    // Early exit if we don't have the required data
-    if (!Array.isArray(progress) || !questions[gameMode]) {
-      console.log(`[useProgressStore] No data for ${gameMode} calculation`);
-      return null;
-    }
-
-    // Get all questions for this game mode
-    const modeQuestions = questions[gameMode];
-    const difficulties: ("easy" | "medium" | "hard")[] = [
-      "easy",
-      "medium",
-      "hard",
-    ];
-
-    // Expected counts by difficulty
-    const getQuizCountByDifficulty = (
-      mode: string,
-      difficulty: string
-    ): number => {
-      const diffQuestions = questions[mode]?.[difficulty];
-      return Array.isArray(diffQuestions) ? diffQuestions.length : 0;
-    };
-
-    const expectedCounts = {
-      easy: getQuizCountByDifficulty(gameMode, "easy"),
-      medium: getQuizCountByDifficulty(gameMode, "medium"),
-      hard: getQuizCountByDifficulty(gameMode, "hard"),
-    };
-
-    // Calculate progress for each difficulty
-    const difficultyBreakdown: DifficultyProgress[] = difficulties.map(
-      (difficulty) => {
-        const difficultyQuestions = modeQuestions[difficulty] || [];
-        const totalLevels = Math.max(
-          difficultyQuestions.length,
-          expectedCounts[difficulty]
-        );
-
-        // Find progress entries for this difficulty
-        const difficultyProgress = progress.filter((entry) => {
-          // Find the question that matches this progress entry
-          const question = difficultyQuestions.find(
-            (q) =>
-              String(q.id) === String(entry.quizId) ||
-              String(q.questionId) === String(entry.quizId)
-          );
-          return !!question;
-        });
-
-        // Calculate level-by-level progress
-        const levels: LevelProgress[] = difficultyQuestions.map((question) => {
-          const questionId = String(question.id || question.questionId);
-          const levelProgress = difficultyProgress.find(
-            (p) => String(p.quizId) === questionId
-          );
-
-          const attempts = levelProgress?.attempts || [];
-          const totalAttempts = attempts.length;
-          const correctAttempts = attempts.filter(
-            (a: any) => a.isCorrect
-          ).length;
-          const totalTimeSpent = levelProgress?.totalTimeSpent || 0;
-          const bestTime =
-            attempts.length > 0
-              ? Math.min(
-                  ...attempts
-                    .map((a: any) => a.timeSpent || 0)
-                    .filter((t) => t > 0)
-                )
-              : 0;
-
-          // Extract level number and create better title
-          const levelString = question.level || `Level ${questionId}`;
-          const levelTitle = question.title || "Untitled";
-          const displayTitle = `${levelString}: ${levelTitle}`;
-
-          return {
-            levelId: questionId,
-            title: displayTitle,
-            isCompleted: levelProgress?.completed || false,
-            totalAttempts,
-            correctAttempts,
-            totalTimeSpent,
-            lastAttemptDate: levelProgress?.lastAttemptDate,
-            recentAttempts: attempts.slice(0, 3),
-          };
-        });
-
-        // Add placeholder levels for missing questions
-        const missingCount = Math.max(
-          0,
-          expectedCounts[difficulty] - difficultyQuestions.length
-        );
-
-        for (let i = 0; i < missingCount; i++) {
-          const levelNumber = difficultyQuestions.length + i + 1;
-          levels.push({
-            levelId: `placeholder_${difficulty}_${levelNumber}`,
-            title: `Level ${levelNumber}: Coming Soon`,
-            isCompleted: false,
-            totalAttempts: 0,
-            correctAttempts: 0,
-            totalTimeSpent: 0,
-            lastAttemptDate: null,
-            recentAttempts: [],
-          });
-        }
-
-        // Calculate difficulty statistics
-        const completedLevels = levels.filter((l) => l.isCompleted).length;
-        const totalAttempts = levels.reduce(
-          (sum, l) => sum + l.totalAttempts,
-          0
-        );
-        const correctAttempts = levels.reduce(
-          (sum, l) => sum + l.correctAttempts,
-          0
-        );
-        const totalTimeSpent = levels.reduce(
-          (sum, l) => sum + l.totalTimeSpent,
-          0
-        );
-        const completionRate =
-          totalLevels > 0 ? (completedLevels / totalLevels) * 100 : 0;
-        const averageScore =
-          totalAttempts > 0 ? (correctAttempts / totalAttempts) * 100 : 0;
-
-        const allTimes = levels
-          .flatMap((l) => l.recentAttempts.map((a: any) => a.timeSpent || 0))
-          .filter((t) => t > 0);
-        const bestTime = allTimes.length > 0 ? Math.min(...allTimes) : 0;
-        const worstTime = allTimes.length > 0 ? Math.max(...allTimes) : 0;
-
-        return {
-          difficulty,
-          totalLevels,
-          completedLevels,
-          totalAttempts,
-          correctAttempts,
-          totalTimeSpent,
-          completionRate,
-          averageScore,
-          bestTime,
-          worstTime,
-          levels,
-        };
-      }
-    );
-
-    // Calculate overall statistics
-    const totalLevels = difficultyBreakdown.reduce(
-      (sum, d) => sum + d.totalLevels,
-      0
-    );
-    const completedLevels = difficultyBreakdown.reduce(
-      (sum, d) => sum + d.completedLevels,
-      0
-    );
-    const totalAttempts = difficultyBreakdown.reduce(
-      (sum, d) => sum + d.totalAttempts,
-      0
-    );
-    const correctAttempts = difficultyBreakdown.reduce(
-      (sum, d) => sum + d.correctAttempts,
-      0
-    );
-    const totalTimeSpent = difficultyBreakdown.reduce(
-      (sum, d) => sum + d.totalTimeSpent,
-      0
-    );
-    const overallCompletionRate =
-      totalLevels > 0 ? (completedLevels / totalLevels) * 100 : 0;
-    const overallAverageScore =
-      totalAttempts > 0 ? (correctAttempts / totalAttempts) * 100 : 0;
-
-    const allTimes = difficultyBreakdown
-      .flatMap((d) =>
-        d.levels.flatMap((l) =>
-          l.recentAttempts.map((a: any) => a.timeSpent || 0)
-        )
-      )
-      .filter((t) => t > 0);
-
-    const bestTime = allTimes.length > 0 ? Math.min(...allTimes) : 0;
-    const worstTime = allTimes.length > 0 ? Math.max(...allTimes) : 0;
-
-    // Collect recent attempts from all difficulties
-    const recentAttempts = difficultyBreakdown
-      .flatMap((d) =>
-        d.levels.flatMap((l) =>
-          l.recentAttempts.map((a) => ({
-            ...a,
-            levelId: l.levelId,
-            levelTitle: l.title,
-            difficulty: d.difficulty,
-          }))
-        )
-      )
-      .sort(
-        (a, b) =>
-          new Date(b.attemptDate).getTime() - new Date(a.attemptDate).getTime()
-      )
-      .slice(0, 10);
-
-    return {
-      totalLevels,
-      completedLevels,
-      totalTimeSpent,
-      totalAttempts,
-      correctAttempts,
-      overallCompletionRate,
-      overallAverageScore,
-      bestTime,
-      worstTime,
-      difficultyBreakdown,
-      recentAttempts,
-    };
-  } catch (error) {
-    console.error(
-      `[useProgressStore] Error calculating enhanced progress:`,
-      error
-    );
-    return null;
-  }
-}
 
 export default useProgressStore;
