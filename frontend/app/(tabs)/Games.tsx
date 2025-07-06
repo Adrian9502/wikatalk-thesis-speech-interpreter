@@ -1,11 +1,10 @@
-import React, { useEffect, useState, useCallback } from "react";
+import React, { useEffect, useState, useCallback, useRef } from "react";
 import { StyleSheet, View, ScrollView, Dimensions } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useFocusEffect } from "@react-navigation/native";
 
 import useThemeStore from "@/store/useThemeStore";
 import { getGlobalStyles } from "@/styles/globalStyles";
-import { BASE_COLORS } from "@/constant/colors";
 import WordOfDayModal from "@/components/games/WordOfDayModal";
 import DailyRewardsModal from "@/components/games/rewards/DailyRewardsModal";
 import GameProgressModal from "@/components/games/GameProgressModal/GameProgressModal";
@@ -38,6 +37,10 @@ const Games = () => {
   const [hasError, setHasError] = useState(false);
   // Add a data readiness tracker
   const [dataReady, setDataReady] = useState(false);
+  const [preloadedGameModes, setPreloadedGameModes] = useState<Set<string>>(
+    new Set()
+  );
+  const lastClickRef = useRef<number>(0); // <-- Add this line to declare the missing ref
 
   // Get progress from centralized store
   const {
@@ -145,6 +148,31 @@ const Games = () => {
     }
   }, [isInitializing, isLoading, dataReady]);
 
+  // Add this effect to preload data for commonly accessed game modes
+  useEffect(() => {
+    if (!dataReady) return;
+
+    // Preload most common game modes
+    const preloadData = async () => {
+      const commonModes = ["multipleChoice", "identification"];
+
+      for (const mode of commonModes) {
+        if (!preloadedGameModes.has(mode)) {
+          try {
+            console.log(`[Games] Preloading data for ${mode}...`);
+            await useProgressStore.getState().getEnhancedGameProgress(mode);
+            setPreloadedGameModes((prev) => new Set([...prev, mode]));
+          } catch (error) {
+            // Ignore errors in background loading
+          }
+        }
+      }
+    };
+
+    // Run in background
+    preloadData();
+  }, [dataReady, preloadedGameModes]);
+
   // Refresh progress data when screen is focused
   useFocusEffect(
     React.useCallback(() => {
@@ -166,13 +194,58 @@ const Games = () => {
     });
   };
 
-  // Ultra-optimized progress handler - instant response
+  // Add this function to explicitly refresh all game data when needed
+  const forceRefreshAllData = useCallback(async () => {
+    console.log("[Games] Forcing refresh of all game progress data");
+
+    // Clear all cached data
+    useProgressStore.getState().clearCache();
+
+    // Force fetch new progress data
+    await fetchProgress(true);
+
+    // Force update timestamp to trigger UI updates
+    useProgressStore.setState({ lastUpdated: Date.now() });
+
+    // Return true when complete
+    return true;
+  }, [fetchProgress]);
+
+  // Replace your handleProgressPress function
   const handleProgressPress = useCallback(
     (gameId: string, gameTitle: string) => {
-      // Open modal IMMEDIATELY without any delay or requestAnimationFrame
+      const now = Date.now();
+
+      // Use the ref from component level
+      if (now - lastClickRef.current < 300) {
+        console.log(`[Games] Ignoring duplicate progress button press`);
+        return;
+      }
+
+      lastClickRef.current = now;
+
+      // Only update modal if it's not already showing this game mode
+      if (progressModal.visible && progressModal.gameMode === gameId) {
+        console.log(`[Games] Modal already showing ${gameId}, ignoring`);
+        return;
+      }
+
+      // First open the modal immediately
       openProgressModal(gameId, gameTitle);
+
+      // Only update data if not already cached
+      if (!useProgressStore.getState().enhancedProgress[gameId]) {
+        // Delay this slightly to avoid state batching issues
+        setTimeout(() => {
+          useProgressStore.setState({
+            lastUpdated: Date.now(),
+          });
+        }, 50);
+      } else {
+        console.log(`[Games] Using cached data for ${gameId} modal`);
+      }
     },
-    [openProgressModal]
+    [openProgressModal, progressModal]
   );
 
   // Render loading state

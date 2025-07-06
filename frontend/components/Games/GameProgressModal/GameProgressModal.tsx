@@ -14,6 +14,7 @@ import {
   ActivityIndicator,
   StyleSheet,
   InteractionManager,
+  RefreshControl,
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import * as Animatable from "react-native-animatable";
@@ -33,7 +34,6 @@ import {
 import DifficultyCard from "./DifficultyCard";
 import RecentAttempt from "./RecentAttempt";
 import StatBox from "./StatBox";
-import DotsLoader from "@/components/DotLoader";
 
 const GameProgressModal: React.FC<GameProgressModalProps> = ({
   visible,
@@ -41,6 +41,30 @@ const GameProgressModal: React.FC<GameProgressModalProps> = ({
   gameMode,
   gameTitle,
 }) => {
+  // Add a unique instance ID to track this specific modal instance
+  const instanceId = useRef(Date.now()).current;
+
+  // Performance tracking with instance ID
+  const mountTimeRef = useRef<number>(0);
+
+  // Log with instance ID to see which modal is which
+  useEffect(() => {
+    if (visible) {
+      mountTimeRef.current = Date.now();
+      console.log(
+        `[GameProgressModal-${instanceId}] Started mounting at ${mountTimeRef.current}`
+      );
+
+      return () => {
+        console.log(
+          `[GameProgressModal-${instanceId}] Unmounted after ${
+            Date.now() - mountTimeRef.current
+          }ms`
+        );
+      };
+    }
+  }, [visible, instanceId]);
+
   // Optimized state management
   const [progressData, setProgressData] =
     useState<EnhancedGameModeProgress | null>(null);
@@ -52,111 +76,88 @@ const GameProgressModal: React.FC<GameProgressModalProps> = ({
   const overlayRef = useRef<Animatable.View>(null);
   const modalRef = useRef<Animatable.View>(null);
 
-  const { getEnhancedGameProgress } = useProgressStore();
+  // Add missing ref for tracking request IDs
+  const latestRequestIdRef = useRef<number>(0);
 
-  // Ultra-fast data loading - synchronous when possible
+  // IMPORTANT FIX: Subscribe to lastUpdated to detect progress changes
+  const { getEnhancedGameProgress, lastUpdated } = useProgressStore();
+
+  // Update the useEffect for data loading
   useEffect(() => {
-    if (!visible || !gameMode) {
-      // Reset all states when modal closes
-      setProgressData(null);
-      setIsDataLoading(false);
-      setHasError(false);
-      setContentReady(false);
-      return;
-    }
+    // Only attempt to load data when modal is visible
+    if (!visible) return;
 
-    // Load data synchronously when possible
-    const loadData = () => {
-      const startTime = Date.now();
+    // Create a unique ID for this loading request
+    const requestId = Date.now();
+    latestRequestIdRef.current = requestId;
 
+    // Always show loading immediately
+    setIsDataLoading(true);
+
+    const loadData = async () => {
       try {
-        // Priority 1: Check precomputed data (synchronous)
-        if (isProgressDataPrecomputed()) {
-          const { enhancedProgress } = useProgressStore.getState();
-          const precomputedData = enhancedProgress[gameMode];
+        // Check if we have cached data
+        const cachedData =
+          useProgressStore.getState().enhancedProgress[gameMode];
 
-          if (precomputedData) {
-            const loadTime = Date.now() - startTime;
-            console.log(
-              `[GameProgressModal] Precomputed data loaded for ${gameMode} in ${loadTime}ms`
-            );
-
-            // Set data immediately
-            setProgressData(precomputedData);
-            setIsDataLoading(false);
-            setHasError(false);
-
-            // Use InteractionManager to set content ready after animations
-            InteractionManager.runAfterInteractions(() => {
-              setContentReady(true);
-            });
-            return;
-          }
-        }
-
-        // Priority 2: Check store cache (synchronous)
-        const { enhancedProgress } = useProgressStore.getState();
-        const cachedData = enhancedProgress[gameMode];
-
+        // Use cached data if available, but still show loading for a minimum time
         if (cachedData) {
-          const loadTime = Date.now() - startTime;
-          console.log(
-            `[GameProgressModal] Cached data loaded for ${gameMode} in ${loadTime}ms`
-          );
+          // Ensure the loading state shows for at least 300ms for visual consistency
+          await new Promise((resolve) => setTimeout(resolve, 300));
 
-          setProgressData(cachedData);
-          setIsDataLoading(false);
-          setHasError(false);
-
-          InteractionManager.runAfterInteractions(() => {
-            setContentReady(true);
-          });
+          // Only update if this request is still valid
+          if (latestRequestIdRef.current === requestId && visible) {
+            setProgressData(cachedData);
+            setIsDataLoading(false);
+          }
           return;
         }
 
-        // Priority 3: Need to load data (asynchronous - rare case)
-        console.log(
-          `[GameProgressModal] Loading fresh data for ${gameMode}...`
-        );
-        setIsDataLoading(true);
-        setHasError(false);
+        // No cached data, fetch new data
+        const freshData = await useProgressStore
+          .getState()
+          .getEnhancedGameProgress(gameMode);
 
-        // Load asynchronously
-        getEnhancedGameProgress(gameMode)
-          .then((data) => {
-            const loadTime = Date.now() - startTime;
-            console.log(
-              `[GameProgressModal] Fresh data loaded for ${gameMode} in ${loadTime}ms`
-            );
+        // Ensure minimum loading time (visual consistency)
+        await new Promise((resolve) => setTimeout(resolve, 300));
 
-            setProgressData(data);
-            setIsDataLoading(false);
-            setHasError(!data);
-
-            InteractionManager.runAfterInteractions(() => {
-              setContentReady(true);
-            });
-          })
-          .catch((error) => {
-            console.error(
-              `[GameProgressModal] Error loading data for ${gameMode}:`,
-              error
-            );
-            setIsDataLoading(false);
-            setHasError(true);
-            setContentReady(true);
-          });
+        // Only update if this request is still valid
+        if (latestRequestIdRef.current === requestId && visible) {
+          setProgressData(freshData);
+          setIsDataLoading(false);
+          setHasError(!freshData);
+        }
       } catch (error) {
-        console.error(`[GameProgressModal] Sync error:`, error);
-        setIsDataLoading(false);
-        setHasError(true);
-        setContentReady(true);
+        console.error(`[GameProgressModal] Error loading data:`, error);
+
+        // Show error after minimum loading time
+        await new Promise((resolve) => setTimeout(resolve, 300));
+
+        if (latestRequestIdRef.current === requestId && visible) {
+          setIsDataLoading(false);
+          setHasError(true);
+        }
       }
     };
 
-    // Execute immediately
+    // Execute data loading
     loadData();
-  }, [visible, gameMode, getEnhancedGameProgress]);
+  }, [visible, gameMode]); // Keep dependencies minimal
+
+  // Add cleanup effect separately
+  useEffect(() => {
+    if (!visible) {
+      // Use a longer timeout to ensure modal is fully closed before resetting state
+      const resetTimer = setTimeout(() => {
+        setProgressData(null);
+        setIsDataLoading(false);
+        setHasError(false);
+        setContentReady(false);
+      }, 500);
+
+      return () => clearTimeout(resetTimer);
+    }
+  }, [visible]);
 
   // Optimized helper functions - stable references
   const getDifficultyColor = useCallback((diff: string): string => {
@@ -212,164 +213,169 @@ const GameProgressModal: React.FC<GameProgressModalProps> = ({
     }
   }, [onClose]);
 
-  const laoding = true;
-
-  // Content renderer - memoized and optimized
+  // Content renderer - make loading state more prominent
   const renderContent = useCallback(() => {
-    // Quick loading state for rare cases
-    // isDataLoading && !progressData
-    if ((isDataLoading && !progressData) || !contentReady) {
-      return (
-        <View style={styles.quickLoadingContainer}>
-          <ActivityIndicator size="small" color="#fff" />
-        </View>
-      );
-    }
-
-    // Error state
-    if (hasError || !progressData) {
-      return (
-        <View style={styles.errorContainer}>
-          <Target width={32} height={32} color="rgba(255,255,255,0.6)" />
-          <Text style={styles.errorText}>
-            {hasError
-              ? "Failed to load progress data"
-              : "No progress data available"}
-          </Text>
-          <Text style={styles.errorSubtext}>
-            {hasError
-              ? "Please try again later"
-              : "Start playing to see your statistics!"}
-          </Text>
-        </View>
-      );
-    }
-
-    // Main content - render only when ready
-
     return (
-      <Animatable.View animation="fadeIn" duration={300} useNativeDriver={true}>
-        {/* Overall Progress Summary */}
-        <View style={styles.summaryCard}>
-          <View style={styles.summaryHeader}>
-            <Text style={styles.summaryLabel}>Overall Progress</Text>
-            <View style={styles.completionBadge}>
-              <Text style={styles.badgeText}>
-                {Math.round(progressData.overallCompletionRate)}% COMPLETE
+      <View style={styles.contentContainer}>
+        {/* Loading Overlay - Always the same position in component tree */}
+        {isDataLoading && (
+          <Animatable.View
+            animation="fadeIn"
+            duration={200}
+            style={styles.loadingOverlay}
+            useNativeDriver={true}
+          >
+            <ActivityIndicator color="#fff" size="large" />
+            <Text style={styles.quickLoadingText}>
+              Loading progress data...
+            </Text>
+          </Animatable.View>
+        )}
+
+        {/* Content - Render but hide when loading */}
+        {progressData && (
+          <View
+            style={[
+              styles.contentWrapper,
+              isDataLoading && styles.contentHidden,
+            ]}
+          >
+            {/* Overall Progress Summary */}
+            <View style={styles.summaryCard}>
+              <View style={styles.summaryHeader}>
+                <Text style={styles.summaryLabel}>Overall Progress</Text>
+                <View style={styles.completionBadge}>
+                  <Text style={styles.badgeText}>
+                    {Math.round(progressData.overallCompletionRate)}% COMPLETE
+                  </Text>
+                </View>
+              </View>
+              <View style={styles.progressSummary}>
+                <View style={styles.progressNumbers}>
+                  <Text style={styles.completedText}>
+                    {progressData.completedLevels}
+                  </Text>
+                  <Text style={styles.totalText}>
+                    / {progressData.totalLevels} Levels
+                  </Text>
+                </View>
+              </View>
+              <Text style={styles.encouragementText}>
+                {progressData.overallCompletionRate === 100
+                  ? "Perfect! You've mastered all levels!"
+                  : `${
+                      progressData.totalLevels - progressData.completedLevels
+                    } more to go!`}
               </Text>
             </View>
-          </View>
-          <View style={styles.progressSummary}>
-            <View style={styles.progressNumbers}>
-              <Text style={styles.completedText}>
-                {progressData.completedLevels}
-              </Text>
-              <Text style={styles.totalText}>
-                / {progressData.totalLevels} Levels
-              </Text>
-            </View>
-          </View>
-          <Text style={styles.encouragementText}>
-            {progressData.overallCompletionRate === 100
-              ? "Perfect! You've mastered all levels!"
-              : `${
-                  progressData.totalLevels - progressData.completedLevels
-                } more to go!`}
-          </Text>
-        </View>
 
-        {/* Difficulty Breakdown */}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Progress by Difficulty</Text>
-          {progressData.difficultyBreakdown.map((diffProgress) => (
-            <DifficultyCard
-              key={diffProgress.difficulty}
-              diffProgress={diffProgress}
-              getDifficultyColor={getDifficultyColor}
-              getDifficultyStars={getDifficultyStars}
-            />
-          ))}
-        </View>
-
-        {/* Overall Stats */}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Overall Statistics</Text>
-          <View style={styles.statsGrid}>
-            <StatBox
-              icon={<Target width={20} height={20} color="#FFD700" />}
-              value={`${Math.round(progressData.overallAverageScore)}%`}
-              label="Success Rate"
-            />
-            <StatBox
-              icon={<Clock width={20} height={20} color="#4CAF50" />}
-              value={formatTime(progressData.totalTimeSpent)}
-              label="Total Time"
-            />
-            <StatBox
-              icon={<PlayCircle width={20} height={20} color="#2196F3" />}
-              value={progressData.totalAttempts}
-              label="Total Attempts"
-            />
-            <StatBox
-              icon={<Award width={20} height={20} color="#9C27B0" />}
-              value={progressData.correctAttempts}
-              label="Correct"
-            />
-          </View>
-        </View>
-
-        {/* Recent Activity */}
-        {progressData.recentAttempts &&
-          progressData.recentAttempts.length > 0 && (
+            {/* Difficulty Breakdown */}
             <View style={styles.section}>
-              <Text style={styles.sectionTitle}>Recent Activity</Text>
-              <View style={styles.attemptsContainer}>
-                {progressData.recentAttempts
-                  .slice(0, 5)
-                  .map((attempt, index) => (
-                    <RecentAttempt
-                      key={`${attempt.levelId}-${attempt.attemptDate}-${index}`}
-                      attempt={attempt}
-                      index={index}
-                    />
-                  ))}
+              <Text style={styles.sectionTitle}>Progress by Difficulty</Text>
+              {progressData.difficultyBreakdown.map((diffProgress) => (
+                <DifficultyCard
+                  key={diffProgress.difficulty}
+                  diffProgress={diffProgress}
+                  getDifficultyColor={getDifficultyColor}
+                  getDifficultyStars={getDifficultyStars}
+                />
+              ))}
+            </View>
+
+            {/* Overall Stats */}
+            <View style={styles.section}>
+              <Text style={styles.sectionTitle}>Overall Statistics</Text>
+              <View style={styles.statsGrid}>
+                <StatBox
+                  icon={<Target width={20} height={20} color="#FFD700" />}
+                  value={`${Math.round(progressData.overallAverageScore)}%`}
+                  label="Success Rate"
+                />
+                <StatBox
+                  icon={<Clock width={20} height={20} color="#4CAF50" />}
+                  value={formatTime(progressData.totalTimeSpent)}
+                  label="Total Time"
+                />
+                <StatBox
+                  icon={<PlayCircle width={20} height={20} color="#2196F3" />}
+                  value={progressData.totalAttempts}
+                  label="Total Attempts"
+                />
+                <StatBox
+                  icon={<Award width={20} height={20} color="#9C27B0" />}
+                  value={progressData.correctAttempts}
+                  label="Correct"
+                />
               </View>
             </View>
-          )}
-      </Animatable.View>
+
+            {/* Recent Activity */}
+            {progressData.recentAttempts &&
+              progressData.recentAttempts.length > 0 && (
+                <View style={styles.section}>
+                  <Text style={styles.sectionTitle}>Recent Activity</Text>
+                  <View style={styles.attemptsContainer}>
+                    {progressData.recentAttempts
+                      .slice(0, 5)
+                      .map((attempt, index) => (
+                        <RecentAttempt
+                          key={`${attempt.levelId}-${attempt.attemptDate}-${index}`}
+                          attempt={attempt}
+                          index={index}
+                        />
+                      ))}
+                  </View>
+                </View>
+              )}
+          </View>
+        )}
+
+        {/* Error View - Only show when there's an error and not loading */}
+        {!progressData && !isDataLoading && (
+          <View style={styles.errorContainer}>
+            <Target width={32} height={32} color="rgba(255,255,255,0.6)" />
+            <Text style={styles.errorText}>
+              {hasError
+                ? "Failed to load progress data"
+                : "No progress data available"}
+            </Text>
+            <Text style={styles.errorSubtext}>
+              {hasError
+                ? "Please try again later"
+                : "Start playing to see your statistics!"}
+            </Text>
+          </View>
+        )}
+      </View>
     );
   }, [
     isDataLoading,
     progressData,
     hasError,
-    contentReady,
     getDifficultyColor,
     getDifficultyStars,
   ]);
-
-  // Don't render if not visible
-  if (!visible) return null;
 
   return (
     <Modal
       visible={visible}
       transparent
-      animationType="fade"
+      animationType="none"
       statusBarTranslucent={true}
       onRequestClose={handleClose}
       hardwareAccelerated={true}
     >
       <Animatable.View
         ref={overlayRef}
-        animation="fadeIn"
-        duration={300}
+        animation={visible ? "fadeIn" : "fadeOut"}
+        duration={200}
         style={styles.overlay}
         useNativeDriver={true}
       >
         <Animatable.View
           ref={modalRef}
-          animation="zoomIn"
-          duration={300}
+          animation={visible ? "zoomIn" : "zoomOut"}
+          duration={200}
           style={styles.modalContainer}
           useNativeDriver={true}
         >
@@ -379,7 +385,7 @@ const GameProgressModal: React.FC<GameProgressModalProps> = ({
             start={{ x: 0, y: 0 }}
             end={{ x: 1, y: 1 }}
           >
-            {/* Header - always visible for immediate feedback */}
+            {/* Header */}
             <View style={styles.header}>
               <Text style={styles.title}>{gameTitle} Progress</Text>
               <TouchableOpacity
@@ -392,7 +398,7 @@ const GameProgressModal: React.FC<GameProgressModalProps> = ({
               </TouchableOpacity>
             </View>
 
-            {/* Content */}
+            {/* Content ScrollView */}
             <ScrollView
               style={styles.content}
               showsVerticalScrollIndicator={false}
@@ -457,6 +463,26 @@ const styles = StyleSheet.create({
   scrollContent: {
     flexGrow: 1,
     paddingBottom: 10,
+  },
+  contentContainer: {
+    flex: 1,
+    position: "relative",
+  },
+  loadingOverlay: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    justifyContent: "center",
+    alignItems: "center",
+    zIndex: 10,
+  },
+  contentWrapper: {
+    opacity: 1,
+  },
+  contentHidden: {
+    opacity: 0.3,
   },
 
   // Quick loading state

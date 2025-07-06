@@ -1,5 +1,11 @@
 import React, { useCallback, useEffect } from "react";
-import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  StyleSheet,
+  Platform,
+} from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { TrendingUp, Play } from "react-native-feather";
 import { GAME_GRADIENTS } from "@/constant/gameConstants";
@@ -33,8 +39,47 @@ const GameCard = React.memo(
         ? Math.round((progress.completed / progress.total) * 100)
         : 0;
 
-    // Ultra-fast progress press handler
+    // Update the preload effect in GameCard
+    useEffect(() => {
+      let isMounted = true;
+
+      // This should only run on mount and when game.id changes
+      const preloadData = async () => {
+        try {
+          if (!isMounted) return;
+
+          // FIXED: Don't update lastUpdated here
+          // Only clear this specific game's enhanced progress
+          useProgressStore.setState((state) => ({
+            enhancedProgress: {
+              ...state.enhancedProgress,
+              [game.id]: null,
+            },
+          }));
+
+          // Still preload data
+          await useProgressStore.getState().getEnhancedGameProgress(game.id);
+          console.log(`[GameCard] Preloaded data for ${game.id}`);
+        } catch (error) {
+          // Ignore errors
+        }
+      };
+
+      preloadData();
+
+      return () => {
+        isMounted = false;
+      };
+    }, [game.id]); // FIXED: Remove lastUpdated from dependencies
+
+    // Ultra-fast progress press handler with haptic feedback
     const handleProgressPress = useCallback(() => {
+      // Native feedback immediately (if available)
+      if (Platform && Platform.OS === "ios" && "Haptics" in window) {
+        // @ts-ignore - Expo's haptics might be available
+        Haptics?.selectionAsync?.();
+      }
+
       // Call immediately without any async operations
       onProgressPress();
     }, [onProgressPress]);

@@ -10,9 +10,8 @@ import useGameStore from "@/store/games/useGameStore";
 const API_URL = process.env.EXPO_PUBLIC_BACKEND_URL || "http://localhost:5000";
 
 // Cache management
-const progressCache: { [key: string]: any } = {};
-const CACHE_EXPIRY = 5 * 60 * 1000; // 5 minutes
-let lastGlobalFetchTime = 0;
+const CACHE_EXPIRY = 5 * 60 * 1000;
+let lastModalOpenTime = 0;
 
 interface ProgressState {
   // Core state
@@ -59,7 +58,7 @@ interface ProgressState {
   formatQuizId: (id: string | number) => string;
 
   // Modal actions
-  openProgressModal: (gameMode: string, gameTitle: string) => Promise<void>;
+  openProgressModal: (gameMode: string, gameTitle: string) => void;
   closeProgressModal: () => void;
 
   // Timestamp for last update
@@ -568,6 +567,13 @@ const useProgressStore = create<ProgressState>((set, get) => ({
       if (response.data.success) {
         console.log(`[useProgressStore] Progress update successful!`);
 
+        // Always update timestamp for ANY progress update
+        set({
+          isLoading: false,
+          error: null,
+          lastUpdated: Date.now(),
+        });
+
         // If an item was completed, refresh global progress data immediately
         if (completed) {
           console.log(
@@ -575,19 +581,29 @@ const useProgressStore = create<ProgressState>((set, get) => ({
           );
           await get().fetchProgress(true);
 
-          // Force UI update by updating timestamp
+          // Force UI update by updating timestamp and clearing caches
           set({
             lastUpdated: Date.now(),
-            // Also explicitly clear any cached enhanced progress to force reload
+            // IMPORTANT: Clear ALL enhancedProgress cache to force reload everywhere
             enhancedProgress: {},
           });
 
-          console.log(
-            `[useProgressStore] Progress refresh complete, lastUpdated: ${new Date().toISOString()}`
-          );
+          // Clear the Map cache as well
+          enhancedProgressCache.clear();
+        } else {
+          // ADDED: Even for non-completed updates, clear the specific gameMode cache
+          // This ensures non-completion updates (like attempts) still refresh
+          const gameMode = detectGameModeFromQuizId(quizId);
+          if (gameMode) {
+            set((state) => ({
+              enhancedProgress: {
+                ...state.enhancedProgress,
+                [gameMode]: null,
+              },
+            }));
+          }
         }
 
-        set({ isLoading: false, error: null });
         return response.data.progress;
       } else {
         set({
@@ -617,41 +633,29 @@ const useProgressStore = create<ProgressState>((set, get) => ({
   getEnhancedGameProgress: async (
     gameMode: string
   ): Promise<EnhancedGameModeProgress | null> => {
-    const { enhancedProgress, lastUpdated } = get();
-
-    // Return cached data if available
-    const cacheKey = `${gameMode}-${lastUpdated}`;
-    if (enhancedProgressCache.has(cacheKey)) {
-      return enhancedProgressCache.get(cacheKey)!;
-    }
-
-    // Check store cache
-    if (enhancedProgress[gameMode]) {
-      enhancedProgressCache.set(cacheKey, enhancedProgress[gameMode]);
-      return enhancedProgress[gameMode];
-    }
-
     try {
-      const progress = get().progress;
-      if (!progress) {
-        return null;
+      const { enhancedProgress, lastUpdated } = get();
+
+      // Check store cache first (fastest)
+      if (enhancedProgress[gameMode]) {
+        return enhancedProgress[gameMode];
       }
 
-      // Use async calculation
+      // No cache, so load data
+      const progress = get().progress;
+      if (!progress) return null;
+
       const enhancedData = await calculateEnhancedProgress(gameMode, progress);
 
-      // Cache the result
-      if (enhancedData) {
-        enhancedProgressCache.set(cacheKey, enhancedData);
-      }
-
       // Update store
-      set((state) => ({
-        enhancedProgress: {
-          ...state.enhancedProgress,
-          [gameMode]: enhancedData,
-        },
-      }));
+      if (enhancedData) {
+        set((state) => ({
+          enhancedProgress: {
+            ...state.enhancedProgress,
+            [gameMode]: enhancedData,
+          },
+        }));
+      }
 
       return enhancedData;
     } catch (error) {
@@ -661,7 +665,28 @@ const useProgressStore = create<ProgressState>((set, get) => ({
   },
 
   // Modal management functions
-  openProgressModal: async (gameMode: string, gameTitle: string) => {
+  openProgressModal: (gameMode: string, gameTitle: string) => {
+    const now = Date.now();
+
+    // Prevent opening the same modal multiple times in rapid succession
+    if (now - lastModalOpenTime < 500) {
+      console.log(`[useProgressStore] Ignoring duplicate modal open request`);
+      return;
+    }
+
+    lastModalOpenTime = now;
+
+    // Get current state to check if we're already showing this mode
+    const currentState = get();
+    if (
+      currentState.progressModal.visible &&
+      currentState.progressModal.gameMode === gameMode
+    ) {
+      console.log(`[useProgressStore] Modal already showing ${gameMode}`);
+      return;
+    }
+
+    // Set state synchronously for immediate feedback
     set({
       progressModal: {
         visible: true,
@@ -669,9 +694,6 @@ const useProgressStore = create<ProgressState>((set, get) => ({
         gameTitle,
       },
     });
-
-    // Return a resolved promise for consistency
-    return Promise.resolve();
   },
 
   closeProgressModal: () => {
@@ -686,6 +708,9 @@ const useProgressStore = create<ProgressState>((set, get) => ({
 
   // Clear cached data
   clearCache: () => {
+    // Clear the Map cache as well
+    enhancedProgressCache.clear();
+
     set({
       progress: null,
       lastFetched: 0,
