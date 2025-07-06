@@ -222,7 +222,7 @@ const LevelSelection = () => {
             setActiveFilter={setActiveFilter}
           />
           {filteredLevels.length === 0 ? (
-            <EmptyState />
+            <EmptyState activeFilter={activeFilter} />
           ) : (
             <LevelGrid
               levels={filteredLevels}
