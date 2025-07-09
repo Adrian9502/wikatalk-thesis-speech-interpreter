@@ -5,7 +5,15 @@ import { Clock, CheckCircle, XCircle } from "react-native-feather";
 import { formatTime } from "@/utils/gameUtils";
 
 interface RecentAttemptProps {
-  attempt: any;
+  attempt: {
+    levelId: string | number;
+    levelTitle: string;
+    difficulty: string;
+    attemptDate: string;
+    isCorrect: boolean;
+    timeSpent: number;
+    attemptNumber?: number;
+  };
   index: number;
 }
 
@@ -49,7 +57,11 @@ const RecentAttempt = React.memo(({ attempt, index }: RecentAttemptProps) => {
           {formatTime(attempt.timeSpent || 0)}
         </Text>
         <Text style={styles.attemptDate}>
-          {new Date(attempt.attemptDate).toLocaleDateString()}
+          {new Intl.DateTimeFormat("en-US", {
+            month: "long",
+            day: "numeric",
+            year: "numeric",
+          }).format(new Date(attempt.attemptDate))}
         </Text>
       </View>
     </Animatable.View>
@@ -83,9 +95,11 @@ const styles = StyleSheet.create({
     color: "rgba(255, 255, 255, 0.8)",
   },
   attemptItem: {
-    backgroundColor: "rgba(255, 255, 255, 0.05)",
-    borderRadius: 8,
+    backgroundColor: "rgba(255, 255, 255, 0.1)",
+    borderRadius: 16,
     padding: 12,
+    borderWidth: 1,
+    borderColor: "rgba(255, 255, 255, 0.15)",
   },
   attemptHeader: {
     flexDirection: "row",
@@ -117,5 +131,5 @@ const styles = StyleSheet.create({
   },
 });
 
-RecentAttempt.displayName = 'RecentAttempt';
+RecentAttempt.displayName = "RecentAttempt";
 export default RecentAttempt;

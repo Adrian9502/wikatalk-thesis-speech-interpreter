@@ -4,7 +4,6 @@ import {
   Text,
   StyleSheet,
   ActivityIndicator,
-  FlatList,
   ScrollView,
 } from "react-native";
 import { EnhancedGameModeProgress } from "@/types/gameProgressTypes";
@@ -12,7 +11,6 @@ import { Target } from "react-native-feather";
 import DifficultyCard from "./DifficultyCard";
 import StatGrid from "./StatGrid";
 import RecentAttempt from "./RecentAttempt";
-import useProgressStore from "@/store/games/useProgressStore";
 
 interface ProgressContentProps {
   progressData: EnhancedGameModeProgress | null;
@@ -124,7 +122,9 @@ const ProgressContent: React.FC<ProgressContentProps> = ({
           return <StatGrid progressData={item} />;
 
         case "attempts":
-          return <RecentAttempt attempt={item} index={0} />;
+          return (
+            <RecentAttempt attempt={item} index={section.data.indexOf(item)} />
+          );
 
         default:
           return null;
@@ -166,8 +166,20 @@ const ProgressContent: React.FC<ProgressContentProps> = ({
     >
       {sections.map((section, index) => (
         <View key={`section-${index}`} style={styles.section}>
-          <Text style={styles.sectionTitle}>{section.title}</Text>
-          <View style={styles.sectionContent}>
+          <Text
+            style={[
+              styles.sectionTitle,
+              section.type === "attempts" && styles.attemptsTitle,
+            ]}
+          >
+            {section.title}
+          </Text>
+          <View
+            style={[
+              styles.sectionContent,
+              section.type === "attempts" && styles.attemptsContainer,
+            ]}
+          >
             {section.data.map((item, idx) => (
               <React.Fragment key={`${section.type}-${idx}`}>
                 {renderSectionContent({ item, section })}
@@ -199,7 +211,7 @@ const OverallSummary = React.memo<OverallSummaryProps>(
         </View>
         <Text style={styles.encouragementText}>
           {completionRate === 100
-            ? "Perfect! You've mastered all levels!"
+            ? "Perfect! You've completed all levels!"
             : `${total - completed} more to go!`}
         </Text>
       </View>
@@ -246,7 +258,7 @@ const styles = StyleSheet.create({
     textAlign: "center",
   },
   section: {
-    marginBottom: 20,
+    marginBottom: 15,
   },
   sectionTitle: {
     fontSize: 16,
@@ -312,6 +324,13 @@ const styles = StyleSheet.create({
     fontSize: 13,
     fontFamily: "Poppins-Regular",
     color: "rgba(255,255,255,0.8)",
+  },
+  attemptsTitle: {
+    color: "#fff",
+  },
+  attemptsContainer: {
+    gap: 12,
+    marginTop: 4,
   },
 });
 

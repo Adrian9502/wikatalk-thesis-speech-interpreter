@@ -40,8 +40,8 @@ const styles = StyleSheet.create({
   statsGrid: {
     flexDirection: "row",
     flexWrap: "wrap",
-    justifyContent: "space-between",
-    gap: 8,
+    justifyContent: "center",
+    gap: 16,
   },
 });
 

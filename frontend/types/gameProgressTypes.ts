@@ -1,11 +1,3 @@
-export interface GameProgressModalProps {
-  visible: boolean;
-  onClose: () => void;
-  gameMode: string;
-  preloadedData: any;
-  gameTitle: string;
-}
-
 export interface GameModeProgress {
   completed: number;
   total: number;

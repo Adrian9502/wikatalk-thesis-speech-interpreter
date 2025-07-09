@@ -11,7 +11,6 @@ const API_URL = process.env.EXPO_PUBLIC_BACKEND_URL || "http://localhost:5000";
 
 // Cache management
 const CACHE_EXPIRY = 5 * 60 * 1000;
-let lastModalOpenTime = 0;
 
 interface ProgressState {
   // Core state
@@ -35,13 +34,6 @@ interface ProgressState {
     [gameMode: string]: EnhancedGameModeProgress | null;
   };
 
-  // Modal state management
-  progressModal: {
-    visible: boolean;
-    gameMode: string;
-    gameTitle: string;
-  };
-
   // Actions
   fetchProgress: (forceRefresh?: boolean) => Promise<any[] | null>;
   updateProgress: (
@@ -56,10 +48,6 @@ interface ProgressState {
   ) => Promise<EnhancedGameModeProgress | null>;
   clearCache: () => void;
   formatQuizId: (id: string | number) => string;
-
-  // Modal actions
-  openProgressModal: (gameMode: string, gameTitle: string) => void;
-  closeProgressModal: () => void;
 
   // Timestamp for last update
   lastUpdated: number;
@@ -147,7 +135,10 @@ const calculateGameProgress = (globalProgress: any[] | null) => {
         completed: 0,
         total: getQuizCountByMode("identification"),
       },
-      fillBlanks: { completed: 0, total: getQuizCountByMode("fillBlanks") },
+      fillBlanks: {
+        completed: 0,
+        total: getQuizCountByMode("fillBlanks"),
+      },
     };
   }
 
@@ -397,6 +388,32 @@ async function calculateEnhancedProgress(
       }
     );
 
+    // Add this code to collect recent attempts from all difficulties
+    const allAttempts: any[] = [];
+
+    // Collect recent attempts from all levels across all difficulties
+    difficultyBreakdown.forEach((difficulty) => {
+      difficulty.levels.forEach((level) => {
+        if (level.recentAttempts && level.recentAttempts.length > 0) {
+          const enrichedAttempts = level.recentAttempts.map((attempt) => ({
+            ...attempt,
+            levelId: level.levelId,
+            levelTitle: level.title,
+            difficulty: difficulty.difficulty,
+          }));
+          allAttempts.push(...enrichedAttempts);
+        }
+      });
+    });
+
+    // Sort by most recent first
+    const recentAttempts = allAttempts
+      .sort(
+        (a, b) =>
+          new Date(b.attemptDate).getTime() - new Date(a.attemptDate).getTime()
+      )
+      .slice(0, 10); // Keep only the 10 most recent attempts
+
     return {
       ...overallStats,
       overallCompletionRate:
@@ -410,7 +427,7 @@ async function calculateEnhancedProgress(
       bestTime: 0,
       worstTime: 0,
       difficultyBreakdown,
-      recentAttempts: [],
+      recentAttempts, // Add the sorted recent attempts here
     };
   } catch (error) {
     console.error(`Error calculating enhanced progress:`, error);
@@ -442,13 +459,6 @@ const useProgressStore = create<ProgressState>((set, get) => ({
 
   // Enhanced progress data storage
   enhancedProgress: {},
-
-  // Modal state
-  progressModal: {
-    visible: false,
-    gameMode: "",
-    gameTitle: "",
-  },
 
   // Format quiz ID for API
   formatQuizId: (id: string | number): string => {
@@ -669,51 +679,9 @@ const useProgressStore = create<ProgressState>((set, get) => ({
     // Access existing cache directly
     const enhancedData = useProgressStore.getState().enhancedProgress[gameMode];
     if (enhancedData) return enhancedData;
-    
+
     // No data available, return null
     return null;
-  },
-
-  // Modal management functions
-  openProgressModal: (gameMode: string, gameTitle: string) => {
-    const now = Date.now();
-
-    // Prevent opening the same modal multiple times in rapid succession
-    if (now - lastModalOpenTime < 500) {
-      console.log(`[useProgressStore] Ignoring duplicate modal open request`);
-      return;
-    }
-
-    lastModalOpenTime = now;
-
-    // Get current state to check if we're already showing this mode
-    const currentState = get();
-    if (
-      currentState.progressModal.visible &&
-      currentState.progressModal.gameMode === gameMode
-    ) {
-      console.log(`[useProgressStore] Modal already showing ${gameMode}`);
-      return;
-    }
-
-    // Set state synchronously for immediate feedback
-    set({
-      progressModal: {
-        visible: true,
-        gameMode,
-        gameTitle,
-      },
-    });
-  },
-
-  closeProgressModal: () => {
-    set({
-      progressModal: {
-        visible: false,
-        gameMode: "",
-        gameTitle: "",
-      },
-    });
   },
 
   // Clear cached data

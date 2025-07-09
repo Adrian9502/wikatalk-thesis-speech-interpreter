@@ -29,7 +29,7 @@ const Games = () => {
   const finishLoadTracking = useComponentLoadTime("Games");
 
   // Get the progress modal functions
-  const { showProgressModal } = useProgressModal(); // Fix: Destructure showProgressModal function
+  const { showProgressModal } = useProgressModal();
 
   // Theme store
   const { activeTheme } = useThemeStore();
@@ -191,23 +191,6 @@ const Games = () => {
     });
   };
 
-  // Add this function to explicitly refresh all game data when needed
-  const forceRefreshAllData = useCallback(async () => {
-    console.log("[Games] Forcing refresh of all game progress data");
-
-    // Clear all cached data
-    useProgressStore.getState().clearCache();
-
-    // Force fetch new progress data
-    await fetchProgress(true);
-
-    // Force update timestamp to trigger UI updates
-    useProgressStore.setState({ lastUpdated: Date.now() });
-
-    // Return true when complete
-    return true;
-  }, [fetchProgress]);
-
   // Replace handleProgressPress
   const handleProgressPress = useCallback(
     (gameId: string, gameTitle: string) => {
@@ -261,10 +244,7 @@ const Games = () => {
 
       <SafeAreaView style={[dynamicStyles.container, styles.container]}>
         {/* Dashboard header with welcome message and coins */}
-        <DashboardHeader
-          onCoinsPress={openRewardsModal}
-          // Remove onRefresh prop since DashboardHeader doesn't use it
-        />
+        <DashboardHeader onCoinsPress={openRewardsModal} />
 
         <ScrollView
           showsVerticalScrollIndicator={false}
@@ -310,8 +290,6 @@ const Games = () => {
   );
 };
 
-// Keep styles as they were
-const { height } = Dimensions.get("window");
 const styles = StyleSheet.create({
   wrapper: {
     flex: 1,
