@@ -7,7 +7,6 @@ import useThemeStore from "@/store/useThemeStore";
 import { getGlobalStyles } from "@/styles/globalStyles";
 import WordOfDayModal from "@/components/games/WordOfDayModal";
 import DailyRewardsModal from "@/components/games/rewards/DailyRewardsModal";
-import GameProgressModal from "@/components/games/GameProgressModal/GameProgressModal";
 // Component imports
 import BackgroundEffects from "@/components/games/dashboard/BackgroundEffects";
 import DashboardHeader from "@/components/games/dashboard/DashboardHeader";
@@ -15,6 +14,7 @@ import WordOfDayCard from "@/components/games/dashboard/WordOfDayCard";
 import GamesList from "@/components/games/dashboard/GamesList";
 import ProgressStats from "@/components/games/dashboard/ProgressStats";
 import ErrorDisplay from "@/components/games/common/ErrorDisplay";
+import { useProgressModal } from "@/components/games/ProgressModalProvider";
 
 // Custom hooks
 import useGameDashboard from "@/hooks/games/useGameDashboard";
@@ -27,6 +27,9 @@ import { isAllDataReady } from "@/store/useSplashStore";
 const Games = () => {
   // Performance monitoring for development
   const finishLoadTracking = useComponentLoadTime("Games");
+
+  // Get the progress modal functions
+  const { showProgressModal } = useProgressModal(); // Fix: Destructure showProgressModal function
 
   // Theme store
   const { activeTheme } = useThemeStore();
@@ -43,13 +46,7 @@ const Games = () => {
   const lastClickRef = useRef<number>(0); // <-- Add this line to declare the missing ref
 
   // Get progress from centralized store
-  const {
-    fetchProgress,
-    isLoading: progressLoading,
-    progressModal,
-    closeProgressModal,
-    openProgressModal,
-  } = useProgressStore();
+  const { fetchProgress, isLoading: progressLoading } = useProgressStore();
 
   // Custom hook for dashboard logic (excluding progress)
   const {
@@ -211,7 +208,7 @@ const Games = () => {
     return true;
   }, [fetchProgress]);
 
-  // Replace your handleProgressPress function
+  // Replace handleProgressPress
   const handleProgressPress = useCallback(
     (gameId: string, gameTitle: string) => {
       const now = Date.now();
@@ -221,31 +218,12 @@ const Games = () => {
         console.log(`[Games] Ignoring duplicate progress button press`);
         return;
       }
-
       lastClickRef.current = now;
 
-      // Only update modal if it's not already showing this game mode
-      if (progressModal.visible && progressModal.gameMode === gameId) {
-        console.log(`[Games] Modal already showing ${gameId}, ignoring`);
-        return;
-      }
-
-      // First open the modal immediately
-      openProgressModal(gameId, gameTitle);
-
-      // Only update data if not already cached
-      if (!useProgressStore.getState().enhancedProgress[gameId]) {
-        // Delay this slightly to avoid state batching issues
-        setTimeout(() => {
-          useProgressStore.setState({
-            lastUpdated: Date.now(),
-          });
-        }, 50);
-      } else {
-        console.log(`[Games] Using cached data for ${gameId} modal`);
-      }
+      // Use the context method instead of store
+      showProgressModal(gameId, gameTitle);
     },
-    [openProgressModal, progressModal]
+    [showProgressModal]
   );
 
   // Render loading state
@@ -326,13 +304,6 @@ const Games = () => {
         <DailyRewardsModal
           visible={isDailyRewardsModalVisible}
           onClose={hideDailyRewardsModal}
-        />
-
-        <GameProgressModal
-          visible={progressModal.visible}
-          onClose={closeProgressModal}
-          gameMode={progressModal.gameMode}
-          gameTitle={progressModal.gameTitle}
         />
       </SafeAreaView>
     </View>

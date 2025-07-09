@@ -8,8 +8,8 @@ import {
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { TrendingUp, Play } from "react-native-feather";
-import { GAME_GRADIENTS } from "@/constant/gameConstants";
 import useProgressStore from "@/store/games/useProgressStore";
+import { getGameModeGradient } from "@/utils/gameUtils";
 
 interface GameCardProps {
   game: any;
@@ -86,17 +86,11 @@ const GameCard = React.memo(
 
     // Get the consistent gradient colors from the same source as GameProgressModal
     const getCardGradientColors = () => {
-      // Use the same constants as the modal
-      switch (game.id) {
-        case "multipleChoice":
-          return GAME_GRADIENTS.multipleChoice;
-        case "identification":
-          return GAME_GRADIENTS.identification;
-        case "fillBlanks":
-          return GAME_GRADIENTS.fillBlanks;
-        default:
-          return game.gradientColors; // Fallback to the original colors if needed
-      }
+      // Get gradient from shared utility or fallback to game-specific ones
+      return getGameModeGradient(
+        game.id,
+        game.gradientColors as [string, string]
+      );
     };
 
     const gradientColors = getCardGradientColors();

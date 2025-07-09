@@ -664,6 +664,16 @@ const useProgressStore = create<ProgressState>((set, get) => ({
     }
   },
 
+  // Add a separate API for direct data access without state updates
+  getEnhancedProgressDataSync: (gameMode: string) => {
+    // Access existing cache directly
+    const enhancedData = useProgressStore.getState().enhancedProgress[gameMode];
+    if (enhancedData) return enhancedData;
+    
+    // No data available, return null
+    return null;
+  },
+
   // Modal management functions
   openProgressModal: (gameMode: string, gameTitle: string) => {
     const now = Date.now();

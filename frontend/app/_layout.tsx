@@ -16,6 +16,7 @@ import { InteractionManager } from "react-native";
 import { useSplashStore } from "@/store/useSplashStore";
 import { GoogleSignin } from "@react-native-google-signin/google-signin";
 import { initializeToken } from "@/lib/authTokenManager";
+import { ProgressModalProvider } from "@/components/games/ProgressModalProvider";
 
 // Prevent the splash screen from auto-hiding
 SplashScreen.preventAutoHideAsync();
@@ -179,26 +180,31 @@ const RootLayout = () => {
   return (
     <AuthProvider>
       <ThemeProvider onThemeReady={handleThemeReady}>
-        <PaperProvider>
-          <ValidationProvider>
-            <SafeAreaProvider>
-              <View style={{ flex: 1 }}>
-                <Stack screenOptions={{ headerShown: false }}>
-                  <Stack.Screen name="index" options={{ headerShown: false }} />
-                  <Stack.Screen
-                    name="(auth)"
-                    options={{ headerShown: false }}
-                  />
-                  <Stack.Screen
-                    name="(tabs)"
-                    options={{ headerShown: false }}
-                  />
-                </Stack>
-                <Toast />
-              </View>
-            </SafeAreaProvider>
-          </ValidationProvider>
-        </PaperProvider>
+        <ProgressModalProvider>
+          <PaperProvider>
+            <ValidationProvider>
+              <SafeAreaProvider>
+                <View style={{ flex: 1 }}>
+                  <Stack screenOptions={{ headerShown: false }}>
+                    <Stack.Screen
+                      name="index"
+                      options={{ headerShown: false }}
+                    />
+                    <Stack.Screen
+                      name="(auth)"
+                      options={{ headerShown: false }}
+                    />
+                    <Stack.Screen
+                      name="(tabs)"
+                      options={{ headerShown: false }}
+                    />
+                  </Stack>
+                  <Toast />
+                </View>
+              </SafeAreaProvider>
+            </ValidationProvider>
+          </PaperProvider>
+        </ProgressModalProvider>
       </ThemeProvider>
     </AuthProvider>
   );

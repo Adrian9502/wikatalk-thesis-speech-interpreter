@@ -2,7 +2,7 @@ import { BackHandler, ToastAndroid, Platform } from "react-native";
 import { router } from "expo-router";
 import { BASE_COLORS } from "@/constant/colors";
 import { GameStatus } from "@/types/gameTypes";
-
+import { GAME_GRADIENTS } from "@/constant/gameConstants";
 // Type definitions
 export type GameMode = "identification" | "multipleChoice" | "fillBlanks";
 export type DifficultyLevel = "easy" | "medium" | "hard";
@@ -82,6 +82,35 @@ export const getDifficultyColors = (
     case "easy":
     default:
       return ["#4CAF50", "#2E7D32"];
+  }
+};
+
+/**
+ * Returns consistent gradient colors based on game mode
+ * @param gameMode The game mode identifier (multipleChoice, identification, fillBlanks)
+ * @param defaultGradient Optional default gradient to use if game mode is not recognized
+ * @returns A tuple of two colors representing the gradient
+ */
+export const getGameModeGradient = (
+  gameMode: string | undefined,
+  defaultGradient?: [string, string]
+): [string, string] => {
+  const fallbackGradient: [string, string] = defaultGradient || [
+    "#3B4DA3",
+    "#251D79",
+  ];
+
+  if (!gameMode) return fallbackGradient;
+
+  switch (gameMode) {
+    case "multipleChoice":
+      return GAME_GRADIENTS.multipleChoice as [string, string];
+    case "identification":
+      return GAME_GRADIENTS.identification as [string, string];
+    case "fillBlanks":
+      return GAME_GRADIENTS.fillBlanks as [string, string];
+    default:
+      return fallbackGradient;
   }
 };
 
