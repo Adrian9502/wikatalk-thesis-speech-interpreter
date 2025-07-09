@@ -32,14 +32,14 @@ interface CoinsState {
   isDailyRewardsModalVisible: boolean;
 
   // Actions
-  fetchCoinsBalance: () => Promise<void>;
+  fetchCoinsBalance: (forceRefresh?: boolean) => Promise<boolean | undefined>;
   addCoins: (amount: number) => Promise<void>;
   deductCoins: (amount: number) => Promise<boolean>;
 
   // Daily rewards actions
-  checkDailyReward: () => Promise<boolean>;
+  checkDailyReward: (forceRefresh?: boolean) => Promise<boolean | null>;
   claimDailyReward: () => Promise<number | null>;
-  fetchRewardsHistory: () => Promise<void>;
+  fetchRewardsHistory: (forceRefresh?: boolean) => Promise<boolean | undefined>;
 
   // Modal actions
   showDailyRewardsModal: () => void;
@@ -47,7 +47,24 @@ interface CoinsState {
 
   // Add reset function
   resetState: () => void;
+
+  // Cache management
+  lastCoinsChecked: number;
+  lastRewardsChecked: number;
+  lastRewardStatusChecked: number;
+
+  // New preloading method
+  prefetchRewardsData: () => Promise<boolean>;
+
+  // Method to get data synchronously - just declare the signature here
+  getRewardsDataSync: () => {
+    dailyRewardsHistory: DailyRewardsHistory | null;
+    isDailyRewardAvailable: boolean;
+    coins: number;
+  };
 }
+
+const REWARDS_CACHE_EXPIRY = 10 * 60 * 1000; // 10 minutes
 
 const useCoinsStore = create<CoinsState>((set, get) => ({
   // Initial state
@@ -76,9 +93,25 @@ const useCoinsStore = create<CoinsState>((set, get) => ({
   },
 
   // Fetch user's coin balance
-  fetchCoinsBalance: async () => {
+  fetchCoinsBalance: async (forceRefresh = false) => {
+    const currentTime = Date.now();
+    const { lastCoinsChecked } = get();
+
+    // Use cached data if not forcing refresh
+    if (
+      !forceRefresh &&
+      lastCoinsChecked > 0 &&
+      currentTime - lastCoinsChecked < REWARDS_CACHE_EXPIRY
+    ) {
+      console.log("[CoinsStore] Using cached coins balance");
+      return true;
+    }
+
     try {
-      set({ isLoading: true, error: null });
+      // Only set loading if not preloading in background
+      if (forceRefresh) {
+        set({ isLoading: true, error: null });
+      }
 
       // Get token from authTokenManager instead of AsyncStorage directly
       const token = getToken();
@@ -102,7 +135,12 @@ const useCoinsStore = create<CoinsState>((set, get) => ({
         if (response.data.success) {
           const coins = response.data.coins;
           await AsyncStorage.setItem("user_coins", coins.toString());
-          set({ coins, isLoading: false });
+          set({
+            coins,
+            isLoading: false,
+            lastCoinsChecked: Date.now(), // Update timestamp
+          });
+          return true;
         }
       } catch (error: any) {
         console.error(
@@ -203,20 +241,34 @@ const useCoinsStore = create<CoinsState>((set, get) => ({
   },
 
   // Check if daily reward is available
-  checkDailyReward: async () => {
+  checkDailyReward: async (forceRefresh = false) => {
+    const today = new Date().toISOString().split("T")[0];
+    const { lastRewardStatusChecked, lastCheckedDate } = get();
+
+    // If we already checked today and cache is fresh, use cached result
+    if (
+      !forceRefresh &&
+      lastRewardStatusChecked > 0 &&
+      Date.now() - lastRewardStatusChecked < REWARDS_CACHE_EXPIRY &&
+      lastCheckedDate === today
+    ) {
+      console.log("[CoinsStore] Using cached daily reward status");
+      return get().isDailyRewardAvailable;
+    }
+
     try {
+      // Only set loading if not in background
+      if (forceRefresh) {
+        set({ isLoading: true });
+      }
+
       // Get token from authTokenManager
       const token = getToken();
       if (!token) {
-        console.log("No token available for daily reward check");
-        return false;
+        console.log("No token available for claimDailyReward");
+        set({ isLoading: false, error: "Authentication required" });
+        return null;
       }
-
-      const today = new Date().toISOString().split("T")[0];
-
-      // Force a fresh check if user has just logged in
-      // Clear any cached state about previous reward status
-      set({ lastCheckedDate: null });
 
       const response = await axios.get(`${API_URL}/api/rewards/daily/check`, {
         headers: {
@@ -228,12 +280,16 @@ const useCoinsStore = create<CoinsState>((set, get) => ({
         set({
           isDailyRewardAvailable: true,
           lastCheckedDate: today,
+          lastRewardStatusChecked: Date.now(),
+          isLoading: false,
         });
         return true;
       } else {
         set({
           isDailyRewardAvailable: false,
           lastCheckedDate: today,
+          lastRewardStatusChecked: Date.now(),
+          isLoading: false,
         });
         return false;
       }
@@ -289,9 +345,25 @@ const useCoinsStore = create<CoinsState>((set, get) => ({
   },
 
   // Fetch rewards history
-  fetchRewardsHistory: async () => {
+  fetchRewardsHistory: async (forceRefresh = false) => {
+    const { lastRewardsChecked } = get();
+
+    // Use cache if available and fresh
+    if (
+      !forceRefresh &&
+      lastRewardsChecked > 0 &&
+      Date.now() - lastRewardsChecked < REWARDS_CACHE_EXPIRY &&
+      get().dailyRewardsHistory
+    ) {
+      console.log("[CoinsStore] Using cached rewards history");
+      return true;
+    }
+
     try {
-      set({ isLoading: true, error: null });
+      // Only set loading state if explicitly requested
+      if (forceRefresh) {
+        set({ isLoading: true, error: null });
+      }
 
       // Get token from centralized manager
       const token = getToken();
@@ -313,8 +385,10 @@ const useCoinsStore = create<CoinsState>((set, get) => ({
       if (response.data) {
         set({
           dailyRewardsHistory: response.data,
+          lastRewardsChecked: Date.now(),
           isLoading: false,
         });
+        return true;
       }
     } catch (error) {
       console.error("Error fetching rewards history:", error);
@@ -329,6 +403,53 @@ const useCoinsStore = create<CoinsState>((set, get) => ({
 
   hideDailyRewardsModal: () => {
     set({ isDailyRewardsModalVisible: false });
+  },
+
+  // New properties for cache management
+  lastCoinsChecked: 0,
+  lastRewardsChecked: 0,
+  lastRewardStatusChecked: 0,
+
+  // Implement the method here
+  getRewardsDataSync: () => {
+    return {
+      dailyRewardsHistory: get().dailyRewardsHistory,
+      isDailyRewardAvailable: get().isDailyRewardAvailable,
+      coins: get().coins,
+    };
+  },
+
+  // Add a comprehensive prefetch method for app startup
+  prefetchRewardsData: async () => {
+    try {
+      const token = getToken();
+      if (!token) {
+        console.log("[CoinsStore] No token available for prefetching");
+        return false;
+      }
+
+      console.log("[CoinsStore] Prefetching rewards data during app startup");
+
+      // Run all fetches in parallel for maximum speed
+      const startTime = Date.now();
+      const results = await Promise.allSettled([
+        get().fetchCoinsBalance(),
+        get().checkDailyReward(),
+        get().fetchRewardsHistory(),
+      ]);
+
+      const success = results.every((r) => r.status === "fulfilled");
+      console.log(
+        `[CoinsStore] Prefetch completed in ${Date.now() - startTime}ms (${
+          success ? "success" : "partial"
+        })`
+      );
+
+      return success;
+    } catch (error) {
+      console.error("[CoinsStore] Error prefetching rewards data:", error);
+      return false;
+    }
   },
 }));
 

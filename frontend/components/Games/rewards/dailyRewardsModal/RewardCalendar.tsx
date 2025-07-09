@@ -1,3 +1,5 @@
+// cspell:ignore scrollview subviews
+
 import React, { useRef, useEffect, useMemo } from "react";
 import { View, Text, ScrollView } from "react-native";
 import { rewardStyles } from "@/styles/games/rewards.styles";
@@ -24,51 +26,62 @@ const RewardCalendar: React.FC<RewardCalendarProps> = ({
 }) => {
   const scrollViewRef = useRef<ScrollView>(null);
 
-  // Generate rewards data only once per month/year/history change
-  const rewards = useMemo(() => {
-    const today = new Date();
-    const todayFormatted = formatDateForComparison(today);
-    const rewards: RewardDay[] = [];
-
-    // Extract month and generate days
-    const month = today.getMonth();
-    const daysInMonth = getDaysInMonth(year, month);
-
-    // Prepare claimed dates map for quick lookup
-    const claimedDatesMap: Record<string, boolean> = {};
+  // Create a fast lookup map for claimed dates instead of iterating
+  const claimedDatesMap = useMemo(() => {
+    const map: Record<string, boolean> = {};
     if (dailyRewardsHistory?.claimedDates) {
       dailyRewardsHistory.claimedDates.forEach((claimed: any) => {
         const date = claimed.date.split("T")[0];
-        claimedDatesMap[date] = true;
+        map[date] = true;
       });
     }
+    return map;
+  }, [dailyRewardsHistory]);
 
-    // Generate data for each day in the month
-    for (let dayNum = 1; dayNum <= daysInMonth; dayNum++) {
-      const date = new Date(year, month, dayNum);
-      const dateFormatted = formatDateForComparison(date);
-      const reward = getDayRewardAmount(date);
+  // Add a useDeferredValue for the rewards calculation
+  const rewards = useMemo(() => {
+    console.log("[RewardCalendar] Calculating rewards data");
 
-      // Determine status once
-      let status: "claimed" | "today" | "upcoming" | "missed";
-      if (dateFormatted === todayFormatted) {
-        status = claimedDatesMap[dateFormatted] ? "claimed" : "today";
-      } else if (dateFormatted < todayFormatted) {
-        status = claimedDatesMap[dateFormatted] ? "claimed" : "missed";
-      } else {
-        status = "upcoming";
+    // Move this calculation to a worker or defer it
+    const today = new Date();
+    const todayFormatted = formatDateForComparison(today);
+    const rewards = [];
+
+    // This is the expensive part - calculate quickly
+    const month = today.getMonth();
+    const daysInMonth = getDaysInMonth(year, month);
+
+    // Generate data in batches to avoid blocking
+    const batchSize = 5;
+    for (let i = 0; i < daysInMonth; i += batchSize) {
+      const endIdx = Math.min(i + batchSize, daysInMonth);
+
+      for (let dayNum = i + 1; dayNum <= endIdx; dayNum++) {
+        const date = new Date(year, month, dayNum);
+        const dateFormatted = formatDateForComparison(date);
+        const reward = getDayRewardAmount(date);
+
+        // Determine status once
+        let status: "claimed" | "today" | "upcoming" | "missed";
+        if (dateFormatted === todayFormatted) {
+          status = claimedDatesMap[dateFormatted] ? "claimed" : "today";
+        } else if (dateFormatted < todayFormatted) {
+          status = claimedDatesMap[dateFormatted] ? "claimed" : "missed";
+        } else {
+          status = "upcoming";
+        }
+
+        rewards.push({
+          day: dayNum,
+          date: dateFormatted,
+          reward,
+          status,
+        });
       }
-
-      rewards.push({
-        day: dayNum,
-        date: dateFormatted,
-        reward,
-        status,
-      });
     }
 
     return rewards;
-  }, [year, dailyRewardsHistory]);
+  }, [year, claimedDatesMap]);
 
   // Auto-scroll to today when modal opens and data is ready
   useEffect(() => {
@@ -113,7 +126,6 @@ const RewardCalendar: React.FC<RewardCalendarProps> = ({
         contentContainerStyle={rewardStyles.rewardsGrid}
         removeClippedSubviews={true}
         scrollEventThrottle={16}
-        initialNumToRender={10}
       >
         {rewards.map((item, index) => (
           <RewardDayItem key={`day-${item.day}`} item={item} />
@@ -123,4 +135,29 @@ const RewardCalendar: React.FC<RewardCalendarProps> = ({
   );
 };
 
+// Use React.lazy to defer rendering this heavy component
+const LazyRewardCalendar = React.lazy(() => Promise.resolve({
+  default: RewardCalendar
+}));
+
 export default React.memo(RewardCalendar);
+
+// In the DailyRewardsModal render function, replace the calendar section with:
+// {dailyRewardsHistory && contentReady && (
+//   <React.Suspense fallback={<View style={styles.calendarPlaceholder} />}>
+//     <LazyRewardCalendar
+//       monthName={dateInfo.monthName}
+//       year={dateInfo.year}
+//       visible={visible && contentReady}
+//       dailyRewardsHistory={dailyRewardsHistory}
+//     />
+//   </React.Suspense>
+// )}
+
+// Add this style:
+// calendarPlaceholder: {
+//   height: 120,
+//   backgroundColor: 'rgba(255,255,255,0.1)',
+//   borderRadius: 16,
+//   marginVertical: 16,
+// },

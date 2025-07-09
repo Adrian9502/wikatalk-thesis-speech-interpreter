@@ -105,9 +105,38 @@ export default function useGameDashboard() {
     });
   }, []);
 
+  // Update the openRewardsModal function to be more immediate
   const openRewardsModal = useCallback(() => {
-    showDailyRewardsModal();
-  }, [showDailyRewardsModal]);
+    // STEP 1: Show modal FIRST - highest priority
+    requestAnimationFrame(() => {
+      useCoinsStore.getState().showDailyRewardsModal();
+    });
+
+    // STEP 2: Background data loading - lower priority
+    setTimeout(() => {
+      const startTime = Date.now();
+
+      // Only use this loading state for UI elements outside the modal
+      setIsLoading(true);
+
+      // Load data in background AFTER showing modal
+      Promise.all([
+        useCoinsStore.getState().fetchRewardsHistory(),
+        useCoinsStore.getState().checkDailyReward(),
+      ])
+        .then(() => {
+          console.log(
+            `[RewardsModal] Data loaded in background in ${Date.now() - startTime}ms`
+          );
+        })
+        .catch((error) => {
+          console.error("[RewardsModal] Background load error:", error);
+        })
+        .finally(() => {
+          setIsLoading(false);
+        });
+    }, 100);
+  }, []);
 
   // Add retry function
   const retryDataLoading = useCallback(async () => {

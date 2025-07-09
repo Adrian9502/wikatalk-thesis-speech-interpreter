@@ -1,4 +1,10 @@
-import React, { useState, useCallback, useRef, useEffect } from "react";
+import React, {
+  useState,
+  useCallback,
+  useRef,
+  useEffect,
+  useMemo,
+} from "react";
 import {
   Modal,
   View,
@@ -6,30 +12,30 @@ import {
   StyleSheet,
   TouchableOpacity,
   Platform,
+  ActivityIndicator,
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { X } from "react-native-feather";
-import Animated, {
-  useAnimatedStyle,
-  useSharedValue,
-  withTiming,
-  runOnJS,
-} from "react-native-reanimated";
+import { InteractionManager } from "react-native";
 import LottieView from "lottie-react-native";
 import useCoinsStore from "@/store/games/useCoinsStore";
 import TodayRewardCard from "./dailyRewardsModal/TodayRewardCard";
 import RewardCalendar from "./dailyRewardsModal/RewardCalendar";
 import ClaimButton from "./dailyRewardsModal/ClaimButton";
 import BalanceCard from "./dailyRewardsModal/BalanceCard";
-import {
-  getDayRewardAmount,
-  formatDateForComparison,
-} from "@/hooks/useRewards";
+import { getDayRewardAmount } from "@/hooks/useRewards";
 
 interface DailyRewardsModalProps {
   visible: boolean;
   onClose: () => void;
 }
+
+// The most minimal possible content for instant display
+const InitialLoadingView = React.memo(() => (
+  <View style={styles.initialLoadingContainer}>
+    <ActivityIndicator size="large" color="#fff" />
+  </View>
+));
 
 const DailyRewardsModal: React.FC<DailyRewardsModalProps> = ({
   visible,
@@ -39,83 +45,106 @@ const DailyRewardsModal: React.FC<DailyRewardsModalProps> = ({
   const lottieRef = useRef<LottieView>(null);
   const [claimAnimation, setClaimAnimation] = useState(false);
   const [claimedToday, setClaimedToday] = useState(false);
-  const [modalVisible, setModalVisible] = useState(visible);
+  const [modalVisible, setModalVisible] = useState(false);
+
+  // Two-phase rendering states
+  const [initialRender, setInitialRender] = useState(true);
+  const [contentReady, setContentReady] = useState(false);
+  const [calendarReady, setCalendarReady] = useState(false);
+  const [renderStartTime] = useState(() => Date.now());
 
   // Store
   const {
     coins,
     dailyRewardsHistory,
-    fetchRewardsHistory,
     claimDailyReward,
-    checkDailyReward,
     isDailyRewardAvailable,
+    getRewardsDataSync,
   } = useCoinsStore();
 
-  // Update modal visibility to match prop
-  useEffect(() => {
-    if (visible) {
-      setModalVisible(true);
-    }
-  }, [visible]);
-
-  // Prefetch data when component mounts
-  useEffect(() => {
-    // Load rewards data in the background when component mounts
-    const prefetchData = async () => {
-      await Promise.all([fetchRewardsHistory(), checkDailyReward()]);
+  // Pre-calculate essential data
+  const todayReward = useMemo(() => getDayRewardAmount(new Date()), []);
+  const dateInfo = useMemo(() => {
+    const now = new Date();
+    return {
+      monthName: now.toLocaleString("default", { month: "long" }),
+      year: now.getFullYear(),
     };
-
-    prefetchData();
   }, []);
 
-  // Reset claim state when modal visibility changes
+  // PHASE 1: Show modal immediately
   useEffect(() => {
     if (visible) {
-      // Just check if reward is available, don't reload everything
-      checkDailyReward();
-      setClaimedToday(false);
-    }
-  }, [visible]);
+      console.log("[DailyRewardsModal] Show modal immediately");
+      setModalVisible(true);
 
-  // Update local claimed state based on global state
-  useEffect(() => {
-    if (!isDailyRewardAvailable) {
-      setClaimedToday(true);
+      // Reset states
+      setInitialRender(true);
+      setContentReady(false);
+      setCalendarReady(false);
+
+      // IMPORTANT: Use cached data immediately if available
+      const { dailyRewardsHistory, isDailyRewardAvailable } =
+        getRewardsDataSync();
+      setClaimedToday(!isDailyRewardAvailable);
+
+      // Use InteractionManager to defer rendering until after modal animation
+      InteractionManager.runAfterInteractions(() => {
+        // First phase: Show basic content (header, today card, claim button)
+        setTimeout(() => {
+          setInitialRender(false);
+          setContentReady(true);
+
+          // Second phase: Delay heavy calendar rendering
+          setTimeout(() => {
+            setCalendarReady(true);
+            console.log(
+              `[DailyRewardsModal] Full render completed in ${
+                Date.now() - renderStartTime
+              }ms`
+            );
+          }, 50);
+        }, 50);
+      });
+    } else {
+      setModalVisible(false);
     }
+  }, [visible, getRewardsDataSync]);
+
+  // Update claimed state when reward status changes
+  useEffect(() => {
+    setClaimedToday(!isDailyRewardAvailable);
   }, [isDailyRewardAvailable]);
 
-  // Memoized claim handler
+  // Optimistic UI update for claiming
   const handleClaimReward = useCallback(async () => {
+    // Update UI immediately
+    setClaimedToday(true);
+    setClaimAnimation(true);
+
+    // Make the API call in the background
     const rewardAmount = await claimDailyReward();
-    if (rewardAmount) {
-      setClaimAnimation(true);
-      setClaimedToday(true);
-      // Use timeout for cleanup
-      setTimeout(() => setClaimAnimation(false), 2000);
+
+    // Handle edge cases
+    if (!rewardAmount) {
+      setClaimedToday(false);
+      setClaimAnimation(false);
     }
+
+    // Hide animation after delay
+    setTimeout(() => setClaimAnimation(false), 2000);
   }, [claimDailyReward]);
 
-  // Handle modal close with delay
+  // Clean modal close
   const handleClose = useCallback(() => {
-    // First hide the modal
     setModalVisible(false);
-
-    // Then call the parent's onClose after animation
-    setTimeout(() => {
-      onClose();
-    }, 200);
+    setTimeout(() => onClose(), 200);
   }, [onClose]);
 
-  // Get today's reward amount
-  const todayReward = getDayRewardAmount(new Date());
-
-  // Get date info once, don't recalculate
-  const now = new Date();
-  const monthName = now.toLocaleString("default", { month: "long" });
-  const year = now.getFullYear();
-
+  // Skip rendering completely if not visible
   if (!visible && !modalVisible) return null;
 
+  const loading = true;
   return (
     <Modal
       visible={modalVisible}
@@ -123,53 +152,71 @@ const DailyRewardsModal: React.FC<DailyRewardsModalProps> = ({
       statusBarTranslucent
       animationType="fade"
       onRequestClose={handleClose}
+      hardwareAccelerated={true}
     >
       <View style={styles.overlay}>
         <View style={styles.modalContainer}>
-          <LinearGradient
-            colors={["#3B4DA3", "#251D79"]}
-            start={{ x: 0, y: 0 }}
-            end={{ x: 1, y: 1 }}
-            style={styles.gradientBackground}
-          >
-            {/* Header */}
-            <View style={styles.header}>
-              <Text style={styles.title}>Daily Rewards</Text>
-              <TouchableOpacity
-                style={styles.closeButton}
-                onPress={handleClose}
-              >
-                <X width={18} height={18} color="#FFF" />
-              </TouchableOpacity>
-            </View>
+          {initialRender ? (
+            <InitialLoadingView />
+          ) : (
+            <LinearGradient
+              colors={["#3B4DA3", "#251D79"]}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 1 }}
+              style={styles.gradientBackground}
+            >
+              {/* Header - Always show immediately */}
+              <View style={styles.header}>
+                <Text style={styles.title}>Daily Rewards</Text>
+                <TouchableOpacity
+                  style={styles.closeButton}
+                  onPress={handleClose}
+                >
+                  <X width={18} height={18} color="#FFF" />
+                </TouchableOpacity>
+              </View>
 
-            {/* Today's Reward Card */}
-            <TodayRewardCard
-              rewardAmount={todayReward}
-              isAvailable={isDailyRewardAvailable}
-              claimedToday={claimedToday}
-            />
+              {/* PHASE 1: Essential content */}
+              {contentReady && (
+                <>
+                  {/* Today's Reward Card */}
+                  <TodayRewardCard
+                    rewardAmount={todayReward}
+                    isAvailable={isDailyRewardAvailable}
+                    claimedToday={claimedToday}
+                  />
 
-            {/* Rewards Calendar */}
-            <RewardCalendar
-              monthName={monthName}
-              year={year}
-              visible={visible}
-              dailyRewardsHistory={dailyRewardsHistory}
-            />
+                  {/* PHASE 2: Heavy calendar component */}
+                  {calendarReady ? (
+                    dailyRewardsHistory && (
+                      <RewardCalendar
+                        monthName={dateInfo.monthName}
+                        year={dateInfo.year}
+                        visible={visible && calendarReady}
+                        dailyRewardsHistory={dailyRewardsHistory}
+                      />
+                    )
+                  ) : (
+                    <View style={styles.calendarPlaceholder}>
+                      <ActivityIndicator color="#FFD700" size="small" />
+                    </View>
+                  )}
 
-            {/* Claim Button */}
-            <ClaimButton
-              isAvailable={isDailyRewardAvailable}
-              claimedToday={claimedToday}
-              onClaim={handleClaimReward}
-            />
+                  {/* Claim Button */}
+                  <ClaimButton
+                    isAvailable={isDailyRewardAvailable}
+                    claimedToday={claimedToday}
+                    onClaim={handleClaimReward}
+                  />
 
-            {/* Balance */}
-            <BalanceCard balance={coins} />
-          </LinearGradient>
+                  {/* Balance */}
+                  <BalanceCard balance={coins} />
+                </>
+              )}
+            </LinearGradient>
+          )}
 
-          {/* Claim Animation - Only render when needed */}
+          {/* Claim Animation */}
           {claimAnimation && (
             <View style={styles.animationOverlay}>
               <LottieView
@@ -178,7 +225,6 @@ const DailyRewardsModal: React.FC<DailyRewardsModalProps> = ({
                 autoPlay
                 loop={false}
                 style={styles.coinAnimation}
-                cacheStrategy="strong"
                 onAnimationFinish={() => setClaimAnimation(false)}
               />
             </View>
@@ -189,7 +235,6 @@ const DailyRewardsModal: React.FC<DailyRewardsModalProps> = ({
   );
 };
 
-// Optimized styles with cached values
 const styles = StyleSheet.create({
   overlay: {
     flex: 1,
@@ -200,7 +245,7 @@ const styles = StyleSheet.create({
   modalContainer: {
     width: "90%",
     maxWidth: 380,
-    borderRadius: 20,
+    borderRadius: 16,
     overflow: "hidden",
     ...Platform.select({
       ios: {
@@ -216,6 +261,27 @@ const styles = StyleSheet.create({
   },
   gradientBackground: {
     padding: 20,
+  },
+  initialLoadingContainer: {
+    height: 400,
+    backgroundColor: "#3B4DA3",
+    justifyContent: "center",
+    alignItems: "center",
+    width: "90%",
+    maxWidth: 380,
+    borderRadius: 16,
+    overflow: "hidden",
+    ...Platform.select({
+      ios: {
+        shadowColor: "#000",
+        shadowOffset: { width: 0, height: 10 },
+        shadowOpacity: 0.3,
+        shadowRadius: 15,
+      },
+      android: {
+        elevation: 10,
+      },
+    }),
   },
   header: {
     flexDirection: "row",
@@ -246,11 +312,19 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     backgroundColor: "rgba(0,0,0,0.4)",
-    borderRadius: 20,
+    borderRadius: 16,
   },
   coinAnimation: {
     width: 250,
     height: 250,
+  },
+  calendarPlaceholder: {
+    height: 120,
+    backgroundColor: "rgba(255,255,255,0.1)",
+    borderRadius: 16,
+    marginVertical: 16,
+    justifyContent: "center",
+    alignItems: "center",
   },
 });
 
