@@ -131,7 +131,7 @@ export const ProgressModalProvider: React.FC<{ children: React.ReactNode }> = ({
                 start={{ x: 0, y: 0 }}
                 end={{ x: 1, y: 1 }}
               >
-                <ActivityIndicator size="large" color="#fff" />
+                <ActivityIndicator size="small" color="#fff" />
                 <Text style={styles.loadingText}>Loading progress data...</Text>
               </LinearGradient>
             )}
@@ -182,8 +182,8 @@ const styles = StyleSheet.create({
   },
   loadingText: {
     color: "#fff",
-    marginTop: 16,
-    fontFamily: "Poppins-Medium",
+    marginTop: 13,
+    fontFamily: "Poppins-Regular",
     fontSize: 16,
   },
 });

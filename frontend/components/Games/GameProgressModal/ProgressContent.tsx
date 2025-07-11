@@ -88,7 +88,7 @@ const ProgressContent: React.FC<ProgressContentProps> = ({
       // Fix the type error by explicitly typing the section
       sections.push({
         title: "Recent Activity",
-        data: progressData.recentAttempts.slice(0, 5) as any[], // Use type assertion here
+        data: progressData.recentAttempts.slice(0, 5) as any[],
         type: "attempts",
       });
     }
@@ -132,16 +132,6 @@ const ProgressContent: React.FC<ProgressContentProps> = ({
     },
     [getDifficultyColor, getDifficultyStars]
   );
-
-  // Loading state
-  if (isLoading) {
-    return (
-      <View style={styles.loadingContainer}>
-        <ActivityIndicator color="#fff" size="small" />
-        <Text style={styles.loadingText}>Loading progress data...</Text>
-      </View>
-    );
-  }
 
   // Error/empty state
   if (!progressData) {

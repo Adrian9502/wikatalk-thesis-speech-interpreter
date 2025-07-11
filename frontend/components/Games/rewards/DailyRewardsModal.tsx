@@ -30,13 +30,6 @@ interface DailyRewardsModalProps {
   onClose: () => void;
 }
 
-// The most minimal possible content for instant display
-const InitialLoadingView = React.memo(() => (
-  <View style={styles.initialLoadingContainer}>
-    <ActivityIndicator size="large" color="#fff" />
-  </View>
-));
-
 const DailyRewardsModal: React.FC<DailyRewardsModalProps> = ({
   visible,
   onClose,
@@ -47,10 +40,8 @@ const DailyRewardsModal: React.FC<DailyRewardsModalProps> = ({
   const [claimedToday, setClaimedToday] = useState(false);
   const [modalVisible, setModalVisible] = useState(false);
 
-  // Two-phase rendering states
-  const [initialRender, setInitialRender] = useState(true);
-  const [contentReady, setContentReady] = useState(false);
-  const [calendarReady, setCalendarReady] = useState(false);
+  // Combined loading state - only one loading state for everything
+  const [isLoading, setIsLoading] = useState(true);
   const [renderStartTime] = useState(() => Date.now());
 
   // Store
@@ -72,16 +63,12 @@ const DailyRewardsModal: React.FC<DailyRewardsModalProps> = ({
     };
   }, []);
 
-  // PHASE 1: Show modal immediately
+  // Show modal immediately with optimized loading
   useEffect(() => {
     if (visible) {
       console.log("[DailyRewardsModal] Show modal immediately");
       setModalVisible(true);
-
-      // Reset states
-      setInitialRender(true);
-      setContentReady(false);
-      setCalendarReady(false);
+      setIsLoading(true);
 
       // IMPORTANT: Use cached data immediately if available
       const { dailyRewardsHistory, isDailyRewardAvailable } =
@@ -90,26 +77,20 @@ const DailyRewardsModal: React.FC<DailyRewardsModalProps> = ({
 
       // Use InteractionManager to defer rendering until after modal animation
       InteractionManager.runAfterInteractions(() => {
-        // First phase: Show basic content (header, today card, claim button)
+        // Only one phase: once everything is ready, stop loading
         setTimeout(() => {
-          setInitialRender(false);
-          setContentReady(true);
-
-          // Second phase: Delay heavy calendar rendering
-          setTimeout(() => {
-            setCalendarReady(true);
-            console.log(
-              `[DailyRewardsModal] Full render completed in ${
-                Date.now() - renderStartTime
-              }ms`
-            );
-          }, 50);
-        }, 50);
+          setIsLoading(false);
+          console.log(
+            `[DailyRewardsModal] Full render completed in ${
+              Date.now() - renderStartTime
+            }ms`
+          );
+        }, 100);
       });
     } else {
       setModalVisible(false);
     }
-  }, [visible, getRewardsDataSync]);
+  }, [visible, getRewardsDataSync, renderStartTime]);
 
   // Update claimed state when reward status changes
   useEffect(() => {
@@ -144,7 +125,6 @@ const DailyRewardsModal: React.FC<DailyRewardsModalProps> = ({
   // Skip rendering completely if not visible
   if (!visible && !modalVisible) return null;
 
-  const loading = true;
   return (
     <Modal
       visible={modalVisible}
@@ -156,65 +136,61 @@ const DailyRewardsModal: React.FC<DailyRewardsModalProps> = ({
     >
       <View style={styles.overlay}>
         <View style={styles.modalContainer}>
-          {initialRender ? (
-            <InitialLoadingView />
-          ) : (
-            <LinearGradient
-              colors={["#3B4DA3", "#251D79"]}
-              start={{ x: 0, y: 0 }}
-              end={{ x: 1, y: 1 }}
-              style={styles.gradientBackground}
-            >
-              {/* Header - Always show immediately */}
-              <View style={styles.header}>
-                <Text style={styles.title}>Daily Rewards</Text>
-                <TouchableOpacity
-                  style={styles.closeButton}
-                  onPress={handleClose}
-                >
-                  <X width={18} height={18} color="#FFF" />
-                </TouchableOpacity>
+          <LinearGradient
+            colors={["#3B4DA3", "#251D79"]}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 1 }}
+            style={styles.gradientBackground}
+          >
+            {/* Header - Always show immediately */}
+            <View style={styles.header}>
+              <Text style={styles.title}>Daily Rewards</Text>
+              <TouchableOpacity
+                style={styles.closeButton}
+                onPress={handleClose}
+              >
+                <X width={18} height={18} color="#FFF" />
+              </TouchableOpacity>
+            </View>
+
+            {isLoading ? (
+              <View style={styles.fullHeightLoader}>
+                <ActivityIndicator color="#fff" size="small" />
+                <Text style={styles.loadingText}>Loading...</Text>
               </View>
+            ) : (
+              <>
+                {/* Today's Reward Card */}
+                <TodayRewardCard
+                  rewardAmount={todayReward}
+                  isAvailable={isDailyRewardAvailable}
+                  claimedToday={claimedToday}
+                />
 
-              {/* PHASE 1: Essential content */}
-              {contentReady && (
-                <>
-                  {/* Today's Reward Card */}
-                  <TodayRewardCard
-                    rewardAmount={todayReward}
-                    isAvailable={isDailyRewardAvailable}
-                    claimedToday={claimedToday}
+                {/* Calendar section - no separate loading indicator */}
+                {dailyRewardsHistory ? (
+                  <RewardCalendar
+                    monthName={dateInfo.monthName}
+                    year={dateInfo.year}
+                    visible={visible}
+                    dailyRewardsHistory={dailyRewardsHistory}
                   />
+                ) : (
+                  <View style={styles.calendarPlaceholder} />
+                )}
 
-                  {/* PHASE 2: Heavy calendar component */}
-                  {calendarReady ? (
-                    dailyRewardsHistory && (
-                      <RewardCalendar
-                        monthName={dateInfo.monthName}
-                        year={dateInfo.year}
-                        visible={visible && calendarReady}
-                        dailyRewardsHistory={dailyRewardsHistory}
-                      />
-                    )
-                  ) : (
-                    <View style={styles.calendarPlaceholder}>
-                      <ActivityIndicator color="#FFD700" size="small" />
-                    </View>
-                  )}
+                {/* Claim Button */}
+                <ClaimButton
+                  isAvailable={isDailyRewardAvailable}
+                  claimedToday={claimedToday}
+                  onClaim={handleClaimReward}
+                />
 
-                  {/* Claim Button */}
-                  <ClaimButton
-                    isAvailable={isDailyRewardAvailable}
-                    claimedToday={claimedToday}
-                    onClaim={handleClaimReward}
-                  />
-
-                  {/* Balance */}
-                  <BalanceCard balance={coins} />
-                </>
-              )}
-            </LinearGradient>
-          )}
+                {/* Balance */}
+                <BalanceCard balance={coins} />
+              </>
+            )}
+          </LinearGradient>
 
           {/* Claim Animation */}
           {claimAnimation && (
@@ -262,27 +238,6 @@ const styles = StyleSheet.create({
   gradientBackground: {
     padding: 20,
   },
-  initialLoadingContainer: {
-    height: 400,
-    backgroundColor: "#3B4DA3",
-    justifyContent: "center",
-    alignItems: "center",
-    width: "90%",
-    maxWidth: 380,
-    borderRadius: 16,
-    overflow: "hidden",
-    ...Platform.select({
-      ios: {
-        shadowColor: "#000",
-        shadowOffset: { width: 0, height: 10 },
-        shadowOpacity: 0.3,
-        shadowRadius: 15,
-      },
-      android: {
-        elevation: 10,
-      },
-    }),
-  },
   header: {
     flexDirection: "row",
     justifyContent: "center",
@@ -318,11 +273,21 @@ const styles = StyleSheet.create({
     width: 250,
     height: 250,
   },
+  loadingText: {
+    color: "#fff",
+    marginTop: 13,
+    fontFamily: "Poppins-Regular",
+    fontSize: 16,
+  },
   calendarPlaceholder: {
     height: 120,
     backgroundColor: "rgba(255,255,255,0.1)",
     borderRadius: 16,
     marginVertical: 16,
+  },
+  fullHeightLoader: {
+    height: 420,
+    marginTop: 20,
     justifyContent: "center",
     alignItems: "center",
   },
