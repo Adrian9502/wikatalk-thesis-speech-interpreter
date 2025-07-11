@@ -5,6 +5,7 @@ import { LinearGradient } from "expo-linear-gradient";
 import { Target, Award } from "react-native-feather";
 import { SectionHeader } from "@/components/games/common/AnimatedSection";
 import useProgressStore from "@/store/games/useProgressStore";
+import { GAME_GRADIENTS, GAME_MODES } from "@/constant/gameConstants";
 
 const ProgressStats = React.memo(() => {
   // Get progress data from the centralized store with lastUpdated
@@ -37,7 +38,7 @@ const ProgressStats = React.memo(() => {
       <View style={styles.statsGrid}>
         <View style={styles.quickStatCard}>
           <LinearGradient
-            colors={["#FF6B6B", "#FF8E8E"]}
+            colors={GAME_GRADIENTS[GAME_MODES.FILL_BLANKS]}
             style={styles.statCardGradient}
           >
             <View style={styles.statIconContainer}>
@@ -50,7 +51,7 @@ const ProgressStats = React.memo(() => {
 
         <View style={styles.quickStatCard}>
           <LinearGradient
-            colors={["#4ECDC4", "#44A08D"]}
+            colors={GAME_GRADIENTS[GAME_MODES.MULTIPLE_CHOICE]}
             style={styles.statCardGradient}
           >
             <View style={styles.statIconContainer}>

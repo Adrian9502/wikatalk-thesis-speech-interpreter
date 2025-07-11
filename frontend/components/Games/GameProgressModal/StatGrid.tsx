@@ -28,7 +28,7 @@ const StatGrid: React.FC<StatGridProps> = ({ progressData }) => {
         label="Total Attempts"
       />
       <StatBox
-        icon={<Award width={20} height={20} color="#9C27B0" />}
+        icon={<Award width={20} height={20} color="#FFD700" />}
         value={progressData.correctAttempts}
         label="Correct"
       />
