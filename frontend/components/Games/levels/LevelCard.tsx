@@ -62,12 +62,7 @@ const LevelCard: React.FC<LevelCardProps> = React.memo(
     const levelNumber = levelString.replace(/^Level\s+/, "");
 
     return (
-      <Animatable.View
-        animation="fadeIn"
-        duration={500}
-        delay={animationDelay}
-        useNativeDriver
-      >
+      <>
         <Animated.View style={{ transform: [{ scale: scaleAnim }] }}>
           <TouchableOpacity
             style={styles.levelCard}
@@ -163,7 +158,7 @@ const LevelCard: React.FC<LevelCardProps> = React.memo(
             </LinearGradient>
           </TouchableOpacity>
         </Animated.View>
-      </Animatable.View>
+      </>
     );
   },
   // Enhanced memo comparison

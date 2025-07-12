@@ -9,8 +9,7 @@ export const useLevelData = (gameMode: string | string[] | undefined) => {
   const [showLevels, setShowLevels] = useState(false);
 
   const { fetchQuestionsByMode, questions, isLoading, error } = useGameStore();
-  const { progress: globalProgress, refreshProgress } =
-    useUserProgress("global");
+  const { progress: globalProgress } = useUserProgress("global");
 
   // PERFORMANCE FIX: More efficient refs
   const hasInitializedRef = useRef(false);
@@ -53,41 +52,39 @@ export const useLevelData = (gameMode: string | string[] | undefined) => {
     fetchData();
   }, [fetchData]);
 
-  // PERFORMANCE FIX: Throttled level processing
+  // Separate effect to handle showLevels state
+  useEffect(() => {
+    if (levels.length > 0 && !showLevels) {
+      const timer = setTimeout(() => setShowLevels(true), 100);
+      return () => clearTimeout(timer);
+    }
+  }, [levels.length, showLevels]);
+
   useEffect(() => {
     if (!gameMode || !questions || isProcessingRef.current) return;
-
     const progressArray = Array.isArray(globalProgress) ? globalProgress : [];
-    const currentProgressHash = getProgressHash(progressArray);
-
-    // Only process if there are actual changes
+    const currentProgressHash = getProgressHash(progressArray); // Only process if there are actual changes
     const hasProgressChanged =
       currentProgressHash !== lastProgressHashRef.current;
     const hasNoLevels = levelsRef.current.length === 0;
-
     if (hasNoLevels || hasProgressChanged) {
       isProcessingRef.current = true;
-
       try {
         const safeGameMode =
           typeof gameMode === "string" ? gameMode : String(gameMode);
-
         console.log(
           `[useLevelData] Processing levels for ${safeGameMode} (hash changed: ${hasProgressChanged})`
         );
-
         const currentLevels = convertQuizToLevels(
           safeGameMode,
           questions as QuizQuestions,
           progressArray
         );
-
         // PERFORMANCE FIX: More efficient comparison
         const statusChanges = currentLevels.filter((newLevel, index) => {
           const oldLevel = levelsRef.current[index];
           return !oldLevel || oldLevel.status !== newLevel.status;
         });
-
         if (statusChanges.length > 0 || hasNoLevels) {
           console.log(
             `[useLevelData] ${statusChanges.length} level status changes detected`
@@ -95,10 +92,9 @@ export const useLevelData = (gameMode: string | string[] | undefined) => {
           setLevels(currentLevels);
           levelsRef.current = currentLevels;
           lastProgressHashRef.current = currentProgressHash;
-
-          // Show levels with a small delay
-          if (currentLevels.length > 0) {
-            setTimeout(() => setShowLevels(true), 100);
+          // Show levels immediately for first load, no delay
+          if (currentLevels.length > 0 && hasNoLevels) {
+            setShowLevels(true);
           }
         } else {
           console.log(`[useLevelData] No level status changes detected`);
@@ -112,25 +108,6 @@ export const useLevelData = (gameMode: string | string[] | undefined) => {
       }
     }
   }, [gameMode, questions, globalProgress, getProgressHash]);
-
-  // PERFORMANCE FIX: Throttled refresh function
-  const refreshLevels = useCallback(async () => {
-    if (isProcessingRef.current) {
-      console.log(`[useLevelData] Skipping refresh - already processing`);
-      return;
-    }
-
-    console.log(`[useLevelData] Manually refreshing levels`);
-    try {
-      // Force refresh the global progress
-      await refreshProgress();
-
-      // Reset the hash to force level reprocessing
-      lastProgressHashRef.current = "";
-    } catch (error) {
-      console.error("Error refreshing levels:", error);
-    }
-  }, [refreshProgress]);
 
   const completionPercentage =
     levels.length > 0
@@ -161,6 +138,5 @@ export const useLevelData = (gameMode: string | string[] | undefined) => {
     error,
     completionPercentage,
     handleRetry,
-    refreshLevels,
   };
 };

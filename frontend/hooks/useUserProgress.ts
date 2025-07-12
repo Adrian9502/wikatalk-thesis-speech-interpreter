@@ -6,10 +6,12 @@ import { UserProgress } from "@/types/userProgress";
 const API_URL = process.env.EXPO_PUBLIC_BACKEND_URL || "http://localhost:5000";
 
 export const useUserProgress = (quizId: string | number | "global") => {
-  const [progress, setProgress] = useState<UserProgress | UserProgress[] | null>(null);
+  const [progress, setProgress] = useState<
+    UserProgress | UserProgress[] | null
+  >(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  
+
   // Use refs to prevent unnecessary API calls and preserve state
   const hasInitializedRef = useRef(false);
   const lastQuizIdRef = useRef<string | number | "global" | null>(null);
@@ -19,54 +21,102 @@ export const useUserProgress = (quizId: string | number | "global") => {
   const formatQuizId = useCallback((id: string | number): string => {
     if (id === "global") return "global";
 
-    const numericId = typeof id === "string" ? id.replace(/^n-/, "") : String(id);
+    const numericId =
+      typeof id === "string" ? id.replace(/^n-/, "") : String(id);
     return `n-${numericId}`;
   }, []);
 
   // Create default progress object
-  const createDefaultProgress = useCallback((id: string | number): UserProgress => {
-    return {
-      userId: "",
-      quizId: String(id),
-      exercisesCompleted: 0,
-      totalExercises: 1,
-      completed: false,
-      totalTimeSpent: 0,
-      attempts: [],
-    };
-  }, []);
+  const createDefaultProgress = useCallback(
+    (id: string | number): UserProgress => {
+      return {
+        userId: "",
+        quizId: String(id),
+        exercisesCompleted: 0,
+        totalExercises: 1,
+        completed: false,
+        totalTimeSpent: 0,
+        attempts: [],
+      };
+    },
+    []
+  );
 
   // ENHANCED: Stable fetch function with caching
-  const fetchProgress = useCallback(async (forceRefresh: boolean = false) => {
-    const cacheKey = String(quizId);
-    
-    // Return cached data if available and not forcing refresh
-    if (!forceRefresh && progressCacheRef.current[cacheKey] && lastQuizIdRef.current === quizId) {
-      console.log(`[useUserProgress] Using cached data for ${cacheKey}`);
-      setProgress(progressCacheRef.current[cacheKey]);
-      return progressCacheRef.current[cacheKey];
-    }
+  const fetchProgress = useCallback(
+    async (forceRefresh: boolean = false) => {
+      const cacheKey = String(quizId);
 
-    try {
-      setIsLoading(true);
-      setError(null);
-
-      const token = getToken();
-      if (!token) {
-        console.log("[useUserProgress] No auth token available");
-        const defaultResult = quizId === "global" ? [] : createDefaultProgress(quizId);
-        setProgress(defaultResult);
-        progressCacheRef.current[cacheKey] = defaultResult;
-        return defaultResult;
+      // Return cached data if available and not forcing refresh
+      if (
+        !forceRefresh &&
+        progressCacheRef.current[cacheKey] &&
+        lastQuizIdRef.current === quizId
+      ) {
+        console.log(`[useUserProgress] Using cached data for ${cacheKey}`);
+        setProgress(progressCacheRef.current[cacheKey]);
+        return progressCacheRef.current[cacheKey];
       }
 
-      // Handle global progress fetch
-      if (quizId === "global") {
-        console.log(`[useUserProgress] Fetching all progress (force: ${forceRefresh})`);
+      try {
+        setIsLoading(true);
+        setError(null);
+
+        const token = getToken();
+        if (!token) {
+          console.log("[useUserProgress] No auth token available");
+          const defaultResult =
+            quizId === "global" ? [] : createDefaultProgress(quizId);
+          setProgress(defaultResult);
+          progressCacheRef.current[cacheKey] = defaultResult;
+          return defaultResult;
+        }
+
+        // Handle global progress fetch
+        if (quizId === "global") {
+          console.log(
+            `[useUserProgress] Fetching all progress (force: ${forceRefresh})`
+          );
+
+          const response = await axios({
+            method: "get",
+            url: `${API_URL}/api/userprogress`,
+            headers: {
+              Authorization: `Bearer ${token}`,
+              "Content-Type": "application/json",
+            },
+            timeout: 10000,
+          });
+
+          if (response.data.success) {
+            console.log(
+              `[useUserProgress] Successfully fetched global progress: ${response.data.progressEntries.length} entries`
+            );
+            const progressData = response.data.progressEntries;
+
+            setProgress(progressData);
+            progressCacheRef.current[cacheKey] = progressData;
+            lastQuizIdRef.current = quizId;
+            hasInitializedRef.current = true;
+
+            return progressData;
+          }
+
+          const emptyResult: UserProgress[] = [];
+          setProgress(emptyResult);
+          progressCacheRef.current[cacheKey] = emptyResult;
+          return emptyResult;
+        }
+
+        // Normal case - specific quiz ID
+        const formattedId = formatQuizId(quizId);
+        console.log(
+          `[useUserProgress] Fetching progress for: ${formattedId} (force: ${forceRefresh})`
+        );
 
         const response = await axios({
           method: "get",
-          url: `${API_URL}/api/userprogress`,
+          url: `${API_URL}/api/userprogress/${formattedId}`,
           headers: {
             Authorization: `Bearer ${token}`,
             "Content-Type": "application/json",
@@ -75,161 +125,135 @@ export const useUserProgress = (quizId: string | number | "global") => {
         });
 
         if (response.data.success) {
-          console.log(`[useUserProgress] Successfully fetched global progress: ${response.data.progressEntries.length} entries`);
-          const progressData = response.data.progressEntries;
-          
+          console.log(`[useUserProgress] Successfully fetched progress`);
+          const progressData = response.data.progress;
+
           setProgress(progressData);
           progressCacheRef.current[cacheKey] = progressData;
           lastQuizIdRef.current = quizId;
           hasInitializedRef.current = true;
-          
+
           return progressData;
         }
 
-        const emptyResult: UserProgress[] = [];
-        setProgress(emptyResult);
-        progressCacheRef.current[cacheKey] = emptyResult;
-        return emptyResult;
+        const defaultResult = createDefaultProgress(quizId);
+        setProgress(defaultResult);
+        progressCacheRef.current[cacheKey] = defaultResult;
+        return defaultResult;
+      } catch (err: any) {
+        console.error(`[useUserProgress] Error:`, err.message);
+        setError(err.message);
+
+        const defaultResult =
+          quizId === "global" ? [] : createDefaultProgress(quizId);
+        setProgress(defaultResult);
+        progressCacheRef.current[cacheKey] = defaultResult;
+        return defaultResult;
+      } finally {
+        setIsLoading(false);
       }
-
-      // Normal case - specific quiz ID
-      const formattedId = formatQuizId(quizId);
-      console.log(`[useUserProgress] Fetching progress for: ${formattedId} (force: ${forceRefresh})`);
-
-      const response = await axios({
-        method: "get",
-        url: `${API_URL}/api/userprogress/${formattedId}`,
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
-        },
-        timeout: 10000,
-      });
-
-      if (response.data.success) {
-        console.log(`[useUserProgress] Successfully fetched progress`);
-        const progressData = response.data.progress;
-        
-        setProgress(progressData);
-        progressCacheRef.current[cacheKey] = progressData;
-        lastQuizIdRef.current = quizId;
-        hasInitializedRef.current = true;
-        
-        return progressData;
-      }
-
-      const defaultResult = createDefaultProgress(quizId);
-      setProgress(defaultResult);
-      progressCacheRef.current[cacheKey] = defaultResult;
-      return defaultResult;
-    } catch (err: any) {
-      console.error(`[useUserProgress] Error:`, err.message);
-      setError(err.message);
-
-      const defaultResult = quizId === "global" ? [] : createDefaultProgress(quizId);
-      setProgress(defaultResult);
-      progressCacheRef.current[cacheKey] = defaultResult;
-      return defaultResult;
-    } finally {
-      setIsLoading(false);
-    }
-  }, [quizId, formatQuizId, createDefaultProgress]);
+    },
+    [quizId, formatQuizId, createDefaultProgress]
+  );
 
   // ENHANCED: Update progress function with immediate cache update
-  const updateProgress = useCallback(async (
-    timeSpent: number,
-    completed?: boolean,
-    isCorrect?: boolean
-  ) => {
-    try {
-      setIsLoading(true);
-
-      const token = getToken();
-      if (!token) {
-        setIsLoading(false);
-        return null;
-      }
-
-      const formattedId = formatQuizId(quizId);
-      console.log(`[useUserProgress] Updating progress for: ${formattedId}, time: ${timeSpent}, completed: ${completed}, isCorrect: ${isCorrect}`);
-
-      const response = await axios({
-        method: "post",
-        url: `${API_URL}/api/userprogress/${formattedId}`,
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
-        },
-        data: { timeSpent, completed, isCorrect },
-        timeout: 10000,
-      });
-
-      if (response.data.success) {
-        console.log(`[useUserProgress] Successfully updated progress`);
-        const updatedProgress = response.data.progress;
-        
-        // Update current progress
-        setProgress(updatedProgress);
-        
-        // Update cache for current quiz
-        const currentCacheKey = String(quizId);
-        progressCacheRef.current[currentCacheKey] = updatedProgress;
-        
-        // CRITICAL FIX: If this was a completion, immediately update global cache
-        if (completed && isCorrect) {
-          console.log(`[useUserProgress] Level completed! Force refreshing global cache...`);
-          
-          // Invalidate global cache
-          delete progressCacheRef.current["global"];
-          
-          // IMMEDIATE GLOBAL REFRESH: Fetch updated global data right away
-          try {
-            const globalToken = getToken();
-            if (globalToken) {
-              const globalResponse = await axios({
-                method: "get",
-                url: `${API_URL}/api/userprogress`,
-                headers: {
-                  Authorization: `Bearer ${globalToken}`,
-                  "Content-Type": "application/json",
-                },
-                timeout: 5000,
-              });
-
-              if (globalResponse.data.success) {
-                console.log(`[useUserProgress] Immediately updated global cache with latest completion`);
-                progressCacheRef.current["global"] = globalResponse.data.progressEntries;
-              }
-            }
-          } catch (globalError) {
-            console.warn(`[useUserProgress] Failed to immediately refresh global cache:`, globalError);
-          }
-        }
-        
-        return updatedProgress;
-      }
-
-      return null;
-    } catch (err: any) {
-      console.error(`[useUserProgress] Update error:`, err.message);
-      setError(err.message);
-
+  const updateProgress = useCallback(
+    async (timeSpent: number, completed?: boolean, isCorrect?: boolean) => {
       try {
-        return await fetchProgress(true); // Force refresh on error
-      } catch (fetchErr) {
-        console.error("[useUserProgress] Failed to create fallback progress");
-        return null;
-      }
-    } finally {
-      setIsLoading(false);
-    }
-  }, [quizId, formatQuizId, fetchProgress]);
+        setIsLoading(true);
 
-  // ENHANCED: Force refresh function for external use
-  const refreshProgress = useCallback(async () => {
-    console.log(`[useUserProgress] Force refreshing progress for ${quizId}`);
-    return await fetchProgress(true);
-  }, [fetchProgress, quizId]);
+        const token = getToken();
+        if (!token) {
+          setIsLoading(false);
+          return null;
+        }
+
+        const formattedId = formatQuizId(quizId);
+        console.log(
+          `[useUserProgress] Updating progress for: ${formattedId}, time: ${timeSpent}, completed: ${completed}, isCorrect: ${isCorrect}`
+        );
+
+        const response = await axios({
+          method: "post",
+          url: `${API_URL}/api/userprogress/${formattedId}`,
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+          data: { timeSpent, completed, isCorrect },
+          timeout: 10000,
+        });
+
+        if (response.data.success) {
+          console.log(`[useUserProgress] Successfully updated progress`);
+          const updatedProgress = response.data.progress;
+
+          // Update current progress
+          setProgress(updatedProgress);
+
+          // Update cache for current quiz
+          const currentCacheKey = String(quizId);
+          progressCacheRef.current[currentCacheKey] = updatedProgress;
+
+          // CRITICAL FIX: If this was a completion, immediately update global cache
+          if (completed && isCorrect) {
+            console.log(
+              `[useUserProgress] Level completed! Force refreshing global cache...`
+            );
+
+            // Invalidate global cache
+            delete progressCacheRef.current["global"];
+
+            // IMMEDIATE GLOBAL REFRESH: Fetch updated global data right away
+            try {
+              const globalToken = getToken();
+              if (globalToken) {
+                const globalResponse = await axios({
+                  method: "get",
+                  url: `${API_URL}/api/userprogress`,
+                  headers: {
+                    Authorization: `Bearer ${globalToken}`,
+                    "Content-Type": "application/json",
+                  },
+                  timeout: 5000,
+                });
+
+                if (globalResponse.data.success) {
+                  console.log(
+                    `[useUserProgress] Immediately updated global cache with latest completion`
+                  );
+                  progressCacheRef.current["global"] =
+                    globalResponse.data.progressEntries;
+                }
+              }
+            } catch (globalError) {
+              console.warn(
+                `[useUserProgress] Failed to immediately refresh global cache:`,
+                globalError
+              );
+            }
+          }
+
+          return updatedProgress;
+        }
+
+        return null;
+      } catch (err: any) {
+        console.error(`[useUserProgress] Update error:`, err.message);
+        setError(err.message);
+
+        try {
+          return await fetchProgress(true); // Force refresh on error
+        } catch (fetchErr) {
+          console.error("[useUserProgress] Failed to create fallback progress");
+          return null;
+        }
+      } finally {
+        setIsLoading(false);
+      }
+    },
+    [quizId, formatQuizId, fetchProgress]
+  );
 
   // Initialize only once per quizId change
   useEffect(() => {
@@ -245,6 +269,5 @@ export const useUserProgress = (quizId: string | number | "global") => {
     error,
     fetchProgress,
     updateProgress,
-    refreshProgress, // Add this new function
   };
 };

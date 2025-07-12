@@ -1,35 +1,22 @@
-import React, { useCallback, useMemo } from "react";
-import { View, RefreshControl, Dimensions } from "react-native";
-import { FlashList } from "@shopify/flash-list";
-import { BASE_COLORS } from "@/constant/colors";
+import React, { useCallback } from "react";
+import { View, FlatList } from "react-native";
 import { LevelData } from "@/types/gameTypes";
 import { levelStyles as styles } from "@/styles/games/levels.styles";
 import LevelCard from "@/components/games/levels/LevelCard";
 
-const { height } = Dimensions.get("window");
-
 interface LevelGridProps {
   levels: LevelData[];
-  isRefreshing: boolean;
-  onRefresh: () => void;
   onSelectLevel: (level: LevelData) => void;
   difficultyColors: { [key: string]: readonly [string, string] };
 }
 
 const LevelGrid: React.FC<LevelGridProps> = ({
   levels,
-  isRefreshing,
-  onRefresh,
   onSelectLevel,
   difficultyColors,
 }) => {
   // Stable keyExtractor
   const keyExtractor = useCallback((item: LevelData) => `level-${item.id}`, []);
-
-  // Memoized level status hash for stable comparison
-  const levelStatusHash = useMemo(() => {
-    return levels.map((l) => `${l.id}-${l.status}`).join(",");
-  }, [levels]);
 
   // Memoized renderItem with stable comparison
   const renderItem = useCallback(
@@ -44,6 +31,7 @@ const LevelGrid: React.FC<LevelGridProps> = ({
       const isEvenIndex = index % 2 === 0;
 
       const itemStyle = {
+        flex: 1,
         marginRight: isEvenIndex ? 8 : 0,
         marginLeft: isEvenIndex ? 0 : 8,
       };
@@ -74,31 +62,42 @@ const LevelGrid: React.FC<LevelGridProps> = ({
     [difficultyColors, onSelectLevel]
   );
 
-  const listHeight = height - 280; // Adjust this value based on your layout
-
   return (
-    <View style={[styles.levelGridContainer, { height: listHeight }]}>
-      <FlashList
+    <View style={[styles.levelGridContainer]}>
+      <FlatList
         data={levels}
         keyExtractor={keyExtractor}
         renderItem={renderItem}
         numColumns={2}
         contentContainerStyle={styles.gridScrollContent}
         showsVerticalScrollIndicator={false}
-        removeClippedSubviews={true}
-        extraData={levelStatusHash}
-        refreshControl={
-          <RefreshControl
-            refreshing={isRefreshing}
-            onRefresh={onRefresh}
-            colors={[BASE_COLORS.blue, BASE_COLORS.orange]}
-            tintColor={BASE_COLORS.blue}
-          />
-        }
-        estimatedItemSize={190}
+        removeClippedSubviews={false}
+        initialNumToRender={10}
+        maxToRenderPerBatch={10}
+        windowSize={5}
       />
+      {/* <FlashList
+        data={levels}
+        keyExtractor={keyExtractor}
+        renderItem={renderItem}
+        numColumns={2}
+        contentContainerStyle={styles.gridScrollContent}
+        showsVerticalScrollIndicator={false}
+        removeClippedSubviews={false}
+        estimatedItemSize={280}
+        onViewableItemsChanged={({ viewableItems }) => {
+          console.log(
+            "Viewable:",
+            viewableItems.map((v) => v.index)
+          );
+        }}
+        overrideItemLayout={({ index }) => ({
+          length: 250,
+          offset: Math.floor(index / 2) * 250, // if numColumns = 2
+        })}
+      /> */}
     </View>
   );
 };
 
-export default LevelGrid;
+export default React.memo(LevelGrid);

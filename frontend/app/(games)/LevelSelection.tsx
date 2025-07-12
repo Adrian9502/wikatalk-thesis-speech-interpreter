@@ -1,12 +1,6 @@
-import React, {
-  useCallback,
-  useEffect,
-  useMemo,
-  useState,
-  useRef,
-} from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { View, StatusBar } from "react-native";
-import { useLocalSearchParams, router, useFocusEffect } from "expo-router";
+import { useLocalSearchParams, router } from "expo-router";
 import * as Haptics from "expo-haptics";
 import { SafeAreaView } from "react-native-safe-area-context";
 import useThemeStore from "@/store/useThemeStore";
@@ -34,22 +28,17 @@ const LevelSelection = () => {
   const { activeTheme } = useThemeStore();
 
   // Use the custom hook to handle level data
-  const { levels, showLevels, isLoading, error, handleRetry, refreshLevels } =
+  const { levels, showLevels, isLoading, error, handleRetry } =
     useLevelData(gameMode);
 
   // Add level filtering
   const [activeFilter, setActiveFilter] = useState("all");
-  const [isRefreshing, setIsRefreshing] = useState(false);
 
   // Local state for modal handling
   const [selectedLevel, setSelectedLevel] = useState<LevelData | null>(null);
   const [showGameModal, setShowGameModal] = useState(false);
   const [showReviewModal, setShowReviewModal] = useState(false);
   const [preloadedModal, setPreloadedModal] = useState(false);
-
-  // PERFORMANCE FIX: Use refs to prevent unnecessary refreshes
-  const lastRefreshTimeRef = useRef(0);
-  const isRefreshingRef = useRef(false);
 
   // Memoize the completion percentage calculation
   const completionPercentage = useMemo(() => {
@@ -88,38 +77,6 @@ const LevelSelection = () => {
 
     return filtered;
   }, [levels, activeFilter]);
-
-  // PERFORMANCE FIX: Throttled refresh function
-  const throttledRefreshLevels = useCallback(async () => {
-    const now = Date.now();
-
-    // Only refresh if it's been at least 2 seconds since last refresh
-    if (now - lastRefreshTimeRef.current < 2000 || isRefreshingRef.current) {
-      console.log(
-        "[LevelSelection] Skipping refresh - too recent or already in progress"
-      );
-      return;
-    }
-
-    isRefreshingRef.current = true;
-    lastRefreshTimeRef.current = now;
-    setIsRefreshing(true);
-
-    try {
-      await refreshLevels();
-    } finally {
-      isRefreshingRef.current = false;
-      setIsRefreshing(false);
-    }
-  }, [refreshLevels]);
-
-  // Optimized focus effect with throttling
-  useFocusEffect(
-    useCallback(() => {
-      console.log("[LevelSelection] Screen focused, throttled refresh...");
-      throttledRefreshLevels();
-    }, [throttledRefreshLevels])
-  );
 
   // Preload the modal when levels are available (only once)
   useEffect(() => {
@@ -226,8 +183,6 @@ const LevelSelection = () => {
           ) : (
             <LevelGrid
               levels={filteredLevels}
-              isRefreshing={isRefreshing}
-              onRefresh={throttledRefreshLevels}
               onSelectLevel={handleLevelSelectWithCompletion}
               difficultyColors={difficultyColors}
             />
@@ -246,8 +201,6 @@ const LevelSelection = () => {
     showLevels,
     filteredLevels,
     activeFilter,
-    isRefreshing,
-    throttledRefreshLevels,
     handleLevelSelectWithCompletion,
     difficultyColors,
     handleRetry,
