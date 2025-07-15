@@ -65,8 +65,8 @@ const LevelReviewModal: React.FC<LevelReviewModalProps> = ({
         style={modalSharedStyles.overlay}
       >
         <Animatable.View
-          animation="bounceIn"
-          duration={400}
+          animation="bounceInUp"
+          duration={1000}
           style={styles.modalContainer}
         >
           <LinearGradient

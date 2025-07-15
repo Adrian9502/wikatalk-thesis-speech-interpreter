@@ -15,15 +15,11 @@ interface CompletedLevelDetails {
 
 interface LevelStatsSectionProps {
   details: CompletedLevelDetails | null;
-  isLoading?: boolean;
 }
 
-const LevelStatsSection: React.FC<LevelStatsSectionProps> = ({
-  details,
-  isLoading = false,
-}) => {
+const LevelStatsSection: React.FC<LevelStatsSectionProps> = ({ details }) => {
   // Calculate values for when data is available
-  const shortDate = details?.completedDate?.split(",")[0] || "";
+  const completionDate = details?.completedDate;
   const successRate =
     details && details.totalAttempts > 0
       ? Math.round((details.correctAttempts / details.totalAttempts) * 100)
@@ -31,81 +27,56 @@ const LevelStatsSection: React.FC<LevelStatsSectionProps> = ({
 
   return (
     <View style={styles.container}>
+      <Text style={styles.title}>Level Details</Text>
       {/* First Row - Time and Date */}
-      <View style={styles.statsGrid}>
+      <View style={styles.statsRow}>
         {/* Time spent */}
-        <View style={styles.statBox}>
-          <Clock width={20} height={20} color="#fff" strokeWidth={2} />
-          <Text style={styles.statLabel}>Time Spent</Text>
-          {isLoading ? (
-            <ActivityIndicator
-              size="small"
-              color="#fff"
-              style={styles.loadingIndicator}
-            />
-          ) : (
+        <View style={styles.statItem}>
+          <View style={styles.statBox}>
+            <Text style={styles.statLabel}>Time Spent</Text>
+            <Clock width={17} height={17} color="#fff" strokeWidth={2} />
             <Text style={styles.statValue}>
               {details ? formatTime(details.timeSpent || 0) : "--"}
             </Text>
-          )}
+          </View>
         </View>
 
         {/* Completion date */}
-        <View style={styles.statBox}>
-          <Calendar width={20} height={20} color="#fff" strokeWidth={2} />
-          <Text style={styles.statLabel}>Completed</Text>
-          {isLoading ? (
-            <ActivityIndicator
-              size="small"
-              color="#fff"
-              style={styles.loadingIndicator}
-            />
-          ) : (
+        <View style={styles.statItem}>
+          <View style={styles.statBox}>
+            <Text style={styles.statLabel}>Completed</Text>
+            <Calendar width={17} height={17} color="#fff" strokeWidth={2} />
             <Text style={styles.statValue} numberOfLines={2}>
-              {shortDate || "--"}
+              {completionDate || "--"}
             </Text>
-          )}
+          </View>
         </View>
       </View>
 
       {/* Second Row - Attempts and Success Rate */}
-      <View style={styles.statsGrid}>
+      <View style={styles.statsRow}>
         {/* Total attempts */}
-        <View style={styles.statBox}>
-          <Target width={20} height={20} color="#fff" strokeWidth={2} />
-          <Text style={styles.statLabel}>Attempts</Text>
-          {isLoading ? (
-            <ActivityIndicator
-              size="small"
-              color="#fff"
-              style={styles.loadingIndicator}
-            />
-          ) : (
-            <>
-              <Text style={styles.statValue}>
-                {details?.totalAttempts || "--"}
-              </Text>
-            </>
-          )}
+        <View style={styles.statItem}>
+          <View style={styles.statBox}>
+            <Text style={styles.statLabel}>Attempts</Text>
+
+            <Target width={17} height={17} color="#fff" strokeWidth={2} />
+            <Text style={styles.statValue}>
+              {details?.totalAttempts || "--"}
+            </Text>
+          </View>
         </View>
 
         {/* Success rate */}
-        <View style={styles.statBox}>
-          <Award width={20} height={20} color="#fff" strokeWidth={2} />
-          <Text style={styles.statLabel}>Success Rate</Text>
-          {isLoading ? (
-            <ActivityIndicator
-              size="small"
-              color="#fff"
-              style={styles.loadingIndicator}
-            />
-          ) : (
-            <>
-              <Text style={styles.statValue}>
-                {details ? `${successRate}%` : "--"}
-              </Text>
-            </>
-          )}
+        <View style={styles.statItem}>
+          <View style={styles.statBox}>
+            <Text style={styles.statLabel}>Success Rate</Text>
+
+            <Award width={17} height={17} color="#fff" strokeWidth={2} />
+            <Text style={styles.statValue}>
+              {details ? `${successRate}%` : "--"}
+            </Text>
+          </View>
         </View>
       </View>
     </View>
@@ -114,42 +85,52 @@ const LevelStatsSection: React.FC<LevelStatsSectionProps> = ({
 
 const styles = StyleSheet.create({
   container: {
-    minHeight: 200,
+    minHeight: 120,
+    paddingHorizontal: 4,
   },
-  statsGrid: {
+  title: {
+    fontSize: 15,
+    fontFamily: "Poppins-Medium",
+    color: "#fff",
+    lineHeight: 22,
+    marginBottom: 16,
+  },
+  statsRow: {
     flexDirection: "row",
     justifyContent: "space-between",
     marginBottom: 16,
-    gap: 12,
+    gap: 16,
+  },
+  statItem: {
+    flex: 1,
+    alignItems: "center",
+  },
+  statLabel: {
+    fontSize: 13,
+    fontFamily: "Poppins-Medium",
+    color: "rgb(255, 255, 255)",
+    marginBottom: 6,
+    textAlign: "center",
+    letterSpacing: 0.3,
   },
   statBox: {
-    flex: 1,
+    width: "100%",
     borderWidth: 1,
     borderColor: "rgba(255, 255, 255, 0.2)",
     backgroundColor: "rgba(255, 255, 255, 0.1)",
     borderRadius: 16,
-    padding: 12,
+    padding: 8,
     alignItems: "center",
     justifyContent: "center",
-    minHeight: 100,
-  },
-  statLabel: {
-    fontSize: 12,
-    fontFamily: "Poppins-Medium",
-    color: "rgba(255, 255, 255, 0.7)",
-    marginTop: 8,
-    textAlign: "center",
+    minHeight: 50,
   },
   statValue: {
-    fontSize: 15,
+    fontSize: 13,
     fontFamily: "Poppins-SemiBold",
     color: "#fff",
-    marginTop: 4,
+    marginTop: 6,
     textAlign: "center",
-  },
-  // Loading indicator spacing
-  loadingIndicator: {
-    marginTop: 4,
+    letterSpacing: 0.2,
   },
 });
 

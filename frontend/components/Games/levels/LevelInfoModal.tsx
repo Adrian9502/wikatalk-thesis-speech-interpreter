@@ -123,8 +123,8 @@ const LevelInfoModal: React.FC<GameInfoModalProps> = React.memo(
           style={modalSharedStyles.overlay}
         >
           <Animatable.View
-            animation="fadeIn"
-            duration={300}
+            animation="bounceInUp"
+            duration={1000}
             style={modalSharedStyles.modalContainer}
           >
             <LinearGradient
@@ -307,12 +307,12 @@ const styles = StyleSheet.create({
     color: "#fff",
   },
   rulesContainer: {
-    backgroundColor: "rgba(255, 255, 255, 0.2)",
+    backgroundColor: "rgba(255, 255, 255, 0.1)",
     borderRadius: 16,
     padding: 18,
     marginBottom: 22,
     borderWidth: 1,
-    borderColor: "rgba(255, 255, 255, 0.1)",
+    borderColor: "rgba(255, 255, 255, 0.2)",
   },
   rulesTitle: {
     fontSize: 16,
