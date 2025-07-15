@@ -304,9 +304,11 @@ const LevelSelection = () => {
                 visible={showGameModal}
                 onClose={stableHandlers.handleCloseGameModal}
                 onStart={stableHandlers.handleStartGame}
-                levelData={
-                  selectedLevel?.questionData || levels[0]?.questionData
-                }
+                levelData={{
+                  ...selectedLevel.questionData,
+                  ...selectedLevel, // Include all level data
+                  levelString: selectedLevel.levelString, // Ensure levelString is included
+                }}
                 gameMode={
                   typeof gameMode === "string" ? gameMode : String(gameMode)
                 }

@@ -13,14 +13,17 @@ interface LevelHeaderProps {
 const LevelHeader: React.FC<LevelHeaderProps> = ({ level }) => {
   const starCount = getStarCount(level.difficulty);
 
+  // Extract level number from levelString, similar to LevelCard
+  const levelNumber = level.levelString
+    ? level.levelString.replace(/^Level\s+/, "")
+    : String(level.number || level.id);
+
   return (
     <>
       {/* Level number pill */}
       <View style={modalSharedStyles.levelHeader}>
         <View style={modalSharedStyles.levelNumberContainer}>
-          <Text style={modalSharedStyles.levelNumber}>
-            Level {level.number}
-          </Text>
+          <Text style={modalSharedStyles.levelNumber}>Level {levelNumber}</Text>
         </View>
       </View>
 
@@ -60,7 +63,7 @@ const LevelHeader: React.FC<LevelHeaderProps> = ({ level }) => {
       <View style={styles.completedBadgeContainer}>
         <View style={modalSharedStyles.completedBadge}>
           <Check width={18} height={18} color="#fff" />
-          <Text style={styles.completedText}>Level Finished!</Text>
+          <Text style={styles.completedText}>Level Finished</Text>
         </View>
       </View>
     </>

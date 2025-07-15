@@ -163,6 +163,6 @@ export const useLevelData = (gameMode: string | string[] | undefined) => {
     error: error || storeError,
     completionPercentage,
     handleRetry,
-    getFilteredLevels, // NEW: Export filtered levels function
+    getFilteredLevels,
   };
 };

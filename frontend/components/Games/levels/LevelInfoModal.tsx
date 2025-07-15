@@ -41,6 +41,26 @@ const LevelInfoModal: React.FC<GameInfoModalProps> = React.memo(
     isLoading = false,
     difficulty = "Easy",
   }) => {
+    // Simplified state management for better animation performance
+    const [isAnimating, setIsAnimating] = useState(false);
+    const [hasStarted, setHasStarted] = useState(false);
+
+    // Reset state when modal visibility changes
+    useEffect(() => {
+      if (visible) {
+        setIsAnimating(true);
+        setHasStarted(false);
+        // Allow animation to complete
+        const timer = setTimeout(() => {
+          setIsAnimating(false);
+        }, 300);
+        return () => clearTimeout(timer);
+      } else {
+        setIsAnimating(false);
+        setHasStarted(false);
+      }
+    }, [visible]);
+
     // EARLY RETURN: Don't render anything if not visible
     if (!visible) {
       return null;
@@ -51,23 +71,13 @@ const LevelInfoModal: React.FC<GameInfoModalProps> = React.memo(
       return null;
     }
 
-    // Get starCount using the utility function
-    const starCount = getStarCount(difficulty);
-
-    // Simplified state management
-    const [hasBeenStarted, setHasBeenStarted] = useState(false);
-
-    // Reset the hasBeenStarted state when modal is closed
-    useEffect(() => {
-      if (!visible) {
-        setHasBeenStarted(false);
-      }
-    }, [visible]);
-
     // EARLY RETURN: Don't render if already started
-    if (hasBeenStarted) {
+    if (hasStarted) {
       return null;
     }
+
+    // Get starCount using the utility function
+    const starCount = getStarCount(difficulty);
 
     // Get gradient colors for the current difficulty
     const getGradientColors = (): readonly [string, string] => {
@@ -82,29 +92,39 @@ const LevelInfoModal: React.FC<GameInfoModalProps> = React.memo(
       return ["#2563EB", "#1E40AF"] as const;
     };
 
-    // Enhanced start button handler
+    // Enhanced start button handler with animation state
     const handleStart = useCallback(() => {
-      if (isLoading) return;
-      setHasBeenStarted(true);
-      onStart();
-    }, [isLoading, onStart]);
+      if (isLoading || isAnimating) return;
+
+      setHasStarted(true);
+      // Small delay to ensure smooth transition
+      setTimeout(() => {
+        onStart();
+      }, 100);
+    }, [isLoading, isAnimating, onStart]);
+
+    // Enhanced close handler
+    const handleClose = useCallback(() => {
+      if (isAnimating) return;
+      onClose();
+    }, [isAnimating, onClose]);
 
     return (
       <Modal
         visible={visible}
         transparent
-        animationType="fade"
+        animationType="none" // Use custom animation instead
         statusBarTranslucent={true}
-        onRequestClose={onClose}
+        onRequestClose={handleClose}
       >
         <Animatable.View
           animation="fadeIn"
-          duration={150}
+          duration={300}
           style={modalSharedStyles.overlay}
         >
           <Animatable.View
-            animation="zoomIn"
-            duration={200}
+            animation="fadeIn"
+            duration={300}
             style={modalSharedStyles.modalContainer}
           >
             <LinearGradient
@@ -120,36 +140,29 @@ const LevelInfoModal: React.FC<GameInfoModalProps> = React.memo(
 
               {/* Close button */}
               <TouchableOpacity
-                onPress={onClose}
+                onPress={handleClose}
                 style={modalSharedStyles.closeButton}
+                disabled={isAnimating}
               >
                 <X width={20} height={20} color="#fff" />
               </TouchableOpacity>
 
               {/* Level header */}
-              <Animatable.View
-                animation="fadeInDown"
-                duration={600}
-                delay={100}
-                style={modalSharedStyles.levelHeader}
-              >
+              <View style={modalSharedStyles.levelHeader}>
                 <View style={modalSharedStyles.levelNumberContainer}>
                   <Text style={modalSharedStyles.levelNumber}>
-                    {levelData.level || `Level ${levelData.id}`}
+                    {levelData.levelString ||
+                      levelData.level ||
+                      `Level ${levelData.id}`}
                   </Text>
                 </View>
                 <Text style={modalSharedStyles.levelTitle}>
                   {levelData.title}
                 </Text>
-              </Animatable.View>
+              </View>
 
               {/* Badges with difficulty stars and focus area */}
-              <Animatable.View
-                animation="fadeIn"
-                duration={600}
-                delay={200}
-                style={modalSharedStyles.badgesContainer}
-              >
+              <View style={modalSharedStyles.badgesContainer}>
                 <View style={modalSharedStyles.difficultyBadge}>
                   <View style={modalSharedStyles.starContainer}>
                     {Array(3)
@@ -179,42 +192,27 @@ const LevelInfoModal: React.FC<GameInfoModalProps> = React.memo(
                     {getFocusAreaText(levelData.focusArea)}
                   </Text>
                 </View>
-              </Animatable.View>
+              </View>
 
               {/* Level description */}
-              <Animatable.View
-                animation="fadeIn"
-                duration={600}
-                delay={250}
-                style={styles.descriptionContainer}
-              >
+              <View style={styles.descriptionContainer}>
                 <Text style={styles.levelDescription}>
                   {levelData.description}
                 </Text>
-              </Animatable.View>
+              </View>
 
               {/* Game mode info */}
-              <Animatable.View
-                animation="fadeIn"
-                duration={600}
-                delay={300}
-                style={styles.gameModeContainer}
-              >
+              <View style={styles.gameModeContainer}>
                 <View style={styles.infoRow}>
                   <Text style={styles.infoLabel}>Game Mode:</Text>
                   <Text style={styles.infoValue}>
                     {getGameModeName(gameMode)}
                   </Text>
                 </View>
-              </Animatable.View>
+              </View>
 
               {/* How to play */}
-              <Animatable.View
-                animation="fadeIn"
-                duration={600}
-                delay={350}
-                style={styles.rulesContainer}
-              >
+              <View style={styles.rulesContainer}>
                 <Text style={styles.rulesTitle}>How to Play:</Text>
                 <Text style={styles.rulesText}>
                   {gameMode === "multipleChoice"
@@ -223,19 +221,17 @@ const LevelInfoModal: React.FC<GameInfoModalProps> = React.memo(
                     ? "Identify the correct word in the sentence. Tap on it to select. Read carefully before making your choice."
                     : "Fill in the blank with the correct word from the options. Choose wisely as you only get one chance!"}
                 </Text>
-              </Animatable.View>
+              </View>
 
               {/* Start button */}
-              <Animatable.View
-                animation="fadeInUp"
-                duration={200}
-                delay={100}
-                style={styles.buttonContainer}
-              >
+              <View style={styles.buttonContainer}>
                 <TouchableOpacity
-                  style={modalSharedStyles.startAndCloseButton}
+                  style={[
+                    modalSharedStyles.startAndCloseButton,
+                    (isLoading || isAnimating) && styles.disabledButton,
+                  ]}
                   onPress={handleStart}
-                  disabled={isLoading}
+                  disabled={isLoading || isAnimating}
                   activeOpacity={0.8}
                 >
                   {isLoading ? (
@@ -246,28 +242,28 @@ const LevelInfoModal: React.FC<GameInfoModalProps> = React.memo(
                     </Text>
                   )}
                 </TouchableOpacity>
-              </Animatable.View>
+              </View>
             </LinearGradient>
           </Animatable.View>
         </Animatable.View>
       </Modal>
     );
   },
-  // ENHANCED: Better memo comparison to prevent unnecessary renders
+  // Enhanced memo comparison for better performance
   (prevProps, nextProps) => {
-    // Only re-render if these critical props change
     return (
       prevProps.visible === nextProps.visible &&
       prevProps.isLoading === nextProps.isLoading &&
       prevProps.gameMode === nextProps.gameMode &&
       prevProps.difficulty === nextProps.difficulty &&
       prevProps.levelData?.id === nextProps.levelData?.id &&
-      prevProps.levelData?.title === nextProps.levelData?.title
+      prevProps.levelData?.title === nextProps.levelData?.title &&
+      prevProps.levelData?.levelString === nextProps.levelData?.levelString
     );
   }
 );
 
-// Keep only the specific styles for this component
+// Enhanced styles
 const styles = StyleSheet.create({
   extendedContent: {
     paddingBottom: 28,
@@ -332,6 +328,9 @@ const styles = StyleSheet.create({
   },
   buttonContainer: {
     marginTop: 6,
+  },
+  disabledButton: {
+    opacity: 0.7,
   },
 });
 

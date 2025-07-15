@@ -27,22 +27,29 @@ const transformQuestions = (questionsArray) => {
       question: question.question,
       translation: question.translation,
       dialect: question.dialect,
-      focusArea: question.focusArea || "vocabulary", // ADD THIS LINE
+      focusArea: question.focusArea || "vocabulary",
     };
 
-    // Add mode-specific properties
+    // UPDATED: Handle options for both multipleChoice and identification
     if (question.mode === "multipleChoice" && question.options) {
       transformedQuestion.options = question.options;
     }
 
     if (question.mode === "identification") {
-      // UPDATED: Use answer instead of targetWord
       transformedQuestion.answer = question.answer || question.targetWord;
-      transformedQuestion.choices = question.choices || question.options || [];
+      
+      // UPDATED: Use options instead of choices for identification
+      if (question.options && Array.isArray(question.options)) {
+        transformedQuestion.options = question.options;
+      } else if (question.choices && Array.isArray(question.choices)) {
+        // Handle legacy data that might still use choices
+        transformedQuestion.options = question.choices;
+      } else {
+        transformedQuestion.options = [];
+      }
     }
 
     if (question.mode === "fillBlanks") {
-      // UPDATED: Use answer instead of targetWord
       transformedQuestion.answer = question.answer || question.targetWord;
       transformedQuestion.hint = question.hint;
     }

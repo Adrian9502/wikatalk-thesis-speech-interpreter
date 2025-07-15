@@ -10,21 +10,15 @@ const quizQuestionSchema = new mongoose.Schema({
   question: { type: String, required: true },
   translation: String,
   dialect: String,
-  focusArea: { type: String, enum: ['vocabulary', 'grammar', 'pronunciation'], default: 'vocabulary' }, // ADD THIS
+  focusArea: { type: String, enum: ['vocabulary', 'grammar', 'pronunciation'], default: 'vocabulary' },
 
-  // Mode-specific fields
   options: [{ 
     id: String, 
     text: String, 
-    isCorrect: Boolean 
-  }], // For multipleChoice
+    isCorrect: Boolean // Only used for multipleChoice
+  }], // For both multipleChoice and identification
   
-  choices: [{ 
-    id: String, 
-    text: String 
-  }], // For identification
-  
-  answer: String, // CHANGE FROM targetWord to answer
+  answer: String, // For identification and fillBlanks
   hint: String, // For fillBlanks
 }, {
   timestamps: true

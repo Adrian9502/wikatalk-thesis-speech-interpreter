@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { Modal, View, TouchableOpacity, StyleSheet, Text } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import * as Animatable from "react-native-animatable";
@@ -22,27 +22,51 @@ const LevelReviewModal: React.FC<LevelReviewModalProps> = ({
   level,
   gradientColors,
 }) => {
+  const [isAnimating, setIsAnimating] = useState(false);
+
   const { details, isLoading, error } = useLevelDetails(
     level,
     visible && !!level
   );
 
+  // Handle animation state
+  useEffect(() => {
+    if (visible) {
+      setIsAnimating(true);
+      const timer = setTimeout(() => {
+        setIsAnimating(false);
+      }, 400); // Longer delay for review modal
+      return () => clearTimeout(timer);
+    } else {
+      setIsAnimating(false);
+    }
+  }, [visible]);
+
   if (!level) {
     return null;
   }
+
+  const handleClose = () => {
+    if (isAnimating) return;
+    onClose();
+  };
 
   return (
     <Modal
       visible={visible}
       transparent
+      animationType="none" // Use custom animation
       statusBarTranslucent
-      animationType="fade"
-      onRequestClose={onClose}
+      onRequestClose={handleClose}
     >
-      <View style={modalSharedStyles.overlay}>
+      <Animatable.View
+        animation="fadeIn"
+        duration={250}
+        style={modalSharedStyles.overlay}
+      >
         <Animatable.View
-          animation="zoomIn"
-          duration={300}
+          animation="bounceIn"
+          duration={400}
           style={styles.modalContainer}
         >
           <LinearGradient
@@ -67,15 +91,19 @@ const LevelReviewModal: React.FC<LevelReviewModalProps> = ({
             <LevelStatsSection details={details} isLoading={isLoading} />
 
             <TouchableOpacity
-              style={modalSharedStyles.startAndCloseButton}
-              onPress={onClose}
+              style={[
+                modalSharedStyles.startAndCloseButton,
+                isAnimating && styles.disabledButton,
+              ]}
+              onPress={handleClose}
+              disabled={isAnimating}
               activeOpacity={0.7}
             >
               <Text style={modalSharedStyles.startAndCloseText}>CLOSE</Text>
             </TouchableOpacity>
           </LinearGradient>
         </Animatable.View>
-      </View>
+      </Animatable.View>
     </Modal>
   );
 };
@@ -90,6 +118,9 @@ const styles = StyleSheet.create({
   modalContent: {
     padding: 20,
     minHeight: 500,
+  },
+  disabledButton: {
+    opacity: 0.7,
   },
 });
 

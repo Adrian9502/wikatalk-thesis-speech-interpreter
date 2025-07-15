@@ -16,12 +16,23 @@ interface FilteredLevels {
   hard: LevelData[];
 }
 
+interface CompletedLevelDetails {
+  question: string;
+  answer: string;
+  timeSpent: number;
+  completedDate: string;
+  isCorrect: boolean;
+  totalAttempts: number;
+  correctAttempts: number;
+}
+
 interface SplashState {
   isLoadingComplete: boolean;
   splashShown: boolean;
   gameDataPreloaded: boolean;
   progressDataPrecomputed: boolean;
   levelsPrecomputed: boolean;
+  levelDetailsPrecomputed: boolean; // NEW
 
   // Store precomputed levels for each game mode with filters
   precomputedLevels: {
@@ -29,9 +40,13 @@ interface SplashState {
       levels: LevelData[];
       completionPercentage: number;
       lastUpdated: number;
-      // Add precomputed filters
       filteredLevels: FilteredLevels;
     };
+  };
+
+  // NEW: Store precomputed level details for completed levels
+  precomputedLevelDetails: {
+    [levelId: string]: CompletedLevelDetails;
   };
 
   markLoadingComplete: () => void;
@@ -39,12 +54,12 @@ interface SplashState {
   markGameDataPreloaded: () => void;
   markProgressDataPrecomputed: () => void;
   markLevelsPrecomputed: () => void;
+  markLevelDetailsPrecomputed: () => void; // NEW
   preloadGameData: () => Promise<boolean>;
   precomputeAllProgressData: () => Promise<boolean>;
   precomputeAllLevels: () => Promise<boolean>;
-  getLevelsForMode: (
-    gameMode: string
-  ) => {
+  precomputeAllLevelDetails: () => Promise<boolean>; // NEW
+  getLevelsForMode: (gameMode: string) => {
     levels: LevelData[];
     completionPercentage: number;
     filteredLevels: FilteredLevels;
@@ -53,6 +68,7 @@ interface SplashState {
     gameMode: string,
     filter: keyof FilteredLevels
   ) => LevelData[];
+  getLevelDetails: (levelId: string | number) => CompletedLevelDetails | null; // NEW
   reset: () => void;
 }
 
@@ -93,19 +109,110 @@ const precomputeFilters = (levels: LevelData[]): FilteredLevels => {
   return filteredLevels;
 };
 
+// Helper function to extract question and answer (updated)
+const extractQuestionAndAnswerFromData = (
+  levelData: any,
+  progressData: any
+) => {
+  let question = "Question not available";
+  let answer = "Answer not available";
+
+  try {
+    // Extract question
+    if (levelData.question) {
+      question = levelData.question;
+    } else if (levelData.sentence) {
+      question = levelData.sentence;
+    } else if (levelData.prompt) {
+      question = levelData.prompt;
+    } else if (levelData.title) {
+      question = levelData.title;
+    }
+
+    // UPDATED: Extract answer based on mode using unified options
+    if (levelData.answer) {
+      // Direct answer (fillBlanks, identification)
+      answer = levelData.answer;
+    } else if (levelData.options && Array.isArray(levelData.options)) {
+      // UPDATED: Handle both multipleChoice and identification using options
+      const mode = levelData.mode;
+
+      if (mode === "multipleChoice") {
+        // Multiple choice mode - find correct option
+        const correctOption = levelData.options.find(
+          (opt: any) => opt.isCorrect
+        );
+        if (correctOption) {
+          answer =
+            correctOption.text || correctOption.label || correctOption.value;
+        }
+      } else if (mode === "identification") {
+        // Identification mode - find option that matches the answer
+        const correctOption = levelData.options.find(
+          (opt: any) =>
+            opt.text === levelData.answer || opt.id === levelData.answer
+        );
+        if (correctOption) {
+          answer = correctOption.text;
+        }
+      }
+    }
+
+    // Use progress data if available
+    if (
+      progressData &&
+      progressData.attempts &&
+      progressData.attempts.length > 0
+    ) {
+      const lastCorrectAttempt = progressData.attempts
+        .slice()
+        .reverse()
+        .find((attempt: any) => attempt.isCorrect);
+
+      if (lastCorrectAttempt && lastCorrectAttempt.userAnswer) {
+        answer = lastCorrectAttempt.userAnswer;
+      }
+    }
+
+    // Final fallbacks
+    if (question === "Question not available") {
+      question =
+        levelData.title || levelData.description || `Level ${levelData.id}`;
+    }
+
+    if (answer === "Answer not available") {
+      if (levelData.answer) {
+        answer = levelData.answer;
+      } else {
+        answer = "Completed successfully";
+      }
+    }
+  } catch (err) {
+    console.error("[SplashStore] Error extracting Q&A:", err);
+    question =
+      levelData.title || levelData.description || `Level ${levelData.id}`;
+    answer = "Completed successfully";
+  }
+
+  return { question, answer };
+};
+
 export const useSplashStore = create<SplashState>((set, get) => ({
   isLoadingComplete: false,
   splashShown: false,
   gameDataPreloaded: false,
   progressDataPrecomputed: false,
   levelsPrecomputed: false,
+  levelDetailsPrecomputed: false, // NEW
   precomputedLevels: {},
+  precomputedLevelDetails: {}, // NEW
 
   markLoadingComplete: () => set({ isLoadingComplete: true }),
   markSplashShown: () => set({ splashShown: true }),
   markGameDataPreloaded: () => set({ gameDataPreloaded: true }),
   markProgressDataPrecomputed: () => set({ progressDataPrecomputed: true }),
   markLevelsPrecomputed: () => set({ levelsPrecomputed: true }),
+  markLevelDetailsPrecomputed: () => set({ levelDetailsPrecomputed: true }), // NEW
 
   reset: () =>
     set({
@@ -114,8 +221,149 @@ export const useSplashStore = create<SplashState>((set, get) => ({
       gameDataPreloaded: false,
       progressDataPrecomputed: false,
       levelsPrecomputed: false,
+      levelDetailsPrecomputed: false, // NEW
       precomputedLevels: {},
+      precomputedLevelDetails: {}, // NEW
     }),
+
+  // NEW: Precompute all level details for completed levels
+  precomputeAllLevelDetails: async () => {
+    try {
+      console.log("[SplashStore] Starting level details precomputation");
+      const gameStore = useGameStore.getState();
+      const progressStore = useProgressStore.getState();
+
+      const { questions } = gameStore;
+      const globalProgress = progressStore.progress;
+
+      if (!questions || !globalProgress) {
+        console.warn(
+          "[SplashStore] Missing data for level details precomputation"
+        );
+        return false;
+      }
+
+      const precomputedLevelDetails: {
+        [levelId: string]: CompletedLevelDetails;
+      } = {};
+
+      // Process all completed levels
+      const completedProgress = Array.isArray(globalProgress)
+        ? globalProgress.filter((p) => p.completed)
+        : [];
+
+      console.log(
+        `[SplashStore] Processing ${completedProgress.length} completed levels`
+      );
+
+      for (const progressEntry of completedProgress) {
+        try {
+          const levelId = String(progressEntry.quizId).replace(/^n-/, "");
+
+          // Find the question data
+          let questionData = null;
+
+          // Search through all game modes and difficulties
+          for (const [gameMode, difficulties] of Object.entries(questions)) {
+            if (!difficulties || typeof difficulties !== "object") continue;
+
+            for (const [difficulty, questionList] of Object.entries(
+              difficulties
+            )) {
+              if (!Array.isArray(questionList)) continue;
+
+              const found = questionList.find(
+                (q: any) => String(q.id || q.questionId) === levelId
+              );
+
+              if (found) {
+                questionData = found;
+                break;
+              }
+            }
+
+            if (questionData) break;
+          }
+
+          if (!questionData) {
+            console.warn(
+              `[SplashStore] No question data found for level ${levelId}`
+            );
+            continue;
+          }
+
+          // Extract question and answer
+          const { question, answer } = extractQuestionAndAnswerFromData(
+            questionData,
+            progressEntry
+          );
+
+          // Calculate stats
+          const attempts = progressEntry.attempts || [];
+          const totalAttempts = attempts.length;
+          const correctAttempts = attempts.filter(
+            (a: any) => a.isCorrect
+          ).length;
+
+          // Format date
+          const lastAttempt = attempts[attempts.length - 1];
+          const completedDate = new Date(
+            lastAttempt?.attemptDate ||
+              progressEntry.lastAttemptDate ||
+              new Date()
+          );
+          const formattedDate = completedDate.toLocaleDateString("en-US", {
+            year: "numeric",
+            month: "long",
+            day: "numeric",
+          });
+
+          // Store the details
+          precomputedLevelDetails[levelId] = {
+            question,
+            answer,
+            timeSpent: progressEntry.totalTimeSpent || 0,
+            completedDate: formattedDate,
+            isCorrect: true,
+            totalAttempts,
+            correctAttempts,
+          };
+
+          console.log(
+            `[SplashStore] Precomputed details for level ${levelId}:`
+          );
+        } catch (error) {
+          console.error(
+            `[SplashStore] Error processing level ${progressEntry.quizId}:`,
+            error
+          );
+        }
+      }
+
+      // Update store
+      set({ precomputedLevelDetails, levelDetailsPrecomputed: true });
+
+      console.log(
+        `[SplashStore] ✅ Level details precomputed for ${
+          Object.keys(precomputedLevelDetails).length
+        } levels`
+      );
+      return true;
+    } catch (error) {
+      console.error(
+        "[SplashStore] Error in level details precomputation:",
+        error
+      );
+      return false;
+    }
+  },
+
+  // NEW: Get precomputed level details
+  getLevelDetails: (levelId: string | number): CompletedLevelDetails | null => {
+    const { precomputedLevelDetails } = get();
+    const stringId = String(levelId).replace(/^n-/, "");
+    return precomputedLevelDetails[stringId] || null;
+  },
 
   // Enhanced function to precompute all levels with filters
   precomputeAllLevels: async () => {
@@ -124,7 +372,6 @@ export const useSplashStore = create<SplashState>((set, get) => ({
       const gameStore = useGameStore.getState();
       const progressStore = useProgressStore.getState();
 
-      // Ensure we have questions and progress data
       const { questions } = gameStore;
       const globalProgress = progressStore.progress;
 
@@ -145,7 +392,6 @@ export const useSplashStore = create<SplashState>((set, get) => ({
           );
           const startTime = Date.now();
 
-          // Convert quiz data to levels
           const progressArray = Array.isArray(globalProgress)
             ? globalProgress
             : [];
@@ -155,7 +401,6 @@ export const useSplashStore = create<SplashState>((set, get) => ({
             progressArray
           );
 
-          // Calculate completion percentage
           const completedCount = levels.filter(
             (level) => level.status === "completed"
           ).length;
@@ -164,14 +409,13 @@ export const useSplashStore = create<SplashState>((set, get) => ({
               ? Math.round((completedCount / levels.length) * 100)
               : 0;
 
-          // Precompute all filters for this mode
           const filteredLevels = precomputeFilters(levels);
 
           precomputedLevels[mode] = {
             levels,
             completionPercentage,
             lastUpdated: Date.now(),
-            filteredLevels, // Add precomputed filters
+            filteredLevels,
           };
 
           const duration = Date.now() - startTime;
@@ -186,7 +430,6 @@ export const useSplashStore = create<SplashState>((set, get) => ({
         }
       }
 
-      // Update store with precomputed levels
       set({ precomputedLevels, levelsPrecomputed: true });
 
       console.log(
@@ -358,8 +601,23 @@ export const useSplashStore = create<SplashState>((set, get) => ({
         );
       }
 
-      // Phase 4: Load other data in background (don't wait)
-      console.log("[SplashStore] Phase 4: Loading background data");
+      // Phase 4: Precompute level details for completed levels
+      console.log("[SplashStore] Phase 4: Precomputing level details");
+      const levelDetailsPrecomputeSuccess =
+        await get().precomputeAllLevelDetails();
+
+      if (levelDetailsPrecomputeSuccess) {
+        console.log(
+          "[SplashStore] Phase 4 complete: Level details precomputed"
+        );
+      } else {
+        console.warn(
+          "[SplashStore] Phase 4 partial: Some level details failed to precompute"
+        );
+      }
+
+      // Phase 5: Load other data in background (don't wait)
+      console.log("[SplashStore] Phase 5: Loading background data");
       const backgroundPromises = [];
       const pronunciationStore = usePronunciationStore.getState();
 
@@ -369,7 +627,7 @@ export const useSplashStore = create<SplashState>((set, get) => ({
 
       // Don't wait for background data
       Promise.allSettled(backgroundPromises).then(() => {
-        console.log("[SplashStore] Phase 4 complete: Background data loaded");
+        console.log("[SplashStore] Phase 5 complete: Background data loaded");
       });
 
       set({ gameDataPreloaded: true });
@@ -397,6 +655,10 @@ export const isLevelsPrecomputed = (): boolean => {
   return useSplashStore.getState().levelsPrecomputed;
 };
 
+export const isLevelDetailsPrecomputed = (): boolean => {
+  return useSplashStore.getState().levelDetailsPrecomputed;
+};
+
 export const isAllDataReady = (): boolean => {
   const state = useSplashStore.getState();
   return (
@@ -416,4 +678,11 @@ export const getFilteredLevelsForGameMode = (
   filter: keyof FilteredLevels
 ): LevelData[] => {
   return useSplashStore.getState().getFilteredLevels(gameMode, filter);
+};
+
+// NEW: Helper function to get level details
+export const getLevelDetailsForLevel = (
+  levelId: string | number
+): CompletedLevelDetails | null => {
+  return useSplashStore.getState().getLevelDetails(levelId);
 };
