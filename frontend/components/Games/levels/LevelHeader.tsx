@@ -1,6 +1,6 @@
 import React from "react";
 import { View, TouchableOpacity } from "react-native";
-import { CornerUpLeft } from "react-native-feather";
+import { ArrowLeft } from "react-native-feather";
 import * as Animatable from "react-native-animatable";
 import { BASE_COLORS } from "@/constant/colors";
 import { levelStyles as styles } from "@/styles/games/levels.styles";
@@ -19,21 +19,21 @@ const LevelHeader: React.FC<LevelHeaderProps> = ({ title, onBack }) => {
     >
       <View style={styles.headerGradient}>
         <TouchableOpacity onPress={onBack} style={styles.backButton}>
-          <CornerUpLeft width={17} height={17} color={BASE_COLORS.white} />
+          <ArrowLeft width={17} height={17} color={BASE_COLORS.white} />
         </TouchableOpacity>
 
         <View style={styles.headerContent}>
           <View style={styles.headerTextContainer}>
             <Animatable.Text
               animation="fadeIn"
-              delay={400}
+              delay={300}
               style={styles.headerTitle}
             >
               {title || "Levels"}
             </Animatable.Text>
             <Animatable.Text
               animation="fadeIn"
-              delay={500}
+              delay={300}
               style={styles.headerSubtitle}
             >
               Select a level to begin
