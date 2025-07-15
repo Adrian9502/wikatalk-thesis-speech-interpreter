@@ -40,7 +40,7 @@ const LevelSelection = () => {
   const [showReviewModal, setShowReviewModal] = useState(false);
   const [preloadedModal, setPreloadedModal] = useState(false);
 
-  // Memoize the completion percentage calculation
+  // PERFORMANCE FIX: Stable memoization of completion percentage
   const completionPercentage = useMemo(() => {
     if (!levels || levels.length === 0) return 0;
     const completedLevels = levels.filter(
@@ -49,34 +49,127 @@ const LevelSelection = () => {
     return Math.round((completedLevels / levels.length) * 100);
   }, [levels]);
 
-  // Filtered levels based on active filter
+  // PERFORMANCE FIX: Stable filtered levels with proper dependency
   const filteredLevels = useMemo(() => {
+    if (!levels || levels.length === 0) return [];
+
     let filtered = levels;
 
     // Status filters
-    if (activeFilter === "completed") {
-      filtered = filtered.filter((level) => level.status === "completed");
-    } else if (activeFilter === "current") {
-      filtered = filtered.filter((level) => level.status === "current");
-    } else if (activeFilter === "easy") {
-      filtered = filtered.filter(
-        (level) =>
-          level.difficulty === "Easy" || level.difficultyCategory === "easy"
-      );
-    } else if (activeFilter === "medium") {
-      filtered = filtered.filter(
-        (level) =>
-          level.difficulty === "Medium" || level.difficultyCategory === "medium"
-      );
-    } else if (activeFilter === "hard") {
-      filtered = filtered.filter(
-        (level) =>
-          level.difficulty === "Hard" || level.difficultyCategory === "hard"
-      );
+    switch (activeFilter) {
+      case "completed":
+        filtered = filtered.filter((level) => level.status === "completed");
+        break;
+      case "current":
+        filtered = filtered.filter((level) => level.status === "current");
+        break;
+      case "easy":
+        filtered = filtered.filter(
+          (level) =>
+            level.difficulty === "Easy" || level.difficultyCategory === "easy"
+        );
+        break;
+      case "medium":
+        filtered = filtered.filter(
+          (level) =>
+            level.difficulty === "Medium" ||
+            level.difficultyCategory === "medium"
+        );
+        break;
+      case "hard":
+        filtered = filtered.filter(
+          (level) =>
+            level.difficulty === "Hard" || level.difficultyCategory === "hard"
+        );
+        break;
+      default:
+        // "all" - no filtering
+        break;
     }
 
     return filtered;
   }, [levels, activeFilter]);
+
+  // PERFORMANCE FIX: Stable memoized handlers
+  const stableHandlers = useMemo(() => {
+    const handleBack = () => {
+      router.back();
+    };
+
+    const handleStartGame = () => {
+      if (!selectedLevel) return;
+
+      router.push({
+        pathname: "/(games)/Questions",
+        params: {
+          levelId: selectedLevel.id,
+          gameMode: typeof gameMode === "string" ? gameMode : String(gameMode),
+          gameTitle,
+          difficulty:
+            typeof selectedLevel.difficultyCategory === "string"
+              ? selectedLevel.difficultyCategory
+              : "easy",
+          skipModal: "true",
+        },
+      });
+    };
+
+    const handleLevelSelectWithCompletion = (level: LevelData) => {
+      if (level.status === "locked") {
+        console.log(`[LevelSelection] Level ${level.id} is locked`);
+        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
+        return;
+      }
+
+      console.log(
+        `[LevelSelection] Level ${level.id} selected, status: ${level.status}`
+      );
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+      setSelectedLevel(level);
+
+      if (level.status === "completed") {
+        console.log(
+          `[LevelSelection] Opening review modal for completed level ${level.id}`
+        );
+        setShowReviewModal(true);
+        setShowGameModal(false);
+      } else {
+        console.log(
+          `[LevelSelection] Opening game modal for level ${level.id}`
+        );
+        setShowGameModal(true);
+        setShowReviewModal(false);
+      }
+    };
+
+    const handleCloseGameModal = () => {
+      console.log(`[LevelSelection] Closing game modal`);
+      setShowGameModal(false);
+      setSelectedLevel(null);
+    };
+
+    const handleCloseReviewModal = () => {
+      console.log(`[LevelSelection] Closing review modal`);
+      setShowReviewModal(false);
+      setSelectedLevel(null);
+    };
+
+    const handleErrorReset = () => {
+      setComponentError(null);
+    };
+
+    return {
+      handleBack,
+      handleStartGame,
+      handleLevelSelectWithCompletion,
+      handleCloseGameModal,
+      handleCloseReviewModal,
+      handleErrorReset,
+    };
+  }, [selectedLevel, gameMode, gameTitle]);
+
+  // PERFORMANCE FIX: Stable memoized difficulty colors
+  const stableDifficultyColors = useMemo(() => difficultyColors, []);
 
   // Preload the modal when levels are available (only once)
   useEffect(() => {
@@ -85,79 +178,16 @@ const LevelSelection = () => {
     }
   }, [levels.length > 0, preloadedModal]);
 
-  // Navigation handlers
-  const handleBack = useCallback(() => {
-    router.back();
-  }, []);
-
-  const handleStartGame = useCallback(() => {
-    if (!selectedLevel) return;
-
-    router.push({
-      pathname: "/(games)/Questions",
-      params: {
-        levelId: selectedLevel.id,
-        gameMode: typeof gameMode === "string" ? gameMode : String(gameMode),
-        gameTitle,
-        difficulty:
-          typeof selectedLevel.difficultyCategory === "string"
-            ? selectedLevel.difficultyCategory
-            : "easy",
-        skipModal: "true",
-      },
-    });
-  }, [selectedLevel, gameMode, gameTitle]);
-
-  // PERFORMANCE FIX: Level select handler with haptic feedback
-  const handleLevelSelectWithCompletion = useCallback((level: LevelData) => {
-    if (level.status === "locked") {
-      console.log(`[LevelSelection] Level ${level.id} is locked`);
-      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
-      return;
-    }
-
-    console.log(
-      `[LevelSelection] Level ${level.id} selected, status: ${level.status}`
-    );
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-    setSelectedLevel(level);
-
-    if (level.status === "completed") {
-      console.log(
-        `[LevelSelection] Opening review modal for completed level ${level.id}`
-      );
-      setShowReviewModal(true);
-      setShowGameModal(false);
-    } else {
-      console.log(`[LevelSelection] Opening game modal for level ${level.id}`);
-      setShowGameModal(true);
-      setShowReviewModal(false);
-    }
-  }, []);
-
-  // Close handlers for both modals
-  const handleCloseGameModal = useCallback(() => {
-    console.log(`[LevelSelection] Closing game modal`);
-    setShowGameModal(false);
-    setSelectedLevel(null);
-  }, []);
-
-  const handleCloseReviewModal = useCallback(() => {
-    console.log(`[LevelSelection] Closing review modal`);
-    setShowReviewModal(false);
-    setSelectedLevel(null);
-  }, []);
-
-  // Try to reset error when retrying
-  const handleErrorReset = useCallback(() => {
-    setComponentError(null);
-  }, []);
-
-  // Render content with proper components
-  const renderContent = useCallback(() => {
+  // PERFORMANCE FIX: Memoize render content with stable dependencies
+  const renderContent = useMemo(() => {
     // First check for component error
     if (componentError) {
-      return <ErrorState error={componentError} onRetry={handleErrorReset} />;
+      return (
+        <ErrorState
+          error={componentError}
+          onRetry={stableHandlers.handleErrorReset}
+        />
+      );
     }
 
     // Then check for API error
@@ -183,8 +213,8 @@ const LevelSelection = () => {
           ) : (
             <LevelGrid
               levels={filteredLevels}
-              onSelectLevel={handleLevelSelectWithCompletion}
-              difficultyColors={difficultyColors}
+              onSelectLevel={stableHandlers.handleLevelSelectWithCompletion}
+              difficultyColors={stableDifficultyColors}
             />
           )}
         </>
@@ -197,14 +227,14 @@ const LevelSelection = () => {
     componentError,
     error,
     isLoading,
-    levels,
+    levels.length,
     showLevels,
     filteredLevels,
     activeFilter,
-    handleLevelSelectWithCompletion,
-    difficultyColors,
+    stableHandlers.handleLevelSelectWithCompletion,
+    stableHandlers.handleErrorReset,
+    stableDifficultyColors,
     handleRetry,
-    handleErrorReset,
   ]);
 
   // Main render with try/catch for error handling
@@ -225,13 +255,13 @@ const LevelSelection = () => {
 
         <SafeAreaView style={styles.safeArea}>
           {/* Header */}
-          <LevelHeader title={gameTitle} onBack={handleBack} />
+          <LevelHeader title={gameTitle} onBack={stableHandlers.handleBack} />
 
           {/* Progress bar */}
           <LevelProgressBar percentage={completionPercentage} />
 
           {/* Content Area */}
-          <View style={styles.contentArea}>{renderContent()}</View>
+          <View style={styles.contentArea}>{renderContent}</View>
 
           {/* Level Info Modal - For non-completed levels */}
           <LevelInfoModal
@@ -240,8 +270,8 @@ const LevelSelection = () => {
               selectedLevel !== null &&
               selectedLevel.status !== "completed"
             }
-            onClose={handleCloseGameModal}
-            onStart={handleStartGame}
+            onClose={stableHandlers.handleCloseGameModal}
+            onStart={stableHandlers.handleStartGame}
             levelData={selectedLevel?.questionData || levels[0]?.questionData}
             gameMode={
               typeof gameMode === "string" ? gameMode : String(gameMode)
@@ -257,14 +287,14 @@ const LevelSelection = () => {
               selectedLevel !== null &&
               selectedLevel.status === "completed"
             }
-            onClose={handleCloseReviewModal}
+            onClose={stableHandlers.handleCloseReviewModal}
             level={selectedLevel}
             gradientColors={
               selectedLevel
-                ? difficultyColors[
-                    selectedLevel.difficulty as keyof typeof difficultyColors
-                  ] || difficultyColors.Easy
-                : difficultyColors.Easy
+                ? stableDifficultyColors[
+                    selectedLevel.difficulty as keyof typeof stableDifficultyColors
+                  ] || stableDifficultyColors.Easy
+                : stableDifficultyColors.Easy
             }
           />
         </SafeAreaView>
@@ -288,9 +318,12 @@ const LevelSelection = () => {
       >
         <StatusBar barStyle="light-content" />
         <SafeAreaView style={styles.safeArea}>
-          <LevelHeader title={gameTitle} onBack={handleBack} />
+          <LevelHeader title={gameTitle} onBack={stableHandlers.handleBack} />
           <View style={styles.contentArea}>
-            <ErrorState error={error} onRetry={handleErrorReset} />
+            <ErrorState
+              error={error}
+              onRetry={stableHandlers.handleErrorReset}
+            />
           </View>
         </SafeAreaView>
       </View>

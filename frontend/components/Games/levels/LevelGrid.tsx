@@ -1,4 +1,4 @@
-import React, { useCallback } from "react";
+import React, { useCallback, useMemo } from "react";
 import { View, FlatList } from "react-native";
 import { LevelData } from "@/types/gameTypes";
 import { levelStyles as styles } from "@/styles/games/levels.styles";
@@ -18,7 +18,13 @@ const LevelGrid: React.FC<LevelGridProps> = ({
   // Stable keyExtractor
   const keyExtractor = useCallback((item: LevelData) => `level-${item.id}`, []);
 
-  // Memoized renderItem with stable comparison
+  // Memoize default gradient colors to prevent recreation
+  const defaultGradientColors = useMemo(
+    () => difficultyColors.Easy || (["#4CAF50", "#2E7D32"] as const),
+    [difficultyColors.Easy]
+  );
+
+  // Optimized renderItem with better memoization
   const renderItem = useCallback(
     ({ item: level, index }: { item: LevelData; index: number }) => {
       const levelDifficulty =
@@ -26,7 +32,7 @@ const LevelGrid: React.FC<LevelGridProps> = ({
 
       const colorsArray =
         difficultyColors[levelDifficulty as keyof typeof difficultyColors] ||
-        difficultyColors.Easy;
+        defaultGradientColors;
 
       const isEvenIndex = index % 2 === 0;
 
@@ -59,7 +65,28 @@ const LevelGrid: React.FC<LevelGridProps> = ({
         </View>
       );
     },
-    [difficultyColors, onSelectLevel]
+    [difficultyColors, onSelectLevel, defaultGradientColors]
+  );
+
+  // Memoize FlatList props for better performance
+  const flatListProps = useMemo(
+    () => ({
+      numColumns: 2,
+      contentContainerStyle: styles.gridScrollContent,
+      showsVerticalScrollIndicator: false,
+      removeClippedSubviews: true, // Changed to true for better performance
+      initialNumToRender: 8, // Reduced for faster initial render
+      maxToRenderPerBatch: 6, // Reduced batch size
+      windowSize: 4, // Reduced window size
+      updateCellsBatchingPeriod: 100, // Add batching for smoother scrolling
+      // Add getItemLayout for known item heights (if you know card height)
+      // getItemLayout: (data, index) => ({
+      //   length: ITEM_HEIGHT,
+      //   offset: ITEM_HEIGHT * index,
+      //   index,
+      // }),
+    }),
+    [styles.gridScrollContent]
   );
 
   return (
@@ -68,36 +95,29 @@ const LevelGrid: React.FC<LevelGridProps> = ({
         data={levels}
         keyExtractor={keyExtractor}
         renderItem={renderItem}
-        numColumns={2}
-        contentContainerStyle={styles.gridScrollContent}
-        showsVerticalScrollIndicator={false}
-        removeClippedSubviews={false}
-        initialNumToRender={10}
-        maxToRenderPerBatch={10}
-        windowSize={5}
+        {...flatListProps}
       />
-      {/* <FlashList
-        data={levels}
-        keyExtractor={keyExtractor}
-        renderItem={renderItem}
-        numColumns={2}
-        contentContainerStyle={styles.gridScrollContent}
-        showsVerticalScrollIndicator={false}
-        removeClippedSubviews={false}
-        estimatedItemSize={280}
-        onViewableItemsChanged={({ viewableItems }) => {
-          console.log(
-            "Viewable:",
-            viewableItems.map((v) => v.index)
-          );
-        }}
-        overrideItemLayout={({ index }) => ({
-          length: 250,
-          offset: Math.floor(index / 2) * 250, // if numColumns = 2
-        })}
-      /> */}
     </View>
   );
 };
 
-export default React.memo(LevelGrid);
+// Enhanced memo comparison
+export default React.memo(LevelGrid, (prevProps, nextProps) => {
+  // Quick length check first
+  if (prevProps.levels.length !== nextProps.levels.length) {
+    return false;
+  }
+
+  // Check if the levels array actually changed (not just recreated)
+  const levelsChanged = prevProps.levels.some((prevLevel, index) => {
+    const nextLevel = nextProps.levels[index];
+    return (
+      prevLevel.id !== nextLevel.id ||
+      prevLevel.status !== nextLevel.status ||
+      prevLevel.title !== nextLevel.title ||
+      prevLevel.difficulty !== nextLevel.difficulty
+    );
+  });
+
+  return !levelsChanged && prevProps.onSelectLevel === nextProps.onSelectLevel;
+});
