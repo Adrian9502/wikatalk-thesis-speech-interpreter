@@ -4,37 +4,224 @@ import useGameStore from "@/store/games/useGameStore";
 import useProgressStore from "@/store/games/useProgressStore";
 import { usePronunciationStore } from "@/store/usePronunciationStore";
 import useCoinsStore from "@/store/games/useCoinsStore";
+import { convertQuizToLevels } from "@/utils/games/convertQuizToLevels";
+import { LevelData, QuizQuestions } from "@/types/gameTypes";
+
+interface FilteredLevels {
+  all: LevelData[];
+  completed: LevelData[];
+  current: LevelData[];
+  easy: LevelData[];
+  medium: LevelData[];
+  hard: LevelData[];
+}
 
 interface SplashState {
   isLoadingComplete: boolean;
   splashShown: boolean;
   gameDataPreloaded: boolean;
   progressDataPrecomputed: boolean;
+  levelsPrecomputed: boolean;
+
+  // Store precomputed levels for each game mode with filters
+  precomputedLevels: {
+    [gameMode: string]: {
+      levels: LevelData[];
+      completionPercentage: number;
+      lastUpdated: number;
+      // Add precomputed filters
+      filteredLevels: FilteredLevels;
+    };
+  };
+
   markLoadingComplete: () => void;
   markSplashShown: () => void;
   markGameDataPreloaded: () => void;
   markProgressDataPrecomputed: () => void;
+  markLevelsPrecomputed: () => void;
   preloadGameData: () => Promise<boolean>;
   precomputeAllProgressData: () => Promise<boolean>;
+  precomputeAllLevels: () => Promise<boolean>;
+  getLevelsForMode: (
+    gameMode: string
+  ) => {
+    levels: LevelData[];
+    completionPercentage: number;
+    filteredLevels: FilteredLevels;
+  } | null;
+  getFilteredLevels: (
+    gameMode: string,
+    filter: keyof FilteredLevels
+  ) => LevelData[];
   reset: () => void;
 }
+
+// Helper function to precompute all filters for a set of levels
+const precomputeFilters = (levels: LevelData[]): FilteredLevels => {
+  console.log(`[SplashStore] Precomputing filters for ${levels.length} levels`);
+
+  const startTime = Date.now();
+
+  const filteredLevels: FilteredLevels = {
+    all: levels, // All levels (no filtering needed)
+    completed: levels.filter((level) => level.status === "completed"),
+    current: levels.filter((level) => level.status === "current"),
+    easy: levels.filter(
+      (level) =>
+        level.difficulty === "Easy" || level.difficultyCategory === "easy"
+    ),
+    medium: levels.filter(
+      (level) =>
+        level.difficulty === "Medium" || level.difficultyCategory === "medium"
+    ),
+    hard: levels.filter(
+      (level) =>
+        level.difficulty === "Hard" || level.difficultyCategory === "hard"
+    ),
+  };
+
+  const duration = Date.now() - startTime;
+  console.log(`[SplashStore] Filters precomputed in ${duration}ms:`, {
+    all: filteredLevels.all.length,
+    completed: filteredLevels.completed.length,
+    current: filteredLevels.current.length,
+    easy: filteredLevels.easy.length,
+    medium: filteredLevels.medium.length,
+    hard: filteredLevels.hard.length,
+  });
+
+  return filteredLevels;
+};
 
 export const useSplashStore = create<SplashState>((set, get) => ({
   isLoadingComplete: false,
   splashShown: false,
   gameDataPreloaded: false,
   progressDataPrecomputed: false,
+  levelsPrecomputed: false,
+  precomputedLevels: {},
+
   markLoadingComplete: () => set({ isLoadingComplete: true }),
   markSplashShown: () => set({ splashShown: true }),
   markGameDataPreloaded: () => set({ gameDataPreloaded: true }),
   markProgressDataPrecomputed: () => set({ progressDataPrecomputed: true }),
+  markLevelsPrecomputed: () => set({ levelsPrecomputed: true }),
+
   reset: () =>
     set({
       isLoadingComplete: false,
       splashShown: false,
       gameDataPreloaded: false,
-      progressDataPrecomputed: false, // Reset new flag
+      progressDataPrecomputed: false,
+      levelsPrecomputed: false,
+      precomputedLevels: {},
     }),
+
+  // Enhanced function to precompute all levels with filters
+  precomputeAllLevels: async () => {
+    try {
+      console.log("[SplashStore] Starting levels precomputation with filters");
+      const gameStore = useGameStore.getState();
+      const progressStore = useProgressStore.getState();
+
+      // Ensure we have questions and progress data
+      const { questions } = gameStore;
+      const globalProgress = progressStore.progress;
+
+      if (!questions || !globalProgress) {
+        console.warn(
+          "[SplashStore] Missing questions or progress data for levels precomputation"
+        );
+        return false;
+      }
+
+      const modes = ["multipleChoice", "identification", "fillBlanks"];
+      const precomputedLevels: any = {};
+
+      for (const mode of modes) {
+        try {
+          console.log(
+            `[SplashStore] Precomputing levels and filters for ${mode}`
+          );
+          const startTime = Date.now();
+
+          // Convert quiz data to levels
+          const progressArray = Array.isArray(globalProgress)
+            ? globalProgress
+            : [];
+          const levels = convertQuizToLevels(
+            mode,
+            questions as QuizQuestions,
+            progressArray
+          );
+
+          // Calculate completion percentage
+          const completedCount = levels.filter(
+            (level) => level.status === "completed"
+          ).length;
+          const completionPercentage =
+            levels.length > 0
+              ? Math.round((completedCount / levels.length) * 100)
+              : 0;
+
+          // Precompute all filters for this mode
+          const filteredLevels = precomputeFilters(levels);
+
+          precomputedLevels[mode] = {
+            levels,
+            completionPercentage,
+            lastUpdated: Date.now(),
+            filteredLevels, // Add precomputed filters
+          };
+
+          const duration = Date.now() - startTime;
+          console.log(
+            `[SplashStore] Levels and filters for ${mode} precomputed in ${duration}ms (${levels.length} levels, ${completionPercentage}% complete)`
+          );
+        } catch (error) {
+          console.error(
+            `[SplashStore] Error precomputing levels for ${mode}:`,
+            error
+          );
+        }
+      }
+
+      // Update store with precomputed levels
+      set({ precomputedLevels, levelsPrecomputed: true });
+
+      console.log(
+        "[SplashStore] ✅ All levels and filters precomputation complete"
+      );
+      return true;
+    } catch (error) {
+      console.error("[SplashStore] Error in levels precomputation:", error);
+      return false;
+    }
+  },
+
+  // Enhanced function to get levels for a specific mode
+  getLevelsForMode: (gameMode: string) => {
+    const { precomputedLevels } = get();
+    return precomputedLevels[gameMode] || null;
+  },
+
+  // NEW: Function to get filtered levels instantly
+  getFilteredLevels: (
+    gameMode: string,
+    filter: keyof FilteredLevels
+  ): LevelData[] => {
+    const { precomputedLevels } = get();
+    const modeData = precomputedLevels[gameMode];
+
+    if (!modeData || !modeData.filteredLevels) {
+      console.warn(
+        `[SplashStore] No precomputed filters found for ${gameMode}`
+      );
+      return [];
+    }
+
+    return modeData.filteredLevels[filter] || [];
+  },
 
   // Enhanced function to precompute ALL progress data during splash
   precomputeAllProgressData: async () => {
@@ -155,8 +342,24 @@ export const useSplashStore = create<SplashState>((set, get) => ({
         );
       }
 
-      // Phase 3: Load other data in background (don't wait)
-      console.log("[SplashStore] Phase 3: Loading background data");
+      // Phase 3: Precompute ALL levels with filters
+      console.log(
+        "[SplashStore] Phase 3: Precomputing all levels with filters"
+      );
+      const levelsPrecomputeSuccess = await get().precomputeAllLevels();
+
+      if (levelsPrecomputeSuccess) {
+        console.log(
+          "[SplashStore] Phase 3 complete: All levels and filters precomputed"
+        );
+      } else {
+        console.warn(
+          "[SplashStore] Phase 3 partial: Some levels failed to precompute"
+        );
+      }
+
+      // Phase 4: Load other data in background (don't wait)
+      console.log("[SplashStore] Phase 4: Loading background data");
       const backgroundPromises = [];
       const pronunciationStore = usePronunciationStore.getState();
 
@@ -166,7 +369,7 @@ export const useSplashStore = create<SplashState>((set, get) => ({
 
       // Don't wait for background data
       Promise.allSettled(backgroundPromises).then(() => {
-        console.log("[SplashStore] Phase 3 complete: Background data loaded");
+        console.log("[SplashStore] Phase 4 complete: Background data loaded");
       });
 
       set({ gameDataPreloaded: true });
@@ -190,7 +393,27 @@ export const isProgressDataPrecomputed = (): boolean => {
   return useSplashStore.getState().progressDataPrecomputed;
 };
 
+export const isLevelsPrecomputed = (): boolean => {
+  return useSplashStore.getState().levelsPrecomputed;
+};
+
 export const isAllDataReady = (): boolean => {
   const state = useSplashStore.getState();
-  return state.gameDataPreloaded && state.progressDataPrecomputed;
+  return (
+    state.gameDataPreloaded &&
+    state.progressDataPrecomputed &&
+    state.levelsPrecomputed
+  );
+};
+
+export const getLevelsForGameMode = (gameMode: string) => {
+  return useSplashStore.getState().getLevelsForMode(gameMode);
+};
+
+// NEW: Helper function to get filtered levels instantly
+export const getFilteredLevelsForGameMode = (
+  gameMode: string,
+  filter: keyof FilteredLevels
+): LevelData[] => {
+  return useSplashStore.getState().getFilteredLevels(gameMode, filter);
 };

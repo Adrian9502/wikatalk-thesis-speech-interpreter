@@ -41,6 +41,16 @@ const LevelInfoModal: React.FC<GameInfoModalProps> = React.memo(
     isLoading = false,
     difficulty = "Easy",
   }) => {
+    // EARLY RETURN: Don't render anything if not visible
+    if (!visible) {
+      return null;
+    }
+
+    // EARLY RETURN: Don't render if no level data
+    if (!levelData) {
+      return null;
+    }
+
     // Get starCount using the utility function
     const starCount = getStarCount(difficulty);
 
@@ -53,6 +63,11 @@ const LevelInfoModal: React.FC<GameInfoModalProps> = React.memo(
         setHasBeenStarted(false);
       }
     }, [visible]);
+
+    // EARLY RETURN: Don't render if already started
+    if (hasBeenStarted) {
+      return null;
+    }
 
     // Get gradient colors for the current difficulty
     const getGradientColors = (): readonly [string, string] => {
@@ -73,11 +88,6 @@ const LevelInfoModal: React.FC<GameInfoModalProps> = React.memo(
       setHasBeenStarted(true);
       onStart();
     }, [isLoading, onStart]);
-
-    // If modal shouldn't be visible or we don't have level data, return null
-    if (!visible || !levelData || hasBeenStarted) {
-      return null;
-    }
 
     return (
       <Modal
@@ -241,6 +251,18 @@ const LevelInfoModal: React.FC<GameInfoModalProps> = React.memo(
           </Animatable.View>
         </Animatable.View>
       </Modal>
+    );
+  },
+  // ENHANCED: Better memo comparison to prevent unnecessary renders
+  (prevProps, nextProps) => {
+    // Only re-render if these critical props change
+    return (
+      prevProps.visible === nextProps.visible &&
+      prevProps.isLoading === nextProps.isLoading &&
+      prevProps.gameMode === nextProps.gameMode &&
+      prevProps.difficulty === nextProps.difficulty &&
+      prevProps.levelData?.id === nextProps.levelData?.id &&
+      prevProps.levelData?.title === nextProps.levelData?.title
     );
   }
 );

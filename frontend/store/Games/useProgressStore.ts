@@ -15,6 +15,7 @@ const CACHE_EXPIRY = 5 * 60 * 1000;
 interface ProgressState {
   // Core state
   progress: any[] | null;
+  globalProgress: any[] | null; // ADD THIS LINE
   isLoading: boolean;
   error: string | null;
   lastFetched: number;
@@ -438,6 +439,7 @@ async function calculateEnhancedProgress(
 const useProgressStore = create<ProgressState>((set, get) => ({
   // Initial state
   progress: null,
+  globalProgress: null,
   isLoading: false,
   error: null,
   lastFetched: 0,
@@ -514,10 +516,11 @@ const useProgressStore = create<ProgressState>((set, get) => ({
         // Update state with all calculated data
         set({
           progress: progressData,
+          globalProgress: progressData, // ADD THIS LINE
           isLoading: false,
           error: null,
           lastFetched: currentTime,
-          lastUpdated: Date.now(), // Add this line
+          lastUpdated: Date.now(),
           totalCompletedCount,
           totalQuizCount: getTotalQuizCount(),
           gameProgress,
@@ -691,6 +694,7 @@ const useProgressStore = create<ProgressState>((set, get) => ({
 
     set({
       progress: null,
+      globalProgress: null, // ADD THIS LINE
       lastFetched: 0,
       enhancedProgress: {},
     });

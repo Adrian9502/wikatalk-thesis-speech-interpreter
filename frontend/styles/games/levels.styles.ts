@@ -660,4 +660,12 @@ export const levelStyles = StyleSheet.create({
     shadowRadius: 3,
     elevation: 2,
   },
+  // NEW: Filter loading overlay
+  filterLoadingOverlay: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "rgba(0, 0, 0, 0.1)",
+    minHeight: 200,
+  },
 });

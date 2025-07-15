@@ -1,24 +1,33 @@
 import { useEffect, useRef } from "react";
 
 export function useRenderTracker(name: string = "Component") {
-  const renderCount = useRef(0);
-  const mountTime = useRef(performance.now());
-  const isFirstRender = useRef(true);
+  // Only track in development
+  if (__DEV__) {
+    const renderCount = useRef(0);
+    const mountTime = useRef(performance.now());
+    const isFirstRender = useRef(true);
 
-  renderCount.current++;
+    renderCount.current++;
 
-  // Only log mount time on first render
-  useEffect(() => {
-    if (isFirstRender.current) {
-      const endTime = performance.now();
-      const total = (endTime - mountTime.current).toFixed(2);
-      console.log(`[Performance] ${name} mounted in: ${total}ms`);
-      isFirstRender.current = false;
-    }
-  }, [name]);
+    // Only log mount time on first render
+    useEffect(() => {
+      if (isFirstRender.current) {
+        const endTime = performance.now();
+        const total = (endTime - mountTime.current).toFixed(2);
+        console.log(`[Performance] ${name} mounted in: ${total}ms`);
+        isFirstRender.current = false;
+      }
+    }, [name]);
 
-  // Log render count (but not on every render to avoid spam)
-  useEffect(() => {
-    console.log(`[Render Count] ${name} rendered ${renderCount.current} times`);
-  });
+    // Throttled render count logging (only log every 1000ms)
+    useEffect(() => {
+      const timer = setTimeout(() => {
+        console.log(
+          `[Render Count] ${name} rendered ${renderCount.current} times`
+        );
+      }, 1000);
+
+      return () => clearTimeout(timer);
+    });
+  }
 }

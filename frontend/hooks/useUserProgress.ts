@@ -2,6 +2,8 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import axios from "axios";
 import { getToken } from "@/lib/authTokenManager";
 import { UserProgress } from "@/types/userProgress";
+import { useSplashStore } from "@/store/useSplashStore";
+import useProgressStore from "@/store/games/useProgressStore";
 
 const API_URL = process.env.EXPO_PUBLIC_BACKEND_URL || "http://localhost:5000";
 
@@ -42,10 +44,28 @@ export const useUserProgress = (quizId: string | number | "global") => {
     []
   );
 
-  // ENHANCED: Stable fetch function with caching
+  // ENHANCED: Check if we can use precomputed data from splash store
+  const tryUsePrecomputedData = useCallback(() => {
+    if (quizId === "global") {
+      const progressStore = useProgressStore.getState();
+      if (progressStore.progress) {
+        console.log("[useUserProgress] Using precomputed global progress");
+        setProgress(progressStore.progress);
+        return true;
+      }
+    }
+    return false;
+  }, [quizId]);
+
+  // ENHANCED: Stable fetch function with caching and precomputed data check
   const fetchProgress = useCallback(
     async (forceRefresh: boolean = false) => {
       const cacheKey = String(quizId);
+
+      // First, try to use precomputed data if available
+      if (!forceRefresh && tryUsePrecomputedData()) {
+        return progress;
+      }
 
       // Return cached data if available and not forcing refresh
       if (
@@ -153,10 +173,10 @@ export const useUserProgress = (quizId: string | number | "global") => {
         setIsLoading(false);
       }
     },
-    [quizId, formatQuizId, createDefaultProgress]
+    [quizId, formatQuizId, createDefaultProgress, tryUsePrecomputedData]
   );
 
-  // ENHANCED: Update progress function with immediate cache update
+  // ENHANCED: Update progress function with global cache invalidation
   const updateProgress = useCallback(
     async (timeSpent: number, completed?: boolean, isCorrect?: boolean) => {
       try {
@@ -195,43 +215,22 @@ export const useUserProgress = (quizId: string | number | "global") => {
           const currentCacheKey = String(quizId);
           progressCacheRef.current[currentCacheKey] = updatedProgress;
 
-          // CRITICAL FIX: If this was a completion, immediately update global cache
+          // CRITICAL: If this was a completion, invalidate precomputed data
           if (completed && isCorrect) {
             console.log(
-              `[useUserProgress] Level completed! Force refreshing global cache...`
+              `[useUserProgress] Level completed! Invalidating precomputed data...`
             );
 
             // Invalidate global cache
             delete progressCacheRef.current["global"];
 
-            // IMMEDIATE GLOBAL REFRESH: Fetch updated global data right away
-            try {
-              const globalToken = getToken();
-              if (globalToken) {
-                const globalResponse = await axios({
-                  method: "get",
-                  url: `${API_URL}/api/userprogress`,
-                  headers: {
-                    Authorization: `Bearer ${globalToken}`,
-                    "Content-Type": "application/json",
-                  },
-                  timeout: 5000,
-                });
+            // Invalidate splash store precomputed levels AND filters
+            const splashStore = useSplashStore.getState();
+            splashStore.reset(); // This will force recomputation on next access
 
-                if (globalResponse.data.success) {
-                  console.log(
-                    `[useUserProgress] Immediately updated global cache with latest completion`
-                  );
-                  progressCacheRef.current["global"] =
-                    globalResponse.data.progressEntries;
-                }
-              }
-            } catch (globalError) {
-              console.warn(
-                `[useUserProgress] Failed to immediately refresh global cache:`,
-                globalError
-              );
-            }
+            console.log(
+              `[useUserProgress] All precomputed data invalidated - levels and filters will be recomputed`
+            );
           }
 
           return updatedProgress;

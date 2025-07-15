@@ -7,7 +7,6 @@ import { LevelData } from "@/types/gameTypes";
 import { renderFocusIcon } from "@/utils/games/renderFocusIcon";
 import { getStarCount, formatDifficulty } from "@/utils/games/difficultyUtils";
 import { levelStyles as styles } from "@/styles/games/levels.styles";
-import { useRenderTracker } from "@/hooks/useRenderTracker";
 
 interface LevelCardProps {
   level: LevelData;
@@ -21,9 +20,6 @@ interface LevelCardProps {
 
 const LevelCard: React.FC<LevelCardProps> = React.memo(
   ({ level, onSelect, gradientColors }) => {
-    //! Track renders for performance analysis
-    useRenderTracker(`LevelCard - ${level.levelString}`);
-
     // Memoize extracted props to prevent recalculation
     const levelProps = useMemo(() => {
       const {
@@ -120,10 +116,10 @@ const LevelCard: React.FC<LevelCardProps> = React.memo(
 
             {/* Completed Badge */}
             {levelProps.isCompleted && (
-              <Animatable.View animation="fadeIn" style={styles.completedPill}>
+              <View style={styles.completedPill}>
                 <Check width={14} height={14} color="#FFFFFF" strokeWidth={3} />
                 <Text style={styles.completedPillText}>Finished</Text>
-              </Animatable.View>
+              </View>
             )}
 
             {/* Level content */}
