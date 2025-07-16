@@ -41,15 +41,9 @@ export const useLevelDetails = (
       let answer = "Answer not available";
 
       console.log("[useLevelDetails] Extracting Q&A from level:", levelData);
-      console.log("[useLevelDetails] Progress data:", progressData);
 
       try {
         if (levelData.questionData) {
-          console.log(
-            "[useLevelDetails] Using questionData:",
-            levelData.questionData
-          );
-
           // Extract question
           if (levelData.questionData.question) {
             question = levelData.questionData.question;
@@ -59,29 +53,23 @@ export const useLevelDetails = (
             question = levelData.questionData.prompt;
           }
 
-          // UPDATED: Extract answer - unified options handling
+          // Extract answer - unified options handling
           if (levelData.questionData.answer) {
-            // For fillBlanks and identification modes - direct answer
             answer = levelData.questionData.answer;
-            console.log("[useLevelDetails] Found direct answer:", answer);
           } else if (
             levelData.questionData.options &&
             Array.isArray(levelData.questionData.options)
           ) {
-            // UPDATED: Handle both multipleChoice and identification using options
             const mode = levelData.questionData.mode;
 
             if (mode === "multipleChoice") {
-              // For multipleChoice - find the option marked as correct
               const correctOption = levelData.questionData.options.find(
                 (opt: any) => opt.isCorrect
               );
               if (correctOption) {
                 answer = correctOption.text;
-                console.log("[useLevelDetails] Found correct option:", answer);
               }
             } else if (mode === "identification") {
-              // For identification - find the option that matches the answer
               const correctOption = levelData.questionData.options.find(
                 (opt: any) =>
                   opt.text === levelData.questionData.answer ||
@@ -89,16 +77,12 @@ export const useLevelDetails = (
               );
               if (correctOption) {
                 answer = correctOption.text;
-                console.log(
-                  "[useLevelDetails] Found correct identification option:",
-                  answer
-                );
               }
             }
           }
         }
 
-        // Priority 2: Use progress data if available
+        // Use progress data if available
         if (
           progressData &&
           progressData.attempts &&
@@ -111,14 +95,10 @@ export const useLevelDetails = (
 
           if (lastCorrectAttempt && lastCorrectAttempt.userAnswer) {
             answer = lastCorrectAttempt.userAnswer;
-            console.log(
-              "[useLevelDetails] Found user answer from progress:",
-              answer
-            );
           }
         }
 
-        // Priority 3: Use level basic info as fallback for question
+        // Fallbacks
         if (question === "Question not available") {
           question =
             levelData.title ||
@@ -126,11 +106,9 @@ export const useLevelDetails = (
             `Level ${levelData.number || levelData.id}`;
         }
 
-        // Priority 4: Enhanced answer fallback
         if (answer === "Answer not available") {
           if (levelData.questionData) {
             const mode = levelData.questionData.mode;
-
             if (mode === "identification" && levelData.questionData.answer) {
               answer = levelData.questionData.answer;
             } else if (mode === "fillBlanks" && levelData.questionData.answer) {
@@ -142,8 +120,6 @@ export const useLevelDetails = (
             answer = "Completed successfully";
           }
         }
-
-        console.log("[useLevelDetails] Final Q&A:", { question, answer });
       } catch (err) {
         console.error("[useLevelDetails] Error extracting Q&A:", err);
         question =
@@ -160,16 +136,10 @@ export const useLevelDetails = (
 
   const fetchLevelDetails = useCallback(async () => {
     if (!level || !shouldFetch) {
-      console.log(
-        "[useLevelDetails] Skipping fetch - level:",
-        !!level,
-        "shouldFetch:",
-        shouldFetch
-      );
       return;
     }
 
-    // NEW: Check if we have precomputed data first
+    // PRIORITY 1: Check precomputed data FIRST and return immediately
     if (isLevelDetailsPrecomputed()) {
       console.log(
         "[useLevelDetails] Checking precomputed data for level:",
@@ -179,17 +149,17 @@ export const useLevelDetails = (
 
       if (precomputedDetails) {
         console.log(
-          "[useLevelDetails] Using precomputed details:",
-          precomputedDetails
+          "[useLevelDetails] Using precomputed details - NO FETCH NEEDED"
         );
         setDetails(precomputedDetails);
         setIsLoading(false);
         setError(null);
-        return;
+        return; // EARLY RETURN - no fetch needed
       }
     }
 
-    console.log("[useLevelDetails] Starting fetch for level:", level.id);
+    // PRIORITY 2: Only fetch if no precomputed data
+    console.log("[useLevelDetails] No precomputed data - starting API fetch");
     setIsLoading(true);
     setError(null);
 
@@ -200,8 +170,6 @@ export const useLevelDetails = (
       }
 
       const formattedId = `n-${level.id}`;
-      console.log("[useLevelDetails] Fetching progress for ID:", formattedId);
-
       const response = await axios({
         method: "get",
         url: `${API_URL}/api/userprogress/${formattedId}`,
@@ -212,34 +180,19 @@ export const useLevelDetails = (
         timeout: 10000,
       });
 
-      console.log("[useLevelDetails] API Response:", response.data);
-
       if (response.data.success) {
         const progressData = response.data.progress;
-        console.log("[useLevelDetails] Progress data:", progressData);
-
         const attempts = progressData.attempts || [];
         const totalAttempts = attempts.length;
         const correctAttempts = attempts.filter(
           (attempt: any) => attempt.isCorrect
         ).length;
 
-        console.log("[useLevelDetails] Attempts analysis:", {
-          total: totalAttempts,
-          correct: correctAttempts,
-          attempts: attempts,
-        });
-
         const lastCorrectAttempt =
           attempts
             .slice()
             .reverse()
             .find((a: any) => a.isCorrect) || attempts[attempts.length - 1];
-
-        console.log(
-          "[useLevelDetails] Last correct attempt:",
-          lastCorrectAttempt
-        );
 
         const completedDate = new Date(
           lastCorrectAttempt?.attemptDate ||
@@ -267,7 +220,6 @@ export const useLevelDetails = (
           correctAttempts,
         };
 
-        console.log("[useLevelDetails] Final details:", levelDetails);
         setDetails(levelDetails);
       } else {
         throw new Error(
@@ -282,9 +234,9 @@ export const useLevelDetails = (
         "Failed to load level details";
       setError(errorMessage);
 
+      // Create fallback details
       if (level) {
         const { question, answer } = extractQuestionAndAnswer(level, null);
-
         const fallbackDetails: CompletedLevelDetails = {
           question,
           answer,
@@ -298,11 +250,6 @@ export const useLevelDetails = (
           totalAttempts: 1,
           correctAttempts: 1,
         };
-
-        console.log(
-          "[useLevelDetails] Using enhanced fallback details:",
-          fallbackDetails
-        );
         setDetails(fallbackDetails);
       }
     } finally {
@@ -310,16 +257,33 @@ export const useLevelDetails = (
     }
   }, [level, shouldFetch, extractQuestionAndAnswer]);
 
+  // OPTIMIZED: Effect that checks precomputed data synchronously first
   useEffect(() => {
-    if (shouldFetch && level) {
-      console.log("[useLevelDetails] Effect triggered - fetching details");
-      fetchLevelDetails();
-    } else if (!shouldFetch) {
-      console.log("[useLevelDetails] Effect triggered - clearing details");
+    if (!shouldFetch || !level) {
       setDetails(null);
       setError(null);
+      setIsLoading(false);
+      return;
     }
-  }, [fetchLevelDetails, shouldFetch, level?.id]);
+
+    // IMMEDIATE CHECK: Try precomputed data first (synchronous)
+    if (isLevelDetailsPrecomputed()) {
+      const precomputedDetails = getLevelDetailsForLevel(level.id);
+      if (precomputedDetails) {
+        console.log(
+          "[useLevelDetails] Immediate precomputed data found - no loading state"
+        );
+        setDetails(precomputedDetails);
+        setIsLoading(false);
+        setError(null);
+        return; // Don't call fetchLevelDetails
+      }
+    }
+
+    // FALLBACK: If no precomputed data, then fetch
+    console.log("[useLevelDetails] No immediate data - will fetch");
+    fetchLevelDetails();
+  }, [level?.id, shouldFetch, fetchLevelDetails]);
 
   return {
     details,

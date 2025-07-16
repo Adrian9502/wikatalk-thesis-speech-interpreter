@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState, useRef } from "react";
 import {
   Modal,
   View,
@@ -6,6 +6,7 @@ import {
   TouchableOpacity,
   StyleSheet,
   ActivityIndicator,
+  Animated,
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import * as Animatable from "react-native-animatable";
@@ -41,21 +42,39 @@ const LevelInfoModal: React.FC<GameInfoModalProps> = React.memo(
     isLoading = false,
     difficulty = "Easy",
   }) => {
-    // Simplified state management for better animation performance
     const [isAnimating, setIsAnimating] = useState(false);
     const [hasStarted, setHasStarted] = useState(false);
 
-    // Reset state when modal visibility changes
+    // Animation values
+    const overlayOpacity = useRef(new Animated.Value(0)).current;
+    const modalTranslateY = useRef(new Animated.Value(300)).current;
+
+    // Reset state when modal visibility changes - OPTIMIZED timing
     useEffect(() => {
       if (visible) {
         setIsAnimating(true);
         setHasStarted(false);
-        // Allow animation to complete
-        const timer = setTimeout(() => {
+
+        // Start entrance animation
+        Animated.parallel([
+          Animated.timing(overlayOpacity, {
+            toValue: 1,
+            duration: 600,
+            useNativeDriver: true,
+          }),
+          Animated.spring(modalTranslateY, {
+            toValue: 0,
+            tension: 100,
+            friction: 8,
+            useNativeDriver: true,
+          }),
+        ]).start(() => {
           setIsAnimating(false);
-        }, 300);
-        return () => clearTimeout(timer);
+        });
       } else {
+        // Reset values
+        overlayOpacity.setValue(0);
+        modalTranslateY.setValue(300);
         setIsAnimating(false);
         setHasStarted(false);
       }
@@ -92,40 +111,57 @@ const LevelInfoModal: React.FC<GameInfoModalProps> = React.memo(
       return ["#2563EB", "#1E40AF"] as const;
     };
 
-    // Enhanced start button handler with animation state
+    // Enhanced start button handler with optimized timing
     const handleStart = useCallback(() => {
       if (isLoading || isAnimating) return;
-
       setHasStarted(true);
-      // Small delay to ensure smooth transition
+      // Reduced delay for smoother transition
       setTimeout(() => {
         onStart();
-      }, 100);
+      }, 50);
     }, [isLoading, isAnimating, onStart]);
 
     // Enhanced close handler
     const handleClose = useCallback(() => {
       if (isAnimating) return;
-      onClose();
-    }, [isAnimating, onClose]);
+
+      setIsAnimating(true);
+
+      // Animate fade-out
+      Animated.timing(overlayOpacity, {
+        toValue: 0,
+        duration: 400,
+        useNativeDriver: true,
+      }).start(() => {
+        setIsAnimating(false);
+        onClose(); // Close after fade
+      });
+    }, [isAnimating, overlayOpacity, onClose]);
 
     return (
       <Modal
         visible={visible}
         transparent
-        animationType="none" // Use custom animation instead
+        animationType="none"
         statusBarTranslucent={true}
+        hardwareAccelerated={true}
         onRequestClose={handleClose}
       >
-        <Animatable.View
-          animation="fadeIn"
-          duration={300}
-          style={modalSharedStyles.overlay}
+        <Animated.View
+          style={[
+            modalSharedStyles.overlay,
+            {
+              opacity: overlayOpacity,
+            },
+          ]}
         >
-          <Animatable.View
-            animation="bounceInUp"
-            duration={1000}
-            style={modalSharedStyles.modalContainer}
+          <Animated.View
+            style={[
+              modalSharedStyles.modalContainer,
+              {
+                transform: [{ translateY: modalTranslateY }],
+              },
+            ]}
           >
             <LinearGradient
               colors={getGradientColors()}
@@ -143,6 +179,7 @@ const LevelInfoModal: React.FC<GameInfoModalProps> = React.memo(
                 onPress={handleClose}
                 style={modalSharedStyles.closeButton}
                 disabled={isAnimating}
+                hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }} // Better touch target
               >
                 <X width={20} height={20} color="#fff" />
               </TouchableOpacity>
@@ -244,8 +281,8 @@ const LevelInfoModal: React.FC<GameInfoModalProps> = React.memo(
                 </TouchableOpacity>
               </View>
             </LinearGradient>
-          </Animatable.View>
-        </Animatable.View>
+          </Animated.View>
+        </Animated.View>
       </Modal>
     );
   },
@@ -263,7 +300,7 @@ const LevelInfoModal: React.FC<GameInfoModalProps> = React.memo(
   }
 );
 
-// Enhanced styles
+// Enhanced styles for better performance
 const styles = StyleSheet.create({
   extendedContent: {
     paddingBottom: 28,

@@ -229,7 +229,9 @@ export const useSplashStore = create<SplashState>((set, get) => ({
   // NEW: Precompute all level details for completed levels
   precomputeAllLevelDetails: async () => {
     try {
-      console.log("[SplashStore] Starting level details precomputation");
+      console.log(
+        "[SplashStore] Starting comprehensive level details precomputation"
+      );
       const gameStore = useGameStore.getState();
       const progressStore = useProgressStore.getState();
 
@@ -247,24 +249,23 @@ export const useSplashStore = create<SplashState>((set, get) => ({
         [levelId: string]: CompletedLevelDetails;
       } = {};
 
-      // Process all completed levels
-      const completedProgress = Array.isArray(globalProgress)
-        ? globalProgress.filter((p) => p.completed)
-        : [];
+      // Process ALL progress entries (not just completed ones)
+      const allProgress = Array.isArray(globalProgress) ? globalProgress : [];
 
       console.log(
-        `[SplashStore] Processing ${completedProgress.length} completed levels`
+        `[SplashStore] Processing ${allProgress.length} progress entries`
       );
 
-      for (const progressEntry of completedProgress) {
+      for (const progressEntry of allProgress) {
         try {
           const levelId = String(progressEntry.quizId).replace(/^n-/, "");
 
           // Find the question data
           let questionData = null;
+          let gameMode = null;
 
           // Search through all game modes and difficulties
-          for (const [gameMode, difficulties] of Object.entries(questions)) {
+          for (const [mode, difficulties] of Object.entries(questions)) {
             if (!difficulties || typeof difficulties !== "object") continue;
 
             for (const [difficulty, questionList] of Object.entries(
@@ -278,6 +279,7 @@ export const useSplashStore = create<SplashState>((set, get) => ({
 
               if (found) {
                 questionData = found;
+                gameMode = mode;
                 break;
               }
             }
@@ -300,7 +302,7 @@ export const useSplashStore = create<SplashState>((set, get) => ({
 
           // Calculate stats
           const attempts = progressEntry.attempts || [];
-          const totalAttempts = attempts.length;
+          const totalAttempts = Math.max(attempts.length, 1); // At least 1 attempt
           const correctAttempts = attempts.filter(
             (a: any) => a.isCorrect
           ).length;
@@ -318,19 +320,24 @@ export const useSplashStore = create<SplashState>((set, get) => ({
             day: "numeric",
           });
 
-          // Store the details
+          // Store the details for ANY level with progress (not just completed)
           precomputedLevelDetails[levelId] = {
             question,
             answer,
             timeSpent: progressEntry.totalTimeSpent || 0,
             completedDate: formattedDate,
-            isCorrect: true,
+            isCorrect: progressEntry.completed || correctAttempts > 0,
             totalAttempts,
-            correctAttempts,
+            correctAttempts: Math.max(
+              correctAttempts,
+              progressEntry.completed ? 1 : 0
+            ),
           };
 
           console.log(
-            `[SplashStore] Precomputed details for level ${levelId}:`
+            `[SplashStore] Precomputed details for level ${levelId}: ${
+              progressEntry.completed ? "COMPLETED" : "IN_PROGRESS"
+            }`
           );
         } catch (error) {
           console.error(

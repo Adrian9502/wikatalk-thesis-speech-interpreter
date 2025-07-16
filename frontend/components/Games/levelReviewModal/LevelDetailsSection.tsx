@@ -1,6 +1,6 @@
 import React from "react";
-import { View, Text, StyleSheet, ActivityIndicator } from "react-native";
-import { Check, AlertCircle } from "react-native-feather";
+import { View, Text, StyleSheet } from "react-native";
+import { AlertCircle } from "react-native-feather";
 
 interface CompletedLevelDetails {
   question: string;
@@ -14,13 +14,11 @@ interface CompletedLevelDetails {
 
 interface LevelDetailsSectionProps {
   details: CompletedLevelDetails | null;
-  isLoading: boolean;
   error: string | null;
 }
 
 const LevelDetailsSection: React.FC<LevelDetailsSectionProps> = ({
   details,
-  isLoading,
   error,
 }) => {
   if (error) {
@@ -41,11 +39,9 @@ const LevelDetailsSection: React.FC<LevelDetailsSectionProps> = ({
       <View style={styles.sectionContainer}>
         <Text style={styles.sectionLabel}>Question</Text>
         <View style={styles.questionContainer}>
-          {isLoading ? (
-            <ActivityIndicator size="small" color="#fff" />
-          ) : (
-            <Text style={styles.questionText}>{details?.question}</Text>
-          )}
+          <Text style={styles.questionText}>
+            {details?.question || "Question not available"}
+          </Text>
         </View>
       </View>
 
@@ -53,13 +49,9 @@ const LevelDetailsSection: React.FC<LevelDetailsSectionProps> = ({
       <View style={styles.sectionContainer}>
         <Text style={styles.sectionLabel}>Correct Answer</Text>
         <View style={styles.answerContainer}>
-          {isLoading ? (
-            <>
-              <ActivityIndicator size="small" color="#fff" />
-            </>
-          ) : (
-            <Text style={styles.answerText}>{details?.answer}</Text>
-          )}
+          <Text style={styles.answerText}>
+            {details?.answer || "Answer not available"}
+          </Text>
         </View>
       </View>
     </>
@@ -67,16 +59,6 @@ const LevelDetailsSection: React.FC<LevelDetailsSectionProps> = ({
 };
 
 const styles = StyleSheet.create({
-  loadingContainer: {
-    padding: 30,
-    alignItems: "center",
-  },
-  loadingText: {
-    color: "#fff",
-    fontFamily: "Poppins-Medium",
-    marginTop: 12,
-    fontSize: 14,
-  },
   errorContainer: {
     padding: 20,
     backgroundColor: "rgba(255, 255,255, 0.1)",
@@ -100,15 +82,6 @@ const styles = StyleSheet.create({
     textAlign: "center",
     fontSize: 13,
     marginTop: 4,
-  },
-  noDataContainer: {
-    padding: 20,
-    alignItems: "center",
-  },
-  noDataText: {
-    color: "rgba(255, 255, 255, 0.7)",
-    fontFamily: "Poppins-Medium",
-    fontSize: 14,
   },
   sectionContainer: {
     marginBottom: 16,
@@ -134,6 +107,7 @@ const styles = StyleSheet.create({
     fontFamily: "Poppins-Medium",
     color: "#fff",
     lineHeight: 22,
+    textAlign: "center",
   },
   answerContainer: {
     borderWidth: 1,
@@ -144,12 +118,14 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     minHeight: 50,
+    padding: 16,
   },
   answerText: {
     fontSize: 15,
     fontFamily: "Poppins-Medium",
     color: "#fff",
     lineHeight: 22,
+    textAlign: "center",
   },
 });
 
