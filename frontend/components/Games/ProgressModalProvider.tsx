@@ -14,6 +14,7 @@ import useProgressStore from "@/store/games/useProgressStore";
 import { EnhancedGameModeProgress } from "@/types/gameProgressTypes";
 import { InteractionManager } from "react-native";
 import { getGameModeGradient } from "@/utils/gameUtils";
+import ModalLoading from "../ModalLoading";
 
 // Create context for modal control
 const ProgressModalContext = createContext<{
@@ -131,8 +132,7 @@ export const ProgressModalProvider: React.FC<{ children: React.ReactNode }> = ({
                 start={{ x: 0, y: 0 }}
                 end={{ x: 1, y: 1 }}
               >
-                <ActivityIndicator size="small" color="#fff" />
-                <Text style={styles.loadingText}>Loading progress data...</Text>
+                <ModalLoading />
               </LinearGradient>
             )}
 

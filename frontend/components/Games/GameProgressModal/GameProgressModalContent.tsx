@@ -13,6 +13,7 @@ import ProgressContent from "./ProgressContent";
 import useProgressStore from "@/store/games/useProgressStore";
 // utility function
 import { getGameModeGradient } from "@/utils/gameUtils";
+import ModalLoading from "@/components/ModalLoading";
 
 interface GameProgressModalContentProps {
   gameMode: string;
@@ -114,10 +115,7 @@ const GameProgressModalContent: React.FC<GameProgressModalContentProps> = ({
 
       {/* Content - Show loading indicator or actual content */}
       {isDataLoading ? (
-        <View style={styles.loadingContainer}>
-          <ActivityIndicator color="#fff" size="large" />
-          <Text style={styles.loadingText}>Loading data...</Text>
-        </View>
+        <ModalLoading />
       ) : (
         <ProgressContent
           progressData={progressData}
@@ -153,17 +151,6 @@ const styles = StyleSheet.create({
     padding: 8,
     backgroundColor: "rgba(0,0,0,0.2)",
     borderRadius: 20,
-  },
-  loadingContainer: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  loadingText: {
-    fontSize: 14,
-    fontFamily: "Poppins-Medium",
-    color: "rgba(255, 255, 255, 0.8)",
-    marginTop: 16,
   },
 });
 
