@@ -24,6 +24,7 @@ import RewardCalendar from "./dailyRewardsModal/RewardCalendar";
 import ClaimButton from "./dailyRewardsModal/ClaimButton";
 import BalanceCard from "./dailyRewardsModal/BalanceCard";
 import { getDayRewardAmount } from "@/hooks/useRewards";
+import ModalLoading from "@/components/ModalLoading";
 
 interface DailyRewardsModalProps {
   visible: boolean;
@@ -71,8 +72,7 @@ const DailyRewardsModal: React.FC<DailyRewardsModalProps> = ({
       setIsLoading(true);
 
       // IMPORTANT: Use cached data immediately if available
-      const { dailyRewardsHistory, isDailyRewardAvailable } =
-        getRewardsDataSync();
+      const { isDailyRewardAvailable } = getRewardsDataSync();
       setClaimedToday(!isDailyRewardAvailable);
 
       // Use InteractionManager to defer rendering until after modal animation
@@ -155,8 +155,7 @@ const DailyRewardsModal: React.FC<DailyRewardsModalProps> = ({
 
             {isLoading ? (
               <View style={styles.fullHeightLoader}>
-                <ActivityIndicator color="#fff" size="small" />
-                <Text style={styles.loadingText}>Loading...</Text>
+                <ModalLoading />
               </View>
             ) : (
               <>
@@ -272,12 +271,6 @@ const styles = StyleSheet.create({
   coinAnimation: {
     width: 250,
     height: 250,
-  },
-  loadingText: {
-    color: "#fff",
-    marginTop: 13,
-    fontFamily: "Poppins-Regular",
-    fontSize: 16,
   },
   calendarPlaceholder: {
     height: 120,
