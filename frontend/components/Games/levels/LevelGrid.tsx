@@ -8,12 +8,17 @@ interface LevelGridProps {
   levels: LevelData[];
   onSelectLevel: (level: LevelData) => void;
   difficultyColors: { [key: string]: readonly [string, string] };
+  // Animation props
+  shouldAnimateCards?: boolean;
+  animationKey?: string;
 }
 
 const LevelGrid: React.FC<LevelGridProps> = ({
   levels,
   onSelectLevel,
   difficultyColors,
+  shouldAnimateCards = false,
+  animationKey = "",
 }) => {
   // Stable keyExtractor
   const keyExtractor = useCallback((item: LevelData) => `level-${item.id}`, []);
@@ -24,7 +29,7 @@ const LevelGrid: React.FC<LevelGridProps> = ({
     [difficultyColors.Easy]
   );
 
-  // Optimized renderItem with better memoization
+  // Optimized renderItem with animation support
   const renderItem = useCallback(
     ({ item: level, index }: { item: LevelData; index: number }) => {
       const levelDifficulty =
@@ -47,6 +52,9 @@ const LevelGrid: React.FC<LevelGridProps> = ({
         colorsArray[1] || "#2E7D32",
       ];
 
+      // Calculate staggered animation delay
+      const animationDelay = shouldAnimateCards ? index * 50 : 0;
+
       return (
         <View style={itemStyle}>
           <LevelCard
@@ -61,37 +69,33 @@ const LevelGrid: React.FC<LevelGridProps> = ({
                 : "Tap to view level details"
             }
             index={index}
+            shouldAnimate={shouldAnimateCards}
+            animationDelay={animationDelay}
           />
         </View>
       );
     },
-    [difficultyColors, onSelectLevel, defaultGradientColors]
+    [difficultyColors, onSelectLevel, defaultGradientColors, shouldAnimateCards]
   );
 
-  // Memoize FlatList props for better performance
   const flatListProps = useMemo(
     () => ({
       numColumns: 2,
       contentContainerStyle: styles.gridScrollContent,
       showsVerticalScrollIndicator: false,
-      removeClippedSubviews: true, // Changed to true for better performance
-      initialNumToRender: 8, // Reduced for faster initial render
-      maxToRenderPerBatch: 6, // Reduced batch size
-      windowSize: 4, // Reduced window size
-      updateCellsBatchingPeriod: 100, // Add batching for smoother scrolling
-      // Add getItemLayout for known item heights (if you know card height)
-      // getItemLayout: (data, index) => ({
-      //   length: ITEM_HEIGHT,
-      //   offset: ITEM_HEIGHT * index,
-      //   index,
-      // }),
+      removeClippedSubviews: false, // Disable during animations
+      initialNumToRender: shouldAnimateCards ? 6 : 8,
+      maxToRenderPerBatch: shouldAnimateCards ? 4 : 6,
+      windowSize: 4,
+      updateCellsBatchingPeriod: 100,
     }),
-    [styles.gridScrollContent]
+    [styles.gridScrollContent, shouldAnimateCards]
   );
 
   return (
     <View style={[styles.levelGridContainer]}>
       <FlatList
+        key={animationKey}
         data={levels}
         keyExtractor={keyExtractor}
         renderItem={renderItem}
@@ -119,5 +123,10 @@ export default React.memo(LevelGrid, (prevProps, nextProps) => {
     );
   });
 
-  return !levelsChanged && prevProps.onSelectLevel === nextProps.onSelectLevel;
+  return (
+    !levelsChanged &&
+    prevProps.onSelectLevel === nextProps.onSelectLevel &&
+    prevProps.shouldAnimateCards === nextProps.shouldAnimateCards &&
+    prevProps.animationKey === nextProps.animationKey
+  );
 });

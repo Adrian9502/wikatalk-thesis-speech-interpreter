@@ -1,8 +1,7 @@
-import React, { useRef, useMemo } from "react";
+import React, { useRef, useMemo, useEffect, useState } from "react";
 import { Text, View, TouchableOpacity, Animated } from "react-native";
 import { Star, Lock, Check } from "react-native-feather";
 import { LinearGradient } from "expo-linear-gradient";
-import * as Animatable from "react-native-animatable";
 import { LevelData } from "@/types/gameTypes";
 import { renderFocusIcon } from "@/utils/games/renderFocusIcon";
 import { getStarCount, formatDifficulty } from "@/utils/games/difficultyUtils";
@@ -16,10 +15,19 @@ interface LevelCardProps {
   accessibilityLabel?: string;
   accessibilityHint?: string;
   index?: number;
+  shouldAnimate?: boolean;
+  animationDelay?: number;
 }
 
 const LevelCard: React.FC<LevelCardProps> = React.memo(
-  ({ level, onSelect, gradientColors }) => {
+  ({
+    level,
+    onSelect,
+    gradientColors,
+    index = 0,
+    shouldAnimate = false,
+    animationDelay = 0,
+  }) => {
     // Memoize extracted props to prevent recalculation
     const levelProps = useMemo(() => {
       const {
@@ -44,35 +52,79 @@ const LevelCard: React.FC<LevelCardProps> = React.memo(
       };
     }, [level]);
 
-    // Animation reference for press feedback only
     const scaleAnim = useRef(new Animated.Value(1)).current;
+    const entranceOpacity = useRef(
+      new Animated.Value(shouldAnimate ? 0 : 1)
+    ).current;
+    const entranceTranslateY = useRef(
+      new Animated.Value(shouldAnimate ? 30 : 0)
+    ).current;
 
-    // Memoize animation handlers
+    // Animation state
+    const [hasAnimated, setHasAnimated] = useState(!shouldAnimate);
+    const [isEntranceComplete, setIsEntranceComplete] = useState(
+      !shouldAnimate
+    );
+
+    // SIMPLIFIED: Entrance animation
+    useEffect(() => {
+      if (shouldAnimate && !hasAnimated) {
+        const timer = setTimeout(() => {
+          Animated.parallel([
+            Animated.timing(entranceOpacity, {
+              toValue: 1,
+              duration: 400,
+              useNativeDriver: true,
+            }),
+            Animated.timing(entranceTranslateY, {
+              toValue: 0,
+              duration: 400,
+              useNativeDriver: true,
+            }),
+          ]).start(({ finished }) => {
+            if (finished) {
+              setHasAnimated(true);
+              setIsEntranceComplete(true);
+            }
+          });
+        }, animationDelay);
+
+        return () => clearTimeout(timer);
+      }
+    }, [
+      shouldAnimate,
+      hasAnimated,
+      animationDelay,
+      entranceOpacity,
+      entranceTranslateY,
+    ]);
+
+    // SIMPLIFIED: Press animation handlers
     const animationHandlers = useMemo(() => {
       const handlePressIn = () => {
-        if (levelProps.isLocked) return;
+        if (levelProps.isLocked || !isEntranceComplete) return;
 
         Animated.spring(scaleAnim, {
           toValue: 0.95,
-          friction: 5,
+          friction: 6,
           tension: 100,
           useNativeDriver: true,
         }).start();
       };
 
       const handlePressOut = () => {
-        if (levelProps.isLocked) return;
+        if (levelProps.isLocked || !isEntranceComplete) return;
 
         Animated.spring(scaleAnim, {
           toValue: 1,
-          friction: 5,
+          friction: 6,
           tension: 100,
           useNativeDriver: true,
         }).start();
       };
 
       return { handlePressIn, handlePressOut };
-    }, [levelProps.isLocked, scaleAnim]);
+    }, [levelProps.isLocked, scaleAnim, isEntranceComplete]);
 
     // Memoize stars array to prevent recreation
     const starsArray = useMemo(
@@ -87,7 +139,17 @@ const LevelCard: React.FC<LevelCardProps> = React.memo(
     );
 
     return (
-      <Animated.View style={{ transform: [{ scale: scaleAnim }] }}>
+      <Animated.View
+        style={[
+          {
+            opacity: entranceOpacity,
+            transform: [
+              { scale: scaleAnim },
+              { translateY: entranceTranslateY },
+            ],
+          },
+        ]}
+      >
         <TouchableOpacity
           style={styles.levelCard}
           onPress={() => onSelect(level)}
@@ -167,14 +229,16 @@ const LevelCard: React.FC<LevelCardProps> = React.memo(
             {/* Locked overlay */}
             {levelProps.isLocked && (
               <View style={styles.levelLock}>
-                <Animatable.View
-                  animation="pulse"
-                  iterationCount="infinite"
-                  duration={2000}
-                  style={styles.levelLockIcon}
+                <Animated.View
+                  style={[
+                    styles.levelLockIcon,
+                    {
+                      transform: [{ scale: scaleAnim }],
+                    },
+                  ]}
                 >
                   <Lock width={24} height={24} color="#FFFFFF" />
-                </Animatable.View>
+                </Animated.View>
               </View>
             )}
           </LinearGradient>
@@ -182,7 +246,7 @@ const LevelCard: React.FC<LevelCardProps> = React.memo(
       </Animated.View>
     );
   },
-  // Enhanced memo comparison - more specific comparisons
+  // Enhanced memo comparison
   (prevProps, nextProps) => {
     const prevLevel = prevProps.level;
     const nextLevel = nextProps.level;
@@ -195,7 +259,9 @@ const LevelCard: React.FC<LevelCardProps> = React.memo(
       prevLevel.focusArea === nextLevel.focusArea &&
       prevLevel.levelString === nextLevel.levelString &&
       prevProps.gradientColors[0] === nextProps.gradientColors[0] &&
-      prevProps.gradientColors[1] === nextProps.gradientColors[1]
+      prevProps.gradientColors[1] === nextProps.gradientColors[1] &&
+      prevProps.shouldAnimate === nextProps.shouldAnimate &&
+      prevProps.animationDelay === nextProps.animationDelay
     );
   }
 );

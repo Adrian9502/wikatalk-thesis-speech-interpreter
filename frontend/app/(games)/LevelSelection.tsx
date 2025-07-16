@@ -13,6 +13,7 @@ import { levelStyles as styles } from "@/styles/games/levels.styles";
 import { useLevelData } from "@/hooks/useLevelData";
 import { difficultyColors } from "@/constant/colors";
 import { isAllDataReady } from "@/store/useSplashStore";
+import { useAnimationTracker } from "@/hooks/useAnimationTracker";
 // Components
 import ErrorState from "@/components/games/levels/ErrorState";
 import EmptyState from "@/components/games/levels/EmptyState";
@@ -30,6 +31,8 @@ const LevelSelection = () => {
   const { gameMode, gameTitle } = params;
   const { activeTheme } = useThemeStore();
 
+  const { shouldPlayAnimation } = useAnimationTracker();
+
   // Use the enhanced hook that includes precomputed filters
   const {
     levels,
@@ -43,20 +46,39 @@ const LevelSelection = () => {
 
   // Filter state
   const [activeFilter, setActiveFilter] = useState<FilterType>("all");
-  const [isFilterLoading, setIsFilterLoading] = useState(false); // NEW: Filter loading state
+  const [isFilterLoading, setIsFilterLoading] = useState(false);
 
   // Local state for modal handling
   const [selectedLevel, setSelectedLevel] = useState<LevelData | null>(null);
   const [showGameModal, setShowGameModal] = useState(false);
   const [showReviewModal, setShowReviewModal] = useState(false);
 
-  // PERFORMANCE: Check if all data is ready - if not, show loading
   const [dataReady, setDataReady] = useState(false);
+  const [initialLoad, setInitialLoad] = useState(true);
+
+  const [animationKey, setAnimationKey] = useState("initial");
+  const [shouldAnimateCards, setShouldAnimateCards] = useState(false);
 
   useEffect(() => {
     const checkDataReady = () => {
       if (isAllDataReady()) {
         setDataReady(true);
+
+        if (initialLoad) {
+          console.log(
+            "[LevelSelection] Initial data ready - triggering animation"
+          );
+          const gameKey =
+            typeof gameMode === "string" ? gameMode : String(gameMode);
+          const animationKey = `${gameKey}-initial`;
+
+          if (shouldPlayAnimation(animationKey)) {
+            setShouldAnimateCards(true);
+            setAnimationKey(animationKey);
+          }
+
+          setInitialLoad(false);
+        }
       } else {
         console.log("[LevelSelection] Waiting for precomputed data...");
         const timeout = setTimeout(checkDataReady, 100);
@@ -65,7 +87,7 @@ const LevelSelection = () => {
     };
 
     checkDataReady();
-  }, []);
+  }, [shouldPlayAnimation, gameMode, initialLoad]);
 
   // PERFORMANCE FIX: Use precomputed filters with loading state
   const filteredLevels = useMemo(() => {
@@ -156,7 +178,7 @@ const LevelSelection = () => {
       setComponentError(null);
     };
 
-    // ENHANCED: Filter handler with loading state
+    // ENHANCED: Filter handler with animation support
     const handleFilterChange = (filter: FilterType) => {
       if (filter === activeFilter) return; // Don't change if same filter
 
@@ -171,10 +193,28 @@ const LevelSelection = () => {
       requestAnimationFrame(() => {
         setActiveFilter(filter);
 
-        // Hide loading state after a short delay to ensure smooth transition
+        // NEW: Check if animation should play for this filter
+        const gameKey =
+          typeof gameMode === "string" ? gameMode : String(gameMode);
+        const filterAnimationKey = `${gameKey}-${filter}`;
+
+        if (shouldPlayAnimation(filterAnimationKey)) {
+          console.log(
+            `[LevelSelection] Playing animation for filter: ${filter}`
+          );
+          setShouldAnimateCards(true);
+          setAnimationKey(filterAnimationKey);
+        } else {
+          console.log(
+            `[LevelSelection] Skipping animation for filter: ${filter} (already played)`
+          );
+          setShouldAnimateCards(false);
+        }
+
+        // Hide loading state after animation setup
         setTimeout(() => {
           setIsFilterLoading(false);
-        }, 150); // 150ms delay for smooth transition
+        }, 150);
       });
     };
 
@@ -187,7 +227,7 @@ const LevelSelection = () => {
       handleErrorReset,
       handleFilterChange,
     };
-  }, [selectedLevel, gameMode, gameTitle, activeFilter]);
+  }, [selectedLevel, gameMode, gameTitle, activeFilter, shouldPlayAnimation]);
 
   // PERFORMANCE FIX: Stable memoized difficulty colors
   const stableDifficultyColors = useMemo(() => difficultyColors, []);
@@ -243,6 +283,8 @@ const LevelSelection = () => {
                   levels={filteredLevels}
                   onSelectLevel={stableHandlers.handleLevelSelectWithCompletion}
                   difficultyColors={stableDifficultyColors}
+                  shouldAnimateCards={shouldAnimateCards}
+                  animationKey={animationKey}
                 />
               )}
             </>
@@ -262,7 +304,9 @@ const LevelSelection = () => {
     showLevels,
     filteredLevels,
     activeFilter,
-    isFilterLoading, // NEW: Include in dependencies
+    isFilterLoading,
+    shouldAnimateCards,
+    animationKey,
     stableHandlers.handleLevelSelectWithCompletion,
     stableHandlers.handleErrorReset,
     stableHandlers.handleFilterChange,
