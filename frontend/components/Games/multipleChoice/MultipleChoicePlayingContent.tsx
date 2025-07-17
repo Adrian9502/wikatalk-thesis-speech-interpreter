@@ -32,110 +32,135 @@ interface MultipleChoicePlayingContentProps {
   isStarted?: boolean;
 }
 
-const MultipleChoicePlayingContent: React.FC<
-  MultipleChoicePlayingContentProps
-> = ({
-  difficulty,
-  levelData,
-  currentQuestion,
-  selectedOption,
-  handleOptionSelect,
-  isStarted = true,
-}) => {
-  return (
-    <>
-      {/* Question Card */}
-      <Animatable.View
-        animation="fadeInUp"
-        duration={700}
-        delay={200}
-        style={gameSharedStyles.questionCardWrapper}
-      >
-        <LinearGradient
-          colors={
-            getDifficultyColors(difficulty, levelData) as readonly [
-              string,
-              string
-            ]
-          }
-          style={gameSharedStyles.questionGradient}
-        >
-          <Text style={gameSharedStyles.questionText}>
-            {safeTextRender(currentQuestion?.question)}
-          </Text>
-        </LinearGradient>
-      </Animatable.View>
+const MultipleChoicePlayingContent: React.FC<MultipleChoicePlayingContentProps> =
+  React.memo(
+    ({
+      difficulty,
+      levelData,
+      currentQuestion,
+      selectedOption,
+      handleOptionSelect,
+      isStarted = true,
+    }) => {
+      // PERFORMANCE: Memoize gradient colors
+      const gradientColors = React.useMemo(
+        () =>
+          getDifficultyColors(difficulty, levelData) as readonly [
+            string,
+            string
+          ],
+        [difficulty, levelData]
+      );
 
-      {/* Options */}
-      <View
-        style={[
-          gameSharedStyles.optionsContainer,
-          styles.multipleChoiceOptions,
-        ]}
-      >
-        {currentQuestion?.options &&
-          currentQuestion.options.map((option: Option, index: number) => {
-            // Debug log each option
-            console.log(`[MultipleChoicePlayingContent] Option ${index}:`, {
-              id: option.id,
-              text: option.text,
-              textType: typeof option.text,
-              isCorrect: option.isCorrect,
-            });
+      // PERFORMANCE: Memoize options to prevent re-renders
+      const options = React.useMemo(
+        () => currentQuestion?.options || [],
+        [currentQuestion?.options]
+      );
 
-            return (
-              <Animatable.View
-                key={option.id}
-                animation="fadeInUp"
-                duration={600}
-                delay={300 + index * 100}
-              >
-                <TouchableOpacity
-                  style={getOptionStyle({
+      return (
+        <>
+          {/* Question Card */}
+          <Animatable.View
+            animation="fadeInUp"
+            duration={700}
+            delay={200}
+            style={gameSharedStyles.questionCardWrapper}
+          >
+            <LinearGradient
+              colors={gradientColors}
+              style={gameSharedStyles.questionGradient}
+            >
+              <Text style={gameSharedStyles.questionText}>
+                {safeTextRender(currentQuestion?.question)}
+              </Text>
+            </LinearGradient>
+          </Animatable.View>
+
+          {/* Options */}
+          <View
+            style={[
+              gameSharedStyles.optionsContainer,
+              styles.multipleChoiceOptions,
+            ]}
+          >
+            {options.map((option: Option, index: number) => {
+              // PERFORMANCE: Memoize option style calculation
+              const optionStyle = React.useMemo(
+                () =>
+                  getOptionStyle({
                     isSelected: selectedOption === option.id,
                     isCorrect: option.isCorrect,
-                  })}
-                  onPress={() => handleOptionSelect(option.id)}
-                  disabled={selectedOption !== null || !isStarted}
-                  activeOpacity={0.9}
+                  }),
+                [selectedOption, option.id, option.isCorrect]
+              );
+
+              return (
+                <Animatable.View
+                  key={option.id}
+                  animation="fadeInUp"
+                  duration={600}
+                  delay={300 + index * 100}
                 >
-                  <View style={gameSharedStyles.optionContent}>
-                    <View
-                      style={[
-                        gameSharedStyles.optionIdContainer,
-                        { alignSelf: "flex-start" },
-                      ]}
-                    >
-                      <Text style={gameSharedStyles.optionId}>
-                        {option.id.toUpperCase()}
+                  <TouchableOpacity
+                    style={optionStyle}
+                    onPress={() => handleOptionSelect(option.id)}
+                    disabled={selectedOption !== null || !isStarted}
+                    activeOpacity={0.9}
+                  >
+                    <View style={gameSharedStyles.optionContent}>
+                      <View
+                        style={[
+                          gameSharedStyles.optionIdContainer,
+                          { alignSelf: "flex-start" },
+                        ]}
+                      >
+                        <Text style={gameSharedStyles.optionId}>
+                          {option.id.toUpperCase()}
+                        </Text>
+                      </View>
+                      <Text
+                        style={gameSharedStyles.optionText}
+                        numberOfLines={0}
+                      >
+                        {safeTextRender(option.text)}
                       </Text>
                     </View>
-                    <Text style={gameSharedStyles.optionText} numberOfLines={0}>
-                      {safeTextRender(option.text)}
-                    </Text>
-                  </View>
 
-                  {/* Show check/x icon if selected */}
-                  {selectedOption === option.id && (
-                    <View style={gameSharedStyles.resultIconContainer}>
-                      {option.isCorrect ? (
-                        <Check
-                          width={18}
-                          height={18}
-                          color={BASE_COLORS.white}
-                        />
-                      ) : (
-                        <X width={18} height={18} color={BASE_COLORS.white} />
-                      )}
-                    </View>
-                  )}
-                </TouchableOpacity>
-              </Animatable.View>
-            );
-          })}
-      </View>
-    </>
+                    {/* Show check/x icon if selected */}
+                    {selectedOption === option.id && (
+                      <View style={gameSharedStyles.resultIconContainer}>
+                        {option.isCorrect ? (
+                          <Check
+                            width={18}
+                            height={18}
+                            color={BASE_COLORS.white}
+                          />
+                        ) : (
+                          <X width={18} height={18} color={BASE_COLORS.white} />
+                        )}
+                      </View>
+                    )}
+                  </TouchableOpacity>
+                </Animatable.View>
+              );
+            })}
+          </View>
+        </>
+      );
+    },
+    (prevProps, nextProps) => {
+      // PERFORMANCE: Custom comparison for better memoization
+      return (
+        prevProps.selectedOption === nextProps.selectedOption &&
+        prevProps.currentQuestion?.question ===
+          nextProps.currentQuestion?.question &&
+        prevProps.currentQuestion?.options?.length ===
+          nextProps.currentQuestion?.options?.length &&
+        prevProps.isStarted === nextProps.isStarted &&
+        prevProps.difficulty === nextProps.difficulty
+      );
+    }
   );
-};
 
-export default React.memo(MultipleChoicePlayingContent);
+export default MultipleChoicePlayingContent;

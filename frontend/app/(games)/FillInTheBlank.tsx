@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect } from "react";
+import React, { useCallback, useEffect, useMemo } from "react";
 import { KeyboardAvoidingView, Platform } from "react-native";
 import useGameStore from "@/store/games/useGameStore";
 import GameContainer from "@/components/games/GameContainer";
@@ -15,203 +15,203 @@ interface FillInTheBlankProps {
   isStarted?: boolean;
 }
 
-const FillInTheBlank: React.FC<FillInTheBlankProps> = ({
-  levelId,
-  levelData,
-  difficulty = "easy",
-  isStarted = false,
-}) => {
-  // User progress hook
-  const { progress, updateProgress } = useUserProgress(
-    levelData?.questionId || levelId
-  );
+const FillInTheBlank: React.FC<FillInTheBlankProps> = React.memo(
+  ({ levelId, levelData, difficulty = "easy", isStarted = false }) => {
+    // User progress hook
+    const { progress, updateProgress } = useUserProgress(
+      levelData?.questionId || levelId
+    );
 
-  // Get quiz store state and actions
-  const {
-    gameState: { score, gameStatus, timerRunning, timeElapsed },
-    fillInTheBlankState: {
-      exercises,
-      currentExerciseIndex,
-      userAnswer,
-      showHint,
-      showTranslation,
-      showFeedback,
-      isCorrect,
-      attemptsLeft,
-    },
-    initialize,
-    startGame,
-    handleRestart,
-    setUserAnswer,
-    toggleHint,
-    toggleTranslation,
-    checkAnswer,
-    setTimerRunning,
-    setTimeElapsed,
-  } = useGameStore();
+    // Get quiz store state and actions
+    const {
+      gameState: { score, gameStatus, timerRunning, timeElapsed },
+      fillInTheBlankState: {
+        exercises,
+        currentExerciseIndex,
+        userAnswer,
+        showHint,
+        showTranslation,
+        showFeedback,
+        isCorrect,
+        attemptsLeft,
+      },
+      initialize,
+      startGame,
+      handleRestart,
+      setUserAnswer,
+      toggleHint,
+      toggleTranslation,
+      checkAnswer,
+      setTimerRunning,
+      setTimeElapsed,
+    } = useGameStore();
 
-  // Set initial time from progress when component mounts
-  useEffect(() => {
-    if (progress && !Array.isArray(progress) && progress.totalTimeSpent > 0) {
-      console.log(
-        `[FillInTheBlank] Setting initial time from progress: ${progress.totalTimeSpent}`
-      );
-      setTimeElapsed(progress.totalTimeSpent);
-    } else {
-      console.log(`[FillInTheBlank] Resetting timer to 0`);
-      setTimeElapsed(0);
-    }
-  }, [progress, setTimeElapsed]);
+    // Set initial time from progress when component mounts
+    useEffect(() => {
+      if (progress && !Array.isArray(progress) && progress.totalTimeSpent > 0) {
+        console.log(
+          `[FillInTheBlank] Setting initial time from progress: ${progress.totalTimeSpent}`
+        );
+        setTimeElapsed(progress.totalTimeSpent);
+      } else {
+        console.log(`[FillInTheBlank] Resetting timer to 0`);
+        setTimeElapsed(0);
+      }
+    }, [progress, setTimeElapsed]);
 
-  // ENHANCED: Check answer handler with progress tracking and completion
-  const checkAnswerWithProgress = async () => {
-    try {
-      console.log(`[FillInTheBlank] Checking answer: ${userAnswer}`);
+    // PERFORMANCE: Memoize check answer handler
+    const checkAnswerWithProgress = useCallback(async () => {
+      try {
+        console.log(`[FillInTheBlank] Checking answer: ${userAnswer}`);
 
-      // 1. Stop the timer and capture current time
-      setTimerRunning(false);
-      const currentTime = timeElapsed;
-      console.log(`[FillInTheBlank] Time captured: ${currentTime}`);
+        // 1. Stop the timer and capture current time
+        setTimerRunning(false);
+        const currentTime = timeElapsed;
+        console.log(`[FillInTheBlank] Time captured: ${currentTime}`);
 
-      // 2. Call the check answer handler in quiz store
-      checkAnswer();
+        // 2. Call the check answer handler in quiz store
+        checkAnswer();
 
-      // 3. Update the user progress in backend
-      // We need to use setTimeout because isCorrect state updates after checkAnswer
-      setTimeout(async () => {
-        const currentState = useGameStore.getState().fillInTheBlankState;
-        if (currentState.showFeedback) {
-          console.log(
-            `[FillInTheBlank] Updating progress - Time: ${currentTime}, Correct: ${currentState.isCorrect}, Completed: ${currentState.isCorrect}`
-          );
+        // 3. Update the user progress in backend
+        setTimeout(async () => {
+          const currentState = useGameStore.getState().fillInTheBlankState;
+          if (currentState.showFeedback) {
+            console.log(
+              `[FillInTheBlank] Updating progress - Time: ${currentTime}, Correct: ${currentState.isCorrect}, Completed: ${currentState.isCorrect}`
+            );
 
-          // FIXED: Use the result to avoid unused variable warning
-          const updatedProgress = await updateProgress(
-            currentTime,
-            currentState.isCorrect,
-            currentState.isCorrect
-          );
+            const updatedProgress = await updateProgress(
+              currentTime,
+              currentState.isCorrect,
+              currentState.isCorrect
+            );
 
-          if (updatedProgress) {
-            console.log(`[FillInTheBlank] Progress updated successfully`);
-          }
-        }
-      }, 100);
-    } catch (error) {
-      console.error("[FillInTheBlank] Error in answer check:", error);
-    }
-  };
-
-  // Restart handler with progress sync
-  const handleRestartWithProgress = async () => {
-    handleRestart();
-
-    // Reset timer to continue from where they left off if they have progress
-    if (progress && !Array.isArray(progress) && progress.totalTimeSpent > 0) {
-      setTimeElapsed(progress.totalTimeSpent);
-    } else {
-      setTimeElapsed(0);
-    }
-
-    console.log(`[FillInTheBlank] Restarting game`);
-  };
-
-  // Current exercise and game mode
-  const currentExercise = exercises[currentExerciseIndex];
-  const gameMode = "fillBlanks";
-
-  const focusArea =
-    currentExercise?.focusArea || levelData?.focusArea || "Vocabulary";
-
-  // Initialize game
-  useGameInitialization(
-    levelData,
-    levelId,
-    gameMode,
-    difficulty,
-    isStarted,
-    initialize,
-    startGame,
-    gameStatus,
-    timerRunning,
-    progress && !Array.isArray(progress) ? progress.totalTimeSpent : 0
-  );
-
-  // Stop timer when answer is checked
-  useEffect(() => {
-    if (showFeedback) {
-      setTimerRunning(false);
-    }
-  }, [showFeedback, setTimerRunning]);
-
-  // Memoize toggle functions for better performance
-  const memoizedToggleHint = useCallback(() => {
-    toggleHint();
-  }, [toggleHint]);
-
-  const memoizedToggleTranslation = useCallback(() => {
-    toggleTranslation();
-  }, [toggleTranslation]);
-
-  return (
-    <KeyboardAvoidingView
-      style={{ flex: 1 }}
-      behavior={Platform.OS === "ios" ? "padding" : undefined}
-      keyboardVerticalOffset={Platform.OS === "ios" ? 0 : 20}
-    >
-      <GameContainer
-        title="Fill in the Blank"
-        level={currentExercise?.level || `Level ${levelId}`}
-        levelTitle={currentExercise?.title || "Fill in the Blank"}
-        timerRunning={timerRunning}
-        gameStatus={gameStatus}
-      >
-        {gameStatus === "playing" ? (
-          <GamePlayingContent
-            timerRunning={timerRunning}
-            difficulty={difficulty}
-            focusArea={focusArea}
-            isStarted={isStarted}
-            gameStatus={gameStatus}
-            initialTime={
-              progress && !Array.isArray(progress) ? progress.totalTimeSpent : 0
+            if (updatedProgress) {
+              console.log(`[FillInTheBlank] Progress updated successfully`);
             }
-          >
-            <FillInTheBlankPlayingContent
-              difficulty={difficulty}
-              levelData={levelData}
+          }
+        }, 100);
+      } catch (error) {
+        console.error("[FillInTheBlank] Error in answer check:", error);
+      }
+    }, [userAnswer, timeElapsed, setTimerRunning, checkAnswer, updateProgress]);
+
+    // PERFORMANCE: Memoize restart handler
+    const handleRestartWithProgress = useCallback(async () => {
+      handleRestart();
+
+      // Reset timer to continue from where they left off if they have progress
+      if (progress && !Array.isArray(progress) && progress.totalTimeSpent > 0) {
+        setTimeElapsed(progress.totalTimeSpent);
+      } else {
+        setTimeElapsed(0);
+      }
+
+      console.log(`[FillInTheBlank] Restarting game`);
+    }, [handleRestart, progress, setTimeElapsed]);
+
+    // PERFORMANCE: Memoize current exercise and game config
+    const gameConfig = useMemo(() => {
+      const currentExercise = exercises[currentExerciseIndex];
+      return {
+        currentExercise,
+        focusArea:
+          currentExercise?.focusArea || levelData?.focusArea || "Vocabulary",
+        question: exercises[0]?.sentence || "No question available",
+        userAnswerDisplay: userAnswer || "(No answer provided)",
+        initialTime:
+          progress && !Array.isArray(progress) ? progress.totalTimeSpent : 0,
+      };
+    }, [exercises, currentExerciseIndex, levelData, userAnswer, progress]);
+
+    // PERFORMANCE: Memoize toggle functions
+    const memoizedToggleHint = useCallback(() => {
+      toggleHint();
+    }, [toggleHint]);
+
+    const memoizedToggleTranslation = useCallback(() => {
+      toggleTranslation();
+    }, [toggleTranslation]);
+
+    // Initialize game
+    useGameInitialization(
+      levelData,
+      levelId,
+      "fillBlanks",
+      difficulty,
+      isStarted,
+      initialize,
+      startGame,
+      gameStatus,
+      timerRunning,
+      gameConfig.initialTime
+    );
+
+    // Stop timer when answer is checked
+    useEffect(() => {
+      if (showFeedback) {
+        setTimerRunning(false);
+      }
+    }, [showFeedback, setTimerRunning]);
+
+    return (
+      <KeyboardAvoidingView
+        style={{ flex: 1 }}
+        behavior={Platform.OS === "ios" ? "padding" : undefined}
+        keyboardVerticalOffset={Platform.OS === "ios" ? 0 : 20}
+      >
+        <GameContainer
+          title="Fill in the Blank"
+          level={gameConfig.currentExercise?.level || `Level ${levelId}`}
+          levelTitle={gameConfig.currentExercise?.title || "Fill in the Blank"}
+          timerRunning={timerRunning}
+          gameStatus={gameStatus}
+        >
+          {gameStatus === "playing" ? (
+            <GamePlayingContent
               timerRunning={timerRunning}
-              userAnswer={userAnswer}
-              showHint={showHint}
-              showTranslation={showTranslation}
-              showFeedback={showFeedback}
-              isCorrect={isCorrect}
-              attemptsLeft={attemptsLeft}
-              currentExercise={currentExercise}
-              setUserAnswer={setUserAnswer}
-              toggleHint={memoizedToggleHint}
-              toggleTranslation={memoizedToggleTranslation}
-              checkAnswer={checkAnswerWithProgress}
+              difficulty={difficulty}
+              focusArea={gameConfig.focusArea}
+              isStarted={isStarted}
+              gameStatus={gameStatus}
+              initialTime={gameConfig.initialTime}
+            >
+              <FillInTheBlankPlayingContent
+                difficulty={difficulty}
+                levelData={levelData}
+                timerRunning={timerRunning}
+                userAnswer={userAnswer}
+                showHint={showHint}
+                showTranslation={showTranslation}
+                showFeedback={showFeedback}
+                isCorrect={isCorrect}
+                attemptsLeft={attemptsLeft}
+                currentExercise={gameConfig.currentExercise}
+                setUserAnswer={setUserAnswer}
+                toggleHint={memoizedToggleHint}
+                toggleTranslation={memoizedToggleTranslation}
+                checkAnswer={checkAnswerWithProgress}
+              />
+            </GamePlayingContent>
+          ) : (
+            <GameCompletedContent
+              score={score}
+              timeElapsed={timeElapsed}
+              difficulty={difficulty}
+              question={gameConfig.question}
+              userAnswer={gameConfig.userAnswerDisplay}
+              isCorrect={score > 0}
+              levelId={levelId}
+              gameMode="fillBlanks"
+              gameTitle="Fill in the Blank"
+              onRestart={handleRestartWithProgress}
+              focusArea={gameConfig.focusArea}
             />
-          </GamePlayingContent>
-        ) : (
-          <GameCompletedContent
-            score={score}
-            timeElapsed={timeElapsed}
-            difficulty={difficulty}
-            question={exercises[0]?.sentence || "No question available"}
-            userAnswer={userAnswer || "(No answer provided)"}
-            isCorrect={score > 0}
-            levelId={levelId}
-            gameMode="fillBlanks"
-            gameTitle="Fill in the Blank"
-            onRestart={handleRestartWithProgress}
-            focusArea={focusArea}
-          />
-        )}
-      </GameContainer>
-    </KeyboardAvoidingView>
-  );
-};
+          )}
+        </GameContainer>
+      </KeyboardAvoidingView>
+    );
+  }
+);
 
 export default FillInTheBlank;
