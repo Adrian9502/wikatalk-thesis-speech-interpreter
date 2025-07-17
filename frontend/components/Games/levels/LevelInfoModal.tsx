@@ -9,7 +9,7 @@ import {
   Animated,
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
-import { X, Star, Clock, RotateCcw } from "react-native-feather";
+import { X, Star, Clock, CheckCircle, RotateCcw } from "react-native-feather";
 import { difficultyColors } from "@/constant/colors";
 import {
   renderFocusIcon,
@@ -57,6 +57,7 @@ const LevelInfoModal: React.FC<GameInfoModalProps> = React.memo(
     // Animation values
     const overlayOpacity = useRef(new Animated.Value(0)).current;
     const modalTranslateY = useRef(new Animated.Value(300)).current;
+    const progressOpacity = useRef(new Animated.Value(0)).current;
 
     // FIXED: Fetch fresh progress when modal becomes visible
     useEffect(() => {
@@ -72,6 +73,7 @@ const LevelInfoModal: React.FC<GameInfoModalProps> = React.memo(
       if (visible) {
         setIsAnimating(true);
         setHasStarted(false);
+        progressOpacity.setValue(0);
 
         // Start entrance animation
         Animated.parallel([
@@ -88,15 +90,24 @@ const LevelInfoModal: React.FC<GameInfoModalProps> = React.memo(
           }),
         ]).start(() => {
           setIsAnimating(false);
+          // Fade in progress section after modal is settled
+          if (progressInfo.hasProgress || progressInfo.isLoading) {
+            Animated.timing(progressOpacity, {
+              toValue: 1,
+              duration: 400,
+              useNativeDriver: true,
+            }).start();
+          }
         });
       } else {
         // Reset values
         overlayOpacity.setValue(0);
         modalTranslateY.setValue(300);
+        progressOpacity.setValue(0);
         setIsAnimating(false);
         setHasStarted(false);
       }
-    }, [visible, overlayOpacity, modalTranslateY]);
+    }, [visible, overlayOpacity, modalTranslateY, progressOpacity]);
 
     // FIXED: Enhanced start button handler
     const handleStart = useCallback(() => {
@@ -200,6 +211,72 @@ const LevelInfoModal: React.FC<GameInfoModalProps> = React.memo(
         isLoading: false,
       };
     }, [progress, progressLoading]);
+
+    // NEW: Update progress opacity when progress info changes
+    useEffect(() => {
+      if (visible && !isAnimating) {
+        const shouldShow = progressInfo.hasProgress || progressInfo.isLoading;
+        Animated.timing(progressOpacity, {
+          toValue: shouldShow ? 1 : 0,
+          duration: 300,
+          useNativeDriver: true,
+        }).start();
+      }
+    }, [
+      progressInfo.hasProgress,
+      progressInfo.isLoading,
+      visible,
+      isAnimating,
+      progressOpacity,
+    ]);
+
+    // NEW: Progress Badge Component
+    const ProgressBadge = React.useCallback(() => {
+      if (!progressInfo.hasProgress && !progressInfo.isLoading) {
+        return null;
+      }
+
+      return (
+        <Animated.View
+          style={[
+            styles.progressBadge,
+            {
+              opacity: progressOpacity,
+            },
+          ]}
+        >
+          {progressInfo.isLoading ? (
+            <View style={styles.progressBadgeContent}>
+              <ActivityIndicator size="small" color="#fff" />
+            </View>
+          ) : (
+            <View style={styles.progressBadgeContent}>
+              <View style={styles.progressIcon}>
+                {progressInfo.isCompleted ? (
+                  <CheckCircle width={14} height={14} color="#4CAF50" />
+                ) : (
+                  <Clock width={15} height={15} color="#fbff26ff" />
+                )}
+              </View>
+              <Text style={styles.progressBadgeText}>
+                {progressInfo.isCompleted ? "Completed" : "In Progress"}
+              </Text>
+              <Text style={styles.progressTime}>
+                {formatTime(progressInfo.timeSpent)}
+              </Text>
+              {progressInfo.attempts > 0 && (
+                <View style={styles.attemptContainer}>
+                  <RotateCcw width={15} height={15} color="#fbff26ff" />
+                  <Text style={styles.progressAttempts}>
+                    {progressInfo.attempts}x
+                  </Text>
+                </View>
+              )}
+            </View>
+          )}
+        </Animated.View>
+      );
+    }, [progressInfo, progressOpacity]);
 
     const getGradientColors = (): readonly [string, string] => {
       if (difficulty && difficulty in difficultyColors) {
@@ -311,45 +388,8 @@ const LevelInfoModal: React.FC<GameInfoModalProps> = React.memo(
                 </View>
               </View>
 
-              {/* FIXED: Enhanced Progress Info Section with loading state */}
-              {(progressInfo.hasProgress || progressInfo.isLoading) && (
-                <View style={styles.progressInfoContainer}>
-                  <Text style={styles.progressInfoTitle}>Your Progress</Text>
-
-                  {progressInfo.isLoading ? (
-                    <View style={styles.progressLoadingContainer}>
-                      <ActivityIndicator size="small" color="#fff" />
-                      <Text style={styles.progressLoadingText}>
-                        Loading progress...
-                      </Text>
-                    </View>
-                  ) : (
-                    <>
-                      <View style={styles.progressStatsContainer}>
-                        <View style={styles.progressStat}>
-                          <Clock width={16} height={16} color="#fff" />
-                          <Text style={styles.progressStatText}>
-                            {formatTime(progressInfo.timeSpent)}
-                          </Text>
-                        </View>
-                        <View style={styles.progressStat}>
-                          <RotateCcw width={16} height={16} color="#fff" />
-                          <Text style={styles.progressStatText}>
-                            {progressInfo.attempts} attempt
-                            {progressInfo.attempts !== 1 ? "s" : ""}
-                          </Text>
-                        </View>
-                      </View>
-                      <Text style={styles.progressInfoNote}>
-                        {progressInfo.isCompleted
-                          ? "✅ Completed! You can play again to improve your time."
-                          : "⏰ You'll continue from where you left off."}
-                      </Text>
-                    </>
-                  )}
-                </View>
-              )}
-
+              {/* NEW: Progress Badge */}
+              <ProgressBadge />
               {/* Level description */}
               <View style={styles.descriptionContainer}>
                 <Text style={styles.levelDescription}>
@@ -425,61 +465,58 @@ const styles = StyleSheet.create({
     borderRadius: 50,
     backgroundColor: "rgba(0, 0, 0, 0.1)",
   },
-  // Progress info styles
-  progressInfoContainer: {
-    backgroundColor: "rgba(0, 0, 0, 0.2)",
-    borderRadius: 12,
-    padding: 16,
-    marginBottom: 16,
-    borderWidth: 1,
-    borderColor: "rgba(255, 255, 255, 0.1)",
-  },
-  progressInfoTitle: {
-    fontSize: 16,
-    fontFamily: "Poppins-SemiBold",
-    color: "#fff",
-    marginBottom: 8,
-    textAlign: "center",
-  },
-  // FIXED: Add loading state styles
-  progressLoadingContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    paddingVertical: 12,
-  },
-  progressLoadingText: {
-    fontSize: 14,
-    fontFamily: "Poppins-Medium",
-    color: "#fff",
-    marginLeft: 8,
-  },
-  progressStatsContainer: {
-    flexDirection: "row",
-    justifyContent: "space-around",
-    marginBottom: 8,
-  },
-  progressStat: {
-    flexDirection: "row",
-    alignItems: "center",
+  progressBadge: {
+    alignSelf: "center",
     backgroundColor: "rgba(255, 255, 255, 0.1)",
+    borderRadius: 20,
     paddingHorizontal: 12,
     paddingVertical: 6,
-    borderRadius: 16,
+    marginBottom: 12,
+    borderWidth: 1,
+    borderColor: "rgba(255, 255, 255, 0.2)",
   },
-  progressStatText: {
+  progressBadgeContent: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
+  },
+  progressIcon: {
+    width: 16,
+    height: 16,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  progressBadgeText: {
     fontSize: 14,
     fontFamily: "Poppins-Medium",
     color: "#fff",
-    marginLeft: 6,
   },
-  progressInfoNote: {
+  progressTime: {
+    fontSize: 14,
+    fontFamily: "Poppins-SemiBold",
+    color: "#fbff26ff",
+    backgroundColor: "rgba(255, 255, 255, 0.2)",
+    paddingHorizontal: 7,
+    paddingVertical: 2,
+    borderRadius: 16,
+  },
+  attemptContainer: {
+    flexDirection: "row",
+    gap: 5,
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "rgba(255, 255, 255, 0.2)",
+    paddingHorizontal: 7,
+    paddingVertical: 2,
+    borderRadius: 16,
+  },
+  progressAttempts: {
     fontSize: 12,
-    fontFamily: "Poppins-Regular",
-    color: "rgba(255, 255, 255, 0.8)",
-    textAlign: "center",
-    fontStyle: "italic",
+    fontFamily: "Poppins-Medium",
+    color: "#fff",
   },
+
+  // Existing styles
   descriptionContainer: {
     width: "100%",
     marginBottom: 16,
