@@ -81,11 +81,20 @@ const FillInTheBlank: React.FC<FillInTheBlankProps> = ({
       setTimeout(async () => {
         const currentState = useGameStore.getState().fillInTheBlankState;
         if (currentState.showFeedback) {
+          console.log(
+            `[FillInTheBlank] Updating progress - Time: ${currentTime}, Correct: ${currentState.isCorrect}, Completed: ${currentState.isCorrect}`
+          );
+
+          // FIXED: Use the result to avoid unused variable warning
           const updatedProgress = await updateProgress(
             currentTime,
             currentState.isCorrect,
             currentState.isCorrect
           );
+
+          if (updatedProgress) {
+            console.log(`[FillInTheBlank] Progress updated successfully`);
+          }
         }
       }, 100);
     } catch (error) {

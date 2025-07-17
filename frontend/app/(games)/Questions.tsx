@@ -1,7 +1,5 @@
-import React, { useEffect, useState, useCallback, useRef } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import {
-  AppState,
-  AppStateStatus,
   View,
   ActivityIndicator,
   Text,
@@ -9,66 +7,56 @@ import {
   StyleSheet,
 } from "react-native";
 import { useLocalSearchParams, router } from "expo-router";
-import { BASE_COLORS } from "@/constant/colors";
+import useGameStore from "@/store/games/useGameStore";
 import useThemeStore from "@/store/useThemeStore";
+import { BASE_COLORS } from "@/constant/colors";
+import AppLoading from "@/components/AppLoading";
+import LevelInfoModal from "@/components/games/levels/LevelInfoModal";
 import MultipleChoice from "./MultipleChoice";
 import Identification from "./Identification";
 import FillInTheBlank from "./FillInTheBlank";
-import LevelInfoModal from "@/components/games/levels/LevelInfoModal";
-import useGameStore from "@/store/games/useGameStore";
-import AppLoading from "@/components/AppLoading";
 
 const Questions = () => {
+  // IMPORTANT: ALL HOOKS MUST BE CALLED BEFORE ANY EARLY RETURNS
   const params = useLocalSearchParams();
-  const gameMode = params.gameMode as string;
-  const levelId = parseInt(params.levelId as string) || 1;
-  const difficulty = params.difficulty as string;
-  const skipModal = params.skipModal === "true";
   const { activeTheme } = useThemeStore();
 
-  // App state reference
-  const appState = useRef(AppState.currentState);
-
-  // Modal state with ref for AppState handler
-  const modalStateRef = useRef({
-    showInfoModal: !skipModal,
-    showGame: skipModal,
-    isLoading: false,
-    hasStarted: skipModal,
-  });
-
-  // State for the component
-  const [modalState, setModalState] = useState(() => modalStateRef.current);
-  const [levelData, setLevelData] = useState(null);
-  const [actualDifficulty, setActualDifficulty] = useState(difficulty);
-  const [localLoading, setLocalLoading] = useState(true);
-  const [gameComponentReady, setGameComponentReady] = useState(false);
-
-  // Get quiz store methods
   const {
-    fetchQuestionsByMode,
     getLevelData,
+    fetchQuestionsByMode,
     isLoading: storeLoading,
     error,
   } = useGameStore();
 
-  // Update ref whenever modalState changes
-  useEffect(() => {
-    modalStateRef.current = modalState;
-    // Log state changes - this is now safely inside a hook
-    if (__DEV__) {
-      console.log("Modal state updated:", modalState);
-    }
-  }, [modalState]);
+  // Local state - ALL hooks declared first
+  const [localLoading, setLocalLoading] = useState(true);
+  const [gameComponentReady, setGameComponentReady] = useState(false);
+  const [levelData, setLevelData] = useState<any>(null);
+  const [actualDifficulty, setActualDifficulty] = useState<string>("easy");
+  const [modalState, setModalState] = useState({
+    showInfoModal: true,
+    showGame: false,
+    isLoading: false,
+    hasStarted: false,
+  });
 
-  // Handle app state changes
+  // Extract params with proper type handling
+  const gameMode =
+    typeof params.gameMode === "string" ? params.gameMode : "multipleChoice";
+  const levelId = Number(params.levelId) || 1;
+  const difficulty =
+    typeof params.difficulty === "string" ? params.difficulty : "easy";
+  const skipModal = params.skipModal === "true";
+
+  // FIXED: Load quiz data effect
   useEffect(() => {
-    const handleAppStateChange = (nextAppState: AppStateStatus) => {
-      if (
-        appState.current.match(/inactive|background/) &&
-        nextAppState === "active"
-      ) {
-        if (modalStateRef.current.hasStarted) {
+    const loadQuizData = async () => {
+      try {
+        setLocalLoading(true);
+        setGameComponentReady(false);
+
+        // If skipModal is true, start with game view
+        if (skipModal) {
           setModalState({
             showInfoModal: false,
             showGame: true,
@@ -76,25 +64,9 @@ const Questions = () => {
             hasStarted: true,
           });
         }
-      }
-      appState.current = nextAppState;
-    };
 
-    const subscription = AppState.addEventListener(
-      "change",
-      handleAppStateChange
-    );
-
-    return () => subscription?.remove();
-  }, []);
-
-  // Fetch questions on component mount
-  useEffect(() => {
-    const loadQuizData = async () => {
-      setLocalLoading(true);
-      try {
+        // Try to get level data directly first
         const result = getLevelData(gameMode, levelId, difficulty);
-
         if (result) {
           if (result.foundDifficulty) {
             setLevelData(result.levelData);
@@ -107,6 +79,7 @@ const Questions = () => {
           return;
         }
 
+        // If no data found, fetch questions
         await fetchQuestionsByMode(gameMode);
 
         const updatedResult = getLevelData(gameMode, levelId, difficulty);
@@ -118,47 +91,87 @@ const Questions = () => {
             setLevelData(updatedResult);
           }
         }
+
         setLocalLoading(false);
         setGameComponentReady(true);
       } catch (error) {
         console.error("Error loading quiz data:", error);
         setLocalLoading(false);
+        setGameComponentReady(false);
       }
     };
 
     loadQuizData();
-  }, [gameMode, levelId, difficulty, getLevelData, fetchQuestionsByMode]);
+  }, [
+    gameMode,
+    levelId,
+    difficulty,
+    skipModal,
+    getLevelData,
+    fetchQuestionsByMode,
+  ]);
 
-  // Game start handler
+  // FIXED: Game start handler with proper navigation safety
   const handleStartGame = useCallback(() => {
     if (modalState.isLoading || modalState.hasStarted) return;
+
+    console.log("[Questions] Starting game...");
 
     setModalState((prev) => ({
       ...prev,
       isLoading: true,
     }));
 
+    // Use a longer delay to ensure proper cleanup
     setTimeout(() => {
-      setModalState({
-        showInfoModal: false,
-        showGame: true,
-        isLoading: false,
-        hasStarted: true,
-      });
-    }, 500);
+      try {
+        setModalState({
+          showInfoModal: false,
+          showGame: true,
+          isLoading: false,
+          hasStarted: true,
+        });
+      } catch (error) {
+        console.error("[Questions] Error starting game:", error);
+        // Reset state on error
+        setModalState((prev) => ({
+          ...prev,
+          isLoading: false,
+        }));
+      }
+    }, 300); // Increased delay
   }, [modalState.isLoading, modalState.hasStarted]);
 
-  // Modal close handler
+  // FIXED: Modal close handler with navigation safety
   const handleCloseModal = useCallback(() => {
-    router.back();
+    try {
+      console.log("[Questions] Closing modal and navigating back");
+
+      // Add a small delay to ensure modal closes properly
+      setTimeout(() => {
+        if (router.canGoBack()) {
+          router.back();
+        } else {
+          router.replace("/(tabs)/Games");
+        }
+      }, 100);
+    } catch (error) {
+      console.error("[Questions] Navigation error:", error);
+      // Fallback navigation
+      setTimeout(() => {
+        router.replace("/(tabs)/Games");
+      }, 200);
+    }
   }, []);
 
-  // Render game component based on mode
+  // FIXED: Render game component with all hooks called first
   const renderGameComponent = useCallback(() => {
-    if (storeLoading || !gameComponentReady) {
+    // Don't render if still loading
+    if (storeLoading || !gameComponentReady || localLoading) {
       return <ActivityIndicator size="large" color={BASE_COLORS.blue} />;
     }
 
+    // Handle error state
     if (error) {
       return (
         <View
@@ -178,6 +191,7 @@ const Questions = () => {
       );
     }
 
+    // Handle missing level data
     if (!levelData) {
       return (
         <View
@@ -199,6 +213,7 @@ const Questions = () => {
       );
     }
 
+    // Render appropriate game component
     switch (gameMode) {
       case "multipleChoice":
         return (
@@ -228,7 +243,10 @@ const Questions = () => {
           />
         );
       default:
-        router.replace("/(tabs)/Games");
+        // Safe fallback navigation
+        setTimeout(() => {
+          router.replace("/(tabs)/Games");
+        }, 0);
         return <ActivityIndicator size="large" color={BASE_COLORS.blue} />;
     }
   }, [
@@ -240,11 +258,13 @@ const Questions = () => {
     storeLoading,
     error,
     gameComponentReady,
+    localLoading,
     activeTheme.backgroundColor,
     difficulty,
   ]);
 
-  // Loading state check - AFTER all hooks are defined
+  // FIXED: Main render - all hooks are now called before any conditional logic
+  // Show loading state while data is being prepared
   if (
     localLoading ||
     storeLoading ||
@@ -253,20 +273,23 @@ const Questions = () => {
     return <AppLoading />;
   }
 
-  // Main render - No more hooks after this point
   return (
     <View style={styles.container}>
+      {/* Only render game component when we should show the game */}
       {modalState.showGame ? renderGameComponent() : null}
 
-      <LevelInfoModal
-        visible={modalState.showInfoModal && !modalState.hasStarted}
-        onClose={handleCloseModal}
-        onStart={handleStartGame}
-        levelData={levelData}
-        gameMode={gameMode}
-        isLoading={modalState.isLoading}
-        difficulty={actualDifficulty}
-      />
+      {/* FIXED: Only render modal when it should be visible AND we have data */}
+      {modalState.showInfoModal && !modalState.hasStarted && levelData && (
+        <LevelInfoModal
+          visible={modalState.showInfoModal && !modalState.hasStarted}
+          onClose={handleCloseModal}
+          onStart={handleStartGame}
+          levelData={levelData}
+          gameMode={gameMode}
+          isLoading={modalState.isLoading}
+          difficulty={actualDifficulty}
+        />
+      )}
     </View>
   );
 };
@@ -298,16 +321,6 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontFamily: "Poppins-SemiBold",
     color: BASE_COLORS.white,
-  },
-  loaderContainer: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  fullScreenLoader: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
   },
 });
 

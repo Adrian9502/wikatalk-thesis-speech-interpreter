@@ -68,16 +68,21 @@ const MultipleChoice: React.FC<MultipleChoiceProps> = ({
       // 3. Call the option select handler in quiz store
       handleOptionSelect(optionId);
 
-      // 4. CRITICAL FIX: Update progress with completion status immediately
+      // 4. Update progress with completion status immediately
       console.log(
         `[MultipleChoice] Updating progress - Time: ${currentTime}, Correct: ${isCorrect}, Completed: ${isCorrect}`
       );
 
+      // FIXED: Use the result to avoid unused variable warning
       const updatedProgress = await updateProgress(
         currentTime,
         isCorrect,
         isCorrect
       );
+
+      if (updatedProgress) {
+        console.log(`[MultipleChoice] Progress updated successfully`);
+      }
     } catch (error) {
       console.error("[MultipleChoice] Error in option selection:", error);
     }

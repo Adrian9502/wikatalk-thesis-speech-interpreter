@@ -9,7 +9,6 @@ import {
   Animated,
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
-import * as Animatable from "react-native-animatable";
 import { X, Star } from "react-native-feather";
 import { difficultyColors } from "@/constant/colors";
 import {
@@ -42,6 +41,7 @@ const LevelInfoModal: React.FC<GameInfoModalProps> = React.memo(
     isLoading = false,
     difficulty = "Easy",
   }) => {
+    // IMPORTANT: ALL HOOKS MUST BE DECLARED FIRST
     const [isAnimating, setIsAnimating] = useState(false);
     const [hasStarted, setHasStarted] = useState(false);
 
@@ -49,7 +49,7 @@ const LevelInfoModal: React.FC<GameInfoModalProps> = React.memo(
     const overlayOpacity = useRef(new Animated.Value(0)).current;
     const modalTranslateY = useRef(new Animated.Value(300)).current;
 
-    // Reset state when modal visibility changes - OPTIMIZED timing
+    // Reset state when modal visibility changes
     useEffect(() => {
       if (visible) {
         setIsAnimating(true);
@@ -78,48 +78,40 @@ const LevelInfoModal: React.FC<GameInfoModalProps> = React.memo(
         setIsAnimating(false);
         setHasStarted(false);
       }
-    }, [visible]);
+    }, [visible, overlayOpacity, modalTranslateY]);
 
-    // EARLY RETURN: Don't render anything if not visible
-    if (!visible) {
-      return null;
-    }
-
-    // EARLY RETURN: Don't render if no level data
-    if (!levelData) {
-      return null;
-    }
-
-    // EARLY RETURN: Don't render if already started
-    if (hasStarted) {
-      return null;
-    }
-
-    // Get starCount using the utility function
-    const starCount = getStarCount(difficulty);
-
-    // Get gradient colors for the current difficulty
-    const getGradientColors = (): readonly [string, string] => {
-      if (difficulty && difficulty in difficultyColors) {
-        return difficultyColors[difficulty as DifficultyLevel];
-      }
-      const capitalized =
-        difficulty.charAt(0).toUpperCase() + difficulty.slice(1).toLowerCase();
-      if (capitalized in difficultyColors) {
-        return difficultyColors[capitalized as DifficultyLevel];
-      }
-      return ["#2563EB", "#1E40AF"] as const;
-    };
-
-    // Enhanced start button handler with optimized timing
+    // FIXED: Enhanced start button handler
     const handleStart = useCallback(() => {
-      if (isLoading || isAnimating) return;
+      if (isLoading || isAnimating || hasStarted) return;
+
+      console.log("[LevelInfoModal] Starting level...");
       setHasStarted(true);
-      // Reduced delay for smoother transition
-      setTimeout(() => {
-        onStart();
-      }, 50);
-    }, [isLoading, isAnimating, onStart]);
+
+      // Close modal first, then navigate
+      const closeAndNavigate = () => {
+        try {
+          // Animate modal out
+          Animated.timing(overlayOpacity, {
+            toValue: 0,
+            duration: 200,
+            useNativeDriver: true,
+          }).start(() => {
+            // Then trigger navigation after modal is hidden
+            setTimeout(() => {
+              onStart();
+            }, 50);
+          });
+        } catch (error) {
+          console.error("[LevelInfoModal] Navigation error:", error);
+          // Fallback - direct navigation
+          setTimeout(() => {
+            onStart();
+          }, 300);
+        }
+      };
+
+      closeAndNavigate();
+    }, [isLoading, isAnimating, hasStarted, overlayOpacity, onStart]);
 
     // Enhanced close handler
     const handleClose = useCallback(() => {
@@ -134,9 +126,29 @@ const LevelInfoModal: React.FC<GameInfoModalProps> = React.memo(
         useNativeDriver: true,
       }).start(() => {
         setIsAnimating(false);
-        onClose(); // Close after fade
+        onClose();
       });
     }, [isAnimating, overlayOpacity, onClose]);
+
+    // Calculate derived values AFTER all hooks
+    const starCount = getStarCount(difficulty);
+
+    const getGradientColors = (): readonly [string, string] => {
+      if (difficulty && difficulty in difficultyColors) {
+        return difficultyColors[difficulty as DifficultyLevel];
+      }
+      const capitalized =
+        difficulty.charAt(0).toUpperCase() + difficulty.slice(1).toLowerCase();
+      if (capitalized in difficultyColors) {
+        return difficultyColors[capitalized as DifficultyLevel];
+      }
+      return ["#2563EB", "#1E40AF"] as const;
+    };
+
+    // FIXED: Check visibility and data AFTER all hooks are called
+    if (!visible || !levelData || hasStarted) {
+      return null;
+    }
 
     return (
       <Modal
@@ -179,7 +191,7 @@ const LevelInfoModal: React.FC<GameInfoModalProps> = React.memo(
                 onPress={handleClose}
                 style={modalSharedStyles.closeButton}
                 disabled={isAnimating}
-                hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }} // Better touch target
+                hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
               >
                 <X width={20} height={20} color="#fff" />
               </TouchableOpacity>
@@ -256,7 +268,7 @@ const LevelInfoModal: React.FC<GameInfoModalProps> = React.memo(
                     ? "Select the correct answer from the options provided. The timer will stop when you answer. Be quick but accurate!"
                     : gameMode === "identification"
                     ? "Identify the correct word in the sentence. Tap on it to select. Read carefully before making your choice."
-                    : "Fill in the blank with the correct word from the options. Choose wisely as you only get one chance!"}
+                    : "Fill in the blank with the correct word. Type your answer and tap Check. Choose wisely!"}
                 </Text>
               </View>
 
@@ -265,10 +277,11 @@ const LevelInfoModal: React.FC<GameInfoModalProps> = React.memo(
                 <TouchableOpacity
                   style={[
                     modalSharedStyles.startAndCloseButton,
-                    (isLoading || isAnimating) && styles.disabledButton,
+                    (isLoading || isAnimating || hasStarted) &&
+                      styles.disabledButton,
                   ]}
                   onPress={handleStart}
-                  disabled={isLoading || isAnimating}
+                  disabled={isLoading || isAnimating || hasStarted}
                   activeOpacity={0.8}
                 >
                   {isLoading ? (
@@ -285,22 +298,9 @@ const LevelInfoModal: React.FC<GameInfoModalProps> = React.memo(
         </Animated.View>
       </Modal>
     );
-  },
-  // Enhanced memo comparison for better performance
-  (prevProps, nextProps) => {
-    return (
-      prevProps.visible === nextProps.visible &&
-      prevProps.isLoading === nextProps.isLoading &&
-      prevProps.gameMode === nextProps.gameMode &&
-      prevProps.difficulty === nextProps.difficulty &&
-      prevProps.levelData?.id === nextProps.levelData?.id &&
-      prevProps.levelData?.title === nextProps.levelData?.title &&
-      prevProps.levelData?.levelString === nextProps.levelData?.levelString
-    );
   }
 );
 
-// Enhanced styles for better performance
 const styles = StyleSheet.create({
   extendedContent: {
     paddingBottom: 28,

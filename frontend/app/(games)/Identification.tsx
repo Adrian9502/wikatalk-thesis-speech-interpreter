@@ -79,6 +79,22 @@ const Identification: React.FC<IdentificationProps> = ({
 
       // 3. Call the word select handler in quiz store
       handleWordSelect(wordIndex);
+
+      // 4. Update progress with completion status
+      console.log(
+        `[Identification] Updating progress - Time: ${currentTime}, Correct: ${isCorrect}, Completed: ${isCorrect}`
+      );
+
+      // FIXED: Use the result to avoid unused variable warning
+      const updatedProgress = await updateProgress(
+        currentTime,
+        isCorrect,
+        isCorrect
+      );
+
+      if (updatedProgress) {
+        console.log(`[Identification] Progress updated successfully`);
+      }
     } catch (error) {
       console.error("[Identification] Error in word selection:", error);
     }

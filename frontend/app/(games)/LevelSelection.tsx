@@ -14,6 +14,8 @@ import { useLevelData } from "@/hooks/useLevelData";
 import { difficultyColors } from "@/constant/colors";
 import { isAllDataReady, useSplashStore } from "@/store/useSplashStore";
 import { useAnimationTracker } from "@/hooks/useAnimationTracker";
+import { safeNavigate } from "@/utils/navigationUtils";
+
 // Components
 import ErrorState from "@/components/games/levels/ErrorState";
 import EmptyState from "@/components/games/levels/EmptyState";
@@ -138,22 +140,36 @@ const LevelSelection = () => {
       router.back();
     };
 
+    // Update LevelSelection.tsx to use safe navigation
     const handleStartGame = () => {
       if (!selectedLevel) return;
 
-      router.push({
-        pathname: "/(games)/Questions",
-        params: {
-          levelId: selectedLevel.id,
-          gameMode: typeof gameMode === "string" ? gameMode : String(gameMode),
-          gameTitle,
-          difficulty:
-            typeof selectedLevel.difficultyCategory === "string"
-              ? selectedLevel.difficultyCategory
-              : "easy",
-          skipModal: "true",
+      console.log(
+        "[LevelSelection] Starting game with level:",
+        selectedLevel.id
+      );
+
+      // Close modal first
+      setShowGameModal(false);
+
+      // Use safe navigation
+      safeNavigate.push(
+        {
+          pathname: "/(games)/Questions",
+          params: {
+            levelId: selectedLevel.id,
+            gameMode:
+              typeof gameMode === "string" ? gameMode : String(gameMode),
+            gameTitle,
+            difficulty:
+              typeof selectedLevel.difficultyCategory === "string"
+                ? selectedLevel.difficultyCategory
+                : "easy",
+            skipModal: "true",
+          },
         },
-      });
+        200
+      );
     };
 
     const handleLevelSelectWithCompletion = (level: LevelData) => {
