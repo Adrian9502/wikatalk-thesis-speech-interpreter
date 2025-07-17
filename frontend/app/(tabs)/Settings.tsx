@@ -17,6 +17,7 @@ import {
 } from "@/components/settings/SettingsRenderer";
 import { router } from "expo-router";
 import ContactSupportModal from "@/components/helpAndFAQ/ContactSupportModal";
+import { clearAllAccountData } from "@/utils/accountUtils";
 
 // Types
 type SettingItemWithToggle = {
@@ -60,6 +61,10 @@ const Settings = () => {
 
   const handleLogout = async () => {
     try {
+      console.log("[Settings] Logging out user"); // Clear all account data before logout
+
+      await clearAllAccountData();
+
       await logout();
     } catch (error) {
       console.error("Logout error:", error);

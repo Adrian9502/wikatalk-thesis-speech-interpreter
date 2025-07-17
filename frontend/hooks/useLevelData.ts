@@ -9,6 +9,7 @@ import {
 import useGameStore from "@/store/games/useGameStore";
 import { convertQuizToLevels } from "@/utils/games/convertQuizToLevels";
 import { useUserProgress } from "@/hooks/useUserProgress";
+import { useAuthStore } from "@/store/useAuthStore";
 
 type FilterType = "all" | "completed" | "current" | "easy" | "medium" | "hard";
 
@@ -18,6 +19,9 @@ export const useLevelData = (gameMode: string | string[] | undefined) => {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [completionPercentage, setCompletionPercentage] = useState(0);
+
+  // NEW: Track current user to detect account changes
+  const [lastUserId, setLastUserId] = useState<string | null>(null);
 
   const {
     fetchQuestionsByMode,
@@ -37,13 +41,30 @@ export const useLevelData = (gameMode: string | string[] | undefined) => {
         setIsLoading(true);
         setError(null);
 
-        // First, try to get precomputed levels from splash store
-        if (isLevelsPrecomputed()) {
+        // NEW: Get current user ID and check for changes - FIX: Handle undefined
+        const authStore = useAuthStore.getState();
+        const currentUserId =
+          authStore.userData?.id || authStore.userData?.email || null;
+
+        const userChanged = lastUserId !== null && lastUserId !== currentUserId;
+
+        if (userChanged) {
+          console.log(
+            `[useLevelData] User changed from ${lastUserId} to ${currentUserId}, forcing refresh`
+          );
+          // Clear precomputed data for account change
+          useSplashStore.getState().reset();
+        }
+
+        setLastUserId(currentUserId); // This is now safe since currentUserId is string | null
+
+        // Try to get precomputed levels (but skip if user changed)
+        if (isLevelsPrecomputed() && !userChanged) {
           console.log(
             `[useLevelData] Using precomputed levels for ${safeGameMode}`
           );
-
           const precomputedData = getLevelsForGameMode(safeGameMode);
+
           if (precomputedData) {
             setLevels(precomputedData.levels);
             setCompletionPercentage(precomputedData.completionPercentage);
@@ -53,9 +74,9 @@ export const useLevelData = (gameMode: string | string[] | undefined) => {
           }
         }
 
-        // Fallback: compute levels on demand (should rarely happen)
+        // Fallback: compute levels on demand
         console.log(
-          `[useLevelData] Precomputed levels not available for ${safeGameMode}, computing on demand`
+          `[useLevelData] Computing levels on demand for ${safeGameMode}`
         );
 
         // Ensure we have questions
@@ -63,7 +84,7 @@ export const useLevelData = (gameMode: string | string[] | undefined) => {
           await fetchQuestionsByMode(safeGameMode);
         }
 
-        // Convert to levels
+        // Convert to levels with fresh progress data
         const progressArray = Array.isArray(globalProgress)
           ? globalProgress
           : [];
@@ -99,7 +120,13 @@ export const useLevelData = (gameMode: string | string[] | undefined) => {
     if (safeGameMode) {
       loadLevels();
     }
-  }, [safeGameMode, questions, globalProgress, fetchQuestionsByMode]);
+  }, [
+    safeGameMode,
+    questions,
+    globalProgress,
+    fetchQuestionsByMode,
+    lastUserId,
+  ]);
 
   const handleRetry = useCallback(async () => {
     if (safeGameMode) {

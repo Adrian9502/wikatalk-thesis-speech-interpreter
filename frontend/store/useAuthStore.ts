@@ -11,6 +11,7 @@ import { useTranslateStore } from "./useTranslateStore";
 import { GoogleSignin } from "@react-native-google-signin/google-signin";
 import useCoinsStore from "./games/useCoinsStore";
 import { authService, testAPIConnection } from "@/services/api";
+import { clearAllAccountData, refreshAccountData } from "@/utils/accountUtils";
 
 // Types
 interface UserData {
@@ -415,6 +416,9 @@ export const useAuthStore = create<AuthState>()(
           setupAxiosDefaults(token);
           setToken(token); // Update the token manager
           set({ userToken: token, userData: user });
+
+          await refreshAccountData();
+
           setTimeout(() => {
             get().getUserProfile();
           }, 500);
@@ -498,6 +502,7 @@ export const useAuthStore = create<AuthState>()(
               },
               isAppReady: true,
             });
+            await refreshAccountData();
 
             const themeStore = useThemeStore.getState();
             await themeStore.syncThemeWithServer();
@@ -552,6 +557,8 @@ export const useAuthStore = create<AuthState>()(
         });
 
         try {
+          await clearAllAccountData();
+
           useThemeStore.getState().resetToDefaultTheme();
           // Reset coins store state
           useCoinsStore.getState().resetState();

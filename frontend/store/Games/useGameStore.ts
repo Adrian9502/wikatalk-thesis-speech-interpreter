@@ -123,6 +123,7 @@ interface QuizState {
   getLevelData: (gameMode: string, levelId: number, difficulty?: string) => any;
   clearQuestions: () => void;
   testConnection: () => Promise<boolean>;
+  clearAllAccountData: () => void;
 
   // Common game actions
   setGameStatus: (status: GameStatus) => void;
@@ -1231,6 +1232,46 @@ const useGameStore = create<QuizState>((set, get) => ({
     }
 
     return true;
+  },
+
+  // Clear all account-specific data
+  clearAllAccountData: () => {
+    console.log("[GameStore] Clearing all account-specific data");
+
+    set({
+      userProgress: null,
+      // Reset game states
+      gameState: {
+        gameStatus: "idle",
+        score: 0,
+        timerRunning: false,
+        timeElapsed: 0,
+        levelId: 1,
+        currentMode: null,
+      },
+      multipleChoiceState: {
+        currentQuestion: null,
+        selectedOption: null,
+      },
+      fillInTheBlankState: {
+        exercises: [],
+        currentExerciseIndex: 0,
+        userAnswer: "",
+        showHint: false,
+        showTranslation: false,
+        showFeedback: false,
+        isCorrect: false,
+        attemptsLeft: 2,
+      },
+      identificationState: {
+        sentences: [],
+        currentSentenceIndex: 0,
+        words: [],
+        selectedWord: null,
+        showTranslation: false,
+        feedback: null,
+      },
+    });
   },
 }));
 

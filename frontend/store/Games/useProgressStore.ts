@@ -6,6 +6,7 @@ import {
   EnhancedGameModeProgress,
 } from "@/types/gameProgressTypes";
 import useGameStore from "@/store/games/useGameStore";
+import { useAuthStore } from "../useAuthStore";
 
 const API_URL = process.env.EXPO_PUBLIC_BACKEND_URL || "http://localhost:5000";
 
@@ -15,7 +16,7 @@ const CACHE_EXPIRY = 5 * 60 * 1000;
 interface ProgressState {
   // Core state
   progress: any[] | null;
-  globalProgress: any[] | null; // ADD THIS LINE
+  globalProgress: any[] | null;
   isLoading: boolean;
   error: string | null;
   lastFetched: number;
@@ -49,9 +50,13 @@ interface ProgressState {
   ) => Promise<EnhancedGameModeProgress | null>;
   clearCache: () => void;
   formatQuizId: (id: string | number) => string;
+  clearAllAccountData: () => void;
 
   // Timestamp for last update
   lastUpdated: number;
+
+  // NEW: Add user tracking
+  currentUserId: string | null;
 }
 
 // Helper function to detect game mode from quiz ID
@@ -470,16 +475,64 @@ const useProgressStore = create<ProgressState>((set, get) => ({
     return `n-${numericId}`;
   },
 
+  // NEW: Clear all account-specific data
+  clearAllAccountData: () => {
+    console.log("[ProgressStore] Clearing all account-specific data");
+
+    // Clear the Map cache
+    enhancedProgressCache.clear();
+
+    set({
+      progress: null,
+      globalProgress: null,
+      isLoading: false,
+      error: null,
+      lastFetched: 0,
+      totalCompletedCount: 0,
+      totalQuizCount: getTotalQuizCount(),
+      gameProgress: {
+        multipleChoice: {
+          completed: 0,
+          total: getQuizCountByMode("multipleChoice"),
+        },
+        identification: {
+          completed: 0,
+          total: getQuizCountByMode("identification"),
+        },
+        fillBlanks: { completed: 0, total: getQuizCountByMode("fillBlanks") },
+      },
+      enhancedProgress: {},
+      lastUpdated: Date.now(),
+      currentUserId: null,
+    });
+  },
+
   // Fetch user progress (global or specific)
   fetchProgress: async (forceRefresh = false): Promise<any[] | null> => {
     const currentTime = Date.now();
-    const { lastFetched } = get();
+    const { lastFetched, currentUserId } = get();
+
+    // NEW: Check for user changes
+    const authStore = useAuthStore.getState();
+    const newUserId = authStore.userData?.id || authStore.userData?.email;
+    const userChanged = currentUserId !== null && currentUserId !== newUserId;
+
+    if (userChanged) {
+      console.log(
+        `[ProgressStore] User changed from ${currentUserId} to ${newUserId}, forcing refresh`
+      );
+      forceRefresh = true;
+      set({ currentUserId: newUserId });
+    } else if (currentUserId === null) {
+      set({ currentUserId: newUserId });
+    }
 
     // Use cached data if available and not forcing refresh
     if (
       !forceRefresh &&
       lastFetched > 0 &&
-      currentTime - lastFetched < CACHE_EXPIRY
+      currentTime - lastFetched < CACHE_EXPIRY &&
+      !userChanged
     ) {
       return get().progress;
     }
@@ -702,6 +755,7 @@ const useProgressStore = create<ProgressState>((set, get) => ({
 
   // Timestamp for last update
   lastUpdated: Date.now(),
+  currentUserId: null,
 }));
 
 export default useProgressStore;

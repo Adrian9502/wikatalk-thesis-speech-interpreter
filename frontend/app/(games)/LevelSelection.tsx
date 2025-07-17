@@ -12,7 +12,7 @@ import LevelProgressBar from "@/components/games/levels/LevelProgressBar";
 import { levelStyles as styles } from "@/styles/games/levels.styles";
 import { useLevelData } from "@/hooks/useLevelData";
 import { difficultyColors } from "@/constant/colors";
-import { isAllDataReady } from "@/store/useSplashStore";
+import { isAllDataReady, useSplashStore } from "@/store/useSplashStore";
 import { useAnimationTracker } from "@/hooks/useAnimationTracker";
 // Components
 import ErrorState from "@/components/games/levels/ErrorState";
@@ -60,11 +60,13 @@ const LevelSelection = () => {
   const [animationKey, setAnimationKey] = useState("initial");
   const [shouldAnimateCards, setShouldAnimateCards] = useState(false);
 
+  // NEW: Enhanced data ready check with fallback
   useEffect(() => {
-    const checkDataReady = () => {
+    const checkDataReady = async () => {
       if (isAllDataReady()) {
         setDataReady(true);
 
+        // Trigger initial animation when data is ready
         if (initialLoad) {
           console.log(
             "[LevelSelection] Initial data ready - triggering animation"
@@ -82,6 +84,25 @@ const LevelSelection = () => {
         }
       } else {
         console.log("[LevelSelection] Waiting for precomputed data...");
+
+        // NEW: Check if we've been waiting too long (fallback mechanism)
+        const startTime = Date.now();
+        const maxWaitTime = 10000; // 10 seconds
+
+        if (startTime > maxWaitTime) {
+          console.warn(
+            "[LevelSelection] Data precomputation taking too long, triggering manual preload"
+          );
+
+          // Manually trigger data precomputation
+          const splashStore = useSplashStore.getState();
+          try {
+            await splashStore.preloadGameData();
+          } catch (error) {
+            console.error("[LevelSelection] Manual preload failed:", error);
+          }
+        }
+
         const timeout = setTimeout(checkDataReady, 100);
         return () => clearTimeout(timeout);
       }
