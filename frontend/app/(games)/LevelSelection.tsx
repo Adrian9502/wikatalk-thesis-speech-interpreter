@@ -20,6 +20,7 @@ import EmptyState from "@/components/games/levels/EmptyState";
 import LevelGrid from "@/components/games/levels/LevelGrid";
 import FilterBar from "@/components/games/levels/FilterBar";
 import AppLoading from "@/components/AppLoading";
+import DotsLoader from "@/components/DotLoader";
 
 type FilterType = "all" | "completed" | "current" | "easy" | "medium" | "hard";
 
@@ -272,7 +273,7 @@ const LevelSelection = () => {
           {/* Show loading overlay during filter transition */}
           {isFilterLoading ? (
             <View style={styles.filterLoadingOverlay}>
-              <AppLoading />
+              <DotsLoader />
             </View>
           ) : (
             <>
@@ -351,7 +352,7 @@ const LevelSelection = () => {
                 levelData={{
                   ...selectedLevel.questionData,
                   ...selectedLevel, // Include all level data
-                  levelString: selectedLevel.levelString, // Ensure levelString is included
+                  levelString: selectedLevel.levelString,
                 }}
                 gameMode={
                   typeof gameMode === "string" ? gameMode : String(gameMode)
@@ -361,7 +362,6 @@ const LevelSelection = () => {
               />
             )}
 
-          {/* FIXED: Only render modal when it should be visible */}
           {showReviewModal &&
             selectedLevel &&
             selectedLevel.status === "completed" && (
