@@ -21,7 +21,7 @@ const MultipleChoice: React.FC<MultipleChoiceProps> = ({
   isStarted = false,
 }) => {
   // Get user progress
-  const { progress, updateProgress, refreshProgress } = useUserProgress(
+  const { progress, updateProgress } = useUserProgress(
     levelData?.questionId || levelId
   );
 
@@ -78,21 +78,6 @@ const MultipleChoice: React.FC<MultipleChoiceProps> = ({
         isCorrect,
         isCorrect
       );
-
-      // 5. If level was completed, force a global progress refresh
-      if (isCorrect && updatedProgress) {
-        console.log(
-          `[MultipleChoice] Level ${levelId} completed successfully! Refreshing global progress...`
-        );
-
-        // Force refresh global progress immediately
-        setTimeout(async () => {
-          await refreshProgress();
-          console.log(
-            `[MultipleChoice] Global progress refreshed after completion`
-          );
-        }, 200);
-      }
     } catch (error) {
       console.error("[MultipleChoice] Error in option selection:", error);
     }

@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React from "react";
 import { Text, TouchableOpacity, View } from "react-native";
 import { Check, X } from "react-native-feather";
 import { LinearGradient } from "expo-linear-gradient";

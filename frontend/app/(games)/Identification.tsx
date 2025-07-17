@@ -25,7 +25,7 @@ const Identification: React.FC<IdentificationProps> = ({
   isStarted = false,
 }) => {
   // user progress hook
-  const { progress, updateProgress, refreshProgress } = useUserProgress(
+  const { progress, updateProgress } = useUserProgress(
     levelData?.questionId || levelId
   );
 
@@ -79,28 +79,6 @@ const Identification: React.FC<IdentificationProps> = ({
 
       // 3. Call the word select handler in quiz store
       handleWordSelect(wordIndex);
-
-      // 4. CRITICAL FIX: Update progress with completion status
-      const updatedProgress = await updateProgress(
-        currentTime,
-        isCorrect,
-        isCorrect
-      );
-
-      // 5. If level was completed, force refresh global progress
-      if (isCorrect && updatedProgress) {
-        console.log(
-          `[Identification] Level ${levelId} completed successfully!`,
-          updatedProgress
-        );
-
-        setTimeout(async () => {
-          await refreshProgress();
-          console.log(
-            `[Identification] Global progress refreshed after completion`
-          );
-        }, 200);
-      }
     } catch (error) {
       console.error("[Identification] Error in word selection:", error);
     }

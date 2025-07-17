@@ -22,7 +22,7 @@ const FillInTheBlank: React.FC<FillInTheBlankProps> = ({
   isStarted = false,
 }) => {
   // User progress hook
-  const { progress, updateProgress, refreshProgress } = useUserProgress(
+  const { progress, updateProgress } = useUserProgress(
     levelData?.questionId || levelId
   );
 
@@ -86,21 +86,6 @@ const FillInTheBlank: React.FC<FillInTheBlankProps> = ({
             currentState.isCorrect,
             currentState.isCorrect
           );
-
-          // If level was completed, refresh global progress
-          if (currentState.isCorrect && updatedProgress) {
-            console.log(
-              `[FillInTheBlank] Level ${levelId} completed successfully!`,
-              updatedProgress
-            );
-
-            setTimeout(async () => {
-              await refreshProgress();
-              console.log(
-                `[FillInTheBlank] Global progress refreshed after completion`
-              );
-            }, 200);
-          }
         }
       }, 100);
     } catch (error) {

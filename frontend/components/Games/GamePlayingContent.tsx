@@ -13,7 +13,7 @@ interface GamePlayingContentProps {
   children: React.ReactNode;
   isStarted?: boolean;
   gameStatus?: "idle" | "ready" | "playing" | "completed";
-  initialTime?: number; // Add this prop
+  initialTime?: number;
 }
 
 const GamePlayingContent: React.FC<GamePlayingContentProps> = React.memo(
@@ -23,7 +23,7 @@ const GamePlayingContent: React.FC<GamePlayingContentProps> = React.memo(
     focusArea = "Vocabulary",
     children,
     isStarted = true,
-    initialTime = 0, // Default to 0
+    initialTime = 0,
   }) => {
     return (
       <ScrollView
@@ -39,7 +39,9 @@ const GamePlayingContent: React.FC<GamePlayingContentProps> = React.memo(
           style={gameSharedStyles.statsContainer}
         >
           {/* Timer on left - pass initialTime */}
-          {isStarted && <Timer isRunning={timerRunning} initialTime={initialTime} />}
+          {isStarted && (
+            <Timer isRunning={timerRunning} initialTime={initialTime} />
+          )}
 
           {/* Badges on right */}
           <View style={gameSharedStyles.badgesContainer}>
