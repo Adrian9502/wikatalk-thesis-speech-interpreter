@@ -674,13 +674,20 @@ const useGameStore = create<QuizState>((set, get) => ({
       },
     })),
 
-  updateTimeElapsed: (time) =>
-    set((state) => ({
-      gameState: {
-        ...state.gameState,
-        timeElapsed: time,
-      },
-    })),
+  // Update the updateTimeElapsed method to be more efficient
+  updateTimeElapsed: (time) => {
+    const currentTime = get().gameState.timeElapsed;
+
+    // Only update if there's a significant change (reduce unnecessary updates)
+    if (Math.abs(currentTime - time) >= 0.1) {
+      set((state) => ({
+        gameState: {
+          ...state.gameState,
+          timeElapsed: time,
+        },
+      }));
+    }
+  },
 
   resetTimer: () =>
     set((state) => ({
@@ -908,14 +915,20 @@ const useGameStore = create<QuizState>((set, get) => ({
 
   // Start game
   startGame: () => {
-    // Set game status to playing immediately with one update
+    const currentTimeElapsed = get().gameState.timeElapsed;
+
+    // FIXED: Preserve existing time instead of resetting
+    console.log(
+      `[GameStore] Starting game with existing time: ${currentTimeElapsed}`
+    );
+
     set((state) => ({
       gameState: {
         ...state.gameState,
         gameStatus: "playing",
         timerRunning: true,
-        // Initialize with a small value to prevent 0:00 times
-        timeElapsed: 0.1,
+        // Keep the existing timeElapsed value
+        timeElapsed: currentTimeElapsed,
       },
     }));
   },

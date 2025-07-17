@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useCallback } from "react";
+import React, { useEffect, useMemo, useCallback, useRef } from "react";
 import useGameStore from "@/store/games/useGameStore";
 import GameContainer from "@/components/games/GameContainer";
 import GamePlayingContent from "@/components/games/GamePlayingContent";
@@ -16,6 +16,11 @@ interface MultipleChoiceProps {
 
 const MultipleChoice: React.FC<MultipleChoiceProps> = React.memo(
   ({ levelId, levelData, difficulty = "easy", isStarted = false }) => {
+    // NEW: Track if initial setup is complete
+    const initialSetupComplete = useRef(false);
+    const lastProgressTimeRef = useRef<number>(0);
+    const gameStartedRef = useRef(false);
+
     // Get user progress
     const { progress, updateProgress } = useUserProgress(
       levelData?.questionId || levelId
@@ -33,39 +38,54 @@ const MultipleChoice: React.FC<MultipleChoiceProps> = React.memo(
       setTimerRunning,
     } = useGameStore();
 
-    // Set initial time from progress when component mounts
+    // FIXED: Set initial time from progress when component mounts - prevent multiple calls
     useEffect(() => {
-      if (progress && !Array.isArray(progress) && progress.totalTimeSpent > 0) {
-        console.log(
-          `[MultipleChoice] Setting initial time from progress: ${progress.totalTimeSpent}`
-        );
-        setTimeElapsed(progress.totalTimeSpent);
-      } else {
-        console.log(`[MultipleChoice] Resetting timer to 0`);
+      if (progress && !Array.isArray(progress)) {
+        const progressTime = progress.totalTimeSpent || 0;
+
+        // Only update if time has actually changed and we haven't done initial setup
+        if (
+          progressTime !== lastProgressTimeRef.current ||
+          !initialSetupComplete.current
+        ) {
+          console.log(
+            `[MultipleChoice] Setting initial time from progress: ${progressTime} (was: ${lastProgressTimeRef.current})`
+          );
+
+          lastProgressTimeRef.current = progressTime;
+          setTimeElapsed(progressTime);
+          initialSetupComplete.current = true;
+        }
+      } else if (!initialSetupComplete.current) {
+        console.log(`[MultipleChoice] No previous progress, starting from 0`);
         setTimeElapsed(0);
+        lastProgressTimeRef.current = 0;
+        initialSetupComplete.current = true;
       }
     }, [progress, setTimeElapsed]);
 
-    // PERFORMANCE: Memoize the option selection handler
+    // FIXED: Better option selection handler with proper time capture
     const handleOptionSelectWithProgress = useCallback(
       async (optionId: string) => {
         try {
           console.log(`[MultipleChoice] Option selected: ${optionId}`);
 
-          // 1. Stop the timer and capture current time
-          setTimerRunning(false);
-          const currentTime = timeElapsed;
+          // FIXED: Get current time from store first, then stop timer
+          const currentTime = useGameStore.getState().gameState.timeElapsed;
           console.log(`[MultipleChoice] Time captured: ${currentTime}`);
 
-          // 2. Get if the answer is correct
+          // Stop the timer
+          setTimerRunning(false);
+
+          // Get if the answer is correct
           const isCorrect = !!currentQuestion?.options.find(
             (option) => option.id === optionId && option.isCorrect
           );
 
-          // 3. Call the option select handler in quiz store
+          // Call the option select handler in quiz store
           handleOptionSelect(optionId);
 
-          // 4. Update progress with completion status immediately
+          // Update progress with completion status immediately
           console.log(
             `[MultipleChoice] Updating progress - Time: ${currentTime}, Correct: ${isCorrect}, Completed: ${isCorrect}`
           );
@@ -85,7 +105,6 @@ const MultipleChoice: React.FC<MultipleChoiceProps> = React.memo(
       },
       [
         currentQuestion?.options,
-        timeElapsed,
         setTimerRunning,
         handleOptionSelect,
         updateProgress,
@@ -97,14 +116,40 @@ const MultipleChoice: React.FC<MultipleChoiceProps> = React.memo(
       handleRestart();
 
       // Reset timer to continue from where they left off if they have progress
-      if (progress && !Array.isArray(progress) && progress.totalTimeSpent > 0) {
-        setTimeElapsed(progress.totalTimeSpent);
-      } else {
-        setTimeElapsed(0);
-      }
+      const progressTime =
+        progress && !Array.isArray(progress) ? progress.totalTimeSpent || 0 : 0;
+      setTimeElapsed(progressTime);
+      lastProgressTimeRef.current = progressTime;
+      gameStartedRef.current = false;
 
-      console.log(`[MultipleChoice] Restarting game`);
+      console.log(
+        `[MultipleChoice] Restarting game with time: ${progressTime}`
+      );
     }, [handleRestart, progress, setTimeElapsed]);
+
+    // FIXED: Stable game config that doesn't change on every render
+    const gameConfig = useMemo(() => {
+      const progressTime =
+        progress && !Array.isArray(progress) ? progress.totalTimeSpent || 0 : 0;
+
+      return {
+        focusArea:
+          currentQuestion?.focusArea || levelData?.focusArea || "Vocabulary",
+        selectedAnswerText:
+          currentQuestion?.options?.find((o) => o.id === selectedOption)
+            ?.text || "",
+        isSelectedCorrect:
+          currentQuestion?.options?.find((o) => o.id === selectedOption)
+            ?.isCorrect || false,
+        initialTime: progressTime,
+      };
+    }, [
+      currentQuestion?.focusArea,
+      currentQuestion?.options,
+      levelData?.focusArea,
+      selectedOption,
+      progress,
+    ]);
 
     // Initialize game
     useGameInitialization(
@@ -117,25 +162,17 @@ const MultipleChoice: React.FC<MultipleChoiceProps> = React.memo(
       startGame,
       gameStatus,
       timerRunning,
-      progress && !Array.isArray(progress) ? progress.totalTimeSpent : 0
+      gameConfig.initialTime
     );
 
-    // PERFORMANCE: Memoize derived values
-    const gameConfig = useMemo(
-      () => ({
-        focusArea:
-          currentQuestion?.focusArea || levelData?.focusArea || "Vocabulary",
-        selectedAnswerText:
-          currentQuestion?.options?.find((o) => o.id === selectedOption)
-            ?.text || "",
-        isSelectedCorrect:
-          currentQuestion?.options?.find((o) => o.id === selectedOption)
-            ?.isCorrect || false,
-        initialTime:
-          progress && !Array.isArray(progress) ? progress.totalTimeSpent : 0,
-      }),
-      [currentQuestion, levelData, selectedOption, progress]
-    );
+    // REMOVED: Excessive logging that was causing performance issues
+    // Only log when game starts for the first time
+    if (gameStatus === "playing" && !gameStartedRef.current) {
+      console.log(
+        `[MultipleChoice] Game started with initialTime: ${gameConfig.initialTime}`
+      );
+      gameStartedRef.current = true;
+    }
 
     return (
       <GameContainer

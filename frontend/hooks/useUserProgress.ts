@@ -161,14 +161,26 @@ export const useUserProgress = (quizId: string | number | "global") => {
 
         if (response.data.success) {
           console.log(`[useUserProgress] Successfully fetched progress`);
+
+          // FIXED: Handle null progress from backend
           const progressData = response.data.progress;
 
-          setProgress(progressData);
-          progressCacheRef.current[cacheKey] = progressData;
-          lastQuizIdRef.current = quizId;
-          hasInitializedRef.current = true;
-
-          return progressData;
+          if (progressData) {
+            setProgress(progressData);
+            progressCacheRef.current[cacheKey] = progressData;
+            lastQuizIdRef.current = quizId;
+            hasInitializedRef.current = true;
+            return progressData;
+          } else {
+            // No progress found, create default
+            console.log(
+              `[useUserProgress] No progress found, creating default`
+            );
+            const defaultResult = createDefaultProgress(quizId);
+            setProgress(defaultResult);
+            progressCacheRef.current[cacheKey] = defaultResult;
+            return defaultResult;
+          }
         }
 
         const defaultResult = createDefaultProgress(quizId);
@@ -197,7 +209,7 @@ export const useUserProgress = (quizId: string | number | "global") => {
     ]
   );
 
-  // ENHANCED: Update progress function with global cache invalidation
+  // ENHANCED: Update progress function with better error handling
   const updateProgress = useCallback(
     async (timeSpent: number, completed?: boolean, isCorrect?: boolean) => {
       try {
@@ -236,14 +248,19 @@ export const useUserProgress = (quizId: string | number | "global") => {
           const currentCacheKey = String(quizId);
           progressCacheRef.current[currentCacheKey] = updatedProgress;
 
-          // CRITICAL: If this was a completion, invalidate precomputed data
+          // CRITICAL: Clear ALL cache entries to force fresh data on next access
+          console.log(
+            `[useUserProgress] Clearing all cache entries to force refresh`
+          );
+          progressCacheRef.current = {
+            [currentCacheKey]: updatedProgress, // Keep only the current one
+          };
+
+          // If this was a completion, invalidate precomputed data
           if (completed && isCorrect) {
             console.log(
               `[useUserProgress] Level completed! Invalidating precomputed data...`
             );
-
-            // Invalidate global cache
-            delete progressCacheRef.current["global"];
 
             // Invalidate splash store precomputed levels AND filters
             const splashStore = useSplashStore.getState();
@@ -262,12 +279,26 @@ export const useUserProgress = (quizId: string | number | "global") => {
         console.error(`[useUserProgress] Update error:`, err.message);
         setError(err.message);
 
+        // FIXED: Better error recovery - try to fetch fresh data
         try {
-          return await fetchProgress(true); // Force refresh on error
+          console.log(
+            `[useUserProgress] Attempting to fetch fresh data after error`
+          );
+          const freshData = await fetchProgress(true); // Force refresh on error
+          if (freshData) {
+            console.log(
+              `[useUserProgress] Successfully recovered with fresh data`
+            );
+            return freshData;
+          }
         } catch (fetchErr) {
-          console.error("[useUserProgress] Failed to create fallback progress");
-          return null;
+          console.error(
+            "[useUserProgress] Failed to fetch fresh data:",
+            fetchErr
+          );
         }
+
+        return null;
       } finally {
         setIsLoading(false);
       }

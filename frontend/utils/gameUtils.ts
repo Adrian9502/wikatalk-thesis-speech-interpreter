@@ -49,19 +49,24 @@ export const handleCustomBackPress = (
 };
 
 /**
- * Format seconds to mm:ss.xx format (with exactly 2 decimal places)
+ * Format seconds to a human-readable string
  */
 export const formatTime = (seconds: number): string => {
-  const mins = Math.floor(seconds / 60);
-  const secs = Math.floor(seconds % 60);
+  if (seconds < 60) {
+    return `${Math.floor(seconds)}s`;
+  }
 
-  // Format to exactly 2 decimal places, handling JavaScript floating point precision
-  const centiseconds = Math.round((seconds % 1) * 100);
+  const minutes = Math.floor(seconds / 60);
+  const remainingSeconds = Math.floor(seconds % 60);
 
-  // Ensure two-digit formatting for seconds and centiseconds
-  return `${mins}:${secs.toString().padStart(2, "0")}.${centiseconds
-    .toString()
-    .padStart(2, "0")}`;
+  if (minutes < 60) {
+    return `${minutes}m ${remainingSeconds}s`;
+  }
+
+  const hours = Math.floor(minutes / 60);
+  const remainingMinutes = minutes % 60;
+
+  return `${hours}h ${remainingMinutes}m`;
 };
 
 /**

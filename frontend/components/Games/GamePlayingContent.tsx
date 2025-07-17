@@ -25,6 +25,20 @@ const GamePlayingContent: React.FC<GamePlayingContentProps> = React.memo(
     isStarted = true,
     initialTime = 0,
   }) => {
+    // REMOVED: Excessive logging that was causing performance issues
+    // Only log when timer starts or significant changes occur
+    const timerStartedRef = React.useRef(false);
+
+    if (timerRunning && !timerStartedRef.current) {
+      console.log(
+        `[GamePlayingContent] Timer started with initialTime: ${initialTime}`
+      );
+      timerStartedRef.current = true;
+    } else if (!timerRunning && timerStartedRef.current) {
+      console.log(`[GamePlayingContent] Timer stopped`);
+      timerStartedRef.current = false;
+    }
+
     return (
       <ScrollView
         showsVerticalScrollIndicator={false}
@@ -38,9 +52,13 @@ const GamePlayingContent: React.FC<GamePlayingContentProps> = React.memo(
           delay={100}
           style={gameSharedStyles.statsContainer}
         >
-          {/* Timer on left - pass initialTime */}
+          {/* Timer on left */}
           {isStarted && (
-            <Timer isRunning={timerRunning} initialTime={initialTime} />
+            <Timer
+              isRunning={timerRunning}
+              initialTime={initialTime}
+              key={`timer-${initialTime}`}
+            />
           )}
 
           {/* Badges on right */}

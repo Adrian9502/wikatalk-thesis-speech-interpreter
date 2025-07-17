@@ -9,7 +9,7 @@ import {
   Animated,
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
-import { X, Star } from "react-native-feather";
+import { X, Star, Clock, RotateCcw } from "react-native-feather";
 import { difficultyColors } from "@/constant/colors";
 import {
   renderFocusIcon,
@@ -18,6 +18,8 @@ import {
 } from "@/utils/games/renderFocusIcon";
 import { formatDifficulty, getStarCount } from "@/utils/games/difficultyUtils";
 import modalSharedStyles from "@/styles/games/modalSharedStyles";
+import { useUserProgress } from "@/hooks/useUserProgress";
+import { formatTime } from "@/utils/gameUtils";
 
 type DifficultyLevel = keyof typeof difficultyColors;
 
@@ -45,9 +47,25 @@ const LevelInfoModal: React.FC<GameInfoModalProps> = React.memo(
     const [isAnimating, setIsAnimating] = useState(false);
     const [hasStarted, setHasStarted] = useState(false);
 
+    // NEW: Get progress data to show initial time - FIXED: Force refresh when modal opens
+    const {
+      progress,
+      isLoading: progressLoading,
+      fetchProgress,
+    } = useUserProgress(levelData?.questionId || levelData?.id);
+
     // Animation values
     const overlayOpacity = useRef(new Animated.Value(0)).current;
     const modalTranslateY = useRef(new Animated.Value(300)).current;
+
+    // FIXED: Fetch fresh progress when modal becomes visible
+    useEffect(() => {
+      if (visible) {
+        console.log("[LevelInfoModal] Modal opened, fetching fresh progress");
+        // Force refresh progress data when modal opens
+        fetchProgress(true);
+      }
+    }, [visible, fetchProgress]);
 
     // Reset state when modal visibility changes
     useEffect(() => {
@@ -132,6 +150,56 @@ const LevelInfoModal: React.FC<GameInfoModalProps> = React.memo(
 
     // Calculate derived values AFTER all hooks
     const starCount = getStarCount(difficulty);
+
+    // FIXED: Enhanced progress info calculation with better debugging
+    const progressInfo = React.useMemo(() => {
+      console.log("[LevelInfoModal] Calculating progress info:", {
+        progress,
+        progressLoading,
+        isArray: Array.isArray(progress),
+        progressType: typeof progress,
+      });
+
+      if (progressLoading) {
+        return {
+          hasProgress: false,
+          timeSpent: 0,
+          attempts: 0,
+          isCompleted: false,
+          isLoading: true,
+        };
+      }
+
+      if (!progress || Array.isArray(progress)) {
+        console.log("[LevelInfoModal] No valid progress data");
+        return {
+          hasProgress: false,
+          timeSpent: 0,
+          attempts: 0,
+          isCompleted: false,
+          isLoading: false,
+        };
+      }
+
+      const attempts = progress.attempts?.length || 0;
+      const timeSpent = progress.totalTimeSpent || 0;
+      const isCompleted = progress.completed || false;
+
+      console.log("[LevelInfoModal] Progress info calculated:", {
+        attempts,
+        timeSpent,
+        isCompleted,
+        hasProgress: timeSpent > 0 || attempts > 0,
+      });
+
+      return {
+        hasProgress: timeSpent > 0 || attempts > 0,
+        timeSpent,
+        attempts,
+        isCompleted,
+        isLoading: false,
+      };
+    }, [progress, progressLoading]);
 
     const getGradientColors = (): readonly [string, string] => {
       if (difficulty && difficulty in difficultyColors) {
@@ -243,6 +311,45 @@ const LevelInfoModal: React.FC<GameInfoModalProps> = React.memo(
                 </View>
               </View>
 
+              {/* FIXED: Enhanced Progress Info Section with loading state */}
+              {(progressInfo.hasProgress || progressInfo.isLoading) && (
+                <View style={styles.progressInfoContainer}>
+                  <Text style={styles.progressInfoTitle}>Your Progress</Text>
+
+                  {progressInfo.isLoading ? (
+                    <View style={styles.progressLoadingContainer}>
+                      <ActivityIndicator size="small" color="#fff" />
+                      <Text style={styles.progressLoadingText}>
+                        Loading progress...
+                      </Text>
+                    </View>
+                  ) : (
+                    <>
+                      <View style={styles.progressStatsContainer}>
+                        <View style={styles.progressStat}>
+                          <Clock width={16} height={16} color="#fff" />
+                          <Text style={styles.progressStatText}>
+                            {formatTime(progressInfo.timeSpent)}
+                          </Text>
+                        </View>
+                        <View style={styles.progressStat}>
+                          <RotateCcw width={16} height={16} color="#fff" />
+                          <Text style={styles.progressStatText}>
+                            {progressInfo.attempts} attempt
+                            {progressInfo.attempts !== 1 ? "s" : ""}
+                          </Text>
+                        </View>
+                      </View>
+                      <Text style={styles.progressInfoNote}>
+                        {progressInfo.isCompleted
+                          ? "✅ Completed! You can play again to improve your time."
+                          : "⏰ You'll continue from where you left off."}
+                      </Text>
+                    </>
+                  )}
+                </View>
+              )}
+
               {/* Level description */}
               <View style={styles.descriptionContainer}>
                 <Text style={styles.levelDescription}>
@@ -265,14 +372,14 @@ const LevelInfoModal: React.FC<GameInfoModalProps> = React.memo(
                 <Text style={styles.rulesTitle}>How to Play:</Text>
                 <Text style={styles.rulesText}>
                   {gameMode === "multipleChoice"
-                    ? "Select the correct answer from the options provided. The timer will stop when you answer. Be quick but accurate!"
+                    ? "Select the correct answer from the options provided. The timer will continue from where you left off. Be quick but accurate!"
                     : gameMode === "identification"
-                    ? "Identify the correct word in the sentence. Tap on it to select. Read carefully before making your choice."
-                    : "Fill in the blank with the correct word. Type your answer and tap Check. Choose wisely!"}
+                    ? "Identify the correct word in the sentence. Tap on it to select. The timer continues from your last attempt. Read carefully!"
+                    : "Fill in the blank with the correct word. Type your answer and tap Check. Your timer continues from where you left off. Choose wisely!"}
                 </Text>
               </View>
 
-              {/* Start button */}
+              {/* Start/Continue button */}
               <View style={styles.buttonContainer}>
                 <TouchableOpacity
                   style={[
@@ -288,7 +395,11 @@ const LevelInfoModal: React.FC<GameInfoModalProps> = React.memo(
                     <ActivityIndicator size="small" color="#000" />
                   ) : (
                     <Text style={modalSharedStyles.startAndCloseText}>
-                      START LEVEL
+                      {progressInfo.hasProgress && !progressInfo.isCompleted
+                        ? "CONTINUE LEVEL"
+                        : progressInfo.isCompleted
+                        ? "PLAY AGAIN"
+                        : "START LEVEL"}
                     </Text>
                   )}
                 </TouchableOpacity>
@@ -313,6 +424,61 @@ const styles = StyleSheet.create({
     height: 100,
     borderRadius: 50,
     backgroundColor: "rgba(0, 0, 0, 0.1)",
+  },
+  // Progress info styles
+  progressInfoContainer: {
+    backgroundColor: "rgba(0, 0, 0, 0.2)",
+    borderRadius: 12,
+    padding: 16,
+    marginBottom: 16,
+    borderWidth: 1,
+    borderColor: "rgba(255, 255, 255, 0.1)",
+  },
+  progressInfoTitle: {
+    fontSize: 16,
+    fontFamily: "Poppins-SemiBold",
+    color: "#fff",
+    marginBottom: 8,
+    textAlign: "center",
+  },
+  // FIXED: Add loading state styles
+  progressLoadingContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    paddingVertical: 12,
+  },
+  progressLoadingText: {
+    fontSize: 14,
+    fontFamily: "Poppins-Medium",
+    color: "#fff",
+    marginLeft: 8,
+  },
+  progressStatsContainer: {
+    flexDirection: "row",
+    justifyContent: "space-around",
+    marginBottom: 8,
+  },
+  progressStat: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "rgba(255, 255, 255, 0.1)",
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 16,
+  },
+  progressStatText: {
+    fontSize: 14,
+    fontFamily: "Poppins-Medium",
+    color: "#fff",
+    marginLeft: 6,
+  },
+  progressInfoNote: {
+    fontSize: 12,
+    fontFamily: "Poppins-Regular",
+    color: "rgba(255, 255, 255, 0.8)",
+    textAlign: "center",
+    fontStyle: "italic",
   },
   descriptionContainer: {
     width: "100%",

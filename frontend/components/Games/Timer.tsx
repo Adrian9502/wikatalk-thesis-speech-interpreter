@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState, useCallback } from "react";
 import { View, Text, StyleSheet } from "react-native";
 import { Clock } from "react-native-feather";
 import { BASE_COLORS } from "@/constant/colors";
@@ -9,119 +9,139 @@ interface TimerProps {
   initialTime?: number;
 }
 
-const Timer: React.FC<TimerProps> = ({ isRunning, initialTime = 0 }) => {
-  // Local state for display formatting only
-  const [displayTime, setDisplayTime] = useState("00:00.00");
+const Timer: React.FC<TimerProps> = React.memo(
+  ({ isRunning, initialTime = 0 }) => {
+    const [displayTime, setDisplayTime] = useState("00:00.00");
+    const { updateTimeElapsed } = useGameStore();
 
-  // Use refs to avoid re-renders
-  const timeRef = useRef(initialTime);
-  const lastUpdateTimeRef = useRef(Date.now());
-  const isRunningRef = useRef(isRunning);
-  const animFrameIdRef = useRef<number | null>(null);
-  const storeTimeRef = useRef(0);
+    // Use refs to maintain state across renders
+    const timeRef = useRef(initialTime);
+    const storeTimeRef = useRef(initialTime);
+    const animFrameIdRef = useRef<number | null>(null);
+    const lastUpdateTimeRef = useRef(Date.now());
+    const lastInitialTimeRef = useRef(initialTime);
 
-  // Get store actions but don't subscribe to updates
-  const updateTimeElapsed = useGameStore.getState().updateTimeElapsed;
+    // FIXED: Format time with proper precision
+    const formatAndDisplayTime = useCallback((time: number) => {
+      try {
+        time = Math.max(0, time);
+        const minutes = Math.floor(time / 60);
+        const seconds = Math.floor(time % 60);
+        const centiseconds = Math.floor((time % 1) * 100);
 
-  // Format time helper function
-  const formatAndDisplayTime = (time: number) => {
-    try {
-      const minutes = Math.floor(time / 60);
-      const seconds = Math.floor(time % 60);
-      const centiseconds = Math.round((time % 1) * 100);
-
-      setDisplayTime(
-        `${minutes.toString().padStart(2, "0")}:${seconds
-          .toString()
-          .padStart(2, "0")}.${centiseconds.toString().padStart(2, "0")}`
-      );
-    } catch (error) {
-      console.error("Timer formatting error:", error);
-      setDisplayTime("00:00.00");
-    }
-  };
-
-  // Initialize on mount with initialTime
-  useEffect(() => {
-    timeRef.current = initialTime || 0;
-    storeTimeRef.current = initialTime || 0;
-    formatAndDisplayTime(initialTime || 0);
-
-    return () => {
-      if (animFrameIdRef.current) {
-        cancelAnimationFrame(animFrameIdRef.current);
-        updateTimeElapsed(timeRef.current);
+        setDisplayTime(
+          `${minutes.toString().padStart(2, "0")}:${seconds
+            .toString()
+            .padStart(2, "0")}.${centiseconds.toString().padStart(2, "0")}`
+        );
+      } catch (error) {
+        console.error("Timer formatting error:", error);
+        setDisplayTime("00:00.00");
       }
-    };
-  }, []);
+    }, []);
 
-  // Handle running state changes
-  useEffect(() => {
-    isRunningRef.current = isRunning;
+    // FIXED: Handle initial time changes properly
+    useEffect(() => {
+      if (lastInitialTimeRef.current !== initialTime) {
+        console.log(
+          `[Timer] Initial time changed from ${lastInitialTimeRef.current} to ${initialTime}`
+        );
 
-    if (isRunning) {
-      lastUpdateTimeRef.current = Date.now();
+        lastInitialTimeRef.current = initialTime;
+        timeRef.current = initialTime;
+        storeTimeRef.current = initialTime;
+        formatAndDisplayTime(initialTime);
 
-      if (!animFrameIdRef.current) {
+        // Update store immediately with new initial time
+        updateTimeElapsed(initialTime);
+      }
+    }, [initialTime, formatAndDisplayTime, updateTimeElapsed]);
+
+    // FIXED: Handle running state changes properly with better performance
+    useEffect(() => {
+      if (isRunning) {
+        console.log(`[Timer] Starting timer from: ${timeRef.current}`);
+        lastUpdateTimeRef.current = Date.now();
+
         const updateTimer = () => {
-          if (!isRunningRef.current) return;
+          if (!isRunning) return; // Exit early if no longer running
 
           const now = Date.now();
-          const elapsed = (now - lastUpdateTimeRef.current) / 1000;
-          timeRef.current += elapsed;
+          const deltaTime = (now - lastUpdateTimeRef.current) / 1000;
+
+          // Add delta time to current time
+          timeRef.current += deltaTime;
           lastUpdateTimeRef.current = now;
 
+          // Format and display
           formatAndDisplayTime(timeRef.current);
 
-          // Only update store every 1 second to avoid excessive updates
-          if (Math.floor(timeRef.current) > Math.floor(storeTimeRef.current)) {
+          // FIXED: Update store less frequently to reduce re-renders
+          if (Math.abs(timeRef.current - storeTimeRef.current) >= 0.2) {
             updateTimeElapsed(timeRef.current);
             storeTimeRef.current = timeRef.current;
           }
 
-          animFrameIdRef.current = requestAnimationFrame(updateTimer);
+          if (isRunning) {
+            animFrameIdRef.current = requestAnimationFrame(updateTimer);
+          }
         };
 
         animFrameIdRef.current = requestAnimationFrame(updateTimer);
+      } else {
+        console.log(`[Timer] Stopping timer at: ${timeRef.current}`);
+        if (animFrameIdRef.current) {
+          cancelAnimationFrame(animFrameIdRef.current);
+          animFrameIdRef.current = null;
+        }
+        // Update store with final time
+        updateTimeElapsed(timeRef.current);
       }
-    } else if (animFrameIdRef.current) {
-      cancelAnimationFrame(animFrameIdRef.current);
-      animFrameIdRef.current = null;
-      updateTimeElapsed(timeRef.current);
-    }
 
-    return () => {
-      if (animFrameIdRef.current) {
-        cancelAnimationFrame(animFrameIdRef.current);
-        animFrameIdRef.current = null;
-      }
-    };
-  }, [isRunning]);
+      return () => {
+        if (animFrameIdRef.current) {
+          cancelAnimationFrame(animFrameIdRef.current);
+          animFrameIdRef.current = null;
+        }
+      };
+    }, [isRunning, formatAndDisplayTime, updateTimeElapsed]);
 
-  return (
-    <View style={styles.timerContainer}>
-      <Clock width={16} height={16} color={BASE_COLORS.white} />
-      <Text style={styles.timerText}>{displayTime}</Text>
-    </View>
-  );
-};
+    // Cleanup on unmount
+    useEffect(() => {
+      return () => {
+        if (animFrameIdRef.current) {
+          cancelAnimationFrame(animFrameIdRef.current);
+          // Update store with final time
+          updateTimeElapsed(timeRef.current);
+        }
+      };
+    }, [updateTimeElapsed]);
+
+    return (
+      <View style={styles.timerContainer}>
+        <Clock width={16} height={16} color={BASE_COLORS.white} />
+        <Text style={styles.timerText}>{displayTime}</Text>
+      </View>
+    );
+  }
+);
 
 const styles = StyleSheet.create({
   timerContainer: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "rgba(255, 255, 255, 0.15)",
-    paddingHorizontal: 14,
-    paddingVertical: 8,
-    borderRadius: 16,
-    gap: 6,
+    backgroundColor: "rgba(0, 0, 0, 0.2)",
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 20,
+    minWidth: 80,
   },
   timerText: {
-    fontSize: 14,
     color: BASE_COLORS.white,
+    fontSize: 14,
     fontFamily: "Poppins-Medium",
-    width: 80,
+    marginLeft: 6,
   },
 });
 
-export default React.memo(Timer);
+export default Timer;

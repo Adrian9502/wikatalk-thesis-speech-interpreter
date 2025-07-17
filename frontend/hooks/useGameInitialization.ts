@@ -1,56 +1,63 @@
 import { useEffect, useRef } from "react";
-import { setupBackButtonHandler } from "@/utils/gameUtils";
-import { GameStatus } from "@/types/gameTypes";
-import useGameStore from "@/store/games/useGameStore";
 
-export function useGameInitialization(
+export const useGameInitialization = (
   levelData: any,
   levelId: number,
   gameMode: string,
   difficulty: string,
   isStarted: boolean,
-  initialize: (data: any, id: number, mode: string, diff: string) => void,
+  initialize: (
+    levelData: any,
+    levelId: number,
+    gameMode: string,
+    difficulty: string
+  ) => void,
   startGame: () => void,
   gameStatus: string,
   timerRunning: boolean,
-  initialTime: number = 0 // Added this parameter for previous time
-) {
-  // Track initialization to prevent repeated calls
-  const isInitializedRef = useRef(false);
+  initialTime: number = 0
+) => {
+  // NEW: Track if we've already initialized to prevent multiple calls
+  const hasInitialized = useRef(false);
+  const hasStarted = useRef(false);
 
-  // Handle back button
   useEffect(() => {
-    const cleanupBackHandler = setupBackButtonHandler(
-      gameStatus as GameStatus,
-      timerRunning
-    );
-    return () => cleanupBackHandler();
-  }, [gameStatus, timerRunning]);
-
-  // Initialize and start game
-  useEffect(() => {
-    // Only initialize once per component instance
-    if (!isInitializedRef.current) {
+    if (levelData && gameStatus === "idle" && !hasInitialized.current) {
       console.log(
         `[useGameInitialization] Initializing ${gameMode} at level ${levelId}`
       );
-
-      // Initialize game data
       initialize(levelData, levelId, gameMode, difficulty);
-      isInitializedRef.current = true;
+      hasInitialized.current = true;
+    }
+  }, [levelData, levelId, gameMode, difficulty, gameStatus, initialize]);
 
-      // Set initial elapsed time if provided
+  useEffect(() => {
+    if (
+      levelData &&
+      gameStatus === "idle" &&
+      isStarted &&
+      hasInitialized.current &&
+      !hasStarted.current
+    ) {
+      console.log(
+        `[useGameInitialization] Starting game with initial time: ${initialTime}`
+      );
+
+      // FIXED: Don't reset timer if we have initial time
       if (initialTime > 0) {
         console.log(
-          `[useGameInitialization] Setting initial time: ${initialTime}s`
+          `[useGameInitialization] Continuing from previous time: ${initialTime}`
         );
-        useGameStore.getState().setTimeElapsed(initialTime);
       }
-    }
 
-    // Only start game if it's not already playing and isStarted is true
-    if (isStarted && gameStatus === "idle") {
       startGame();
+      hasStarted.current = true;
     }
-  }, [isStarted, gameStatus]);
-}
+  }, [levelData, gameStatus, isStarted, startGame, initialTime]);
+
+  // Reset refs when level changes
+  useEffect(() => {
+    hasInitialized.current = false;
+    hasStarted.current = false;
+  }, [levelId, gameMode]);
+};
