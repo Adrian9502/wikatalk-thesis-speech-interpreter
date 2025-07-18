@@ -78,8 +78,8 @@ router.get("/:quizId", protect, async (req, res) => {
     // FIXED: Don't create new progress in GET route
     // Just return a "not found" response that frontend can handle
     console.log("[PROGRESS] No progress found for quiz:", quizId);
-    return res.json({ 
-      success: true, 
+    return res.json({
+      success: true,
       progress: null,
       message: "No progress found for this quiz"
     });
@@ -100,7 +100,7 @@ router.post("/:quizId", protect, async (req, res) => {
     console.log("[PROGRESS] Route handler triggered for POST /:quizId");
     const userId = req.user._id;
     let { quizId } = req.params;
-    const { timeSpent, completed, isCorrect } = req.body; 
+    const { timeSpent, completed, isCorrect } = req.body;
 
     console.log("[PROGRESS] Updating progress for quiz:", quizId);
     console.log("[PROGRESS] Time spent:", timeSpent, "Completed:", completed, "Is correct:", isCorrect);
@@ -133,7 +133,7 @@ router.post("/:quizId", protect, async (req, res) => {
         // First, get the current progress to calculate attempt number
         const existingProgress = await UserProgress.findOne({ userId, quizId });
         const attemptNumber = existingProgress ? (existingProgress.attempts.length + 1) : 1;
-        
+
         // Create the new attempt record
         const newAttempt = {
           quizId,
@@ -146,7 +146,7 @@ router.post("/:quizId", protect, async (req, res) => {
 
         // Add the attempt to the update
         updateData.$push = { attempts: newAttempt };
-        
+
         // FIXED: Initialize $set properly to avoid conflicts
         updateData.$set = {
           totalTimeSpent: timeSpentNum,
@@ -164,7 +164,7 @@ router.post("/:quizId", protect, async (req, res) => {
       if (!updateData.$set) {
         updateData.$set = {};
       }
-      
+
       // Only set completed if it's not already set in $setOnInsert
       updateData.$set.completed = completed;
 
@@ -178,8 +178,8 @@ router.post("/:quizId", protect, async (req, res) => {
     const progress = await UserProgress.findOneAndUpdate(
       { userId, quizId },
       updateData,
-      { 
-        new: true, 
+      {
+        new: true,
         upsert: true,
         setDefaultsOnInsert: true
       }
@@ -190,18 +190,18 @@ router.post("/:quizId", protect, async (req, res) => {
 
   } catch (error) {
     console.error("[PROGRESS] Error updating progress:", error);
-    
+
     // ENHANCED: Better error handling for different types of conflicts
     if (error.code === 11000) {
       console.log("[PROGRESS] Duplicate key error, attempting to update existing record");
-      
+
       try {
         // If we get a duplicate key error, just update the existing record
-        const existingProgress = await UserProgress.findOne({ 
-          userId: req.user._id, 
-          quizId: req.params.quizId.replace('n-', '') 
+        const existingProgress = await UserProgress.findOne({
+          userId: req.user._id,
+          quizId: req.params.quizId.replace('n-', '')
         });
-        
+
         if (existingProgress) {
           // Update the existing record
           if (req.body.timeSpent !== undefined) {
@@ -220,14 +220,14 @@ router.post("/:quizId", protect, async (req, res) => {
               existingProgress.lastAttemptDate = new Date();
             }
           }
-          
+
           if (req.body.completed !== undefined) {
             existingProgress.completed = req.body.completed;
             if (req.body.completed) {
               existingProgress.exercisesCompleted = 1;
             }
           }
-          
+
           await existingProgress.save();
           return res.json({ success: true, progress: existingProgress });
         }
@@ -237,14 +237,14 @@ router.post("/:quizId", protect, async (req, res) => {
     } else if (error.code === 40) {
       // FIXED: Handle ConflictingUpdateOperators error
       console.log("[PROGRESS] ConflictingUpdateOperators error, using direct update approach");
-      
+
       try {
         // Find the existing document and update it directly
-        const existingProgress = await UserProgress.findOne({ 
-          userId: req.user._id, 
-          quizId: req.params.quizId.replace('n-', '') 
+        const existingProgress = await UserProgress.findOne({
+          userId: req.user._id,
+          quizId: req.params.quizId.replace('n-', '')
         });
-        
+
         if (existingProgress) {
           // Update fields individually to avoid conflicts
           if (req.body.timeSpent !== undefined) {
@@ -259,14 +259,14 @@ router.post("/:quizId", protect, async (req, res) => {
                 attemptNumber: existingProgress.attempts.length + 1,
                 cumulativeTime: timeSpentNum
               });
-              
+
               // Update other fields
               existingProgress.totalTimeSpent = timeSpentNum;
               existingProgress.lastAttemptTime = timeSpentNum;
               existingProgress.lastAttemptDate = new Date();
             }
           }
-          
+
           // Update completion status
           if (req.body.completed !== undefined) {
             existingProgress.completed = req.body.completed;
@@ -274,11 +274,11 @@ router.post("/:quizId", protect, async (req, res) => {
               existingProgress.exercisesCompleted = 1;
             }
           }
-          
+
           // Save the updated document
           const updatedProgress = await existingProgress.save();
           return res.json({ success: true, progress: updatedProgress });
-          
+
         } else {
           // Create new document if none exists
           const newProgress = new UserProgress({
@@ -299,7 +299,7 @@ router.post("/:quizId", protect, async (req, res) => {
             }] : [],
             lastAttemptDate: new Date()
           });
-          
+
           const savedProgress = await newProgress.save();
           return res.json({ success: true, progress: savedProgress });
         }
@@ -307,8 +307,99 @@ router.post("/:quizId", protect, async (req, res) => {
         console.error("[PROGRESS] Direct update failed:", directUpdateError);
       }
     }
-    
+
     res.status(500).json({ success: false, message: error.message });
+  }
+});
+
+/**
+ * @route   POST /api/userprogress/:quizId/reset-timer
+ * @desc    Reset timer for a quiz (costs 50 coins)
+ * @access  Private
+ */
+router.post("/:quizId/reset-timer", protect, async (req, res) => {
+  try {
+    console.log("[PROGRESS] Reset timer request for quiz:", req.params.quizId);
+    const userId = req.user._id;
+    let { quizId } = req.params;
+
+    // Handle numeric ID format with prefix
+    if (quizId.startsWith('n-')) {
+      quizId = quizId.replace('n-', '');
+      console.log("[PROGRESS] Converted numeric ID to:", quizId);
+    }
+
+    // Check if user has enough coins
+    const User = require("../models/user.model");
+    const user = await User.findById(userId);
+
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found"
+      });
+    }
+
+    const RESET_COST = 50;
+    if (user.coins < RESET_COST) {
+      return res.status(400).json({
+        success: false,
+        message: "Insufficient coins. You need 50 coins to reset the timer.",
+        currentCoins: user.coins,
+        requiredCoins: RESET_COST
+      });
+    }
+
+    // Find existing progress
+    const existingProgress = await UserProgress.findOne({ userId, quizId });
+
+    if (!existingProgress) {
+      return res.status(404).json({
+        success: false,
+        message: "No progress found for this quiz"
+      });
+    }
+
+    // Don't allow reset if already completed
+    if (existingProgress.completed) {
+      return res.status(400).json({
+        success: false,
+        message: "Cannot reset timer for completed levels"
+      });
+    }
+
+    // Reset the timer fields
+    existingProgress.totalTimeSpent = 0;
+    existingProgress.lastAttemptTime = 0;
+    existingProgress.lastAttemptDate = new Date();
+
+    // Clear all attempts (optional - keeps history but resets timer)
+    // Comment out the next line if you want to keep attempt history
+    existingProgress.attempts = [];
+
+    // Save the updated progress
+    await existingProgress.save();
+
+    // Deduct coins from user
+    user.coins -= RESET_COST;
+    await user.save();
+
+    console.log(`[PROGRESS] Timer reset successfully for quiz ${quizId}, ${RESET_COST} coins deducted`);
+
+    res.json({
+      success: true,
+      message: "Timer reset successfully!",
+      progress: existingProgress,
+      coinsDeducted: RESET_COST,
+      remainingCoins: user.coins
+    });
+
+  } catch (error) {
+    console.error("[PROGRESS] Error resetting timer:", error);
+    res.status(500).json({
+      success: false,
+      message: "Failed to reset timer"
+    });
   }
 });
 

@@ -306,6 +306,77 @@ export const useUserProgress = (quizId: string | number | "global") => {
     [quizId, formatQuizId, fetchProgress]
   );
 
+  // Add this function to the useUserProgress hook
+  const resetTimer = useCallback(
+    async (
+      quizId: string | number
+    ): Promise<{
+      success: boolean;
+      message?: string;
+      coinsDeducted?: number;
+      remainingCoins?: number;
+    }> => {
+      try {
+        setIsLoading(true);
+        setError(null);
+
+        const token = getToken();
+        if (!token) {
+          setIsLoading(false);
+          return { success: false, message: "Authentication required" };
+        }
+
+        const formattedId = formatQuizId(quizId);
+        console.log(`[useUserProgress] Resetting timer for: ${formattedId}`);
+
+        const response = await axios({
+          method: "post",
+          url: `${API_URL}/api/userprogress/${formattedId}/reset-timer`,
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+          timeout: 10000,
+        });
+
+        if (response.data.success) {
+          console.log(`[useUserProgress] Timer reset successfully`);
+
+          // Update local progress with reset data
+          const updatedProgress = response.data.progress;
+          setProgress(updatedProgress);
+
+          // Clear cache to force fresh data
+          const cacheKey = String(quizId);
+          progressCacheRef.current[cacheKey] = updatedProgress;
+
+          return {
+            success: true,
+            message: response.data.message,
+            coinsDeducted: response.data.coinsDeducted,
+            remainingCoins: response.data.remainingCoins,
+          };
+        }
+
+        return {
+          success: false,
+          message: response.data.message || "Failed to reset timer",
+        };
+      } catch (err: any) {
+        console.error(`[useUserProgress] Reset timer error:`, err.message);
+        setError(err.message);
+
+        return {
+          success: false,
+          message: err.response?.data?.message || "Failed to reset timer",
+        };
+      } finally {
+        setIsLoading(false);
+      }
+    },
+    [formatQuizId]
+  );
+
   // Initialize only once per quizId change
   useEffect(() => {
     if (quizId && lastQuizIdRef.current !== quizId) {
@@ -320,5 +391,6 @@ export const useUserProgress = (quizId: string | number | "global") => {
     error,
     fetchProgress,
     updateProgress,
+    resetTimer, // Add this
   };
 };

@@ -7,9 +7,18 @@ import {
   StyleSheet,
   ActivityIndicator,
   Animated,
+  Image,
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
-import { X, Star, Clock, CheckCircle, RotateCcw } from "react-native-feather";
+import {
+  X,
+  Star,
+  Clock,
+  CheckCircle,
+  RotateCcw,
+  RefreshCw,
+  AlertTriangle,
+} from "react-native-feather";
 import { difficultyColors } from "@/constant/colors";
 import {
   renderFocusIcon,
@@ -20,6 +29,7 @@ import { formatDifficulty, getStarCount } from "@/utils/games/difficultyUtils";
 import modalSharedStyles from "@/styles/games/modalSharedStyles";
 import { useUserProgress } from "@/hooks/useUserProgress";
 import { formatTime } from "@/utils/gameUtils";
+import useCoinsStore from "@/store/games/useCoinsStore";
 
 type DifficultyLevel = keyof typeof difficultyColors;
 
@@ -43,126 +53,45 @@ const LevelInfoModal: React.FC<GameInfoModalProps> = React.memo(
     isLoading = false,
     difficulty = "Easy",
   }) => {
-    // IMPORTANT: ALL HOOKS MUST BE DECLARED FIRST
     const [isAnimating, setIsAnimating] = useState(false);
     const [hasStarted, setHasStarted] = useState(false);
+    const [showResetConfirmation, setShowResetConfirmation] = useState(false);
+    const [isResetting, setIsResetting] = useState(false);
+    // NEW: Reset message state
+    const [resetMessage, setResetMessage] = useState<{
+      type: "success" | "error";
+      title: string;
+      description: string;
+    } | null>(null);
 
-    // NEW: Get progress data to show initial time - FIXED: Force refresh when modal opens
     const {
       progress,
       isLoading: progressLoading,
       fetchProgress,
+      resetTimer,
     } = useUserProgress(levelData?.questionId || levelData?.id);
+
+    // Get coins from store
+    const { coins, fetchCoinsBalance } = useCoinsStore();
 
     // Animation values
     const overlayOpacity = useRef(new Animated.Value(0)).current;
     const modalTranslateY = useRef(new Animated.Value(300)).current;
     const progressOpacity = useRef(new Animated.Value(0)).current;
+    const confirmationOpacity = useRef(new Animated.Value(0)).current;
+    const confirmationScale = useRef(new Animated.Value(0.8)).current;
+    // NEW: Reset message animation
+    const resetMessageOpacity = useRef(new Animated.Value(0)).current;
+    const resetMessageScale = useRef(new Animated.Value(0.8)).current;
 
-    // FIXED: Fetch fresh progress when modal becomes visible
     useEffect(() => {
       if (visible) {
         console.log("[LevelInfoModal] Modal opened, fetching fresh progress");
-        // Force refresh progress data when modal opens
         fetchProgress(true);
+        fetchCoinsBalance(true);
       }
-    }, [visible, fetchProgress]);
+    }, [visible, fetchProgress, fetchCoinsBalance]);
 
-    // Reset state when modal visibility changes
-    useEffect(() => {
-      if (visible) {
-        setIsAnimating(true);
-        setHasStarted(false);
-        progressOpacity.setValue(0);
-
-        // Start entrance animation
-        Animated.parallel([
-          Animated.timing(overlayOpacity, {
-            toValue: 1,
-            duration: 600,
-            useNativeDriver: true,
-          }),
-          Animated.spring(modalTranslateY, {
-            toValue: 0,
-            tension: 100,
-            friction: 8,
-            useNativeDriver: true,
-          }),
-        ]).start(() => {
-          setIsAnimating(false);
-          // Fade in progress section after modal is settled
-          if (progressInfo.hasProgress || progressInfo.isLoading) {
-            Animated.timing(progressOpacity, {
-              toValue: 1,
-              duration: 400,
-              useNativeDriver: true,
-            }).start();
-          }
-        });
-      } else {
-        // Reset values
-        overlayOpacity.setValue(0);
-        modalTranslateY.setValue(300);
-        progressOpacity.setValue(0);
-        setIsAnimating(false);
-        setHasStarted(false);
-      }
-    }, [visible, overlayOpacity, modalTranslateY, progressOpacity]);
-
-    // FIXED: Enhanced start button handler
-    const handleStart = useCallback(() => {
-      if (isLoading || isAnimating || hasStarted) return;
-
-      console.log("[LevelInfoModal] Starting level...");
-      setHasStarted(true);
-
-      // Close modal first, then navigate
-      const closeAndNavigate = () => {
-        try {
-          // Animate modal out
-          Animated.timing(overlayOpacity, {
-            toValue: 0,
-            duration: 200,
-            useNativeDriver: true,
-          }).start(() => {
-            // Then trigger navigation after modal is hidden
-            setTimeout(() => {
-              onStart();
-            }, 50);
-          });
-        } catch (error) {
-          console.error("[LevelInfoModal] Navigation error:", error);
-          // Fallback - direct navigation
-          setTimeout(() => {
-            onStart();
-          }, 300);
-        }
-      };
-
-      closeAndNavigate();
-    }, [isLoading, isAnimating, hasStarted, overlayOpacity, onStart]);
-
-    // Enhanced close handler
-    const handleClose = useCallback(() => {
-      if (isAnimating) return;
-
-      setIsAnimating(true);
-
-      // Animate fade-out
-      Animated.timing(overlayOpacity, {
-        toValue: 0,
-        duration: 400,
-        useNativeDriver: true,
-      }).start(() => {
-        setIsAnimating(false);
-        onClose();
-      });
-    }, [isAnimating, overlayOpacity, onClose]);
-
-    // Calculate derived values AFTER all hooks
-    const starCount = getStarCount(difficulty);
-
-    // FIXED: Enhanced progress info calculation with better debugging
     const progressInfo = React.useMemo(() => {
       console.log("[LevelInfoModal] Calculating progress info:", {
         progress,
@@ -212,10 +141,64 @@ const LevelInfoModal: React.FC<GameInfoModalProps> = React.memo(
       };
     }, [progress, progressLoading]);
 
-    // NEW: Update progress opacity when progress info changes
+    // Reset state when modal visibility changes
+    useEffect(() => {
+      if (visible) {
+        setIsAnimating(true);
+        setHasStarted(false);
+        progressOpacity.setValue(0);
+        confirmationOpacity.setValue(0);
+        confirmationScale.setValue(0.8);
+        resetMessageOpacity.setValue(0);
+        resetMessageScale.setValue(0.8);
+        setShowResetConfirmation(false);
+        setResetMessage(null);
+
+        // Start entrance animation
+        Animated.parallel([
+          Animated.timing(overlayOpacity, {
+            toValue: 1,
+            duration: 600,
+            useNativeDriver: true,
+          }),
+          Animated.spring(modalTranslateY, {
+            toValue: 0,
+            tension: 100,
+            friction: 8,
+            useNativeDriver: true,
+          }),
+        ]).start(() => {
+          setIsAnimating(false);
+        });
+      } else {
+        // Reset values
+        overlayOpacity.setValue(0);
+        modalTranslateY.setValue(300);
+        progressOpacity.setValue(0);
+        confirmationOpacity.setValue(0);
+        confirmationScale.setValue(0.8);
+        resetMessageOpacity.setValue(0);
+        resetMessageScale.setValue(0.8);
+        setIsAnimating(false);
+        setHasStarted(false);
+        setShowResetConfirmation(false);
+        setIsResetting(false);
+        setResetMessage(null);
+      }
+    }, [
+      visible,
+      overlayOpacity,
+      modalTranslateY,
+      progressOpacity,
+      confirmationOpacity,
+      confirmationScale,
+    ]);
+
     useEffect(() => {
       if (visible && !isAnimating) {
-        const shouldShow = progressInfo.hasProgress || progressInfo.isLoading;
+        const shouldShow =
+          progressInfo.hasProgress || progressInfo.isLoading || resetMessage;
+
         Animated.timing(progressOpacity, {
           toValue: shouldShow ? 1 : 0,
           duration: 300,
@@ -225,16 +208,246 @@ const LevelInfoModal: React.FC<GameInfoModalProps> = React.memo(
     }, [
       progressInfo.hasProgress,
       progressInfo.isLoading,
+      resetMessage,
       visible,
       isAnimating,
       progressOpacity,
     ]);
 
-    // NEW: Progress Badge Component
+    const showResetMessage = useCallback(
+      (type: "success" | "error", title: string) => {
+        console.log(
+          `[LevelInfoModal] Showing reset message: ${type} - ${title}`
+        );
+
+        // STEP 1: First animate out the confirmation if it's showing
+        if (showResetConfirmation) {
+          Animated.parallel([
+            Animated.timing(confirmationOpacity, {
+              toValue: 0,
+              duration: 200,
+              useNativeDriver: true,
+            }),
+            Animated.spring(confirmationScale, {
+              toValue: 0.8,
+              tension: 120,
+              friction: 8,
+              useNativeDriver: true,
+            }),
+          ]).start(() => {
+            // STEP 2: After confirmation is hidden, set the message and animate it in
+            setShowResetConfirmation(false);
+            // Simplified message - just use title, ignore description
+            setResetMessage({ type, title, description: "" });
+
+            // Small delay to ensure state is updated
+            setTimeout(() => {
+              Animated.parallel([
+                Animated.timing(resetMessageOpacity, {
+                  toValue: 1,
+                  duration: 400,
+                  useNativeDriver: true,
+                }),
+                Animated.spring(resetMessageScale, {
+                  toValue: 1,
+                  tension: 80,
+                  friction: 8,
+                  useNativeDriver: true,
+                }),
+              ]).start(() => {
+                console.log(
+                  `[LevelInfoModal] Reset message animation completed`
+                );
+              });
+            }, 50);
+          });
+        } else {
+          // If no confirmation showing, directly show the message
+          // Simplified message - just use title, ignore description
+          setResetMessage({ type, title, description: "" });
+
+          setTimeout(() => {
+            Animated.parallel([
+              Animated.timing(resetMessageOpacity, {
+                toValue: 1,
+                duration: 400,
+                useNativeDriver: true,
+              }),
+              Animated.spring(resetMessageScale, {
+                toValue: 1,
+                tension: 80,
+                friction: 8,
+                useNativeDriver: true,
+              }),
+            ]).start(() => {
+              console.log(`[LevelInfoModal] Reset message animation completed`);
+            });
+          }, 50);
+        }
+
+        // Auto-hide after 2.5 seconds (shorter since message is simpler)
+        setTimeout(() => {
+          console.log(`[LevelInfoModal] Hiding reset message`);
+          Animated.parallel([
+            Animated.timing(resetMessageOpacity, {
+              toValue: 0,
+              duration: 300,
+              useNativeDriver: true,
+            }),
+            Animated.spring(resetMessageScale, {
+              toValue: 0.8,
+              tension: 120,
+              friction: 8,
+              useNativeDriver: true,
+            }),
+          ]).start(() => {
+            setResetMessage(null);
+            console.log(`[LevelInfoModal] Reset message cleared`);
+          });
+        }, 2500);
+      },
+      [
+        showResetConfirmation,
+        confirmationOpacity,
+        confirmationScale,
+        resetMessageOpacity,
+        resetMessageScale,
+      ]
+    );
+
+    const handleStart = useCallback(() => {
+      if (isLoading || isAnimating || hasStarted) return;
+
+      console.log("[LevelInfoModal] Starting level...");
+      setHasStarted(true);
+
+      // Close modal first, then navigate
+      const closeAndNavigate = () => {
+        try {
+          // Animate modal out
+          Animated.timing(overlayOpacity, {
+            toValue: 0,
+            duration: 200,
+            useNativeDriver: true,
+          }).start(() => {
+            // Then trigger navigation after modal is hidden
+            setTimeout(() => {
+              onStart();
+            }, 50);
+          });
+        } catch (error) {
+          console.error("[LevelInfoModal] Navigation error:", error);
+          // Fallback - direct navigation
+          setTimeout(() => {
+            onStart();
+          }, 300);
+        }
+      };
+
+      closeAndNavigate();
+    }, [isLoading, isAnimating, hasStarted, overlayOpacity, onStart]);
+
+    // Enhanced close handler
+    const handleClose = useCallback(() => {
+      if (isAnimating) return;
+
+      setIsAnimating(true);
+
+      // Animate fade-out
+      Animated.timing(overlayOpacity, {
+        toValue: 0,
+        duration: 400,
+        useNativeDriver: true,
+      }).start(() => {
+        setIsAnimating(false);
+        onClose();
+      });
+    }, [isAnimating, overlayOpacity, onClose]);
+
+    const handleShowResetConfirmation = useCallback(() => {
+      setShowResetConfirmation(true);
+
+      // Animate confirmation in
+      Animated.parallel([
+        Animated.timing(confirmationOpacity, {
+          toValue: 1,
+          duration: 300,
+          useNativeDriver: true,
+        }),
+        Animated.spring(confirmationScale, {
+          toValue: 1,
+          tension: 100,
+          friction: 8,
+          useNativeDriver: true,
+        }),
+      ]).start();
+    }, [confirmationOpacity, confirmationScale]);
+
+    const handleHideResetConfirmation = useCallback(() => {
+      // Animate confirmation out
+      Animated.parallel([
+        Animated.timing(confirmationOpacity, {
+          toValue: 0,
+          duration: 200,
+          useNativeDriver: true,
+        }),
+        Animated.spring(confirmationScale, {
+          toValue: 0.8,
+          tension: 120,
+          friction: 8,
+          useNativeDriver: true,
+        }),
+      ]).start(() => {
+        setShowResetConfirmation(false);
+      });
+    }, [confirmationOpacity, confirmationScale]);
+
+    const handleResetTimer = useCallback(async () => {
+      try {
+        setIsResetting(true);
+
+        const result = await resetTimer(levelData?.questionId || levelData?.id);
+
+        if (result.success) {
+          // Show simple success message
+          showResetMessage("success", "Timer Reset Successfully!");
+
+          // Refresh progress and coins in background
+          fetchProgress(true);
+          fetchCoinsBalance(true);
+        } else {
+          // Show simple error message
+          showResetMessage("error", "Timer Reset Failed. Try again later.");
+        }
+      } catch (error) {
+        // Show simple error message
+        showResetMessage("error", "Timer Reset Failed. Try again later.");
+      } finally {
+        setIsResetting(false);
+      }
+    }, [
+      resetTimer,
+      levelData,
+      fetchProgress,
+      fetchCoinsBalance,
+      showResetMessage,
+    ]);
+
+    // Calculate derived values AFTER all hooks
+    const starCount = getStarCount(difficulty);
+
+    // progress badge component
     const ProgressBadge = React.useCallback(() => {
-      if (!progressInfo.hasProgress && !progressInfo.isLoading) {
+      // Show the badge if there's progress, loading, or a reset message
+      if (
+        !progressInfo.hasProgress &&
+        !progressInfo.isLoading &&
+        !resetMessage
+      ) {
         return null;
       }
+
+      const canAfford = coins >= 50;
 
       return (
         <Animated.View
@@ -245,38 +458,171 @@ const LevelInfoModal: React.FC<GameInfoModalProps> = React.memo(
             },
           ]}
         >
-          {progressInfo.isLoading ? (
-            <View style={styles.progressBadgeContent}>
+          {progressInfo.isLoading && !resetMessage ? (
+            <View>
               <ActivityIndicator size="small" color="#fff" />
             </View>
           ) : (
-            <View style={styles.progressBadgeContent}>
-              <View style={styles.progressIcon}>
-                {progressInfo.isCompleted ? (
-                  <CheckCircle width={14} height={14} color="#4CAF50" />
-                ) : (
-                  <Clock width={15} height={15} color="#fbff26ff" />
-                )}
-              </View>
-              <Text style={styles.progressBadgeText}>
-                {progressInfo.isCompleted ? "Completed" : "In Progress"}
-              </Text>
-              <Text style={styles.progressTime}>
-                {formatTime(progressInfo.timeSpent)}
-              </Text>
-              {progressInfo.attempts > 0 && (
-                <View style={styles.attemptContainer}>
-                  <RotateCcw width={15} height={15} color="#fbff26ff" />
-                  <Text style={styles.progressAttempts}>
-                    {progressInfo.attempts}x
-                  </Text>
+            <>
+              {/* Main Progress Content - Show when no reset states are active */}
+              {!showResetConfirmation && !resetMessage && (
+                <View style={styles.progressBadgeContent}>
+                  <View style={styles.progressLeftContent}>
+                    <View style={styles.progressIcon}>
+                      {progressInfo.isCompleted ? (
+                        <CheckCircle width={14} height={14} color="#22C216" />
+                      ) : (
+                        <Clock width={15} height={15} color="#fbff26ff" />
+                      )}
+                    </View>
+                    <Text style={styles.progressBadgeText}>
+                      {progressInfo.isCompleted ? "Completed" : "In Progress"}
+                    </Text>
+                    <Text style={styles.progressTime}>
+                      {formatTime(progressInfo.timeSpent)}
+                    </Text>
+                    {progressInfo.attempts > 0 && (
+                      <View style={styles.attemptContainer}>
+                        <RotateCcw width={15} height={15} color="#fbff26ff" />
+                        <Text style={styles.progressAttempts}>
+                          {progressInfo.attempts}x
+                        </Text>
+                      </View>
+                    )}
+                  </View>
+
+                  {/* Reset Timer Button */}
+                  {progressInfo.hasProgress && !progressInfo.isCompleted && (
+                    <TouchableOpacity
+                      style={styles.resetButton}
+                      onPress={handleShowResetConfirmation}
+                      disabled={isResetting}
+                    >
+                      <RefreshCw width={14} height={14} color="#fff" />
+                      <Text style={styles.resetButtonText}>Reset</Text>
+                      <Image
+                        source={require("@/assets/images/coin.png")}
+                        style={styles.coinImage}
+                      />
+                      <Text style={styles.resetButtonCost}>50</Text>
+                    </TouchableOpacity>
+                  )}
                 </View>
               )}
-            </View>
+
+              {/* Reset Confirmation */}
+              {showResetConfirmation && !resetMessage && (
+                <Animated.View
+                  style={[
+                    styles.resetConfirmationContent,
+                    {
+                      opacity: confirmationOpacity,
+                      transform: [{ scale: confirmationScale }],
+                    },
+                  ]}
+                >
+                  {/* ... existing confirmation UI ... */}
+                  <View style={styles.resetConfirmationHeader}>
+                    <Text style={styles.resetConfirmationTitle}>
+                      Reset Timer?
+                    </Text>
+                  </View>
+
+                  <View style={styles.resetConfirmationTextContainer}>
+                    <View style={styles.costContainer}>
+                      <Text style={styles.resetConfirmationText}>Cost:</Text>
+                      <Image
+                        source={require("@/assets/images/coin.png")}
+                        style={styles.coinImage}
+                      />
+                      <Text style={styles.resetConfirmationText}>50</Text>
+                    </View>
+
+                    <Text style={styles.resetConfirmationSeparator}>•</Text>
+
+                    <View style={styles.balanceContainer}>
+                      <Text style={styles.resetConfirmationText}>Balance:</Text>
+                      <Image
+                        source={require("@/assets/images/coin.png")}
+                        style={styles.coinImage}
+                      />
+                      <Text style={styles.resetConfirmationText}>{coins}</Text>
+                    </View>
+                  </View>
+
+                  <View style={styles.resetConfirmationButtons}>
+                    <TouchableOpacity
+                      style={styles.resetCancelButton}
+                      onPress={handleHideResetConfirmation}
+                      disabled={isResetting}
+                    >
+                      <Text style={styles.resetCancelButtonText}>Cancel</Text>
+                    </TouchableOpacity>
+
+                    <TouchableOpacity
+                      style={[
+                        styles.resetConfirmButton,
+                        (!canAfford || isResetting) &&
+                          styles.resetConfirmButtonDisabled,
+                      ]}
+                      onPress={handleResetTimer}
+                      disabled={!canAfford || isResetting}
+                    >
+                      {isResetting ? (
+                        <ActivityIndicator size="small" color="#fff" />
+                      ) : (
+                        <Text style={styles.resetConfirmButtonText}>
+                          {canAfford ? "Reset" : "Can't Reset"}
+                        </Text>
+                      )}
+                    </TouchableOpacity>
+                  </View>
+                </Animated.View>
+              )}
+
+              {resetMessage && (
+                <Animated.View
+                  style={[
+                    styles.resetMessageContent,
+                    {
+                      opacity: resetMessageOpacity,
+                      transform: [{ scale: resetMessageScale }],
+                    },
+                  ]}
+                >
+                  <View style={styles.resetMessageHeader}>
+                    <View style={styles.resetMessageIcon}>
+                      {resetMessage.type === "success" ? (
+                        <CheckCircle width={18} height={18} color="#22C216" />
+                      ) : (
+                        <AlertTriangle width={18} height={18} color="#FF6B6B" />
+                      )}
+                    </View>
+                    <Text style={styles.resetMessageTitle}>
+                      {resetMessage.title}
+                    </Text>
+                  </View>
+                </Animated.View>
+              )}
+            </>
           )}
         </Animated.View>
       );
-    }, [progressInfo, progressOpacity]);
+    }, [
+      progressInfo,
+      progressOpacity,
+      isResetting,
+      coins,
+      showResetConfirmation,
+      resetMessage,
+      confirmationOpacity,
+      confirmationScale,
+      resetMessageOpacity,
+      resetMessageScale,
+      handleShowResetConfirmation,
+      handleHideResetConfirmation,
+      handleResetTimer,
+    ]);
 
     const getGradientColors = (): readonly [string, string] => {
       if (difficulty && difficulty in difficultyColors) {
@@ -388,8 +734,9 @@ const LevelInfoModal: React.FC<GameInfoModalProps> = React.memo(
                 </View>
               </View>
 
-              {/* NEW: Progress Badge */}
+              {/* Enhanced Progress Badge */}
               <ProgressBadge />
+
               {/* Level description */}
               <View style={styles.descriptionContainer}>
                 <Text style={styles.levelDescription}>
@@ -465,21 +812,6 @@ const styles = StyleSheet.create({
     borderRadius: 50,
     backgroundColor: "rgba(0, 0, 0, 0.1)",
   },
-  progressBadge: {
-    alignSelf: "center",
-    backgroundColor: "rgba(255, 255, 255, 0.1)",
-    borderRadius: 20,
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    marginBottom: 12,
-    borderWidth: 1,
-    borderColor: "rgba(255, 255, 255, 0.2)",
-  },
-  progressBadgeContent: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 6,
-  },
   progressIcon: {
     width: 16,
     height: 16,
@@ -487,31 +819,199 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   progressBadgeText: {
-    fontSize: 14,
+    fontSize: 12,
     fontFamily: "Poppins-Medium",
     color: "#fff",
   },
   progressTime: {
-    fontSize: 14,
+    fontSize: 12,
     fontFamily: "Poppins-SemiBold",
     color: "#fbff26ff",
     backgroundColor: "rgba(255, 255, 255, 0.2)",
-    paddingHorizontal: 7,
+    paddingHorizontal: 6,
     paddingVertical: 2,
-    borderRadius: 16,
+    borderRadius: 12,
   },
   attemptContainer: {
     flexDirection: "row",
-    gap: 5,
+    gap: 4,
     alignItems: "center",
     justifyContent: "center",
     backgroundColor: "rgba(255, 255, 255, 0.2)",
-    paddingHorizontal: 7,
+    paddingHorizontal: 6,
     paddingVertical: 2,
-    borderRadius: 16,
+    borderRadius: 12,
   },
   progressAttempts: {
     fontSize: 12,
+    fontFamily: "Poppins-Medium",
+    color: "#fff",
+  },
+  progressBadgeContent: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    width: "100%",
+  },
+  progressLeftContent: {
+    flexDirection: "row",
+    justifyContent: "center",
+    alignItems: "center",
+    gap: 6,
+    flex: 1,
+    flexWrap: "wrap",
+  },
+  resetButton: {
+    flexDirection: "row",
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "rgba(245, 47, 47, 0.9)",
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    borderRadius: 18,
+    gap: 4,
+    marginRight: 8,
+    flexShrink: 0,
+    borderWidth: 1,
+    borderColor: "rgba(255, 255, 255, 0.3)",
+  },
+  resetButtonText: {
+    fontSize: 12,
+    fontFamily: "Poppins-SemiBold",
+    color: "#fff",
+  },
+  coinImage: {
+    width: 16,
+    height: 16,
+    alignSelf: "center",
+  },
+  resetButtonCost: {
+    fontSize: 12,
+    fontFamily: "Poppins-Bold",
+    color: "#fbff26ff",
+  },
+  progressBadge: {
+    alignSelf: "center",
+    backgroundColor: "rgba(255, 255, 255, 0.1)",
+    borderRadius: 20,
+    paddingHorizontal: 6,
+    paddingVertical: 6,
+    marginBottom: 12,
+    borderWidth: 1,
+    borderColor: "rgba(255, 255, 255, 0.2)",
+  },
+  resetConfirmationContent: {
+    alignItems: "center",
+    justifyContent: "center",
+    paddingVertical: 6,
+    paddingHorizontal: 12,
+    width: "100%",
+  },
+  resetConfirmationHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    marginBottom: 4,
+    gap: 6,
+  },
+  resetConfirmationTitle: {
+    fontSize: 15,
+    fontFamily: "Poppins-SemiBold",
+    color: "#fff",
+  },
+  resetConfirmationText: {
+    fontSize: 13,
+    fontFamily: "Poppins-Medium",
+    color: "rgba(255, 255, 255, 0.8)",
+    textAlign: "center",
+  },
+  resetConfirmationButtons: {
+    flexDirection: "row",
+    gap: 8,
+    justifyContent: "center",
+  },
+  resetCancelButton: {
+    backgroundColor: "rgba(255, 255, 255, 0.2)",
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 16,
+    minWidth: 60,
+    borderWidth: 1,
+    borderColor: "rgba(255, 255, 255, 0.3)",
+  },
+  resetCancelButtonText: {
+    fontSize: 11,
+    fontFamily: "Poppins-Medium",
+    color: "#fff",
+    textAlign: "center",
+  },
+  resetConfirmButton: {
+    backgroundColor: "#4CAF50",
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 16,
+    minWidth: 60,
+    borderWidth: 1,
+    borderColor: "rgba(255, 255, 255, 0.3)",
+  },
+  resetConfirmButtonDisabled: {
+    backgroundColor: "rgba(255, 255, 255, 0.3)",
+    opacity: 0.6,
+  },
+  resetConfirmButtonText: {
+    fontSize: 12,
+    fontFamily: "Poppins-SemiBold",
+    color: "#fff",
+    textAlign: "center",
+  },
+  resetConfirmationTextContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    marginBottom: 4,
+    gap: 8,
+  },
+  costContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 4,
+  },
+  balanceContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 4,
+  },
+  resetConfirmationSeparator: {
+    fontSize: 13,
+    fontFamily: "Poppins-Medium",
+    color: "rgba(255, 255, 255, 0.8)",
+  },
+  resetMessageContent: {
+    alignItems: "center",
+    justifyContent: "center",
+    paddingVertical: 6,
+    paddingHorizontal: 8,
+    width: "100%",
+    borderRadius: 16,
+  },
+  resetMessageHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  resetMessageIcon: {
+    width: 22,
+    height: 22,
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "rgba(255, 255, 255, 0.2)",
+    borderRadius: 11,
+    marginRight: 8,
+  },
+  resetMessageTitle: {
+    fontSize: 14,
     fontFamily: "Poppins-Medium",
     color: "#fff",
   },
