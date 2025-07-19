@@ -146,7 +146,7 @@ const LevelInfoModal: React.FC<GameInfoModalProps> = React.memo(
       if (visible) {
         setIsAnimating(true);
         setHasStarted(false);
-        progressOpacity.setValue(0);
+        progressOpacity.setValue(1); // Set to 1 immediately instead of 0
         confirmationOpacity.setValue(0);
         confirmationScale.setValue(0.8);
         resetMessageOpacity.setValue(0);
@@ -174,7 +174,7 @@ const LevelInfoModal: React.FC<GameInfoModalProps> = React.memo(
         // Reset values
         overlayOpacity.setValue(0);
         modalTranslateY.setValue(300);
-        progressOpacity.setValue(0);
+        progressOpacity.setValue(1); // Keep at 1 instead of 0
         confirmationOpacity.setValue(0);
         confirmationScale.setValue(0.8);
         resetMessageOpacity.setValue(0);
@@ -192,26 +192,6 @@ const LevelInfoModal: React.FC<GameInfoModalProps> = React.memo(
       progressOpacity,
       confirmationOpacity,
       confirmationScale,
-    ]);
-
-    useEffect(() => {
-      if (visible && !isAnimating) {
-        const shouldShow =
-          progressInfo.hasProgress || progressInfo.isLoading || resetMessage;
-
-        Animated.timing(progressOpacity, {
-          toValue: shouldShow ? 1 : 0,
-          duration: 300,
-          useNativeDriver: true,
-        }).start();
-      }
-    }, [
-      progressInfo.hasProgress,
-      progressInfo.isLoading,
-      resetMessage,
-      visible,
-      isAnimating,
-      progressOpacity,
     ]);
 
     const showResetMessage = useCallback(
@@ -438,148 +418,164 @@ const LevelInfoModal: React.FC<GameInfoModalProps> = React.memo(
 
     // progress badge component
     const ProgressBadge = React.useCallback(() => {
-      // Show the badge if there's progress, loading, or a reset message
-      if (
-        !progressInfo.hasProgress &&
-        !progressInfo.isLoading &&
-        !resetMessage
-      ) {
-        return null;
-      }
-
       const canAfford = coins >= 50;
 
       return (
-        <Animated.View
-          style={[
-            styles.progressBadge,
-            {
-              opacity: progressOpacity,
-            },
-          ]}
-        >
-          {progressInfo.isLoading && !resetMessage ? (
+        <View style={[styles.progressBadge]}>
+          {progressInfo.isLoading ? (
             <View>
               <ActivityIndicator size="small" color="#fff" />
             </View>
           ) : (
             <>
-              {/* Main Progress Content - Show when no reset states are active */}
-              {!showResetConfirmation && !resetMessage && (
-                <View style={styles.progressBadgeContent}>
-                  <View style={styles.progressLeftContent}>
-                    <View style={styles.progressIcon}>
-                      {progressInfo.isCompleted ? (
-                        <CheckCircle width={14} height={14} color="#22C216" />
-                      ) : (
-                        <Clock width={15} height={15} color="#fbff26ff" />
-                      )}
+              {/* Check if we have progress */}
+              {progressInfo.hasProgress ? (
+                <>
+                  {/* Main Progress Content - Show when no reset states are active */}
+                  {!showResetConfirmation && !resetMessage && (
+                    <View style={styles.progressBadgeContent}>
+                      <View style={styles.progressLeftContent}>
+                        <View style={styles.progressIcon}>
+                          {progressInfo.isCompleted ? (
+                            <CheckCircle
+                              width={14}
+                              height={14}
+                              color="#22C216"
+                            />
+                          ) : (
+                            <Clock width={15} height={15} color="#fbff26ff" />
+                          )}
+                        </View>
+                        <Text style={styles.progressBadgeText}>
+                          {progressInfo.isCompleted
+                            ? "Completed"
+                            : "In Progress"}
+                        </Text>
+                        <Text style={styles.progressTime}>
+                          {formatTime(progressInfo.timeSpent)}
+                        </Text>
+                        {progressInfo.attempts > 0 && (
+                          <View style={styles.attemptContainer}>
+                            <RotateCcw
+                              width={15}
+                              height={15}
+                              color="#fbff26ff"
+                            />
+                            <Text style={styles.progressAttempts}>
+                              {progressInfo.attempts}x
+                            </Text>
+                          </View>
+                        )}
+                      </View>
+
+                      {/* Reset Timer Button */}
+                      {progressInfo.hasProgress &&
+                        !progressInfo.isCompleted && (
+                          <TouchableOpacity
+                            style={styles.resetButton}
+                            onPress={handleShowResetConfirmation}
+                            disabled={isResetting}
+                          >
+                            <RefreshCw width={14} height={14} color="#fff" />
+                            <Text style={styles.resetButtonText}>Reset</Text>
+                            <Image
+                              source={require("@/assets/images/coin.png")}
+                              style={styles.coinImage}
+                            />
+                            <Text style={styles.resetButtonCost}>50</Text>
+                          </TouchableOpacity>
+                        )}
                     </View>
-                    <Text style={styles.progressBadgeText}>
-                      {progressInfo.isCompleted ? "Completed" : "In Progress"}
-                    </Text>
-                    <Text style={styles.progressTime}>
-                      {formatTime(progressInfo.timeSpent)}
-                    </Text>
-                    {progressInfo.attempts > 0 && (
-                      <View style={styles.attemptContainer}>
-                        <RotateCcw width={15} height={15} color="#fbff26ff" />
-                        <Text style={styles.progressAttempts}>
-                          {progressInfo.attempts}x
+                  )}
+
+                  {/* Reset Confirmation */}
+                  {showResetConfirmation && !resetMessage && (
+                    <Animated.View
+                      style={[
+                        styles.resetConfirmationContent,
+                        {
+                          opacity: confirmationOpacity,
+                          transform: [{ scale: confirmationScale }],
+                        },
+                      ]}
+                    >
+                      <View style={styles.resetConfirmationHeader}>
+                        <Text style={styles.resetConfirmationTitle}>
+                          Reset Timer?
                         </Text>
                       </View>
-                    )}
-                  </View>
 
-                  {/* Reset Timer Button */}
-                  {progressInfo.hasProgress && !progressInfo.isCompleted && (
-                    <TouchableOpacity
-                      style={styles.resetButton}
-                      onPress={handleShowResetConfirmation}
-                      disabled={isResetting}
-                    >
-                      <RefreshCw width={14} height={14} color="#fff" />
-                      <Text style={styles.resetButtonText}>Reset</Text>
-                      <Image
-                        source={require("@/assets/images/coin.png")}
-                        style={styles.coinImage}
-                      />
-                      <Text style={styles.resetButtonCost}>50</Text>
-                    </TouchableOpacity>
+                      <View style={styles.resetConfirmationTextContainer}>
+                        <View style={styles.costContainer}>
+                          <Text style={styles.resetConfirmationText}>
+                            Cost:
+                          </Text>
+                          <Image
+                            source={require("@/assets/images/coin.png")}
+                            style={styles.coinImage}
+                          />
+                          <Text style={styles.resetConfirmationText}>50</Text>
+                        </View>
+
+                        <Text style={styles.resetConfirmationSeparator}>•</Text>
+
+                        <View style={styles.balanceContainer}>
+                          <Text style={styles.resetConfirmationText}>
+                            Balance:
+                          </Text>
+                          <Image
+                            source={require("@/assets/images/coin.png")}
+                            style={styles.coinImage}
+                          />
+                          <Text style={styles.resetConfirmationText}>
+                            {coins}
+                          </Text>
+                        </View>
+                      </View>
+
+                      <View style={styles.resetConfirmationButtons}>
+                        <TouchableOpacity
+                          style={styles.resetCancelButton}
+                          onPress={handleHideResetConfirmation}
+                          disabled={isResetting}
+                        >
+                          <Text style={styles.resetCancelButtonText}>
+                            Cancel
+                          </Text>
+                        </TouchableOpacity>
+
+                        <TouchableOpacity
+                          style={[
+                            styles.resetConfirmButton,
+                            (!canAfford || isResetting) &&
+                              styles.resetConfirmButtonDisabled,
+                          ]}
+                          onPress={handleResetTimer}
+                          disabled={!canAfford || isResetting}
+                        >
+                          {isResetting ? (
+                            <ActivityIndicator size="small" color="#fff" />
+                          ) : (
+                            <Text style={styles.resetConfirmButtonText}>
+                              {canAfford ? "Reset" : "Can't Reset"}
+                            </Text>
+                          )}
+                        </TouchableOpacity>
+                      </View>
+                    </Animated.View>
                   )}
-                </View>
+                </>
+              ) : (
+                /* No progress - Show placeholder when no reset states are active */
+                !showResetConfirmation &&
+                !resetMessage && (
+                  <View style={styles.noProgressContainer}>
+                    <Text style={styles.noProgressText}>No progress yet</Text>
+                  </View>
+                )
               )}
 
-              {/* Reset Confirmation */}
-              {showResetConfirmation && !resetMessage && (
-                <Animated.View
-                  style={[
-                    styles.resetConfirmationContent,
-                    {
-                      opacity: confirmationOpacity,
-                      transform: [{ scale: confirmationScale }],
-                    },
-                  ]}
-                >
-                  {/* ... existing confirmation UI ... */}
-                  <View style={styles.resetConfirmationHeader}>
-                    <Text style={styles.resetConfirmationTitle}>
-                      Reset Timer?
-                    </Text>
-                  </View>
-
-                  <View style={styles.resetConfirmationTextContainer}>
-                    <View style={styles.costContainer}>
-                      <Text style={styles.resetConfirmationText}>Cost:</Text>
-                      <Image
-                        source={require("@/assets/images/coin.png")}
-                        style={styles.coinImage}
-                      />
-                      <Text style={styles.resetConfirmationText}>50</Text>
-                    </View>
-
-                    <Text style={styles.resetConfirmationSeparator}>•</Text>
-
-                    <View style={styles.balanceContainer}>
-                      <Text style={styles.resetConfirmationText}>Balance:</Text>
-                      <Image
-                        source={require("@/assets/images/coin.png")}
-                        style={styles.coinImage}
-                      />
-                      <Text style={styles.resetConfirmationText}>{coins}</Text>
-                    </View>
-                  </View>
-
-                  <View style={styles.resetConfirmationButtons}>
-                    <TouchableOpacity
-                      style={styles.resetCancelButton}
-                      onPress={handleHideResetConfirmation}
-                      disabled={isResetting}
-                    >
-                      <Text style={styles.resetCancelButtonText}>Cancel</Text>
-                    </TouchableOpacity>
-
-                    <TouchableOpacity
-                      style={[
-                        styles.resetConfirmButton,
-                        (!canAfford || isResetting) &&
-                          styles.resetConfirmButtonDisabled,
-                      ]}
-                      onPress={handleResetTimer}
-                      disabled={!canAfford || isResetting}
-                    >
-                      {isResetting ? (
-                        <ActivityIndicator size="small" color="#fff" />
-                      ) : (
-                        <Text style={styles.resetConfirmButtonText}>
-                          {canAfford ? "Reset" : "Can't Reset"}
-                        </Text>
-                      )}
-                    </TouchableOpacity>
-                  </View>
-                </Animated.View>
-              )}
-
+              {/* Reset Message - Always show when present */}
               {resetMessage && (
                 <Animated.View
                   style={[
@@ -606,11 +602,10 @@ const LevelInfoModal: React.FC<GameInfoModalProps> = React.memo(
               )}
             </>
           )}
-        </Animated.View>
+        </View>
       );
     }, [
       progressInfo,
-      progressOpacity,
       isResetting,
       coins,
       showResetConfirmation,
@@ -1071,6 +1066,18 @@ const styles = StyleSheet.create({
   },
   disabledButton: {
     opacity: 0.7,
+  },
+  noProgressContainer: {
+    alignItems: "center",
+    justifyContent: "center",
+    paddingVertical: 6,
+    paddingHorizontal: 12,
+  },
+  noProgressText: {
+    fontSize: 13,
+    fontFamily: "Poppins-Medium",
+    color: "rgba(255, 255, 255, 0.7)",
+    textAlign: "center",
   },
 });
 

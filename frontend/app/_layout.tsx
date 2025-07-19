@@ -17,6 +17,17 @@ import { useSplashStore } from "@/store/useSplashStore";
 import { GoogleSignin } from "@react-native-google-signin/google-signin";
 import { initializeToken } from "@/lib/authTokenManager";
 import { ProgressModalProvider } from "@/components/games/ProgressModalProvider";
+import {
+  registerSplashStore,
+  registerProgressStore,
+  registerGameStore,
+  registerCoinsStore,
+  setCurrentUserId,
+} from "@/utils/dataManager";
+import useProgressStore from "@/store/games/useProgressStore";
+import useGameStore from "@/store/games/useGameStore";
+import useCoinsStore from "@/store/games/useCoinsStore";
+import { useAuthStore } from "@/store/useAuthStore";
 
 // Prevent the splash screen from auto-hiding
 SplashScreen.preventAutoHideAsync();
@@ -171,6 +182,31 @@ const RootLayout = () => {
     markLoadingComplete,
     markSplashShown,
   ]);
+
+  // Register stores with dataManager to break circular dependencies
+  useEffect(() => {
+    registerSplashStore(useSplashStore.getState());
+    registerProgressStore(useProgressStore.getState());
+    registerGameStore(useGameStore.getState());
+    registerCoinsStore(useCoinsStore.getState());
+
+    // Set initial user ID
+    const authState = useAuthStore.getState();
+    const userId = authState.userData?.id || authState.userData?.email || null;
+    setCurrentUserId(userId);
+
+    console.log("[Layout] Data manager initialized with stores");
+  }, []);
+
+  // Track user changes
+  useEffect(() => {
+    const unsubscribe = useAuthStore.subscribe((state) => {
+      const userId = state.userData?.id || state.userData?.email || null;
+      setCurrentUserId(userId);
+    });
+
+    return unsubscribe;
+  }, []);
 
   // Only show splash animation in RootLayout, not in child components
   if (showSplashAnimation && !splashShown) {

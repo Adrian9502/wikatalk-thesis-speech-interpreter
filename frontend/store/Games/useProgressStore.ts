@@ -6,7 +6,11 @@ import {
   EnhancedGameModeProgress,
 } from "@/types/gameProgressTypes";
 import useGameStore from "@/store/games/useGameStore";
-import { useAuthStore } from "../useAuthStore";
+import {
+  getCurrentUserId,
+  hasUserChanged,
+  setCurrentUserId,
+} from "@/utils/dataManager";
 
 const API_URL = process.env.EXPO_PUBLIC_BACKEND_URL || "http://localhost:5000";
 
@@ -512,18 +516,17 @@ const useProgressStore = create<ProgressState>((set, get) => ({
     const currentTime = Date.now();
     const { lastFetched, currentUserId } = get();
 
-    // NEW: Check for user changes
-    const authStore = useAuthStore.getState();
-    const newUserId = authStore.userData?.id || authStore.userData?.email;
-    const userChanged = currentUserId !== null && currentUserId !== newUserId;
+    // NEW: Check for user changes using dataManager
+    const newUserId = getCurrentUserId();
+    const userChanged = hasUserChanged(newUserId);
 
     if (userChanged) {
-      console.log(
-        `[ProgressStore] User changed from ${currentUserId} to ${newUserId}, forcing refresh`
-      );
+      console.log(`[ProgressStore] User changed, forcing refresh`);
       forceRefresh = true;
+      setCurrentUserId(newUserId);
       set({ currentUserId: newUserId });
     } else if (currentUserId === null) {
+      setCurrentUserId(newUserId);
       set({ currentUserId: newUserId });
     }
 

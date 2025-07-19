@@ -4,7 +4,11 @@ import { getToken } from "@/lib/authTokenManager";
 import { UserProgress } from "@/types/userProgress";
 import { useSplashStore } from "@/store/useSplashStore";
 import useProgressStore from "@/store/games/useProgressStore";
-import { useAuthStore } from "@/store/useAuthStore";
+import {
+  getCurrentUserId,
+  hasUserChanged,
+  setCurrentUserId,
+} from "@/utils/dataManager";
 
 const API_URL = process.env.EXPO_PUBLIC_BACKEND_URL || "http://localhost:5000";
 
@@ -65,20 +69,17 @@ export const useUserProgress = (quizId: string | number | "global") => {
       const formattedId = formatQuizId(quizId);
       const cacheKey = formattedId;
 
-      // NEW: Get current user ID (adjust path to your auth store) - FIX: Handle undefined
-      const authStore = useAuthStore.getState();
-      const newUserId =
-        authStore.userData?.id || authStore.userData?.email || null;
+      // NEW: Get current user ID using dataManager
+      const newUserId = getCurrentUserId();
 
       // NEW: Clear cache if user changed
-      if (currentUserId !== null && currentUserId !== newUserId) {
-        console.log(
-          `[useUserProgress] User changed from ${currentUserId} to ${newUserId}, clearing cache`
-        );
+      if (hasUserChanged(newUserId)) {
+        console.log(`[useUserProgress] User changed, clearing cache`);
         progressCacheRef.current = {}; // Clear entire cache
-        setCurrentUserId(newUserId); // This is now safe since newUserId is string | null
+        setCurrentUserId(newUserId);
+        setCurrentUserId(newUserId); // Update local state too
       } else if (currentUserId === null) {
-        setCurrentUserId(newUserId); // This is now safe since newUserId is string | null
+        setCurrentUserId(newUserId);
       }
 
       // Check cache only if not force refreshing AND user hasn't changed

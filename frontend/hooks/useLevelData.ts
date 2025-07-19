@@ -9,7 +9,11 @@ import {
 import useGameStore from "@/store/games/useGameStore";
 import { convertQuizToLevels } from "@/utils/games/convertQuizToLevels";
 import { useUserProgress } from "@/hooks/useUserProgress";
-import { useAuthStore } from "@/store/useAuthStore";
+import {
+  getCurrentUserId,
+  hasUserChanged,
+  setCurrentUserId,
+} from "@/utils/dataManager";
 
 type FilterType = "all" | "completed" | "current" | "easy" | "medium" | "hard";
 
@@ -41,19 +45,15 @@ export const useLevelData = (gameMode: string | string[] | undefined) => {
         setIsLoading(true);
         setError(null);
 
-        // NEW: Get current user ID and check for changes - FIX: Handle undefined
-        const authStore = useAuthStore.getState();
-        const currentUserId =
-          authStore.userData?.id || authStore.userData?.email || null;
-
-        const userChanged = lastUserId !== null && lastUserId !== currentUserId;
+        // NEW: Get current user ID and check for changes using dataManager
+        const currentUserId = getCurrentUserId();
+        const userChanged = hasUserChanged(currentUserId);
 
         if (userChanged) {
-          console.log(
-            `[useLevelData] User changed from ${lastUserId} to ${currentUserId}, forcing refresh`
-          );
+          console.log(`[useLevelData] User changed, forcing refresh`);
           // Clear precomputed data for account change
           useSplashStore.getState().reset();
+          setCurrentUserId(currentUserId);
         }
 
         setLastUserId(currentUserId); // This is now safe since currentUserId is string | null

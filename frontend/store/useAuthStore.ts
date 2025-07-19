@@ -11,7 +11,7 @@ import { useTranslateStore } from "./useTranslateStore";
 import { GoogleSignin } from "@react-native-google-signin/google-signin";
 import useCoinsStore from "./games/useCoinsStore";
 import { authService, testAPIConnection } from "@/services/api";
-import { clearAllAccountData, refreshAccountData } from "@/utils/accountUtils";
+import { clearAllAccountData, refreshAccountData } from "@/utils/dataManager";
 
 // Types
 interface UserData {
