@@ -49,9 +49,21 @@ export const handleCustomBackPress = (
 };
 
 /**
- * Format seconds to a human-readable string
+ * Format time to display with 2 decimal places
+ */
+export const formatTimeDecimal = (seconds: number): string => {
+  return seconds.toFixed(2);
+};
+
+/**
+ * Format seconds to a human-readable string with better precision
  */
 export const formatTime = (seconds: number): string => {
+  // For very short times, show with decimal places
+  if (seconds < 10) {
+    return `${seconds.toFixed(2)}s`;
+  }
+
   if (seconds < 60) {
     return `${Math.floor(seconds)}s`;
   }

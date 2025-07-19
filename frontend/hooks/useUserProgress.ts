@@ -9,6 +9,7 @@ import {
   hasUserChanged,
   setCurrentUserId,
 } from "@/utils/dataManager";
+import { getIndividualProgressFromCache } from "@/store/useSplashStore";
 
 const API_URL = process.env.EXPO_PUBLIC_BACKEND_URL || "http://localhost:5000";
 
@@ -24,6 +25,10 @@ export const useUserProgress = (quizId: string | number | "global") => {
   const hasInitializedRef = useRef(false);
   const lastQuizIdRef = useRef<string | number | "global" | null>(null);
   const progressCacheRef = useRef<{ [key: string]: any }>({});
+
+  // NEW: Add refs to track fetch state
+  const isFetchingRef = useRef(false);
+  const lastFetchTimeRef = useRef(0);
 
   // Format the ID for API
   const formatQuizId = useCallback((id: string | number): string => {
@@ -63,37 +68,106 @@ export const useUserProgress = (quizId: string | number | "global") => {
     return false;
   }, [quizId]);
 
-  // ENHANCED: Stable fetch function with caching and precomputed data check
+  // ENHANCED: Try cached data first before setting loading state
+  const tryUseCachedProgress = useCallback(() => {
+    if (quizId === "global") {
+      const progressStore = useProgressStore.getState();
+      if (progressStore.progress) {
+        console.log("[useUserProgress] Using cached global progress");
+        setProgress(progressStore.progress);
+        setIsLoading(false);
+        return true;
+      }
+    } else {
+      // Check individual cache first
+      const cachedProgress = getIndividualProgressFromCache(quizId);
+      if (cachedProgress) {
+        console.log(
+          `[useUserProgress] Using cached individual progress for ${quizId}`
+        );
+        setProgress(cachedProgress);
+        setIsLoading(false);
+
+        // Cache it locally too
+        const formattedId = formatQuizId(quizId);
+        progressCacheRef.current[formattedId] = cachedProgress;
+        return true;
+      }
+    }
+    return false;
+  }, [quizId, formatQuizId]);
+
+  // ENHANCED: Immediate cache check on mount
+  useEffect(() => {
+    if (quizId && lastQuizIdRef.current !== quizId) {
+      hasInitializedRef.current = false;
+
+      // NEW: Try cache IMMEDIATELY and set loading to false if found
+      const foundCache = tryUseCachedProgress();
+
+      if (!foundCache) {
+        // Only set loading to true if we don't have cache
+        setIsLoading(true);
+        fetchProgress(false);
+      }
+    }
+  }, [quizId, fetchProgress, tryUseCachedProgress]);
+
+  // ENHANCED: Stable fetch function with debouncing
   const fetchProgress = useCallback(
     async (forceRefresh: boolean = false) => {
+      // Prevent multiple concurrent fetches
+      if (isFetchingRef.current && !forceRefresh) {
+        console.log(`[useUserProgress] Fetch already in progress, skipping`);
+        return progress;
+      }
+
+      // Debounce rapid calls (unless force refresh)
+      const now = Date.now();
+      if (!forceRefresh && now - lastFetchTimeRef.current < 500) {
+        console.log(`[useUserProgress] Debouncing fetch call`);
+        return progress;
+      }
+
+      lastFetchTimeRef.current = now;
+      isFetchingRef.current = true;
+
       const formattedId = formatQuizId(quizId);
       const cacheKey = formattedId;
 
       // NEW: Get current user ID using dataManager
       const newUserId = getCurrentUserId();
 
-      // NEW: Clear cache if user changed
+      // Clear cache if user changed
       if (hasUserChanged(newUserId)) {
         console.log(`[useUserProgress] User changed, clearing cache`);
-        progressCacheRef.current = {}; // Clear entire cache
+        progressCacheRef.current = {};
         setCurrentUserId(newUserId);
-        setCurrentUserId(newUserId); // Update local state too
       } else if (currentUserId === null) {
         setCurrentUserId(newUserId);
       }
 
-      // Check cache only if not force refreshing AND user hasn't changed
-      if (
-        !forceRefresh &&
-        progressCacheRef.current[cacheKey] &&
-        currentUserId === newUserId
-      ) {
-        console.log(`[useUserProgress] Using cached data for ${formattedId}`);
-        setProgress(progressCacheRef.current[cacheKey]);
-        setIsLoading(false);
-        return progressCacheRef.current[cacheKey];
+      // ENHANCED: Try cached data first (only set loading if no cache)
+      if (!forceRefresh && currentUserId === newUserId) {
+        // 1. Check local cache first
+        if (progressCacheRef.current[cacheKey]) {
+          console.log(
+            `[useUserProgress] Using local cached data for ${formattedId}`
+          );
+          setProgress(progressCacheRef.current[cacheKey]);
+          setIsLoading(false);
+          isFetchingRef.current = false;
+          return progressCacheRef.current[cacheKey];
+        }
+
+        // 2. Check splash store cache
+        if (tryUseCachedProgress()) {
+          isFetchingRef.current = false;
+          return progress;
+        }
       }
 
+      // Only set loading to true when we actually need to fetch
       try {
         setIsLoading(true);
         setError(null);
@@ -163,7 +237,6 @@ export const useUserProgress = (quizId: string | number | "global") => {
         if (response.data.success) {
           console.log(`[useUserProgress] Successfully fetched progress`);
 
-          // FIXED: Handle null progress from backend
           const progressData = response.data.progress;
 
           if (progressData) {
@@ -199,18 +272,20 @@ export const useUserProgress = (quizId: string | number | "global") => {
         return defaultResult;
       } finally {
         setIsLoading(false);
+        isFetchingRef.current = false;
       }
     },
     [
       quizId,
       formatQuizId,
       createDefaultProgress,
-      tryUsePrecomputedData,
+      tryUseCachedProgress,
       currentUserId,
+      progress, // Add this to dependencies
     ]
   );
 
-  // ENHANCED: Update progress function with better error handling
+  // Update the updateProgress function
   const updateProgress = useCallback(
     async (timeSpent: number, completed?: boolean, isCorrect?: boolean) => {
       try {
@@ -245,17 +320,20 @@ export const useUserProgress = (quizId: string | number | "global") => {
           // Update current progress
           setProgress(updatedProgress);
 
-          // Update cache for current quiz
-          const currentCacheKey = String(quizId);
-          progressCacheRef.current[currentCacheKey] = updatedProgress;
-
           // CRITICAL: Clear ALL cache entries to force fresh data on next access
           console.log(
             `[useUserProgress] Clearing all cache entries to force refresh`
           );
-          progressCacheRef.current = {
-            [currentCacheKey]: updatedProgress, // Keep only the current one
-          };
+          progressCacheRef.current = {}; // Clear entire local cache
+
+          // NEW: Also invalidate the splash store individual cache for this specific quiz
+          const splashStore = useSplashStore.getState();
+          if (splashStore.setIndividualProgress) {
+            console.log(
+              `[useUserProgress] Updating splash store cache for ${formattedId}`
+            );
+            splashStore.setIndividualProgress(String(quizId), updatedProgress);
+          }
 
           // If this was a completion, invalidate precomputed data
           if (completed && isCorrect) {
@@ -264,7 +342,6 @@ export const useUserProgress = (quizId: string | number | "global") => {
             );
 
             // Invalidate splash store precomputed levels AND filters
-            const splashStore = useSplashStore.getState();
             splashStore.reset(); // This will force recomputation on next access
 
             console.log(
@@ -307,7 +384,7 @@ export const useUserProgress = (quizId: string | number | "global") => {
     [quizId, formatQuizId, fetchProgress]
   );
 
-  // Add this function to the useUserProgress hook
+  // NEW: Add a resetTimer function that also clears caches
   const resetTimer = useCallback(
     async (
       quizId: string | number
@@ -347,9 +424,20 @@ export const useUserProgress = (quizId: string | number | "global") => {
           const updatedProgress = response.data.progress;
           setProgress(updatedProgress);
 
-          // Clear cache to force fresh data
-          const cacheKey = String(quizId);
-          progressCacheRef.current[cacheKey] = updatedProgress;
+          // CRITICAL: Clear all caches to force fresh data
+          console.log(
+            `[useUserProgress] Clearing all caches after timer reset`
+          );
+          progressCacheRef.current = {}; // Clear local cache
+
+          // NEW: Update splash store cache with reset progress
+          const splashStore = useSplashStore.getState();
+          if (splashStore.setIndividualProgress) {
+            console.log(
+              `[useUserProgress] Updating splash store cache after reset for ${formattedId}`
+            );
+            splashStore.setIndividualProgress(String(quizId), updatedProgress);
+          }
 
           return {
             success: true,
@@ -377,14 +465,6 @@ export const useUserProgress = (quizId: string | number | "global") => {
     },
     [formatQuizId]
   );
-
-  // Initialize only once per quizId change
-  useEffect(() => {
-    if (quizId && lastQuizIdRef.current !== quizId) {
-      hasInitializedRef.current = false; // Reset for new quizId
-      fetchProgress(false); // Don't force refresh on first load
-    }
-  }, [quizId, fetchProgress]);
 
   return {
     progress,

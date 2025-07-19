@@ -195,6 +195,8 @@ const LevelSelection = () => {
         console.log(
           `[LevelSelection] Opening game modal for level ${level.id}`
         );
+
+        // NEW: Show modal immediately, don't wait for data
         setShowGameModal(true);
         setShowReviewModal(false);
       }

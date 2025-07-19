@@ -28,7 +28,7 @@ import {
 import { formatDifficulty, getStarCount } from "@/utils/games/difficultyUtils";
 import modalSharedStyles from "@/styles/games/modalSharedStyles";
 import { useUserProgress } from "@/hooks/useUserProgress";
-import { formatTime } from "@/utils/gameUtils";
+import { formatTime, formatTimeDecimal } from "@/utils/gameUtils";
 import useCoinsStore from "@/store/games/useCoinsStore";
 
 type DifficultyLevel = keyof typeof difficultyColors;
@@ -57,12 +57,25 @@ const LevelInfoModal: React.FC<GameInfoModalProps> = React.memo(
     const [hasStarted, setHasStarted] = useState(false);
     const [showResetConfirmation, setShowResetConfirmation] = useState(false);
     const [isResetting, setIsResetting] = useState(false);
-    // NEW: Reset message state
     const [resetMessage, setResetMessage] = useState<{
       type: "success" | "error";
       title: string;
       description: string;
     } | null>(null);
+
+    // NEW: Track if we've fetched fresh data for this modal session
+    const [hasFetchedFresh, setHasFetchedFresh] = useState(false);
+    const fetchInProgressRef = useRef(false);
+    const modalSessionRef = useRef<string | null>(null);
+
+    // ADD: Missing Animated.Value declarations
+    const overlayOpacity = useRef(new Animated.Value(0)).current;
+    const modalTranslateY = useRef(new Animated.Value(300)).current;
+    const progressOpacity = useRef(new Animated.Value(1)).current;
+    const confirmationOpacity = useRef(new Animated.Value(0)).current;
+    const confirmationScale = useRef(new Animated.Value(0.8)).current;
+    const resetMessageOpacity = useRef(new Animated.Value(0)).current;
+    const resetMessageScale = useRef(new Animated.Value(0.8)).current;
 
     const {
       progress,
@@ -74,33 +87,66 @@ const LevelInfoModal: React.FC<GameInfoModalProps> = React.memo(
     // Get coins from store
     const { coins, fetchCoinsBalance } = useCoinsStore();
 
-    // Animation values
-    const overlayOpacity = useRef(new Animated.Value(0)).current;
-    const modalTranslateY = useRef(new Animated.Value(300)).current;
-    const progressOpacity = useRef(new Animated.Value(0)).current;
-    const confirmationOpacity = useRef(new Animated.Value(0)).current;
-    const confirmationScale = useRef(new Animated.Value(0.8)).current;
-    // NEW: Reset message animation
-    const resetMessageOpacity = useRef(new Animated.Value(0)).current;
-    const resetMessageScale = useRef(new Animated.Value(0.8)).current;
-
+    // FIXED: Prevent multiple fetches with session tracking
     useEffect(() => {
-      if (visible) {
-        console.log("[LevelInfoModal] Modal opened, fetching fresh progress");
-        fetchProgress(true);
-        fetchCoinsBalance(true);
-      }
-    }, [visible, fetchProgress, fetchCoinsBalance]);
+      if (visible && !fetchInProgressRef.current) {
+        // Create a unique session ID for this modal open
+        const sessionId = Date.now().toString();
+        modalSessionRef.current = sessionId;
 
+        console.log(`[LevelInfoModal] Modal opened (session: ${sessionId})`);
+
+        // Always force refresh coins immediately (this is fast)
+        fetchCoinsBalance(true);
+
+        // Only fetch if we haven't already fetched for this session
+        if (!hasFetchedFresh) {
+          fetchInProgressRef.current = true;
+
+          const fetchTimer = setTimeout(() => {
+            // Check if this session is still active
+            if (modalSessionRef.current === sessionId) {
+              console.log(
+                `[LevelInfoModal] Fetching fresh progress data (session: ${sessionId})`
+              );
+
+              fetchProgress(true).finally(() => {
+                // Only update state if this session is still active
+                if (modalSessionRef.current === sessionId) {
+                  setHasFetchedFresh(true);
+                  fetchInProgressRef.current = false;
+                }
+              });
+            }
+          }, 300);
+
+          return () => {
+            clearTimeout(fetchTimer);
+            fetchInProgressRef.current = false;
+          };
+        }
+      } else if (!visible) {
+        // Reset when modal closes
+        console.log(`[LevelInfoModal] Modal closed, resetting state`);
+        setHasFetchedFresh(false);
+        fetchInProgressRef.current = false;
+        modalSessionRef.current = null;
+      }
+    }, [visible]); // CHANGED: Remove fetchCoinsBalance and fetchProgress from dependencies
+
+    // FIXED: Update progress info calculation to handle the double loading issue
     const progressInfo = React.useMemo(() => {
       console.log("[LevelInfoModal] Calculating progress info:", {
         progress,
         progressLoading,
+        hasFetchedFresh,
+        fetchInProgress: fetchInProgressRef.current,
         isArray: Array.isArray(progress),
         progressType: typeof progress,
       });
 
-      if (progressLoading) {
+      // Show loading if we're fetching OR if we haven't fetched fresh data yet OR if fetch is in progress
+      if (progressLoading || !hasFetchedFresh || fetchInProgressRef.current) {
         return {
           hasProgress: false,
           timeSpent: 0,
@@ -127,19 +173,19 @@ const LevelInfoModal: React.FC<GameInfoModalProps> = React.memo(
 
       console.log("[LevelInfoModal] Progress info calculated:", {
         attempts,
-        timeSpent,
+        timeSpent: Number(timeSpent.toFixed(2)), // Format to 2 decimal places
         isCompleted,
         hasProgress: timeSpent > 0 || attempts > 0,
       });
 
       return {
         hasProgress: timeSpent > 0 || attempts > 0,
-        timeSpent,
+        timeSpent: Number(timeSpent.toFixed(2)), // NEW: Format to 2 decimal places
         attempts,
         isCompleted,
         isLoading: false,
       };
-    }, [progress, progressLoading]);
+    }, [progress, progressLoading, hasFetchedFresh]);
 
     // Reset state when modal visibility changes
     useEffect(() => {
@@ -174,7 +220,7 @@ const LevelInfoModal: React.FC<GameInfoModalProps> = React.memo(
         // Reset values
         overlayOpacity.setValue(0);
         modalTranslateY.setValue(300);
-        progressOpacity.setValue(1); // Keep at 1 instead of 0
+        progressOpacity.setValue(1);
         confirmationOpacity.setValue(0);
         confirmationScale.setValue(0.8);
         resetMessageOpacity.setValue(0);
@@ -192,6 +238,8 @@ const LevelInfoModal: React.FC<GameInfoModalProps> = React.memo(
       progressOpacity,
       confirmationOpacity,
       confirmationScale,
+      resetMessageOpacity,
+      resetMessageScale,
     ]);
 
     const showResetMessage = useCallback(
@@ -392,9 +440,12 @@ const LevelInfoModal: React.FC<GameInfoModalProps> = React.memo(
           // Show simple success message
           showResetMessage("success", "Timer Reset Successfully!");
 
-          // Refresh progress and coins in background
-          fetchProgress(true);
-          fetchCoinsBalance(true);
+          // CHANGED: Force refresh progress immediately after reset
+          console.log(
+            "[LevelInfoModal] Timer reset successful, refreshing progress"
+          );
+          await fetchProgress(true); // Force refresh to get updated data
+          fetchCoinsBalance(true); // Also refresh coins
         } else {
           // Show simple error message
           showResetMessage("error", "Timer Reset Failed. Try again later.");
@@ -408,7 +459,7 @@ const LevelInfoModal: React.FC<GameInfoModalProps> = React.memo(
     }, [
       resetTimer,
       levelData,
-      fetchProgress,
+      fetchProgress, // Keep this dependency
       fetchCoinsBalance,
       showResetMessage,
     ]);
@@ -423,7 +474,7 @@ const LevelInfoModal: React.FC<GameInfoModalProps> = React.memo(
       return (
         <View style={[styles.progressBadge]}>
           {progressInfo.isLoading ? (
-            <View>
+            <View style={styles.loadingContainer}>
               <ActivityIndicator size="small" color="#fff" />
             </View>
           ) : (
@@ -1078,6 +1129,12 @@ const styles = StyleSheet.create({
     fontFamily: "Poppins-Medium",
     color: "rgba(255, 255, 255, 0.7)",
     textAlign: "center",
+  },
+  loadingContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 8,
   },
 });
 

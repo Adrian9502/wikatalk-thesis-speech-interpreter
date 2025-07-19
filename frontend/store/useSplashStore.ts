@@ -44,9 +44,14 @@ interface SplashState {
     };
   };
 
-  // NEW: Store precomputed level details for completed levels
+  // Store precomputed level details for completed levels
   precomputedLevelDetails: {
     [levelId: string]: CompletedLevelDetails;
+  };
+
+  // Cache individual progress entries
+  individualProgressCache: {
+    [quizId: string]: any;
   };
 
   markLoadingComplete: () => void;
@@ -54,11 +59,11 @@ interface SplashState {
   markGameDataPreloaded: () => void;
   markProgressDataPrecomputed: () => void;
   markLevelsPrecomputed: () => void;
-  markLevelDetailsPrecomputed: () => void; // NEW
+  markLevelDetailsPrecomputed: () => void;
   preloadGameData: () => Promise<boolean>;
   precomputeAllProgressData: () => Promise<boolean>;
   precomputeAllLevels: () => Promise<boolean>;
-  precomputeAllLevelDetails: () => Promise<boolean>; // NEW
+  precomputeAllLevelDetails: () => Promise<boolean>;
   getLevelsForMode: (gameMode: string) => {
     levels: LevelData[];
     completionPercentage: number;
@@ -68,7 +73,11 @@ interface SplashState {
     gameMode: string,
     filter: keyof FilteredLevels
   ) => LevelData[];
-  getLevelDetails: (levelId: string | number) => CompletedLevelDetails | null; // NEW
+  getLevelDetails: (levelId: string | number) => CompletedLevelDetails | null;
+  getIndividualProgress: (quizId: string) => any | null;
+  setIndividualProgress: (quizId: string, progress: any) => void;
+  clearIndividualProgress: (quizId: string) => void;
+  precomputeIndividualProgress: () => Promise<boolean>;
   reset: () => void;
 }
 
@@ -203,16 +212,17 @@ export const useSplashStore = create<SplashState>((set, get) => ({
   gameDataPreloaded: false,
   progressDataPrecomputed: false,
   levelsPrecomputed: false,
-  levelDetailsPrecomputed: false, // NEW
+  levelDetailsPrecomputed: false,
   precomputedLevels: {},
-  precomputedLevelDetails: {}, // NEW
+  precomputedLevelDetails: {},
+  individualProgressCache: {},
 
   markLoadingComplete: () => set({ isLoadingComplete: true }),
   markSplashShown: () => set({ splashShown: true }),
   markGameDataPreloaded: () => set({ gameDataPreloaded: true }),
   markProgressDataPrecomputed: () => set({ progressDataPrecomputed: true }),
   markLevelsPrecomputed: () => set({ levelsPrecomputed: true }),
-  markLevelDetailsPrecomputed: () => set({ levelDetailsPrecomputed: true }), // NEW
+  markLevelDetailsPrecomputed: () => set({ levelDetailsPrecomputed: true }),
 
   reset: () =>
     set({
@@ -221,10 +231,89 @@ export const useSplashStore = create<SplashState>((set, get) => ({
       gameDataPreloaded: false,
       progressDataPrecomputed: false,
       levelsPrecomputed: false,
-      levelDetailsPrecomputed: false, // NEW
+      levelDetailsPrecomputed: false,
       precomputedLevels: {},
-      precomputedLevelDetails: {}, // NEW
+      precomputedLevelDetails: {},
+      individualProgressCache: {},
     }),
+
+  // ADD: Missing individual progress cache methods
+  getIndividualProgress: (quizId: string) => {
+    const { individualProgressCache } = get();
+    const formattedId = quizId.replace(/^n-/, "");
+    return individualProgressCache[formattedId] || null;
+  },
+
+  setIndividualProgress: (quizId: string, progress: any) => {
+    const formattedId = quizId.replace(/^n-/, "");
+
+    console.log(
+      `[SplashStore] Updating individual cache for ${formattedId}:`,
+      progress
+    );
+
+    set((state) => ({
+      individualProgressCache: {
+        ...state.individualProgressCache,
+        [formattedId]: progress,
+      },
+    }));
+  },
+
+  // NEW: Add a method to clear individual progress cache entry
+  clearIndividualProgress: (quizId: string) => {
+    const formattedId = quizId.replace(/^n-/, "");
+
+    console.log(`[SplashStore] Clearing individual cache for ${formattedId}`);
+
+    set((state) => {
+      const newCache = { ...state.individualProgressCache };
+      delete newCache[formattedId];
+      return {
+        individualProgressCache: newCache,
+      };
+    });
+  },
+
+  precomputeIndividualProgress: async () => {
+    try {
+      console.log("[SplashStore] Precomputing individual progress cache");
+      const progressStore = useProgressStore.getState();
+      const globalProgress = progressStore.progress;
+
+      if (!Array.isArray(globalProgress)) {
+        console.warn(
+          "[SplashStore] No global progress available for individual caching"
+        );
+        return false;
+      }
+
+      const individualCache: { [quizId: string]: any } = {};
+
+      // Convert global progress array to individual cache
+      globalProgress.forEach((entry) => {
+        if (entry && entry.quizId) {
+          const cleanId = String(entry.quizId).replace(/^n-/, "");
+          individualCache[cleanId] = entry;
+        }
+      });
+
+      set({ individualProgressCache: individualCache });
+
+      console.log(
+        `[SplashStore] ✅ Individual progress cached for ${
+          Object.keys(individualCache).length
+        } entries`
+      );
+      return true;
+    } catch (error) {
+      console.error(
+        "[SplashStore] Error precomputing individual progress:",
+        error
+      );
+      return false;
+    }
+  },
 
   // NEW: Precompute all level details for completed levels
   precomputeAllLevelDetails: async () => {
@@ -574,57 +663,39 @@ export const useSplashStore = create<SplashState>((set, get) => ({
       corePromises.push(progressStore.fetchProgress(true));
       corePromises.push(coinsStore.prefetchRewardsData());
 
-      // Wait for all core data to load
       await Promise.all(corePromises);
       console.log("[SplashStore] Phase 1 complete: Core data loaded");
 
-      // Phase 2: Precompute ALL progress data
-      console.log("[SplashStore] Phase 2: Precomputing all progress data");
+      // Phase 2: Precompute individual progress cache
+      console.log(
+        "[SplashStore] Phase 2: Precomputing individual progress cache"
+      );
+      const individualProgressSuccess =
+        await get().precomputeIndividualProgress();
+
+      // Phase 3: Precompute ALL progress data
+      console.log("[SplashStore] Phase 3: Precomputing all progress data");
       const progressPrecomputeSuccess = await get().precomputeAllProgressData();
 
-      if (progressPrecomputeSuccess) {
-        console.log(
-          "[SplashStore] Phase 2 complete: All progress data precomputed"
-        );
-      } else {
-        console.warn(
-          "[SplashStore] Phase 2 partial: Some progress data failed to precompute"
-        );
-      }
-
-      // Phase 3: Precompute ALL levels with filters
+      // Phase 4: Precompute ALL levels with filters
       console.log(
-        "[SplashStore] Phase 3: Precomputing all levels with filters"
+        "[SplashStore] Phase 4: Precomputing all levels with filters"
       );
       const levelsPrecomputeSuccess = await get().precomputeAllLevels();
 
-      if (levelsPrecomputeSuccess) {
-        console.log(
-          "[SplashStore] Phase 3 complete: All levels and filters precomputed"
-        );
-      } else {
-        console.warn(
-          "[SplashStore] Phase 3 partial: Some levels failed to precompute"
-        );
-      }
-
-      // Phase 4: Precompute level details for completed levels
-      console.log("[SplashStore] Phase 4: Precomputing level details");
+      // Phase 5: Precompute level details for completed levels
+      console.log("[SplashStore] Phase 5: Precomputing level details");
       const levelDetailsPrecomputeSuccess =
         await get().precomputeAllLevelDetails();
 
-      if (levelDetailsPrecomputeSuccess) {
-        console.log(
-          "[SplashStore] Phase 4 complete: Level details precomputed"
-        );
+      if (individualProgressSuccess) {
+        console.log("[SplashStore] Individual progress cached successfully");
       } else {
-        console.warn(
-          "[SplashStore] Phase 4 partial: Some level details failed to precompute"
-        );
+        console.warn("[SplashStore] Individual progress caching failed");
       }
 
-      // Phase 5: Load other data in background (don't wait)
-      console.log("[SplashStore] Phase 5: Loading background data");
+      // Phase 6: Load other data in background (don't wait)
+      console.log("[SplashStore] Phase 6: Loading background data");
       const backgroundPromises = [];
       const pronunciationStore = usePronunciationStore.getState();
 
@@ -634,7 +705,7 @@ export const useSplashStore = create<SplashState>((set, get) => ({
 
       // Don't wait for background data
       Promise.allSettled(backgroundPromises).then(() => {
-        console.log("[SplashStore] Phase 5 complete: Background data loaded");
+        console.log("[SplashStore] Phase 6 complete: Background data loaded");
       });
 
       set({ gameDataPreloaded: true });
@@ -692,4 +763,14 @@ export const getLevelDetailsForLevel = (
   levelId: string | number
 ): CompletedLevelDetails | null => {
   return useSplashStore.getState().getLevelDetails(levelId);
+};
+
+// NEW: Helper function to get individual progress
+export const getIndividualProgressFromCache = (quizId: string | number) => {
+  return useSplashStore.getState().getIndividualProgress(String(quizId));
+};
+
+// NEW: Helper function to clear individual progress cache
+export const clearIndividualProgressFromCache = (quizId: string | number) => {
+  return useSplashStore.getState().clearIndividualProgress(String(quizId));
 };
