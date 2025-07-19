@@ -57,6 +57,13 @@ const Questions = () => {
 
         // If skipModal is true, start with game view
         if (skipModal) {
+          const gameStore = useGameStore.getState();
+          console.log("[Questions] skipModal detected, ensuring clean state");
+          // Ensure clean state for new level
+          gameStore.setGameStatus("idle");
+          gameStore.setScore(0);
+          gameStore.setTimerRunning(false);
+          gameStore.resetTimer();
           setModalState({
             showInfoModal: false,
             showGame: true,

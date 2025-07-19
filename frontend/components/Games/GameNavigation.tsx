@@ -6,6 +6,7 @@ import { LinearGradient } from "expo-linear-gradient";
 import { BASE_COLORS, gameModeNavigationColors } from "@/constant/colors";
 import gameSharedStyles from "@/styles/gamesSharedStyles";
 import { GameMode } from "@/types/gameTypes";
+import useGameStore from "@/store/games/useGameStore";
 
 interface GameNavigationProps {
   levelId: number;
@@ -43,7 +44,15 @@ const GameNavigation: React.FC<GameNavigationProps> = ({
   // Update the handleNextLevel function to use direct navigation
   const handleNextLevel = () => {
     console.log(`Navigating to level ${numericLevelId + 1} for ${gameMode}`);
-
+    // Reset game state before navigation
+    const gameStore = useGameStore.getState();
+    console.log(`[GameNavigation] Resetting game state before navigation`);
+    // Reset common game state
+    gameStore.setGameStatus("idle");
+    gameStore.setScore(0);
+    gameStore.setTimerRunning(false);
+    gameStore.resetTimer();
+    gameStore.handleRestart();
     router.replace({
       pathname: "/(games)/Questions",
       params: {
@@ -61,6 +70,14 @@ const GameNavigation: React.FC<GameNavigationProps> = ({
     newGameMode: string,
     newGameTitle: string
   ) => {
+    const gameStore = useGameStore.getState();
+    console.log(`[GameNavigation] Resetting game state before mode switch`);
+    gameStore.setGameStatus("idle");
+    gameStore.setScore(0);
+    gameStore.setTimerRunning(false);
+    gameStore.resetTimer();
+    gameStore.handleRestart();
+
     router.replace({
       pathname: "/(games)/LevelSelection",
       params: {

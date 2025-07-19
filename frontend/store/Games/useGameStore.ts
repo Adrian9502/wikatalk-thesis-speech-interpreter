@@ -718,7 +718,7 @@ const useGameStore = create<QuizState>((set, get) => ({
         timeElapsed: 0,
         timerRunning: false,
       },
-      error: null, // Clear any previous errors
+      error: null,
     }));
 
     // Mode-specific initialization
