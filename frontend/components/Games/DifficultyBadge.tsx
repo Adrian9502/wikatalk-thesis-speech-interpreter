@@ -1,7 +1,7 @@
 import React from "react";
 import { View, Text, StyleSheet } from "react-native";
-import { Star } from "react-native-feather";
-import { BASE_COLORS } from "@/constant/colors";
+import { BASE_COLORS, iconColors } from "@/constant/colors";
+import MaterialCommunityIcons from "react-native-vector-icons/MaterialCommunityIcons";
 
 interface DifficultyBadgeProps {
   difficulty?: string;
@@ -14,19 +14,43 @@ const DifficultyBadge: React.FC<DifficultyBadgeProps> = ({
     <View style={styles.difficultyBadge}>
       {difficulty === "medium" && (
         <>
-          <Star width={13} height={13} color={BASE_COLORS.white} />
-          <Star width={13} height={13} color={BASE_COLORS.white} />
+          <MaterialCommunityIcons
+            name="star"
+            size={16}
+            color={iconColors.brightYellow}
+          />
+          <MaterialCommunityIcons
+            name="star"
+            size={16}
+            color={iconColors.brightYellow}
+          />
         </>
       )}
       {difficulty === "hard" && (
         <>
-          <Star width={13} height={13} color={BASE_COLORS.white} />
-          <Star width={13} height={13} color={BASE_COLORS.white} />
-          <Star width={13} height={13} color={BASE_COLORS.white} />
+          <MaterialCommunityIcons
+            name="star"
+            size={16}
+            color={iconColors.brightYellow}
+          />
+          <MaterialCommunityIcons
+            name="star"
+            size={16}
+            color={iconColors.brightYellow}
+          />
+          <MaterialCommunityIcons
+            name="star"
+            size={16}
+            color={iconColors.brightYellow}
+          />
         </>
       )}
       {(difficulty === "easy" || !difficulty) && (
-        <Star width={13} height={13} color={BASE_COLORS.white} />
+        <MaterialCommunityIcons
+          name="star"
+          size={16}
+          color={iconColors.brightYellow}
+        />
       )}
       <Text style={styles.difficultyText}>
         {difficulty
@@ -42,14 +66,15 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
-    backgroundColor: "rgba(255, 255, 255, 0.15)",
-    paddingHorizontal: 14,
-    paddingVertical: 8,
+    borderWidth: 1,
     borderRadius: 16,
+    backgroundColor: "rgba(0, 0, 0, 0.2)",
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderColor: "rgba(255, 255, 255, 0.12)",
     gap: 6,
   },
   difficultyText: {
-    marginTop: 4,
     fontSize: 12,
     fontFamily: "Poppins-Medium",
     color: BASE_COLORS.white,

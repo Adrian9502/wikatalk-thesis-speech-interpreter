@@ -24,11 +24,13 @@ const styles = StyleSheet.create({
   focusAreaBadge: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "rgba(255, 255, 255, 0.15)",
-    paddingHorizontal: 14,
-    paddingVertical: 8,
     borderRadius: 16,
+    borderWidth: 1,
+    backgroundColor: "rgba(0, 0, 0, 0.2)",
+    paddingHorizontal: 12,
+    paddingVertical: 6,
     gap: 6,
+    borderColor: "rgba(255, 255, 255, 0.12)",
   },
   focusAreaText: {
     marginTop: 4,

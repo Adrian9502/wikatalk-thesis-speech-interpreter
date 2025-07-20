@@ -1,17 +1,41 @@
 import React from "react";
 import { BASE_COLORS } from "@/constant/colors";
-import { BookOpen, Type, Volume2 } from "react-native-feather";
+import MaterialCommunityIcons from "react-native-vector-icons/MaterialCommunityIcons";
 
 export const renderFocusIcon = (focusArea: string = "vocabulary") => {
   switch (focusArea.toLowerCase()) {
     case "grammar":
-      return <Type width={16} height={16} color={BASE_COLORS.white} />;
+      return (
+        <MaterialCommunityIcons
+          name="format-text"
+          size={18}
+          color={BASE_COLORS.white}
+        />
+      );
     case "vocabulary":
-      return <BookOpen width={16} height={16} color={BASE_COLORS.white} />;
+      return (
+        <MaterialCommunityIcons
+          name="book-open-page-variant"
+          size={18}
+          color={BASE_COLORS.white}
+        />
+      );
     case "pronunciation":
-      return <Volume2 width={16} height={16} color={BASE_COLORS.white} />;
+      return (
+        <MaterialCommunityIcons
+          name="volume-high"
+          size={18}
+          color={BASE_COLORS.white}
+        />
+      );
     default:
-      return <BookOpen width={16} height={16} color={BASE_COLORS.white} />;
+      return (
+        <MaterialCommunityIcons
+          name="book-open-page-variant"
+          size={18}
+          color={BASE_COLORS.white}
+        />
+      );
   }
 };
 

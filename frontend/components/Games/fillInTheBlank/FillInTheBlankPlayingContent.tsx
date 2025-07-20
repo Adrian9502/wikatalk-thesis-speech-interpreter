@@ -6,14 +6,14 @@ import {
   TextInput,
   ScrollView,
 } from "react-native";
-import { Check, X } from "react-native-feather";
+import { Check, X, Eye, EyeOff, Type } from "react-native-feather";
 import { LinearGradient } from "expo-linear-gradient";
 import * as Animatable from "react-native-animatable";
 import { BASE_COLORS } from "@/constant/colors";
-import { getDifficultyColors } from "@/utils/gameUtils";
+import { getGameModeGradient } from "@/utils/gameUtils";
 import styles from "@/styles/games/fillInTheBlank.styles";
 import gameSharedStyles from "@/styles/gamesSharedStyles";
-
+import Icon from "react-native-vector-icons/Feather";
 interface RenderPlayingContentProps {
   difficulty: string;
   levelData: any;
@@ -48,43 +48,51 @@ const FillInTheBlankPlayingContent: React.FC<RenderPlayingContentProps> =
       toggleTranslation,
       checkAnswer,
     }) => {
-      // Input ref
       const inputRef = useRef<TextInput>(null);
 
-      // PERFORMANCE: Memoize gradient colors
-      const gradientColors = useMemo(
-        () =>
-          getDifficultyColors(difficulty, levelData) as readonly [
-            string,
-            string
-          ],
-        [difficulty, levelData]
+      // Get game mode gradient
+      const gameGradientColors = useMemo(
+        () => getGameModeGradient("fillBlanks"),
+        []
       );
 
-      // PERFORMANCE: Memoize formatted sentence
+      // Memoize formatted sentence
       const formattedSentence = useMemo(() => {
         if (!currentExercise?.sentence || !currentExercise?.answer) {
           return "Loading...";
         }
-        return currentExercise.sentence.replace(
-          new RegExp(currentExercise.answer, "gi"),
-          "_".repeat(currentExercise.answer.length)
-        );
+
+        const sentence = currentExercise.sentence;
+        const answer = currentExercise.answer;
+        const blank = "_".repeat(Math.max(answer.length, 8));
+
+        return sentence.replace(new RegExp(answer, "gi"), blank);
       }, [currentExercise?.sentence, currentExercise?.answer]);
 
-      // PERFORMANCE: Memoize attempts display
-      const attemptsDisplay = useMemo(
-        () =>
-          attemptsLeft > 0 ? Array(attemptsLeft).fill("●").join(" ") : "0",
-        [attemptsLeft]
-      );
+      // Memoize attempts display
+      const attemptsDisplay = useMemo(() => {
+        const hearts = Array(2)
+          .fill(0)
+          .map((_, index) => (
+            <Text
+              key={index}
+              style={[
+                styles.heartIcon,
+                index < attemptsLeft
+                  ? styles.heartActive
+                  : styles.heartInactive,
+              ]}
+            >
+              ♥
+            </Text>
+          ));
+        return hearts;
+      }, [attemptsLeft]);
 
-      // PERFORMANCE: Memoize clear handler
       const handleClear = useCallback(() => {
         setUserAnswer("");
       }, [setUserAnswer]);
 
-      // PERFORMANCE: Memoize button states
       const canSubmit = useMemo(
         () => userAnswer.trim().length > 0 && !showFeedback,
         [userAnswer, showFeedback]
@@ -100,130 +108,245 @@ const FillInTheBlankPlayingContent: React.FC<RenderPlayingContentProps> =
           keyboardShouldPersistTaps="handled"
           keyboardDismissMode="on-drag"
         >
-          {/* Attempts Display */}
-          <View style={styles.attemptsContainer}>
-            <Text style={styles.attemptsText}>Attempts: {attemptsDisplay}</Text>
-          </View>
-
-          {/* Sentence Card */}
+          {/* Enhanced Sentence Card */}
           <Animatable.View
-            animation="fadeInUp"
-            duration={500}
-            style={styles.sentenceCard}
+            animation="zoomIn"
+            duration={800}
+            delay={200}
+            style={styles.sentenceCardContainer}
           >
             <LinearGradient
-              colors={gradientColors}
-              style={styles.sentenceGradient}
+              colors={gameGradientColors}
+              style={styles.sentenceCard}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 1 }}
             >
+              {/* Sentence Text */}
               <Text style={styles.sentenceText}>{formattedSentence}</Text>
+
+              {/* Decorative Elements */}
+              <View style={styles.sentenceDecoration1} />
+              <View style={styles.sentenceDecoration2} />
             </LinearGradient>
           </Animatable.View>
 
-          {/* Input Section */}
-          <View style={styles.inputSection}>
-            <Text style={styles.inputLabel}>Fill in the blank:</Text>
-            <View style={styles.inputContainer}>
-              <TextInput
-                ref={inputRef}
-                style={styles.input}
-                placeholder="Type your answer here..."
-                placeholderTextColor="rgba(255, 255, 255, 0.5)"
-                value={userAnswer}
-                onChangeText={setUserAnswer}
-                autoCapitalize="none"
-                selectionColor={BASE_COLORS.white}
-              />
+          {/* Attempts Display */}
+          <Animatable.View
+            animation="fadeInDown"
+            duration={600}
+            style={styles.attemptsContainer}
+          >
+            <Text style={styles.attemptsLabel}>Attempts left:</Text>
+            <View style={styles.heartsContainer}>{attemptsDisplay}</View>
+          </Animatable.View>
 
-              {userAnswer.length > 0 && (
-                <TouchableOpacity
-                  style={styles.clearButton}
-                  onPress={handleClear}
-                >
-                  <X width={20} height={20} color={BASE_COLORS.white} />
-                </TouchableOpacity>
-              )}
+          {/* Enhanced Input Section */}
+          <Animatable.View
+            animation="slideInUp"
+            duration={700}
+            delay={400}
+            style={styles.inputSection}
+          >
+            <View style={styles.inputHeader}>
+              <Text style={styles.inputLabel}>Your Answer:</Text>
+            </View>
+
+            <View style={styles.inputWrapper}>
+              <LinearGradient
+                colors={[
+                  "rgba(255, 255, 255, 0.05)",
+                  "rgba(255, 255, 255, 0.09)",
+                ]}
+                style={styles.inputContainer}
+              >
+                <TextInput
+                  ref={inputRef}
+                  style={styles.input}
+                  placeholder="Type your answer here..."
+                  placeholderTextColor="rgba(255, 255, 255, 0.5)"
+                  value={userAnswer}
+                  onChangeText={setUserAnswer}
+                  autoCapitalize="none"
+                  selectionColor={BASE_COLORS.white}
+                  multiline={false}
+                />
+
+                {userAnswer.length > 0 && (
+                  <TouchableOpacity
+                    style={styles.clearButton}
+                    onPress={handleClear}
+                  >
+                    <X
+                      width={18}
+                      height={18}
+                      color="rgba(255, 255, 255, 0.7)"
+                    />
+                  </TouchableOpacity>
+                )}
+              </LinearGradient>
 
               <TouchableOpacity
-                style={[styles.submitButton, !canSubmit && { opacity: 0.7 }]}
+                style={[
+                  styles.submitButton,
+                  !canSubmit && styles.submitButtonDisabled,
+                ]}
                 onPress={checkAnswer}
                 disabled={!canSubmit}
               >
-                <Text style={styles.submitButtonText}>Check</Text>
+                <LinearGradient
+                  colors={
+                    canSubmit
+                      ? ["#4CAF50", "#2E7D32"]
+                      : ["rgba(255, 255, 255, 0.3)", "rgba(255, 255, 255, 0.2)"]
+                  }
+                  style={styles.submitGradient}
+                >
+                  <Text
+                    style={[
+                      styles.submitButtonText,
+                      !canSubmit && styles.submitButtonTextDisabled,
+                    ]}
+                  >
+                    CHECK
+                  </Text>
+                </LinearGradient>
               </TouchableOpacity>
             </View>
-          </View>
+          </Animatable.View>
 
-          {/* Help Buttons */}
-          <View style={styles.helpButtonsContainer}>
-            <TouchableOpacity style={styles.hintButton} onPress={toggleHint}>
-              <Text style={styles.hintButtonText}>
-                {showHint ? "Hide Hint" : "Show Hint"}
-              </Text>
-            </TouchableOpacity>
+          {/* Enhanced Help Buttons */}
+          <Animatable.View
+            animation="fadeIn"
+            duration={600}
+            delay={600}
+            style={styles.helpSection}
+          >
+            <Text style={styles.helpTitle}>Need help?</Text>
+            <View style={styles.helpButtons}>
+              <TouchableOpacity
+                style={[styles.helpButton, showHint && styles.helpButtonActive]}
+                onPress={toggleHint}
+              >
+                <Icon
+                  name="activity"
+                  size={16}
+                  color={
+                    showHint ? BASE_COLORS.white : "rgba(255, 255, 255, 0.7)"
+                  }
+                />
+                <Text
+                  style={[
+                    styles.helpButtonText,
+                    showHint && styles.helpButtonTextActive,
+                  ]}
+                >
+                  {showHint ? "Hide Hint" : "Show Hint"}
+                </Text>
+              </TouchableOpacity>
 
-            <TouchableOpacity
-              style={styles.hintButton}
-              onPress={toggleTranslation}
-            >
-              <Text style={styles.hintButtonText}>
-                {showTranslation ? "Hide Translation" : "Show Translation"}
-              </Text>
-            </TouchableOpacity>
-          </View>
-
-          {/* Hint Card */}
-          {showHint && currentExercise?.hint && (
-            <View style={styles.hintCard}>
-              <Text style={styles.hintLabel}>Hint:</Text>
-              <Text style={styles.hintText}>{currentExercise.hint}</Text>
-            </View>
-          )}
-
-          {/* Translation Card */}
-          {showTranslation && currentExercise?.translation && (
-            <View style={styles.hintCard}>
-              <Text style={styles.hintLabel}>Translation:</Text>
-              <Text style={styles.hintText}>{currentExercise.translation}</Text>
-            </View>
-          )}
-
-          {/* Feedback Card */}
-          {showFeedback && (
-            <View
-              style={[
-                styles.feedbackCard,
-                isCorrect ? styles.correctFeedback : styles.incorrectFeedback,
-              ]}
-            >
-              <View style={styles.feedbackIconContainer}>
-                {isCorrect ? (
-                  <Check width={20} height={20} color={BASE_COLORS.white} />
+              <TouchableOpacity
+                style={[
+                  styles.helpButton,
+                  showTranslation && styles.helpButtonActive,
+                ]}
+                onPress={toggleTranslation}
+              >
+                {showTranslation ? (
+                  <EyeOff width={16} height={16} color={BASE_COLORS.white} />
                 ) : (
-                  <X width={20} height={20} color={BASE_COLORS.white} />
+                  <Eye
+                    width={16}
+                    height={16}
+                    color="rgba(255, 255, 255, 0.7)"
+                  />
                 )}
-              </View>
-              <Text style={styles.feedbackText}>
-                {isCorrect ? "Level Completed!" : "Incorrect. Try again!"}
-              </Text>
+                <Text
+                  style={[
+                    styles.helpButtonText,
+                    showTranslation && styles.helpButtonTextActive,
+                  ]}
+                >
+                  {showTranslation ? "Hide Translation" : "Show Translation"}
+                </Text>
+              </TouchableOpacity>
             </View>
+          </Animatable.View>
+
+          {/* Animated Help Cards */}
+          {showHint && currentExercise?.hint && (
+            <Animatable.View
+              animation="slideInUp"
+              duration={500}
+              style={styles.helpCard}
+            >
+              <LinearGradient
+                colors={["rgba(255, 193, 7, 0.2)", "rgba(255, 193, 7, 0.1)"]}
+                style={styles.helpCardGradient}
+              >
+                <View style={styles.helpCardHeader}>
+                  <Icon name="activity" size={18} color="#FFC107" />
+                  <Text style={styles.helpCardTitle}>Hint</Text>
+                </View>
+                <Text style={styles.helpCardText}>{currentExercise.hint}</Text>
+              </LinearGradient>
+            </Animatable.View>
+          )}
+
+          {showTranslation && currentExercise?.translation && (
+            <Animatable.View
+              animation="slideInUp"
+              duration={500}
+              style={styles.helpCard}
+            >
+              <LinearGradient
+                colors={["rgba(33, 150, 243, 0.2)", "rgba(33, 150, 243, 0.1)"]}
+                style={styles.helpCardGradient}
+              >
+                <View style={styles.helpCardHeader}>
+                  <Eye width={18} height={18} color="#2196F3" />
+                  <Text style={styles.helpCardTitle}>Translation</Text>
+                </View>
+                <Text style={styles.helpCardText}>
+                  {currentExercise.translation}
+                </Text>
+              </LinearGradient>
+            </Animatable.View>
+          )}
+
+          {/* Enhanced Feedback Card */}
+          {showFeedback && (
+            <Animatable.View
+              animation="bounceIn"
+              duration={2000}
+              style={styles.feedbackContainer}
+            >
+              <LinearGradient
+                colors={
+                  isCorrect ? ["#4CAF50", "#2E7D32"] : ["#F44336", "#C62828"]
+                }
+                style={styles.feedbackCard}
+              >
+                <View style={styles.feedbackIcon}>
+                  {isCorrect ? (
+                    <Check width={24} height={24} color={BASE_COLORS.white} />
+                  ) : (
+                    <X width={24} height={24} color={BASE_COLORS.white} />
+                  )}
+                </View>
+                <View style={styles.feedbackContent}>
+                  <Text style={styles.feedbackTitle}>
+                    {isCorrect ? "Perfect!" : "Not quite right"}
+                  </Text>
+                  <Text style={styles.feedbackText}>
+                    {isCorrect
+                      ? "You got it! Well done."
+                      : `Try again! You have ${attemptsLeft} attempts left.`}
+                  </Text>
+                </View>
+              </LinearGradient>
+            </Animatable.View>
           )}
         </ScrollView>
-      );
-    },
-    (prevProps, nextProps) => {
-      // PERFORMANCE: Custom comparison for better memoization
-      return (
-        prevProps.userAnswer === nextProps.userAnswer &&
-        prevProps.showHint === nextProps.showHint &&
-        prevProps.showTranslation === nextProps.showTranslation &&
-        prevProps.showFeedback === nextProps.showFeedback &&
-        prevProps.isCorrect === nextProps.isCorrect &&
-        prevProps.attemptsLeft === nextProps.attemptsLeft &&
-        prevProps.currentExercise?.sentence ===
-          nextProps.currentExercise?.sentence &&
-        prevProps.currentExercise?.answer ===
-          nextProps.currentExercise?.answer &&
-        prevProps.difficulty === nextProps.difficulty
       );
     }
   );

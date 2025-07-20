@@ -19,7 +19,7 @@ import {
   RefreshCw,
   AlertTriangle,
 } from "react-native-feather";
-import { difficultyColors } from "@/constant/colors";
+import { difficultyColors, iconColors } from "@/constant/colors";
 import {
   renderFocusIcon,
   getFocusAreaText,
@@ -494,7 +494,11 @@ const LevelInfoModal: React.FC<GameInfoModalProps> = React.memo(
                               color="#22C216"
                             />
                           ) : (
-                            <Clock width={15} height={15} color="#fbff26ff" />
+                            <Clock
+                              width={15}
+                              height={15}
+                              color={iconColors.brightYellow}
+                            />
                           )}
                         </View>
                         <Text style={styles.progressBadgeText}>
@@ -510,7 +514,7 @@ const LevelInfoModal: React.FC<GameInfoModalProps> = React.memo(
                             <RotateCcw
                               width={15}
                               height={15}
-                              color="#fbff26ff"
+                              color={iconColors.brightYellow}
                             />
                             <Text style={styles.progressAttempts}>
                               {progressInfo.attempts}x
@@ -872,7 +876,7 @@ const styles = StyleSheet.create({
   progressTime: {
     fontSize: 12,
     fontFamily: "Poppins-SemiBold",
-    color: "#fbff26ff",
+    color: iconColors.brightYellow,
     backgroundColor: "rgba(255, 255, 255, 0.2)",
     paddingHorizontal: 6,
     paddingVertical: 2,
@@ -934,7 +938,7 @@ const styles = StyleSheet.create({
   resetButtonCost: {
     fontSize: 12,
     fontFamily: "Poppins-Bold",
-    color: "#fbff26ff",
+    color: iconColors.brightYellow,
   },
   progressBadge: {
     alignSelf: "center",

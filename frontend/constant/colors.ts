@@ -80,6 +80,9 @@ export const getPositionalColors = (
     success: BASE_COLORS.success,
   };
 };
+export const iconColors = {
+  brightYellow: "#fbff26ff" as const,
+};
 
 export const difficultyColors = {
   Easy: ["#22C216", "#007F3B"] as const,
