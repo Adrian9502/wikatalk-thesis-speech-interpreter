@@ -72,10 +72,10 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
     paddingVertical: 6,
     borderColor: "rgba(255, 255, 255, 0.12)",
-    gap: 6,
   },
   difficultyText: {
     fontSize: 12,
+    marginLeft: 6,
     fontFamily: "Poppins-Medium",
     color: BASE_COLORS.white,
   },

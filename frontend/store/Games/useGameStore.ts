@@ -120,7 +120,7 @@ interface QuizState {
     level: number,
     mode: string
   ) => Promise<QuestionType | null>;
-  getLevelData: (gameMode: string, levelId: number, difficulty?: string) => any;
+  getLevelData: (gameMode: string, levelId: number, difficulty: string) => any;
   clearQuestions: () => void;
   testConnection: () => Promise<boolean>;
   clearAllAccountData: () => void;
@@ -591,8 +591,11 @@ const useGameStore = create<QuizState>((set, get) => ({
     }
   },
 
-  // Get level data for game components - similar to the current logic in Questions.tsx
-  getLevelData: (gameMode: string, levelId: number, difficulty = "easy") => {
+  getLevelData: (
+    gameMode: string,
+    levelId: number,
+    difficulty: string = "easy"
+  ) => {
     const modeQuestions = get().questions[gameMode as GameMode];
     if (!modeQuestions) return null;
 
@@ -601,7 +604,12 @@ const useGameStore = create<QuizState>((set, get) => ({
       const levelData = modeQuestions[difficulty as Difficulty].find(
         (q: QuestionType) => q.id === levelId
       );
-      if (levelData) return levelData;
+      if (levelData) {
+        console.log(
+          `[getLevelData] Found level ${levelId} in ${difficulty}: difficulty=${levelData.difficulty}`
+        );
+        return levelData;
+      }
     }
 
     // Try to find in any difficulty
@@ -611,6 +619,9 @@ const useGameStore = create<QuizState>((set, get) => ({
         (q: QuestionType) => q.id === levelId
       );
       if (levelData) {
+        console.log(
+          `[getLevelData] Found level ${levelId} in ${diff} (not ${difficulty}): difficulty=${levelData.difficulty}`
+        );
         return {
           levelData,
           foundDifficulty: diff,
@@ -623,7 +634,11 @@ const useGameStore = create<QuizState>((set, get) => ({
       modeQuestions[difficulty as Difficulty] &&
       modeQuestions[difficulty as Difficulty].length > 0
     ) {
-      return modeQuestions[difficulty as Difficulty][0];
+      const fallbackLevel = modeQuestions[difficulty as Difficulty][0];
+      console.log(
+        `[getLevelData] Using fallback level: difficulty=${fallbackLevel.difficulty}`
+      );
+      return fallbackLevel;
     }
 
     return null;

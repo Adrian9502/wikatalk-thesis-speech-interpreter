@@ -113,16 +113,29 @@ const FillInTheBlank: React.FC<FillInTheBlankProps> = React.memo(
     // PERFORMANCE: Memoize current exercise and game config
     const gameConfig = useMemo(() => {
       const currentExercise = exercises[currentExerciseIndex];
+
+      // FIXED: Better focus area extraction
+      const focusArea =
+        currentExercise?.focusArea ||
+        levelData?.focusArea ||
+        exercises?.[0]?.focusArea ||
+        "Vocabulary";
+
       return {
         currentExercise,
-        focusArea:
-          currentExercise?.focusArea || levelData?.focusArea || "Vocabulary",
+        focusArea,
         question: exercises[0]?.sentence || "No question available",
         userAnswerDisplay: userAnswer || "(No answer provided)",
         initialTime:
           progress && !Array.isArray(progress) ? progress.totalTimeSpent : 0,
       };
-    }, [exercises, currentExerciseIndex, levelData, userAnswer, progress]);
+    }, [
+      exercises,
+      currentExerciseIndex,
+      levelData?.focusArea,
+      userAnswer,
+      progress,
+    ]);
 
     // PERFORMANCE: Memoize toggle functions
     const memoizedToggleHint = useCallback(() => {

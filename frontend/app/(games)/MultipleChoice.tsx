@@ -132,9 +132,15 @@ const MultipleChoice: React.FC<MultipleChoiceProps> = React.memo(
       const progressTime =
         progress && !Array.isArray(progress) ? progress.totalTimeSpent || 0 : 0;
 
+      // FIXED: Better focus area extraction with fallbacks
+      const focusArea =
+        currentQuestion?.focusArea ||
+        levelData?.focusArea ||
+        levelData?.questions?.[0]?.focusArea ||
+        "Vocabulary";
+
       return {
-        focusArea:
-          currentQuestion?.focusArea || levelData?.focusArea || "Vocabulary",
+        focusArea,
         selectedAnswerText:
           currentQuestion?.options?.find((o) => o.id === selectedOption)
             ?.text || "",
@@ -147,6 +153,7 @@ const MultipleChoice: React.FC<MultipleChoiceProps> = React.memo(
       currentQuestion?.focusArea,
       currentQuestion?.options,
       levelData?.focusArea,
+      levelData?.questions,
       selectedOption,
       progress,
     ]);

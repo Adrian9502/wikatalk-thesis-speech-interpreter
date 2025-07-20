@@ -26,25 +26,21 @@ const GamePlayingContent: React.FC<GamePlayingContentProps> = React.memo(
     children,
     isStarted = true,
     initialTime = 0,
-    gameMode = "multipleChoice",
   }) => {
-    // Get consistent gradient colors based on game mode
-    const gradientColors = React.useMemo(
-      () => getGameModeGradient(gameMode),
-      [gameMode]
-    );
-
     const timerStartedRef = React.useRef(false);
 
-    if (timerRunning && !timerStartedRef.current) {
-      console.log(
-        `[GamePlayingContent] Timer started with initialTime: ${initialTime}`
-      );
-      timerStartedRef.current = true;
-    } else if (!timerRunning && timerStartedRef.current) {
-      console.log(`[GamePlayingContent] Timer stopped`);
-      timerStartedRef.current = false;
-    }
+    // Optimized timer logging - only log state changes
+    React.useEffect(() => {
+      if (timerRunning && !timerStartedRef.current) {
+        console.log(
+          `[GamePlayingContent] Timer started with initialTime: ${initialTime}`
+        );
+        timerStartedRef.current = true;
+      } else if (!timerRunning && timerStartedRef.current) {
+        console.log(`[GamePlayingContent] Timer stopped`);
+        timerStartedRef.current = false;
+      }
+    }, [timerRunning, initialTime]);
 
     return (
       <View style={styles.container}>

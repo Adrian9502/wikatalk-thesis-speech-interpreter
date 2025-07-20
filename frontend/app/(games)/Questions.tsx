@@ -48,7 +48,7 @@ const Questions = () => {
     typeof params.difficulty === "string" ? params.difficulty : "easy";
   const skipModal = params.skipModal === "true";
 
-  // FIXED: Load quiz data effect
+  // FIXED: Load quiz data effect with stable dependencies
   useEffect(() => {
     const loadQuizData = async () => {
       try {
@@ -80,6 +80,10 @@ const Questions = () => {
             setActualDifficulty(result.foundDifficulty);
           } else {
             setLevelData(result);
+            // Extract difficulty from the level data itself
+            const extractedDifficulty =
+              result.difficulty || result.difficultyCategory || "easy";
+            setActualDifficulty(extractedDifficulty);
           }
           setLocalLoading(false);
           setGameComponentReady(true);
@@ -96,6 +100,11 @@ const Questions = () => {
             setActualDifficulty(updatedResult.foundDifficulty);
           } else {
             setLevelData(updatedResult);
+            const extractedDifficulty =
+              updatedResult.difficulty ||
+              updatedResult.difficultyCategory ||
+              "easy";
+            setActualDifficulty(extractedDifficulty);
           }
         }
 
@@ -112,10 +121,12 @@ const Questions = () => {
   }, [
     gameMode,
     levelId,
-    difficulty,
+    // REMOVED: difficulty - use it for initial fetch but don't re-run when it changes
     skipModal,
+    // MEMOIZED: These functions should be stable
     getLevelData,
     fetchQuestionsByMode,
+    // Only run once per level/game mode combination
   ]);
 
   // FIXED: Game start handler with proper navigation safety
@@ -171,7 +182,7 @@ const Questions = () => {
     }
   }, []);
 
-  // FIXED: Render game component with all hooks called first
+  // FIXED: Render game component with stable dependencies
   const renderGameComponent = useCallback(() => {
     // Don't render if still loading
     if (storeLoading || !gameComponentReady || localLoading) {
@@ -208,7 +219,7 @@ const Questions = () => {
           ]}
         >
           <Text style={styles.errorText}>
-            Level {levelId} not found in {difficulty} difficulty.
+            Level {levelId} not found in {actualDifficulty} difficulty.
           </Text>
           <TouchableOpacity
             style={styles.backButton}
@@ -220,7 +231,7 @@ const Questions = () => {
       );
     }
 
-    // Render appropriate game component
+    // Render appropriate game component - REMOVED: Debug logs
     switch (gameMode) {
       case "multipleChoice":
         return (
@@ -260,14 +271,14 @@ const Questions = () => {
     levelData,
     gameMode,
     levelId,
-    actualDifficulty,
+    actualDifficulty, // Use actualDifficulty instead of difficulty
     modalState.showGame,
     storeLoading,
     error,
     gameComponentReady,
     localLoading,
     activeTheme.backgroundColor,
-    difficulty,
+    // REMOVED: difficulty from dependencies - this was causing the infinite loop
   ]);
 
   // FIXED: Main render - all hooks are now called before any conditional logic

@@ -124,6 +124,13 @@ const Identification: React.FC<IdentificationProps> = React.memo(
     const gameConfig = useMemo(() => {
       const currentSentence = sentences[currentSentenceIndex];
 
+      // FIXED: Better focus area extraction
+      const focusArea =
+        currentSentence?.focusArea ||
+        levelData?.focusArea ||
+        sentences?.[0]?.focusArea ||
+        "Vocabulary";
+
       // Calculate selected answer for review
       const selectedAnswerText =
         selectedWord !== null && words[selectedWord]
@@ -136,8 +143,7 @@ const Identification: React.FC<IdentificationProps> = React.memo(
 
       return {
         currentSentence,
-        focusArea:
-          currentSentence?.focusArea || levelData?.focusArea || "Vocabulary",
+        focusArea,
         selectedAnswerText,
         isCorrect: feedback === "correct",
         question: currentSentence?.sentence || currentSentence?.question || "",
@@ -149,7 +155,7 @@ const Identification: React.FC<IdentificationProps> = React.memo(
       currentSentenceIndex,
       selectedWord,
       words,
-      levelData,
+      levelData?.focusArea,
       feedback,
       progress,
     ]);
@@ -216,7 +222,7 @@ const Identification: React.FC<IdentificationProps> = React.memo(
         {gameStatus === "playing" ? (
           <GamePlayingContent
             timerRunning={timerRunning}
-            difficulty={difficulty}
+            difficulty={difficulty} // This should be the actual difficulty passed as prop
             focusArea={gameConfig.focusArea}
             isStarted={isStarted}
             gameStatus={gameStatus}
