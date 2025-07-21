@@ -51,3 +51,10 @@ export const GAME_GRADIENTS = {
   [GAME_MODES.IDENTIFICATION]: ["#e01f78", "#6a03ad"] as const,
   [GAME_MODES.FILL_BLANKS]: ["#22C216", "#007F3B"] as const,
 };
+
+export const NAVIGATION_COLORS = {
+  green: ["#22C216", "#007F3B"] as const,
+  yellow: ["#cfa012ff", "#B28704"] as const,
+  blue: ["#2196F3", "#0D47A1"] as const,
+  purple: ["#9C27B0", "#6A0080"] as const,
+};

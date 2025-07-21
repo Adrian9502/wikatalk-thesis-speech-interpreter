@@ -1,17 +1,16 @@
-import React from "react";
-import { ScrollView, View, Text } from "react-native";
+import React, { useMemo } from "react";
+import { ScrollView, View, Text, StyleSheet } from "react-native";
 import * as Animatable from "react-native-animatable";
 import { LinearGradient } from "expo-linear-gradient";
-import { Check, X } from "react-native-feather";
-import { BASE_COLORS } from "@/constant/colors";
-import DifficultyBadge from "@/components/games/DifficultyBadge";
-import FocusAreaBadge from "@/components/games/FocusAreaBadge";
+import { BASE_COLORS, iconColors } from "@/constant/colors";
 import AnswerReview from "@/components/games/AnswerReview";
 import GameNavigation from "@/components/games/GameNavigation";
 import { formatTime } from "@/utils/gameUtils";
 import gameSharedStyles from "@/styles/gamesSharedStyles";
 import { GameMode } from "@/types/gameTypes";
-
+import { MaterialCommunityIcons } from "@expo/vector-icons";
+import { NAVIGATION_COLORS } from "@/constant/gameConstants";
+import { renderFocusIcon } from "@/utils/games/renderFocusIcon";
 interface GameCompletedContentProps {
   score: number;
   timeElapsed: number;
@@ -41,82 +40,129 @@ const GameCompletedContent: React.FC<GameCompletedContentProps> = ({
   onRestart,
   focusArea = "Vocabulary",
 }) => {
+  // Render difficulty stars
+  const renderDifficultyStars = useMemo(() => {
+    const stars = [];
+    const starCount =
+      difficulty === "hard" ? 3 : difficulty === "medium" ? 2 : 1;
+
+    for (let i = 0; i < starCount; i++) {
+      stars.push(
+        <MaterialCommunityIcons
+          key={i}
+          name="star"
+          size={16}
+          color={iconColors.brightYellow}
+        />
+      );
+    }
+    return stars;
+  }, [difficulty]);
   return (
     <ScrollView
       showsVerticalScrollIndicator={false}
       contentContainerStyle={gameSharedStyles.contentContainer}
     >
-      {/* Stats Container with Time Taken */}
+      {/* Stats Row */}
       <Animatable.View
-        animation="fadeIn"
+        animation="slideInUp"
         duration={600}
-        delay={100}
-        style={gameSharedStyles.statsContainer}
+        style={styles.statsRow}
       >
-        <View style={gameSharedStyles.timeContainer}>
-          <Text style={gameSharedStyles.timeValue}>
-            Time: {formatTime(timeElapsed)}
-          </Text>
-        </View>
-
-        {/* Add badges container */}
-        <View style={gameSharedStyles.badgesContainer}>
-          <DifficultyBadge difficulty={difficulty} />
-          <FocusAreaBadge focusArea={focusArea} />
-        </View>
-      </Animatable.View>
-
-      {/* Completion Message with conditional color */}
-      <Animatable.View
-        animation="fadeInUp"
-        duration={700}
-        delay={200}
-        style={gameSharedStyles.questionCardWrapper}
-      >
-        <LinearGradient
-          colors={
-            score > 0
-              ? (["#4CAF50", "#2E7D32"] as const)
-              : ([BASE_COLORS.danger, "#C62828"] as const)
-          }
-          style={gameSharedStyles.questionGradient}
-        >
-          <View style={gameSharedStyles.resultIconLarge}>
-            {score > 0 ? (
-              <Check width={30} height={30} color={BASE_COLORS.white} />
-            ) : (
-              <X width={30} height={30} color={BASE_COLORS.white} />
-            )}
+        {/* Time Stat */}
+        {timeElapsed !== undefined && (
+          <View style={styles.statCard}>
+            <LinearGradient
+              colors={NAVIGATION_COLORS.blue}
+              style={styles.statCardGradient}
+            >
+              <MaterialCommunityIcons size={16} name="clock" color="#fff" />
+              <Text style={styles.statValue}>{formatTime(timeElapsed)}</Text>
+            </LinearGradient>
           </View>
-          <Text style={gameSharedStyles.completionTitle}>
-            {score > 0 ? "Level Completed!" : "Try Again!"}
-          </Text>
-          <Text style={gameSharedStyles.completionMessage}>
-            {score > 0
-              ? "Great job! You answered correctly."
-              : "Your answer was incorrect. Keep practicing to improve."}
-          </Text>
-        </LinearGradient>
+        )}
+
+        {/* Difficulty Stat - Replaces Score Stat */}
+        <View style={styles.statCard}>
+          <LinearGradient
+            colors={NAVIGATION_COLORS.purple}
+            style={styles.statCardGradient}
+          >
+            <View style={styles.difficultyStarsContainer}>
+              {renderDifficultyStars}
+            </View>
+            <Text style={styles.statValue}>
+              {difficulty.charAt(0).toUpperCase() + difficulty.slice(1)}
+            </Text>
+          </LinearGradient>
+        </View>
+
+        {/* Focus Area Stat - Replaces Result Stat */}
+        <View style={styles.statCard}>
+          <LinearGradient
+            colors={NAVIGATION_COLORS.yellow}
+            style={styles.statCardGradient}
+          >
+            {renderFocusIcon(focusArea)}
+            <Text style={styles.statValue}>
+              {focusArea.charAt(0).toUpperCase() + focusArea.slice(1)}
+            </Text>
+          </LinearGradient>
+        </View>
       </Animatable.View>
 
-      {/* Answer Review Section */}
+      {/* Enhanced Answer Review Section */}
       <AnswerReview
         question={question}
         userAnswer={userAnswer}
         isCorrect={isCorrect}
         timeElapsed={timeElapsed}
+        difficulty={difficulty}
+        focusArea={focusArea}
+        gameMode={gameMode}
+        animation="fadeInUp"
+        duration={800}
+        delay={200}
       />
 
-      {/* Navigation buttons - USE THE PROPER COMPONENT */}
+      {/* Navigation Section */}
       <GameNavigation
         levelId={levelId}
         gameMode={gameMode}
         gameTitle={gameTitle}
-        difficulty={difficulty}
         onRestart={onRestart}
+        difficulty={difficulty}
       />
     </ScrollView>
   );
 };
-
+const styles = StyleSheet.create({
+  // Stats Row
+  statsRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    marginBottom: 20,
+    gap: 12,
+  },
+  statCard: {
+    flex: 1,
+  },
+  statCardGradient: {
+    borderRadius: 16,
+    padding: 8,
+    alignItems: "center",
+    justifyContent: "center",
+    flexDirection: "row",
+    gap: 8,
+  },
+  statValue: {
+    fontSize: 12,
+    fontFamily: "Poppins-Medium",
+    color: BASE_COLORS.white,
+  },
+  difficultyStarsContainer: {
+    flexDirection: "row",
+    gap: 2,
+  },
+});
 export default GameCompletedContent;

@@ -1,5 +1,5 @@
-import React, { useEffect, useMemo, useState } from "react";
-import { View, StatusBar } from "react-native";
+import React, { useEffect, useMemo, useState, useCallback } from "react";
+import { View, StatusBar, BackHandler } from "react-native"; // Add BackHandler
 import { useLocalSearchParams, router } from "expo-router";
 import * as Haptics from "expo-haptics";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -31,8 +31,15 @@ const LevelSelection = () => {
   const [componentError, setComponentError] = useState<Error | null>(null);
 
   const params = useLocalSearchParams();
-  const { gameMode, gameTitle } = params;
   const { activeTheme } = useThemeStore();
+
+  // FIXED: Properly extract string values from params
+  const gameMode = Array.isArray(params.gameMode)
+    ? params.gameMode[0]
+    : params.gameMode || "multipleChoice";
+  const gameTitle = Array.isArray(params.gameTitle)
+    ? params.gameTitle[0]
+    : params.gameTitle || "Game";
 
   const { shouldPlayAnimation } = useAnimationTracker();
 
@@ -85,7 +92,7 @@ const LevelSelection = () => {
           setInitialLoad(false);
         }
       } else {
-        console.log("[LevelSelection] Waiting for precomputed data...");
+        console.log("[LevelSelection] Waiting for pre-computed data...");
 
         // NEW: Check if we've been waiting too long (fallback mechanism)
         const startTime = Date.now();
@@ -93,10 +100,10 @@ const LevelSelection = () => {
 
         if (startTime > maxWaitTime) {
           console.warn(
-            "[LevelSelection] Data precomputation taking too long, triggering manual preload"
+            "[LevelSelection] Data pre-computation taking too long, triggering manual preload"
           );
 
-          // Manually trigger data precomputation
+          // Manually trigger data pre-computation
           const splashStore = useSplashStore.getState();
           try {
             await splashStore.preloadGameData();
@@ -113,7 +120,7 @@ const LevelSelection = () => {
     checkDataReady();
   }, [shouldPlayAnimation, gameMode, initialLoad]);
 
-  // PERFORMANCE FIX: Use precomputed filters with loading state
+  // PERFORMANCE FIX: Use pre-computed filters with loading state
   const filteredLevels = useMemo(() => {
     if (!showLevels || !getFilteredLevels) {
       return [];
@@ -137,7 +144,9 @@ const LevelSelection = () => {
   // PERFORMANCE FIX: Stable memoized handlers
   const stableHandlers = useMemo(() => {
     const handleBack = () => {
-      router.back();
+      console.log("[LevelSelection] Back button pressed - navigating to Games");
+      // FIXED: Use replace instead of back to avoid navigation stack issues
+      router.replace("/(tabs)/Games");
     };
 
     // Update LevelSelection.tsx to use safe navigation
@@ -152,24 +161,20 @@ const LevelSelection = () => {
       // Close modal first
       setShowGameModal(false);
 
-      // Use safe navigation
-      safeNavigate.push(
-        {
-          pathname: "/(games)/Questions",
-          params: {
-            levelId: selectedLevel.id,
-            gameMode:
-              typeof gameMode === "string" ? gameMode : String(gameMode),
-            gameTitle,
-            difficulty:
-              typeof selectedLevel.difficultyCategory === "string"
-                ? selectedLevel.difficultyCategory
-                : "easy",
-            skipModal: "true",
-          },
+      // FIXED: Use replace to avoid navigation stack buildup
+      router.replace({
+        pathname: "/(games)/Questions",
+        params: {
+          levelId: selectedLevel.id,
+          gameMode,
+          gameTitle,
+          difficulty:
+            typeof selectedLevel.difficultyCategory === "string"
+              ? selectedLevel.difficultyCategory
+              : "easy",
+          skipModal: "true",
         },
-        200
-      );
+      });
     };
 
     const handleLevelSelectWithCompletion = (level: LevelData) => {
@@ -354,6 +359,30 @@ const LevelSelection = () => {
     handleRetry,
   ]);
 
+  // FIXED: Handle hardware back button
+  useEffect(() => {
+    const backHandler = BackHandler.addEventListener(
+      "hardwareBackPress",
+      () => {
+        console.log("[LevelSelection] Hardware back button pressed");
+
+        // If any modal is open, close it first
+        if (showGameModal || showReviewModal) {
+          setShowGameModal(false);
+          setShowReviewModal(false);
+          setSelectedLevel(null);
+          return true; // Prevent default back action
+        }
+
+        // Otherwise, navigate to Games tab
+        router.replace("/(tabs)/Games");
+        return true; // Prevent default back action
+      }
+    );
+
+    return () => backHandler.remove();
+  }, [showGameModal, showReviewModal]);
+
   // Main render with try/catch for error handling
   try {
     return (
@@ -393,9 +422,7 @@ const LevelSelection = () => {
                   ...selectedLevel, // Include all level data
                   levelString: selectedLevel.levelString,
                 }}
-                gameMode={
-                  typeof gameMode === "string" ? gameMode : String(gameMode)
-                }
+                gameMode={gameMode}
                 isLoading={isLoading}
                 difficulty={selectedLevel?.difficultyCategory || "easy"}
               />
