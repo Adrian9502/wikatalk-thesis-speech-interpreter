@@ -1,11 +1,11 @@
 import React from "react";
 import { View, StatusBar, Text } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { Header } from "@/components/Header";
 import DecorativeCircles from "@/components/games/DecorativeCircles";
 import useThemeStore from "@/store/useThemeStore";
 import gameSharedStyles from "@/styles/gamesSharedStyles";
 import DotsLoader from "@/components/DotLoader";
+import GameHeader from "./GameHeader";
 
 interface GameContainerProps {
   title: string;
@@ -14,7 +14,7 @@ interface GameContainerProps {
   timerRunning: boolean;
   gameStatus: "idle" | "playing" | "completed";
   children: React.ReactNode;
-  variant?: "double" | "triple"; // Decorative circles variant
+  variant?: "double" | "triple";
 }
 
 const GameContainer: React.FC<GameContainerProps> = ({
@@ -39,7 +39,7 @@ const GameContainer: React.FC<GameContainerProps> = ({
       <DecorativeCircles variant={variant} />
 
       <SafeAreaView style={gameSharedStyles.container}>
-        <Header title={title} disableBack={timerRunning} hideBack={true} />
+        <GameHeader title={title} disableBack={timerRunning} hideBack={true} />
 
         {/* Level Title - outside game status condition */}
         <View style={gameSharedStyles.levelTitleContainer}>

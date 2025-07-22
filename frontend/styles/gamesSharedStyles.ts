@@ -271,10 +271,10 @@ export const gameSharedStyles = StyleSheet.create({
   // Level header styles
   levelTitleContainer: {
     paddingHorizontal: 4,
-    marginBottom: 16,
+    marginBottom: 8,
   },
   levelTitleText: {
-    fontSize: 13,
+    fontSize: 12,
     fontFamily: "Poppins-Medium",
     color: BASE_COLORS.white,
     opacity: 0.8,

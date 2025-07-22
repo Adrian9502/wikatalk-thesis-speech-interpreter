@@ -16,6 +16,8 @@ interface AnswerReviewProps {
   difficulty?: string;
   focusArea?: string;
   gameMode?: string;
+  levelId?: number;
+  levelTitle?: string;
   animation?: string;
   duration?: number;
   delay?: number;
