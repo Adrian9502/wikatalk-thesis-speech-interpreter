@@ -6,7 +6,9 @@ import * as Animatable from "react-native-animatable";
 import { BASE_COLORS } from "@/constant/colors";
 import { getGameModeGradient } from "@/utils/gameUtils";
 import styles from "@/styles/games/identification.styles";
+import gamesSharedStyles from "@/styles/gamesSharedStyles";
 import { safeTextRender } from "@/utils/textUtils";
+import LevelTitleHeader from "@/components/games/LevelTitleHeader";
 
 interface IdentificationPlayingContentProps {
   difficulty: string;
@@ -40,30 +42,36 @@ const IdentificationPlayingContent: React.FC<
   const wordOptions = React.useMemo(() => words || [], [words]);
 
   return (
-    <View style={styles.container}>
+    <View style={gamesSharedStyles.gameContainer}>
       {/* Enhanced Question Card */}
       <Animatable.View
         animation="zoomIn"
         duration={800}
         delay={200}
-        style={styles.questionCardContainer}
+        style={gamesSharedStyles.questionCardContainer}
       >
         <LinearGradient
-          style={styles.questionCard}
+          style={gamesSharedStyles.questionCard}
           colors={gameGradientColors}
           start={{ x: 0, y: 0 }}
           end={{ x: 1, y: 1 }}
         >
-          {/* Question Text */}
-          <Text style={styles.questionText}>
-            {safeTextRender(
-              currentSentence?.sentence || currentSentence?.question
-            )}
-          </Text>
-
+          <LevelTitleHeader
+            levelString={currentSentence?.level}
+            actualTitle={currentSentence?.title}
+            animationDelay={0}
+          />
+          <View style={gamesSharedStyles.questionContainer}>
+            {/* Question Text */}
+            <Text style={gamesSharedStyles.questionText}>
+              {safeTextRender(
+                currentSentence?.sentence || currentSentence?.question
+              )}
+            </Text>
+          </View>
           {/* Decorative Elements */}
-          <View style={styles.cardDecoration1} />
-          <View style={styles.cardDecoration2} />
+          <View style={gamesSharedStyles.cardDecoration1} />
+          <View style={gamesSharedStyles.cardDecoration2} />
         </LinearGradient>
       </Animatable.View>
 
@@ -130,7 +138,7 @@ const IdentificationPlayingContent: React.FC<
                         </Text>
                       </View>
 
-                      {/* Selection Pulse - UPDATED: Always show when selected */}
+                      {/* Selection Pulse */}
                       {isSelected && <View style={styles.selectionPulse} />}
                     </LinearGradient>
                   </TouchableOpacity>

@@ -3,12 +3,24 @@ import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
 import { ArrowLeft } from "react-native-feather";
 import { BASE_COLORS } from "@/constant/colors";
 import { useNavigation } from "expo-router";
+import StatsContainer from "@/components/games/StatsContainer";
 
 type HeaderProps = {
   title: string;
   disableBack?: boolean;
   hideBack?: boolean;
   onBackPress?: () => void;
+
+  // NEW: Stats container props
+  showStats?: boolean;
+  difficulty?: string;
+  focusArea?: string;
+  showTimer?: boolean;
+  timerRunning?: boolean;
+  initialTime?: number;
+  isStarted?: boolean;
+  variant?: "playing" | "completed";
+  finalTime?: number;
 };
 
 const GameHeader = ({
@@ -16,6 +28,17 @@ const GameHeader = ({
   disableBack = false,
   hideBack = false,
   onBackPress,
+
+  // NEW: Stats props
+  showStats = false,
+  difficulty,
+  focusArea,
+  showTimer,
+  timerRunning,
+  initialTime,
+  isStarted,
+  variant,
+  finalTime,
 }: HeaderProps) => {
   const navigation = useNavigation();
 
@@ -31,32 +54,51 @@ const GameHeader = ({
 
   return (
     <View style={styles.headerContainer}>
-      {/* Left section - Back button */}
-      {!hideBack ? (
-        <TouchableOpacity
-          style={[styles.backButton, disableBack && styles.disabledButton]}
-          onPress={handleBackPress}
-          disabled={disableBack}
-          activeOpacity={0.7}
-        >
-          <ArrowLeft width={20} height={20} color={BASE_COLORS.white} />
-        </TouchableOpacity>
-      ) : (
-        <View style={styles.placeholder} />
-      )}
+      {/* Main Header Row */}
+      <View style={styles.headerRow}>
+        {/* Left section - Back button */}
+        {!hideBack ? (
+          <TouchableOpacity
+            style={[styles.backButton, disableBack && styles.disabledButton]}
+            onPress={handleBackPress}
+            disabled={disableBack}
+            activeOpacity={0.7}
+          >
+            <ArrowLeft width={20} height={20} color={BASE_COLORS.white} />
+          </TouchableOpacity>
+        ) : (
+          <View style={styles.placeholder} />
+        )}
 
-      {/* Center section - Title with game styling */}
-      <View style={styles.titleContainer}>
-        <View style={styles.titleWrapper}>
-          <Text style={styles.title} numberOfLines={1}>
-            {title}
-          </Text>
-          <View style={styles.titleUnderline} />
+        {/* Center section - Title with game styling */}
+        <View style={styles.titleContainer}>
+          <View style={styles.titleWrapper}>
+            <Text style={styles.title} numberOfLines={1}>
+              {title}
+            </Text>
+          </View>
         </View>
+
+        {/* Right section - Placeholder for symmetry */}
+        <View style={styles.placeholder} />
       </View>
 
-      {/* Right section - Placeholder for symmetry */}
-      <View style={styles.placeholder} />
+      {/* NEW: Stats Container Row */}
+      {showStats && difficulty && (
+        <View>
+          <StatsContainer
+            difficulty={difficulty}
+            focusArea={focusArea}
+            showTimer={showTimer}
+            timerRunning={timerRunning}
+            initialTime={initialTime}
+            isStarted={isStarted}
+            animationDelay={0} // No animation delay in header
+            variant={variant}
+            finalTime={finalTime}
+          />
+        </View>
+      )}
     </View>
   );
 };
@@ -65,14 +107,16 @@ export default React.memo(GameHeader);
 
 const styles = StyleSheet.create({
   headerContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    paddingHorizontal: 20,
-    paddingVertical: 12,
-    height: 56,
     backgroundColor: "transparent",
   },
+
+  headerRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingVertical: 6,
+    justifyContent: "space-between",
+  },
+
   backButton: {
     width: 32,
     height: 32,
@@ -114,14 +158,6 @@ const styles = StyleSheet.create({
     textShadowOffset: { width: 0, height: 1 },
     textShadowRadius: 2,
     letterSpacing: 0.5,
-  },
-  titleUnderline: {
-    width: 40,
-    height: 2,
-    backgroundColor: BASE_COLORS.white,
-    borderRadius: 1,
-    marginTop: 4,
-    opacity: 0.8,
   },
   placeholder: {
     width: 32,

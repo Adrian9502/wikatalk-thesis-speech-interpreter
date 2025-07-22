@@ -268,18 +268,6 @@ export const gameSharedStyles = StyleSheet.create({
     textAlign: "center",
   },
 
-  // Level header styles
-  levelTitleContainer: {
-    paddingHorizontal: 4,
-    marginBottom: 8,
-  },
-  levelTitleText: {
-    fontSize: 12,
-    fontFamily: "Poppins-Medium",
-    color: BASE_COLORS.white,
-    opacity: 0.8,
-  },
-
   // SHARED OPTION STYLES (moved from both components)
   optionsContainer: {
     marginBottom: 20,
@@ -320,7 +308,7 @@ export const gameSharedStyles = StyleSheet.create({
     color: BASE_COLORS.white,
     flex: 1,
     lineHeight: 22,
-    flexWrap: "wrap", // Ensure text wraps
+    flexWrap: "wrap",
   },
   correctOption: {
     backgroundColor: "rgba(34, 197, 94, 0.2)",
@@ -333,7 +321,7 @@ export const gameSharedStyles = StyleSheet.create({
   resultIconContainer: {
     position: "absolute",
     right: 16,
-    top: "50%", // Position at 50% from top
+    top: "50%",
     width: 32,
     height: 32,
     borderRadius: 18,
@@ -369,6 +357,55 @@ export const gameSharedStyles = StyleSheet.create({
     fontSize: 14,
     fontFamily: "Poppins-SemiBold",
     color: BASE_COLORS.white,
+  },
+
+  // Game playing content shared styles
+  // used in MultipleChoicePlayingContent,IdentificationPlayingContent and FillInBlankPlayingContent
+  gameContainer: {
+    flex: 1,
+  },
+  cardDecoration1: {
+    position: "absolute",
+    top: -20,
+    left: -20,
+    width: 80,
+    height: 80,
+    borderRadius: 40,
+    backgroundColor: "rgba(255, 255, 255, 0.08)",
+  },
+  cardDecoration2: {
+    position: "absolute",
+    bottom: -30,
+    right: -30,
+    width: 100,
+    height: 100,
+    borderRadius: 50,
+    backgroundColor: "rgba(255, 255, 255, 0.05)",
+  },
+  questionCardContainer: {
+    marginVertical: 30,
+  },
+
+  questionCard: {
+    borderRadius: 16,
+    padding: 16,
+    position: "relative",
+    overflow: "hidden",
+    minHeight: 100,
+  },
+  questionText: {
+    fontSize: 20,
+    fontFamily: "Poppins-Medium",
+    color: BASE_COLORS.white,
+    textAlign: "center",
+    lineHeight: 26,
+  },
+  questionContainer: {
+    borderRadius: 16,
+    padding: 40,
+    overflow: "hidden",
+    justifyContent: "center",
+    alignItems: "center",
   },
 });
 

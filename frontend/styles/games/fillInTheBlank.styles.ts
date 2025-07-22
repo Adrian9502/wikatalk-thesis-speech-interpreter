@@ -36,47 +36,6 @@ export default StyleSheet.create({
     color: "rgba(255, 255, 255, 0.31)",
   },
 
-  // Enhanced Sentence Card
-  sentenceCardContainer: {
-    marginBottom: 20,
-  },
-  sentenceCard: {
-    borderRadius: 16,
-    padding: 12,
-    borderWidth: 1,
-    borderColor: "rgba(0, 0, 0, 0.12)",
-    position: "relative",
-    overflow: "hidden",
-    minHeight: 100,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  sentenceText: {
-    fontSize: 20,
-    fontFamily: "Poppins-Medium",
-    color: BASE_COLORS.white,
-    textAlign: "center",
-    lineHeight: 26,
-  },
-  sentenceDecoration1: {
-    position: "absolute",
-    top: -15,
-    left: -15,
-    width: 60,
-    height: 60,
-    borderRadius: 30,
-    backgroundColor: "rgba(255, 255, 255, 0.08)",
-  },
-  sentenceDecoration2: {
-    position: "absolute",
-    bottom: -20,
-    right: -20,
-    width: 80,
-    height: 80,
-    borderRadius: 40,
-    backgroundColor: "rgba(255, 255, 255, 0.05)",
-  },
-
   // Enhanced Input Section
   inputSection: {
     marginBottom: 24,

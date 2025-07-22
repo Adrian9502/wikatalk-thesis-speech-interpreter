@@ -33,7 +33,6 @@ const styles = StyleSheet.create({
     borderColor: "rgba(255, 255, 255, 0.12)",
   },
   focusAreaText: {
-    marginTop: 4,
     fontSize: 12,
     fontFamily: "Poppins-Medium",
     color: BASE_COLORS.white,

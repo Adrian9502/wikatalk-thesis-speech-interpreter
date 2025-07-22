@@ -167,6 +167,39 @@ const FillInTheBlank: React.FC<FillInTheBlankProps> = React.memo(
       }
     }, [showFeedback, setTimerRunning]);
 
+    // Get next level data for navigation
+    const { getLevelData } = useGameStore();
+
+    const nextLevelData = useMemo(() => {
+      const nextLevelId = levelId + 1;
+      const nextLevel = getLevelData("fillBlanks", nextLevelId, difficulty);
+
+      if (nextLevel && nextLevel.levelData) {
+        return {
+          title: nextLevel.levelData.title,
+          level: nextLevel.levelData.level,
+        };
+      } else if (nextLevel) {
+        return {
+          title: nextLevel.title,
+          level: nextLevel.level,
+        };
+      }
+
+      return null;
+    }, [levelId, difficulty, getLevelData]);
+
+    const getNextLevelTitle = () => {
+      if (nextLevelData?.level && nextLevelData?.title) {
+        return `${nextLevelData.level} - ${nextLevelData.title}`;
+      } else if (nextLevelData?.level) {
+        return nextLevelData.level;
+      } else if (nextLevelData?.title) {
+        return `Level ${levelId + 1} - ${nextLevelData.title}`;
+      }
+      return `Level ${levelId + 1}`;
+    };
+
     return (
       <KeyboardAvoidingView
         style={{ flex: 1 }}
@@ -175,10 +208,14 @@ const FillInTheBlank: React.FC<FillInTheBlankProps> = React.memo(
       >
         <GameContainer
           title="Fill in the Blank"
-          level={gameConfig.currentExercise?.level || `Level ${levelId}`}
-          levelTitle={gameConfig.currentExercise?.title || "Fill in the Blank"}
           timerRunning={timerRunning}
           gameStatus={gameStatus}
+          difficulty={difficulty}
+          focusArea={gameConfig.focusArea}
+          showTimer={true}
+          initialTime={gameConfig.initialTime}
+          isStarted={isStarted}
+          finalTime={timeElapsed}
         >
           {gameStatus === "playing" ? (
             <GamePlayingContent
@@ -188,6 +225,8 @@ const FillInTheBlank: React.FC<FillInTheBlankProps> = React.memo(
               isStarted={isStarted}
               gameStatus={gameStatus}
               initialTime={gameConfig.initialTime}
+              levelString={gameConfig.currentExercise?.level}
+              actualTitle={gameConfig.currentExercise?.title}
             >
               <FillInTheBlankPlayingContent
                 difficulty={difficulty}
@@ -207,6 +246,7 @@ const FillInTheBlank: React.FC<FillInTheBlankProps> = React.memo(
               />
             </GamePlayingContent>
           ) : (
+            // GameCompletedContent remains unchanged
             <GameCompletedContent
               score={score}
               timeElapsed={timeElapsed}
@@ -219,6 +259,9 @@ const FillInTheBlank: React.FC<FillInTheBlankProps> = React.memo(
               gameTitle="Fill in the Blank"
               onRestart={handleRestartWithProgress}
               focusArea={gameConfig.focusArea}
+              levelString={gameConfig.currentExercise?.level}
+              actualTitle={gameConfig.currentExercise?.title}
+              nextLevelTitle={getNextLevelTitle()}
             />
           )}
         </GameContainer>

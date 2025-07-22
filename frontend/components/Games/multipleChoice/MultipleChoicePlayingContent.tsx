@@ -1,12 +1,14 @@
 import React from "react";
-import { Text, TouchableOpacity, View } from "react-native";
-import { Circle } from "react-native-feather"; // REMOVED Check and X imports
+import { View, Text, TouchableOpacity } from "react-native";
+import { Circle } from "react-native-feather";
 import { LinearGradient } from "expo-linear-gradient";
 import * as Animatable from "react-native-animatable";
 import { BASE_COLORS } from "@/constant/colors";
 import { getGameModeGradient } from "@/utils/gameUtils";
 import styles from "@/styles/games/multipleChoice.styles";
+import gamesSharedStyles from "@/styles/gamesSharedStyles";
 import { safeTextRender } from "@/utils/textUtils";
+import LevelTitleHeader from "@/components/games/LevelTitleHeader";
 
 // Define an interface for the option object
 interface Option {
@@ -19,6 +21,8 @@ interface Option {
 interface Question {
   question: string;
   options: Option[];
+  level?: string;
+  title?: string;
 }
 
 interface MultipleChoicePlayingContentProps {
@@ -46,39 +50,45 @@ const MultipleChoicePlayingContent: React.FC<MultipleChoicePlayingContentProps> 
         []
       );
 
-      // Memoize options to prevent re-renders
       const options = React.useMemo(
         () => currentQuestion?.options || [],
         [currentQuestion?.options]
       );
 
       return (
-        <View style={styles.container}>
+        <View style={gamesSharedStyles.gameContainer}>
           {/* Enhanced Question Card */}
           <Animatable.View
             animation="zoomIn"
             duration={800}
             delay={200}
-            style={styles.questionCardContainer}
+            style={gamesSharedStyles.questionCardContainer}
           >
             <LinearGradient
+              style={gamesSharedStyles.questionCard}
               colors={gameGradientColors}
-              style={styles.questionCard}
               start={{ x: 0, y: 0 }}
               end={{ x: 1, y: 1 }}
             >
-              {/* Question Text */}
-              <Text style={styles.questionText}>
-                {safeTextRender(currentQuestion?.question)}
-              </Text>
+              <LevelTitleHeader
+                levelString={currentQuestion?.level}
+                actualTitle={currentQuestion?.title}
+                animationDelay={0}
+              />
+              <View style={gamesSharedStyles.questionContainer}>
+                {/* Question Text */}
+                <Text style={gamesSharedStyles.questionText}>
+                  {safeTextRender(currentQuestion?.question)}
+                </Text>
+              </View>
 
               {/* Decorative Elements */}
-              <View style={styles.cardDecoration1} />
-              <View style={styles.cardDecoration2} />
+              <View style={gamesSharedStyles.cardDecoration1} />
+              <View style={gamesSharedStyles.cardDecoration2} />
             </LinearGradient>
           </Animatable.View>
 
-          {/* Enhanced Options Container */}
+          {/* Enhanced Options Section */}
           <View style={styles.optionsContainer}>
             <Animatable.View
               animation="fadeIn"
@@ -106,23 +116,22 @@ const MultipleChoicePlayingContent: React.FC<MultipleChoicePlayingContentProps> 
 
             {options.map((option: Option, index: number) => {
               const isSelected = selectedOption === option.id;
-              // REMOVED: const showResult = selectedOption !== null;
 
               return (
                 <Animatable.View
                   key={option.id}
                   animation="slideInUp"
                   duration={600}
-                  delay={700 + index * 150}
+                  delay={700 + index * 100}
                   style={styles.optionWrapper}
                 >
                   <TouchableOpacity
                     style={[
                       styles.optionCard,
-                      isSelected && styles.selectedOption,
+                      isSelected && styles.selectedOptionCard,
                     ]}
                     onPress={() => handleOptionSelect(option.id)}
-                    disabled={selectedOption !== null || !isStarted}
+                    disabled={selectedOption !== null}
                     activeOpacity={0.8}
                   >
                     <LinearGradient
@@ -137,21 +146,19 @@ const MultipleChoicePlayingContent: React.FC<MultipleChoicePlayingContentProps> 
                       {/* Option Letter */}
                       <View style={styles.optionLetter}>
                         <Text style={styles.optionLetterText}>
-                          {option.id.toUpperCase()}
+                          {String.fromCharCode(65 + index)}
                         </Text>
                       </View>
 
                       {/* Option Content */}
                       <View style={styles.optionContent}>
-                        <Text style={styles.optionText} numberOfLines={0}>
+                        <Text style={styles.optionText} numberOfLines={3}>
                           {safeTextRender(option.text)}
                         </Text>
                       </View>
 
-                      {/* REMOVED: Result Icon section completely */}
-
-                      {/* Selection Indicator - UPDATED: Always show when selected */}
-                      {isSelected && <View style={styles.selectionPulse} />}
+                      {/* Selection indicator */}
+                      {isSelected && <View style={styles.selectionIndicator} />}
                     </LinearGradient>
                   </TouchableOpacity>
                 </Animatable.View>

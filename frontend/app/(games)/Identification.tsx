@@ -174,15 +174,44 @@ const Identification: React.FC<IdentificationProps> = React.memo(
       gameConfig.initialTime
     );
 
+    // Get next level data for navigation
+    const { getLevelData } = useGameStore();
+
+    const nextLevelData = useMemo(() => {
+      const nextLevelId = levelId + 1;
+      const nextLevel = getLevelData("identification", nextLevelId, difficulty);
+
+      if (nextLevel && nextLevel.levelData) {
+        return {
+          title: nextLevel.levelData.title,
+          level: nextLevel.levelData.level,
+        };
+      } else if (nextLevel) {
+        return {
+          title: nextLevel.title,
+          level: nextLevel.level,
+        };
+      }
+
+      return null;
+    }, [levelId, difficulty, getLevelData]);
+
+    const getNextLevelTitle = () => {
+      if (nextLevelData?.level && nextLevelData?.title) {
+        return `${nextLevelData.level} - ${nextLevelData.title}`;
+      } else if (nextLevelData?.level) {
+        return nextLevelData.level;
+      } else if (nextLevelData?.title) {
+        return `Level ${levelId + 1} - ${nextLevelData.title}`;
+      }
+      return `Level ${levelId + 1}`;
+    };
+
     // Error state handling
     if (error) {
       return (
         <GameContainer
           title="Word Identification"
-          level={gameConfig.currentSentence?.level || `Level ${levelId}`}
-          levelTitle={
-            gameConfig.currentSentence?.title || "Word Identification"
-          }
           timerRunning={timerRunning}
           gameStatus={gameStatus}
         >
@@ -214,19 +243,25 @@ const Identification: React.FC<IdentificationProps> = React.memo(
     return (
       <GameContainer
         title="Word Identification"
-        level={gameConfig.currentSentence?.level || `Level ${levelId}`}
-        levelTitle={gameConfig.currentSentence?.title || "Word Identification"}
         timerRunning={timerRunning}
         gameStatus={gameStatus}
+        difficulty={difficulty}
+        focusArea={gameConfig.focusArea}
+        showTimer={true}
+        initialTime={gameConfig.initialTime}
+        isStarted={isStarted}
+        finalTime={timeElapsed}
       >
         {gameStatus === "playing" ? (
           <GamePlayingContent
             timerRunning={timerRunning}
-            difficulty={difficulty} // This should be the actual difficulty passed as prop
+            difficulty={difficulty}
             focusArea={gameConfig.focusArea}
             isStarted={isStarted}
             gameStatus={gameStatus}
             initialTime={gameConfig.initialTime}
+            levelString={gameConfig.currentSentence?.level}
+            actualTitle={gameConfig.currentSentence?.title}
           >
             <IdentificationPlayingContent
               difficulty={difficulty}
@@ -252,6 +287,9 @@ const Identification: React.FC<IdentificationProps> = React.memo(
             gameTitle="Word Identification"
             onRestart={handleRestartWithProgress}
             focusArea={gameConfig.focusArea}
+            levelString={gameConfig.currentSentence?.level}
+            actualTitle={gameConfig.currentSentence?.title}
+            nextLevelTitle={getNextLevelTitle()}
           />
         )}
       </GameContainer>

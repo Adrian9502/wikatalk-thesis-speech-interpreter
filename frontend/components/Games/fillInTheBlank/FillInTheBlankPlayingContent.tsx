@@ -12,8 +12,10 @@ import * as Animatable from "react-native-animatable";
 import { BASE_COLORS } from "@/constant/colors";
 import { getGameModeGradient } from "@/utils/gameUtils";
 import styles from "@/styles/games/fillInTheBlank.styles";
-import gameSharedStyles from "@/styles/gamesSharedStyles";
+import gamesSharedStyles from "@/styles/gamesSharedStyles";
+import LevelTitleHeader from "@/components/games/LevelTitleHeader";
 import Icon from "react-native-vector-icons/Feather";
+
 interface RenderPlayingContentProps {
   difficulty: string;
   levelData: any;
@@ -101,10 +103,7 @@ const FillInTheBlankPlayingContent: React.FC<RenderPlayingContentProps> =
       return (
         <ScrollView
           showsVerticalScrollIndicator={false}
-          contentContainerStyle={[
-            gameSharedStyles.contentContainer,
-            { flexGrow: 1 },
-          ]}
+          contentContainerStyle={gamesSharedStyles.gameContainer}
           keyboardShouldPersistTaps="handled"
           keyboardDismissMode="on-drag"
         >
@@ -113,20 +112,29 @@ const FillInTheBlankPlayingContent: React.FC<RenderPlayingContentProps> =
             animation="zoomIn"
             duration={800}
             delay={200}
-            style={styles.sentenceCardContainer}
+            style={gamesSharedStyles.questionCardContainer}
           >
             <LinearGradient
               colors={gameGradientColors}
-              style={styles.sentenceCard}
+              style={gamesSharedStyles.questionCard}
               start={{ x: 0, y: 0 }}
               end={{ x: 1, y: 1 }}
             >
+              <LevelTitleHeader
+                levelString={currentExercise?.level}
+                actualTitle={currentExercise?.title}
+                animationDelay={0}
+              />
               {/* Sentence Text */}
-              <Text style={styles.sentenceText}>{formattedSentence}</Text>
-
+              <View style={gamesSharedStyles.questionContainer}>
+                {/* Question Text */}
+                <Text style={gamesSharedStyles.questionText}>
+                  {formattedSentence}
+                </Text>
+              </View>
               {/* Decorative Elements */}
-              <View style={styles.sentenceDecoration1} />
-              <View style={styles.sentenceDecoration2} />
+              <View style={gamesSharedStyles.cardDecoration1} />
+              <View style={gamesSharedStyles.cardDecoration2} />
             </LinearGradient>
           </Animatable.View>
 
@@ -134,6 +142,7 @@ const FillInTheBlankPlayingContent: React.FC<RenderPlayingContentProps> =
           <Animatable.View
             animation="fadeInDown"
             duration={600}
+            delay={400}
             style={styles.attemptsContainer}
           >
             <Text style={styles.attemptsLabel}>Attempts left:</Text>
@@ -144,7 +153,7 @@ const FillInTheBlankPlayingContent: React.FC<RenderPlayingContentProps> =
           <Animatable.View
             animation="slideInUp"
             duration={700}
-            delay={400}
+            delay={600}
             style={styles.inputSection}
           >
             <View style={styles.inputHeader}>
@@ -218,7 +227,7 @@ const FillInTheBlankPlayingContent: React.FC<RenderPlayingContentProps> =
           <Animatable.View
             animation="fadeIn"
             duration={600}
-            delay={600}
+            delay={800}
             style={styles.helpSection}
           >
             <Text style={styles.helpTitle}>Need help?</Text>

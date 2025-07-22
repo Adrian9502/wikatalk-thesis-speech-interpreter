@@ -181,14 +181,52 @@ const MultipleChoice: React.FC<MultipleChoiceProps> = React.memo(
       gameStartedRef.current = true;
     }
 
+    // Get next level data for navigation
+    const { getLevelData } = useGameStore();
+
+    const nextLevelData = useMemo(() => {
+      const nextLevelId = levelId + 1;
+      const nextLevel = getLevelData("multipleChoice", nextLevelId, difficulty);
+
+      if (nextLevel && nextLevel.levelData) {
+        return {
+          title: nextLevel.levelData.title,
+          level: nextLevel.levelData.level,
+        };
+      } else if (nextLevel) {
+        return {
+          title: nextLevel.title,
+          level: nextLevel.level,
+        };
+      }
+
+      return null;
+    }, [levelId, difficulty, getLevelData]);
+
+    // Helper function to get next level title
+    const getNextLevelTitle = () => {
+      if (nextLevelData?.level && nextLevelData?.title) {
+        return `${nextLevelData.level} - ${nextLevelData.title}`;
+      } else if (nextLevelData?.level) {
+        return nextLevelData.level;
+      } else if (nextLevelData?.title) {
+        return `Level ${levelId + 1} - ${nextLevelData.title}`;
+      }
+      return `Level ${levelId + 1}`;
+    };
+
     return (
       <GameContainer
         title="Multiple Choice"
-        level={currentQuestion?.level || `Level ${levelId}`}
-        levelTitle={currentQuestion?.title || "Multiple Choice Quiz"}
         timerRunning={timerRunning}
         gameStatus={gameStatus}
         variant="triple"
+        difficulty={difficulty}
+        focusArea={gameConfig.focusArea}
+        showTimer={true}
+        initialTime={gameConfig.initialTime}
+        isStarted={isStarted}
+        finalTime={timeElapsed}
       >
         {gameStatus === "playing" ? (
           <GamePlayingContent
@@ -198,6 +236,8 @@ const MultipleChoice: React.FC<MultipleChoiceProps> = React.memo(
             focusArea={gameConfig.focusArea}
             gameStatus={gameStatus}
             initialTime={gameConfig.initialTime}
+            levelString={currentQuestion?.level}
+            actualTitle={currentQuestion?.title}
           >
             <MultipleChoicePlayingContent
               difficulty={difficulty}
@@ -209,6 +249,7 @@ const MultipleChoice: React.FC<MultipleChoiceProps> = React.memo(
             />
           </GamePlayingContent>
         ) : (
+          // GameCompletedContent remains unchanged
           <GameCompletedContent
             score={score}
             timeElapsed={timeElapsed}
@@ -221,6 +262,9 @@ const MultipleChoice: React.FC<MultipleChoiceProps> = React.memo(
             gameTitle="Multiple Choice"
             onRestart={handleRestartWithProgress}
             focusArea={gameConfig.focusArea}
+            levelString={currentQuestion?.level}
+            actualTitle={currentQuestion?.title}
+            nextLevelTitle={getNextLevelTitle()}
           />
         )}
       </GameContainer>

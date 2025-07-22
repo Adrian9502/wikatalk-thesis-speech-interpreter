@@ -2,49 +2,6 @@ import { StyleSheet } from "react-native";
 import { BASE_COLORS } from "@/constant/colors";
 
 export default StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-  questionCardContainer: {
-    marginBottom: 20,
-  },
-  questionCard: {
-    borderRadius: 16,
-    padding: 12,
-    borderWidth: 1,
-    borderColor: "rgba(0, 0, 0, 0.12)",
-    position: "relative",
-    overflow: "hidden",
-    minHeight: 100,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  questionText: {
-    fontSize: 20,
-    fontFamily: "Poppins-Medium",
-    color: BASE_COLORS.white,
-    textAlign: "center",
-    lineHeight: 26,
-  },
-  cardDecoration1: {
-    position: "absolute",
-    top: -20,
-    left: -20,
-    width: 80,
-    height: 80,
-    borderRadius: 40,
-    backgroundColor: "rgba(255, 255, 255, 0.08)",
-  },
-  cardDecoration2: {
-    position: "absolute",
-    bottom: -30,
-    right: -30,
-    width: 100,
-    height: 100,
-    borderRadius: 50,
-    backgroundColor: "rgba(255, 255, 255, 0.05)",
-  },
-
   // Enhanced Instructions
   instructionsContainer: {
     alignItems: "center",

@@ -1,11 +1,7 @@
 import React from "react";
 import { ScrollView, View, StyleSheet } from "react-native";
 import * as Animatable from "react-native-animatable";
-import Timer from "@/components/games/Timer";
-import DifficultyBadge from "@/components/games/DifficultyBadge";
-import FocusAreaBadge from "@/components/games/FocusAreaBadge";
 import gameSharedStyles from "@/styles/gamesSharedStyles";
-import { getGameModeGradient } from "@/utils/gameUtils";
 
 interface GamePlayingContentProps {
   timerRunning: boolean;
@@ -16,17 +12,12 @@ interface GamePlayingContentProps {
   gameStatus?: "idle" | "ready" | "playing" | "completed";
   initialTime?: number;
   gameMode?: string;
+  levelString?: string;
+  actualTitle?: string;
 }
 
 const GamePlayingContent: React.FC<GamePlayingContentProps> = React.memo(
-  ({
-    timerRunning,
-    difficulty,
-    focusArea = "Vocabulary",
-    children,
-    isStarted = true,
-    initialTime = 0,
-  }) => {
+  ({ timerRunning, children, initialTime = 0, levelString, actualTitle }) => {
     const timerStartedRef = React.useRef(false);
 
     // Optimized timer logging - only log state changes
@@ -72,46 +63,11 @@ const GamePlayingContent: React.FC<GamePlayingContentProps> = React.memo(
           ]}
           keyboardShouldPersistTaps="handled"
         >
-          {/* Enhanced Stats Container */}
-          <Animatable.View
-            animation="slideInDown"
-            duration={800}
-            delay={100}
-            style={styles.statsContainer}
-          >
-            {/* Timer Section */}
-            {isStarted && (
-              <Animatable.View
-                animation="fadeInLeft"
-                duration={600}
-                delay={200}
-                style={styles.timerSection}
-              >
-                <Timer
-                  isRunning={timerRunning}
-                  initialTime={initialTime}
-                  key={`timer-${initialTime}`}
-                />
-              </Animatable.View>
-            )}
-
-            {/* Badges Section */}
-            <Animatable.View
-              animation="fadeInRight"
-              duration={600}
-              delay={300}
-              style={styles.badgesSection}
-            >
-              <DifficultyBadge difficulty={difficulty} />
-              <FocusAreaBadge focusArea={focusArea} />
-            </Animatable.View>
-          </Animatable.View>
-
-          {/* Content Area  */}
+          {/* Content Area - now starts immediately */}
           <Animatable.View
             animation="fadeInUp"
             duration={800}
-            delay={400}
+            delay={200} // Reduced delay since no level section above
             style={styles.contentArea}
           >
             {children}
@@ -154,27 +110,6 @@ const styles = StyleSheet.create({
   scrollContent: {
     paddingBottom: 40,
     zIndex: 2,
-  },
-  statsContainer: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    marginBottom: 24,
-  },
-  timerSection: {
-    borderWidth: 1,
-    borderRadius: 16,
-    minWidth: 110,
-    backgroundColor: "rgba(0, 0, 0, 0.2)",
-    paddingHorizontal: 12,
-    paddingVertical: 7,
-    alignItems: "center",
-    justifyContent: "center",
-    borderColor: "rgba(255, 255, 255, 0.12)",
-  },
-  badgesSection: {
-    flexDirection: "row",
-    gap: 12,
   },
   contentArea: {
     flex: 1,

@@ -3,8 +3,9 @@ import { View, Text, StyleSheet } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import * as Animatable from "react-native-animatable";
 import { Check, X } from "react-native-feather";
+import MaterialCommunityIcons from "react-native-vector-icons/MaterialCommunityIcons";
 import { BASE_COLORS, difficultyColors } from "@/constant/colors";
-import { getGameModeGradient } from "@/utils/gameUtils";
+import { formatTime, getGameModeGradient } from "@/utils/gameUtils";
 import { safeTextRender } from "@/utils/textUtils";
 import { NAVIGATION_COLORS } from "@/constant/gameConstants";
 
@@ -18,6 +19,8 @@ interface AnswerReviewProps {
   gameMode?: string;
   levelId?: number;
   levelTitle?: string;
+  levelString?: string;
+  actualTitle?: string;
   animation?: string;
   duration?: number;
   delay?: number;
@@ -29,7 +32,12 @@ const AnswerReview: React.FC<AnswerReviewProps> = ({
   question,
   userAnswer,
   isCorrect,
+  timeElapsed,
   gameMode = "multipleChoice",
+  levelId,
+  levelTitle,
+  levelString,
+  actualTitle,
   animation = "fadeInUp",
   duration = 800,
   delay = 300,
@@ -46,6 +54,19 @@ const AnswerReview: React.FC<AnswerReviewProps> = ({
   const resultColors = useMemo(() => {
     return isCorrect ? NAVIGATION_COLORS.green : difficultyColors.Hard;
   }, [isCorrect]);
+
+  // Format the level display text
+  const levelDisplayText = useMemo(() => {
+    if (levelString && actualTitle) {
+      return `${levelString} - ${actualTitle}`;
+    } else if (levelString) {
+      return levelString;
+    } else if (levelTitle) {
+      return levelTitle;
+    } else {
+      return `Level ${levelId || 1}`;
+    }
+  }, [levelString, actualTitle, levelTitle, levelId]);
 
   return (
     <Animatable.View
@@ -88,13 +109,34 @@ const AnswerReview: React.FC<AnswerReviewProps> = ({
               : "Keep practicing to improve your skills."}
           </Text>
 
+          {/* Level Information */}
+          <View style={styles.levelInfoContainer}>
+            <View style={styles.levelBadge}>
+              <Text style={styles.levelText}>{levelDisplayText}</Text>
+            </View>
+          </View>
+
+          {/* Time Taken Section  */}
+          {timeElapsed !== undefined && (
+            <View style={styles.timeInfoContainer}>
+              <View style={styles.timeBadge}>
+                <MaterialCommunityIcons
+                  name="clock"
+                  size={16}
+                  color={BASE_COLORS.white}
+                />
+                <Text style={styles.timeText}>
+                  Time: {formatTime(timeElapsed)}
+                </Text>
+              </View>
+            </View>
+          )}
+
           {/* Decorative Elements */}
           <View style={styles.cardDecoration1} />
           <View style={styles.cardDecoration2} />
         </LinearGradient>
       </Animatable.View>
-      {/* Divider */}
-      <View style={styles.divider} />
 
       {/* Review Details Card */}
       <Animatable.View
@@ -145,12 +187,7 @@ const AnswerReview: React.FC<AnswerReviewProps> = ({
               <Text style={styles.sectionTitle}>{answerLabel}</Text>
             </View>
             <View style={styles.contentContainer}>
-              <Text
-                style={[
-                  styles.answerText,
-                  isCorrect ? styles.correctText : styles.incorrectText,
-                ]}
-              >
+              <Text style={[styles.answerText]}>
                 {safeTextRender(userAnswer) || "(No answer provided)"}
               </Text>
             </View>
@@ -202,12 +239,67 @@ const styles = StyleSheet.create({
     textAlign: "center",
   },
   resultMessage: {
-    fontSize: 15,
+    fontSize: 14,
     fontFamily: "Poppins-Medium",
     color: "rgba(255, 255, 255, 0.9)",
     textAlign: "center",
     lineHeight: 22,
+    marginBottom: 16,
   },
+
+  // Level Information Styles
+  levelInfoContainer: {
+    flexDirection: "row",
+    justifyContent: "center",
+    alignItems: "center",
+    marginBottom: 12,
+    paddingHorizontal: 8,
+  },
+  levelBadge: {
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderRadius: 16,
+    backgroundColor: "rgba(255, 255, 255, 0.10)",
+    borderWidth: 1,
+    borderColor: "rgba(255, 255, 255, 0.3)",
+  },
+  levelText: {
+    fontSize: 16,
+    fontFamily: "Poppins-SemiBold",
+    color: BASE_COLORS.white,
+    textShadowColor: "rgba(0, 0, 0, 0.5)",
+    textShadowOffset: { width: 0, height: 1 },
+    textShadowRadius: 3,
+    textAlign: "center",
+    letterSpacing: 0.3,
+  },
+
+  // Time Information
+  timeInfoContainer: {
+    flexDirection: "row",
+    justifyContent: "center",
+    alignItems: "center",
+    marginBottom: 4,
+    paddingHorizontal: 8,
+  },
+  timeBadge: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingHorizontal: 14,
+    paddingVertical: 6,
+    borderRadius: 14,
+    backgroundColor: "rgba(255, 255, 255, 0.10)",
+    borderWidth: 1,
+    borderColor: "rgba(255, 255, 255, 0.3)",
+    gap: 8,
+  },
+  timeText: {
+    fontSize: 15,
+    fontFamily: "Poppins-Medium",
+    color: BASE_COLORS.white,
+    letterSpacing: 0.3,
+  },
+
   cardDecoration1: {
     position: "absolute",
     top: -20,
@@ -254,10 +346,10 @@ const styles = StyleSheet.create({
     marginRight: 6,
   },
   correctIcon: {
-    backgroundColor: "rgba(0, 255, 8, 0.3)",
+    backgroundColor: "rgba(0, 255, 8, 0.6)",
   },
   incorrectIcon: {
-    backgroundColor: "rgba(255, 17, 0, 0.3)",
+    backgroundColor: "rgba(255, 17, 0, 0.6)",
   },
   sectionIcon: {
     fontSize: 16,
@@ -269,7 +361,7 @@ const styles = StyleSheet.create({
   },
   contentContainer: {
     backgroundColor: "rgba(255, 255, 255, 0.10)",
-    borderRadius: 12,
+    borderRadius: 16,
     padding: 16,
     borderWidth: 1,
     borderColor: "rgba(255, 255, 255, 0.3)",
@@ -283,15 +375,10 @@ const styles = StyleSheet.create({
   },
   answerText: {
     fontSize: 16,
+    color: BASE_COLORS.white,
     textAlign: "center",
     fontFamily: "Poppins-Medium",
     lineHeight: 22,
-  },
-  correctText: {
-    color: "#81C784",
-  },
-  incorrectText: {
-    color: "#E57373",
   },
   divider: {
     height: 1,

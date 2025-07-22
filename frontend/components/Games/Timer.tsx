@@ -130,10 +130,11 @@ const styles = StyleSheet.create({
   timerContainer: {
     flexDirection: "row",
     alignItems: "center",
+    justifyContent: "center",
   },
   timerText: {
     color: BASE_COLORS.white,
-    fontSize: 14,
+    fontSize: 13,
     fontFamily: "Poppins-Medium",
     marginLeft: 6,
   },
