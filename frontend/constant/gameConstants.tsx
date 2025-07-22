@@ -57,4 +57,5 @@ export const NAVIGATION_COLORS = {
   yellow: ["#cfa012ff", "#B28704"] as const,
   blue: ["#2196F3", "#0D47A1"] as const,
   purple: ["#9C27B0", "#6A0080"] as const,
+  indigo: ["#4361EE", "#3A0CA3"] as const,
 };

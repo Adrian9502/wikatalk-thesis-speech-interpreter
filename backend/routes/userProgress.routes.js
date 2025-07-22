@@ -3,6 +3,16 @@ const router = express.Router();
 const { protect } = require("../middleware/auth.middleware");
 const UserProgress = require("../models/userProgress.model");
 
+// Add the reset cost calculation function
+const calculateResetCost = (secondsSpent) => {
+  if (secondsSpent <= 30) return 50;         // 0–30 sec → 50 coins
+  if (secondsSpent <= 120) return 60;        // 30s – 2 mins → 60 coins
+  if (secondsSpent <= 300) return 70;        // 2 – 5 mins → 70 coins
+  if (secondsSpent <= 600) return 85;        // 5 – 10 mins → 85 coins
+  if (secondsSpent <= 1200) return 100;      // 10 – 20 mins → 100 coins
+  return 120;                                // 20+ mins → 120 coins
+};
+
 // More detailed logging for routes
 router.use((req, res, next) => {
   console.log(`[PROGRESS_ROUTE] ${req.method} ${req.originalUrl}`);
@@ -314,7 +324,7 @@ router.post("/:quizId", protect, async (req, res) => {
 
 /**
  * @route   POST /api/userprogress/:quizId/reset-timer
- * @desc    Reset timer for a quiz (costs 50 coins)
+ * @desc    Reset timer for a quiz (dynamic cost based on time spent)
  * @access  Private
  */
 router.post("/:quizId/reset-timer", protect, async (req, res) => {
@@ -327,27 +337,6 @@ router.post("/:quizId/reset-timer", protect, async (req, res) => {
     if (quizId.startsWith('n-')) {
       quizId = quizId.replace('n-', '');
       console.log("[PROGRESS] Converted numeric ID to:", quizId);
-    }
-
-    // Check if user has enough coins
-    const User = require("../models/user.model");
-    const user = await User.findById(userId);
-
-    if (!user) {
-      return res.status(404).json({
-        success: false,
-        message: "User not found"
-      });
-    }
-
-    const RESET_COST = 50;
-    if (user.coins < RESET_COST) {
-      return res.status(400).json({
-        success: false,
-        message: "Insufficient coins. You need 50 coins to reset the timer.",
-        currentCoins: user.coins,
-        requiredCoins: RESET_COST
-      });
     }
 
     // Find existing progress
@@ -368,13 +357,42 @@ router.post("/:quizId/reset-timer", protect, async (req, res) => {
       });
     }
 
+    // UPDATED: Calculate dynamic cost based on time spent
+    const timeSpent = existingProgress.totalTimeSpent || 0;
+    const RESET_COST = calculateResetCost(timeSpent);
+    
+    console.log(`[PROGRESS] Calculated reset cost for ${timeSpent}s: ${RESET_COST} coins`);
+
+    // Check if user has enough coins
+    const user = await UserProgress.findById(userId);
+
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found"
+      });
+    }
+
+    if (user.coins < RESET_COST) {
+      return res.status(400).json({
+        success: false,
+        message: `Insufficient coins. You need ${RESET_COST} coins to reset the timer.`,
+        currentCoins: user.coins,
+        requiredCoins: RESET_COST,
+        timeSpent: timeSpent,
+        costBreakdown: {
+          baseMessage: getResetCostMessage(timeSpent),
+          timeRange: getTimeRangeMessage(timeSpent)
+        }
+      });
+    }
+
     // Reset the timer fields
     existingProgress.totalTimeSpent = 0;
     existingProgress.lastAttemptTime = 0;
     existingProgress.lastAttemptDate = new Date();
 
     // Clear all attempts (optional - keeps history but resets timer)
-    // Comment out the next line if you want to keep attempt history
     existingProgress.attempts = [];
 
     // Save the updated progress
@@ -391,7 +409,12 @@ router.post("/:quizId/reset-timer", protect, async (req, res) => {
       message: "Timer reset successfully!",
       progress: existingProgress,
       coinsDeducted: RESET_COST,
-      remainingCoins: user.coins
+      remainingCoins: user.coins,
+      costBreakdown: {
+        originalTimeSpent: timeSpent,
+        costReason: getResetCostMessage(timeSpent),
+        timeRange: getTimeRangeMessage(timeSpent)
+      }
     });
 
   } catch (error) {
@@ -402,5 +425,24 @@ router.post("/:quizId/reset-timer", protect, async (req, res) => {
     });
   }
 });
+
+// Helper functions for backend
+function getResetCostMessage(secondsSpent) {
+  if (secondsSpent <= 30) return "Quick reset (under 30 seconds)";
+  if (secondsSpent <= 120) return "Short session (under 2 minutes)";
+  if (secondsSpent <= 300) return "Medium session (2-5 minutes)";
+  if (secondsSpent <= 600) return "Long session (5-10 minutes)";
+  if (secondsSpent <= 1200) return "Extended session (10-20 minutes)";
+  return "Very long session (over 20 minutes)";
+}
+
+function getTimeRangeMessage(secondsSpent) {
+  if (secondsSpent <= 30) return "0-30s";
+  if (secondsSpent <= 120) return "30s-2m";
+  if (secondsSpent <= 300) return "2-5m";
+  if (secondsSpent <= 600) return "5-10m";
+  if (secondsSpent <= 1200) return "10-20m";
+  return "20m+";
+}
 
 module.exports = router;

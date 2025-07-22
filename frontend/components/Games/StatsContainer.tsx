@@ -7,6 +7,7 @@ import FocusAreaBadge from "@/components/games/FocusAreaBadge";
 import { Clock } from "react-native-feather";
 import { BASE_COLORS } from "@/constant/colors";
 import { formatTime } from "@/utils/gameUtils";
+import { calculateResetCost } from "@/utils/resetCostUtils";
 
 interface StatsContainerProps {
   difficulty: string;
@@ -31,6 +32,14 @@ const StatsContainer: React.FC<StatsContainerProps> = ({
   variant = "playing",
   finalTime, // Add this parameter
 }) => {
+  // Calculate reset cost for completed state
+  const resetCost = React.useMemo(() => {
+    if (variant === "completed" && finalTime) {
+      return calculateResetCost(finalTime);
+    }
+    return 50; // Default
+  }, [variant, finalTime]);
+
   return (
     <Animatable.View
       animation="slideInDown"
@@ -63,6 +72,12 @@ const StatsContainer: React.FC<StatsContainerProps> = ({
               <Text style={styles.staticTimerText}>
                 {formatTime(finalTime || 0)}
               </Text>
+              {/* NEW: Show reset cost indicator for completed state */}
+              {variant === "completed" && (
+                <View style={styles.resetCostIndicator}>
+                  <Text style={styles.resetCostText}>Reset: {resetCost}🪙</Text>
+                </View>
+              )}
             </View>
           )}
         </Animatable.View>
@@ -123,6 +138,18 @@ const styles = StyleSheet.create({
   },
   completedBadgesSection: {
     // Remove justifyContent: center to allow timer to show
+  },
+  resetCostIndicator: {
+    marginLeft: 8,
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    backgroundColor: "rgba(255, 193, 7, 0.2)",
+    borderRadius: 8,
+  },
+  resetCostText: {
+    fontSize: 10,
+    fontFamily: "Poppins-Medium",
+    color: "#FFC107",
   },
 });
 

@@ -10,6 +10,10 @@ import {
   setCurrentUserId,
 } from "@/utils/dataManager";
 import { getIndividualProgressFromCache } from "@/store/useSplashStore";
+import {
+  calculateResetCost,
+  getResetCostDescription,
+} from "@/utils/resetCostUtils";
 
 const API_URL = process.env.EXPO_PUBLIC_BACKEND_URL || "http://localhost:5000";
 
@@ -393,6 +397,11 @@ export const useUserProgress = (quizId: string | number | "global") => {
       message?: string;
       coinsDeducted?: number;
       remainingCoins?: number;
+      costBreakdown?: {
+        originalTimeSpent: number;
+        costReason: string;
+        timeRange: string;
+      };
     }> => {
       try {
         setIsLoading(true);
@@ -406,6 +415,16 @@ export const useUserProgress = (quizId: string | number | "global") => {
 
         const formattedId = formatQuizId(quizId);
         console.log(`[useUserProgress] Resetting timer for: ${formattedId}`);
+
+        // UPDATED: Calculate expected cost before request
+        const currentProgress =
+          progress && !Array.isArray(progress) ? progress : null;
+        const timeSpent = currentProgress?.totalTimeSpent || 0;
+        const expectedCost = calculateResetCost(timeSpent);
+
+        console.log(
+          `[useUserProgress] Expected reset cost: ${expectedCost} coins for ${timeSpent}s`
+        );
 
         const response = await axios({
           method: "post",
@@ -444,6 +463,7 @@ export const useUserProgress = (quizId: string | number | "global") => {
             message: response.data.message,
             coinsDeducted: response.data.coinsDeducted,
             remainingCoins: response.data.remainingCoins,
+            costBreakdown: response.data.costBreakdown,
           };
         }
 
@@ -458,12 +478,13 @@ export const useUserProgress = (quizId: string | number | "global") => {
         return {
           success: false,
           message: err.response?.data?.message || "Failed to reset timer",
+          costBreakdown: err.response?.data?.costBreakdown,
         };
       } finally {
         setIsLoading(false);
       }
     },
-    [formatQuizId]
+    [progress, updateProgress]
   );
 
   return {

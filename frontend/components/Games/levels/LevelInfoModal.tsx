@@ -18,6 +18,7 @@ import {
   RotateCcw,
   RefreshCw,
   AlertTriangle,
+  Info,
 } from "react-native-feather";
 import { difficultyColors, iconColors } from "@/constant/colors";
 import {
@@ -30,6 +31,12 @@ import modalSharedStyles from "@/styles/games/modalSharedStyles";
 import { useUserProgress } from "@/hooks/useUserProgress";
 import { formatTime, formatTimeDecimal } from "@/utils/gameUtils";
 import useCoinsStore from "@/store/games/useCoinsStore";
+import {
+  calculateResetCost,
+  getResetCostDescription,
+  getTimeRangeForDisplay,
+} from "@/utils/resetCostUtils";
+import ResetCostInfoModal from "@/components/games/levels/ResetCostInfoModal";
 
 type DifficultyLevel = keyof typeof difficultyColors;
 
@@ -62,8 +69,7 @@ const LevelInfoModal: React.FC<GameInfoModalProps> = React.memo(
       title: string;
       description: string;
     } | null>(null);
-
-    // NEW: Track if we've fetched fresh data for this modal session
+    const [showCostInfoModal, setShowCostInfoModal] = useState(false);
     const [hasFetchedFresh, setHasFetchedFresh] = useState(false);
     const fetchInProgressRef = useRef(false);
     const modalSessionRef = useRef<string | null>(null);
@@ -186,6 +192,34 @@ const LevelInfoModal: React.FC<GameInfoModalProps> = React.memo(
         isLoading: false,
       };
     }, [progress, progressLoading, hasFetchedFresh]);
+
+    // NEW: Calculate dynamic reset cost
+    const resetCostInfo = React.useMemo(() => {
+      if (!progressInfo.hasProgress || progressInfo.isLoading) {
+        return {
+          cost: 50, // Default cost
+          description: "Quick reset",
+          timeRange: "0-30s",
+          timeSpent: 0,
+        };
+      }
+
+      const timeSpent = progressInfo.timeSpent;
+      const cost = calculateResetCost(timeSpent);
+      const description = getResetCostDescription(timeSpent);
+      const timeRange = getTimeRangeForDisplay(timeSpent);
+
+      return {
+        cost,
+        description,
+        timeRange,
+        timeSpent,
+      };
+    }, [
+      progressInfo.hasProgress,
+      progressInfo.isLoading,
+      progressInfo.timeSpent,
+    ]);
 
     // Reset state when modal visibility changes
     useEffect(() => {
@@ -437,8 +471,14 @@ const LevelInfoModal: React.FC<GameInfoModalProps> = React.memo(
         const result = await resetTimer(levelData?.questionId || levelData?.id);
 
         if (result.success) {
+          // Show success message with cost breakdown
+          const costInfo = result.costBreakdown;
+          const message = costInfo
+            ? `Timer Reset! ${result.coinsDeducted} coins deducted for ${costInfo.timeRange} session.`
+            : "Timer Reset Successfully!";
+
           // Show simple success message
-          showResetMessage("success", "Timer Reset Successfully!");
+          showResetMessage("success", message);
 
           // CHANGED: Force refresh progress immediately after reset
           console.log(
@@ -447,8 +487,10 @@ const LevelInfoModal: React.FC<GameInfoModalProps> = React.memo(
           await fetchProgress(true); // Force refresh to get updated data
           fetchCoinsBalance(true); // Also refresh coins
         } else {
-          // Show simple error message
-          showResetMessage("error", "Timer Reset Failed. Try again later.");
+          // Show error message
+          const message =
+            result.message || "Timer Reset Failed. Try again later.";
+          showResetMessage("error", message);
         }
       } catch (error) {
         // Show simple error message
@@ -469,7 +511,7 @@ const LevelInfoModal: React.FC<GameInfoModalProps> = React.memo(
 
     // progress badge component
     const ProgressBadge = React.useCallback(() => {
-      const canAfford = coins >= 50;
+      const canAfford = coins >= resetCostInfo.cost;
 
       return (
         <View style={[styles.progressBadge]}>
@@ -479,71 +521,64 @@ const LevelInfoModal: React.FC<GameInfoModalProps> = React.memo(
             </View>
           ) : (
             <>
-              {/* Check if we have progress */}
               {progressInfo.hasProgress ? (
                 <>
-                  {/* Main Progress Content - Show when no reset states are active */}
+                  {/* Main Progress Content */}
                   {!showResetConfirmation && !resetMessage && (
                     <View style={styles.progressBadgeContent}>
                       <View style={styles.progressLeftContent}>
-                        <View style={styles.progressIcon}>
-                          {progressInfo.isCompleted ? (
-                            <CheckCircle
-                              width={14}
-                              height={14}
-                              color="#22C216"
-                            />
-                          ) : (
-                            <Clock
-                              width={15}
-                              height={15}
-                              color={iconColors.brightYellow}
-                            />
-                          )}
+                        {/* Combined Status and Time */}
+                        <View style={styles.progressLeftContainer}>
+                          {/* Status Icon */}
+                          <Clock
+                            width={15}
+                            height={15}
+                            color={iconColors.brightYellow}
+                          />
+                          <Text style={styles.combinedProgressText}>
+                            In Progress • {formatTime(progressInfo.timeSpent)}
+                            {progressInfo.attempts > 0 &&
+                              ` • ${progressInfo.attempts}x`}
+                          </Text>
                         </View>
-                        <Text style={styles.progressBadgeText}>
-                          {progressInfo.isCompleted
-                            ? "Completed"
-                            : "In Progress"}
-                        </Text>
-                        <Text style={styles.progressTime}>
-                          {formatTime(progressInfo.timeSpent)}
-                        </Text>
-                        {progressInfo.attempts > 0 && (
-                          <View style={styles.attemptContainer}>
-                            <RotateCcw
-                              width={15}
-                              height={15}
-                              color={iconColors.brightYellow}
-                            />
-                            <Text style={styles.progressAttempts}>
-                              {progressInfo.attempts}x
-                            </Text>
-                          </View>
-                        )}
+                        <TouchableOpacity
+                          style={styles.infoButton}
+                          onPress={() => setShowCostInfoModal(true)}
+                        >
+                          <Info
+                            width={16}
+                            height={16}
+                            color="rgba(255, 255, 255, 0.7)"
+                          />
+                        </TouchableOpacity>
+                        {/* Reset Button (only if in progress) */}
+                        {progressInfo.hasProgress &&
+                          !progressInfo.isCompleted && (
+                            <TouchableOpacity
+                              style={styles.resetButton}
+                              onPress={handleShowResetConfirmation}
+                              disabled={isResetting}
+                            >
+                              <RefreshCw width={12} height={12} color="#fff" />
+                              <View style={styles.resetButtonContainer}>
+                                <Text style={styles.resetButtonText}>
+                                  Reset
+                                </Text>
+                                <Image
+                                  source={require("@/assets/images/coin.png")}
+                                  style={styles.coinImage}
+                                />
+                                <Text style={styles.resetButtonCost}>
+                                  {resetCostInfo.cost}
+                                </Text>
+                              </View>
+                            </TouchableOpacity>
+                          )}
                       </View>
-
-                      {/* Reset Timer Button */}
-                      {progressInfo.hasProgress &&
-                        !progressInfo.isCompleted && (
-                          <TouchableOpacity
-                            style={styles.resetButton}
-                            onPress={handleShowResetConfirmation}
-                            disabled={isResetting}
-                          >
-                            <RefreshCw width={14} height={14} color="#fff" />
-                            <Text style={styles.resetButtonText}>Reset</Text>
-                            <Image
-                              source={require("@/assets/images/coin.png")}
-                              style={styles.coinImage}
-                            />
-                            <Text style={styles.resetButtonCost}>50</Text>
-                          </TouchableOpacity>
-                        )}
                     </View>
                   )}
 
-                  {/* Reset Confirmation */}
+                  {/* UPDATED: Reset Confirmation with Dynamic Pricing */}
                   {showResetConfirmation && !resetMessage && (
                     <Animated.View
                       style={[
@@ -560,6 +595,7 @@ const LevelInfoModal: React.FC<GameInfoModalProps> = React.memo(
                         </Text>
                       </View>
 
+                      {/* UPDATED: Show cost breakdown */}
                       <View style={styles.resetConfirmationTextContainer}>
                         <View style={styles.costContainer}>
                           <Text style={styles.resetConfirmationText}>
@@ -569,7 +605,9 @@ const LevelInfoModal: React.FC<GameInfoModalProps> = React.memo(
                             source={require("@/assets/images/coin.png")}
                             style={styles.coinImage}
                           />
-                          <Text style={styles.resetConfirmationText}>50</Text>
+                          <Text style={styles.resetConfirmationText}>
+                            {resetCostInfo.cost}
+                          </Text>
                         </View>
 
                         <Text style={styles.resetConfirmationSeparator}>•</Text>
@@ -621,7 +659,7 @@ const LevelInfoModal: React.FC<GameInfoModalProps> = React.memo(
                   )}
                 </>
               ) : (
-                /* No progress - Show placeholder when no reset states are active */
+                /* No progress - Show placeholder */
                 !showResetConfirmation &&
                 !resetMessage && (
                   <View style={styles.noProgressContainer}>
@@ -663,6 +701,7 @@ const LevelInfoModal: React.FC<GameInfoModalProps> = React.memo(
       progressInfo,
       isResetting,
       coins,
+      resetCostInfo,
       showResetConfirmation,
       resetMessage,
       confirmationOpacity,
@@ -718,7 +757,7 @@ const LevelInfoModal: React.FC<GameInfoModalProps> = React.memo(
           >
             <LinearGradient
               colors={getGradientColors()}
-              style={[modalSharedStyles.modalContent, styles.extendedContent]}
+              style={[modalSharedStyles.modalContent]}
               start={{ x: 0, y: 0 }}
               end={{ x: 1, y: 1 }}
             >
@@ -832,10 +871,8 @@ const LevelInfoModal: React.FC<GameInfoModalProps> = React.memo(
                     <ActivityIndicator size="small" color="#000" />
                   ) : (
                     <Text style={modalSharedStyles.startAndCloseText}>
-                      {progressInfo.hasProgress && !progressInfo.isCompleted
+                      {progressInfo.hasProgress
                         ? "CONTINUE LEVEL"
-                        : progressInfo.isCompleted
-                        ? "PLAY AGAIN"
                         : "START LEVEL"}
                     </Text>
                   )}
@@ -844,15 +881,17 @@ const LevelInfoModal: React.FC<GameInfoModalProps> = React.memo(
             </LinearGradient>
           </Animated.View>
         </Animated.View>
+        {/* NEW: Cost Info Modal */}
+        <ResetCostInfoModal
+          visible={showCostInfoModal}
+          onClose={() => setShowCostInfoModal(false)}
+        />
       </Modal>
     );
   }
 );
 
 const styles = StyleSheet.create({
-  extendedContent: {
-    paddingBottom: 28,
-  },
   decorativeShape3: {
     position: "absolute",
     top: 120,
@@ -874,7 +913,7 @@ const styles = StyleSheet.create({
     color: "#fff",
   },
   progressTime: {
-    fontSize: 12,
+    fontSize: 11,
     fontFamily: "Poppins-SemiBold",
     color: iconColors.brightYellow,
     backgroundColor: "rgba(255, 255, 255, 0.2)",
@@ -890,45 +929,58 @@ const styles = StyleSheet.create({
     backgroundColor: "rgba(255, 255, 255, 0.2)",
     paddingHorizontal: 6,
     paddingVertical: 2,
-    borderRadius: 12,
+    borderRadius: 16,
   },
   progressAttempts: {
-    fontSize: 12,
+    fontSize: 11,
     fontFamily: "Poppins-Medium",
     color: "#fff",
   },
   progressBadgeContent: {
     flexDirection: "row",
     alignItems: "center",
-    justifyContent: "center",
+    justifyContent: "flex-start",
     width: "100%",
   },
   progressLeftContent: {
     flexDirection: "row",
-    justifyContent: "center",
+    justifyContent: "flex-start",
     alignItems: "center",
     gap: 6,
     flex: 1,
-    flexWrap: "wrap",
+    flexWrap: "nowrap",
+  },
+  progressLeftContainer: {
+    justifyContent: "center",
+    alignItems: "center",
+    gap: 4,
+    flexDirection: "row",
+    backgroundColor: "rgba(255, 255, 255, 0.15)",
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 12,
+    flex: 1,
   },
   resetButton: {
     flexDirection: "row",
     justifyContent: "center",
     alignItems: "center",
     backgroundColor: "rgba(245, 47, 47, 0.9)",
-    paddingHorizontal: 10,
-    paddingVertical: 6,
-    borderRadius: 18,
-    gap: 4,
-    marginRight: 8,
-    flexShrink: 0,
+    paddingHorizontal: 5,
+    paddingVertical: 8,
+    borderRadius: 16,
     borderWidth: 1,
     borderColor: "rgba(255, 255, 255, 0.3)",
+    gap: 4,
+    flexShrink: 0,
   },
   resetButtonText: {
     fontSize: 12,
-    fontFamily: "Poppins-SemiBold",
+    fontFamily: "Poppins-Medium",
     color: "#fff",
+    flexDirection: "row",
+    justifyContent: "center",
+    alignItems: "center",
   },
   coinImage: {
     width: 16,
@@ -937,13 +989,13 @@ const styles = StyleSheet.create({
   },
   resetButtonCost: {
     fontSize: 12,
-    fontFamily: "Poppins-Bold",
+    fontFamily: "Poppins-SemiBold",
     color: iconColors.brightYellow,
   },
   progressBadge: {
     alignSelf: "center",
     backgroundColor: "rgba(255, 255, 255, 0.1)",
-    borderRadius: 20,
+    borderRadius: 16,
     paddingHorizontal: 6,
     paddingVertical: 6,
     marginBottom: 12,
@@ -1032,6 +1084,12 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     gap: 4,
+  },
+  resetButtonContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 4,
+    justifyContent: "center",
   },
   resetConfirmationSeparator: {
     fontSize: 13,
@@ -1139,6 +1197,22 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     gap: 8,
+  },
+  infoButton: {
+    width: 25,
+    height: 25,
+    borderRadius: 15,
+    backgroundColor: "rgba(255, 255, 255, 0.15)",
+    justifyContent: "center",
+    alignItems: "center",
+    borderWidth: 1,
+    borderColor: "rgba(255, 255, 255, 0.2)",
+  },
+  combinedProgressText: {
+    fontSize: 12,
+    fontFamily: "Poppins-Medium",
+    color: "#fff",
+    textAlign: "center",
   },
 });
 
