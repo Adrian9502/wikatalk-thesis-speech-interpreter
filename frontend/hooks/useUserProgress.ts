@@ -4,16 +4,9 @@ import { getToken } from "@/lib/authTokenManager";
 import { UserProgress } from "@/types/userProgress";
 import { useSplashStore } from "@/store/useSplashStore";
 import useProgressStore from "@/store/games/useProgressStore";
-import {
-  getCurrentUserId,
-  hasUserChanged,
-  setCurrentUserId,
-} from "@/utils/dataManager";
+import { getCurrentUserId, hasUserChanged } from "@/utils/dataManager";
 import { getIndividualProgressFromCache } from "@/store/useSplashStore";
-import {
-  calculateResetCost,
-  getResetCostDescription,
-} from "@/utils/resetCostUtils";
+import { calculateResetCost } from "@/utils/resetCostUtils";
 
 const API_URL = process.env.EXPO_PUBLIC_BACKEND_URL || "http://localhost:5000";
 
@@ -59,19 +52,6 @@ export const useUserProgress = (quizId: string | number | "global") => {
     []
   );
 
-  // ENHANCED: Check if we can use precomputed data from splash store
-  const tryUsePrecomputedData = useCallback(() => {
-    if (quizId === "global") {
-      const progressStore = useProgressStore.getState();
-      if (progressStore.progress) {
-        console.log("[useUserProgress] Using precomputed global progress");
-        setProgress(progressStore.progress);
-        return true;
-      }
-    }
-    return false;
-  }, [quizId]);
-
   // ENHANCED: Try cached data first before setting loading state
   const tryUseCachedProgress = useCallback(() => {
     if (quizId === "global") {
@@ -100,6 +80,22 @@ export const useUserProgress = (quizId: string | number | "global") => {
     }
     return false;
   }, [quizId, formatQuizId]);
+
+  // ENHANCED: Immediate cache check on mount
+  useEffect(() => {
+    if (quizId && lastQuizIdRef.current !== quizId) {
+      hasInitializedRef.current = false;
+
+      // NEW: Try cache IMMEDIATELY and set loading to false if found
+      const foundCache = tryUseCachedProgress();
+
+      if (!foundCache) {
+        // Only set loading to true if we don't have cache
+        setIsLoading(true);
+        fetchProgress(false);
+      }
+    }
+  }, [quizId, tryUseCachedProgress]);
 
   // ENHANCED: Stable fetch function with debouncing
   const fetchProgress = useCallback(
@@ -273,22 +269,6 @@ export const useUserProgress = (quizId: string | number | "global") => {
     ]
   );
 
-  // ENHANCED: Immediate cache check on mount
-  useEffect(() => {
-    if (quizId && lastQuizIdRef.current !== quizId) {
-      hasInitializedRef.current = false;
-
-      // NEW: Try cache IMMEDIATELY and set loading to false if found
-      const foundCache = tryUseCachedProgress();
-
-      if (!foundCache) {
-        // Only set loading to true if we don't have cache
-        setIsLoading(true);
-        fetchProgress(false);
-      }
-    }
-  }, [quizId, fetchProgress, tryUseCachedProgress]);
-
   // Update the updateProgress function
   const updateProgress = useCallback(
     async (timeSpent: number, completed?: boolean, isCorrect?: boolean) => {
@@ -388,7 +368,7 @@ export const useUserProgress = (quizId: string | number | "global") => {
     [quizId, formatQuizId, fetchProgress]
   );
 
-  // NEW: Add a resetTimer function that also clears caches
+  // resetTimer function that also clears caches
   const resetTimer = useCallback(
     async (
       quizId: string | number
@@ -493,6 +473,6 @@ export const useUserProgress = (quizId: string | number | "global") => {
     error,
     fetchProgress,
     updateProgress,
-    resetTimer, // Add this
+    resetTimer,
   };
 };
