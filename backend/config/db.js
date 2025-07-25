@@ -12,8 +12,6 @@ const connectDB = async () => {
 
   try {
     const options = {
-      useNewUrlParser: true,
-      useUnifiedTopology: true,
       serverSelectionTimeoutMS: 60000, // Give more time for serverless cold starts
       socketTimeoutMS: 60000, // Close sockets after 45 seconds of inactivity
       retryWrites: true,
