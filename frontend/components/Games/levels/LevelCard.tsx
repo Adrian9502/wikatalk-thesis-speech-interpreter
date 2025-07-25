@@ -36,7 +36,21 @@ const LevelCard: React.FC<LevelCardProps> = React.memo(
         difficulty = "Easy",
         status = "current",
         focusArea = "Vocabulary",
+        difficultyCategory = "easy",
       } = level || {};
+
+      // NEW: Calculate lock reason for better UX
+      const getLockReason = () => {
+        if (status !== "locked") return null;
+
+        const diffLower = difficultyCategory.toLowerCase();
+        if (diffLower === "medium") {
+          return "Complete all Easy levels to unlock";
+        } else if (diffLower === "hard") {
+          return "Complete all Medium levels to unlock";
+        }
+        return "Locked";
+      };
 
       return {
         levelString,
@@ -44,11 +58,13 @@ const LevelCard: React.FC<LevelCardProps> = React.memo(
         difficulty,
         status,
         focusArea,
+        difficultyCategory,
         starCount: getStarCount(difficulty),
         levelNumber: levelString.replace(/^Level\s+/, ""),
         formattedDifficulty: formatDifficulty(difficulty),
         isLocked: status === "locked",
         isCompleted: status === "completed",
+        lockReason: getLockReason(),
       };
     }, [level]);
 
@@ -159,7 +175,9 @@ const LevelCard: React.FC<LevelCardProps> = React.memo(
           disabled={levelProps.isLocked}
         >
           <LinearGradient
-            colors={gradientColors}
+            colors={
+              levelProps.isLocked ? ["#666666", "#444444"] : gradientColors
+            }
             start={{ x: 0, y: 0 }}
             end={{ x: 1, y: 1 }}
             style={styles.levelCardGradient}
@@ -226,18 +244,25 @@ const LevelCard: React.FC<LevelCardProps> = React.memo(
               </View>
             </View>
 
-            {/* Locked overlay */}
+            {/* Locked overlay with reason */}
             {levelProps.isLocked && (
               <View style={styles.levelLock}>
                 <Animated.View
                   style={[
-                    styles.levelLockIcon,
+                    styles.levelLockContent,
                     {
                       transform: [{ scale: scaleAnim }],
                     },
                   ]}
                 >
-                  <Lock width={24} height={24} color="#FFFFFF" />
+                  <View style={styles.levelLockIcon}>
+                    <Lock width={24} height={24} color="#FFFFFF" />
+                  </View>
+                  {levelProps.lockReason && (
+                    <Text style={styles.lockReasonText} numberOfLines={2}>
+                      {levelProps.lockReason}
+                    </Text>
+                  )}
                 </Animated.View>
               </View>
             )}

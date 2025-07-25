@@ -18,8 +18,13 @@ export const convertQuizToLevels = (
 
   // Check if the gameMode exists in quizData
   if (!quizData[safeGameMode]) {
-    console.warn(`[convertQuizToLevels] No data found for gameMode: ${safeGameMode}`);
-    console.log(`[convertQuizToLevels] Available modes:`, Object.keys(quizData));
+    console.warn(
+      `[convertQuizToLevels] No data found for gameMode: ${safeGameMode}`
+    );
+    console.log(
+      `[convertQuizToLevels] Available modes:`,
+      Object.keys(quizData)
+    );
     return [];
   }
 
@@ -80,8 +85,75 @@ export const convertQuizToLevels = (
     `[convertQuizToLevels] Total questions after sorting: ${allQuestions.length}`
   );
 
-  // Helper function to determine level status based on progress
-  const getLevelStatus = (questionId: number): "completed" | "current" | "locked" => {
+  // Calculate difficulty completion stats for locking logic
+  const difficultyStats = {
+    easy: { total: 0, completed: 0 },
+    medium: { total: 0, completed: 0 },
+    hard: { total: 0, completed: 0 },
+  };
+
+  // Count total questions per difficulty
+  allQuestions.forEach((question) => {
+    const diff = question.difficultyCategory?.toLowerCase() || "easy";
+    if (difficultyStats[diff as keyof typeof difficultyStats]) {
+      difficultyStats[diff as keyof typeof difficultyStats].total++;
+    }
+  });
+
+  // Count completed questions per difficulty
+  userProgressData.forEach((progress) => {
+    if (!progress.completed) return;
+
+    let progressQuizId: number;
+    if (typeof progress.quizId === "string") {
+      const cleanId = progress.quizId.replace(/^n-/, "");
+      progressQuizId = parseInt(cleanId, 10);
+    } else {
+      progressQuizId = progress.quizId;
+    }
+
+    // Find the question with this ID to get its difficulty
+    const question = allQuestions.find((q) => {
+      const questionId = q.questionId || q.id;
+      return questionId === progressQuizId;
+    });
+
+    if (question) {
+      const diff = question.difficultyCategory?.toLowerCase() || "easy";
+      if (difficultyStats[diff as keyof typeof difficultyStats]) {
+        difficultyStats[diff as keyof typeof difficultyStats].completed++;
+      }
+    }
+  });
+
+  // Determine if difficulty tiers should be unlocked
+  const isEasyComplete =
+    difficultyStats.easy.total > 0 &&
+    difficultyStats.easy.completed >= difficultyStats.easy.total;
+  const isMediumComplete =
+    difficultyStats.medium.total > 0 &&
+    difficultyStats.medium.completed >= difficultyStats.medium.total;
+
+  console.log(`[convertQuizToLevels] Difficulty completion status:`, {
+    easy: `${difficultyStats.easy.completed}/${difficultyStats.easy.total} (${
+      isEasyComplete ? "COMPLETE" : "INCOMPLETE"
+    })`,
+    medium: `${difficultyStats.medium.completed}/${
+      difficultyStats.medium.total
+    } (${isMediumComplete ? "COMPLETE" : "INCOMPLETE"})`,
+    hard: `${difficultyStats.hard.completed}/${difficultyStats.hard.total}`,
+    mediumUnlocked: isEasyComplete,
+    hardUnlocked: isMediumComplete,
+  });
+
+  // Helper function to determine level status based on progress and locking rules
+  const getLevelStatus = (
+    questionId: number,
+    difficulty: string
+  ): "completed" | "current" | "locked" => {
+    const difficultyLower = difficulty.toLowerCase();
+
+    // Check if level is completed
     const levelProgress = userProgressData.find((progress) => {
       let progressQuizId: number;
 
@@ -95,42 +167,74 @@ export const convertQuizToLevels = (
       return progressQuizId === questionId && progress.completed === true;
     });
 
-    return levelProgress ? "completed" : "current";
+    if (levelProgress) {
+      return "completed";
+    }
+
+    // Apply locking rules
+    switch (difficultyLower) {
+      case "easy":
+        // Easy levels are always unlocked
+        return "current";
+
+      case "medium":
+        // Medium levels are locked until all easy levels are completed
+        if (!isEasyComplete) {
+          return "locked";
+        }
+        return "current";
+
+      case "hard":
+        // Hard levels are locked until all medium levels are completed
+        if (!isMediumComplete) {
+          return "locked";
+        }
+        return "current";
+
+      default:
+        return "current";
+    }
   };
 
   // Convert to level objects
-  const allLevels: LevelData[] = allQuestions.map((item: any, index: number) => {
-    const questionId = item.questionId || item.id || index + 1;
-    const levelStatus = getLevelStatus(questionId);
+  const allLevels: LevelData[] = allQuestions.map(
+    (item: any, index: number) => {
+      const questionId = item.questionId || item.id || index + 1;
+      const difficulty = item.difficultyCategory || "easy";
+      const levelStatus = getLevelStatus(questionId, difficulty);
 
-    const level: LevelData = {
-      id: questionId,
-      number: questionId,
-      levelString: item.level || `Level ${questionId}`,
-      title: item.title || `Level ${questionId}`,
-      description: item.description || "Practice your skills",
-      difficulty:
-        typeof item.difficultyCategory === "string"
-          ? item.difficultyCategory.charAt(0).toUpperCase() +
-            item.difficultyCategory.slice(1)
-          : "Easy",
-      status: levelStatus,
-      stars: levelStatus === "completed" ? 3 : Math.floor(Math.random() * 3),
-      focusArea:
-        item.focusArea && item.focusArea !== "undefined"
-          ? item.focusArea.charAt(0).toUpperCase() + item.focusArea.slice(1)
-          : "Vocabulary",
-      questionData: item,
-      difficultyCategory: item.difficultyCategory || "easy",
-    };
+      const level: LevelData = {
+        id: questionId,
+        number: questionId,
+        levelString: item.level || `Level ${questionId}`,
+        title: item.title || `Level ${questionId}`,
+        description: item.description || "Practice your skills",
+        difficulty:
+          typeof item.difficultyCategory === "string"
+            ? item.difficultyCategory.charAt(0).toUpperCase() +
+              item.difficultyCategory.slice(1)
+            : "Easy",
+        status: levelStatus,
+        stars: levelStatus === "completed" ? 3 : Math.floor(Math.random() * 3),
+        focusArea:
+          item.focusArea && item.focusArea !== "undefined"
+            ? item.focusArea.charAt(0).toUpperCase() + item.focusArea.slice(1)
+            : "Vocabulary",
+        questionData: item,
+        difficultyCategory: item.difficultyCategory || "easy",
+      };
 
-    return level;
-  });
+      return level;
+    }
+  );
 
-  const completedCount = allLevels.filter((l) => l.status === "completed")
-    .length;
+  const completedCount = allLevels.filter(
+    (l) => l.status === "completed"
+  ).length;
+  const lockedCount = allLevels.filter((l) => l.status === "locked").length;
+
   console.log(
-    `[convertQuizToLevels] Final result: ${allLevels.length} levels for ${gameMode} (${completedCount} completed)`
+    `[convertQuizToLevels] Final result: ${allLevels.length} levels for ${gameMode} (${completedCount} completed, ${lockedCount} locked)`
   );
 
   return allLevels;

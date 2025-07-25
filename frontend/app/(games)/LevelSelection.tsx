@@ -200,7 +200,23 @@ const LevelSelection = () => {
     const handleLevelSelectWithCompletion = (level: LevelData) => {
       if (level.status === "locked") {
         console.log(`[LevelSelection] Level ${level.id} is locked`);
+
+        // NEW: Show specific lock reason
+        const difficulty = level.difficultyCategory?.toLowerCase();
+        let lockMessage = "This level is locked.";
+
+        if (difficulty === "medium") {
+          lockMessage = "Complete all Easy levels to unlock Medium difficulty.";
+        } else if (difficulty === "hard") {
+          lockMessage = "Complete all Medium levels to unlock Hard difficulty.";
+        }
+
+        // You can show a toast or alert here instead of just haptic feedback
         Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
+
+        // Optional: Show an alert with the lock reason
+        // Alert.alert("Level Locked", lockMessage);
+
         return;
       }
 
