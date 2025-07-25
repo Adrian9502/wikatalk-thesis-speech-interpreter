@@ -101,22 +101,6 @@ export const useUserProgress = (quizId: string | number | "global") => {
     return false;
   }, [quizId, formatQuizId]);
 
-  // ENHANCED: Immediate cache check on mount
-  useEffect(() => {
-    if (quizId && lastQuizIdRef.current !== quizId) {
-      hasInitializedRef.current = false;
-
-      // NEW: Try cache IMMEDIATELY and set loading to false if found
-      const foundCache = tryUseCachedProgress();
-
-      if (!foundCache) {
-        // Only set loading to true if we don't have cache
-        setIsLoading(true);
-        fetchProgress(false);
-      }
-    }
-  }, [quizId, fetchProgress, tryUseCachedProgress]);
-
   // ENHANCED: Stable fetch function with debouncing
   const fetchProgress = useCallback(
     async (forceRefresh: boolean = false) => {
@@ -288,6 +272,22 @@ export const useUserProgress = (quizId: string | number | "global") => {
       progress, // Add this to dependencies
     ]
   );
+
+  // ENHANCED: Immediate cache check on mount
+  useEffect(() => {
+    if (quizId && lastQuizIdRef.current !== quizId) {
+      hasInitializedRef.current = false;
+
+      // NEW: Try cache IMMEDIATELY and set loading to false if found
+      const foundCache = tryUseCachedProgress();
+
+      if (!foundCache) {
+        // Only set loading to true if we don't have cache
+        setIsLoading(true);
+        fetchProgress(false);
+      }
+    }
+  }, [quizId, fetchProgress, tryUseCachedProgress]);
 
   // Update the updateProgress function
   const updateProgress = useCallback(

@@ -128,7 +128,7 @@ const MultipleChoicePlayingContent: React.FC<MultipleChoicePlayingContentProps> 
                   <TouchableOpacity
                     style={[
                       styles.optionCard,
-                      isSelected && styles.selectedOptionCard,
+                      isSelected && styles.selectedOption,
                     ]}
                     onPress={() => handleOptionSelect(option.id)}
                     disabled={selectedOption !== null}
@@ -156,9 +156,6 @@ const MultipleChoicePlayingContent: React.FC<MultipleChoicePlayingContentProps> 
                           {safeTextRender(option.text)}
                         </Text>
                       </View>
-
-                      {/* Selection indicator */}
-                      {isSelected && <View style={styles.selectionIndicator} />}
                     </LinearGradient>
                   </TouchableOpacity>
                 </Animatable.View>
