@@ -313,23 +313,27 @@ export const useUserProgress = (quizId: string | number | "global") => {
           // NEW: Also invalidate the splash store individual cache for this specific quiz
           const splashStore = useSplashStore.getState();
           if (splashStore.setIndividualProgress) {
-            console.log(
-              `[useUserProgress] Updating splash store cache for ${formattedId}`
-            );
-            splashStore.setIndividualProgress(String(quizId), updatedProgress);
+            splashStore.setIndividualProgress(formattedId, updatedProgress);
           }
 
-          // If this was a completion, invalidate precomputed data
+          // FIXED: Force refresh of global progress in progress store
           if (completed && isCorrect) {
             console.log(
-              `[useUserProgress] Level completed! Invalidating precomputed data...`
+              `[useUserProgress] Level completed! Invalidating ALL caches including global progress...`
             );
 
-            // Invalidate splash store precomputed levels AND filters
-            splashStore.reset(); // This will force recomputation on next access
+            // Clear progress store cache completely
+            const progressStore = useProgressStore.getState();
+            progressStore.clearCache();
+
+            // Force fetch fresh global progress
+            progressStore.fetchProgress(true);
+
+            // Reset splash store to force recomputation
+            splashStore.reset();
 
             console.log(
-              `[useUserProgress] All precomputed data invalidated - levels and filters will be recomputed`
+              `[useUserProgress] All caches invalidated - levels and filters will be recomputed`
             );
           }
 
@@ -348,9 +352,6 @@ export const useUserProgress = (quizId: string | number | "global") => {
           );
           const freshData = await fetchProgress(true); // Force refresh on error
           if (freshData) {
-            console.log(
-              `[useUserProgress] Successfully recovered with fresh data`
-            );
             return freshData;
           }
         } catch (fetchErr) {

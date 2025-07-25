@@ -14,6 +14,7 @@ import {
   hasUserChanged,
   setCurrentUserId,
 } from "@/utils/dataManager";
+import useProgressStore from "@/store/games/useProgressStore";
 
 type FilterType = "all" | "completed" | "current" | "easy" | "medium" | "hard";
 
@@ -56,10 +57,20 @@ export const useLevelData = (gameMode: string | string[] | undefined) => {
           setCurrentUserId(currentUserId);
         }
 
-        setLastUserId(currentUserId); // This is now safe since currentUserId is string | null
+        setLastUserId(currentUserId);
 
-        // Try to get precomputed levels (but skip if user changed)
-        if (isLevelsPrecomputed() && !userChanged) {
+        // FIXED: Always check for fresh global progress when loading levels
+        // This ensures we get the latest completion status
+        const { progress: globalProgress } = useProgressStore.getState();
+        const shouldForceRefresh = !globalProgress || userChanged;
+
+        if (shouldForceRefresh) {
+          console.log(`[useLevelData] Forcing fresh global progress fetch`);
+          await useProgressStore.getState().fetchProgress(true);
+        }
+
+        // Try to get precomputed levels (but skip if user changed or force refresh needed)
+        if (isLevelsPrecomputed() && !userChanged && !shouldForceRefresh) {
           console.log(
             `[useLevelData] Using precomputed levels for ${safeGameMode}`
           );
@@ -74,7 +85,7 @@ export const useLevelData = (gameMode: string | string[] | undefined) => {
           }
         }
 
-        // Fallback: compute levels on demand
+        // Fallback: compute levels on demand with fresh data
         console.log(
           `[useLevelData] Computing levels on demand for ${safeGameMode}`
         );
@@ -84,10 +95,17 @@ export const useLevelData = (gameMode: string | string[] | undefined) => {
           await fetchQuestionsByMode(safeGameMode);
         }
 
-        // Convert to levels with fresh progress data
-        const progressArray = Array.isArray(globalProgress)
-          ? globalProgress
+        // Get fresh global progress for conversion
+        const freshGlobalProgress = useProgressStore.getState().progress;
+        const progressArray = Array.isArray(freshGlobalProgress)
+          ? freshGlobalProgress
           : [];
+
+        console.log(
+          `[useLevelData] Using ${progressArray.length} progress entries for level conversion`
+        );
+
+        // Convert to levels with fresh progress data
         const currentLevels = convertQuizToLevels(
           safeGameMode,
           questions,
@@ -123,7 +141,7 @@ export const useLevelData = (gameMode: string | string[] | undefined) => {
   }, [
     safeGameMode,
     questions,
-    globalProgress,
+    globalProgress, // Keep this to trigger refresh when global progress changes
     fetchQuestionsByMode,
     lastUserId,
   ]);

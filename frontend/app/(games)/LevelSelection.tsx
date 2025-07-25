@@ -23,6 +23,7 @@ import LevelGrid from "@/components/games/levels/LevelGrid";
 import FilterBar from "@/components/games/levels/FilterBar";
 import AppLoading from "@/components/AppLoading";
 import DotsLoader from "@/components/DotLoader";
+import useProgressStore from "@/store/games/useProgressStore";
 
 type FilterType = "all" | "completed" | "current" | "easy" | "medium" | "hard";
 
@@ -72,7 +73,26 @@ const LevelSelection = () => {
   // NEW: Enhanced data ready check with fallback
   useEffect(() => {
     const checkDataReady = async () => {
-      if (isAllDataReady()) {
+      // FIXED: Always check if we need to refresh data when component mounts
+      // This handles the case where user completes a level and navigates back
+      const progressStore = useProgressStore.getState();
+      const splashStore = useSplashStore.getState();
+
+      // Check if we have stale data by comparing timestamps
+      const lastProgressUpdate = progressStore.lastUpdated || 0;
+      const lastSplashUpdate =
+        splashStore.precomputedLevels[gameMode]?.lastUpdated || 0;
+
+      const isDataStale = lastProgressUpdate > lastSplashUpdate;
+
+      if (isDataStale) {
+        console.log(
+          `[LevelSelection] Detected stale precomputed data, forcing refresh`
+        );
+        splashStore.reset();
+      }
+
+      if (isAllDataReady() && !isDataStale) {
         setDataReady(true);
 
         // Trigger initial animation when data is ready

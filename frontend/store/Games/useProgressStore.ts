@@ -745,14 +745,18 @@ const useProgressStore = create<ProgressState>((set, get) => ({
 
   // Clear cached data
   clearCache: () => {
+    console.log("[ProgressStore] Clearing all cached data");
+
     // Clear the Map cache as well
     enhancedProgressCache.clear();
 
     set({
       progress: null,
-      globalProgress: null, // ADD THIS LINE
+      globalProgress: null,
       lastFetched: 0,
       enhancedProgress: {},
+      // FIXED: Also update timestamp to indicate cache was cleared
+      lastUpdated: Date.now(),
     });
   },
 
