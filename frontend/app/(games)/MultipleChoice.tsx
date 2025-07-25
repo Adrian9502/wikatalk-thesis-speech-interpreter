@@ -215,6 +215,24 @@ const MultipleChoice: React.FC<MultipleChoiceProps> = React.memo(
       return `Level ${levelId + 1}`;
     };
 
+    // UPDATED: Handle timer reset callback - don't restart immediately
+    const handleTimerReset = useCallback(() => {
+      // REMOVED: Don't call handleRestart() immediately
+      // The user will restart manually after seeing the success message
+
+      // Reset the initial time to 0 for future restarts
+      if (progress && !Array.isArray(progress)) {
+        // Force progress to be cleared locally so timer starts from 0
+        setTimeElapsed(0);
+        lastProgressTimeRef.current = 0;
+        initialSetupComplete.current = true;
+      }
+
+      console.log(
+        `[MultipleChoice] Timer reset completed, user can restart manually`
+      );
+    }, [setTimeElapsed, progress]);
+
     return (
       <GameContainer
         title="Multiple Choice"
@@ -227,6 +245,8 @@ const MultipleChoice: React.FC<MultipleChoiceProps> = React.memo(
         initialTime={gameConfig.initialTime}
         isStarted={isStarted}
         finalTime={timeElapsed}
+        levelId={levelId} // Pass levelId
+        onTimerReset={handleTimerReset} // Pass callback
       >
         {gameStatus === "playing" ? (
           <GamePlayingContent

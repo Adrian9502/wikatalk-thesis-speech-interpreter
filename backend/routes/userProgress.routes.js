@@ -2,7 +2,7 @@ const express = require("express");
 const router = express.Router();
 const { protect } = require("../middleware/auth.middleware");
 const UserProgress = require("../models/userProgress.model");
-
+const User = require("../models/user.model");
 // Add the reset cost calculation function
 const calculateResetCost = (secondsSpent) => {
   if (secondsSpent <= 30) return 50;         // 0–30 sec → 50 coins
@@ -360,11 +360,11 @@ router.post("/:quizId/reset-timer", protect, async (req, res) => {
     // UPDATED: Calculate dynamic cost based on time spent
     const timeSpent = existingProgress.totalTimeSpent || 0;
     const RESET_COST = calculateResetCost(timeSpent);
-    
+
     console.log(`[PROGRESS] Calculated reset cost for ${timeSpent}s: ${RESET_COST} coins`);
 
     // Check if user has enough coins
-    const user = await UserProgress.findById(userId);
+    const user = await User.findById(userId);
 
     if (!user) {
       return res.status(404).json({

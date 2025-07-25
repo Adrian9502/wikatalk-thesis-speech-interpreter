@@ -50,8 +50,6 @@ const GameCompletedContent: React.FC<GameCompletedContentProps> = ({
       showsVerticalScrollIndicator={false}
       contentContainerStyle={gameSharedStyles.contentContainer}
     >
-      {/* REMOVED: StatsContainer - now in header */}
-
       {/* Answer Review Section */}
       <AnswerReview
         question={question}

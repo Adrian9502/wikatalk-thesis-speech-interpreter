@@ -39,7 +39,9 @@ const GameHeader = ({
   isStarted,
   variant,
   finalTime,
-}: HeaderProps) => {
+  levelId, // Add this
+  onTimerReset, // Add this
+}: HeaderProps & { levelId?: number | string; onTimerReset?: () => void }) => {
   const navigation = useNavigation();
 
   const handleBackPress = () => {
@@ -83,7 +85,7 @@ const GameHeader = ({
         <View style={styles.placeholder} />
       </View>
 
-      {/* NEW: Stats Container Row */}
+      {/* Stats Container Row */}
       {showStats && difficulty && (
         <View>
           <StatsContainer
@@ -93,9 +95,11 @@ const GameHeader = ({
             timerRunning={timerRunning}
             initialTime={initialTime}
             isStarted={isStarted}
-            animationDelay={0} // No animation delay in header
+            animationDelay={0}
             variant={variant}
             finalTime={finalTime}
+            levelId={levelId}
+            onTimerReset={onTimerReset}
           />
         </View>
       )}

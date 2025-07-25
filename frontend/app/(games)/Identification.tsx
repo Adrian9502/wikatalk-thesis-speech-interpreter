@@ -106,6 +106,14 @@ const Identification: React.FC<IdentificationProps> = React.memo(
       ]
     );
 
+    const handleTimerReset = useCallback(() => {
+      // UPDATED: Don't restart immediately, just reset the timer state
+      setTimeElapsed(0);
+      console.log(
+        `[Identification] Timer reset completed, user can restart manually`
+      );
+    }, [setTimeElapsed]);
+
     // PERFORMANCE: Memoize restart handler
     const handleRestartWithProgress = useCallback(async () => {
       handleRestart();
@@ -251,6 +259,8 @@ const Identification: React.FC<IdentificationProps> = React.memo(
         initialTime={gameConfig.initialTime}
         isStarted={isStarted}
         finalTime={timeElapsed}
+        levelId={levelId}
+        onTimerReset={handleTimerReset}
       >
         {gameStatus === "playing" ? (
           <GamePlayingContent

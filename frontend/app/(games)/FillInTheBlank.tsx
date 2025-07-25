@@ -96,6 +96,14 @@ const FillInTheBlank: React.FC<FillInTheBlankProps> = React.memo(
       }
     }, [userAnswer, timeElapsed, setTimerRunning, checkAnswer, updateProgress]);
 
+    const handleTimerReset = useCallback(() => {
+      // UPDATED: Don't restart immediately, just reset the timer state
+      setTimeElapsed(0);
+      console.log(
+        `[FillInTheBlank] Timer reset completed, user can restart manually`
+      );
+    }, [setTimeElapsed]);
+
     // PERFORMANCE: Memoize restart handler
     const handleRestartWithProgress = useCallback(async () => {
       handleRestart();
@@ -216,6 +224,8 @@ const FillInTheBlank: React.FC<FillInTheBlankProps> = React.memo(
           initialTime={gameConfig.initialTime}
           isStarted={isStarted}
           finalTime={timeElapsed}
+          levelId={levelId}
+          onTimerReset={handleTimerReset}
         >
           {gameStatus === "playing" ? (
             <GamePlayingContent

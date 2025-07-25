@@ -21,6 +21,8 @@ interface GameContainerProps {
   initialTime?: number;
   isStarted?: boolean;
   finalTime?: number;
+  levelId?: number | string;
+  onTimerReset?: () => void;
 }
 
 const GameContainer: React.FC<GameContainerProps> = ({
@@ -30,13 +32,15 @@ const GameContainer: React.FC<GameContainerProps> = ({
   children,
   variant = "triple",
 
-  // NEW: Stats props
+  // Stats props
   difficulty,
   focusArea,
   showTimer,
   initialTime,
   isStarted,
   finalTime,
+  levelId,
+  onTimerReset,
 }) => {
   const { activeTheme } = useThemeStore();
 
@@ -70,6 +74,8 @@ const GameContainer: React.FC<GameContainerProps> = ({
           isStarted={isStarted}
           variant={statsVariant}
           finalTime={finalTime}
+          levelId={levelId}
+          onTimerReset={onTimerReset}
         />
 
         {gameStatus === "idle" ? (
