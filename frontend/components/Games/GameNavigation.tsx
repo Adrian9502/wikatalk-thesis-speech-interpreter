@@ -87,6 +87,20 @@ const GameNavigation: React.FC<GameNavigationProps> = ({
     const nextDifficulty =
       nextLevel?.difficultyCategory?.toLowerCase() || "easy";
 
+    // NEW: Helper function to create next level display text
+    const createNextLevelText = (level: any) => {
+      const levelString =
+        level?.levelString ||
+        level?.questionData?.level ||
+        `Level ${nextLevelId}`;
+      const title = level?.title || level?.questionData?.title;
+
+      if (title) {
+        return `${levelString} - ${title}`;
+      }
+      return levelString;
+    };
+
     // Determine next level status and reasons
     let nextLevelStatus = "available";
     let nextLevelTitle = "";
@@ -127,9 +141,9 @@ const GameNavigation: React.FC<GameNavigationProps> = ({
 
         if (isSameDifficulty) {
           // FIXED: Within same difficulty - allow progression regardless of correctness
-          // This handles the case where user answers incorrectly but should still progress
+          // UPDATED: Use level string instead of just title
           nextLevelTitle = "Next Level";
-          nextLevelSubtitle = nextLevel.title || `Level ${nextLevelId}`;
+          nextLevelSubtitle = createNextLevelText(nextLevel);
 
           // Special case: If next level is already completed, show different text
           if (nextLevel.status === "completed") {
@@ -144,16 +158,16 @@ const GameNavigation: React.FC<GameNavigationProps> = ({
             nextLevelSubtitle = "✅ Answer correctly to unlock next difficulty";
           } else {
             nextLevelTitle = "Next Level";
-            nextLevelSubtitle = `${
-              nextLevel.title || `Level ${nextLevelId}`
-            } (${
-              nextDifficulty.charAt(0).toUpperCase() + nextDifficulty.slice(1)
-            })`;
+            // UPDATED: Use level string and add difficulty indicator
+            const levelText = createNextLevelText(nextLevel);
+            const difficultyText =
+              nextDifficulty.charAt(0).toUpperCase() + nextDifficulty.slice(1);
+            nextLevelSubtitle = `${levelText} (${difficultyText})`;
           }
         } else {
           // This shouldn't happen in normal flow, but handle it
           nextLevelTitle = "Next Level";
-          nextLevelSubtitle = nextLevel.title || `Level ${nextLevelId}`;
+          nextLevelSubtitle = createNextLevelText(nextLevel);
         }
       }
     } else {
@@ -183,6 +197,8 @@ const GameNavigation: React.FC<GameNavigationProps> = ({
       nextDifficulty,
       nextLevelExists: !!nextLevel,
       nextLevelStatus: nextLevel?.status,
+      nextLevelString: nextLevel?.levelString || nextLevel?.questionData?.level,
+      nextLevelTitle: nextLevel?.title || nextLevel?.questionData?.title,
       isLastLevel,
       totalLevels,
       difficultyStats,
@@ -287,13 +303,30 @@ const GameNavigation: React.FC<GameNavigationProps> = ({
         },
       });
     } else {
-      // NEW: Show modal instead of direct navigation
+      // NEW: Show modal instead of direct navigation with enhanced level data
       if (nextLevel) {
-        setNextLevelData({
+        // UPDATED: Pass comprehensive level data including level string
+        const modalLevelData = {
           ...nextLevel.questionData,
           ...nextLevel,
-          levelString: nextLevel.levelString,
+          // Ensure we have the level string available
+          levelString:
+            nextLevel.levelString ||
+            nextLevel.questionData?.level ||
+            `Level ${nextLevelId}`,
+          // Ensure we have the title
+          title: nextLevel.title || nextLevel.questionData?.title,
+          // Add the level number for reference
+          levelNumber: nextLevelId,
+        };
+
+        console.log(`[GameNavigation] Prepared modal data:`, {
+          levelString: modalLevelData.levelString,
+          title: modalLevelData.title,
+          levelNumber: modalLevelData.levelNumber,
         });
+
+        setNextLevelData(modalLevelData);
         setShowNextLevelModal(true);
       }
     }

@@ -17,7 +17,6 @@ import Identification from "./Identification";
 import FillInTheBlank from "./FillInTheBlank";
 
 const Questions = () => {
-  // IMPORTANT: ALL HOOKS MUST BE CALLED BEFORE ANY EARLY RETURNS
   const params = useLocalSearchParams();
   const { activeTheme } = useThemeStore();
 

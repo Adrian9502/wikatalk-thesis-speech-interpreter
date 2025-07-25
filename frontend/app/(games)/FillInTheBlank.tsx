@@ -7,6 +7,8 @@ import { useGameInitialization } from "@/hooks/useGameInitialization";
 import FillInTheBlankPlayingContent from "@/components/games/fillInTheBlank/FillInTheBlankPlayingContent";
 import GamePlayingContent from "@/components/games/GamePlayingContent";
 import { useUserProgress } from "@/hooks/useUserProgress";
+// NEW: Import the utility function
+import { useNextLevelData } from "@/utils/games/levelUtils";
 
 interface FillInTheBlankProps {
   levelId: number;
@@ -45,6 +47,13 @@ const FillInTheBlank: React.FC<FillInTheBlankProps> = React.memo(
       setTimerRunning,
       setTimeElapsed,
     } = useGameStore();
+
+    // NEW: Use the utility hook for next level data
+    const { getNextLevelTitle } = useNextLevelData(
+      "fillBlanks",
+      levelId,
+      difficulty
+    );
 
     // Set initial time from progress when component mounts
     useEffect(() => {
@@ -175,39 +184,6 @@ const FillInTheBlank: React.FC<FillInTheBlankProps> = React.memo(
       }
     }, [showFeedback, setTimerRunning]);
 
-    // Get next level data for navigation
-    const { getLevelData } = useGameStore();
-
-    const nextLevelData = useMemo(() => {
-      const nextLevelId = levelId + 1;
-      const nextLevel = getLevelData("fillBlanks", nextLevelId, difficulty);
-
-      if (nextLevel && nextLevel.levelData) {
-        return {
-          title: nextLevel.levelData.title,
-          level: nextLevel.levelData.level,
-        };
-      } else if (nextLevel) {
-        return {
-          title: nextLevel.title,
-          level: nextLevel.level,
-        };
-      }
-
-      return null;
-    }, [levelId, difficulty, getLevelData]);
-
-    const getNextLevelTitle = () => {
-      if (nextLevelData?.level && nextLevelData?.title) {
-        return `${nextLevelData.level} - ${nextLevelData.title}`;
-      } else if (nextLevelData?.level) {
-        return nextLevelData.level;
-      } else if (nextLevelData?.title) {
-        return `Level ${levelId + 1} - ${nextLevelData.title}`;
-      }
-      return `Level ${levelId + 1}`;
-    };
-
     return (
       <KeyboardAvoidingView
         style={{ flex: 1 }}
@@ -256,7 +232,6 @@ const FillInTheBlank: React.FC<FillInTheBlankProps> = React.memo(
               />
             </GamePlayingContent>
           ) : (
-            // GameCompletedContent with updated props
             <GameCompletedContent
               score={score}
               timeElapsed={timeElapsed}

@@ -6,6 +6,8 @@ import GameCompletedContent from "@/components/games/GameCompletedContent";
 import { useGameInitialization } from "@/hooks/useGameInitialization";
 import MultipleChoicePlayingContent from "@/components/games/multipleChoice/MultipleChoicePlayingContent";
 import { useUserProgress } from "@/hooks/useUserProgress";
+// NEW: Import the utility function
+import { useNextLevelData } from "@/utils/games/levelUtils";
 
 interface MultipleChoiceProps {
   levelId: number;
@@ -37,6 +39,13 @@ const MultipleChoice: React.FC<MultipleChoiceProps> = React.memo(
       setTimeElapsed,
       setTimerRunning,
     } = useGameStore();
+
+    // NEW: Use the utility hook for next level data
+    const { getNextLevelTitle } = useNextLevelData(
+      "multipleChoice",
+      levelId,
+      difficulty
+    );
 
     // FIXED: Set initial time from progress when component mounts - prevent multiple calls
     useEffect(() => {
@@ -181,40 +190,6 @@ const MultipleChoice: React.FC<MultipleChoiceProps> = React.memo(
       gameStartedRef.current = true;
     }
 
-    // Get next level data for navigation
-    const { getLevelData } = useGameStore();
-
-    const nextLevelData = useMemo(() => {
-      const nextLevelId = levelId + 1;
-      const nextLevel = getLevelData("multipleChoice", nextLevelId, difficulty);
-
-      if (nextLevel && nextLevel.levelData) {
-        return {
-          title: nextLevel.levelData.title,
-          level: nextLevel.levelData.level,
-        };
-      } else if (nextLevel) {
-        return {
-          title: nextLevel.title,
-          level: nextLevel.level,
-        };
-      }
-
-      return null;
-    }, [levelId, difficulty, getLevelData]);
-
-    // Helper function to get next level title
-    const getNextLevelTitle = () => {
-      if (nextLevelData?.level && nextLevelData?.title) {
-        return `${nextLevelData.level} - ${nextLevelData.title}`;
-      } else if (nextLevelData?.level) {
-        return nextLevelData.level;
-      } else if (nextLevelData?.title) {
-        return `Level ${levelId + 1} - ${nextLevelData.title}`;
-      }
-      return `Level ${levelId + 1}`;
-    };
-
     // UPDATED: Handle timer reset callback - don't restart immediately
     const handleTimerReset = useCallback(() => {
       // REMOVED: Don't call handleRestart() immediately
@@ -245,8 +220,8 @@ const MultipleChoice: React.FC<MultipleChoiceProps> = React.memo(
         initialTime={gameConfig.initialTime}
         isStarted={isStarted}
         finalTime={timeElapsed}
-        levelId={levelId} // Pass levelId
-        onTimerReset={handleTimerReset} // Pass callback
+        levelId={levelId}
+        onTimerReset={handleTimerReset}
       >
         {gameStatus === "playing" ? (
           <GamePlayingContent
@@ -269,7 +244,6 @@ const MultipleChoice: React.FC<MultipleChoiceProps> = React.memo(
             />
           </GamePlayingContent>
         ) : (
-          // GameCompletedContent remains unchanged
           <GameCompletedContent
             score={score}
             timeElapsed={timeElapsed}

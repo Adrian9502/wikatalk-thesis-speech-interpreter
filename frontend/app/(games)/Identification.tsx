@@ -10,6 +10,8 @@ import { useGameInitialization } from "@/hooks/useGameInitialization";
 import { router } from "expo-router";
 import IdentificationPlayingContent from "@/components/games/identification/IdentificationPlayingContent";
 import { useUserProgress } from "@/hooks/useUserProgress";
+// NEW: Import the utility function
+import { useNextLevelData } from "@/utils/games/levelUtils";
 
 interface IdentificationProps {
   levelId: number;
@@ -44,6 +46,13 @@ const Identification: React.FC<IdentificationProps> = React.memo(
       setTimeElapsed,
       setTimerRunning,
     } = useGameStore();
+
+    // NEW: Use the utility hook for next level data
+    const { getNextLevelTitle } = useNextLevelData(
+      "identification",
+      levelId,
+      difficulty
+    );
 
     // Set initial time from progress when component mounts
     useEffect(() => {
@@ -181,39 +190,6 @@ const Identification: React.FC<IdentificationProps> = React.memo(
       timerRunning,
       gameConfig.initialTime
     );
-
-    // Get next level data for navigation
-    const { getLevelData } = useGameStore();
-
-    const nextLevelData = useMemo(() => {
-      const nextLevelId = levelId + 1;
-      const nextLevel = getLevelData("identification", nextLevelId, difficulty);
-
-      if (nextLevel && nextLevel.levelData) {
-        return {
-          title: nextLevel.levelData.title,
-          level: nextLevel.levelData.level,
-        };
-      } else if (nextLevel) {
-        return {
-          title: nextLevel.title,
-          level: nextLevel.level,
-        };
-      }
-
-      return null;
-    }, [levelId, difficulty, getLevelData]);
-
-    const getNextLevelTitle = () => {
-      if (nextLevelData?.level && nextLevelData?.title) {
-        return `${nextLevelData.level} - ${nextLevelData.title}`;
-      } else if (nextLevelData?.level) {
-        return nextLevelData.level;
-      } else if (nextLevelData?.title) {
-        return `Level ${levelId + 1} - ${nextLevelData.title}`;
-      }
-      return `Level ${levelId + 1}`;
-    };
 
     // Error state handling
     if (error) {
