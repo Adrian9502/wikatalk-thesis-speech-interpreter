@@ -9,7 +9,7 @@ import {
   Image,
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
-import { X, Info, Clock, Coins } from "react-native-feather";
+import { X, Info, Clock } from "react-native-feather";
 import * as Animatable from "react-native-animatable";
 import { BASE_COLORS, iconColors } from "@/constant/colors";
 import { NAVIGATION_COLORS } from "@/constant/gameConstants";
