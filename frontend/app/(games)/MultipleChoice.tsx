@@ -285,6 +285,8 @@ const MultipleChoice: React.FC<MultipleChoiceProps> = React.memo(
             levelString={currentQuestion?.level}
             actualTitle={currentQuestion?.title}
             nextLevelTitle={getNextLevelTitle()}
+            isCurrentLevelCompleted={gameConfig.isSelectedCorrect}
+            isCorrectAnswer={gameConfig.isSelectedCorrect}
           />
         )}
       </GameContainer>

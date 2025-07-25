@@ -181,7 +181,8 @@ const LevelSelection = () => {
       // Close modal first
       setShowGameModal(false);
 
-      // FIXED: Use replace to avoid navigation stack buildup
+      // FIXED: Only use skipModal when starting from level selection modal
+      // This ensures the modal is shown when navigating between levels
       router.replace({
         pathname: "/(games)/Questions",
         params: {
@@ -192,7 +193,7 @@ const LevelSelection = () => {
             typeof selectedLevel.difficultyCategory === "string"
               ? selectedLevel.difficultyCategory
               : "easy",
-          skipModal: "true",
+          skipModal: "true", // Only skip modal when starting from level selection
         },
       });
     };

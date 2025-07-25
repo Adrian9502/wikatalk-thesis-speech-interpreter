@@ -256,7 +256,7 @@ const FillInTheBlank: React.FC<FillInTheBlankProps> = React.memo(
               />
             </GamePlayingContent>
           ) : (
-            // GameCompletedContent remains unchanged
+            // GameCompletedContent with updated props
             <GameCompletedContent
               score={score}
               timeElapsed={timeElapsed}
@@ -272,6 +272,8 @@ const FillInTheBlank: React.FC<FillInTheBlankProps> = React.memo(
               levelString={gameConfig.currentExercise?.level}
               actualTitle={gameConfig.currentExercise?.title}
               nextLevelTitle={getNextLevelTitle()}
+              isCurrentLevelCompleted={score > 0}
+              isCorrectAnswer={score > 0}
             />
           )}
         </GameContainer>

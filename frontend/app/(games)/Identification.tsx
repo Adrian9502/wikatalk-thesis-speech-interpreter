@@ -300,6 +300,8 @@ const Identification: React.FC<IdentificationProps> = React.memo(
             levelString={gameConfig.currentSentence?.level}
             actualTitle={gameConfig.currentSentence?.title}
             nextLevelTitle={getNextLevelTitle()}
+            isCurrentLevelCompleted={gameConfig.isCorrect}
+            isCorrectAnswer={gameConfig.isCorrect}
           />
         )}
       </GameContainer>

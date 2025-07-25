@@ -153,7 +153,7 @@ export const convertQuizToLevels = (
   ): "completed" | "current" | "locked" => {
     const difficultyLower = difficulty.toLowerCase();
 
-    // Check if level is completed
+    // Check if level is completed first
     const levelProgress = userProgressData.find((progress) => {
       let progressQuizId: number;
 
@@ -180,6 +180,9 @@ export const convertQuizToLevels = (
       case "medium":
         // Medium levels are locked until all easy levels are completed
         if (!isEasyComplete) {
+          console.log(
+            `[convertQuizToLevels] Level ${questionId} (medium) locked - Easy not complete (${difficultyStats.easy.completed}/${difficultyStats.easy.total})`
+          );
           return "locked";
         }
         return "current";
@@ -187,6 +190,9 @@ export const convertQuizToLevels = (
       case "hard":
         // Hard levels are locked until all medium levels are completed
         if (!isMediumComplete) {
+          console.log(
+            `[convertQuizToLevels] Level ${questionId} (hard) locked - Medium not complete (${difficultyStats.medium.completed}/${difficultyStats.medium.total})`
+          );
           return "locked";
         }
         return "current";
