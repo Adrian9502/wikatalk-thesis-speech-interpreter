@@ -742,8 +742,8 @@ export const useSplashStore = create<SplashState>((set, get) => ({
         gameLevels = convertQuizToLevels(gameMode, questions, gameProgressData);
       }
 
-      // Precompute filters
-      const filters = state.precomputeFiltersForLevels(gameLevels);
+      // FIXED: Use the standalone helper function, not a store method
+      const filters = precomputeFilters(gameLevels);
 
       // Calculate completion percentage
       const completedCount = gameLevels.filter(
@@ -760,7 +760,7 @@ export const useSplashStore = create<SplashState>((set, get) => ({
           ...state.precomputedLevels,
           [gameMode]: {
             levels: gameLevels,
-            filters,
+            filters, // This now uses the correct function
             completionPercentage,
             lastUpdated: Date.now(),
           },
