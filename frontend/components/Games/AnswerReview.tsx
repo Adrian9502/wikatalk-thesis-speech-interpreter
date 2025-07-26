@@ -8,6 +8,9 @@ import { BASE_COLORS, difficultyColors } from "@/constant/colors";
 import { formatTime, getGameModeGradient } from "@/utils/gameUtils";
 import { safeTextRender } from "@/utils/textUtils";
 import { NAVIGATION_COLORS } from "@/constant/gameConstants";
+// NEW: Import badge components
+import DifficultyBadge from "@/components/games/DifficultyBadge";
+import FocusAreaBadge from "@/components/games/FocusAreaBadge";
 
 interface AnswerReviewProps {
   question: string | any;
@@ -33,6 +36,8 @@ const AnswerReview: React.FC<AnswerReviewProps> = ({
   userAnswer,
   isCorrect,
   timeElapsed,
+  difficulty = "easy", // NEW: Default value
+  focusArea = "Vocabulary", // NEW: Default value
   gameMode = "multipleChoice",
   levelId,
   levelTitle,
@@ -114,6 +119,12 @@ const AnswerReview: React.FC<AnswerReviewProps> = ({
             <View style={styles.levelBadge}>
               <Text style={styles.levelText}>{levelDisplayText}</Text>
             </View>
+          </View>
+
+          {/* NEW: Level Details Badges */}
+          <View style={styles.levelDetailsContainer}>
+            <DifficultyBadge difficulty={difficulty} />
+            <FocusAreaBadge focusArea={focusArea} />
           </View>
 
           {/* Time Taken Section  */}
@@ -272,6 +283,16 @@ const styles = StyleSheet.create({
     textShadowRadius: 3,
     textAlign: "center",
     letterSpacing: 0.3,
+  },
+
+  // NEW: Level Details Badges Container
+  levelDetailsContainer: {
+    flexDirection: "row",
+    justifyContent: "center",
+    alignItems: "center",
+    gap: 12,
+    marginBottom: 12,
+    paddingHorizontal: 8,
   },
 
   // Time Information

@@ -18,15 +18,17 @@ interface MultipleChoiceProps {
 
 const MultipleChoice: React.FC<MultipleChoiceProps> = React.memo(
   ({ levelId, levelData, difficulty = "easy", isStarted = false }) => {
+    // Get user progress - DECLARE AT TOP LEVEL
+    const { progress, updateProgress, fetchProgress } = useUserProgress(
+      levelData?.questionId || levelId
+    );
+
     // NEW: Track if initial setup is complete
     const initialSetupComplete = useRef(false);
     const lastProgressTimeRef = useRef<number>(0);
     const gameStartedRef = useRef(false);
-
-    // Get user progress
-    const { progress, updateProgress } = useUserProgress(
-      levelData?.questionId || levelId
-    );
+    // ADD: Track restart state to prevent double rendering
+    const isRestartingRef = useRef(false);
 
     // Get quiz store state and actions
     const {
@@ -49,6 +51,12 @@ const MultipleChoice: React.FC<MultipleChoiceProps> = React.memo(
 
     // FIXED: Set initial time from progress when component mounts - prevent multiple calls
     useEffect(() => {
+      // CRITICAL: Don't update during restart process
+      if (isRestartingRef.current) {
+        console.log(`[MultipleChoice] Skipping progress update during restart`);
+        return;
+      }
+
       if (progress && !Array.isArray(progress)) {
         const progressTime = progress.totalTimeSpent || 0;
 
@@ -120,19 +128,81 @@ const MultipleChoice: React.FC<MultipleChoiceProps> = React.memo(
     );
 
     const handleRestartWithProgress = useCallback(async () => {
-      handleRestart();
+      console.log(`[MultipleChoice] Restarting with complete cache refresh`);
 
-      // Reset timer to continue from where they left off if they have progress
-      const progressTime =
-        progress && !Array.isArray(progress) ? progress.totalTimeSpent || 0 : 0;
-      setTimeElapsed(progressTime);
-      lastProgressTimeRef.current = progressTime;
-      gameStartedRef.current = false;
+      // CRITICAL: Set restart flag to prevent double rendering
+      isRestartingRef.current = true;
 
-      console.log(
-        `[MultipleChoice] Restarting game with time: ${progressTime}`
-      );
-    }, [handleRestart, progress, setTimeElapsed]);
+      try {
+        // 1. Clear all local state first
+        setTimeElapsed(0);
+        lastProgressTimeRef.current = 0;
+        initialSetupComplete.current = false;
+        gameStartedRef.current = false;
+
+        // 2. Clear game store state
+        const gameStore = useGameStore.getState();
+        gameStore.resetTimer();
+        gameStore.setTimeElapsed(0);
+        gameStore.setGameStatus("idle");
+
+        // 3. CRITICAL: Force fetch fresh progress data BEFORE restarting
+        console.log(`[MultipleChoice] Force fetching fresh progress data`);
+
+        try {
+          const freshProgress = await fetchProgress(true); // Force refresh
+
+          // 4. Use the fresh progress time (should be 0 after reset)
+          let progressTime = 0;
+          if (freshProgress && !Array.isArray(freshProgress)) {
+            progressTime = freshProgress.totalTimeSpent || 0;
+            console.log(
+              `[MultipleChoice] Using fresh progress time: ${progressTime}`
+            );
+          } else {
+            console.log(`[MultipleChoice] No fresh progress found, using 0`);
+          }
+
+          // 5. CRITICAL: Update local state with fresh time SYNCHRONOUSLY
+          setTimeElapsed(progressTime);
+          lastProgressTimeRef.current = progressTime;
+          initialSetupComplete.current = true; // Mark as setup complete
+
+          // 6. CRITICAL: Small delay to ensure state is applied
+          await new Promise((resolve) => setTimeout(resolve, 50));
+
+          // 7. Now restart the game
+          handleRestart();
+
+          console.log(
+            `[MultipleChoice] Restart completed with fresh time: ${progressTime}`
+          );
+        } catch (fetchError) {
+          console.error(
+            `[MultipleChoice] Error fetching fresh progress:`,
+            fetchError
+          );
+          // Fallback: restart with 0 time
+          setTimeElapsed(0);
+          lastProgressTimeRef.current = 0;
+          initialSetupComplete.current = true;
+          handleRestart();
+        }
+      } catch (error) {
+        console.error(`[MultipleChoice] Error during restart:`, error);
+        // Fallback: restart with 0 time
+        setTimeElapsed(0);
+        lastProgressTimeRef.current = 0;
+        initialSetupComplete.current = true;
+        handleRestart();
+      } finally {
+        // CRITICAL: Clear restart flag after a delay to ensure everything is settled
+        setTimeout(() => {
+          isRestartingRef.current = false;
+          console.log(`[MultipleChoice] Restart process completed`);
+        }, 100);
+      }
+    }, [handleRestart, setTimeElapsed, fetchProgress]);
 
     const gameConfig = useMemo(() => {
       const progressTime =
@@ -186,18 +256,21 @@ const MultipleChoice: React.FC<MultipleChoiceProps> = React.memo(
     }
 
     const handleTimerReset = useCallback(() => {
-      // Reset the initial time to 0 for future restarts
-      if (progress && !Array.isArray(progress)) {
-        // Force progress to be cleared locally so timer starts from 0
-        setTimeElapsed(0);
-        lastProgressTimeRef.current = 0;
-        initialSetupComplete.current = true;
-      }
+      console.log(
+        `[MultipleChoice] Timer reset received - resetting timer data only, staying on completed screen`
+      );
+
+      setTimeElapsed(0);
+      lastProgressTimeRef.current = 0;
+
+      const gameStore = useGameStore.getState();
+      gameStore.resetTimer();
+      gameStore.setTimeElapsed(0);
 
       console.log(
-        `[MultipleChoice] Timer reset completed, user can restart manually`
+        `[MultipleChoice] Timer reset completed - staying on completed screen`
       );
-    }, [setTimeElapsed, progress]);
+    }, [setTimeElapsed]);
 
     return (
       <GameContainer

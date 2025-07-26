@@ -704,15 +704,16 @@ const useGameStore = create<QuizState>((set, get) => ({
       }));
     }
   },
-
-  resetTimer: () =>
+  resetTimer: () => {
+    console.log("[GameStore] Resetting timer completely");
     set((state) => ({
       gameState: {
         ...state.gameState,
         timeElapsed: 0,
         timerRunning: false,
       },
-    })),
+    }));
+  },
 
   // Game initialization
   initialize: (levelData, levelId, gameMode, difficulty = "easy") => {
@@ -953,18 +954,20 @@ const useGameStore = create<QuizState>((set, get) => ({
   handleRestart: () => {
     const { currentMode } = get().gameState;
 
-    // Reset common state
+    console.log("[GameStore] Restarting game, clearing ALL state completely");
+
+    // CRITICAL: Reset ALL common state to initial values
     set((state) => ({
       gameState: {
         ...state.gameState,
         gameStatus: "playing",
         score: 0,
         timerRunning: true,
-        timeElapsed: 0,
+        timeElapsed: 0, // Always start from 0 - components will set correct time
       },
     }));
 
-    // Reset mode-specific state
+    // Reset mode-specific state completely
     if (currentMode === "multipleChoice") {
       set({
         multipleChoiceState: {
@@ -978,11 +981,11 @@ const useGameStore = create<QuizState>((set, get) => ({
           ...get().fillInTheBlankState,
           currentExerciseIndex: 0,
           userAnswer: "",
+          showFeedback: false,
           showHint: false,
           showTranslation: false,
-          showFeedback: false,
-          isCorrect: false,
           attemptsLeft: 2,
+          isCorrect: false,
         },
       });
     } else if (currentMode === "identification") {
@@ -995,6 +998,8 @@ const useGameStore = create<QuizState>((set, get) => ({
         },
       });
     }
+
+    console.log("[GameStore] All game state reset completed");
   },
 
   // MULTIPLE CHOICE ACTIONS

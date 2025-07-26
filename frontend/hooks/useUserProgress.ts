@@ -97,13 +97,25 @@ export const useUserProgress = (quizId: string | number | "global") => {
     }
   }, [quizId, tryUseCachedProgress]);
 
-  // ENHANCED: Stable fetch function with debouncing
+  // ENHANCED: Stable fetch function with better force refresh handling
   const fetchProgress = useCallback(
     async (forceRefresh: boolean = false) => {
       // Prevent multiple concurrent fetches
       if (isFetchingRef.current && !forceRefresh) {
         console.log(`[useUserProgress] Fetch already in progress, skipping`);
         return progress;
+      }
+
+      // CRITICAL: Always clear cache on force refresh
+      if (forceRefresh) {
+        console.log(`[useUserProgress] Force refresh - clearing ALL caches`);
+        progressCacheRef.current = {};
+
+        // Also clear splash store cache for this specific item
+        const splashStore = useSplashStore.getState();
+        if (quizId !== "global" && splashStore.clearIndividualProgress) {
+          splashStore.clearIndividualProgress(String(quizId));
+        }
       }
 
       // Debounce rapid calls (unless force refresh)
@@ -131,7 +143,7 @@ export const useUserProgress = (quizId: string | number | "global") => {
         setCurrentUserId(newUserId);
       }
 
-      // ENHANCED: Try cached data first (only set loading if no cache)
+      // ENHANCED: Skip cache check if force refresh
       if (!forceRefresh && currentUserId === newUserId) {
         // 1. Check local cache first
         if (progressCacheRef.current[cacheKey]) {
@@ -265,7 +277,7 @@ export const useUserProgress = (quizId: string | number | "global") => {
       createDefaultProgress,
       tryUseCachedProgress,
       currentUserId,
-      progress, // Add this to dependencies
+      progress,
     ]
   );
 
@@ -397,16 +409,6 @@ export const useUserProgress = (quizId: string | number | "global") => {
         const formattedId = formatQuizId(quizId);
         console.log(`[useUserProgress] Resetting timer for: ${formattedId}`);
 
-        // UPDATED: Calculate expected cost before request
-        const currentProgress =
-          progress && !Array.isArray(progress) ? progress : null;
-        const timeSpent = currentProgress?.totalTimeSpent || 0;
-        const expectedCost = calculateResetCost(timeSpent);
-
-        console.log(
-          `[useUserProgress] Expected reset cost: ${expectedCost} coins for ${timeSpent}s`
-        );
-
         const response = await axios({
           method: "post",
           url: `${API_URL}/api/userprogress/${formattedId}/reset-timer`,
@@ -420,24 +422,45 @@ export const useUserProgress = (quizId: string | number | "global") => {
         if (response.data.success) {
           console.log(`[useUserProgress] Timer reset successfully`);
 
-          // Update local progress with reset data
-          const updatedProgress = response.data.progress;
-          setProgress(updatedProgress);
+          // CRITICAL: Create reset progress with 0 time
+          const resetProgress = {
+            ...progress,
+            totalTimeSpent: 0,
+            lastAttemptTime: 0,
+            attempts: [],
+          };
 
-          // CRITICAL: Clear all caches to force fresh data
+          // CRITICAL: Update local state immediately
+          setProgress(resetProgress);
+
+          // CRITICAL: Clear ALL cache entries everywhere
           console.log(
-            `[useUserProgress] Clearing all caches after timer reset`
+            `[useUserProgress] Clearing ALL caches after timer reset`
           );
-          progressCacheRef.current = {}; // Clear local cache
 
-          // NEW: Update splash store cache with reset progress
+          // 1. Clear local cache
+          progressCacheRef.current = {};
+
+          // 2. Clear individual progress cache
           const splashStore = useSplashStore.getState();
           if (splashStore.setIndividualProgress) {
             console.log(
-              `[useUserProgress] Updating splash store cache after reset for ${formattedId}`
+              `[useUserProgress] Updating splash store with reset progress`
             );
-            splashStore.setIndividualProgress(String(quizId), updatedProgress);
+            splashStore.setIndividualProgress(String(quizId), resetProgress);
           }
+
+          // 3. Force clear splash store completely to trigger recomputation
+          splashStore.reset();
+
+          // 4. Clear progress store cache
+          const progressStore = useProgressStore.getState();
+          progressStore.clearCache();
+
+          // 5. Force refresh global progress
+          await progressStore.fetchProgress(true);
+
+          console.log(`[useUserProgress] All caches cleared and refreshed`);
 
           return {
             success: true,
@@ -465,7 +488,7 @@ export const useUserProgress = (quizId: string | number | "global") => {
         setIsLoading(false);
       }
     },
-    [progress, updateProgress]
+    [progress, formatQuizId]
   );
 
   return {

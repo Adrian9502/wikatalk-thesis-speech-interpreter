@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from "react";
+import React, { useMemo, useState, useCallback } from "react";
 import { View, Text, StyleSheet } from "react-native";
 import { router } from "expo-router";
 import * as Animatable from "react-native-animatable";
@@ -8,7 +8,9 @@ import useGameStore from "@/store/games/useGameStore";
 import { NAVIGATION_COLORS } from "@/constant/gameConstants";
 import GameButton from "@/components/games/GameButton";
 import { useLevelData } from "@/hooks/useLevelData";
-import LevelInfoModal from "@/components/games/levels/LevelInfoModal"; // NEW: Import modal
+import LevelInfoModal from "@/components/games/levels/LevelInfoModal";
+import useProgressStore from "@/store/games/useProgressStore";
+import { useSplashStore } from "@/store/useSplashStore";
 
 interface GameNavigationProps {
   levelId: number;
@@ -31,7 +33,7 @@ const GameNavigation: React.FC<GameNavigationProps> = ({
   isCurrentLevelCompleted = false,
   isCorrectAnswer = false,
 }) => {
-  // NEW: Modal state
+  // Modal state
   const [showNextLevelModal, setShowNextLevelModal] = useState(false);
   const [nextLevelData, setNextLevelData] = useState<any>(null);
 
@@ -87,7 +89,7 @@ const GameNavigation: React.FC<GameNavigationProps> = ({
     const nextDifficulty =
       nextLevel?.difficultyCategory?.toLowerCase() || "easy";
 
-    // NEW: Helper function to create next level display text
+    // Helper function to create next level display text
     const createNextLevelText = (level: any) => {
       const levelString =
         level?.levelString ||
@@ -110,7 +112,6 @@ const GameNavigation: React.FC<GameNavigationProps> = ({
 
     // FIXED: Enhanced next level availability check
     if (isLastLevel) {
-      // Only show "All Levels Complete" if there truly are no more levels
       nextLevelStatus = "disabled";
       nextLevelTitle = "All Levels Complete!";
       nextLevelSubtitle = `🎉 You've completed all ${totalLevels} levels in ${gameTitle}`;
@@ -140,38 +141,31 @@ const GameNavigation: React.FC<GameNavigationProps> = ({
           (currentDifficulty === "medium" && nextDifficulty === "hard");
 
         if (isSameDifficulty) {
-          // FIXED: Within same difficulty - allow progression regardless of correctness
-          // UPDATED: Use level string instead of just title
           nextLevelTitle = "Next Level";
           nextLevelSubtitle = createNextLevelText(nextLevel);
 
-          // Special case: If next level is already completed, show different text
           if (nextLevel.status === "completed") {
             nextLevelTitle = "Next Level (Completed)";
             nextLevelSubtitle = "You'll be redirected to level selection";
           }
         } else if (isDifficultyIncrease) {
-          // FIXED: Difficulty increase - check if current level was completed correctly
           if (!isCurrentLevelCompleted || !isCorrectAnswer) {
             nextLevelStatus = "disabled";
             nextLevelTitle = "Complete Current Level";
             nextLevelSubtitle = "✅ Answer correctly to unlock next difficulty";
           } else {
             nextLevelTitle = "Next Level";
-            // UPDATED: Use level string and add difficulty indicator
             const levelText = createNextLevelText(nextLevel);
             const difficultyText =
               nextDifficulty.charAt(0).toUpperCase() + nextDifficulty.slice(1);
             nextLevelSubtitle = `${levelText} (${difficultyText})`;
           }
         } else {
-          // This shouldn't happen in normal flow, but handle it
           nextLevelTitle = "Next Level";
           nextLevelSubtitle = createNextLevelText(nextLevel);
         }
       }
     } else {
-      // This shouldn't happen if isLastLevel logic is correct, but as a fallback
       nextLevelStatus = "disabled";
       nextLevelTitle = "No More Levels";
       nextLevelSubtitle = "🎯 Try other difficulty modes";
@@ -179,41 +173,13 @@ const GameNavigation: React.FC<GameNavigationProps> = ({
 
     // ENHANCED: Check Retry availability with better logic
     if (isCurrentLevelCompleted && isCorrectAnswer) {
-      // Only disable retry if user got it right
       retryStatus = "disabled";
       retryMessage =
         "🌟 Level completed correctly! Try the next level or explore other game modes.";
     } else if (isCurrentLevelCompleted && !isCorrectAnswer) {
-      // Allow retry if user completed but got it wrong
       retryStatus = "available";
       retryMessage = "";
     }
-
-    // FIXED: Enhanced debug logging
-    console.log(`[GameNavigation] Navigation state calculated:`, {
-      currentLevelId: numericLevelId,
-      currentDifficulty,
-      nextLevelId,
-      nextDifficulty,
-      nextLevelExists: !!nextLevel,
-      nextLevelStatus: nextLevel?.status,
-      nextLevelString: nextLevel?.levelString || nextLevel?.questionData?.level,
-      nextLevelTitle: nextLevel?.title || nextLevel?.questionData?.title,
-      isLastLevel,
-      totalLevels,
-      difficultyStats,
-      isEasyComplete,
-      isMediumComplete,
-      isCurrentLevelCompleted,
-      isCorrectAnswer,
-      finalStatus: nextLevelStatus,
-      finalTitle: nextLevelTitle,
-      finalSubtitle: nextLevelSubtitle,
-      isSameDifficulty: currentDifficulty === nextDifficulty,
-      isDifficultyIncrease:
-        (currentDifficulty === "easy" && nextDifficulty === "medium") ||
-        (currentDifficulty === "medium" && nextDifficulty === "hard"),
-    });
 
     return {
       nextLevel: {
@@ -221,7 +187,7 @@ const GameNavigation: React.FC<GameNavigationProps> = ({
         title: nextLevelTitle,
         subtitle: nextLevelSubtitle,
         exists: !isLastLevel && !!nextLevel,
-        data: nextLevel, // NEW: Include the actual level data
+        data: nextLevel,
       },
       retry: {
         status: retryStatus,
@@ -303,20 +269,15 @@ const GameNavigation: React.FC<GameNavigationProps> = ({
         },
       });
     } else {
-      // NEW: Show modal instead of direct navigation with enhanced level data
       if (nextLevel) {
-        // UPDATED: Pass comprehensive level data including level string
         const modalLevelData = {
           ...nextLevel.questionData,
           ...nextLevel,
-          // Ensure we have the level string available
           levelString:
             nextLevel.levelString ||
             nextLevel.questionData?.level ||
             `Level ${nextLevelId}`,
-          // Ensure we have the title
           title: nextLevel.title || nextLevel.questionData?.title,
-          // Add the level number for reference
           levelNumber: nextLevelId,
         };
 
@@ -332,7 +293,7 @@ const GameNavigation: React.FC<GameNavigationProps> = ({
     }
   };
 
-  // NEW: Handle modal start - this is where actual navigation happens
+  // Handle modal start - this is where actual navigation happens
   const handleModalStart = () => {
     const nextLevelId = numericLevelId + 1;
     console.log(`[GameNavigation] Starting level ${nextLevelId} from modal`);
@@ -362,13 +323,14 @@ const GameNavigation: React.FC<GameNavigationProps> = ({
     });
   };
 
-  // NEW: Handle modal close
+  // Handle modal close
   const handleModalClose = () => {
     setShowNextLevelModal(false);
     setNextLevelData(null);
   };
 
-  const handleRetry = () => {
+  // FIXED: Properly access stores without breaking hooks rules
+  const handleRetry = useCallback(async () => {
     if (navigationState.retry.status === "disabled") {
       console.log(
         "[GameNavigation] Retry is disabled:",
@@ -377,9 +339,38 @@ const GameNavigation: React.FC<GameNavigationProps> = ({
       return;
     }
 
-    console.log("[GameNavigation] Retrying current level");
-    onRestart();
-  };
+    console.log("[GameNavigation] Retrying current level - forcing fresh data");
+
+    try {
+      // FIXED: Use getState() to access stores properly
+      const gameStore = useGameStore.getState();
+      gameStore.setGameStatus("idle");
+      gameStore.setScore(0);
+      gameStore.setTimerRunning(false);
+      gameStore.resetTimer();
+      gameStore.setTimeElapsed(0);
+
+      // FIXED: Access progress store properly
+      const progressStore = useProgressStore.getState();
+      progressStore.clearCache();
+
+      // Force refresh progress
+      await progressStore.fetchProgress(true);
+
+      // FIXED: Access splash store properly
+      const splashStore = useSplashStore.getState();
+      splashStore.reset();
+
+      setTimeout(() => {
+        console.log("[GameNavigation] All caches cleared, calling onRestart");
+        onRestart();
+      }, 100);
+    } catch (error) {
+      console.error("[GameNavigation] Error during retry preparation:", error);
+      // Always call onRestart as fallback
+      onRestart();
+    }
+  }, [navigationState.retry.status, navigationState.retry.message, onRestart]);
 
   const handleGameModeNavigation = (
     newGameMode: string,
@@ -421,7 +412,7 @@ const GameNavigation: React.FC<GameNavigationProps> = ({
           style={[styles.floatingElement, styles.element2]}
         />
 
-        {/* Primary Action Section */}
+        {/* Primary Section */}
         <Animatable.View
           animation="slideInUp"
           duration={800}
@@ -495,68 +486,54 @@ const GameNavigation: React.FC<GameNavigationProps> = ({
           </View>
         </Animatable.View>
 
-        {/* Game Mode Navigation Section */}
+        {/* Game Mode Navigation */}
         <Animatable.View animation="fadeIn" duration={600} delay={500}>
           <View style={styles.divider} />
 
-          <Text style={styles.sectionTitle}>Try Other Game Modes</Text>
+          <Text style={styles.sectionTitle}>Other Game Modes</Text>
           <Text style={styles.sectionSubtitle}>
-            Challenge yourself with different learning styles
+            Try different learning styles
           </Text>
 
           <View style={styles.gameModeGrid}>
-            {gameMode !== "multipleChoice" && (
-              <GameButton
-                variant="gameMode"
-                title="Multiple Choice"
-                subtitle="Select the correct answer"
-                iconName="flash"
-                colors={gameModeNavigationColors.multipleChoice}
-                onPress={() =>
-                  handleGameModeNavigation("multipleChoice", "Multiple Choice")
-                }
-                animation="slideInLeft"
-                delay={600}
-              />
-            )}
-
-            {gameMode !== "identification" && (
-              <GameButton
-                variant="gameMode"
-                title="Word Identification"
-                subtitle="Find the correct word"
-                iconName="eye"
-                colors={gameModeNavigationColors.identification}
-                onPress={() =>
-                  handleGameModeNavigation(
-                    "identification",
-                    "Word Identification"
-                  )
-                }
-                animation="slideInUp"
-                delay={700}
-              />
-            )}
-
-            {gameMode !== "fillBlanks" && (
-              <GameButton
-                variant="gameMode"
-                title="Fill in the Blanks"
-                subtitle="Complete the sentence"
-                iconName="pencil"
-                colors={gameModeNavigationColors.fillBlanks}
-                onPress={() =>
-                  handleGameModeNavigation("fillBlanks", "Fill in the Blanks")
-                }
-                animation="slideInRight"
-                delay={800}
-              />
-            )}
+            <GameButton
+              variant="gameMode"
+              title="Multiple Choice"
+              subtitle="Pick the right answer"
+              iconName="format-list-bulleted"
+              colors={gameModeNavigationColors.multipleChoice}
+              onPress={() =>
+                handleGameModeNavigation("multipleChoice", "Multiple Choice")
+              }
+            />
+            <GameButton
+              variant="gameMode"
+              title="Word Identification"
+              subtitle="Find the correct word"
+              iconName="crosshairs-gps"
+              colors={gameModeNavigationColors.identification}
+              onPress={() =>
+                handleGameModeNavigation(
+                  "identification",
+                  "Word Identification"
+                )
+              }
+            />
+            <GameButton
+              variant="gameMode"
+              title="Fill in the Blank"
+              subtitle="Complete the sentence"
+              iconName="pencil"
+              colors={gameModeNavigationColors.fillBlanks}
+              onPress={() =>
+                handleGameModeNavigation("fillBlanks", "Fill in the Blank")
+              }
+            />
           </View>
         </Animatable.View>
       </View>
 
-      {/* NEW: Next Level Modal */}
+      {/* Next Level Modal */}
       {showNextLevelModal && nextLevelData && (
         <View style={styles.modalOverlay}>
           <LevelInfoModal
@@ -652,7 +629,7 @@ const styles = StyleSheet.create({
     gap: 8,
   },
 
-  // NEW: Modal overlay
+  // Modal overlay
   modalOverlay: {
     position: "absolute",
     top: 0,

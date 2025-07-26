@@ -11,6 +11,7 @@ import {
 import * as Animatable from "react-native-animatable";
 import { LinearGradient } from "expo-linear-gradient";
 import { RefreshCw, X, CheckCircle } from "react-native-feather";
+import MaterialCommunityIcons from "react-native-vector-icons/MaterialCommunityIcons";
 import Timer from "@/components/games/Timer";
 import DifficultyBadge from "@/components/games/DifficultyBadge";
 import FocusAreaBadge from "@/components/games/FocusAreaBadge";
@@ -21,6 +22,9 @@ import { calculateResetCost } from "@/utils/resetCostUtils";
 import { NAVIGATION_COLORS } from "@/constant/gameConstants";
 import { useUserProgress } from "@/hooks/useUserProgress";
 import useCoinsStore from "@/store/games/useCoinsStore";
+import useGameStore from "@/store/games/useGameStore";
+import useProgressStore from "@/store/games/useProgressStore";
+import { useSplashStore } from "@/store/useSplashStore";
 
 interface StatsContainerProps {
   difficulty: string;
@@ -34,7 +38,6 @@ interface StatsContainerProps {
   finalTime?: number;
   levelId?: number | string;
   onTimerReset?: () => void;
-  // NEW: Add prop to track if answer was correct
   isCorrectAnswer?: boolean;
 }
 
@@ -50,7 +53,6 @@ const StatsContainer: React.FC<StatsContainerProps> = ({
   finalTime,
   levelId,
   onTimerReset,
-  // NEW: Accept the correct answer prop
   isCorrectAnswer = false,
 }) => {
   // Reset modal state
@@ -61,6 +63,10 @@ const StatsContainer: React.FC<StatsContainerProps> = ({
   // NEW: Success message state
   const [showSuccessMessage, setShowSuccessMessage] = useState(false);
   const [resetMessage, setResetMessage] = useState("");
+
+  // NEW: Success notification state (separate from modal)
+  const [showResetSuccessNotification, setShowResetSuccessNotification] =
+    useState(false);
 
   // Get user progress and coins
   const { resetTimer } = useUserProgress(levelId || "");
@@ -76,17 +82,24 @@ const StatsContainer: React.FC<StatsContainerProps> = ({
 
   // Check if user can afford reset
   const canAfford = coins >= resetCost;
-  const shouldDisableReset = !canAfford || isCorrectAnswer; // Disable if correct answer
+
+  // UPDATED: Enhanced disable logic - disable if correct answer, can't afford, OR time is 0
+  const shouldDisableReset =
+    !canAfford || isCorrectAnswer || (currentTime || finalTime || 0) === 0;
 
   // Handle reset button press
   const handleResetPress = useCallback(() => {
-    if (variant === "completed" && levelId && !isCorrectAnswer) {
+    if (
+      variant === "completed" &&
+      levelId &&
+      !isCorrectAnswer &&
+      (currentTime || finalTime || 0) > 0
+    ) {
       setShowResetModal(true);
       setShowSuccessMessage(false);
     }
-  }, [variant, levelId, isCorrectAnswer]); // Add isCorrectAnswer to dependencies
+  }, [variant, levelId, isCorrectAnswer, currentTime, finalTime]);
 
-  // Handle reset confirmation
   const handleConfirmReset = useCallback(async () => {
     if (!levelId || isResetting) return;
 
@@ -96,20 +109,68 @@ const StatsContainer: React.FC<StatsContainerProps> = ({
       const result = await resetTimer(levelId);
 
       if (result.success) {
-        // Update local time display
+        // Update current time to 0
         setCurrentTime(0);
-
-        // Refresh coins balance
         fetchCoinsBalance(true);
 
-        // Show success message instead of closing modal immediately
         const coinsDeducted = result.coinsDeducted || resetCost;
-        setResetMessage(
-          `Timer and progress reset successfully! ${coinsDeducted} coins deducted. You can now play the level with a fresh timer.`
-        );
+        const successMsg = `Timer reset successfully! 🪙 ${coinsDeducted} coins deducted.`;
+
+        setResetMessage(successMsg);
         setShowSuccessMessage(true);
 
-        console.log(`[StatsContainer] Timer reset successfully`);
+        console.log(
+          `[StatsContainer] Timer reset successfully - staying on completed screen`
+        );
+
+        // CRITICAL: Clear the game store's timer state BUT don't restart
+        const gameStore = useGameStore.getState();
+        gameStore.resetTimer();
+        gameStore.setTimeElapsed(0);
+        // REMOVED: Don't change game status or restart - stay on completed screen
+        // gameStore.setGameStatus("idle");
+        // gameStore.setScore(0);
+        // gameStore.setTimerRunning(false);
+
+        // CRITICAL: Clear any cached progress for this level
+        const progressStore = useProgressStore.getState();
+        progressStore.clearCache();
+
+        // Force refresh global progress
+        progressStore.fetchProgress(true);
+
+        // FIXED: Clear splash store cache for this level using correct method
+        const splashStore = useSplashStore.getState();
+
+        // Get the existing individual progress first
+        const existingProgress = splashStore.getIndividualProgress
+          ? splashStore.getIndividualProgress(String(levelId))
+          : null;
+
+        // Update with reset progress using the correct method
+        if (splashStore.setIndividualProgress) {
+          const resetProgress = existingProgress
+            ? {
+                ...existingProgress,
+                totalTimeSpent: 0,
+                lastAttemptTime: 0,
+                attempts: [],
+              }
+            : {
+                totalTimeSpent: 0,
+                lastAttemptTime: 0,
+                attempts: [],
+                completed: false,
+                quizId: String(levelId),
+              };
+
+          splashStore.setIndividualProgress(String(levelId), resetProgress);
+          console.log(
+            `[StatsContainer] Updated splash store cache for level ${levelId}`
+          );
+        }
+
+        console.log(`[StatsContainer] All caches cleared after timer reset`);
       } else {
         console.error(`[StatsContainer] Reset failed:`, result.message);
         setResetMessage("Reset failed. Please try again.");
@@ -125,24 +186,74 @@ const StatsContainer: React.FC<StatsContainerProps> = ({
   }, [levelId, resetTimer, fetchCoinsBalance, resetCost]);
 
   const handleSuccessAcknowledge = useCallback(() => {
+    console.log(
+      "[StatsContainer] Success acknowledged - keeping completed state"
+    );
+
     setShowSuccessMessage(false);
     setShowResetModal(false);
 
-    // ONLY call onTimerReset after user acknowledges the success message
-    if (onTimerReset && resetMessage.includes("successfully")) {
-      // Small delay to ensure modal is closed first
-      setTimeout(() => {
-        onTimerReset();
-      }, 300);
-    }
-  }, [onTimerReset, resetMessage]);
+    console.log(
+      "[StatsContainer] Timer reset completed, staying on completed screen"
+    );
+  }, []);
 
-  // Handle modal close
   const handleCloseModal = useCallback(() => {
     if (!isResetting && !showSuccessMessage) {
       setShowResetModal(false);
     }
   }, [isResetting, showSuccessMessage]);
+
+  const renderStaticTimer = () => (
+    <View style={styles.staticTimerContainer}>
+      <View style={styles.timeContainer}>
+        <Clock width={16} height={16} color={BASE_COLORS.white} />
+        <Text style={styles.staticTimerText}>
+          {formatTime(currentTime || finalTime || 0)}
+        </Text>
+      </View>
+
+      {variant === "completed" && levelId && (
+        <View style={styles.resetSection}>
+          <TouchableOpacity
+            style={[
+              styles.resetButton,
+              shouldDisableReset && styles.resetButtonDisabled,
+            ]}
+            onPress={handleResetPress}
+            disabled={shouldDisableReset}
+            activeOpacity={0.8}
+          >
+            <RefreshCw width={12} height={12} color="#fff" />
+            <Text style={styles.resetButtonText}>🪙 {resetCost}</Text>
+          </TouchableOpacity>
+
+          {/*  Persistent reset status message */}
+          {(currentTime || finalTime || 0) === 0 && (
+            <View style={styles.resetStatusContainer}>
+              <MaterialCommunityIcons
+                name="check-circle"
+                size={12}
+                color="#4CAF50"
+              />
+              <Text style={styles.resetStatusText}>
+                Timer Reset Successfully! 🎉
+              </Text>
+            </View>
+          )}
+        </View>
+      )}
+    </View>
+  );
+
+  // UPDATED: Get reset button disabled reason
+  const getDisabledReason = () => {
+    if (isCorrectAnswer) return "Level completed correctly!";
+    if ((currentTime || finalTime || 0) === 0)
+      return "Timer is already at 0:00";
+    if (!canAfford) return "Insufficient coins";
+    return "";
+  };
 
   return (
     <>
@@ -155,7 +266,7 @@ const StatsContainer: React.FC<StatsContainerProps> = ({
           variant === "completed" && styles.completedStatsContainer,
         ]}
       >
-        {/* Timer Section - Show in both variants but different behavior */}
+        {/* Timer Section - Always show when showTimer is true */}
         {showTimer && (
           <Animatable.View
             animation="fadeInLeft"
@@ -171,46 +282,26 @@ const StatsContainer: React.FC<StatsContainerProps> = ({
                 key={`timer-${initialTime}`}
               />
             ) : (
-              // Static time display for completed state
-              <View style={styles.staticTimerContainer}>
-                <View style={styles.timeContainer}>
-                  <Clock width={16} height={16} color={BASE_COLORS.white} />
-                  <Text style={styles.staticTimerText}>
-                    {formatTime(currentTime || finalTime || 0)}
-                  </Text>
-                </View>
-                {variant === "completed" && levelId && (
-                  <TouchableOpacity
-                    style={[
-                      styles.resetButton,
-                      shouldDisableReset && styles.resetButtonDisabled,
-                    ]}
-                    onPress={handleResetPress}
-                    disabled={shouldDisableReset}
-                    activeOpacity={0.8}
-                  >
-                    <RefreshCw width={12} height={12} color="#fff" />
-                    <Text style={styles.resetButtonText}>{resetCost} 🪙</Text>
-                  </TouchableOpacity>
-                )}
-              </View>
+              // Static time display for completed state with reset button
+              renderStaticTimer()
             )}
           </Animatable.View>
         )}
 
-        {/* Badges Section */}
-        <Animatable.View
-          animation="fadeInRight"
-          duration={600}
-          delay={animationDelay + (showTimer ? 200 : 100)}
-          style={styles.badgesSection}
-        >
-          <DifficultyBadge difficulty={difficulty} />
-          <FocusAreaBadge focusArea={focusArea} />
-        </Animatable.View>
+        {/* UPDATED: Badges Section - Only show when game is playing */}
+        {variant === "playing" && (
+          <Animatable.View
+            animation="fadeInRight"
+            duration={600}
+            delay={animationDelay + (showTimer ? 200 : 100)}
+            style={styles.badgesSection}
+          >
+            <DifficultyBadge difficulty={difficulty} />
+            <FocusAreaBadge focusArea={focusArea} />
+          </Animatable.View>
+        )}
       </Animatable.View>
 
-      {/* Reset Confirmation Modal */}
       <Modal
         visible={showResetModal}
         transparent
@@ -232,9 +323,6 @@ const StatsContainer: React.FC<StatsContainerProps> = ({
                 // Success Message View
                 <>
                   <View style={styles.successHeader}>
-                    <View style={styles.successIcon}>
-                      <CheckCircle width={24} height={24} color="#4CAF50" />
-                    </View>
                     <Text style={styles.successTitle}>
                       {resetMessage.includes("successfully")
                         ? "Success!"
@@ -270,11 +358,14 @@ const StatsContainer: React.FC<StatsContainerProps> = ({
                   </View>
 
                   <View style={styles.modalBody}>
-                    {isCorrectAnswer ? (
+                    {/* UPDATED: Show different messages based on disabled reason */}
+                    {shouldDisableReset ? (
                       <Text style={styles.modalText}>
-                        🌟 Great job! You answered correctly, so timer reset is
-                        not available. Try the next level or explore other game
-                        modes!
+                        {isCorrectAnswer
+                          ? "🌟 Great job! You answered correctly, so timer reset is not available. Try the next level or explore other game modes!"
+                          : (currentTime || finalTime || 0) === 0
+                          ? "⏰ Timer is already at 0:00. No need to reset!"
+                          : "💰 Insufficient coins for reset. Earn more coins and try again!"}
                       </Text>
                     ) : (
                       <>
@@ -307,19 +398,12 @@ const StatsContainer: React.FC<StatsContainerProps> = ({
                             </View>
                           </View>
                         </View>
-
-                        {!canAfford && (
-                          <Text style={styles.insufficientText}>
-                            Insufficient coins for reset
-                          </Text>
-                        )}
                       </>
                     )}
                   </View>
 
                   <View style={styles.modalActions}>
-                    {/* UPDATED: Only show reset button if answer was incorrect */}
-                    {!isCorrectAnswer ? (
+                    {!shouldDisableReset ? (
                       <>
                         <TouchableOpacity
                           style={styles.cancelButton}
@@ -332,23 +416,21 @@ const StatsContainer: React.FC<StatsContainerProps> = ({
                         <TouchableOpacity
                           style={[
                             styles.confirmButton,
-                            (!canAfford || isResetting) &&
-                              styles.confirmButtonDisabled,
+                            isResetting && styles.confirmButtonDisabled,
                           ]}
                           onPress={handleConfirmReset}
-                          disabled={!canAfford || isResetting}
+                          disabled={isResetting}
                         >
                           {isResetting ? (
                             <ActivityIndicator size="small" color="#fff" />
                           ) : (
                             <Text style={styles.confirmButtonText}>
-                              {canAfford ? "Reset Timer" : "Can't Reset"}
+                              Reset Timer
                             </Text>
                           )}
                         </TouchableOpacity>
                       </>
                     ) : (
-                      // Show only close button if answer was correct
                       <TouchableOpacity
                         style={[styles.confirmButton, { flex: 1 }]}
                         onPress={handleCloseModal}
@@ -367,6 +449,7 @@ const StatsContainer: React.FC<StatsContainerProps> = ({
   );
 };
 
+// Add new styles for the success notification
 const styles = StyleSheet.create({
   statsContainer: {
     flexDirection: "row",
@@ -427,6 +510,27 @@ const styles = StyleSheet.create({
     fontSize: 12,
     fontFamily: "Poppins-Medium",
     color: "#fff",
+  },
+  resetSection: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 4,
+  },
+  resetStatusContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "rgba(76, 175, 80, 0.2)",
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: "rgba(255, 255, 255, 0.3)",
+  },
+  resetStatusText: {
+    fontSize: 12,
+    fontFamily: "Poppins-Medium",
+    color: "#4CAF50",
+    marginLeft: 4,
   },
 
   // Modal styles
@@ -558,22 +662,13 @@ const styles = StyleSheet.create({
     textAlign: "center",
   },
 
-  // NEW: Success message styles
   successHeader: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
     marginBottom: 16,
   },
-  successIcon: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
-    backgroundColor: "rgba(76, 175, 80, 0.2)",
-    justifyContent: "center",
-    alignItems: "center",
-    marginRight: 6,
-  },
+
   successTitle: {
     fontSize: 18,
     fontFamily: "Poppins-SemiBold",
@@ -583,7 +678,7 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   successText: {
-    fontSize: 14,
+    fontSize: 13,
     fontFamily: "Poppins-Regular",
     color: "rgba(255, 255, 255, 0.9)",
     lineHeight: 20,

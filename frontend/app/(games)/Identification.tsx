@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useCallback } from "react";
+import React, { useEffect, useMemo, useCallback, useRef } from "react";
 import { View, Text, TouchableOpacity } from "react-native";
 import { BASE_COLORS } from "@/constant/colors";
 import useGameStore from "@/store/games/useGameStore";
@@ -10,7 +10,6 @@ import { useGameInitialization } from "@/hooks/useGameInitialization";
 import { router } from "expo-router";
 import IdentificationPlayingContent from "@/components/games/identification/IdentificationPlayingContent";
 import { useUserProgress } from "@/hooks/useUserProgress";
-// NEW: Import the utility function
 import { useNextLevelData } from "@/utils/games/levelUtils";
 
 interface IdentificationProps {
@@ -22,10 +21,13 @@ interface IdentificationProps {
 
 const Identification: React.FC<IdentificationProps> = React.memo(
   ({ levelId, levelData, difficulty = "easy", isStarted = false }) => {
-    // user progress hook
-    const { progress, updateProgress } = useUserProgress(
+    // FIXED: Declare hook at top level
+    const { progress, updateProgress, fetchProgress } = useUserProgress(
       levelData?.questionId || levelId
     );
+
+    // ADD: Track restart state
+    const isRestartingRef = useRef(false);
 
     const {
       gameState: { score, gameStatus, timerRunning, timeElapsed },
@@ -56,6 +58,12 @@ const Identification: React.FC<IdentificationProps> = React.memo(
 
     // Set initial time from progress when component mounts
     useEffect(() => {
+      // CRITICAL: Don't update during restart process
+      if (isRestartingRef.current) {
+        console.log(`[Identification] Skipping progress update during restart`);
+        return;
+      }
+
       if (progress && !Array.isArray(progress) && progress.totalTimeSpent > 0) {
         console.log(
           `[Identification] Setting initial time from progress: ${progress.totalTimeSpent}`
@@ -116,26 +124,87 @@ const Identification: React.FC<IdentificationProps> = React.memo(
     );
 
     const handleTimerReset = useCallback(() => {
-      // UPDATED: Don't restart immediately, just reset the timer state
-      setTimeElapsed(0);
       console.log(
-        `[Identification] Timer reset completed, user can restart manually`
+        `[Identification] Timer reset received - resetting timer data only, staying on completed screen`
+      );
+
+      setTimeElapsed(0);
+
+      const gameStore = useGameStore.getState();
+      gameStore.resetTimer();
+      gameStore.setTimeElapsed(0);
+
+      console.log(
+        `[Identification] Timer reset completed - staying on completed screen`
       );
     }, [setTimeElapsed]);
 
-    // PERFORMANCE: Memoize restart handler
     const handleRestartWithProgress = useCallback(async () => {
-      handleRestart();
+      console.log(`[Identification] Restarting with complete cache refresh`);
 
-      // Reset timer to continue from where they left off if they have progress
-      if (progress && !Array.isArray(progress) && progress.totalTimeSpent > 0) {
-        setTimeElapsed(progress.totalTimeSpent);
-      } else {
+      // CRITICAL: Set restart flag
+      isRestartingRef.current = true;
+
+      try {
+        // 1. Clear local state
         setTimeElapsed(0);
-      }
 
-      console.log(`[Identification] Restarting game`);
-    }, [handleRestart, progress, setTimeElapsed]);
+        // 2. Clear game store state
+        const gameStore = useGameStore.getState();
+        gameStore.resetTimer();
+        gameStore.setTimeElapsed(0);
+        gameStore.setGameStatus("idle");
+
+        // 3. CRITICAL: Force fetch fresh progress data BEFORE restarting
+        console.log(`[Identification] Force fetching fresh progress data`);
+
+        try {
+          const freshProgress = await fetchProgress(true); // Force refresh
+
+          // 4. Use the fresh progress time (should be 0 after reset)
+          let progressTime = 0;
+          if (freshProgress && !Array.isArray(freshProgress)) {
+            progressTime = freshProgress.totalTimeSpent || 0;
+            console.log(
+              `[Identification] Using fresh progress time: ${progressTime}`
+            );
+          } else {
+            console.log(`[Identification] No fresh progress found, using 0`);
+          }
+
+          // 5. CRITICAL: Update local state synchronously
+          setTimeElapsed(progressTime);
+
+          // 6. Small delay to ensure state is applied
+          await new Promise((resolve) => setTimeout(resolve, 50));
+
+          // 7. Now restart the game
+          handleRestart();
+
+          console.log(
+            `[Identification] Restart completed with fresh time: ${progressTime}`
+          );
+        } catch (fetchError) {
+          console.error(
+            `[Identification] Error fetching fresh progress:`,
+            fetchError
+          );
+          // Fallback: restart with 0 time
+          setTimeElapsed(0);
+          handleRestart();
+        }
+      } catch (error) {
+        console.error(`[Identification] Error during restart:`, error);
+        setTimeElapsed(0);
+        handleRestart();
+      } finally {
+        // Clear restart flag after delay
+        setTimeout(() => {
+          isRestartingRef.current = false;
+          console.log(`[Identification] Restart process completed`);
+        }, 100);
+      }
+    }, [handleRestart, setTimeElapsed, fetchProgress]);
 
     // PERFORMANCE: Memoize game configuration
     const gameConfig = useMemo(() => {
