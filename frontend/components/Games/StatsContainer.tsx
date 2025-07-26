@@ -34,6 +34,8 @@ interface StatsContainerProps {
   finalTime?: number;
   levelId?: number | string;
   onTimerReset?: () => void;
+  // NEW: Add prop to track if answer was correct
+  isCorrectAnswer?: boolean;
 }
 
 const StatsContainer: React.FC<StatsContainerProps> = ({
@@ -48,6 +50,8 @@ const StatsContainer: React.FC<StatsContainerProps> = ({
   finalTime,
   levelId,
   onTimerReset,
+  // NEW: Accept the correct answer prop
+  isCorrectAnswer = false,
 }) => {
   // Reset modal state
   const [showResetModal, setShowResetModal] = useState(false);
@@ -72,14 +76,15 @@ const StatsContainer: React.FC<StatsContainerProps> = ({
 
   // Check if user can afford reset
   const canAfford = coins >= resetCost;
+  const shouldDisableReset = !canAfford || isCorrectAnswer; // Disable if correct answer
 
   // Handle reset button press
   const handleResetPress = useCallback(() => {
-    if (variant === "completed" && levelId) {
+    if (variant === "completed" && levelId && !isCorrectAnswer) {
       setShowResetModal(true);
-      setShowSuccessMessage(false); // Reset success message state
+      setShowSuccessMessage(false);
     }
-  }, [variant, levelId]);
+  }, [variant, levelId, isCorrectAnswer]); // Add isCorrectAnswer to dependencies
 
   // Handle reset confirmation
   const handleConfirmReset = useCallback(async () => {
@@ -168,22 +173,24 @@ const StatsContainer: React.FC<StatsContainerProps> = ({
             ) : (
               // Static time display for completed state
               <View style={styles.staticTimerContainer}>
-                <Clock width={16} height={16} color={BASE_COLORS.white} />
-                <Text style={styles.staticTimerText}>
-                  {formatTime(currentTime || finalTime || 0)}
-                </Text>
+                <View style={styles.timeContainer}>
+                  <Clock width={16} height={16} color={BASE_COLORS.white} />
+                  <Text style={styles.staticTimerText}>
+                    {formatTime(currentTime || finalTime || 0)}
+                  </Text>
+                </View>
                 {variant === "completed" && levelId && (
                   <TouchableOpacity
                     style={[
                       styles.resetButton,
-                      !canAfford && styles.resetButtonDisabled,
+                      shouldDisableReset && styles.resetButtonDisabled,
                     ]}
                     onPress={handleResetPress}
-                    disabled={!canAfford}
+                    disabled={shouldDisableReset}
                     activeOpacity={0.8}
                   >
                     <RefreshCw width={12} height={12} color="#fff" />
-                    <Text style={styles.resetButtonText}>{resetCost}🪙</Text>
+                    <Text style={styles.resetButtonText}>{resetCost} 🪙</Text>
                   </TouchableOpacity>
                 )}
               </View>
@@ -196,10 +203,7 @@ const StatsContainer: React.FC<StatsContainerProps> = ({
           animation="fadeInRight"
           duration={600}
           delay={animationDelay + (showTimer ? 200 : 100)}
-          style={[
-            styles.badgesSection,
-            variant === "completed" && styles.completedBadgesSection,
-          ]}
+          style={styles.badgesSection}
         >
           <DifficultyBadge difficulty={difficulty} />
           <FocusAreaBadge focusArea={focusArea} />
@@ -224,7 +228,6 @@ const StatsContainer: React.FC<StatsContainerProps> = ({
               colors={NAVIGATION_COLORS.indigo}
               style={styles.modalContent}
             >
-              {/* UPDATED: Conditional content based on state */}
               {showSuccessMessage ? (
                 // Success Message View
                 <>
@@ -267,69 +270,92 @@ const StatsContainer: React.FC<StatsContainerProps> = ({
                   </View>
 
                   <View style={styles.modalBody}>
-                    <Text style={styles.modalText}>
-                      This will reset your timer to 0:00 and clear your progress
-                      for this level.
-                    </Text>
-
-                    {/* Cost info */}
-                    <View style={styles.costInfo}>
-                      <View style={styles.costRow}>
-                        <Text style={styles.costLabel}>Cost:</Text>
-                        <View style={styles.costValue}>
-                          <Image
-                            source={require("@/assets/images/coin.png")}
-                            style={styles.coinImage}
-                          />
-                          <Text style={styles.costText}>{resetCost}</Text>
-                        </View>
-                      </View>
-
-                      <View style={styles.costRow}>
-                        <Text style={styles.costLabel}>Your Balance:</Text>
-                        <View style={styles.costValue}>
-                          <Image
-                            source={require("@/assets/images/coin.png")}
-                            style={styles.coinImage}
-                          />
-                          <Text style={styles.costText}>{coins}</Text>
-                        </View>
-                      </View>
-                    </View>
-
-                    {!canAfford && (
-                      <Text style={styles.insufficientText}>
-                        Insufficient coins for reset
+                    {isCorrectAnswer ? (
+                      <Text style={styles.modalText}>
+                        🌟 Great job! You answered correctly, so timer reset is
+                        not available. Try the next level or explore other game
+                        modes!
                       </Text>
+                    ) : (
+                      <>
+                        <Text style={styles.modalText}>
+                          This will reset your timer to 0:00 and clear your
+                          progress for this level.
+                        </Text>
+
+                        {/* Cost info */}
+                        <View style={styles.costInfo}>
+                          <View style={styles.costRow}>
+                            <Text style={styles.costLabel}>Cost:</Text>
+                            <View style={styles.costValue}>
+                              <Image
+                                source={require("@/assets/images/coin.png")}
+                                style={styles.coinImage}
+                              />
+                              <Text style={styles.costText}>{resetCost}</Text>
+                            </View>
+                          </View>
+
+                          <View style={styles.costRow}>
+                            <Text style={styles.costLabel}>Your Balance:</Text>
+                            <View style={styles.costValue}>
+                              <Image
+                                source={require("@/assets/images/coin.png")}
+                                style={styles.coinImage}
+                              />
+                              <Text style={styles.costText}>{coins}</Text>
+                            </View>
+                          </View>
+                        </View>
+
+                        {!canAfford && (
+                          <Text style={styles.insufficientText}>
+                            Insufficient coins for reset
+                          </Text>
+                        )}
+                      </>
                     )}
                   </View>
 
                   <View style={styles.modalActions}>
-                    <TouchableOpacity
-                      style={styles.cancelButton}
-                      onPress={handleCloseModal}
-                      disabled={isResetting}
-                    >
-                      <Text style={styles.cancelButtonText}>Cancel</Text>
-                    </TouchableOpacity>
+                    {/* UPDATED: Only show reset button if answer was incorrect */}
+                    {!isCorrectAnswer ? (
+                      <>
+                        <TouchableOpacity
+                          style={styles.cancelButton}
+                          onPress={handleCloseModal}
+                          disabled={isResetting}
+                        >
+                          <Text style={styles.cancelButtonText}>Cancel</Text>
+                        </TouchableOpacity>
 
-                    <TouchableOpacity
-                      style={[
-                        styles.confirmButton,
-                        (!canAfford || isResetting) &&
-                          styles.confirmButtonDisabled,
-                      ]}
-                      onPress={handleConfirmReset}
-                      disabled={!canAfford || isResetting}
-                    >
-                      {isResetting ? (
-                        <ActivityIndicator size="small" color="#fff" />
-                      ) : (
-                        <Text style={styles.confirmButtonText}>
-                          {canAfford ? "Reset Timer" : "Can't Reset"}
-                        </Text>
-                      )}
-                    </TouchableOpacity>
+                        <TouchableOpacity
+                          style={[
+                            styles.confirmButton,
+                            (!canAfford || isResetting) &&
+                              styles.confirmButtonDisabled,
+                          ]}
+                          onPress={handleConfirmReset}
+                          disabled={!canAfford || isResetting}
+                        >
+                          {isResetting ? (
+                            <ActivityIndicator size="small" color="#fff" />
+                          ) : (
+                            <Text style={styles.confirmButtonText}>
+                              {canAfford ? "Reset Timer" : "Can't Reset"}
+                            </Text>
+                          )}
+                        </TouchableOpacity>
+                      </>
+                    ) : (
+                      // Show only close button if answer was correct
+                      <TouchableOpacity
+                        style={[styles.confirmButton, { flex: 1 }]}
+                        onPress={handleCloseModal}
+                      >
+                        <Text style={styles.confirmButtonText}>Got it!</Text>
+                      </TouchableOpacity>
+                    )}
                   </View>
                 </>
               )}
@@ -345,27 +371,32 @@ const styles = StyleSheet.create({
   statsContainer: {
     flexDirection: "row",
     justifyContent: "space-between",
+    marginBottom: 8,
     alignItems: "center",
   },
   completedStatsContainer: {
     justifyContent: "space-between",
-    marginBottom: 8,
   },
   timerSection: {
-    borderWidth: 1,
-    borderRadius: 16,
     minWidth: 110,
-    backgroundColor: "rgba(0, 0, 0, 0.2)",
-    paddingHorizontal: 12,
-    paddingVertical: 7,
-    alignItems: "center",
-    justifyContent: "center",
-    borderColor: "rgba(255, 255, 255, 0.12)",
   },
   staticTimerContainer: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
+    gap: 6,
+  },
+  timeContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "rgba(0, 0, 0, 0.2)",
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderWidth: 1,
+    minWidth: 90,
+    borderRadius: 16,
+    borderColor: "rgba(255, 255, 255, 0.12)",
   },
   staticTimerText: {
     color: BASE_COLORS.white,
@@ -375,10 +406,7 @@ const styles = StyleSheet.create({
   },
   badgesSection: {
     flexDirection: "row",
-    gap: 12,
-  },
-  completedBadgesSection: {
-    // Remove justifyContent: center to allow timer to show
+    gap: 6,
   },
   resetButton: {
     flexDirection: "row",
@@ -387,7 +415,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
     paddingVertical: 6,
     borderRadius: 16,
-    marginLeft: 8,
     gap: 6,
     borderWidth: 1,
     borderColor: "rgba(255, 255, 255, 0.3)",

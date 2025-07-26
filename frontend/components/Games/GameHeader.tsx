@@ -21,6 +21,7 @@ type HeaderProps = {
   isStarted?: boolean;
   variant?: "playing" | "completed";
   finalTime?: number;
+  isCorrectAnswer?: boolean;
 };
 
 const GameHeader = ({
@@ -39,8 +40,9 @@ const GameHeader = ({
   isStarted,
   variant,
   finalTime,
-  levelId, // Add this
-  onTimerReset, // Add this
+  levelId,
+  onTimerReset,
+  isCorrectAnswer,
 }: HeaderProps & { levelId?: number | string; onTimerReset?: () => void }) => {
   const navigation = useNavigation();
 
@@ -100,6 +102,7 @@ const GameHeader = ({
             finalTime={finalTime}
             levelId={levelId}
             onTimerReset={onTimerReset}
+            isCorrectAnswer={isCorrectAnswer}
           />
         </View>
       )}

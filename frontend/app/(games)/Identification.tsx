@@ -237,6 +237,7 @@ const Identification: React.FC<IdentificationProps> = React.memo(
         finalTime={timeElapsed}
         levelId={levelId}
         onTimerReset={handleTimerReset}
+        isCorrectAnswer={gameConfig.isCorrect}
       >
         {gameStatus === "playing" ? (
           <GamePlayingContent

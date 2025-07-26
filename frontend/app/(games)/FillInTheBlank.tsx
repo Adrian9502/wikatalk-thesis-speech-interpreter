@@ -202,6 +202,7 @@ const FillInTheBlank: React.FC<FillInTheBlankProps> = React.memo(
           finalTime={timeElapsed}
           levelId={levelId}
           onTimerReset={handleTimerReset}
+          isCorrectAnswer={score > 0}
         >
           {gameStatus === "playing" ? (
             <GamePlayingContent

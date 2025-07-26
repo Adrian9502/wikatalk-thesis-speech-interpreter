@@ -14,7 +14,7 @@ interface GameContainerProps {
   children: React.ReactNode;
   variant?: "double" | "triple";
 
-  // NEW: Stats props to pass to header
+  // Stats props to pass to header
   difficulty?: string;
   focusArea?: string;
   showTimer?: boolean;
@@ -23,6 +23,8 @@ interface GameContainerProps {
   finalTime?: number;
   levelId?: number | string;
   onTimerReset?: () => void;
+  // NEW: Add isCorrectAnswer prop
+  isCorrectAnswer?: boolean;
 }
 
 const GameContainer: React.FC<GameContainerProps> = ({
@@ -41,6 +43,7 @@ const GameContainer: React.FC<GameContainerProps> = ({
   finalTime,
   levelId,
   onTimerReset,
+  isCorrectAnswer,
 }) => {
   const { activeTheme } = useThemeStore();
 
@@ -76,6 +79,7 @@ const GameContainer: React.FC<GameContainerProps> = ({
           finalTime={finalTime}
           levelId={levelId}
           onTimerReset={onTimerReset}
+          isCorrectAnswer={isCorrectAnswer}
         />
 
         {gameStatus === "idle" ? (

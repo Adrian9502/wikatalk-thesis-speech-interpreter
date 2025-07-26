@@ -73,7 +73,6 @@ const MultipleChoice: React.FC<MultipleChoiceProps> = React.memo(
       }
     }, [progress, setTimeElapsed]);
 
-    // FIXED: Better option selection handler with proper time capture
     const handleOptionSelectWithProgress = useCallback(
       async (optionId: string) => {
         try {
@@ -120,7 +119,6 @@ const MultipleChoice: React.FC<MultipleChoiceProps> = React.memo(
       ]
     );
 
-    // PERFORMANCE: Memoize restart handler
     const handleRestartWithProgress = useCallback(async () => {
       handleRestart();
 
@@ -136,7 +134,6 @@ const MultipleChoice: React.FC<MultipleChoiceProps> = React.memo(
       );
     }, [handleRestart, progress, setTimeElapsed]);
 
-    // FIXED: Stable game config that doesn't change on every render
     const gameConfig = useMemo(() => {
       const progressTime =
         progress && !Array.isArray(progress) ? progress.totalTimeSpent || 0 : 0;
@@ -181,8 +178,6 @@ const MultipleChoice: React.FC<MultipleChoiceProps> = React.memo(
       gameConfig.initialTime
     );
 
-    // REMOVED: Excessive logging that was causing performance issues
-    // Only log when game starts for the first time
     if (gameStatus === "playing" && !gameStartedRef.current) {
       console.log(
         `[MultipleChoice] Game started with initialTime: ${gameConfig.initialTime}`
@@ -190,11 +185,7 @@ const MultipleChoice: React.FC<MultipleChoiceProps> = React.memo(
       gameStartedRef.current = true;
     }
 
-    // UPDATED: Handle timer reset callback - don't restart immediately
     const handleTimerReset = useCallback(() => {
-      // REMOVED: Don't call handleRestart() immediately
-      // The user will restart manually after seeing the success message
-
       // Reset the initial time to 0 for future restarts
       if (progress && !Array.isArray(progress)) {
         // Force progress to be cleared locally so timer starts from 0
@@ -222,6 +213,7 @@ const MultipleChoice: React.FC<MultipleChoiceProps> = React.memo(
         finalTime={timeElapsed}
         levelId={levelId}
         onTimerReset={handleTimerReset}
+        isCorrectAnswer={gameConfig.isSelectedCorrect}
       >
         {gameStatus === "playing" ? (
           <GamePlayingContent
