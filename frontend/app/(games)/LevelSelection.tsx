@@ -70,30 +70,112 @@ const LevelSelection = () => {
   const [animationKey, setAnimationKey] = useState("initial");
   const [shouldAnimateCards, setShouldAnimateCards] = useState(false);
 
-  // NEW: Enhanced data ready check with fallback
+  // NEW: Enhanced data ready check with better stale detection and error handling
   useEffect(() => {
     const checkDataReady = async () => {
-      // FIXED: Always check if we need to refresh data when component mounts
-      // This handles the case where user completes a level and navigates back
-      const progressStore = useProgressStore.getState();
-      const splashStore = useSplashStore.getState();
+      try {
+        // FIXED: Better stale data detection with null checks
+        const progressStore = useProgressStore.getState();
+        const splashStore = useSplashStore.getState();
 
-      // Check if we have stale data by comparing timestamps
-      const lastProgressUpdate = progressStore.lastUpdated || 0;
-      const lastSplashUpdate =
-        splashStore.precomputedLevels[gameMode]?.lastUpdated || 0;
+        // CRITICAL: Add null checks to prevent "Cannot convert undefined value to object" error
+        if (!progressStore || !splashStore) {
+          console.log(`[LevelSelection] Store not ready, retrying...`);
+          setTimeout(checkDataReady, 100);
+          return;
+        }
 
-      const isDataStale = lastProgressUpdate > lastSplashUpdate;
+        // FIXED: Safely check for precomputed data with proper null checks
+        const precomputedLevelsData = splashStore.precomputedLevels || {};
+        const enhancedProgressData = splashStore.enhancedProgress || {};
 
-      if (isDataStale) {
-        console.log(
-          `[LevelSelection] Detected stale precomputed data, forcing refresh`
-        );
-        splashStore.reset();
-      }
+        const hasPrecomputedLevels = precomputedLevelsData[gameMode]?.levels;
+        const hasPrecomputedProgress = enhancedProgressData[gameMode];
 
-      if (isAllDataReady() && !isDataStale) {
+        console.log(`[LevelSelection] Data availability check:`, {
+          gameMode,
+          hasPrecomputedLevels: !!hasPrecomputedLevels,
+          hasPrecomputedProgress: !!hasPrecomputedProgress,
+          levelsCount: hasPrecomputedLevels?.length || 0,
+          precomputedLevelsKeys: Object.keys(precomputedLevelsData),
+          enhancedProgressKeys: Object.keys(enhancedProgressData),
+        });
+
+        if (!hasPrecomputedLevels) {
+          console.log(
+            `[LevelSelection] Missing precomputed levels for ${gameMode}, waiting for splash store...`
+          );
+
+          // Check if splash store is still loading
+          if (!splashStore.levelsPrecomputed) {
+            console.log(
+              `[LevelSelection] Splash store still precomputing, waiting...`
+            );
+            setTimeout(checkDataReady, 200);
+            return;
+          } else {
+            console.log(
+              `[LevelSelection] Splash store completed but no levels found, triggering manual preload`
+            );
+            // Force manual preload
+            try {
+              const success = await splashStore.preloadGameData();
+              if (success) {
+                setTimeout(checkDataReady, 100);
+                return;
+              } else {
+                console.warn(
+                  `[LevelSelection] Manual preload failed, proceeding with available data`
+                );
+              }
+            } catch (preloadError) {
+              console.error(
+                `[LevelSelection] Error during manual preload:`,
+                preloadError
+              );
+              // Continue with available data instead of blocking
+            }
+          }
+        }
+
+        // FIXED: More intelligent stale detection with null checks
+        const lastProgressUpdate = progressStore.lastUpdated || 0;
+        const lastSplashUpdate =
+          precomputedLevelsData[gameMode]?.lastUpdated || 0;
+
+        // Only consider data stale if the difference is significant (more than 2 minutes)
+        const timeDifference = lastProgressUpdate - lastSplashUpdate;
+        const isSignificantlyStale = timeDifference > 120000; // 2 minutes instead of 30 seconds
+
+        console.log(`[LevelSelection] Data freshness check:`, {
+          lastProgressUpdate: new Date(lastProgressUpdate).toISOString(),
+          lastSplashUpdate: new Date(lastSplashUpdate).toISOString(),
+          timeDifference: `${timeDifference}ms`,
+          isSignificantlyStale,
+        });
+
+        // CRITICAL FIX: Set data as ready FIRST, then do background refresh if needed
         setDataReady(true);
+
+        // OPTIONAL: Background refresh if data is stale (don't block on this)
+        if (isSignificantlyStale && hasPrecomputedLevels) {
+          console.log(
+            `[LevelSelection] Data is significantly stale (${timeDifference}ms), doing background refresh`
+          );
+
+          // Do background refresh without blocking UI
+          setTimeout(async () => {
+            try {
+              await progressStore.fetchProgress(true);
+              console.log(`[LevelSelection] Background refresh completed`);
+            } catch (error) {
+              console.error(
+                `[LevelSelection] Background refresh error:`,
+                error
+              );
+            }
+          }, 100);
+        }
 
         // Trigger initial animation when data is ready
         if (initialLoad) {
@@ -111,34 +193,75 @@ const LevelSelection = () => {
 
           setInitialLoad(false);
         }
-      } else {
-        console.log("[LevelSelection] Waiting for pre-computed data...");
+      } catch (error) {
+        console.error(`[LevelSelection] Error in checkDataReady:`, error);
 
-        // NEW: Check if we've been waiting too long (fallback mechanism)
-        const startTime = Date.now();
-        const maxWaitTime = 10000; // 10 seconds
+        // CRITICAL: Always set data as ready to prevent infinite loading, even on error
+        setDataReady(true);
 
-        if (startTime > maxWaitTime) {
-          console.warn(
-            "[LevelSelection] Data pre-computation taking too long, triggering manual preload"
-          );
-
-          // Manually trigger data pre-computation
-          const splashStore = useSplashStore.getState();
-          try {
-            await splashStore.preloadGameData();
-          } catch (error) {
-            console.error("[LevelSelection] Manual preload failed:", error);
-          }
+        if (initialLoad) {
+          setInitialLoad(false);
         }
 
-        const timeout = setTimeout(checkDataReady, 100);
-        return () => clearTimeout(timeout);
+        // Log more details about the error for debugging
+        if (error instanceof Error) {
+          console.error(`[LevelSelection] Error details:`, {
+            message: error.message,
+            stack: error.stack,
+            gameMode,
+          });
+        }
       }
     };
 
     checkDataReady();
   }, [shouldPlayAnimation, gameMode, initialLoad]);
+
+  const isAllDataReady = useCallback(() => {
+    try {
+      const splashStore = useSplashStore.getState();
+
+      // FIXED: Add null checks to prevent errors
+      if (!splashStore) {
+        console.log(`[LevelSelection] Splash store not available`);
+        return false;
+      }
+
+      // Check for specific game mode data instead of all game modes
+      const gameKey =
+        typeof gameMode === "string" ? gameMode : String(gameMode);
+
+      // FIXED: Safe access with null checks
+      const precomputedLevelsData = splashStore.precomputedLevels || {};
+      const enhancedProgressData = splashStore.enhancedProgress || {};
+      const individualProgressCache = splashStore.individualProgressCache || {};
+
+      const requiredData = {
+        levels: precomputedLevelsData[gameKey]?.levels,
+        progress: enhancedProgressData[gameKey],
+        filters: precomputedLevelsData[gameKey]?.filters,
+        individualProgress: Object.keys(individualProgressCache).length > 0,
+      };
+
+      const isReady = Object.values(requiredData).every(Boolean);
+
+      if (!isReady) {
+        console.log(`[LevelSelection] Missing data for ${gameKey}:`, {
+          hasLevels: !!requiredData.levels,
+          hasProgress: !!requiredData.progress,
+          hasFilters: !!requiredData.filters,
+          hasIndividualProgress: !!requiredData.individualProgress,
+          availablePrecomputedKeys: Object.keys(precomputedLevelsData),
+          availableProgressKeys: Object.keys(enhancedProgressData),
+        });
+      }
+
+      return isReady;
+    } catch (error) {
+      console.error(`[LevelSelection] Error in isAllDataReady:`, error);
+      return false; // Safe fallback
+    }
+  }, [gameMode]);
 
   // PERFORMANCE FIX: Use pre-computed filters with loading state
   const filteredLevels = useMemo(() => {

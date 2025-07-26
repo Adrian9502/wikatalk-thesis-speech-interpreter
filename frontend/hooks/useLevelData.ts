@@ -39,67 +39,145 @@ export const useLevelData = (gameMode: string | string[] | undefined) => {
   const safeGameMode =
     typeof gameMode === "string" ? gameMode : String(gameMode);
 
-  // Main effect to get levels data
+  // ENHANCED: Main effect to get levels data with better precomputed data usage
   useEffect(() => {
     const loadLevels = async () => {
       try {
         setIsLoading(true);
         setError(null);
 
-        // NEW: Get current user ID and check for changes using dataManager
+        // Check for user changes
         const currentUserId = getCurrentUserId();
         const userChanged = hasUserChanged(currentUserId);
 
         if (userChanged) {
           console.log(`[useLevelData] User changed, forcing refresh`);
-          // Clear precomputed data for account change
           useSplashStore.getState().reset();
           setCurrentUserId(currentUserId);
         }
-
         setLastUserId(currentUserId);
 
-        // FIXED: Always check for fresh global progress when loading levels
-        // This ensures we get the latest completion status
-        const { progress: globalProgress } = useProgressStore.getState();
-        const shouldForceRefresh = !globalProgress || userChanged;
+        // ENHANCED: Try precomputed data first with better validation
+        const splashStore = useSplashStore.getState();
+        const precomputedData = splashStore.precomputedLevels[safeGameMode];
 
-        if (shouldForceRefresh) {
-          console.log(`[useLevelData] Forcing fresh global progress fetch`);
-          await useProgressStore.getState().fetchProgress(true);
-        }
+        if (
+          precomputedData?.levels &&
+          precomputedData.levels.length > 0 &&
+          !userChanged
+        ) {
+          // RELAXED: Accept data that's up to 10 minutes old to prevent blocking
+          const dataAge = Date.now() - (precomputedData.lastUpdated || 0);
+          const isDataFresh = dataAge < 600000; // 10 minutes instead of 5
 
-        // Try to get precomputed levels (but skip if user changed or force refresh needed)
-        if (isLevelsPrecomputed() && !userChanged && !shouldForceRefresh) {
-          console.log(
-            `[useLevelData] Using precomputed levels for ${safeGameMode}`
-          );
-          const precomputedData = getLevelsForGameMode(safeGameMode);
-
-          if (precomputedData) {
+          if (isDataFresh) {
+            console.log(
+              `[useLevelData] Using fresh precomputed levels for ${safeGameMode} (${dataAge}ms old)`
+            );
             setLevels(precomputedData.levels);
-            setCompletionPercentage(precomputedData.completionPercentage);
+            setCompletionPercentage(precomputedData.completionPercentage || 0);
             setShowLevels(true);
             setIsLoading(false);
+            return;
+          } else {
+            console.log(
+              `[useLevelData] Precomputed data is old (${dataAge}ms old), but using it anyway to prevent blocking`
+            );
+            // CHANGED: Use stale data anyway, but refresh in background
+            setLevels(precomputedData.levels);
+            setCompletionPercentage(precomputedData.completionPercentage || 0);
+            setShowLevels(true);
+            setIsLoading(false);
+
+            // Background refresh
+            setTimeout(async () => {
+              try {
+                console.log(
+                  `[useLevelData] Background refresh for ${safeGameMode}`
+                );
+                if (!questions[safeGameMode]) {
+                  await fetchQuestionsByMode(safeGameMode);
+                }
+
+                const progressStore = useProgressStore.getState();
+                await progressStore.fetchProgress(false);
+                const progressArray = progressStore.progress || [];
+
+                const currentLevels = convertQuizToLevels(
+                  safeGameMode,
+                  questions,
+                  progressArray
+                );
+                const completedCount = currentLevels.filter(
+                  (level) => level.status === "completed"
+                ).length;
+                const percentage =
+                  currentLevels.length > 0
+                    ? Math.round((completedCount / currentLevels.length) * 100)
+                    : 0;
+
+                // Update with fresh data
+                setLevels(currentLevels);
+                setCompletionPercentage(percentage);
+
+                // Update precomputed data
+                splashStore.precomputeSpecificGameMode(
+                  safeGameMode,
+                  currentLevels,
+                  progressArray
+                );
+
+                console.log(
+                  `[useLevelData] Background refresh completed for ${safeGameMode}`
+                );
+              } catch (error) {
+                console.error(
+                  `[useLevelData] Background refresh error:`,
+                  error
+                );
+              }
+            }, 500);
+
             return;
           }
         }
 
-        // Fallback: compute levels on demand with fresh data
+        // ENHANCED: Only compute on demand when necessary
         console.log(
           `[useLevelData] Computing levels on demand for ${safeGameMode}`
         );
 
         // Ensure we have questions
         if (!questions[safeGameMode]) {
-          await fetchQuestionsByMode(safeGameMode);
+          console.log(`[useLevelData] Fetching questions for ${safeGameMode}`);
+          try {
+            await fetchQuestionsByMode(safeGameMode);
+          } catch (error) {
+            console.error(`[useLevelData] Error fetching questions:`, error);
+            setError("Failed to load questions");
+            setIsLoading(false);
+            return;
+          }
         }
 
-        // Get fresh global progress for conversion
-        const freshGlobalProgress = useProgressStore.getState().progress;
-        const progressArray = Array.isArray(freshGlobalProgress)
-          ? freshGlobalProgress
-          : [];
+        // Get fresh progress data efficiently
+        const progressStore = useProgressStore.getState();
+        let progressArray = [];
+
+        if (progressStore.progress && Array.isArray(progressStore.progress)) {
+          progressArray = progressStore.progress;
+        } else {
+          // Only fetch if we don't have any progress data
+          console.log(`[useLevelData] Fetching progress data`);
+          try {
+            await progressStore.fetchProgress(false);
+            progressArray = progressStore.progress || [];
+          } catch (error) {
+            console.error(`[useLevelData] Error fetching progress:`, error);
+            // Continue with empty progress array
+            progressArray = [];
+          }
+        }
 
         console.log(
           `[useLevelData] Using ${progressArray.length} progress entries for level conversion`
@@ -125,6 +203,15 @@ export const useLevelData = (gameMode: string | string[] | undefined) => {
         setCompletionPercentage(percentage);
         setShowLevels(true);
         setIsLoading(false);
+
+        // ENHANCED: Update precomputed data in background
+        setTimeout(() => {
+          splashStore.precomputeSpecificGameMode(
+            safeGameMode,
+            currentLevels,
+            progressArray
+          );
+        }, 100);
       } catch (err) {
         console.error(
           `[useLevelData] Error loading levels for ${safeGameMode}:`,
@@ -141,9 +228,9 @@ export const useLevelData = (gameMode: string | string[] | undefined) => {
   }, [
     safeGameMode,
     questions,
-    globalProgress, // Keep this to trigger refresh when global progress changes
     fetchQuestionsByMode,
     lastUserId,
+    // REMOVED: globalProgress dependency to prevent unnecessary reloads
   ]);
 
   const handleRetry = useCallback(async () => {

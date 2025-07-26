@@ -514,9 +514,9 @@ const useProgressStore = create<ProgressState>((set, get) => ({
   // Fetch user progress (global or specific)
   fetchProgress: async (forceRefresh = false): Promise<any[] | null> => {
     const currentTime = Date.now();
-    const { lastFetched, currentUserId } = get();
+    const { lastFetched, currentUserId, progress } = get();
 
-    // NEW: Check for user changes using dataManager
+    // Check for user changes
     const newUserId = getCurrentUserId();
     const userChanged = hasUserChanged(newUserId);
 
@@ -530,14 +530,23 @@ const useProgressStore = create<ProgressState>((set, get) => ({
       set({ currentUserId: newUserId });
     }
 
-    // Use cached data if available and not forcing refresh
-    if (
-      !forceRefresh &&
-      lastFetched > 0 &&
-      currentTime - lastFetched < CACHE_EXPIRY &&
-      !userChanged
-    ) {
-      return get().progress;
+    // ENHANCED: Better cache validation
+    const cacheAge = currentTime - lastFetched;
+    const isCacheValid =
+      lastFetched > 0 && cacheAge < CACHE_EXPIRY && !userChanged;
+
+    if (!forceRefresh && isCacheValid && progress) {
+      console.log(`[ProgressStore] Using valid cache (${cacheAge}ms old)`);
+      return progress;
+    }
+
+    // Only log when actually fetching
+    if (forceRefresh) {
+      console.log(`[ProgressStore] Force refresh requested`);
+    } else {
+      console.log(
+        `[ProgressStore] Cache invalid (age: ${cacheAge}ms), fetching fresh data`
+      );
     }
 
     try {
@@ -545,8 +554,9 @@ const useProgressStore = create<ProgressState>((set, get) => ({
 
       const token = getToken();
       if (!token) {
-        set({ isLoading: false, error: "Authentication required" });
-        return null;
+        console.log("[ProgressStore] No auth token available");
+        set({ isLoading: false });
+        return progress || [];
       }
 
       const response = await axios({
@@ -561,34 +571,30 @@ const useProgressStore = create<ProgressState>((set, get) => ({
 
       if (response.data.success) {
         const progressData = response.data.progressEntries;
-
-        // Calculate derived data
-        const gameProgress = calculateGameProgress(progressData);
-        const totalCompletedCount = Object.values(gameProgress).reduce(
-          (sum, mode) => sum + mode.completed,
-          0
+        console.log(
+          `[ProgressStore] Fresh progress fetched: ${progressData.length} entries`
         );
 
-        // Update state with all calculated data
+        // Calculate game progress
+        const gameProgress = calculateGameProgress(progressData);
+        const totalCompleted = progressData.filter(
+          (p: any) => p.completed
+        ).length;
+
         set({
           progress: progressData,
-          globalProgress: progressData, // ADD THIS LINE
+          globalProgress: progressData,
+          gameProgress,
+          totalCompletedCount: totalCompleted,
+          lastFetched: currentTime,
+          lastUpdated: currentTime,
           isLoading: false,
           error: null,
-          lastFetched: currentTime,
-          lastUpdated: Date.now(),
-          totalCompletedCount,
-          totalQuizCount: getTotalQuizCount(),
-          gameProgress,
         });
 
         return progressData;
       } else {
-        set({
-          isLoading: false,
-          error: response.data.message || "Failed to fetch progress",
-        });
-        return null;
+        throw new Error(response.data.message || "Failed to fetch progress");
       }
     } catch (error) {
       console.error("Error fetching progress:", error);
@@ -597,7 +603,7 @@ const useProgressStore = create<ProgressState>((set, get) => ({
         error:
           error instanceof Error ? error.message : "Failed to fetch progress",
       });
-      return null;
+      return progress || [];
     }
   },
 

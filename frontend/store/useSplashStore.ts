@@ -216,7 +216,7 @@ export const useSplashStore = create<SplashState>((set, get) => ({
   precomputedLevels: {},
   precomputedLevelDetails: {},
   individualProgressCache: {},
-
+  enhancedProgress: {},
   markLoadingComplete: () => set({ isLoadingComplete: true }),
   markSplashShown: () => set({ splashShown: true }),
   markGameDataPreloaded: () => set({ gameDataPreloaded: true }),
@@ -716,6 +716,62 @@ export const useSplashStore = create<SplashState>((set, get) => ({
     } catch (error) {
       console.error("[SplashStore] Error in comprehensive preloading:", error);
       return false;
+    }
+  },
+
+  // Add this method to the SplashStore
+  precomputeSpecificGameMode: async (
+    gameMode: string,
+    levels?: LevelData[],
+    progressData?: any[]
+  ) => {
+    const state = get();
+
+    try {
+      console.log(`[SplashStore] Precomputing specific game mode: ${gameMode}`);
+
+      let gameLevels = levels;
+      let gameProgressData = progressData;
+
+      // Get data if not provided
+      if (!gameLevels || !gameProgressData) {
+        const { questions } = useGameStore.getState();
+        const { progress } = useProgressStore.getState();
+
+        gameProgressData = Array.isArray(progress) ? progress : [];
+        gameLevels = convertQuizToLevels(gameMode, questions, gameProgressData);
+      }
+
+      // Precompute filters
+      const filters = state.precomputeFiltersForLevels(gameLevels);
+
+      // Calculate completion percentage
+      const completedCount = gameLevels.filter(
+        (level) => level.status === "completed"
+      ).length;
+      const completionPercentage =
+        gameLevels.length > 0
+          ? Math.round((completedCount / gameLevels.length) * 100)
+          : 0;
+
+      // Update precomputed data
+      set((state) => ({
+        precomputedLevels: {
+          ...state.precomputedLevels,
+          [gameMode]: {
+            levels: gameLevels,
+            filters,
+            completionPercentage,
+            lastUpdated: Date.now(),
+          },
+        },
+      }));
+
+      console.log(
+        `[SplashStore] ✅ Specific precomputation complete for ${gameMode}`
+      );
+    } catch (error) {
+      console.error(`[SplashStore] Error precomputing ${gameMode}:`, error);
     }
   },
 }));
