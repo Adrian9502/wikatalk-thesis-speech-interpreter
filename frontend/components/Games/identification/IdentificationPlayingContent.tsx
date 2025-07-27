@@ -136,8 +136,6 @@ const IdentificationPlayingContent: React.FC<
                     style={[
                       styles.wordCard,
                       isSelected && styles.selectedWordCard,
-                      // NEW: Add disabled styling
-                      // isAnimating && styles.wordCardDisabled,
                     ]}
                     onPress={() => handleWordPress(index)}
                     disabled={isAnimating || selectedWord !== null}

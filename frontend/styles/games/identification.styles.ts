@@ -37,11 +37,16 @@ export default StyleSheet.create({
   wordCard: {
     borderRadius: 16,
     overflow: "hidden",
+    paddingVertical: 8,
+    flexDirection: "row",
+    alignItems: "center",
+    borderWidth: 1,
+    borderColor: "rgba(255, 255, 255, 0.1)",
+    paddingHorizontal: 12,
     minHeight: 50,
   },
   selectedWordCard: {
-    borderColor: "rgba(255, 255, 255, 0.4)",
-    transform: [{ scale: 1.02 }],
+    borderColor: "rgb(255, 255, 255)",
   },
   incorrectWordCard: {
     borderColor: "#F44336",
