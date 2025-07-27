@@ -32,7 +32,7 @@ interface SplashState {
   gameDataPreloaded: boolean;
   progressDataPrecomputed: boolean;
   levelsPrecomputed: boolean;
-  levelDetailsPrecomputed: boolean; // NEW
+  levelDetailsPrecomputed: boolean;
 
   // Store precomputed levels for each game mode with filters
   precomputedLevels: {
@@ -52,6 +52,11 @@ interface SplashState {
   // Cache individual progress entries
   individualProgressCache: {
     [quizId: string]: any;
+  };
+
+  // ADD: Missing enhancedProgress property
+  enhancedProgress: {
+    [gameMode: string]: any;
   };
 
   markLoadingComplete: () => void;
@@ -78,6 +83,11 @@ interface SplashState {
   setIndividualProgress: (quizId: string, progress: any) => void;
   clearIndividualProgress: (quizId: string) => void;
   precomputeIndividualProgress: () => Promise<boolean>;
+  precomputeSpecificGameMode: (
+    gameMode: string,
+    levels?: LevelData[],
+    progressData?: any[]
+  ) => Promise<void>;
   reset: () => void;
 }
 
@@ -743,7 +753,7 @@ export const useSplashStore = create<SplashState>((set, get) => ({
       }
 
       // FIXED: Use the standalone helper function, not a store method
-      const filters = precomputeFilters(gameLevels);
+      const filteredLevels = precomputeFilters(gameLevels);
 
       // Calculate completion percentage
       const completedCount = gameLevels.filter(
@@ -754,13 +764,13 @@ export const useSplashStore = create<SplashState>((set, get) => ({
           ? Math.round((completedCount / gameLevels.length) * 100)
           : 0;
 
-      // Update precomputed data
+      // Update precomputed data - FIXED: Use consistent property name
       set((state) => ({
         precomputedLevels: {
           ...state.precomputedLevels,
           [gameMode]: {
             levels: gameLevels,
-            filters, // This now uses the correct function
+            filteredLevels, // Use filteredLevels consistently
             completionPercentage,
             lastUpdated: Date.now(),
           },

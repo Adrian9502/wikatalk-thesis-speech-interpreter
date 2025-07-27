@@ -1,5 +1,5 @@
-import React, { useEffect, useMemo, useState, useCallback } from "react";
-import { View, StatusBar, BackHandler } from "react-native"; // Add BackHandler
+import React, { useEffect, useMemo, useState } from "react";
+import { View, StatusBar, BackHandler } from "react-native";
 import { useLocalSearchParams, router } from "expo-router";
 import * as Haptics from "expo-haptics";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -12,9 +12,8 @@ import LevelProgressBar from "@/components/games/levels/LevelProgressBar";
 import { levelStyles as styles } from "@/styles/games/levels.styles";
 import { useLevelData } from "@/hooks/useLevelData";
 import { difficultyColors } from "@/constant/colors";
-import { isAllDataReady, useSplashStore } from "@/store/useSplashStore";
+import { useSplashStore } from "@/store/useSplashStore";
 import { useAnimationTracker } from "@/hooks/useAnimationTracker";
-import { safeNavigate } from "@/utils/navigationUtils";
 
 // Components
 import ErrorState from "@/components/games/levels/ErrorState";
@@ -34,7 +33,7 @@ const LevelSelection = () => {
   const params = useLocalSearchParams();
   const { activeTheme } = useThemeStore();
 
-  // FIXED: Properly extract string values from params
+  // Properly extract string values from params
   const gameMode = Array.isArray(params.gameMode)
     ? params.gameMode[0]
     : params.gameMode || "multipleChoice";
@@ -70,7 +69,6 @@ const LevelSelection = () => {
   const [animationKey, setAnimationKey] = useState("initial");
   const [shouldAnimateCards, setShouldAnimateCards] = useState(false);
 
-  // NEW: Enhanced data ready check with better stale detection and error handling
   useEffect(() => {
     const checkDataReady = async () => {
       try {
@@ -217,53 +215,6 @@ const LevelSelection = () => {
     checkDataReady();
   }, [shouldPlayAnimation, gameMode, initialLoad]);
 
-  const isAllDataReady = useCallback(() => {
-    try {
-      const splashStore = useSplashStore.getState();
-
-      // FIXED: Add null checks to prevent errors
-      if (!splashStore) {
-        console.log(`[LevelSelection] Splash store not available`);
-        return false;
-      }
-
-      // Check for specific game mode data instead of all game modes
-      const gameKey =
-        typeof gameMode === "string" ? gameMode : String(gameMode);
-
-      // FIXED: Safe access with null checks
-      const precomputedLevelsData = splashStore.precomputedLevels || {};
-      const enhancedProgressData = splashStore.enhancedProgress || {};
-      const individualProgressCache = splashStore.individualProgressCache || {};
-
-      const requiredData = {
-        levels: precomputedLevelsData[gameKey]?.levels,
-        progress: enhancedProgressData[gameKey],
-        filters: precomputedLevelsData[gameKey]?.filters,
-        individualProgress: Object.keys(individualProgressCache).length > 0,
-      };
-
-      const isReady = Object.values(requiredData).every(Boolean);
-
-      if (!isReady) {
-        console.log(`[LevelSelection] Missing data for ${gameKey}:`, {
-          hasLevels: !!requiredData.levels,
-          hasProgress: !!requiredData.progress,
-          hasFilters: !!requiredData.filters,
-          hasIndividualProgress: !!requiredData.individualProgress,
-          availablePrecomputedKeys: Object.keys(precomputedLevelsData),
-          availableProgressKeys: Object.keys(enhancedProgressData),
-        });
-      }
-
-      return isReady;
-    } catch (error) {
-      console.error(`[LevelSelection] Error in isAllDataReady:`, error);
-      return false; // Safe fallback
-    }
-  }, [gameMode]);
-
-  // PERFORMANCE FIX: Use pre-computed filters with loading state
   const filteredLevels = useMemo(() => {
     if (!showLevels || !getFilteredLevels) {
       return [];
@@ -284,7 +235,6 @@ const LevelSelection = () => {
     return filtered;
   }, [activeFilter, showLevels, getFilteredLevels]);
 
-  // PERFORMANCE FIX: Stable memoized handlers
   const stableHandlers = useMemo(() => {
     const handleBack = () => {
       console.log("[LevelSelection] Back button pressed - navigating to Games");
@@ -434,10 +384,8 @@ const LevelSelection = () => {
     };
   }, [selectedLevel, gameMode, gameTitle, activeFilter, shouldPlayAnimation]);
 
-  // PERFORMANCE FIX: Stable memoized difficulty colors
   const stableDifficultyColors = useMemo(() => difficultyColors, []);
 
-  // PERFORMANCE FIX: Memoize render content with stable dependencies
   const renderContent = useMemo(() => {
     // Wait for data to be ready
     if (!dataReady) {
@@ -519,7 +467,6 @@ const LevelSelection = () => {
     handleRetry,
   ]);
 
-  // FIXED: Handle hardware back button
   useEffect(() => {
     const backHandler = BackHandler.addEventListener(
       "hardwareBackPress",

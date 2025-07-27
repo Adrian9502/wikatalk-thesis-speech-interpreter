@@ -2,13 +2,11 @@ import { useState, useEffect, useCallback } from "react";
 import { LevelData } from "@/types/gameTypes";
 import {
   useSplashStore,
-  getLevelsForGameMode,
   isLevelsPrecomputed,
   getFilteredLevelsForGameMode,
 } from "@/store/useSplashStore";
 import useGameStore from "@/store/games/useGameStore";
 import { convertQuizToLevels } from "@/utils/games/convertQuizToLevels";
-import { useUserProgress } from "@/hooks/useUserProgress";
 import {
   getCurrentUserId,
   hasUserChanged,
@@ -34,7 +32,6 @@ export const useLevelData = (gameMode: string | string[] | undefined) => {
     isLoading: storeLoading,
     error: storeError,
   } = useGameStore();
-  const { progress: globalProgress } = useUserProgress("global");
 
   const safeGameMode =
     typeof gameMode === "string" ? gameMode : String(gameMode);
@@ -101,7 +98,7 @@ export const useLevelData = (gameMode: string | string[] | undefined) => {
 
                 const progressStore = useProgressStore.getState();
                 await progressStore.fetchProgress(false);
-                const progressArray = progressStore.progress || [];
+                const progressArray: any[] = progressStore.progress || [];
 
                 const currentLevels = convertQuizToLevels(
                   safeGameMode,
@@ -121,7 +118,7 @@ export const useLevelData = (gameMode: string | string[] | undefined) => {
                 setCompletionPercentage(percentage);
 
                 // Update precomputed data
-                splashStore.precomputeSpecificGameMode(
+                await splashStore.precomputeSpecificGameMode(
                   safeGameMode,
                   currentLevels,
                   progressArray
@@ -162,7 +159,7 @@ export const useLevelData = (gameMode: string | string[] | undefined) => {
 
         // Get fresh progress data efficiently
         const progressStore = useProgressStore.getState();
-        let progressArray = [];
+        let progressArray: any[] = []; // FIXED: Explicit type annotation
 
         if (progressStore.progress && Array.isArray(progressStore.progress)) {
           progressArray = progressStore.progress;
@@ -205,8 +202,8 @@ export const useLevelData = (gameMode: string | string[] | undefined) => {
         setIsLoading(false);
 
         // ENHANCED: Update precomputed data in background
-        setTimeout(() => {
-          splashStore.precomputeSpecificGameMode(
+        setTimeout(async () => {
+          await splashStore.precomputeSpecificGameMode(
             safeGameMode,
             currentLevels,
             progressArray
