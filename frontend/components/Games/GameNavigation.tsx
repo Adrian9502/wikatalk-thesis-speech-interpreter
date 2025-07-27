@@ -350,15 +350,11 @@ const GameNavigation: React.FC<GameNavigationProps> = ({
       // NEW: Set loading state
       setIsRetryLoading(true);
 
-      // FIXED: Use getState() to access stores properly
       const gameStore = useGameStore.getState();
       gameStore.setGameStatus("idle");
       gameStore.setScore(0);
       gameStore.setTimerRunning(false);
-      gameStore.resetTimer();
-      gameStore.setTimeElapsed(0);
 
-      // FIXED: Access progress store properly
       const progressStore = useProgressStore.getState();
       progressStore.clearCache();
 

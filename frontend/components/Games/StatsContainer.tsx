@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from "react";
+import React, { useState, useCallback, useEffect } from "react";
 import {
   View,
   StyleSheet,
@@ -60,13 +60,12 @@ const StatsContainer: React.FC<StatsContainerProps> = ({
   const [isResetting, setIsResetting] = useState(false);
   const [currentTime, setCurrentTime] = useState(finalTime || 0);
 
-  // NEW: Success message state
+  // SUCCESS message state
   const [showSuccessMessage, setShowSuccessMessage] = useState(false);
   const [resetMessage, setResetMessage] = useState("");
 
-  // NEW: Success notification state (separate from modal)
-  const [showResetSuccessNotification, setShowResetSuccessNotification] =
-    useState(false);
+  // NEW: Track if this was an actual paid reset
+  const [wasActualReset, setWasActualReset] = useState(false);
 
   // Get user progress and coins
   const { resetTimer } = useUserProgress(levelId || "");
@@ -83,9 +82,13 @@ const StatsContainer: React.FC<StatsContainerProps> = ({
   // Check if user can afford reset
   const canAfford = coins >= resetCost;
 
-  // UPDATED: Enhanced disable logic - disable if correct answer, can't afford, OR time is 0
+  // UPDATED: Enhanced disable logic
   const shouldDisableReset =
     !canAfford || isCorrectAnswer || (currentTime || finalTime || 0) === 0;
+
+  // FIXED: Only show success message if it was an actual paid reset
+  const shouldShowResetSuccess =
+    (currentTime || finalTime || 0) === 0 && wasActualReset;
 
   // Handle reset button press
   const handleResetPress = useCallback(() => {
@@ -111,6 +114,8 @@ const StatsContainer: React.FC<StatsContainerProps> = ({
       if (result.success) {
         // Update current time to 0
         setCurrentTime(0);
+        // NEW: Mark this as an actual paid reset
+        setWasActualReset(true);
         fetchCoinsBalance(true);
 
         const coinsDeducted = result.coinsDeducted || resetCost;
@@ -123,23 +128,19 @@ const StatsContainer: React.FC<StatsContainerProps> = ({
           `[StatsContainer] Timer reset successfully - staying on completed screen`
         );
 
-        // CRITICAL: Clear the game store's timer state BUT don't restart
+        // Clear the game store's timer state BUT don't restart
         const gameStore = useGameStore.getState();
         gameStore.resetTimer();
         gameStore.setTimeElapsed(0);
-        // REMOVED: Don't change game status or restart - stay on completed screen
-        // gameStore.setGameStatus("idle");
-        // gameStore.setScore(0);
-        // gameStore.setTimerRunning(false);
 
-        // CRITICAL: Clear any cached progress for this level
+        // Clear any cached progress for this level
         const progressStore = useProgressStore.getState();
         progressStore.clearCache();
 
         // Force refresh global progress
         progressStore.fetchProgress(true);
 
-        // FIXED: Clear splash store cache for this level using correct method
+        // Clear splash store cache for this level
         const splashStore = useSplashStore.getState();
 
         // Get the existing individual progress first
@@ -185,6 +186,13 @@ const StatsContainer: React.FC<StatsContainerProps> = ({
     }
   }, [levelId, resetTimer, fetchCoinsBalance, resetCost]);
 
+  // NEW: Reset the wasActualReset flag when time changes (from retry)
+  useEffect(() => {
+    if (finalTime !== 0 && wasActualReset) {
+      setWasActualReset(false);
+    }
+  }, [finalTime, wasActualReset]);
+
   const handleSuccessAcknowledge = useCallback(() => {
     console.log(
       "[StatsContainer] Success acknowledged - keeping completed state"
@@ -192,6 +200,7 @@ const StatsContainer: React.FC<StatsContainerProps> = ({
 
     setShowSuccessMessage(false);
     setShowResetModal(false);
+    setWasActualReset(false); // Reset the flag
 
     console.log(
       "[StatsContainer] Timer reset completed, staying on completed screen"
@@ -228,8 +237,8 @@ const StatsContainer: React.FC<StatsContainerProps> = ({
             <Text style={styles.resetButtonText}>🪙 {resetCost}</Text>
           </TouchableOpacity>
 
-          {/*  Persistent reset status message */}
-          {(currentTime || finalTime || 0) === 0 && (
+          {/* FIXED: Only show reset success if it was an actual paid reset */}
+          {shouldShowResetSuccess && (
             <View style={styles.resetStatusContainer}>
               <MaterialCommunityIcons
                 name="check-circle"
