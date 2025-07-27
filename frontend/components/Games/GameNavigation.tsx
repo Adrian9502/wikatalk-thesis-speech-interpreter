@@ -1,5 +1,5 @@
-import React, { useMemo, useState, useCallback } from "react";
-import { View, Text, StyleSheet } from "react-native";
+import React, { useMemo, useState, useCallback, useEffect } from "react";
+import { View, Text, StyleSheet, ActivityIndicator } from "react-native";
 import { router } from "expo-router";
 import * as Animatable from "react-native-animatable";
 import { BASE_COLORS, gameModeNavigationColors } from "@/constant/colors";
@@ -36,13 +36,28 @@ const GameNavigation: React.FC<GameNavigationProps> = ({
   // Modal state
   const [showNextLevelModal, setShowNextLevelModal] = useState(false);
   const [nextLevelData, setNextLevelData] = useState<any>(null);
+  const [isRetryLoading, setIsRetryLoading] = useState(false);
+
+  // NEW: Track animation state
+  const [isAnimating, setIsAnimating] = useState(true);
+
+  // NEW: Enable interactions after animations complete
+  useEffect(() => {
+    // Calculate total animation duration based on your existing delays
+    const totalAnimationDuration = 800 + 300 + 500; // slideInUp + fadeInUp + fadeIn delays
+
+    const timer = setTimeout(() => {
+      setIsAnimating(false);
+    }, totalAnimationDuration);
+
+    return () => clearTimeout(timer);
+  }, []);
 
   // Ensure levelId is parsed as a number
   const numericLevelId = Number(levelId);
 
   // Get level data to check next level availability and lock status
   const { levels, isLoading } = useLevelData(gameMode);
-  const { getLevelData } = useGameStore();
 
   // ENHANCED: Calculate navigation state with comprehensive checks
   const navigationState = useMemo(() => {
@@ -209,7 +224,12 @@ const GameNavigation: React.FC<GameNavigationProps> = ({
   ]);
 
   // Enhanced handlers with validation
-  const handleBackToLevels = () => {
+  const handleBackToLevels = useCallback(() => {
+    if (isAnimating) {
+      console.log("[GameNavigation] Back to levels disabled during animation");
+      return;
+    }
+
     console.log("[GameNavigation] Navigating back to levels with replace");
 
     const gameStore = useGameStore.getState();
@@ -223,28 +243,12 @@ const GameNavigation: React.FC<GameNavigationProps> = ({
       pathname: "/(games)/LevelSelection",
       params: { gameMode, gameTitle, difficulty },
     });
-  };
-
-  const handleBackToHome = () => {
-    console.log("[GameNavigation] Navigating to home with replace");
-
-    const gameStore = useGameStore.getState();
-    gameStore.setGameStatus("idle");
-    gameStore.setScore(0);
-    gameStore.setTimerRunning(false);
-    gameStore.resetTimer();
-    gameStore.handleRestart();
-
-    router.replace("/(tabs)/Games");
-  };
+  }, [isAnimating]);
 
   // UPDATED: Show modal instead of direct navigation
-  const handleNextLevel = () => {
-    if (navigationState.nextLevel.status === "disabled") {
-      console.log(
-        "[GameNavigation] Next level is disabled:",
-        navigationState.nextLevel.subtitle
-      );
+  const handleNextLevel = useCallback(() => {
+    if (isAnimating || navigationState.nextLevel.status === "disabled") {
+      console.log("[GameNavigation] Next level disabled or animating");
       return;
     }
 
@@ -291,7 +295,7 @@ const GameNavigation: React.FC<GameNavigationProps> = ({
         setShowNextLevelModal(true);
       }
     }
-  };
+  }, [isAnimating, navigationState.nextLevel.status /* ...other deps */]);
 
   // Handle modal start - this is where actual navigation happens
   const handleModalStart = () => {
@@ -331,17 +335,21 @@ const GameNavigation: React.FC<GameNavigationProps> = ({
 
   // FIXED: Properly access stores without breaking hooks rules
   const handleRetry = useCallback(async () => {
-    if (navigationState.retry.status === "disabled") {
-      console.log(
-        "[GameNavigation] Retry is disabled:",
-        navigationState.retry.message
-      );
+    if (
+      isAnimating ||
+      navigationState.retry.status === "disabled" ||
+      isRetryLoading
+    ) {
+      console.log("[GameNavigation] Retry disabled or animating");
       return;
     }
 
     console.log("[GameNavigation] Retrying current level - forcing fresh data");
 
     try {
+      // NEW: Set loading state
+      setIsRetryLoading(true);
+
       // FIXED: Use getState() to access stores properly
       const gameStore = useGameStore.getState();
       gameStore.setGameStatus("idle");
@@ -361,39 +369,90 @@ const GameNavigation: React.FC<GameNavigationProps> = ({
       const splashStore = useSplashStore.getState();
       splashStore.reset();
 
+      // NEW: Add 2-second delay for progress processing
+      await new Promise((resolve) => setTimeout(resolve, 2000));
+
       setTimeout(() => {
         console.log("[GameNavigation] All caches cleared, calling onRestart");
         onRestart();
+        // NEW: Reset loading state after restart
+        setIsRetryLoading(false);
       }, 100);
     } catch (error) {
       console.error("[GameNavigation] Error during retry preparation:", error);
-      // Always call onRestart as fallback
+      // Always call onRestart as fallback and reset loading
       onRestart();
+      setIsRetryLoading(false);
     }
-  }, [navigationState.retry.status, navigationState.retry.message, onRestart]);
+  }, [
+    isAnimating,
+    navigationState.retry.status,
+    navigationState.retry.message,
+    onRestart,
+    isRetryLoading,
+  ]);
 
-  const handleGameModeNavigation = (
-    newGameMode: string,
-    newGameTitle: string
-  ) => {
-    console.log(`[GameNavigation] Switching to ${newGameMode}`);
+  const handleGameModeNavigation = useCallback(
+    (newGameMode: string, newGameTitle: string) => {
+      if (isAnimating) {
+        console.log(
+          "[GameNavigation] Game mode navigation disabled during animation"
+        );
+        return;
+      }
 
-    const gameStore = useGameStore.getState();
-    gameStore.setGameStatus("idle");
-    gameStore.setScore(0);
-    gameStore.setTimerRunning(false);
-    gameStore.resetTimer();
-    gameStore.handleRestart();
+      console.log(`[GameNavigation] Switching to ${newGameMode}`);
 
-    router.replace({
-      pathname: "/(games)/LevelSelection",
-      params: {
-        gameMode: newGameMode,
-        gameTitle: newGameTitle,
-        difficulty,
+      const gameStore = useGameStore.getState();
+      gameStore.setGameStatus("idle");
+      gameStore.setScore(0);
+      gameStore.setTimerRunning(false);
+      gameStore.resetTimer();
+      gameStore.handleRestart();
+
+      router.replace({
+        pathname: "/(games)/LevelSelection",
+        params: {
+          gameMode: newGameMode,
+          gameTitle: newGameTitle,
+          difficulty,
+        },
+      });
+    },
+    [isAnimating, difficulty]
+  );
+
+  // FIXED: Filter game modes based on current mode
+  const availableGameModes = useMemo(() => {
+    const currentMode =
+      typeof gameMode === "string" ? gameMode : String(gameMode);
+    const allModes = [
+      {
+        mode: "multipleChoice",
+        title: "Multiple Choice",
+        subtitle: "Pick the right answer",
+        iconName: "format-list-bulleted",
+        colors: gameModeNavigationColors.multipleChoice,
       },
-    });
-  };
+      {
+        mode: "identification",
+        title: "Word Identification",
+        subtitle: "Find the correct word",
+        iconName: "crosshairs-gps",
+        colors: gameModeNavigationColors.identification,
+      },
+      {
+        mode: "fillBlanks",
+        title: "Fill in the Blank",
+        subtitle: "Complete the sentence",
+        iconName: "pencil",
+        colors: gameModeNavigationColors.fillBlanks,
+      },
+    ];
+
+    // Filter out current mode
+    return allModes.filter((mode) => mode.mode !== currentMode);
+  }, [gameMode]);
 
   return (
     <>
@@ -464,6 +523,7 @@ const GameNavigation: React.FC<GameNavigationProps> = ({
               onPress={handleRetry}
               flex={1}
               disabled={navigationState.retry.status === "disabled"}
+              isLoading={isRetryLoading}
             />
 
             <GameButton
@@ -474,19 +534,10 @@ const GameNavigation: React.FC<GameNavigationProps> = ({
               onPress={handleBackToLevels}
               flex={1}
             />
-
-            <GameButton
-              variant="secondary"
-              title="Home"
-              iconName="home"
-              colors={NAVIGATION_COLORS.purple}
-              onPress={handleBackToHome}
-              flex={1}
-            />
           </View>
         </Animatable.View>
 
-        {/* Game Mode Navigation */}
+        {/* FIXED: Game Mode Navigation - Only show other modes */}
         <Animatable.View animation="fadeIn" duration={600} delay={500}>
           <View style={styles.divider} />
 
@@ -496,39 +547,17 @@ const GameNavigation: React.FC<GameNavigationProps> = ({
           </Text>
 
           <View style={styles.gameModeGrid}>
-            <GameButton
-              variant="gameMode"
-              title="Multiple Choice"
-              subtitle="Pick the right answer"
-              iconName="format-list-bulleted"
-              colors={gameModeNavigationColors.multipleChoice}
-              onPress={() =>
-                handleGameModeNavigation("multipleChoice", "Multiple Choice")
-              }
-            />
-            <GameButton
-              variant="gameMode"
-              title="Word Identification"
-              subtitle="Find the correct word"
-              iconName="crosshairs-gps"
-              colors={gameModeNavigationColors.identification}
-              onPress={() =>
-                handleGameModeNavigation(
-                  "identification",
-                  "Word Identification"
-                )
-              }
-            />
-            <GameButton
-              variant="gameMode"
-              title="Fill in the Blank"
-              subtitle="Complete the sentence"
-              iconName="pencil"
-              colors={gameModeNavigationColors.fillBlanks}
-              onPress={() =>
-                handleGameModeNavigation("fillBlanks", "Fill in the Blank")
-              }
-            />
+            {availableGameModes.map((mode) => (
+              <GameButton
+                key={mode.mode}
+                variant="gameMode"
+                title={mode.title}
+                subtitle={mode.subtitle}
+                iconName={mode.iconName}
+                colors={mode.colors}
+                onPress={() => handleGameModeNavigation(mode.mode, mode.title)}
+              />
+            ))}
           </View>
         </Animatable.View>
       </View>

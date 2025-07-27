@@ -1,4 +1,10 @@
-import React, { useRef, useMemo, useCallback } from "react";
+import React, {
+  useRef,
+  useMemo,
+  useCallback,
+  useState,
+  useEffect,
+} from "react";
 import {
   View,
   Text,
@@ -52,11 +58,24 @@ const FillInTheBlankPlayingContent: React.FC<RenderPlayingContentProps> =
     }) => {
       const inputRef = useRef<TextInput>(null);
 
+      // NEW: Track animation state
+      const [isAnimating, setIsAnimating] = useState(true);
+
       // Get game mode gradient
       const gameGradientColors = useMemo(
         () => getGameModeGradient("fillBlanks"),
         []
       );
+
+      // NEW: Enable interactions after animations complete
+      useEffect(() => {
+        const animationDuration = 800 + 200 + 400 + 200 + 600 + 200; // Total animation time
+        const timer = setTimeout(() => {
+          setIsAnimating(false);
+        }, animationDuration);
+
+        return () => clearTimeout(timer);
+      }, []);
 
       // Memoize formatted sentence
       const formattedSentence = useMemo(() => {
@@ -92,13 +111,29 @@ const FillInTheBlankPlayingContent: React.FC<RenderPlayingContentProps> =
       }, [attemptsLeft]);
 
       const handleClear = useCallback(() => {
+        if (isAnimating) return;
         setUserAnswer("");
-      }, [setUserAnswer]);
+      }, [setUserAnswer, isAnimating]);
 
       const canSubmit = useMemo(
-        () => userAnswer.trim().length > 0 && !showFeedback,
-        [userAnswer, showFeedback]
+        () => userAnswer.trim().length > 0 && !showFeedback && !isAnimating,
+        [userAnswer, showFeedback, isAnimating]
       );
+
+      const handleCheckAnswer = useCallback(() => {
+        if (isAnimating || !canSubmit) return;
+        checkAnswer();
+      }, [checkAnswer, isAnimating, canSubmit]);
+
+      const handleToggleHint = useCallback(() => {
+        if (isAnimating) return;
+        toggleHint();
+      }, [toggleHint, isAnimating]);
+
+      const handleToggleTranslation = useCallback(() => {
+        if (isAnimating) return;
+        toggleTranslation();
+      }, [toggleTranslation, isAnimating]);
 
       return (
         <ScrollView
@@ -166,7 +201,11 @@ const FillInTheBlankPlayingContent: React.FC<RenderPlayingContentProps> =
                   "rgba(255, 255, 255, 0.05)",
                   "rgba(255, 255, 255, 0.09)",
                 ]}
-                style={styles.inputContainer}
+                style={[
+                  styles.inputContainer,
+                  // NEW: Add disabled styling
+                  // isAnimating && styles.inputDisabled,
+                ]}
               >
                 <TextInput
                   ref={inputRef}
@@ -174,13 +213,14 @@ const FillInTheBlankPlayingContent: React.FC<RenderPlayingContentProps> =
                   placeholder="Type your answer here..."
                   placeholderTextColor="rgba(255, 255, 255, 0.5)"
                   value={userAnswer}
-                  onChangeText={setUserAnswer}
+                  onChangeText={isAnimating ? undefined : setUserAnswer}
                   autoCapitalize="none"
                   selectionColor={BASE_COLORS.white}
                   multiline={false}
+                  editable={!isAnimating}
                 />
 
-                {userAnswer.length > 0 && (
+                {userAnswer.length > 0 && !isAnimating && (
                   <TouchableOpacity
                     style={styles.clearButton}
                     onPress={handleClear}
@@ -199,7 +239,7 @@ const FillInTheBlankPlayingContent: React.FC<RenderPlayingContentProps> =
                   styles.submitButton,
                   !canSubmit && styles.submitButtonDisabled,
                 ]}
-                onPress={checkAnswer}
+                onPress={handleCheckAnswer}
                 disabled={!canSubmit}
               >
                 <LinearGradient
@@ -233,8 +273,13 @@ const FillInTheBlankPlayingContent: React.FC<RenderPlayingContentProps> =
             <Text style={styles.helpTitle}>Need help?</Text>
             <View style={styles.helpButtons}>
               <TouchableOpacity
-                style={[styles.helpButton, showHint && styles.helpButtonActive]}
-                onPress={toggleHint}
+                style={[
+                  styles.helpButton,
+                  showHint && styles.helpButtonActive,
+                  // isAnimating && styles.helpButtonDisabled,
+                ]}
+                onPress={handleToggleHint}
+                disabled={isAnimating}
               >
                 <Icon
                   name="activity"
@@ -257,8 +302,10 @@ const FillInTheBlankPlayingContent: React.FC<RenderPlayingContentProps> =
                 style={[
                   styles.helpButton,
                   showTranslation && styles.helpButtonActive,
+                  // isAnimating && styles.helpButtonDisabled,
                 ]}
-                onPress={toggleTranslation}
+                onPress={handleToggleTranslation}
+                disabled={isAnimating}
               >
                 {showTranslation ? (
                   <EyeOff width={16} height={16} color={BASE_COLORS.white} />

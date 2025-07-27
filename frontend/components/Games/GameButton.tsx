@@ -5,6 +5,7 @@ import {
   View,
   StyleSheet,
   ViewStyle,
+  ActivityIndicator,
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import * as Animatable from "react-native-animatable";
@@ -23,6 +24,7 @@ interface GameButtonProps {
   animation?: string;
   delay?: number;
   disabled?: boolean;
+  isLoading?: boolean;
 }
 
 const GameButton: React.FC<GameButtonProps> = ({
@@ -37,17 +39,40 @@ const GameButton: React.FC<GameButtonProps> = ({
   animation,
   delay,
   disabled = false,
+  isLoading = false,
 }) => {
+  // NEW: Add internal disabled state that doesn't affect styling
+  const [internalDisabled, setInternalDisabled] = React.useState(false);
+
+  // NEW: Enable interactions after animation completes
+  React.useEffect(() => {
+    if (animation && delay !== undefined) {
+      setInternalDisabled(true);
+
+      const timer = setTimeout(() => {
+        setInternalDisabled(false);
+      }, delay + 600); // Animation duration + delay
+
+      return () => clearTimeout(timer);
+    }
+  }, [animation, delay]);
+
+  // Determine if button should be functionally disabled
+  const isFunctionallyDisabled = disabled || isLoading || internalDisabled;
+
+  // Only apply visual disabled styles for explicit disabled prop or loading
+  const shouldShowDisabledStyle = disabled || isLoading;
+
   const buttonStyle: ViewStyle[] = [
     styles.baseButton,
     variant === "primary" && styles.primaryButton,
     variant === "secondary" && styles.secondaryButton,
     variant === "gameMode" && styles.gameModeButton,
-    disabled && styles.disabledButton,
+    shouldShowDisabledStyle && styles.disabledButton, // Only visual disabled when explicitly disabled
     ...(flex ? [{ flex }] : []),
   ].filter(Boolean) as ViewStyle[];
 
-  const gradientColors: readonly [string, string] = disabled
+  const gradientColors: readonly [string, string] = shouldShowDisabledStyle
     ? (["#4a4a4a", "#2a2a2a"] as const)
     : colors;
 
@@ -57,29 +82,37 @@ const GameButton: React.FC<GameButtonProps> = ({
         return [
           styles.iconContainer,
           styles.primaryIconContainer,
-          disabled && styles.disabledIconContainer,
+          shouldShowDisabledStyle && styles.disabledIconContainer,
         ];
       case "secondary":
         return [
           styles.iconContainer,
           styles.secondaryIconContainer,
-          disabled && styles.disabledIconContainer,
+          shouldShowDisabledStyle && styles.disabledIconContainer,
         ];
       case "gameMode":
         return [
           styles.iconContainer,
           styles.gameModeIconContainer,
-          disabled && styles.disabledIconContainer,
+          shouldShowDisabledStyle && styles.disabledIconContainer,
         ];
       default:
-        return [styles.iconContainer, disabled && styles.disabledIconContainer];
+        return [
+          styles.iconContainer,
+          shouldShowDisabledStyle && styles.disabledIconContainer,
+        ];
     }
   };
 
   const getTextStyles = () => {
-    const baseTitle = [styles.title, disabled && styles.disabledTitle];
-
-    const baseSubtitle = [styles.subtitle, disabled && styles.disabledSubtitle];
+    const baseTitle = [
+      styles.title,
+      shouldShowDisabledStyle && styles.disabledTitle,
+    ];
+    const baseSubtitle = [
+      styles.subtitle,
+      shouldShowDisabledStyle && styles.disabledSubtitle,
+    ];
 
     switch (variant) {
       case "primary":
@@ -108,12 +141,12 @@ const GameButton: React.FC<GameButtonProps> = ({
     <TouchableOpacity
       style={buttonStyle}
       onPress={onPress}
-      activeOpacity={disabled ? 1 : 0.85}
-      disabled={disabled}
+      activeOpacity={isFunctionallyDisabled ? 1 : 0.85} // No visual feedback when disabled
+      disabled={isFunctionallyDisabled} // Functionally disabled
       accessible={true}
       accessibilityLabel={`${title}${subtitle ? `, ${subtitle}` : ""}`}
       accessibilityRole="button"
-      accessibilityState={{ disabled }}
+      accessibilityState={{ disabled: isFunctionallyDisabled }}
     >
       <LinearGradient
         colors={gradientColors}
@@ -127,7 +160,12 @@ const GameButton: React.FC<GameButtonProps> = ({
         ]}
       >
         {/* Subtle overlay for depth */}
-        <View style={[styles.overlay, disabled && styles.disabledOverlay]} />
+        <View
+          style={[
+            styles.overlay,
+            shouldShowDisabledStyle && styles.disabledOverlay,
+          ]}
+        />
 
         <View
           style={[
@@ -137,38 +175,50 @@ const GameButton: React.FC<GameButtonProps> = ({
             variant === "gameMode" && styles.gameModeContent,
           ]}
         >
-          {iconName && (
+          {/* Show loading or icon */}
+          {isLoading ? (
             <View style={getIconContainerStyle()}>
-              <MaterialCommunityIcons
-                name={iconName}
-                size={variant === "primary" ? iconSize + 4 : iconSize}
-                color={
-                  disabled ? "rgba(255, 255, 255, 0.4)" : BASE_COLORS.white
-                }
+              <ActivityIndicator
+                size="small"
+                color="rgba(255, 255, 255, 0.7)"
               />
             </View>
+          ) : (
+            iconName && (
+              <View style={getIconContainerStyle()}>
+                <MaterialCommunityIcons
+                  name={iconName}
+                  size={variant === "primary" ? iconSize + 4 : iconSize}
+                  color={
+                    shouldShowDisabledStyle
+                      ? "rgba(255, 255, 255, 0.4)"
+                      : BASE_COLORS.white
+                  }
+                />
+              </View>
+            )
           )}
 
           <View
             style={[
               styles.textContainer,
-              !iconName && styles.textContainerNoIcon,
+              !iconName && !isLoading && styles.textContainerNoIcon,
               variant === "secondary" && styles.secondaryTextContainer,
             ]}
           >
             <Text style={textStyles.title} numberOfLines={1}>
-              {title}
+              {isLoading && title === "Retry" ? "Processing..." : title}
             </Text>
 
-            {subtitle && (
+            {subtitle && !isLoading && (
               <Text style={textStyles.subtitle} numberOfLines={1}>
                 {subtitle}
               </Text>
             )}
           </View>
 
-          {/* Arrow indicator for primary buttons */}
-          {variant === "primary" && !disabled && (
+          {/* Arrow indicator for primary buttons (hide when loading) */}
+          {variant === "primary" && !shouldShowDisabledStyle && !isLoading && (
             <View style={styles.arrowIndicator}>
               <MaterialCommunityIcons
                 name="chevron-right"

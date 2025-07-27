@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { View, Text, TouchableOpacity } from "react-native";
 import { Circle } from "react-native-feather";
 import { LinearGradient } from "expo-linear-gradient";
@@ -44,6 +44,9 @@ const MultipleChoicePlayingContent: React.FC<MultipleChoicePlayingContentProps> 
       handleOptionSelect,
       isStarted = true,
     }) => {
+      // NEW: Track animation state
+      const [isAnimating, setIsAnimating] = useState(true);
+
       // Get game mode gradient for consistency
       const gameGradientColors = React.useMemo(
         () => getGameModeGradient("multipleChoice"),
@@ -54,6 +57,22 @@ const MultipleChoicePlayingContent: React.FC<MultipleChoicePlayingContentProps> 
         () => currentQuestion?.options || [],
         [currentQuestion?.options]
       );
+
+      // NEW: Enable interactions after animations complete
+      useEffect(() => {
+        const animationDuration = 700 + options.length * 100 + 200; // Total animation time
+        const timer = setTimeout(() => {
+          setIsAnimating(false);
+        }, animationDuration);
+
+        return () => clearTimeout(timer);
+      }, [options.length]);
+
+      // NEW: Disabled option handler
+      const handleOptionPress = (optionId: string) => {
+        if (isAnimating || selectedOption !== null) return;
+        handleOptionSelect(optionId);
+      };
 
       return (
         <View style={gamesSharedStyles.gameContainer}>
@@ -129,10 +148,12 @@ const MultipleChoicePlayingContent: React.FC<MultipleChoicePlayingContentProps> 
                     style={[
                       styles.optionCard,
                       isSelected && styles.selectedOption,
+                      // NEW: Add disabled styling
+                      // isAnimating && styles.optionDisabled,
                     ]}
-                    onPress={() => handleOptionSelect(option.id)}
-                    disabled={selectedOption !== null}
-                    activeOpacity={0.8}
+                    onPress={() => handleOptionPress(option.id)}
+                    disabled={isAnimating || selectedOption !== null}
+                    activeOpacity={isAnimating ? 1 : 0.8}
                   >
                     <LinearGradient
                       colors={[

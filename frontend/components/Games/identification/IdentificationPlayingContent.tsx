@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { View, Text, TouchableOpacity } from "react-native";
 import { Eye, EyeOff } from "react-native-feather";
 import { LinearGradient } from "expo-linear-gradient";
@@ -33,6 +33,9 @@ const IdentificationPlayingContent: React.FC<
   toggleTranslation,
   handleWordSelect,
 }) => {
+  // NEW: Track animation state
+  const [isAnimating, setIsAnimating] = useState(true);
+
   // Get game mode gradient for consistency
   const gameGradientColors = React.useMemo(
     () => getGameModeGradient("identification"),
@@ -40,6 +43,27 @@ const IdentificationPlayingContent: React.FC<
   );
 
   const wordOptions = React.useMemo(() => words || [], [words]);
+
+  // NEW: Enable interactions after animations complete
+  useEffect(() => {
+    const animationDuration = 900 + wordOptions.length * 100 + 300; // Total animation time
+    const timer = setTimeout(() => {
+      setIsAnimating(false);
+    }, animationDuration);
+
+    return () => clearTimeout(timer);
+  }, [wordOptions.length]);
+
+  // NEW: Disabled handlers
+  const handleWordPress = (index: number) => {
+    if (isAnimating || selectedWord !== null) return;
+    handleWordSelect(index);
+  };
+
+  const handleToggleTranslation = () => {
+    if (isAnimating) return;
+    toggleTranslation();
+  };
 
   return (
     <View style={gamesSharedStyles.gameContainer}>
@@ -112,35 +136,27 @@ const IdentificationPlayingContent: React.FC<
                     style={[
                       styles.wordCard,
                       isSelected && styles.selectedWordCard,
+                      // NEW: Add disabled styling
+                      // isAnimating && styles.wordCardDisabled,
                     ]}
-                    onPress={() => handleWordSelect(index)}
-                    disabled={selectedWord !== null}
-                    activeOpacity={0.8}
+                    onPress={() => handleWordPress(index)}
+                    disabled={isAnimating || selectedWord !== null}
+                    activeOpacity={isAnimating ? 1 : 0.8}
                   >
-                    <LinearGradient
-                      colors={[
-                        "rgba(255, 255, 255, 0.1)",
-                        "rgba(255, 255, 255, 0.05)",
-                      ]}
-                      style={styles.wordGradient}
-                      start={{ x: 0, y: 0 }}
-                      end={{ x: 1, y: 0 }}
-                    >
-                      {/* Word Number */}
-                      <View style={styles.wordNumber}>
-                        <Text style={styles.wordNumberText}>{index + 1}</Text>
-                      </View>
+                    {/* Word Number */}
+                    <View style={styles.wordNumber}>
+                      <Text style={styles.wordNumberText}>{index + 1}</Text>
+                    </View>
 
-                      {/* Word Content */}
-                      <View style={styles.wordContent}>
-                        <Text style={styles.wordText} numberOfLines={2}>
-                          {safeTextRender(word.text)}
-                        </Text>
-                      </View>
+                    {/* Word Content */}
+                    <View style={styles.wordContent}>
+                      <Text style={styles.wordText} numberOfLines={2}>
+                        {safeTextRender(word.text)}
+                      </Text>
+                    </View>
 
-                      {/* Selection Pulse */}
-                      {isSelected && <View style={styles.selectionPulse} />}
-                    </LinearGradient>
+                    {/* Selection Pulse */}
+                    {isSelected && <View style={styles.selectionPulse} />}
                   </TouchableOpacity>
                 </Animatable.View>
               );
@@ -164,8 +180,10 @@ const IdentificationPlayingContent: React.FC<
           style={[
             styles.translationButton,
             showTranslation && styles.translationButtonActive,
+            // isAnimating && styles.translationButtonDisabled,
           ]}
-          onPress={toggleTranslation}
+          onPress={handleToggleTranslation}
+          disabled={isAnimating}
         >
           {showTranslation ? (
             <EyeOff width={16} height={16} color={BASE_COLORS.white} />
