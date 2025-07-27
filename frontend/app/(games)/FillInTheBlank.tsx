@@ -6,8 +6,10 @@ import GameCompletedContent from "@/components/games/GameCompletedContent";
 import { useGameInitialization } from "@/hooks/useGameInitialization";
 import FillInTheBlankPlayingContent from "@/components/games/fillInTheBlank/FillInTheBlankPlayingContent";
 import GamePlayingContent from "@/components/games/GamePlayingContent";
-import { useUserProgress } from "@/hooks/useUserProgress";
 import { useNextLevelData } from "@/utils/games/levelUtils";
+import { useGameProgress } from "@/hooks/games/useGameProgress";
+import { useGameRestart } from "@/hooks/games/useGameRestart";
+import { useTimerReset } from "@/hooks/games/useTimerReset";
 
 interface FillInTheBlankProps {
   levelId: number;
@@ -18,15 +20,7 @@ interface FillInTheBlankProps {
 
 const FillInTheBlank: React.FC<FillInTheBlankProps> = React.memo(
   ({ levelId, levelData, difficulty = "easy", isStarted = false }) => {
-    const { progress, updateProgress, fetchProgress } = useUserProgress(
-      levelData?.questionId || levelId
-    );
-
-    const isRestartingRef = useRef(false);
-    // ADD: Restart lock like in MultipleChoice
-    const restartLockRef = useRef(false);
-
-    // Get quiz store state and actions
+    // Game state and actions
     const {
       gameState: { score, gameStatus, timerRunning, timeElapsed },
       fillInTheBlankState: {
@@ -50,55 +44,51 @@ const FillInTheBlank: React.FC<FillInTheBlankProps> = React.memo(
       setTimeElapsed,
     } = useGameStore();
 
-    // NEW: Use the utility hook for next level data
+    // Custom hooks for shared logic
+    const { updateProgress, fetchProgress, isRestartingRef, restartLockRef } =
+      useGameProgress(levelData, levelId);
+
     const { getNextLevelTitle } = useNextLevelData(
       "fillBlanks",
       levelId,
       difficulty
     );
 
-    // Set initial time from progress when component mounts
-    useEffect(() => {
-      // CRITICAL: Don't update during restart process
-      if (isRestartingRef.current) {
-        console.log(`[FillInTheBlank] Skipping progress update during restart`);
-        return;
-      }
+    const handleRestartWithProgress = useGameRestart(
+      isRestartingRef,
+      restartLockRef,
+      fetchProgress,
+      handleRestart,
+      setTimeElapsed,
+      "FillInTheBlank"
+    );
 
-      if (progress && !Array.isArray(progress) && progress.totalTimeSpent > 0) {
-        console.log(
-          `[FillInTheBlank] Setting initial time from progress: ${progress.totalTimeSpent}`
-        );
-        setTimeElapsed(progress.totalTimeSpent);
-      } else {
-        console.log(`[FillInTheBlank] Resetting timer to 0`);
-        setTimeElapsed(0);
-      }
-    }, [progress, setTimeElapsed]);
-
-    // PERFORMANCE: Memoize check answer handler
     const checkAnswerWithProgress = useCallback(async () => {
       try {
         console.log(`[FillInTheBlank] Checking answer: ${userAnswer}`);
 
-        // 1. Stop the timer and capture current time
-        setTimerRunning(false);
-        const currentTime = timeElapsed;
-        console.log(`[FillInTheBlank] Time captured: ${currentTime}`);
+        // CRITICAL: Capture time once and use everywhere
+        const preciseTime = timeElapsed;
+        const exactFinalTime = Math.round(preciseTime * 100) / 100;
+        finalTimeRef.current = exactFinalTime;
 
-        // 2. Call the check answer handler in quiz store
+        console.log(
+          `[FillInTheBlank] Final time captured: ${exactFinalTime}s (will be used everywhere)`
+        );
+
+        setTimerRunning(false);
         checkAnswer();
 
-        // 3. Update the user progress in backend
+        // Update progress after state change
         setTimeout(async () => {
           const currentState = useGameStore.getState().fillInTheBlankState;
           if (currentState.showFeedback) {
             console.log(
-              `[FillInTheBlank] Updating progress - Time: ${currentTime}, Correct: ${currentState.isCorrect}, Completed: ${currentState.isCorrect}`
+              `[FillInTheBlank] Updating progress - Time: ${exactFinalTime}, Correct: ${currentState.isCorrect}, Completed: ${currentState.isCorrect}`
             );
 
             const updatedProgress = await updateProgress(
-              currentTime,
+              exactFinalTime, // Use the exact same value
               currentState.isCorrect,
               currentState.isCorrect
             );
@@ -113,131 +103,64 @@ const FillInTheBlank: React.FC<FillInTheBlankProps> = React.memo(
       }
     }, [userAnswer, timeElapsed, setTimerRunning, checkAnswer, updateProgress]);
 
-    const handleTimerReset = useCallback(() => {
-      console.log(
-        `[FillInTheBlank] Timer reset received - resetting timer data only, staying on completed screen`
-      );
+    const handleTimerReset = useTimerReset(setTimeElapsed, "FillInTheBlank");
 
-      setTimeElapsed(0);
+    // Add finalTimeRef at the top
+    const finalTimeRef = useRef<number>(0);
 
-      const gameStore = useGameStore.getState();
-      gameStore.resetTimer();
-      gameStore.setTimeElapsed(0);
-      console.log(
-        `[FillInTheBlank] Timer reset completed - staying on completed screen`
-      );
-    }, [setTimeElapsed]);
-
-    const handleRestartWithProgress = useCallback(async () => {
-      // ADD: Prevent multiple simultaneous restarts
-      if (restartLockRef.current) {
-        console.log(`[FillInTheBlank] Restart already in progress, ignoring`);
-        return;
+    // ADDED: Reset finalTimeRef when game restarts
+    useEffect(() => {
+      if (gameStatus === "idle" || gameStatus === "playing") {
+        finalTimeRef.current = 0;
+        console.log(`[FillInTheBlank] Reset finalTimeRef on game restart`);
       }
+    }, [gameStatus]);
 
-      console.log(`[FillInTheBlank] Restarting with complete cache refresh`);
-
-      // CRITICAL: Set both restart flags
-      isRestartingRef.current = true;
-      restartLockRef.current = true;
-
-      try {
-        // 1. Clear local state
-        setTimeElapsed(0);
-
-        // 2. Clear game store state
-        const gameStore = useGameStore.getState();
-        gameStore.resetTimer();
-        gameStore.setTimeElapsed(0);
-        gameStore.setGameStatus("idle");
-
-        // 3. CRITICAL: Force fetch fresh progress data BEFORE restarting
-        console.log(`[FillInTheBlank] Force fetching fresh progress data`);
-
-        try {
-          const freshProgress = await fetchProgress(true); // Force refresh
-
-          // 4. Use the fresh progress time (should be 0 after reset)
-          let progressTime = 0;
-          if (freshProgress && !Array.isArray(freshProgress)) {
-            progressTime = freshProgress.totalTimeSpent || 0;
-            console.log(
-              `[FillInTheBlank] Using fresh progress time: ${progressTime}`
-            );
-          } else {
-            console.log(`[FillInTheBlank] No fresh progress found, using 0`);
-          }
-
-          // 5. CRITICAL: Update local state synchronously
-          setTimeElapsed(progressTime);
-
-          // 6. Small delay to ensure state is applied
-          await new Promise((resolve) => setTimeout(resolve, 50));
-
-          // 7. Now restart the game
-          handleRestart();
-
-          console.log(
-            `[FillInTheBlank] Restart completed with fresh time: ${progressTime}`
-          );
-        } catch (fetchError) {
-          console.error(
-            `[FillInTheBlank] Error fetching fresh progress:`,
-            fetchError
-          );
-          // Fallback: restart with 0 time
-          setTimeElapsed(0);
-          handleRestart();
-        }
-      } catch (error) {
-        console.error(`[FillInTheBlank] Error during restart:`, error);
-        setTimeElapsed(0);
-        handleRestart();
-      } finally {
-        // CRITICAL: Clear both flags after longer delay
-        setTimeout(() => {
-          isRestartingRef.current = false;
-          restartLockRef.current = false;
-          console.log(`[FillInTheBlank] Restart process completed`);
-        }, 500); // Increased delay like MultipleChoice
-      }
-    }, [handleRestart, setTimeElapsed, fetchProgress]);
-
-    // PERFORMANCE: Memoize current exercise and game config
+    // FIXED: Game configuration with better final time logic
     const gameConfig = useMemo(() => {
       const currentExercise = exercises[currentExerciseIndex];
 
-      // FIXED: Better focus area extraction
       const focusArea =
         currentExercise?.focusArea ||
         levelData?.focusArea ||
         exercises?.[0]?.focusArea ||
         "Vocabulary";
 
+      // CRITICAL: Better final time logic
+      let displayTime = 0;
+      if (gameStatus === "completed" && finalTimeRef.current > 0) {
+        displayTime = finalTimeRef.current;
+      } else if (gameStatus === "playing") {
+        displayTime = timeElapsed;
+      }
+
+      console.log(
+        `[FillInTheBlank] Using EXACT final time: ${displayTime} (finalTimeRef: ${finalTimeRef.current})`
+      );
+
       return {
         currentExercise,
         focusArea,
         question: exercises[0]?.sentence || "No question available",
         userAnswerDisplay: userAnswer || "(No answer provided)",
-        initialTime:
-          progress && !Array.isArray(progress) ? progress.totalTimeSpent : 0,
+        initialTime: 0,
+        finalTime: displayTime,
       };
     }, [
       exercises,
       currentExerciseIndex,
       levelData?.focusArea,
       userAnswer,
-      progress,
+      gameStatus,
+      timeElapsed, // Add timeElapsed dependency
     ]);
 
-    // PERFORMANCE: Memoize toggle functions
-    const memoizedToggleHint = useCallback(() => {
-      toggleHint();
-    }, [toggleHint]);
-
-    const memoizedToggleTranslation = useCallback(() => {
-      toggleTranslation();
-    }, [toggleTranslation]);
+    // Memoized toggle functions
+    const memoizedToggleHint = useCallback(() => toggleHint(), [toggleHint]);
+    const memoizedToggleTranslation = useCallback(
+      () => toggleTranslation(),
+      [toggleTranslation]
+    );
 
     // Initialize game
     useGameInitialization(
@@ -260,6 +183,39 @@ const FillInTheBlank: React.FC<FillInTheBlankProps> = React.memo(
       }
     }, [showFeedback, setTimerRunning]);
 
+    // ADDED: Debug effect to track game state changes
+    useEffect(() => {
+      console.log(`[FillInTheBlank] Game state changed:`, {
+        gameStatus,
+        timerRunning,
+        timeElapsed,
+        isStarted,
+        hasExercises: exercises.length > 0,
+      });
+    }, [gameStatus, timerRunning, timeElapsed, isStarted, exercises.length]);
+
+    // ADDED: Force start game if stuck in idle after initialization
+    useEffect(() => {
+      if (
+        levelData &&
+        gameStatus === "idle" &&
+        isStarted &&
+        exercises.length > 0
+      ) {
+        console.log(
+          `[FillInTheBlank] Game seems stuck in idle, force starting...`
+        );
+
+        // Small delay then force start
+        const timer = setTimeout(() => {
+          console.log(`[FillInTheBlank] Force calling startGame()`);
+          startGame();
+        }, 500);
+
+        return () => clearTimeout(timer);
+      }
+    }, [levelData, gameStatus, isStarted, exercises.length, startGame]);
+
     return (
       <KeyboardAvoidingView
         style={{ flex: 1 }}
@@ -275,7 +231,7 @@ const FillInTheBlank: React.FC<FillInTheBlankProps> = React.memo(
           showTimer={true}
           initialTime={gameConfig.initialTime}
           isStarted={isStarted}
-          finalTime={timeElapsed}
+          finalTime={gameConfig.finalTime} // Same value
           levelId={levelId}
           onTimerReset={handleTimerReset}
           isCorrectAnswer={score > 0}
@@ -311,7 +267,7 @@ const FillInTheBlank: React.FC<FillInTheBlankProps> = React.memo(
           ) : (
             <GameCompletedContent
               score={score}
-              timeElapsed={timeElapsed}
+              timeElapsed={gameConfig.finalTime} // Same value
               difficulty={difficulty}
               question={gameConfig.question}
               userAnswer={gameConfig.userAnswerDisplay}

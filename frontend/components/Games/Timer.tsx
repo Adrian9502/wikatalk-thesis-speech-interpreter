@@ -24,10 +24,11 @@ const Timer: React.FC<TimerProps> = React.memo(
     // FIXED: Format time with proper precision
     const formatAndDisplayTime = useCallback((time: number) => {
       try {
-        time = Math.max(0, time);
-        const minutes = Math.floor(time / 60);
-        const seconds = Math.floor(time % 60);
-        const centiseconds = Math.floor((time % 1) * 100);
+        // FIXED: Maintain centiseconds precision
+        const preciseTime = Math.round(time * 100) / 100;
+        const minutes = Math.floor(preciseTime / 60);
+        const seconds = Math.floor(preciseTime % 60);
+        const centiseconds = Math.floor((preciseTime % 1) * 100);
 
         setDisplayTime(
           `${minutes.toString().padStart(2, "0")}:${seconds
@@ -64,22 +65,24 @@ const Timer: React.FC<TimerProps> = React.memo(
         lastUpdateTimeRef.current = Date.now();
 
         const updateTimer = () => {
-          if (!isRunning) return; // Exit early if no longer running
+          if (!isRunning) return;
 
           const now = Date.now();
           const deltaTime = (now - lastUpdateTimeRef.current) / 1000;
 
-          // Add delta time to current time
+          // FIXED: Add delta time with high precision
           timeRef.current += deltaTime;
           lastUpdateTimeRef.current = now;
 
-          // Format and display
+          // Format and display with centiseconds
           formatAndDisplayTime(timeRef.current);
 
-          // FIXED: Update store less frequently to reduce re-renders
-          if (Math.abs(timeRef.current - storeTimeRef.current) >= 0.2) {
-            updateTimeElapsed(timeRef.current);
-            storeTimeRef.current = timeRef.current;
+          // FIXED: Update store with precise time, less frequently to reduce re-renders
+          if (Math.abs(timeRef.current - storeTimeRef.current) >= 0.01) {
+            // Update every centisecond
+            const preciseTime = Math.round(timeRef.current * 100) / 100;
+            updateTimeElapsed(preciseTime);
+            storeTimeRef.current = preciseTime;
           }
 
           if (isRunning) {
@@ -94,8 +97,9 @@ const Timer: React.FC<TimerProps> = React.memo(
           cancelAnimationFrame(animFrameIdRef.current);
           animFrameIdRef.current = null;
         }
-        // Update store with final time
-        updateTimeElapsed(timeRef.current);
+        // Update store with final precise time
+        const finalPreciseTime = Math.round(timeRef.current * 100) / 100;
+        updateTimeElapsed(finalPreciseTime);
       }
 
       return () => {

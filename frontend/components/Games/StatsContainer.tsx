@@ -17,7 +17,7 @@ import DifficultyBadge from "@/components/games/DifficultyBadge";
 import FocusAreaBadge from "@/components/games/FocusAreaBadge";
 import { Clock } from "react-native-feather";
 import { BASE_COLORS, iconColors } from "@/constant/colors";
-import { formatTime } from "@/utils/gameUtils";
+import { formatTime, formatTimerDisplay } from "@/utils/gameUtils";
 import { calculateResetCost } from "@/utils/resetCostUtils";
 import { NAVIGATION_COLORS } from "@/constant/gameConstants";
 import { useUserProgress } from "@/hooks/useUserProgress";
@@ -213,12 +213,33 @@ const StatsContainer: React.FC<StatsContainerProps> = ({
     }
   }, [isResetting, showSuccessMessage]);
 
+  // ENHANCED: Update currentTime when finalTime changes
+  useEffect(() => {
+    if (variant === "completed" && finalTime !== undefined) {
+      console.log(
+        `[StatsContainer] Updating currentTime from finalTime: ${finalTime}`
+      );
+      setCurrentTime(finalTime);
+    }
+  }, [finalTime, variant]);
+
+  // ENHANCED: Reset currentTime when returning to playing state
+  useEffect(() => {
+    if (variant === "playing") {
+      console.log(
+        `[StatsContainer] Variant changed to playing, resetting display time`
+      );
+      setCurrentTime(0);
+      setWasActualReset(false); // Clear reset flag when playing again
+    }
+  }, [variant]);
+
   const renderStaticTimer = () => (
     <View style={styles.staticTimerContainer}>
       <View style={styles.timeContainer}>
         <Clock width={16} height={16} color={BASE_COLORS.white} />
         <Text style={styles.staticTimerText}>
-          {formatTime(currentTime || finalTime || 0)}
+          {formatTimerDisplay(currentTime || finalTime || 0)}
         </Text>
       </View>
 
@@ -237,7 +258,6 @@ const StatsContainer: React.FC<StatsContainerProps> = ({
             <Text style={styles.resetButtonText}>🪙 {resetCost}</Text>
           </TouchableOpacity>
 
-          {/* FIXED: Only show reset success if it was an actual paid reset */}
           {shouldShowResetSuccess && (
             <View style={styles.resetStatusContainer}>
               <MaterialCommunityIcons

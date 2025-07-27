@@ -682,24 +682,27 @@ const useGameStore = create<QuizState>((set, get) => ({
       },
     })),
 
-  setTimeElapsed: (time) =>
+  setTimeElapsed: (time) => {
+    const preciseTime = Math.round(time * 100) / 100;
     set((state) => ({
       gameState: {
         ...state.gameState,
-        timeElapsed: time,
+        timeElapsed: preciseTime,
       },
-    })),
+    }));
+  },
 
   // Update the updateTimeElapsed method to be more efficient
   updateTimeElapsed: (time) => {
     const currentTime = get().gameState.timeElapsed;
 
-    // Only update if there's a significant change (reduce unnecessary updates)
-    if (Math.abs(currentTime - time) >= 0.1) {
+    // FIXED: Use higher precision comparison (0.01 for centiseconds)
+    if (Math.abs(currentTime - time) >= 0.01) {
+      const preciseTime = Math.round(time * 100) / 100;
       set((state) => ({
         gameState: {
           ...state.gameState,
-          timeElapsed: time,
+          timeElapsed: preciseTime,
         },
       }));
     }
@@ -933,10 +936,10 @@ const useGameStore = create<QuizState>((set, get) => ({
   // Start game
   startGame: () => {
     const currentTimeElapsed = get().gameState.timeElapsed;
+    const currentMode = get().gameState.currentMode;
 
-    // FIXED: Preserve existing time instead of resetting
     console.log(
-      `[GameStore] Starting game with existing time: ${currentTimeElapsed}`
+      `[GameStore] Starting ${currentMode} game with existing time: ${currentTimeElapsed}`
     );
 
     set((state) => ({
@@ -944,10 +947,17 @@ const useGameStore = create<QuizState>((set, get) => ({
         ...state.gameState,
         gameStatus: "playing",
         timerRunning: true,
-        // Keep the existing timeElapsed value
         timeElapsed: currentTimeElapsed,
       },
     }));
+
+    // ADDED: Verify the state change
+    setTimeout(() => {
+      const newState = get().gameState;
+      console.log(
+        `[GameStore] After startGame - Status: ${newState.gameStatus}, Timer: ${newState.timerRunning}`
+      );
+    }, 100);
   },
 
   // Restart game

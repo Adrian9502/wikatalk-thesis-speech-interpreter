@@ -56,29 +56,46 @@ export const formatTimeDecimal = (seconds: number): string => {
 };
 
 /**
- * Format seconds to a human-readable string with better precision
+ * Format seconds to a human-readable string with centiseconds precision
+ * FIXED: Consistent rounding to prevent display differences
  */
 export const formatTime = (seconds: number): string => {
-  // For very short times, show with decimal places
-  if (seconds < 10) {
-    return `${seconds.toFixed(2)}s`;
+  // Ensure we have a valid number
+  if (!seconds || isNaN(seconds)) return "0.00s";
+
+  // CRITICAL: Apply the SAME rounding as used in finalTimeRef
+  const preciseSeconds = Math.round(seconds * 100) / 100;
+
+  // For times under 1 minute, show with centiseconds
+  if (preciseSeconds < 60) {
+    return `${preciseSeconds.toFixed(2)}s`;
   }
 
-  if (seconds < 60) {
-    return `${Math.floor(seconds)}s`;
-  }
+  // For times 1 minute and above
+  const minutes = Math.floor(preciseSeconds / 60);
+  const remainingSeconds = preciseSeconds % 60;
 
-  const minutes = Math.floor(seconds / 60);
-  const remainingSeconds = Math.floor(seconds % 60);
+  // Format: 1m 24.43s
+  return `${minutes}m : ${remainingSeconds.toFixed(2)}s`;
+};
 
-  if (minutes < 60) {
-    return `${minutes}m ${remainingSeconds}s`;
-  }
+/**
+ * Format time for timer display (MM:SS.CC format)
+ * FIXED: Consistent rounding to prevent display differences
+ */
+export const formatTimerDisplay = (seconds: number): string => {
+  if (!seconds || isNaN(seconds)) return "00:00.00";
 
-  const hours = Math.floor(minutes / 60);
-  const remainingMinutes = minutes % 60;
+  // CRITICAL: Apply the SAME rounding as used in finalTimeRef
+  const preciseSeconds = Math.round(seconds * 100) / 100;
+  const minutes = Math.floor(preciseSeconds / 60);
+  const remainingSeconds = preciseSeconds % 60;
+  const centiseconds = Math.floor((remainingSeconds % 1) * 100);
+  const wholeSeconds = Math.floor(remainingSeconds);
 
-  return `${hours}h ${remainingMinutes}m`;
+  return `${minutes.toString().padStart(2, "0")}:${wholeSeconds
+    .toString()
+    .padStart(2, "0")}.${centiseconds.toString().padStart(2, "0")}`;
 };
 
 /**

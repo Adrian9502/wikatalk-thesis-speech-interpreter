@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useCallback, useRef } from "react";
+import React, { useMemo, useCallback, useEffect, useRef } from "react";
 import { View, Text, TouchableOpacity } from "react-native";
 import { BASE_COLORS } from "@/constant/colors";
 import useGameStore from "@/store/games/useGameStore";
@@ -9,8 +9,10 @@ import GameCompletedContent from "@/components/games/GameCompletedContent";
 import { useGameInitialization } from "@/hooks/useGameInitialization";
 import { router } from "expo-router";
 import IdentificationPlayingContent from "@/components/games/identification/IdentificationPlayingContent";
-import { useUserProgress } from "@/hooks/useUserProgress";
 import { useNextLevelData } from "@/utils/games/levelUtils";
+import { useGameProgress } from "@/hooks/games/useGameProgress";
+import { useGameRestart } from "@/hooks/games/useGameRestart";
+import { useTimerReset } from "@/hooks/games/useTimerReset";
 
 interface IdentificationProps {
   levelId: number;
@@ -21,14 +23,7 @@ interface IdentificationProps {
 
 const Identification: React.FC<IdentificationProps> = React.memo(
   ({ levelId, levelData, difficulty = "easy", isStarted = false }) => {
-    const { progress, updateProgress, fetchProgress } = useUserProgress(
-      levelData?.questionId || levelId
-    );
-
-    const isRestartingRef = useRef(false);
-    // ADD: Restart lock like in MultipleChoice
-    const restartLockRef = useRef(false);
-
+    // Game state and actions
     const {
       gameState: { score, gameStatus, timerRunning, timeElapsed },
       identificationState: {
@@ -49,58 +44,86 @@ const Identification: React.FC<IdentificationProps> = React.memo(
       setTimerRunning,
     } = useGameStore();
 
-    // NEW: Use the utility hook for next level data
+    // Custom hooks for shared logic
+    const { updateProgress, fetchProgress, isRestartingRef, restartLockRef } =
+      useGameProgress(levelData, levelId);
+
     const { getNextLevelTitle } = useNextLevelData(
       "identification",
       levelId,
       difficulty
     );
 
-    // Set initial time from progress when component mounts
+    const handleRestartWithProgress = useGameRestart(
+      isRestartingRef,
+      restartLockRef,
+      fetchProgress,
+      handleRestart,
+      setTimeElapsed,
+      "Identification"
+    );
+
+    const handleTimerReset = useTimerReset(setTimeElapsed, "Identification");
+
+    // ADDED: Debug effect to track game state changes
     useEffect(() => {
-      // CRITICAL: Don't update during restart process
-      if (isRestartingRef.current || restartLockRef.current) {
-        console.log(`[Identification] Skipping progress update during restart`);
-        return;
-      }
+      console.log(`[Identification] Game state changed:`, {
+        gameStatus,
+        timerRunning,
+        timeElapsed,
+        isStarted,
+        hasWords: words.length > 0,
+        hasSentences: sentences.length > 0,
+      });
+    }, [
+      gameStatus,
+      timerRunning,
+      timeElapsed,
+      isStarted,
+      words.length,
+      sentences.length,
+    ]);
 
-      if (progress && !Array.isArray(progress) && progress.totalTimeSpent > 0) {
-        console.log(
-          `[Identification] Setting initial time from progress: ${progress.totalTimeSpent}`
-        );
-        setTimeElapsed(progress.totalTimeSpent);
-      } else {
-        console.log(`[Identification] Resetting timer to 0`);
-        setTimeElapsed(0);
-      }
-    }, [progress, setTimeElapsed]);
+    // Add finalTimeRef at the top of the component
+    const finalTimeRef = useRef<number>(0);
 
-    // PERFORMANCE: Memoize word selection handler
+    // ADDED: Reset finalTimeRef when game restarts
+    useEffect(() => {
+      if (gameStatus === "idle" || gameStatus === "playing") {
+        finalTimeRef.current = 0;
+        console.log(`[Identification] Reset finalTimeRef on game restart`);
+      }
+    }, [gameStatus]);
+
+    // Handle word selection with progress update
     const handleWordSelectWithProgress = useCallback(
       async (wordIndex: number) => {
         try {
           console.log(`[Identification] Word selected at index: ${wordIndex}`);
 
-          // 1. Stop the timer and capture current time
-          setTimerRunning(false);
-          const currentTime = timeElapsed;
-          console.log(`[Identification] Time captured: ${currentTime}`);
+          // CRITICAL: Capture time once and use everywhere
+          const preciseTime = timeElapsed;
+          const exactFinalTime = Math.round(preciseTime * 100) / 100;
+          finalTimeRef.current = exactFinalTime;
 
-          // 2. Get if the answer is correct
+          console.log(
+            `[Identification] Final time captured: ${exactFinalTime}s (will be used everywhere)`
+          );
+
+          setTimerRunning(false);
+
           const isCorrect =
             words[wordIndex]?.clean?.toLowerCase() ===
             sentences[currentSentenceIndex]?.answer?.toLowerCase();
 
-          // 3. Call the word select handler in quiz store
           handleWordSelect(wordIndex);
 
-          // 4. Update progress with completion status
           console.log(
-            `[Identification] Updating progress - Time: ${currentTime}, Correct: ${isCorrect}, Completed: ${isCorrect}`
+            `[Identification] Updating progress - Time: ${exactFinalTime}, Correct: ${isCorrect}, Completed: ${isCorrect}`
           );
 
           const updatedProgress = await updateProgress(
-            currentTime,
+            exactFinalTime, // Use the exact same value
             isCorrect,
             isCorrect
           );
@@ -123,109 +146,16 @@ const Identification: React.FC<IdentificationProps> = React.memo(
       ]
     );
 
-    const handleTimerReset = useCallback(() => {
-      console.log(
-        `[Identification] Timer reset received - resetting timer data only, staying on completed screen`
-      );
-
-      setTimeElapsed(0);
-
-      const gameStore = useGameStore.getState();
-      gameStore.resetTimer();
-      gameStore.setTimeElapsed(0);
-
-      console.log(
-        `[Identification] Timer reset completed - staying on completed screen`
-      );
-    }, [setTimeElapsed]);
-
-    const handleRestartWithProgress = useCallback(async () => {
-      // ADD: Prevent multiple simultaneous restarts
-      if (restartLockRef.current) {
-        console.log(`[Identification] Restart already in progress, ignoring`);
-        return;
-      }
-
-      console.log(`[Identification] Restarting with complete cache refresh`);
-
-      // CRITICAL: Set both restart flags
-      isRestartingRef.current = true;
-      restartLockRef.current = true;
-
-      try {
-        // 1. Clear local state
-        setTimeElapsed(0);
-
-        // 2. Clear game store state
-        const gameStore = useGameStore.getState();
-        gameStore.resetTimer();
-        gameStore.setTimeElapsed(0);
-        gameStore.setGameStatus("idle");
-
-        // 3. CRITICAL: Force fetch fresh progress data BEFORE restarting
-        console.log(`[Identification] Force fetching fresh progress data`);
-
-        try {
-          const freshProgress = await fetchProgress(true); // Force refresh
-
-          // 4. Use the fresh progress time (should be 0 after reset)
-          let progressTime = 0;
-          if (freshProgress && !Array.isArray(freshProgress)) {
-            progressTime = freshProgress.totalTimeSpent || 0;
-            console.log(
-              `[Identification] Using fresh progress time: ${progressTime}`
-            );
-          } else {
-            console.log(`[Identification] No fresh progress found, using 0`);
-          }
-
-          // 5. CRITICAL: Update local state synchronously
-          setTimeElapsed(progressTime);
-
-          // 6. Small delay to ensure state is applied
-          await new Promise((resolve) => setTimeout(resolve, 50));
-
-          // 7. Now restart the game
-          handleRestart();
-
-          console.log(
-            `[Identification] Restart completed with fresh time: ${progressTime}`
-          );
-        } catch (fetchError) {
-          console.error(
-            `[Identification] Error fetching fresh progress:`,
-            fetchError
-          );
-          // Fallback: restart with 0 time
-          setTimeElapsed(0);
-          handleRestart();
-        }
-      } catch (error) {
-        console.error(`[Identification] Error during restart:`, error);
-        setTimeElapsed(0);
-        handleRestart();
-      } finally {
-        // CRITICAL: Clear both flags after longer delay
-        setTimeout(() => {
-          isRestartingRef.current = false;
-          restartLockRef.current = false;
-          console.log(`[Identification] Restart process completed`);
-        }, 500); // Increased delay like MultipleChoice
-      }
-    }, [handleRestart, setTimeElapsed, fetchProgress]);
-
-    // PERFORMANCE: Memoize game configuration
+    // FIXED: Game configuration with better final time logic
     const gameConfig = useMemo(() => {
       const currentSentence = sentences[currentSentenceIndex];
 
-      // FIXED: Better focus area extraction
       const focusArea =
         currentSentence?.focusArea ||
         levelData?.focusArea ||
         sentences?.[0]?.focusArea ||
         "Vocabulary";
 
-      // Calculate selected answer for review
       const selectedAnswerText =
         selectedWord !== null && words[selectedWord]
           ? typeof words[selectedWord]?.text === "string"
@@ -235,14 +165,26 @@ const Identification: React.FC<IdentificationProps> = React.memo(
             : "Unknown"
           : "Unknown";
 
+      // CRITICAL: Better final time logic
+      let displayTime = 0;
+      if (gameStatus === "completed" && finalTimeRef.current > 0) {
+        displayTime = finalTimeRef.current; // This exact value will be used everywhere
+      } else if (gameStatus === "playing") {
+        displayTime = timeElapsed;
+      }
+
+      console.log(
+        `[Identification] Using EXACT final time: ${displayTime} (finalTimeRef: ${finalTimeRef.current})`
+      );
+
       return {
         currentSentence,
         focusArea,
         selectedAnswerText,
         isCorrect: feedback === "correct",
         question: currentSentence?.sentence || currentSentence?.question || "",
-        initialTime:
-          progress && !Array.isArray(progress) ? progress.totalTimeSpent : 0,
+        initialTime: 0,
+        finalTime: displayTime,
       };
     }, [
       sentences,
@@ -251,10 +193,11 @@ const Identification: React.FC<IdentificationProps> = React.memo(
       words,
       levelData?.focusArea,
       feedback,
-      progress,
+      gameStatus,
+      timeElapsed, // Add timeElapsed dependency
     ]);
 
-    // Initialize game
+    // CRITICAL: Initialize game with proper logging
     useGameInitialization(
       levelData,
       levelId,
@@ -267,6 +210,36 @@ const Identification: React.FC<IdentificationProps> = React.memo(
       timerRunning,
       gameConfig.initialTime
     );
+
+    // ADDED: Force start game if stuck in idle after initialization
+    useEffect(() => {
+      if (
+        levelData &&
+        gameStatus === "idle" &&
+        isStarted &&
+        sentences.length > 0 &&
+        words.length > 0
+      ) {
+        console.log(
+          `[Identification] Game seems stuck in idle, force starting...`
+        );
+
+        // Small delay then force start
+        const timer = setTimeout(() => {
+          console.log(`[Identification] Force calling startGame()`);
+          startGame();
+        }, 500);
+
+        return () => clearTimeout(timer);
+      }
+    }, [
+      levelData,
+      gameStatus,
+      isStarted,
+      sentences.length,
+      words.length,
+      startGame,
+    ]);
 
     // Error state handling
     if (error) {
@@ -311,7 +284,7 @@ const Identification: React.FC<IdentificationProps> = React.memo(
         showTimer={true}
         initialTime={gameConfig.initialTime}
         isStarted={isStarted}
-        finalTime={timeElapsed}
+        finalTime={gameConfig.finalTime} // Use consistent final time
         levelId={levelId}
         onTimerReset={handleTimerReset}
         isCorrectAnswer={gameConfig.isCorrect}
@@ -341,7 +314,7 @@ const Identification: React.FC<IdentificationProps> = React.memo(
         ) : (
           <GameCompletedContent
             score={score}
-            timeElapsed={timeElapsed}
+            timeElapsed={gameConfig.finalTime} // Use consistent final time
             difficulty={difficulty}
             question={gameConfig.question}
             userAnswer={gameConfig.selectedAnswerText}
