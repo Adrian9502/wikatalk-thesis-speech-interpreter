@@ -20,14 +20,28 @@ export const useGameInitialization = (
   // NEW: Track if we've already initialized to prevent multiple calls
   const hasInitialized = useRef(false);
   const hasStarted = useRef(false);
+  const initializationLock = useRef(false); // NEW: Add initialization lock
 
   useEffect(() => {
-    if (levelData && gameStatus === "idle" && !hasInitialized.current) {
+    if (
+      levelData &&
+      gameStatus === "idle" &&
+      !hasInitialized.current &&
+      !initializationLock.current // NEW: Check lock
+    ) {
       console.log(
         `[useGameInitialization] Initializing ${gameMode} at level ${levelId}`
       );
-      initialize(levelData, levelId, gameMode, difficulty);
-      hasInitialized.current = true;
+
+      // NEW: Set lock to prevent multiple initializations
+      initializationLock.current = true;
+
+      // Add small delay to prevent race conditions
+      setTimeout(() => {
+        initialize(levelData, levelId, gameMode, difficulty);
+        hasInitialized.current = true;
+        initializationLock.current = false; // Release lock
+      }, 50);
     }
   }, [levelData, levelId, gameMode, difficulty, gameStatus, initialize]);
 
@@ -50,8 +64,11 @@ export const useGameInitialization = (
         );
       }
 
-      startGame();
-      hasStarted.current = true;
+      // NEW: Add delay to prevent double start
+      setTimeout(() => {
+        startGame();
+        hasStarted.current = true;
+      }, 100);
     }
   }, [levelData, gameStatus, isStarted, startGame, initialTime]);
 
@@ -59,5 +76,6 @@ export const useGameInitialization = (
   useEffect(() => {
     hasInitialized.current = false;
     hasStarted.current = false;
+    initializationLock.current = false; // NEW: Reset lock
   }, [levelId, gameMode]);
 };

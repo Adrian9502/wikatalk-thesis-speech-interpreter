@@ -21,13 +21,13 @@ interface IdentificationProps {
 
 const Identification: React.FC<IdentificationProps> = React.memo(
   ({ levelId, levelData, difficulty = "easy", isStarted = false }) => {
-    // FIXED: Declare hook at top level
     const { progress, updateProgress, fetchProgress } = useUserProgress(
       levelData?.questionId || levelId
     );
 
-    // ADD: Track restart state
     const isRestartingRef = useRef(false);
+    // ADD: Restart lock like in MultipleChoice
+    const restartLockRef = useRef(false);
 
     const {
       gameState: { score, gameStatus, timerRunning, timeElapsed },
@@ -59,7 +59,7 @@ const Identification: React.FC<IdentificationProps> = React.memo(
     // Set initial time from progress when component mounts
     useEffect(() => {
       // CRITICAL: Don't update during restart process
-      if (isRestartingRef.current) {
+      if (isRestartingRef.current || restartLockRef.current) {
         console.log(`[Identification] Skipping progress update during restart`);
         return;
       }
@@ -140,10 +140,17 @@ const Identification: React.FC<IdentificationProps> = React.memo(
     }, [setTimeElapsed]);
 
     const handleRestartWithProgress = useCallback(async () => {
+      // ADD: Prevent multiple simultaneous restarts
+      if (restartLockRef.current) {
+        console.log(`[Identification] Restart already in progress, ignoring`);
+        return;
+      }
+
       console.log(`[Identification] Restarting with complete cache refresh`);
 
-      // CRITICAL: Set restart flag
+      // CRITICAL: Set both restart flags
       isRestartingRef.current = true;
+      restartLockRef.current = true;
 
       try {
         // 1. Clear local state
@@ -198,11 +205,12 @@ const Identification: React.FC<IdentificationProps> = React.memo(
         setTimeElapsed(0);
         handleRestart();
       } finally {
-        // Clear restart flag after delay
+        // CRITICAL: Clear both flags after longer delay
         setTimeout(() => {
           isRestartingRef.current = false;
+          restartLockRef.current = false;
           console.log(`[Identification] Restart process completed`);
-        }, 100);
+        }, 500); // Increased delay like MultipleChoice
       }
     }, [handleRestart, setTimeElapsed, fetchProgress]);
 

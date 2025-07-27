@@ -18,13 +18,13 @@ interface FillInTheBlankProps {
 
 const FillInTheBlank: React.FC<FillInTheBlankProps> = React.memo(
   ({ levelId, levelData, difficulty = "easy", isStarted = false }) => {
-    // FIXED: Declare hook at top level
     const { progress, updateProgress, fetchProgress } = useUserProgress(
       levelData?.questionId || levelId
     );
 
-    // ADD: Track restart state
     const isRestartingRef = useRef(false);
+    // ADD: Restart lock like in MultipleChoice
+    const restartLockRef = useRef(false);
 
     // Get quiz store state and actions
     const {
@@ -129,10 +129,17 @@ const FillInTheBlank: React.FC<FillInTheBlankProps> = React.memo(
     }, [setTimeElapsed]);
 
     const handleRestartWithProgress = useCallback(async () => {
+      // ADD: Prevent multiple simultaneous restarts
+      if (restartLockRef.current) {
+        console.log(`[FillInTheBlank] Restart already in progress, ignoring`);
+        return;
+      }
+
       console.log(`[FillInTheBlank] Restarting with complete cache refresh`);
 
-      // CRITICAL: Set restart flag
+      // CRITICAL: Set both restart flags
       isRestartingRef.current = true;
+      restartLockRef.current = true;
 
       try {
         // 1. Clear local state
@@ -187,11 +194,12 @@ const FillInTheBlank: React.FC<FillInTheBlankProps> = React.memo(
         setTimeElapsed(0);
         handleRestart();
       } finally {
-        // Clear restart flag after delay
+        // CRITICAL: Clear both flags after longer delay
         setTimeout(() => {
           isRestartingRef.current = false;
+          restartLockRef.current = false;
           console.log(`[FillInTheBlank] Restart process completed`);
-        }, 100);
+        }, 500); // Increased delay like MultipleChoice
       }
     }, [handleRestart, setTimeElapsed, fetchProgress]);
 

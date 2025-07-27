@@ -347,38 +347,51 @@ const GameNavigation: React.FC<GameNavigationProps> = ({
     console.log("[GameNavigation] Retrying current level - forcing fresh data");
 
     try {
-      // NEW: Set loading state
+      // NEW: Set loading state FIRST
       setIsRetryLoading(true);
 
+      // CRITICAL: Add delay to prevent race conditions
+      await new Promise((resolve) => setTimeout(resolve, 100));
+
+      // 1. Clean up game store state FIRST
       const gameStore = useGameStore.getState();
       gameStore.setGameStatus("idle");
       gameStore.setScore(0);
       gameStore.setTimerRunning(false);
 
+      // 2. Clear progress store cache
       const progressStore = useProgressStore.getState();
       progressStore.clearCache();
 
-      // Force refresh progress
+      // 3. SEQUENTIAL: Wait for cache clear before fetching
+      await new Promise((resolve) => setTimeout(resolve, 200));
+
+      // 4. Force refresh progress
       await progressStore.fetchProgress(true);
 
-      // FIXED: Access splash store properly
+      // 5. Clear splash store
       const splashStore = useSplashStore.getState();
       splashStore.reset();
 
-      // NEW: Add 2-second delay for progress processing
-      await new Promise((resolve) => setTimeout(resolve, 2000));
+      // 6. CRITICAL: Wait for all operations to complete
+      await new Promise((resolve) => setTimeout(resolve, 500));
 
+      // 7. Now call restart in a controlled manner
+      console.log("[GameNavigation] All caches cleared, calling onRestart");
+      onRestart();
+
+      // 8. CRITICAL: Keep loading state longer to prevent double render
       setTimeout(() => {
-        console.log("[GameNavigation] All caches cleared, calling onRestart");
-        onRestart();
-        // NEW: Reset loading state after restart
         setIsRetryLoading(false);
-      }, 100);
+        console.log("[GameNavigation] Retry process completed");
+      }, 800); // Longer delay
     } catch (error) {
       console.error("[GameNavigation] Error during retry preparation:", error);
       // Always call onRestart as fallback and reset loading
       onRestart();
-      setIsRetryLoading(false);
+      setTimeout(() => {
+        setIsRetryLoading(false);
+      }, 800);
     }
   }, [
     isAnimating,

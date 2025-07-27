@@ -29,6 +29,8 @@ const MultipleChoice: React.FC<MultipleChoiceProps> = React.memo(
     const gameStartedRef = useRef(false);
     // ADD: Track restart state to prevent double rendering
     const isRestartingRef = useRef(false);
+    // NEW: Add restart lock to prevent multiple simultaneous restarts
+    const restartLockRef = useRef(false);
 
     // Get quiz store state and actions
     const {
@@ -52,7 +54,7 @@ const MultipleChoice: React.FC<MultipleChoiceProps> = React.memo(
     // FIXED: Set initial time from progress when component mounts - prevent multiple calls
     useEffect(() => {
       // CRITICAL: Don't update during restart process
-      if (isRestartingRef.current) {
+      if (isRestartingRef.current || restartLockRef.current) {
         console.log(`[MultipleChoice] Skipping progress update during restart`);
         return;
       }
@@ -128,85 +130,80 @@ const MultipleChoice: React.FC<MultipleChoiceProps> = React.memo(
     );
 
     const handleRestartWithProgress = useCallback(async () => {
+      // CRITICAL: Prevent multiple simultaneous restarts
+      if (restartLockRef.current) {
+        console.log(`[MultipleChoice] Restart already in progress, ignoring`);
+        return;
+      }
+
       console.log(`[MultipleChoice] Restarting with complete cache refresh`);
 
-      // CRITICAL: Set restart flag to prevent double rendering
+      // CRITICAL: Set both restart flags
       isRestartingRef.current = true;
+      restartLockRef.current = true;
 
       try {
-        // 1. Clear all local state first, but DON'T reset timeElapsed to 0 yet
+        // 1. IMMEDIATELY reset visual state to prevent double rendering
+        const gameStore = useGameStore.getState();
+        gameStore.setGameStatus("idle");
+
+        // 2. Clear all local state first
         lastProgressTimeRef.current = 0;
         initialSetupComplete.current = false;
         gameStartedRef.current = false;
 
-        // 2. Clear game store state but preserve current time temporarily
-        const gameStore = useGameStore.getState();
-        const currentGameTime = gameStore.gameState.timeElapsed;
+        // 3. Force a small delay to let UI settle
+        await new Promise((resolve) => setTimeout(resolve, 100));
 
-        gameStore.setGameStatus("idle");
-        // REMOVED: Don't reset timer here - let fresh progress data determine the time
-        // gameStore.resetTimer();
-        // gameStore.setTimeElapsed(0);
-
-        // 3. CRITICAL: Force fetch fresh progress data BEFORE restarting
+        // 4. CRITICAL: Force fetch fresh progress data SYNCHRONOUSLY
         console.log(`[MultipleChoice] Force fetching fresh progress data`);
 
-        try {
-          const freshProgress = await fetchProgress(true); // Force refresh
+        const freshProgress = await fetchProgress(true); // Force refresh
 
-          // 4. Use the fresh progress time
-          let progressTime = 0;
-          if (freshProgress && !Array.isArray(freshProgress)) {
-            progressTime = freshProgress.totalTimeSpent || 0;
-            console.log(
-              `[MultipleChoice] Using fresh progress time: ${progressTime}`
-            );
-          } else {
-            console.log(
-              `[MultipleChoice] No fresh progress found, using current time: ${currentGameTime}`
-            );
-            progressTime = currentGameTime; // Use current time instead of 0
-          }
-
-          // 5. CRITICAL: Update local state with fresh time SYNCHRONOUSLY
-          setTimeElapsed(progressTime);
-          lastProgressTimeRef.current = progressTime;
-          initialSetupComplete.current = true;
-
-          // 6. CRITICAL: Small delay to ensure state is applied
-          await new Promise((resolve) => setTimeout(resolve, 50));
-
-          // 7. Now restart the game
-          handleRestart();
-
+        // 5. Use the fresh progress time
+        let progressTime = 0;
+        if (freshProgress && !Array.isArray(freshProgress)) {
+          progressTime = freshProgress.totalTimeSpent || 0;
           console.log(
-            `[MultipleChoice] Restart completed with fresh time: ${progressTime}`
+            `[MultipleChoice] Using fresh progress time: ${progressTime}`
           );
-        } catch (fetchError) {
-          console.error(
-            `[MultipleChoice] Error fetching fresh progress:`,
-            fetchError
-          );
-          // Fallback: restart with current time instead of 0
-          setTimeElapsed(currentGameTime);
-          lastProgressTimeRef.current = currentGameTime;
-          initialSetupComplete.current = true;
-          handleRestart();
+        } else {
+          console.log(`[MultipleChoice] No fresh progress found, using 0`);
+          progressTime = 0;
         }
+
+        // 6. CRITICAL: Update local state SYNCHRONOUSLY
+        setTimeElapsed(progressTime);
+        lastProgressTimeRef.current = progressTime;
+        initialSetupComplete.current = true;
+
+        // 7. CRITICAL: Small delay to ensure state propagation
+        await new Promise((resolve) => setTimeout(resolve, 150));
+
+        // 8. Now restart the game in one atomic operation
+        console.log(`[MultipleChoice] Executing restart`);
+        handleRestart();
+
+        // 9. Small delay before clearing flags
+        await new Promise((resolve) => setTimeout(resolve, 200));
+
+        console.log(
+          `[MultipleChoice] Restart completed with fresh time: ${progressTime}`
+        );
       } catch (error) {
         console.error(`[MultipleChoice] Error during restart:`, error);
-        // Fallback: restart with current time
-        const currentTime = useGameStore.getState().gameState.timeElapsed;
-        setTimeElapsed(currentTime);
-        lastProgressTimeRef.current = currentTime;
+        // Fallback: restart with 0 time
+        setTimeElapsed(0);
+        lastProgressTimeRef.current = 0;
         initialSetupComplete.current = true;
         handleRestart();
       } finally {
-        // CRITICAL: Clear restart flag after a delay
+        // CRITICAL: Clear restart flags after a longer delay
         setTimeout(() => {
           isRestartingRef.current = false;
+          restartLockRef.current = false;
           console.log(`[MultipleChoice] Restart process completed`);
-        }, 100);
+        }, 500); // Increased delay
       }
     }, [handleRestart, setTimeElapsed, fetchProgress]);
 
