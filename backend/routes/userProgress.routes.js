@@ -121,79 +121,81 @@ router.post("/:quizId", protect, async (req, res) => {
       console.log("[PROGRESS] Converted numeric ID to:", quizId);
     }
 
-    // FIXED: Restructure update to avoid conflicts
-    const updateData = {
-      $setOnInsert: {
-        // Only set these fields when creating a new document
+    // FIXED: Use a simpler approach - try to update existing, create if doesn't exist
+    let progress = await UserProgress.findOne({ userId, quizId });
+
+    if (progress) {
+      // Update existing progress
+      console.log("[PROGRESS] Updating existing progress");
+
+      // Add new attempt if time spent is provided
+      if (timeSpent !== undefined) {
+        const timeSpentNum = parseFloat(timeSpent);
+        if (!isNaN(timeSpentNum)) {
+          const newAttempt = {
+            quizId,
+            timeSpent: timeSpentNum,
+            attemptDate: new Date(),
+            isCorrect: isCorrect || false,
+            attemptNumber: progress.attempts.length + 1,
+            cumulativeTime: timeSpentNum
+          };
+
+          progress.attempts.push(newAttempt);
+          progress.totalTimeSpent = timeSpentNum;
+          progress.lastAttemptTime = timeSpentNum;
+          progress.lastAttemptDate = new Date();
+
+          console.log("[PROGRESS] Adding attempt with time:", timeSpentNum, "isCorrect:", isCorrect);
+        }
+      }
+
+      // Update completion status
+      if (completed !== undefined) {
+        progress.completed = completed;
+        if (completed) {
+          progress.exercisesCompleted = 1;
+          console.log("[PROGRESS] Marking quiz as completed");
+        }
+      }
+
+      // Save the updated progress
+      await progress.save();
+
+    } else {
+      // Create new progress
+      console.log("[PROGRESS] Creating new progress");
+
+      const newProgressData = {
         userId,
         quizId,
-        exercisesCompleted: 0,
+        exercisesCompleted: completed ? 1 : 0,
         totalExercises: 1,
-        completed: false,
-        totalTimeSpent: 0,
-        attempts: []
+        completed: completed || false,
+        totalTimeSpent: parseFloat(timeSpent) || 0,
+        lastAttemptTime: parseFloat(timeSpent) || 0,
+        attempts: [],
+        lastAttemptDate: new Date()
+      };
+
+      // Add attempt if time spent is provided
+      if (timeSpent !== undefined) {
+        const timeSpentNum = parseFloat(timeSpent);
+        if (!isNaN(timeSpentNum)) {
+          newProgressData.attempts = [{
+            quizId,
+            timeSpent: timeSpentNum,
+            attemptDate: new Date(),
+            isCorrect: isCorrect || false,
+            attemptNumber: 1,
+            cumulativeTime: timeSpentNum
+          }];
+        }
       }
-    };
 
-    // Add new attempt if time spent is provided
-    if (timeSpent !== undefined) {
-      const timeSpentNum = parseFloat(timeSpent);
-
-      if (!isNaN(timeSpentNum)) {
-        // First, get the current progress to calculate attempt number
-        const existingProgress = await UserProgress.findOne({ userId, quizId });
-        const attemptNumber = existingProgress ? (existingProgress.attempts.length + 1) : 1;
-
-        // Create the new attempt record
-        const newAttempt = {
-          quizId,
-          timeSpent: timeSpentNum,
-          attemptDate: new Date(),
-          isCorrect: isCorrect || false,
-          attemptNumber: attemptNumber,
-          cumulativeTime: timeSpentNum
-        };
-
-        // Add the attempt to the update
-        updateData.$push = { attempts: newAttempt };
-
-        // FIXED: Initialize $set properly to avoid conflicts
-        updateData.$set = {
-          totalTimeSpent: timeSpentNum,
-          lastAttemptTime: timeSpentNum,
-          lastAttemptDate: new Date()
-        };
-
-        console.log("[PROGRESS] Adding attempt with time:", timeSpentNum, "isCorrect:", isCorrect);
-      }
+      progress = new UserProgress(newProgressData);
+      await progress.save();
     }
-
-    // FIXED: Handle completion status separately to avoid conflicts
-    if (completed !== undefined) {
-      // Ensure $set exists
-      if (!updateData.$set) {
-        updateData.$set = {};
-      }
-
-      // Only set completed if it's not already set in $setOnInsert
-      updateData.$set.completed = completed;
-
-      if (completed) {
-        updateData.$set.exercisesCompleted = 1; // Assuming 1 exercise per quiz
-        console.log("[PROGRESS] Marking quiz as completed");
-      }
-    }
-
-    // FIXED: Use findOneAndUpdate with upsert option
-    const progress = await UserProgress.findOneAndUpdate(
-      { userId, quizId },
-      updateData,
-      {
-        new: true,
-        upsert: true,
-        setDefaultsOnInsert: true
-      }
-    );
 
     console.log("[PROGRESS] Progress updated/created successfully");
     res.json({ success: true, progress });
@@ -201,19 +203,19 @@ router.post("/:quizId", protect, async (req, res) => {
   } catch (error) {
     console.error("[PROGRESS] Error updating progress:", error);
 
-    // ENHANCED: Better error handling for different types of conflicts
+    // ENHANCED: Better error handling for different scenarios
     if (error.code === 11000) {
       console.log("[PROGRESS] Duplicate key error, attempting to update existing record");
 
       try {
-        // If we get a duplicate key error, just update the existing record
+        // If we get a duplicate key error, find and update the existing record
         const existingProgress = await UserProgress.findOne({
           userId: req.user._id,
           quizId: req.params.quizId.replace('n-', '')
         });
 
         if (existingProgress) {
-          // Update the existing record
+          // Update the existing record directly
           if (req.body.timeSpent !== undefined) {
             const timeSpentNum = parseFloat(req.body.timeSpent);
             if (!isNaN(timeSpentNum)) {
@@ -243,78 +245,6 @@ router.post("/:quizId", protect, async (req, res) => {
         }
       } catch (retryError) {
         console.error("[PROGRESS] Retry failed:", retryError);
-      }
-    } else if (error.code === 40) {
-      // FIXED: Handle ConflictingUpdateOperators error
-      console.log("[PROGRESS] ConflictingUpdateOperators error, using direct update approach");
-
-      try {
-        // Find the existing document and update it directly
-        const existingProgress = await UserProgress.findOne({
-          userId: req.user._id,
-          quizId: req.params.quizId.replace('n-', '')
-        });
-
-        if (existingProgress) {
-          // Update fields individually to avoid conflicts
-          if (req.body.timeSpent !== undefined) {
-            const timeSpentNum = parseFloat(req.body.timeSpent);
-            if (!isNaN(timeSpentNum)) {
-              // Add new attempt
-              existingProgress.attempts.push({
-                quizId: existingProgress.quizId,
-                timeSpent: timeSpentNum,
-                attemptDate: new Date(),
-                isCorrect: req.body.isCorrect || false,
-                attemptNumber: existingProgress.attempts.length + 1,
-                cumulativeTime: timeSpentNum
-              });
-
-              // Update other fields
-              existingProgress.totalTimeSpent = timeSpentNum;
-              existingProgress.lastAttemptTime = timeSpentNum;
-              existingProgress.lastAttemptDate = new Date();
-            }
-          }
-
-          // Update completion status
-          if (req.body.completed !== undefined) {
-            existingProgress.completed = req.body.completed;
-            if (req.body.completed) {
-              existingProgress.exercisesCompleted = 1;
-            }
-          }
-
-          // Save the updated document
-          const updatedProgress = await existingProgress.save();
-          return res.json({ success: true, progress: updatedProgress });
-
-        } else {
-          // Create new document if none exists
-          const newProgress = new UserProgress({
-            userId: req.user._id,
-            quizId: req.params.quizId.replace('n-', ''),
-            exercisesCompleted: req.body.completed ? 1 : 0,
-            totalExercises: 1,
-            completed: req.body.completed || false,
-            totalTimeSpent: parseFloat(req.body.timeSpent) || 0,
-            lastAttemptTime: parseFloat(req.body.timeSpent) || 0,
-            attempts: req.body.timeSpent ? [{
-              quizId: req.params.quizId.replace('n-', ''),
-              timeSpent: parseFloat(req.body.timeSpent),
-              attemptDate: new Date(),
-              isCorrect: req.body.isCorrect || false,
-              attemptNumber: 1,
-              cumulativeTime: parseFloat(req.body.timeSpent)
-            }] : [],
-            lastAttemptDate: new Date()
-          });
-
-          const savedProgress = await newProgress.save();
-          return res.json({ success: true, progress: savedProgress });
-        }
-      } catch (directUpdateError) {
-        console.error("[PROGRESS] Direct update failed:", directUpdateError);
       }
     }
 
