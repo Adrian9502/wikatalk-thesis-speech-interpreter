@@ -55,7 +55,7 @@ interface ProgressState {
   clearCache: () => void;
   formatQuizId: (id: string | number) => string;
   clearAllAccountData: () => void;
-
+  refreshQuizCounts: () => void;
   // Timestamp for last update
   lastUpdated: number;
 
@@ -95,9 +95,16 @@ const detectGameModeFromQuizId = (quizId: string | number): string | null => {
   return null;
 };
 
-// Count total quizzes for all game modes
+// Count total quizzes for all game modes - FIXED VERSION
 const getTotalQuizCount = (): number => {
   const { questions } = useGameStore.getState();
+
+  // Add validation to ensure questions exist
+  if (!questions || typeof questions !== "object") {
+    console.warn("[getTotalQuizCount] Questions store is not ready");
+    return 0;
+  }
+
   let totalCount = 0;
 
   Object.entries(questions).forEach(([gameMode, difficulties]) => {
@@ -105,11 +112,15 @@ const getTotalQuizCount = (): number => {
       Object.entries(difficulties).forEach(([difficulty, questionList]) => {
         if (Array.isArray(questionList)) {
           totalCount += questionList.length;
+          console.log(
+            `[getTotalQuizCount] ${gameMode}.${difficulty}: ${questionList.length} questions`
+          );
         }
       });
     }
   });
 
+  console.log(`[getTotalQuizCount] Total quiz count: ${totalCount}`);
   return totalCount;
 };
 
@@ -453,19 +464,22 @@ const useProgressStore = create<ProgressState>((set, get) => ({
   error: null,
   lastFetched: 0,
 
-  // Initial game progress metrics
+  // FIXED: Better initial game progress metrics
   totalCompletedCount: 0,
-  totalQuizCount: getTotalQuizCount(),
+  totalQuizCount: 0, // Start with 0, will be updated when questions load
   gameProgress: {
     multipleChoice: {
       completed: 0,
-      total: getQuizCountByMode("multipleChoice"),
+      total: 0, // Will be updated
     },
     identification: {
       completed: 0,
-      total: getQuizCountByMode("identification"),
+      total: 0, // Will be updated
     },
-    fillBlanks: { completed: 0, total: getQuizCountByMode("fillBlanks") },
+    fillBlanks: {
+      completed: 0,
+      total: 0, // Will be updated
+    },
   },
 
   // Enhanced progress data storage
@@ -511,7 +525,31 @@ const useProgressStore = create<ProgressState>((set, get) => ({
     });
   },
 
-  // Fetch user progress (global or specific)
+  // ADD: Missing refreshQuizCounts implementation
+  refreshQuizCounts: () => {
+    const newTotalCount = getTotalQuizCount();
+    console.log(`[ProgressStore] Refreshing quiz counts: ${newTotalCount}`);
+
+    set((state) => ({
+      totalQuizCount: newTotalCount,
+      gameProgress: {
+        multipleChoice: {
+          ...state.gameProgress.multipleChoice,
+          total: getQuizCountByMode("multipleChoice"),
+        },
+        identification: {
+          ...state.gameProgress.identification,
+          total: getQuizCountByMode("identification"),
+        },
+        fillBlanks: {
+          ...state.gameProgress.fillBlanks,
+          total: getQuizCountByMode("fillBlanks"),
+        },
+      },
+    }));
+  },
+
+  // Enhanced fetchProgress method
   fetchProgress: async (forceRefresh = false): Promise<any[] | null> => {
     const currentTime = Date.now();
     const { lastFetched, currentUserId, progress } = get();
@@ -530,7 +568,7 @@ const useProgressStore = create<ProgressState>((set, get) => ({
       set({ currentUserId: newUserId });
     }
 
-    // ENHANCED: Better cache validation
+    // Enhanced cache validation
     const cacheAge = currentTime - lastFetched;
     const isCacheValid =
       lastFetched > 0 && cacheAge < CACHE_EXPIRY && !userChanged;
@@ -554,9 +592,13 @@ const useProgressStore = create<ProgressState>((set, get) => ({
 
       const token = getToken();
       if (!token) {
-        console.log("[ProgressStore] No auth token available");
-        set({ isLoading: false });
-        return progress || [];
+        // FIXED: Still refresh counts even without token
+        get().refreshQuizCounts();
+        set({
+          isLoading: false,
+          error: "Authentication required",
+        });
+        return [];
       }
 
       const response = await axios({
@@ -581,11 +623,15 @@ const useProgressStore = create<ProgressState>((set, get) => ({
           (p: any) => p.completed
         ).length;
 
+        // FIXED: Ensure quiz counts are up to date
+        const currentTotalQuizCount = getTotalQuizCount();
+
         set({
           progress: progressData,
           globalProgress: progressData,
           gameProgress,
           totalCompletedCount: totalCompleted,
+          totalQuizCount: currentTotalQuizCount,
           lastFetched: currentTime,
           lastUpdated: currentTime,
           isLoading: false,
@@ -598,6 +644,10 @@ const useProgressStore = create<ProgressState>((set, get) => ({
       }
     } catch (error) {
       console.error("Error fetching progress:", error);
+
+      // FIXED: Still refresh quiz counts on error
+      get().refreshQuizCounts();
+
       set({
         isLoading: false,
         error:

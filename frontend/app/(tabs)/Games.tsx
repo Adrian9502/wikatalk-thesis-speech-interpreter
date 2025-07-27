@@ -170,6 +170,31 @@ const Games = () => {
     preloadData();
   }, [dataReady, preloadedGameModes]);
 
+  useEffect(() => {
+    const refreshData = async () => {
+      // Ensure questions are loaded first
+      const gameStore = useGameStore.getState();
+      if (
+        !gameStore.questions ||
+        Object.keys(gameStore.questions).length === 0
+      ) {
+        console.log("[Games] Loading questions first...");
+        await gameStore.fetchQuestions();
+      }
+
+      // Then refresh progress and quiz counts
+      const progressStore = useProgressStore.getState();
+      if (progressStore.refreshQuizCounts) {
+        progressStore.refreshQuizCounts();
+      }
+
+      // Force refresh progress
+      await progressStore.fetchProgress(true);
+    };
+
+    refreshData();
+  }, []);
+
   // Refresh progress data when screen is focused
   useFocusEffect(
     React.useCallback(() => {

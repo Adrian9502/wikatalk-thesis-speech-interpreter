@@ -6,6 +6,7 @@ import { Target, Award } from "react-native-feather";
 import { SectionHeader } from "@/components/games/common/AnimatedSection";
 import useProgressStore from "@/store/games/useProgressStore";
 import { GAME_GRADIENTS, GAME_MODES } from "@/constant/gameConstants";
+import { BASE_COLORS } from "@/constant/colors";
 
 const ProgressStats = React.memo(() => {
   // Get progress data from the centralized store with lastUpdated
@@ -26,7 +27,6 @@ const ProgressStats = React.memo(() => {
       animation="fadeInUp"
       duration={1000}
       delay={800}
-      style={styles.quickStatsSection}
       useNativeDriver
     >
       <SectionHeader
@@ -82,16 +82,13 @@ const ProgressStats = React.memo(() => {
 });
 
 const styles = StyleSheet.create({
-  quickStatsSection: {
-    marginBottom: 20,
-  },
   statsGrid: {
     flexDirection: "row",
-    gap: 16,
+    gap: 20,
   },
   quickStatCard: {
     flex: 1,
-    borderRadius: 16,
+    borderRadius: 20,
     overflow: "hidden",
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 4 },
@@ -100,7 +97,7 @@ const styles = StyleSheet.create({
     elevation: 6,
   },
   statCardGradient: {
-    padding: 20,
+    padding: 16,
     alignItems: "center",
     minHeight: 120,
     justifyContent: "center",
@@ -108,35 +105,35 @@ const styles = StyleSheet.create({
   statIconContainer: {
     width: 48,
     height: 48,
-    borderRadius: 16,
+    borderRadius: 20,
     backgroundColor: "rgba(255, 255, 255, 0.2)",
     justifyContent: "center",
     alignItems: "center",
     marginBottom: 12,
   },
   statNumber: {
-    fontSize: 24,
-    fontFamily: "Poppins-Bold",
-    color: "#fff",
+    fontSize: 22,
+    fontFamily: "Poppins-SemiBold",
+    color: BASE_COLORS.white,
     marginBottom: 4,
   },
   statText: {
     fontSize: 12,
-    fontFamily: "Poppins-Medium",
-    color: "rgba(255, 255, 255, 0.9)",
+    fontFamily: "Poppins-Regular",
+    color: BASE_COLORS.white,
     textAlign: "center",
   },
   progressSummaryContainer: {
-    marginTop: 12,
-    paddingVertical: 8,
+    marginTop: 20,
+    paddingVertical: 12,
     paddingHorizontal: 16,
-    borderRadius: 16,
+    borderRadius: 20,
     backgroundColor: "rgba(255, 255, 255, 0.1)",
   },
   progressSummaryText: {
     fontSize: 14,
     fontFamily: "Poppins-Regular",
-    color: "rgba(255, 255, 255, 0.9)",
+    color: BASE_COLORS.white,
     textAlign: "center",
   },
 });
