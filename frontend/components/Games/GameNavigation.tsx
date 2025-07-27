@@ -516,13 +516,15 @@ const GameNavigation: React.FC<GameNavigationProps> = ({
               title="Retry"
               iconName="rotate-left"
               colors={
-                navigationState.retry.status === "disabled"
+                navigationState.retry.status === "disabled" || isRetryLoading
                   ? (["#666666", "#444444"] as const)
                   : NAVIGATION_COLORS.yellow
               }
               onPress={handleRetry}
               flex={1}
-              disabled={navigationState.retry.status === "disabled"}
+              disabled={
+                navigationState.retry.status === "disabled" || isRetryLoading
+              }
               isLoading={isRetryLoading}
             />
 

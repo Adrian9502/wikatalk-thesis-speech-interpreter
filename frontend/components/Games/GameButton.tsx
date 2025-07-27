@@ -60,6 +60,15 @@ const GameButton: React.FC<GameButtonProps> = ({
   // Determine if button should be functionally disabled
   const isFunctionallyDisabled = disabled || isLoading || internalDisabled;
 
+  // FIXED: Make sure onPress is completely blocked when loading
+  const handlePress = () => {
+    if (isFunctionallyDisabled) {
+      console.log("[GameButton] Button press blocked - disabled or loading");
+      return;
+    }
+    onPress();
+  };
+
   // Only apply visual disabled styles for explicit disabled prop or loading
   const shouldShowDisabledStyle = disabled || isLoading;
 
@@ -140,7 +149,7 @@ const GameButton: React.FC<GameButtonProps> = ({
   const content = (
     <TouchableOpacity
       style={buttonStyle}
-      onPress={onPress}
+      onPress={handlePress} // Use our wrapper function
       activeOpacity={isFunctionallyDisabled ? 1 : 0.85} // No visual feedback when disabled
       disabled={isFunctionallyDisabled} // Functionally disabled
       accessible={true}
