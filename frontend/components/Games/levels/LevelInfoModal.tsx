@@ -474,7 +474,7 @@ const LevelInfoModal: React.FC<GameInfoModalProps> = React.memo(
           // Show success message with cost breakdown
           const costInfo = result.costBreakdown;
           const message = costInfo
-            ? `Timer Reset! ${result.coinsDeducted} coins deducted for ${costInfo.timeRange} session.`
+            ? `Timer Reset! ${result.coinsDeducted} coins deducted.`
             : "Timer Reset Successfully!";
 
           // Show simple success message
@@ -955,10 +955,10 @@ const styles = StyleSheet.create({
     alignItems: "center",
     gap: 4,
     flexDirection: "row",
-    backgroundColor: "rgba(255, 255, 255, 0.15)",
+    backgroundColor: "rgba(255, 255, 255, 0.18)",
     paddingHorizontal: 8,
-    paddingVertical: 3,
-    borderRadius: 12,
+    paddingVertical: 7,
+    borderRadius: 20,
     flex: 1,
   },
   resetButton: {
@@ -966,7 +966,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     backgroundColor: "rgba(245, 47, 47, 0.9)",
-    paddingHorizontal: 5,
+    paddingHorizontal: 10,
     paddingVertical: 8,
     borderRadius: 16,
     borderWidth: 1,
@@ -1119,7 +1119,7 @@ const styles = StyleSheet.create({
     marginRight: 8,
   },
   resetMessageTitle: {
-    fontSize: 14,
+    fontSize: 12,
     fontFamily: "Poppins-Medium",
     color: "#fff",
   },
