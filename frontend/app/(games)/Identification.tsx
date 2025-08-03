@@ -13,6 +13,7 @@ import { useNextLevelData } from "@/utils/games/levelUtils";
 import { useGameProgress } from "@/hooks/games/useGameProgress";
 import { useGameRestart } from "@/hooks/games/useGameRestart";
 import { useTimerReset } from "@/hooks/games/useTimerReset";
+import useProgressStore from "@/store/games/useProgressStore";
 
 interface IdentificationProps {
   levelId: number;
@@ -65,25 +66,6 @@ const Identification: React.FC<IdentificationProps> = React.memo(
 
     const handleTimerReset = useTimerReset(setTimeElapsed, "Identification");
 
-    // ADDED: Debug effect to track game state changes
-    useEffect(() => {
-      console.log(`[Identification] Game state changed:`, {
-        gameStatus,
-        timerRunning,
-        timeElapsed,
-        isStarted,
-        hasWords: words.length > 0,
-        hasSentences: sentences.length > 0,
-      });
-    }, [
-      gameStatus,
-      timerRunning,
-      timeElapsed,
-      isStarted,
-      words.length,
-      sentences.length,
-    ]);
-
     // Add finalTimeRef at the top of the component
     const finalTimeRef = useRef<number>(0);
 
@@ -101,7 +83,6 @@ const Identification: React.FC<IdentificationProps> = React.memo(
         try {
           console.log(`[Identification] Word selected at index: ${wordIndex}`);
 
-          // CRITICAL: Capture time once and use everywhere
           const preciseTime = timeElapsed;
           const exactFinalTime = Math.round(preciseTime * 100) / 100;
           finalTimeRef.current = exactFinalTime;
@@ -123,13 +104,22 @@ const Identification: React.FC<IdentificationProps> = React.memo(
           );
 
           const updatedProgress = await updateProgress(
-            exactFinalTime, // Use the exact same value
+            exactFinalTime,
             isCorrect,
             isCorrect
           );
 
           if (updatedProgress) {
             console.log(`[Identification] Progress updated successfully`);
+
+            // ADDED: Force refresh enhanced progress cache for ALL answers (correct AND incorrect)
+            const progressStore = useProgressStore.getState();
+            progressStore.enhancedProgress["identification"] = null; // Clear cache
+            progressStore.lastUpdated = Date.now(); // Trigger UI updates
+
+            console.log(
+              `[Identification] Enhanced progress cache cleared for immediate refresh`
+            );
           }
         } catch (error) {
           console.error("[Identification] Error in word selection:", error);

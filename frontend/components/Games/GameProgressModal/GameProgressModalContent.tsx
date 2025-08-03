@@ -33,33 +33,41 @@ const GameProgressModalContent: React.FC<GameProgressModalContentProps> = ({
   const [progressData, setProgressData] =
     useState<EnhancedGameModeProgress | null>(preloadedData);
 
+  // ADDED: Listen to progress store updates
+  const { lastUpdated } = useProgressStore();
+
   // Performance tracking
   const renderStartTime = useMemo(() => Date.now(), []);
 
-  // Use preloaded data if available, or load it
+  // SIMPLIFIED: Single effect for data loading
   useEffect(() => {
-    // If we already have data, skip loading
-    if (preloadedData) {
-      setProgressData(preloadedData);
-      setIsDataLoading(false);
-      return;
-    }
-
-    // Performance logging
-    console.log(`[GameProgressModalContent] Loading data for ${gameMode}`);
-
-    // Load data
-    const loadData = async () => {
+    const loadData = async (forceRefresh = false) => {
       try {
-        // First check if we have cached data
-        const cachedData =
-          useProgressStore.getState().enhancedProgress[gameMode];
-
-        if (cachedData) {
-          setProgressData(cachedData);
+        // If we have preloaded data and no force refresh, use it
+        if (preloadedData && !forceRefresh) {
+          console.log(
+            `[GameProgressModalContent] Using preloaded data for ${gameMode}`
+          );
+          setProgressData(preloadedData);
           setIsDataLoading(false);
           return;
         }
+
+        console.log(
+          `[GameProgressModalContent] Loading data for ${gameMode} (force: ${forceRefresh})`
+        );
+
+        // Clear cache if force refresh
+        if (forceRefresh) {
+          useProgressStore.setState((state) => ({
+            enhancedProgress: {
+              ...state.enhancedProgress,
+              [gameMode]: null,
+            },
+          }));
+        }
+
+        setIsDataLoading(true);
 
         // Load fresh data
         const data = await useProgressStore
@@ -67,14 +75,63 @@ const GameProgressModalContent: React.FC<GameProgressModalContentProps> = ({
           .getEnhancedGameProgress(gameMode);
         setProgressData(data);
         setIsDataLoading(false);
+
+        console.log(`[GameProgressModalContent] Data loaded for ${gameMode}:`, {
+          totalAttempts: data?.totalAttempts || 0,
+          recentAttempts: data?.recentAttempts?.length || 0,
+        });
       } catch (error) {
         console.error("[GameProgressModalContent] Error loading data:", error);
         setIsDataLoading(false);
       }
     };
 
+    // Initial load
     loadData();
   }, [gameMode, preloadedData]);
+
+  // ADDED: Listen for progress updates and refresh data
+  useEffect(() => {
+    if (!gameMode || !lastUpdated) return;
+
+    console.log(
+      `[GameProgressModalContent] Progress updated for ${gameMode}, refreshing data`
+    );
+
+    // Small delay to ensure backend has processed the update
+    const timer = setTimeout(() => {
+      const loadFreshData = async () => {
+        try {
+          // Force refresh by clearing cache first
+          useProgressStore.setState((state) => ({
+            enhancedProgress: {
+              ...state.enhancedProgress,
+              [gameMode]: null,
+            },
+          }));
+
+          // Load fresh data
+          const data = await useProgressStore
+            .getState()
+            .getEnhancedGameProgress(gameMode);
+          setProgressData(data);
+
+          console.log(
+            `[GameProgressModalContent] Data refreshed for ${gameMode} after progress update`
+          );
+        } catch (error) {
+          console.error(
+            "[GameProgressModalContent] Error refreshing data:",
+            error
+          );
+        }
+      };
+
+      loadFreshData();
+    }, 500); // Small delay to ensure backend processing is complete
+
+    return () => clearTimeout(timer);
+  }, [lastUpdated, gameMode]);
 
   // Mark render completion
   useEffect(() => {

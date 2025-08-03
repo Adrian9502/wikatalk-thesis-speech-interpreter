@@ -9,6 +9,7 @@ import { useNextLevelData } from "@/utils/games/levelUtils";
 import { useGameProgress } from "@/hooks/games/useGameProgress";
 import { useGameRestart } from "@/hooks/games/useGameRestart";
 import { useTimerReset } from "@/hooks/games/useTimerReset";
+import useProgressStore from "@/store/games/useProgressStore";
 
 interface MultipleChoiceProps {
   levelId: number;
@@ -106,11 +107,8 @@ const MultipleChoice: React.FC<MultipleChoiceProps> = React.memo(
         try {
           console.log(`[MultipleChoice] Option selected: ${optionId}`);
 
-          // CRITICAL: Capture time once and use everywhere
           const gameStore = useGameStore.getState();
           const preciseTime = gameStore.gameState.timeElapsed;
-
-          // FIXED: Use consistent rounding and store the EXACT same value
           const exactFinalTime = Math.round(preciseTime * 100) / 100;
           finalTimeRef.current = exactFinalTime;
 
@@ -131,13 +129,22 @@ const MultipleChoice: React.FC<MultipleChoiceProps> = React.memo(
           );
 
           const updatedProgress = await updateProgress(
-            exactFinalTime, // Use the exact same value
+            exactFinalTime,
             isCorrect,
             isCorrect
           );
 
           if (updatedProgress) {
             console.log(`[MultipleChoice] Progress updated successfully`);
+
+            // ADDED: Force refresh enhanced progress cache for ALL answers
+            const progressStore = useProgressStore.getState();
+            progressStore.enhancedProgress["multipleChoice"] = null; // Clear cache
+            progressStore.lastUpdated = Date.now(); // Trigger UI updates
+
+            console.log(
+              `[MultipleChoice] Enhanced progress cache cleared for immediate refresh`
+            );
           }
         } catch (error) {
           console.error("[MultipleChoice] Error in option selection:", error);

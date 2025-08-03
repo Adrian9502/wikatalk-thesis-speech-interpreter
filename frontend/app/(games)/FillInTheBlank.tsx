@@ -10,6 +10,7 @@ import { useNextLevelData } from "@/utils/games/levelUtils";
 import { useGameProgress } from "@/hooks/games/useGameProgress";
 import { useGameRestart } from "@/hooks/games/useGameRestart";
 import { useTimerReset } from "@/hooks/games/useTimerReset";
+import useProgressStore from "@/store/games/useProgressStore";
 
 interface FillInTheBlankProps {
   levelId: number;
@@ -67,7 +68,6 @@ const FillInTheBlank: React.FC<FillInTheBlankProps> = React.memo(
       try {
         console.log(`[FillInTheBlank] Checking answer: ${userAnswer}`);
 
-        // CRITICAL: Capture time once and use everywhere
         const preciseTime = timeElapsed;
         const exactFinalTime = Math.round(preciseTime * 100) / 100;
         finalTimeRef.current = exactFinalTime;
@@ -79,7 +79,6 @@ const FillInTheBlank: React.FC<FillInTheBlankProps> = React.memo(
         setTimerRunning(false);
         checkAnswer();
 
-        // Update progress after state change
         setTimeout(async () => {
           const currentState = useGameStore.getState().fillInTheBlankState;
           if (currentState.showFeedback) {
@@ -88,13 +87,22 @@ const FillInTheBlank: React.FC<FillInTheBlankProps> = React.memo(
             );
 
             const updatedProgress = await updateProgress(
-              exactFinalTime, // Use the exact same value
+              exactFinalTime,
               currentState.isCorrect,
               currentState.isCorrect
             );
 
             if (updatedProgress) {
               console.log(`[FillInTheBlank] Progress updated successfully`);
+
+              // ADDED: Force refresh enhanced progress cache for ALL answers
+              const progressStore = useProgressStore.getState();
+              progressStore.enhancedProgress["fillBlanks"] = null; // Clear cache
+              progressStore.lastUpdated = Date.now(); // Trigger UI updates
+
+              console.log(
+                `[FillInTheBlank] Enhanced progress cache cleared for immediate refresh`
+              );
             }
           }
         }, 100);
