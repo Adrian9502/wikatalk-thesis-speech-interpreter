@@ -14,6 +14,7 @@ import { useGameProgress } from "@/hooks/games/useGameProgress";
 import { useGameRestart } from "@/hooks/games/useGameRestart";
 import { useTimerReset } from "@/hooks/games/useTimerReset";
 import useProgressStore from "@/store/games/useProgressStore";
+import { useAppStateProgress } from "@/hooks/games/useAppStateProgress";
 
 interface IdentificationProps {
   levelId: number;
@@ -26,7 +27,13 @@ const Identification: React.FC<IdentificationProps> = React.memo(
   ({ levelId, levelData, difficulty = "easy", isStarted = false }) => {
     // Game state and actions
     const {
-      gameState: { score, gameStatus, timerRunning, timeElapsed },
+      gameState: {
+        score,
+        gameStatus,
+        timerRunning,
+        timeElapsed,
+        isBackgroundCompletion,
+      },
       identificationState: {
         sentences,
         currentSentenceIndex,
@@ -43,6 +50,7 @@ const Identification: React.FC<IdentificationProps> = React.memo(
       toggleIdentificationTranslation: toggleTranslation,
       setTimeElapsed,
       setTimerRunning,
+      setBackgroundCompletion, // ADD THIS
     } = useGameStore();
 
     // Custom hooks for shared logic
@@ -66,16 +74,49 @@ const Identification: React.FC<IdentificationProps> = React.memo(
 
     const handleTimerReset = useTimerReset(setTimeElapsed, "Identification");
 
+    // ADD: App state monitoring for auto-save
+    const { resetAutoSaveFlag } = useAppStateProgress({
+      levelData,
+      levelId,
+      gameMode: "identification",
+    });
+
     // Add finalTimeRef at the top of the component
     const finalTimeRef = useRef<number>(0);
 
-    // ADDED: Reset finalTimeRef when game restarts
+    // UPDATED: Reset finalTimeRef when game restarts
+    const hasResetForSessionRef = useRef(false);
+
+    // FIXED: Only reset flags once per game restart, not on every status change
     useEffect(() => {
-      if (gameStatus === "idle" || gameStatus === "playing") {
+      if (
+        (gameStatus === "idle" || gameStatus === "playing") &&
+        !hasResetForSessionRef.current
+      ) {
         finalTimeRef.current = 0;
-        console.log(`[Identification] Reset finalTimeRef on game restart`);
+        resetAutoSaveFlag();
+        hasResetForSessionRef.current = true;
+
+        console.log(
+          `[Identification] Reset finalTimeRef and auto-save flag on game restart`
+        );
+
+        // Reset background completion flag separately
+        if (isBackgroundCompletion) {
+          setBackgroundCompletion(false);
+        }
       }
-    }, [gameStatus]);
+
+      // Reset the session flag when game completes
+      if (gameStatus === "completed") {
+        hasResetForSessionRef.current = false;
+      }
+    }, [
+      gameStatus,
+      resetAutoSaveFlag,
+      setBackgroundCompletion,
+      isBackgroundCompletion,
+    ]);
 
     // Handle word selection with progress update
     const handleWordSelectWithProgress = useCallback(
@@ -136,7 +177,7 @@ const Identification: React.FC<IdentificationProps> = React.memo(
       ]
     );
 
-    // FIXED: Game configuration with better final time logic
+    // UPDATED: Game configuration to handle background completion
     const gameConfig = useMemo(() => {
       const currentSentence = sentences[currentSentenceIndex];
 
@@ -146,19 +187,29 @@ const Identification: React.FC<IdentificationProps> = React.memo(
         sentences?.[0]?.focusArea ||
         "Vocabulary";
 
-      const selectedAnswerText =
-        selectedWord !== null && words[selectedWord]
-          ? typeof words[selectedWord]?.text === "string"
-            ? words[selectedWord]?.text
-            : typeof words[selectedWord]?.clean === "string"
-            ? words[selectedWord]?.clean
-            : "Unknown"
-          : "Unknown";
+      // NEW: Handle background completion case
+      let selectedAnswerText = "";
+      let isCorrect = false;
+
+      if (isBackgroundCompletion) {
+        selectedAnswerText = "No answer selected";
+        isCorrect = false;
+      } else {
+        selectedAnswerText =
+          selectedWord !== null && words[selectedWord]
+            ? typeof words[selectedWord]?.text === "string"
+              ? words[selectedWord]?.text
+              : typeof words[selectedWord]?.clean === "string"
+              ? words[selectedWord]?.clean
+              : "Unknown"
+            : "Unknown";
+        isCorrect = feedback === "correct";
+      }
 
       // CRITICAL: Better final time logic
       let displayTime = 0;
       if (gameStatus === "completed" && finalTimeRef.current > 0) {
-        displayTime = finalTimeRef.current; // This exact value will be used everywhere
+        displayTime = finalTimeRef.current;
       } else if (gameStatus === "playing") {
         displayTime = timeElapsed;
       }
@@ -167,10 +218,11 @@ const Identification: React.FC<IdentificationProps> = React.memo(
         currentSentence,
         focusArea,
         selectedAnswerText,
-        isCorrect: feedback === "correct",
+        isCorrect,
         question: currentSentence?.sentence || currentSentence?.question || "",
         initialTime: 0,
         finalTime: displayTime,
+        isBackgroundCompletion, // Pass to completed content
       };
     }, [
       sentences,
@@ -180,7 +232,8 @@ const Identification: React.FC<IdentificationProps> = React.memo(
       levelData?.focusArea,
       feedback,
       gameStatus,
-      timeElapsed, // Add timeElapsed dependency
+      timeElapsed,
+      isBackgroundCompletion, // NEW dependency
     ]);
 
     // CRITICAL: Initialize game with proper logging
@@ -270,7 +323,7 @@ const Identification: React.FC<IdentificationProps> = React.memo(
         showTimer={true}
         initialTime={gameConfig.initialTime}
         isStarted={isStarted}
-        finalTime={gameConfig.finalTime} // Use consistent final time
+        finalTime={gameConfig.finalTime}
         levelId={levelId}
         onTimerReset={handleTimerReset}
         isCorrectAnswer={gameConfig.isCorrect}
@@ -300,7 +353,7 @@ const Identification: React.FC<IdentificationProps> = React.memo(
         ) : (
           <GameCompletedContent
             score={score}
-            timeElapsed={gameConfig.finalTime} // Use consistent final time
+            timeElapsed={gameConfig.finalTime}
             difficulty={difficulty}
             question={gameConfig.question}
             userAnswer={gameConfig.selectedAnswerText}
@@ -315,6 +368,8 @@ const Identification: React.FC<IdentificationProps> = React.memo(
             nextLevelTitle={getNextLevelTitle()}
             isCurrentLevelCompleted={gameConfig.isCorrect}
             isCorrectAnswer={gameConfig.isCorrect}
+            // NEW: Pass background completion flag
+            isBackgroundCompletion={gameConfig.isBackgroundCompletion}
           />
         )}
       </GameContainer>

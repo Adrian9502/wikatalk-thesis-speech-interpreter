@@ -63,7 +63,7 @@ export const formatTime = (seconds: number): string => {
   // Ensure we have a valid number
   if (!seconds || isNaN(seconds)) return "0.00s";
 
-  // CRITICAL: Apply the SAME rounding as used in finalTimeRef
+  // CRITICAL: Apply the EXACT SAME rounding as used everywhere else
   const preciseSeconds = Math.round(seconds * 100) / 100;
 
   // For times under 1 minute, show with centiseconds
@@ -75,8 +75,8 @@ export const formatTime = (seconds: number): string => {
   const minutes = Math.floor(preciseSeconds / 60);
   const remainingSeconds = preciseSeconds % 60;
 
-  // Format: 1m 24.43s
-  return `${minutes}m : ${remainingSeconds.toFixed(2)}s`;
+  // FIXED: Ensure consistent decimal places
+  return `${minutes}m ${remainingSeconds.toFixed(2)}s`;
 };
 
 /**
@@ -86,7 +86,7 @@ export const formatTime = (seconds: number): string => {
 export const formatTimerDisplay = (seconds: number): string => {
   if (!seconds || isNaN(seconds)) return "00:00.00";
 
-  // CRITICAL: Apply the SAME rounding as used in finalTimeRef
+  // CRITICAL: Apply the EXACT SAME rounding as formatTime
   const preciseSeconds = Math.round(seconds * 100) / 100;
   const minutes = Math.floor(preciseSeconds / 60);
   const remainingSeconds = preciseSeconds % 60;

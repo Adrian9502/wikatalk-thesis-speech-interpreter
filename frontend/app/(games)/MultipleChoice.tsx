@@ -9,6 +9,7 @@ import { useNextLevelData } from "@/utils/games/levelUtils";
 import { useGameProgress } from "@/hooks/games/useGameProgress";
 import { useGameRestart } from "@/hooks/games/useGameRestart";
 import { useTimerReset } from "@/hooks/games/useTimerReset";
+import { useAppStateProgress } from "@/hooks/games/useAppStateProgress";
 import useProgressStore from "@/store/games/useProgressStore";
 
 interface MultipleChoiceProps {
@@ -22,7 +23,13 @@ const MultipleChoice: React.FC<MultipleChoiceProps> = React.memo(
   ({ levelId, levelData, difficulty = "easy", isStarted = false }) => {
     // Game state and actions
     const {
-      gameState: { score, gameStatus, timerRunning, timeElapsed },
+      gameState: {
+        score,
+        gameStatus,
+        timerRunning,
+        timeElapsed,
+        isBackgroundCompletion,
+      },
       multipleChoiceState: { selectedOption, currentQuestion },
       initialize,
       startGame,
@@ -30,6 +37,7 @@ const MultipleChoice: React.FC<MultipleChoiceProps> = React.memo(
       handleOptionSelect,
       setTimeElapsed,
       setTimerRunning,
+      setBackgroundCompletion,
     } = useGameStore();
 
     // Custom hooks for shared logic
@@ -58,25 +66,64 @@ const MultipleChoice: React.FC<MultipleChoiceProps> = React.memo(
 
     const handleTimerReset = useTimerReset(setTimeElapsed, "MultipleChoice");
 
+    // ADD: App state monitoring for auto-save
+    const { resetAutoSaveFlag } = useAppStateProgress({
+      levelData,
+      levelId,
+      gameMode: "multipleChoice",
+    });
+
     // Track initial setup
     const initialSetupComplete = useRef(false);
     const lastProgressTimeRef = useRef<number>(0);
     const gameStartedRef = useRef(false);
-    // Add a ref to capture the final time consistently
     const finalTimeRef = useRef<number>(0);
+    // NEW: Add ref to track if we've already reset for this game session
+    const hasResetForSessionRef = useRef(false);
 
-    // ADDED: Reset finalTimeRef when game restarts
+    // FIXED: Only reset flags once per game restart, not on every status change
     useEffect(() => {
-      if (gameStatus === "idle" || gameStatus === "playing") {
+      if (
+        (gameStatus === "idle" || gameStatus === "playing") &&
+        !hasResetForSessionRef.current
+      ) {
         // Reset final time when starting new game session
         finalTimeRef.current = 0;
-        console.log(`[MultipleChoice] Reset finalTimeRef on game restart`);
+        resetAutoSaveFlag(); // Reset auto-save flag
+        hasResetForSessionRef.current = true; // Mark as reset for this session
+
+        console.log(
+          `[MultipleChoice] Reset finalTimeRef and auto-save flag on game restart`
+        );
+
+        // Reset background completion flag separately to avoid infinite loop
+        if (isBackgroundCompletion) {
+          setBackgroundCompletion(false);
+        }
       }
-    }, [gameStatus]);
+
+      // Reset the session flag when game completes to allow next reset
+      if (gameStatus === "completed") {
+        hasResetForSessionRef.current = false;
+      }
+    }, [
+      gameStatus,
+      resetAutoSaveFlag,
+      setBackgroundCompletion,
+      isBackgroundCompletion,
+    ]);
 
     // Set initial time from progress with deduplication prevention
     useEffect(() => {
       if (isRestartingRef.current || restartLockRef.current) return;
+
+      // ADDED: Don't update progress time after game completion
+      if (gameStatus === "completed") {
+        console.log(
+          `[MultipleChoice] Game completed, skipping progress time update`
+        );
+        return;
+      }
 
       if (progress && !Array.isArray(progress)) {
         const progressTime = progress.totalTimeSpent || 0;
@@ -99,7 +146,7 @@ const MultipleChoice: React.FC<MultipleChoiceProps> = React.memo(
         lastProgressTimeRef.current = 0;
         initialSetupComplete.current = true;
       }
-    }, [progress, setTimeElapsed, isRestartingRef, restartLockRef]);
+    }, [progress, setTimeElapsed, isRestartingRef, restartLockRef, gameStatus]); // ADD gameStatus dependency
 
     // Handle option selection with progress update
     const handleOptionSelectWithProgress = useCallback(
@@ -107,13 +154,20 @@ const MultipleChoice: React.FC<MultipleChoiceProps> = React.memo(
         try {
           console.log(`[MultipleChoice] Option selected: ${optionId}`);
 
+          if (selectedOption) {
+            console.log(`[MultipleChoice] Option already selected, ignoring`);
+            return;
+          }
+
           const gameStore = useGameStore.getState();
           const preciseTime = gameStore.gameState.timeElapsed;
+
+          // FIXED: Use higher precision rounding for final time
           const exactFinalTime = Math.round(preciseTime * 100) / 100;
           finalTimeRef.current = exactFinalTime;
 
           console.log(
-            `[MultipleChoice] Final time captured: ${exactFinalTime}s (will be used everywhere)`
+            `[MultipleChoice] Exact final time captured: ${exactFinalTime}s (precise: ${preciseTime})`
           );
 
           setTimerRunning(false);
@@ -137,10 +191,9 @@ const MultipleChoice: React.FC<MultipleChoiceProps> = React.memo(
           if (updatedProgress) {
             console.log(`[MultipleChoice] Progress updated successfully`);
 
-            // ADDED: Force refresh enhanced progress cache for ALL answers
             const progressStore = useProgressStore.getState();
-            progressStore.enhancedProgress["multipleChoice"] = null; // Clear cache
-            progressStore.lastUpdated = Date.now(); // Trigger UI updates
+            progressStore.enhancedProgress["multipleChoice"] = null;
+            progressStore.lastUpdated = Date.now();
 
             console.log(
               `[MultipleChoice] Enhanced progress cache cleared for immediate refresh`
@@ -152,6 +205,7 @@ const MultipleChoice: React.FC<MultipleChoiceProps> = React.memo(
       },
       [
         currentQuestion?.options,
+        selectedOption,
         setTimerRunning,
         handleOptionSelect,
         updateProgress,
@@ -169,25 +223,54 @@ const MultipleChoice: React.FC<MultipleChoiceProps> = React.memo(
         levelData?.questions?.[0]?.focusArea ||
         "Vocabulary";
 
-      // CRITICAL: Use the EXACT SAME finalTimeRef value for all displays
+      // FIXED: Use the EXACT SAME time value for both display and finalTime
       let displayTime = progressTime;
 
-      if (gameStatus === "completed" && finalTimeRef.current > 0) {
-        displayTime = finalTimeRef.current; // This exact value will be used everywhere
+      if (gameStatus === "completed") {
+        if (isBackgroundCompletion) {
+          displayTime = timeElapsed;
+          console.log(
+            `[MultipleChoice] Background completion - using timeElapsed: ${timeElapsed}`
+          );
+        } else if (finalTimeRef.current > 0) {
+          // CRITICAL: Use finalTimeRef for BOTH header and answer review
+          displayTime = finalTimeRef.current;
+          console.log(
+            `[MultipleChoice] Normal completion - using finalTimeRef: ${finalTimeRef.current}`
+          );
+        } else {
+          displayTime = timeElapsed;
+          console.log(
+            `[MultipleChoice] Fallback - using timeElapsed: ${timeElapsed}`
+          );
+        }
       } else if (gameStatus === "playing") {
         displayTime = timeElapsed || progressTime;
       }
 
+      // Handle background completion case
+      let selectedAnswerText = "";
+      let isSelectedCorrect = false;
+
+      if (isBackgroundCompletion) {
+        selectedAnswerText = "No answer provided";
+        isSelectedCorrect = false;
+      } else {
+        selectedAnswerText =
+          currentQuestion?.options?.find((o) => o.id === selectedOption)
+            ?.text || "";
+        isSelectedCorrect =
+          currentQuestion?.options?.find((o) => o.id === selectedOption)
+            ?.isCorrect || false;
+      }
+
       return {
         focusArea,
-        selectedAnswerText:
-          currentQuestion?.options?.find((o) => o.id === selectedOption)
-            ?.text || "",
-        isSelectedCorrect:
-          currentQuestion?.options?.find((o) => o.id === selectedOption)
-            ?.isCorrect || false,
+        selectedAnswerText,
+        isSelectedCorrect,
         initialTime: progressTime,
-        finalTime: displayTime, // This EXACT value goes to both components
+        finalTime: displayTime,
+        isBackgroundCompletion,
       };
     }, [
       currentQuestion,
@@ -196,6 +279,7 @@ const MultipleChoice: React.FC<MultipleChoiceProps> = React.memo(
       progress,
       gameStatus,
       timeElapsed,
+      isBackgroundCompletion,
     ]);
 
     // Initialize game
@@ -233,7 +317,7 @@ const MultipleChoice: React.FC<MultipleChoiceProps> = React.memo(
         showTimer={true}
         initialTime={gameConfig.initialTime}
         isStarted={isStarted}
-        finalTime={gameConfig.finalTime} // Use consistent final time
+        finalTime={gameConfig.finalTime}
         levelId={levelId}
         onTimerReset={handleTimerReset}
         isCorrectAnswer={gameConfig.isSelectedCorrect}
@@ -261,7 +345,7 @@ const MultipleChoice: React.FC<MultipleChoiceProps> = React.memo(
         ) : (
           <GameCompletedContent
             score={score}
-            timeElapsed={gameConfig.finalTime} // Use consistent final time
+            timeElapsed={gameConfig.finalTime}
             difficulty={difficulty}
             question={currentQuestion?.question || ""}
             userAnswer={gameConfig.selectedAnswerText}
@@ -276,6 +360,7 @@ const MultipleChoice: React.FC<MultipleChoiceProps> = React.memo(
             nextLevelTitle={getNextLevelTitle()}
             isCurrentLevelCompleted={gameConfig.isSelectedCorrect}
             isCorrectAnswer={gameConfig.isSelectedCorrect}
+            isBackgroundCompletion={gameConfig.isBackgroundCompletion}
           />
         )}
       </GameContainer>

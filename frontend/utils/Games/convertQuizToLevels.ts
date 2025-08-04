@@ -5,12 +5,16 @@ export const convertQuizToLevels = (
   quizData: QuizQuestions,
   userProgressData: any[] = []
 ): LevelData[] => {
-  console.log(`[convertQuizToLevels] Converting ${gameMode} with:`, {
-    gameMode,
-    quizDataKeys: Object.keys(quizData),
-    hasGameModeData: !!quizData[gameMode],
-    progressCount: userProgressData.length,
-  });
+  // REDUCED: Only log in development and less frequently
+  if (__DEV__ && Math.random() < 0.1) {
+    // Only 10% of calls in dev
+    console.log(`[convertQuizToLevels] Converting ${gameMode} with:`, {
+      gameMode,
+      quizDataKeys: Object.keys(quizData),
+      hasGameModeData: !!quizData[gameMode],
+      progressCount: userProgressData.length,
+    });
+  }
 
   // Ensure gameMode is a string, not an array
   const safeGameMode =
@@ -134,17 +138,15 @@ export const convertQuizToLevels = (
     difficultyStats.medium.total > 0 &&
     difficultyStats.medium.completed >= difficultyStats.medium.total;
 
-  console.log(`[convertQuizToLevels] Difficulty completion status:`, {
-    easy: `${difficultyStats.easy.completed}/${difficultyStats.easy.total} (${
-      isEasyComplete ? "COMPLETE" : "INCOMPLETE"
-    })`,
-    medium: `${difficultyStats.medium.completed}/${
-      difficultyStats.medium.total
-    } (${isMediumComplete ? "COMPLETE" : "INCOMPLETE"})`,
-    hard: `${difficultyStats.hard.completed}/${difficultyStats.hard.total}`,
-    mediumUnlocked: isEasyComplete,
-    hardUnlocked: isMediumComplete,
-  });
+  // REDUCED: Only log completion status summary
+  if (__DEV__) {
+    console.log(`[convertQuizToLevels] ${gameMode} completion:`, {
+      easy: `${difficultyStats.easy.completed}/${difficultyStats.easy.total}`,
+      medium: `${difficultyStats.medium.completed}/${difficultyStats.medium.total}`,
+      hard: `${difficultyStats.hard.completed}/${difficultyStats.hard.total}`,
+      totalLevels: allQuestions.length,
+    });
+  }
 
   // Helper function to determine level status based on progress and locking rules
   const getLevelStatus = (
@@ -180,9 +182,7 @@ export const convertQuizToLevels = (
       case "medium":
         // Medium levels are locked until all easy levels are completed
         if (!isEasyComplete) {
-          console.log(
-            `[convertQuizToLevels] Level ${questionId} (medium) locked - Easy not complete (${difficultyStats.easy.completed}/${difficultyStats.easy.total})`
-          );
+          // REMOVED: Individual level lock logging
           return "locked";
         }
         return "current";
@@ -190,9 +190,7 @@ export const convertQuizToLevels = (
       case "hard":
         // Hard levels are locked until all medium levels are completed
         if (!isMediumComplete) {
-          console.log(
-            `[convertQuizToLevels] Level ${questionId} (hard) locked - Medium not complete (${difficultyStats.medium.completed}/${difficultyStats.medium.total})`
-          );
+          // REMOVED: Individual level lock logging
           return "locked";
         }
         return "current";
@@ -239,9 +237,12 @@ export const convertQuizToLevels = (
   ).length;
   const lockedCount = allLevels.filter((l) => l.status === "locked").length;
 
-  console.log(
-    `[convertQuizToLevels] Final result: ${allLevels.length} levels for ${gameMode} (${completedCount} completed, ${lockedCount} locked)`
-  );
+  // REDUCED: Only log final summary
+  if (__DEV__) {
+    console.log(
+      `[convertQuizToLevels] ${gameMode}: ${allLevels.length} levels (${completedCount} completed, ${lockedCount} locked)`
+    );
+  }
 
   return allLevels;
 };

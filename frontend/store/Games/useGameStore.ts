@@ -67,6 +67,8 @@ interface CommonGameState {
   timeElapsed: number;
   levelId: number;
   currentMode: GameMode | null;
+  // NEW: Add background completion flag
+  isBackgroundCompletion: boolean;
 }
 
 // Mode-specific state interfaces
@@ -133,6 +135,8 @@ interface QuizState {
   setTimeElapsed: (time: number) => void;
   updateTimeElapsed: (time: number) => void;
   resetTimer: () => void;
+  // NEW: Action to set background completion flag
+  setBackgroundCompletion: (isBackground: boolean) => void;
 
   // Game initialization and control
   initialize: (
@@ -259,6 +263,7 @@ const useGameStore = create<QuizState>((set, get) => ({
     timeElapsed: 0,
     levelId: 1,
     currentMode: null,
+    isBackgroundCompletion: false, // NEW
   },
 
   // Initial multiple choice state
@@ -692,6 +697,15 @@ const useGameStore = create<QuizState>((set, get) => ({
     }));
   },
 
+  // ADD THIS MISSING FUNCTION:
+  setBackgroundCompletion: (isBackground: boolean) =>
+    set((state) => ({
+      gameState: {
+        ...state.gameState,
+        isBackgroundCompletion: isBackground,
+      },
+    })),
+
   // Update the updateTimeElapsed method to be more efficient
   updateTimeElapsed: (time) => {
     const currentTime = get().gameState.timeElapsed;
@@ -737,6 +751,7 @@ const useGameStore = create<QuizState>((set, get) => ({
         score: 0,
         timeElapsed: 0,
         timerRunning: false,
+        isBackgroundCompletion: false, // Reset flag
       },
       error: null,
     }));
@@ -973,7 +988,10 @@ const useGameStore = create<QuizState>((set, get) => ({
         gameStatus: "playing",
         score: 0,
         timerRunning: true,
-        timeElapsed: 0, // Always start from 0 - components will set correct time
+        timeElapsed: 0,
+        levelId: state.gameState.levelId,
+        currentMode: state.gameState.currentMode,
+        isBackgroundCompletion: false, // Reset flag
       },
     }));
 
@@ -1013,18 +1031,28 @@ const useGameStore = create<QuizState>((set, get) => ({
   },
 
   // MULTIPLE CHOICE ACTIONS
+  // MULTIPLE CHOICE ACTIONS
   handleOptionSelect: (optionId: string) => {
     const { multipleChoiceState, gameState } = get();
     const { selectedOption, currentQuestion } = multipleChoiceState;
 
     // If already selected, don't do anything
-    if (selectedOption) return;
+    if (selectedOption) {
+      console.log(
+        `[GameStore] Option already selected: ${selectedOption}, ignoring new selection: ${optionId}`
+      );
+      return;
+    }
 
     // Find the selected option ahead of time
     const selectedOptionObj = currentQuestion?.options.find(
       (option) => option.id === optionId
     );
     const isCorrect = !!selectedOptionObj?.isCorrect;
+
+    console.log(
+      `[GameStore] Processing option selection: ${optionId}, isCorrect: ${isCorrect}`
+    );
 
     // Do a single batch update instead of multiple updates
     set({
@@ -1039,17 +1067,17 @@ const useGameStore = create<QuizState>((set, get) => ({
       },
     });
 
-    // Move to completed state after delay
+    // FIXED: Move to completed state after delay
     setTimeout(() => {
+      console.log(`[GameStore] Moving multipleChoice game to completed state`);
       set((state) => ({
         gameState: {
           ...state.gameState,
           gameStatus: "completed",
         },
       }));
-    }, 1000); // Reduced from 1500ms
+    }, 1000);
   },
-
   // FILL IN THE BLANK ACTIONS
   setUserAnswer: (answer: string) =>
     set((state) => ({
@@ -1142,10 +1170,14 @@ const useGameStore = create<QuizState>((set, get) => ({
         },
       }));
 
-      // Move to completed state with proper structure
+      // FIXED: Move to completed state with proper structure
       setTimeout(() => {
+        console.log(
+          `[GameStore] Moving fillBlanks game to completed state (correct)`
+        );
         set((state) => ({
           gameState: {
+            // ✅ Fixed: Use gameState instead of gameStatus
             ...state.gameState,
             gameStatus: "completed",
           },
@@ -1153,10 +1185,14 @@ const useGameStore = create<QuizState>((set, get) => ({
       }, 2000);
     } else {
       if (newAttemptsLeft <= 0) {
-        // No attempts left - move to completed state
+        // FIXED: No attempts left - move to completed state
         setTimeout(() => {
+          console.log(
+            `[GameStore] Moving fillBlanks game to completed state (no attempts)`
+          );
           set((state) => ({
             gameState: {
+              // ✅ Fixed: Use gameState instead of gameStatus
               ...state.gameState,
               gameStatus: "completed",
             },
@@ -1217,6 +1253,10 @@ const useGameStore = create<QuizState>((set, get) => ({
       selectedWord?.clean?.toLowerCase() ===
       (currentSentence?.answer || currentSentence?.targetWord)?.toLowerCase();
 
+    console.log(
+      `[GameStore] handleWordSelect: isCorrect=${isCorrect}, selectedWord=${selectedWord?.clean}, answer=${currentSentence?.answer}`
+    );
+
     // Update selection, feedback and timer in one batch to avoid flicker
     set({
       gameState: {
@@ -1232,10 +1272,12 @@ const useGameStore = create<QuizState>((set, get) => ({
       },
     });
 
-    // Move to completed state after delay
+    // FIXED: Move to completed state after delay
     setTimeout(() => {
+      console.log(`[GameStore] Moving identification game to completed state`);
       set((state) => ({
         gameState: {
+          // ✅ Fixed: Use gameState instead of gameStatus
           ...state.gameState,
           gameStatus: "completed",
         },

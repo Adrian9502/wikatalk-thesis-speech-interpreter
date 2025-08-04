@@ -11,6 +11,7 @@ import { useGameProgress } from "@/hooks/games/useGameProgress";
 import { useGameRestart } from "@/hooks/games/useGameRestart";
 import { useTimerReset } from "@/hooks/games/useTimerReset";
 import useProgressStore from "@/store/games/useProgressStore";
+import { useAppStateProgress } from "@/hooks/games/useAppStateProgress";
 
 interface FillInTheBlankProps {
   levelId: number;
@@ -23,7 +24,13 @@ const FillInTheBlank: React.FC<FillInTheBlankProps> = React.memo(
   ({ levelId, levelData, difficulty = "easy", isStarted = false }) => {
     // Game state and actions
     const {
-      gameState: { score, gameStatus, timerRunning, timeElapsed },
+      gameState: {
+        score,
+        gameStatus,
+        timerRunning,
+        timeElapsed,
+        isBackgroundCompletion,
+      },
       fillInTheBlankState: {
         exercises,
         currentExerciseIndex,
@@ -43,6 +50,7 @@ const FillInTheBlank: React.FC<FillInTheBlankProps> = React.memo(
       checkAnswer,
       setTimerRunning,
       setTimeElapsed,
+      setBackgroundCompletion, // ADD THIS
     } = useGameStore();
 
     // Custom hooks for shared logic
@@ -63,6 +71,13 @@ const FillInTheBlank: React.FC<FillInTheBlankProps> = React.memo(
       setTimeElapsed,
       "FillInTheBlank"
     );
+
+    // ADD: App state monitoring for auto-save
+    const { resetAutoSaveFlag } = useAppStateProgress({
+      levelData,
+      levelId,
+      gameMode: "fillBlanks",
+    });
 
     const checkAnswerWithProgress = useCallback(async () => {
       try {
@@ -117,14 +132,39 @@ const FillInTheBlank: React.FC<FillInTheBlankProps> = React.memo(
     const finalTimeRef = useRef<number>(0);
 
     // ADDED: Reset finalTimeRef when game restarts
-    useEffect(() => {
-      if (gameStatus === "idle" || gameStatus === "playing") {
-        finalTimeRef.current = 0;
-        console.log(`[FillInTheBlank] Reset finalTimeRef on game restart`);
-      }
-    }, [gameStatus]);
+    const hasResetForSessionRef = useRef(false);
 
-    // FIXED: Game configuration with better final time logic
+    useEffect(() => {
+      if (
+        (gameStatus === "idle" || gameStatus === "playing") &&
+        !hasResetForSessionRef.current
+      ) {
+        finalTimeRef.current = 0;
+        resetAutoSaveFlag();
+        hasResetForSessionRef.current = true;
+
+        console.log(
+          `[FillInTheBlank] Reset finalTimeRef and auto-save flag on game restart`
+        );
+
+        // Reset background completion flag separately
+        if (isBackgroundCompletion) {
+          setBackgroundCompletion(false);
+        }
+      }
+
+      // Reset the session flag when game completes
+      if (gameStatus === "completed") {
+        hasResetForSessionRef.current = false;
+      }
+    }, [
+      gameStatus,
+      resetAutoSaveFlag,
+      setBackgroundCompletion,
+      isBackgroundCompletion,
+    ]);
+
+    // UPDATED: Game configuration to handle background completion
     const gameConfig = useMemo(() => {
       const currentExercise = exercises[currentExerciseIndex];
 
@@ -142,13 +182,23 @@ const FillInTheBlank: React.FC<FillInTheBlankProps> = React.memo(
         displayTime = timeElapsed;
       }
 
+      // NEW: Handle background completion case
+      let userAnswerDisplay = "";
+
+      if (isBackgroundCompletion) {
+        userAnswerDisplay = "No answer provided";
+      } else {
+        userAnswerDisplay = userAnswer || "(No answer provided)";
+      }
+
       return {
         currentExercise,
         focusArea,
         question: exercises[0]?.sentence || "No question available",
-        userAnswerDisplay: userAnswer || "(No answer provided)",
+        userAnswerDisplay,
         initialTime: 0,
         finalTime: displayTime,
+        isBackgroundCompletion, // Pass to completed content
       };
     }, [
       exercises,
@@ -156,7 +206,8 @@ const FillInTheBlank: React.FC<FillInTheBlankProps> = React.memo(
       levelData?.focusArea,
       userAnswer,
       gameStatus,
-      timeElapsed, // Add timeElapsed dependency
+      timeElapsed,
+      isBackgroundCompletion, // NEW dependency
     ]);
 
     // Memoized toggle functions
@@ -235,7 +286,7 @@ const FillInTheBlank: React.FC<FillInTheBlankProps> = React.memo(
           showTimer={true}
           initialTime={gameConfig.initialTime}
           isStarted={isStarted}
-          finalTime={gameConfig.finalTime} // Same value
+          finalTime={gameConfig.finalTime}
           levelId={levelId}
           onTimerReset={handleTimerReset}
           isCorrectAnswer={score > 0}
@@ -271,7 +322,7 @@ const FillInTheBlank: React.FC<FillInTheBlankProps> = React.memo(
           ) : (
             <GameCompletedContent
               score={score}
-              timeElapsed={gameConfig.finalTime} // Same value
+              timeElapsed={gameConfig.finalTime}
               difficulty={difficulty}
               question={gameConfig.question}
               userAnswer={gameConfig.userAnswerDisplay}
@@ -286,6 +337,8 @@ const FillInTheBlank: React.FC<FillInTheBlankProps> = React.memo(
               nextLevelTitle={getNextLevelTitle()}
               isCurrentLevelCompleted={score > 0}
               isCorrectAnswer={score > 0}
+              // NEW: Pass background completion flag
+              isBackgroundCompletion={gameConfig.isBackgroundCompletion}
             />
           )}
         </GameContainer>

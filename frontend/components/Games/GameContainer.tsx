@@ -6,6 +6,7 @@ import useThemeStore from "@/store/useThemeStore";
 import gameSharedStyles from "@/styles/gamesSharedStyles";
 import GameHeader from "@/components/games/GameHeader";
 import DotsLoader from "../DotLoader";
+import NavigationWarning from "@/components/games/NavigationWarning"; // Add import
 
 interface GameContainerProps {
   title: string;
@@ -89,6 +90,12 @@ const GameContainer: React.FC<GameContainerProps> = ({
         ) : (
           children
         )}
+
+        {/* NEW: Add Navigation Warning */}
+        <NavigationWarning
+          gameStatus={gameStatus}
+          timerRunning={timerRunning}
+        />
       </SafeAreaView>
     </View>
   );

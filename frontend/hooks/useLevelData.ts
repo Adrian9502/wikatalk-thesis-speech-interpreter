@@ -43,6 +43,11 @@ export const useLevelData = (gameMode: string | string[] | undefined) => {
         setIsLoading(true);
         setError(null);
 
+        // Only log major operations
+        if (__DEV__) {
+          console.log(`[useLevelData] Loading levels for ${safeGameMode}`);
+        }
+
         // Check for user changes
         const currentUserId = getCurrentUserId();
         const userChanged = hasUserChanged(currentUserId);
@@ -200,6 +205,13 @@ export const useLevelData = (gameMode: string | string[] | undefined) => {
         setCompletionPercentage(percentage);
         setShowLevels(true);
         setIsLoading(false);
+
+        // REDUCED: Only log final results
+        if (__DEV__) {
+          console.log(
+            `[useLevelData] ${safeGameMode}: ${currentLevels.length} levels loaded (${percentage}% complete)`
+          );
+        }
 
         // ENHANCED: Update precomputed data in background
         setTimeout(async () => {

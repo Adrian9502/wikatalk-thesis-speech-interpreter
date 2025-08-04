@@ -737,52 +737,61 @@ export const useSplashStore = create<SplashState>((set, get) => ({
   ) => {
     const state = get();
 
-    try {
-      console.log(`[SplashStore] Precomputing specific game mode: ${gameMode}`);
+    // Add debouncing to prevent duplicate processing
+    let precomputeTimeout: NodeJS.Timeout | null = null;
 
-      let gameLevels = levels;
-      let gameProgressData = progressData;
-
-      // Get data if not provided
-      if (!gameLevels || !gameProgressData) {
-        const { questions } = useGameStore.getState();
-        const { progress } = useProgressStore.getState();
-
-        gameProgressData = Array.isArray(progress) ? progress : [];
-        gameLevels = convertQuizToLevels(gameMode, questions, gameProgressData);
-      }
-
-      // FIXED: Use the standalone helper function, not a store method
-      const filteredLevels = precomputeFilters(gameLevels);
-
-      // Calculate completion percentage
-      const completedCount = gameLevels.filter(
-        (level) => level.status === "completed"
-      ).length;
-      const completionPercentage =
-        gameLevels.length > 0
-          ? Math.round((completedCount / gameLevels.length) * 100)
-          : 0;
-
-      // Update precomputed data - FIXED: Use consistent property name
-      set((state) => ({
-        precomputedLevels: {
-          ...state.precomputedLevels,
-          [gameMode]: {
-            levels: gameLevels,
-            filteredLevels, // Use filteredLevels consistently
-            completionPercentage,
-            lastUpdated: Date.now(),
-          },
-        },
-      }));
-
-      console.log(
-        `[SplashStore] ✅ Specific precomputation complete for ${gameMode}`
-      );
-    } catch (error) {
-      console.error(`[SplashStore] Error precomputing ${gameMode}:`, error);
+    // In the precomputeSpecificGameMode function:
+    // ADDED: Debounce to prevent duplicate calls
+    if (precomputeTimeout) {
+      clearTimeout(precomputeTimeout);
     }
+
+    precomputeTimeout = setTimeout(async () => {
+      try {
+        if (__DEV__) {
+          console.log(
+            `[SplashStore] Precomputing specific game mode: ${gameMode}`
+          );
+        }
+
+        const startTime = Date.now();
+        const filteredLevels = precomputeFilters(levels);
+
+        const completedCount = levels.filter(
+          (level) => level.status === "completed"
+        ).length;
+        const completionPercentage =
+          levels.length > 0
+            ? Math.round((completedCount / levels.length) * 100)
+            : 0;
+
+        set((state) => ({
+          precomputedLevels: {
+            ...state.precomputedLevels,
+            [gameMode]: {
+              levels,
+              completionPercentage,
+              lastUpdated: Date.now(),
+              filteredLevels,
+            },
+          },
+        }));
+
+        const duration = Date.now() - startTime;
+
+        // REDUCED: Only log summary
+        if (__DEV__) {
+          console.log(
+            `[SplashStore] ✅ ${gameMode} precomputed: ${levels.length} levels (${duration}ms)`
+          );
+        }
+
+        return true;
+      } catch (error) {
+        console.error(`[SplashStore] Error precomputing ${gameMode}:`, error);
+        return false;
+      }
+    }, 100); // 100ms debounce
   },
 }));
 

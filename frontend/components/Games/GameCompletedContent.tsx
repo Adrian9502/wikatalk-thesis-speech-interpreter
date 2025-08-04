@@ -28,12 +28,14 @@ interface GameCompletedContentProps {
   levelString?: string;
   actualTitle?: string;
   nextLevelTitle?: string;
-  // NEW: Add completion status props
   isCurrentLevelCompleted?: boolean;
   isCorrectAnswer?: boolean;
+  // NEW: Add background completion flag
+  isBackgroundCompletion?: boolean;
 }
 
 const GameCompletedContent: React.FC<GameCompletedContentProps> = ({
+  score,
   timeElapsed,
   difficulty,
   question,
@@ -47,9 +49,9 @@ const GameCompletedContent: React.FC<GameCompletedContentProps> = ({
   levelString,
   actualTitle,
   nextLevelTitle,
-  // NEW: Accept completion status props
   isCurrentLevelCompleted = false,
   isCorrectAnswer = false,
+  isBackgroundCompletion = false, // NEW
 }) => {
   return (
     <ScrollView
@@ -71,6 +73,8 @@ const GameCompletedContent: React.FC<GameCompletedContentProps> = ({
         animation="fadeInUp"
         duration={800}
         delay={0}
+        // NEW: Pass background completion flag
+        isBackgroundCompletion={isBackgroundCompletion}
       />
 
       {/* Navigation Section */}

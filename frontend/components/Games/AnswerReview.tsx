@@ -5,7 +5,7 @@ import * as Animatable from "react-native-animatable";
 import { Check, X } from "react-native-feather";
 import MaterialCommunityIcons from "react-native-vector-icons/MaterialCommunityIcons";
 import { BASE_COLORS, difficultyColors } from "@/constant/colors";
-import { formatTime, getGameModeGradient } from "@/utils/gameUtils";
+import { formatTimerDisplay, getGameModeGradient } from "@/utils/gameUtils";
 import { safeTextRender } from "@/utils/textUtils";
 import { NAVIGATION_COLORS } from "@/constant/gameConstants";
 // NEW: Import badge components
@@ -29,6 +29,8 @@ interface AnswerReviewProps {
   delay?: number;
   questionLabel?: string;
   answerLabel?: string;
+  // NEW: Add background completion flag
+  isBackgroundCompletion?: boolean;
 }
 
 const AnswerReview: React.FC<AnswerReviewProps> = ({
@@ -36,8 +38,8 @@ const AnswerReview: React.FC<AnswerReviewProps> = ({
   userAnswer,
   isCorrect,
   timeElapsed,
-  difficulty = "easy", // NEW: Default value
-  focusArea = "Vocabulary", // NEW: Default value
+  difficulty = "easy",
+  focusArea = "Vocabulary",
   gameMode = "multipleChoice",
   levelId,
   levelTitle,
@@ -48,6 +50,7 @@ const AnswerReview: React.FC<AnswerReviewProps> = ({
   delay = 300,
   questionLabel = "Question:",
   answerLabel = "Your Answer:",
+  isBackgroundCompletion = false, // NEW
 }) => {
   // Get game mode gradient for consistency
   const gameGradientColors = useMemo(
@@ -55,23 +58,49 @@ const AnswerReview: React.FC<AnswerReviewProps> = ({
     [gameMode]
   );
 
-  // Result colors based on correctness
-  const resultColors = useMemo(() => {
-    return isCorrect ? NAVIGATION_COLORS.green : difficultyColors.Hard;
-  }, [isCorrect]);
+  // NEW: Override result colors and text for background completion
+  const getResultData = () => {
+    if (isBackgroundCompletion) {
+      return {
+        title: "Game Interrupted!",
+        message:
+          "You left the game while it was running. Your progress has been saved.",
+        colors: ["#FF9800", "#EF6C00"] as const, // Orange warning gradient
+      };
+    }
+
+    return {
+      title: isCorrect ? "Excellent!" : "Oops! Try again.",
+      message: isCorrect
+        ? "You got it right! Well done."
+        : "Keep practicing to improve your skills.",
+      colors: isCorrect
+        ? (NAVIGATION_COLORS.green as readonly [string, string])
+        : (difficultyColors.Hard as readonly [string, string]),
+    };
+  };
+
+  const resultData = getResultData();
+  const resultColors = resultData.colors;
 
   // Format the level display text
   const levelDisplayText = useMemo(() => {
-    if (levelString && actualTitle) {
-      return `${levelString} - ${actualTitle}`;
-    } else if (levelString) {
-      return levelString;
-    } else if (levelTitle) {
-      return levelTitle;
-    } else {
-      return `Level ${levelId || 1}`;
+    // Priority order: actualTitle > levelTitle > levelString > fallback
+    if (actualTitle) {
+      return actualTitle;
     }
-  }, [levelString, actualTitle, levelTitle, levelId]);
+
+    if (levelTitle) {
+      return levelTitle;
+    }
+
+    if (levelString) {
+      return levelString;
+    }
+
+    // Fallback to level ID
+    return levelId ? `Level ${levelId}` : "Level";
+  }, [actualTitle, levelTitle, levelString, levelId]);
 
   return (
     <Animatable.View
@@ -95,7 +124,13 @@ const AnswerReview: React.FC<AnswerReviewProps> = ({
         >
           {/* Result Icon */}
           <View style={styles.resultIcon}>
-            {isCorrect ? (
+            {isBackgroundCompletion ? (
+              <MaterialCommunityIcons
+                name="alert-circle"
+                size={32}
+                color={BASE_COLORS.white}
+              />
+            ) : isCorrect ? (
               <Check width={32} height={32} color={BASE_COLORS.white} />
             ) : (
               <X width={32} height={32} color={BASE_COLORS.white} />
@@ -103,41 +138,37 @@ const AnswerReview: React.FC<AnswerReviewProps> = ({
           </View>
 
           {/* Result Title */}
-          <Text style={styles.resultTitle}>
-            {isCorrect ? "Excellent!" : "Oops! Try again."}
-          </Text>
+          <Text style={styles.resultTitle}>{resultData.title}</Text>
 
           {/* Result Message */}
-          <Text style={styles.resultMessage}>
-            {isCorrect
-              ? "You got it right! Well done."
-              : "Keep practicing to improve your skills."}
-          </Text>
+          <Text style={styles.resultMessage}>{resultData.message}</Text>
 
           {/* Level Information */}
           <View style={styles.levelInfoContainer}>
             <View style={styles.levelBadge}>
-              <Text style={styles.levelText}>{levelDisplayText}</Text>
+              <Text style={styles.levelText}>
+                {levelString} - {levelDisplayText}
+              </Text>
             </View>
           </View>
 
-          {/* NEW: Level Details Badges */}
+          {/* Level Details Badges */}
           <View style={styles.levelDetailsContainer}>
             <DifficultyBadge difficulty={difficulty} />
             <FocusAreaBadge focusArea={focusArea} />
           </View>
 
-          {/* Time Taken Section  */}
-          {timeElapsed !== undefined && (
+          {/* Time Taken Section - ALWAYS show if timeElapsed is available */}
+          {timeElapsed !== undefined && timeElapsed > 0 && (
             <View style={styles.timeInfoContainer}>
               <View style={styles.timeBadge}>
                 <MaterialCommunityIcons
                   name="clock"
-                  size={16}
+                  size={15}
                   color={BASE_COLORS.white}
                 />
                 <Text style={styles.timeText}>
-                  Time: {formatTime(timeElapsed)}
+                  Time: {formatTimerDisplay(timeElapsed)}
                 </Text>
               </View>
             </View>
@@ -186,10 +217,20 @@ const AnswerReview: React.FC<AnswerReviewProps> = ({
               <View
                 style={[
                   styles.sectionIconContainer,
-                  isCorrect ? styles.correctIcon : styles.incorrectIcon,
+                  isBackgroundCompletion
+                    ? styles.warningIcon
+                    : isCorrect
+                    ? styles.correctIcon
+                    : styles.incorrectIcon,
                 ]}
               >
-                {isCorrect ? (
+                {isBackgroundCompletion ? (
+                  <MaterialCommunityIcons
+                    name="alert-circle"
+                    size={16}
+                    color={BASE_COLORS.white}
+                  />
+                ) : isCorrect ? (
                   <Check width={16} height={16} color={BASE_COLORS.white} />
                 ) : (
                   <X width={16} height={16} color={BASE_COLORS.white} />
@@ -198,7 +239,12 @@ const AnswerReview: React.FC<AnswerReviewProps> = ({
               <Text style={styles.sectionTitle}>{answerLabel}</Text>
             </View>
             <View style={styles.contentContainer}>
-              <Text style={[styles.answerText]}>
+              <Text
+                style={[
+                  styles.answerText,
+                  isBackgroundCompletion && styles.backgroundAnswerText,
+                ]}
+              >
                 {safeTextRender(userAnswer) || "(No answer provided)"}
               </Text>
             </View>
@@ -312,10 +358,10 @@ const styles = StyleSheet.create({
     backgroundColor: "rgba(255, 255, 255, 0.10)",
     borderWidth: 1,
     borderColor: "rgba(255, 255, 255, 0.3)",
-    gap: 8,
+    gap: 6,
   },
   timeText: {
-    fontSize: 15,
+    fontSize: 14,
     fontFamily: "Poppins-Medium",
     color: BASE_COLORS.white,
     letterSpacing: 0.3,
@@ -423,6 +469,18 @@ const styles = StyleSheet.create({
     height: 80,
     borderRadius: 40,
     backgroundColor: "rgba(255, 255, 255, 0.03)",
+  },
+
+  // NEW: Add warning icon style
+  warningIcon: {
+    backgroundColor: "rgba(255, 167, 38, 0.6)",
+  },
+
+  // NEW: Add background answer text style
+  backgroundAnswerText: {
+    fontStyle: "italic",
+    opacity: 0.8,
+    color: "#FFA726", // Orange color to indicate it's a special case
   },
 });
 
