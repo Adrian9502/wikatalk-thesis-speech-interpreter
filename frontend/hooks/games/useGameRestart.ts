@@ -21,13 +21,13 @@ export const useGameRestart = (
     restartLockRef.current = true;
 
     try {
-      // Clear game store state
+      // STEP 1: Clear game store state FIRST
       const gameStore = useGameStore.getState();
       gameStore.setGameStatus("idle");
       gameStore.resetTimer();
       gameStore.setTimeElapsed(0);
 
-      // Fetch fresh progress data
+      // STEP 2: Fetch fresh progress data
       console.log(`[${gameMode}] Force fetching fresh progress data`);
       const freshProgress = await fetchProgress(true);
 
@@ -37,14 +37,17 @@ export const useGameRestart = (
         console.log(`[${gameMode}] Using fresh progress time: ${progressTime}`);
       }
 
-      // Update local state
+      // STEP 3: Update local state
       setTimeElapsed(progressTime);
 
-      // Small delay to ensure state is applied
-      await new Promise((resolve) => setTimeout(resolve, 50));
+      // STEP 4: Small delay to ensure state is applied
+      await new Promise((resolve) => setTimeout(resolve, 100));
 
-      // Restart the game
+      // STEP 5: Restart the game
       handleRestart();
+
+      // STEP 6: ENHANCED - Much longer delay before unlocking to prevent force start
+      await new Promise((resolve) => setTimeout(resolve, 1000));
 
       console.log(
         `[${gameMode}] Restart completed with fresh time: ${progressTime}`
@@ -54,11 +57,12 @@ export const useGameRestart = (
       setTimeElapsed(0);
       handleRestart();
     } finally {
+      // CRITICAL: Much longer delay before clearing restart flags
       setTimeout(() => {
         isRestartingRef.current = false;
         restartLockRef.current = false;
         console.log(`[${gameMode}] Restart process completed`);
-      }, 500);
+      }, 1500); // INCREASED: From 1000ms to 1500ms to prevent early force start
     }
   }, [
     isRestartingRef,

@@ -289,21 +289,56 @@ const FillInTheBlank: React.FC<FillInTheBlankProps> = React.memo(
         levelData &&
         gameStatus === "idle" &&
         isStarted &&
-        exercises.length > 0
+        exercises.length > 0 &&
+        !isRestartingRef.current &&
+        !restartLockRef.current
       ) {
         console.log(
           `[FillInTheBlank] Game seems stuck in idle, force starting...`
         );
 
-        // Small delay then force start
+        // CRITICAL: Add delay to prevent conflict with retry process
         const timer = setTimeout(() => {
-          console.log(`[FillInTheBlank] Force calling startGame()`);
-          startGame();
-        }, 500);
+          // ENHANCED: Double-check multiple conditions before force starting
+          const currentGameStore = useGameStore.getState();
+          const currentProgressStore = useProgressStore.getState();
+
+          // CRITICAL: Don't force start if:
+          // 1. Game status changed
+          // 2. Still in restart process
+          // 3. Progress store is loading (indicates retry in progress)
+          if (
+            currentGameStore.gameState.gameStatus === "idle" &&
+            !isRestartingRef.current &&
+            !restartLockRef.current &&
+            !currentProgressStore.isLoading // NEW: Check if progress store is loading
+          ) {
+            console.log(`[FillInTheBlank] Force calling startGame()`);
+            startGame();
+          } else {
+            console.log(
+              `[FillInTheBlank] Skipping force start - conditions not met:`,
+              {
+                gameStatus: currentGameStore.gameState.gameStatus,
+                isRestarting: isRestartingRef.current,
+                restartLock: restartLockRef.current,
+                progressLoading: currentProgressStore.isLoading,
+              }
+            );
+          }
+        }, 1200); // INCREASED: Longer delay to allow retry process to complete
 
         return () => clearTimeout(timer);
       }
-    }, [levelData, gameStatus, isStarted, exercises.length, startGame]);
+    }, [
+      levelData,
+      gameStatus,
+      isStarted,
+      exercises.length,
+      startGame,
+      isRestartingRef,
+      restartLockRef,
+    ]);
 
     return (
       <KeyboardAvoidingView

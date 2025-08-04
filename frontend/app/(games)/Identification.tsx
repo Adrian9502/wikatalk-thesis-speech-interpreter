@@ -301,17 +301,44 @@ const Identification: React.FC<IdentificationProps> = React.memo(
         gameStatus === "idle" &&
         isStarted &&
         sentences.length > 0 &&
-        words.length > 0
+        words.length > 0 &&
+        !isRestartingRef.current &&
+        !restartLockRef.current
       ) {
         console.log(
           `[Identification] Game seems stuck in idle, force starting...`
         );
 
-        // Small delay then force start
+        // CRITICAL: Add delay to prevent conflict with retry process
         const timer = setTimeout(() => {
-          console.log(`[Identification] Force calling startGame()`);
-          startGame();
-        }, 500);
+          // ENHANCED: Double-check multiple conditions before force starting
+          const currentGameStore = useGameStore.getState();
+          const currentProgressStore = useProgressStore.getState();
+
+          // CRITICAL: Don't force start if:
+          // 1. Game status changed
+          // 2. Still in restart process
+          // 3. Progress store is loading (indicates retry in progress)
+          if (
+            currentGameStore.gameState.gameStatus === "idle" &&
+            !isRestartingRef.current &&
+            !restartLockRef.current &&
+            !currentProgressStore.isLoading // NEW: Check if progress store is loading
+          ) {
+            console.log(`[Identification] Force calling startGame()`);
+            startGame();
+          } else {
+            console.log(
+              `[Identification] Skipping force start - conditions not met:`,
+              {
+                gameStatus: currentGameStore.gameState.gameStatus,
+                isRestarting: isRestartingRef.current,
+                restartLock: restartLockRef.current,
+                progressLoading: currentProgressStore.isLoading,
+              }
+            );
+          }
+        }, 1200); // INCREASED: Longer delay to allow retry process to complete
 
         return () => clearTimeout(timer);
       }
@@ -322,6 +349,8 @@ const Identification: React.FC<IdentificationProps> = React.memo(
       sentences.length,
       words.length,
       startGame,
+      isRestartingRef,
+      restartLockRef,
     ]);
 
     // Error state handling

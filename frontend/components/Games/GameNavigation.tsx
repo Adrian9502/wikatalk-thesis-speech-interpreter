@@ -380,18 +380,18 @@ const GameNavigation: React.FC<GameNavigationProps> = ({
       console.log("[GameNavigation] All caches cleared, calling onRestart");
       onRestart();
 
-      // 8. CRITICAL: Keep loading state longer to prevent double render
+      // 8. ENHANCED: Longer loading state to prevent force start interference
       setTimeout(() => {
         setIsRetryLoading(false);
         console.log("[GameNavigation] Retry process completed");
-      }, 800); // Longer delay
+      }, 1800); // INCREASED: From 1200ms to 1800ms to prevent force start
     } catch (error) {
       console.error("[GameNavigation] Error during retry preparation:", error);
       // Always call onRestart as fallback and reset loading
       onRestart();
       setTimeout(() => {
         setIsRetryLoading(false);
-      }, 800);
+      }, 1800); // INCREASED: Match the success timeout
     }
   }, [
     isAnimating,
