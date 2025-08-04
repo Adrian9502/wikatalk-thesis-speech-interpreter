@@ -55,16 +55,11 @@ const StatsContainer: React.FC<StatsContainerProps> = ({
   onTimerReset,
   isCorrectAnswer = false,
 }) => {
-  // Reset modal state
   const [showResetModal, setShowResetModal] = useState(false);
   const [isResetting, setIsResetting] = useState(false);
   const [currentTime, setCurrentTime] = useState(finalTime || 0);
-
-  // SUCCESS message state
   const [showSuccessMessage, setShowSuccessMessage] = useState(false);
   const [resetMessage, setResetMessage] = useState("");
-
-  // NEW: Track if this was an actual paid reset
   const [wasActualReset, setWasActualReset] = useState(false);
 
   // Get user progress and coins
@@ -213,33 +208,15 @@ const StatsContainer: React.FC<StatsContainerProps> = ({
     }
   }, [isResetting, showSuccessMessage]);
 
-  // ENHANCED: Update currentTime when finalTime changes
-  useEffect(() => {
-    if (variant === "completed" && finalTime !== undefined) {
-      console.log(
-        `[StatsContainer] Updating currentTime from finalTime: ${finalTime}`
-      );
-      setCurrentTime(finalTime);
-    }
-  }, [finalTime, variant]);
-
-  // ENHANCED: Reset currentTime when returning to playing state
-  useEffect(() => {
-    if (variant === "playing") {
-      console.log(
-        `[StatsContainer] Variant changed to playing, resetting display time`
-      );
-      setCurrentTime(0);
-      setWasActualReset(false); // Clear reset flag when playing again
-    }
-  }, [variant]);
-
   const renderStaticTimer = () => (
     <View style={styles.staticTimerContainer}>
       <View style={styles.timeContainer}>
         <Clock width={16} height={16} color={BASE_COLORS.white} />
         <Text style={styles.staticTimerText}>
-          {formatTimerDisplay(currentTime || finalTime || 0)}
+          {/* CRITICAL: For background completion, prefer finalTime, but use currentTime as updated */}
+          {formatTimerDisplay(
+            finalTime !== undefined ? finalTime : currentTime
+          )}
         </Text>
       </View>
 

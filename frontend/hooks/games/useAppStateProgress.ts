@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useCallback } from "react";
 import { AppState, AppStateStatus } from "react-native";
 import useGameStore from "@/store/games/useGameStore";
 import { useGameProgress } from "@/hooks/games/useGameProgress";
@@ -20,6 +20,73 @@ export const useAppStateProgress = ({
   // Track if we've already handled the background transition
   const hasHandledBackgroundRef = useRef(false);
   const lastSaveTimeRef = useRef(0);
+
+  // NEW: Function to handle user-initiated exit
+  const handleUserExit = useCallback(async () => {
+    const gameStore = useGameStore.getState();
+    const { gameStatus, timerRunning, timeElapsed, currentMode } =
+      gameStore.gameState;
+
+    // Only handle if this is the active game mode and we're in a playing state
+    const isActiveGame = currentMode === gameMode;
+    const isPlayingState = gameStatus === "playing" && timerRunning;
+
+    if (isActiveGame && isPlayingState) {
+      console.log(
+        `[AppStateProgress] User exit triggered for ${gameMode} level ${levelId}`
+      );
+
+      try {
+        // CRITICAL: Capture the exact time BEFORE any state changes
+        const exactFinalTime = Math.round(timeElapsed * 100) / 100;
+
+        console.log(
+          `[AppStateProgress] Captured time for user exit: ${exactFinalTime}s`
+        );
+
+        // STEP 1: Stop the timer immediately
+        gameStore.setTimerRunning(false);
+
+        // STEP 2: CRITICAL - Update the timeElapsed to the exact final time FIRST
+        gameStore.setTimeElapsed(exactFinalTime);
+
+        // STEP 3: Small delay to ensure the state update propagates
+        await new Promise((resolve) => setTimeout(resolve, 50));
+
+        // STEP 4: Set background completion flag for user exit
+        gameStore.setBackgroundCompletion(true);
+
+        // STEP 5: Set game status to completed
+        gameStore.setGameStatus("completed");
+
+        console.log(
+          `[AppStateProgress] Recording user exit: ${exactFinalTime}s for ${gameMode} level ${levelId}`
+        );
+
+        // STEP 6: Save progress as user exit (incomplete)
+        const result = await updateProgress(
+          exactFinalTime,
+          false, // isCorrect = false (user exit)
+          false // completed = false (not a real completion)
+        );
+
+        if (result) {
+          console.log(
+            `[AppStateProgress] User exit recorded: ${exactFinalTime}s for ${gameMode} level ${levelId}`
+          );
+        } else {
+          console.error(`[AppStateProgress] Failed to record user exit`);
+        }
+
+        return true;
+      } catch (error) {
+        console.error(`[AppStateProgress] Error recording user exit:`, error);
+        return false;
+      }
+    }
+
+    return false;
+  }, [levelData, levelId, gameMode, updateProgress]);
 
   useEffect(() => {
     const handleAppStateChange = async (nextAppState: AppStateStatus) => {
@@ -142,5 +209,7 @@ export const useAppStateProgress = ({
       hasHandledBackgroundRef.current = false;
       lastSaveTimeRef.current = 0;
     },
+    // NEW: Expose user exit handler
+    handleUserExit,
   };
 };

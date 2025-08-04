@@ -54,8 +54,13 @@ const Identification: React.FC<IdentificationProps> = React.memo(
     } = useGameStore();
 
     // Custom hooks for shared logic
-    const { updateProgress, fetchProgress, isRestartingRef, restartLockRef } =
-      useGameProgress(levelData, levelId);
+    const {
+      progress,
+      updateProgress,
+      fetchProgress,
+      isRestartingRef,
+      restartLockRef,
+    } = useGameProgress(levelData, levelId);
 
     const { getNextLevelTitle } = useNextLevelData(
       "identification",
@@ -75,7 +80,7 @@ const Identification: React.FC<IdentificationProps> = React.memo(
     const handleTimerReset = useTimerReset(setTimeElapsed, "Identification");
 
     // ADD: App state monitoring for auto-save
-    const { resetAutoSaveFlag } = useAppStateProgress({
+    const { resetAutoSaveFlag, handleUserExit } = useAppStateProgress({
       levelData,
       levelId,
       gameMode: "identification",
@@ -176,7 +181,20 @@ const Identification: React.FC<IdentificationProps> = React.memo(
         updateProgress,
       ]
     );
+    const handleUserExitWithSave = useCallback(async () => {
+      console.log("[identification] User exit triggered");
 
+      try {
+        const success = await handleUserExit();
+        if (success) {
+          console.log("[identification] User exit processed successfully");
+        } else {
+          console.error("[identification] User exit processing failed");
+        }
+      } catch (error) {
+        console.error("[identification] Error during user exit:", error);
+      }
+    }, [handleUserExit]);
     // UPDATED: Game configuration to handle background completion
     const gameConfig = useMemo(() => {
       const currentSentence = sentences[currentSentenceIndex];
@@ -187,9 +205,14 @@ const Identification: React.FC<IdentificationProps> = React.memo(
         sentences?.[0]?.focusArea ||
         "Vocabulary";
 
+      // FIXED: Get progress time like MultipleChoice does
+      const progressTime =
+        progress && !Array.isArray(progress) ? progress.totalTimeSpent || 0 : 0;
+
       // NEW: Handle background completion case
       let selectedAnswerText = "";
       let isCorrect = false;
+      let isUserExit = false;
 
       if (isBackgroundCompletion) {
         selectedAnswerText = "No answer selected";
@@ -206,12 +229,31 @@ const Identification: React.FC<IdentificationProps> = React.memo(
         isCorrect = feedback === "correct";
       }
 
-      // CRITICAL: Better final time logic
-      let displayTime = 0;
-      if (gameStatus === "completed" && finalTimeRef.current > 0) {
-        displayTime = finalTimeRef.current;
+      // CRITICAL: Better final time logic with user exit handling
+      let displayTime = progressTime; // FIXED: Start with progressTime
+
+      if (gameStatus === "completed") {
+        if (isBackgroundCompletion) {
+          // For user exits or background completion, use the current timeElapsed
+          displayTime = timeElapsed;
+          console.log(
+            `[Identification] User exit/background completion - using timeElapsed: ${timeElapsed}`
+          );
+        } else if (finalTimeRef.current > 0) {
+          // For normal completion, use the captured final time
+          displayTime = finalTimeRef.current;
+          console.log(
+            `[Identification] Normal completion - using finalTimeRef: ${finalTimeRef.current}`
+          );
+        } else {
+          // Fallback to current elapsed time
+          displayTime = timeElapsed;
+          console.log(
+            `[Identification] Fallback - using timeElapsed: ${timeElapsed}`
+          );
+        }
       } else if (gameStatus === "playing") {
-        displayTime = timeElapsed;
+        displayTime = timeElapsed || progressTime; // FIXED: Fallback to progressTime
       }
 
       return {
@@ -220,9 +262,10 @@ const Identification: React.FC<IdentificationProps> = React.memo(
         selectedAnswerText,
         isCorrect,
         question: currentSentence?.sentence || currentSentence?.question || "",
-        initialTime: 0,
+        initialTime: progressTime, // FIXED: Use progressTime instead of 0
         finalTime: displayTime,
-        isBackgroundCompletion, // Pass to completed content
+        isBackgroundCompletion,
+        isUserExit,
       };
     }, [
       sentences,
@@ -232,8 +275,9 @@ const Identification: React.FC<IdentificationProps> = React.memo(
       levelData?.focusArea,
       feedback,
       gameStatus,
-      timeElapsed,
-      isBackgroundCompletion, // NEW dependency
+      timeElapsed, // IMPORTANT: Include timeElapsed in dependencies
+      isBackgroundCompletion,
+      progress, // ADDED: Add progress as dependency
     ]);
 
     // CRITICAL: Initialize game with proper logging
@@ -327,6 +371,7 @@ const Identification: React.FC<IdentificationProps> = React.memo(
         levelId={levelId}
         onTimerReset={handleTimerReset}
         isCorrectAnswer={gameConfig.isCorrect}
+        onUserExit={handleUserExitWithSave}
       >
         {gameStatus === "playing" ? (
           <GamePlayingContent
@@ -368,8 +413,8 @@ const Identification: React.FC<IdentificationProps> = React.memo(
             nextLevelTitle={getNextLevelTitle()}
             isCurrentLevelCompleted={gameConfig.isCorrect}
             isCorrectAnswer={gameConfig.isCorrect}
-            // NEW: Pass background completion flag
             isBackgroundCompletion={gameConfig.isBackgroundCompletion}
+            isUserExit={gameConfig.isUserExit}
           />
         )}
       </GameContainer>

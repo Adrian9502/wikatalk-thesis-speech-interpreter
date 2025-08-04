@@ -50,12 +50,17 @@ const FillInTheBlank: React.FC<FillInTheBlankProps> = React.memo(
       checkAnswer,
       setTimerRunning,
       setTimeElapsed,
-      setBackgroundCompletion, // ADD THIS
+      setBackgroundCompletion,
     } = useGameStore();
 
     // Custom hooks for shared logic
-    const { updateProgress, fetchProgress, isRestartingRef, restartLockRef } =
-      useGameProgress(levelData, levelId);
+    const {
+      progress,
+      updateProgress,
+      fetchProgress,
+      isRestartingRef,
+      restartLockRef,
+    } = useGameProgress(levelData, levelId);
 
     const { getNextLevelTitle } = useNextLevelData(
       "fillBlanks",
@@ -73,7 +78,7 @@ const FillInTheBlank: React.FC<FillInTheBlankProps> = React.memo(
     );
 
     // ADD: App state monitoring for auto-save
-    const { resetAutoSaveFlag } = useAppStateProgress({
+    const { resetAutoSaveFlag, handleUserExit } = useAppStateProgress({
       levelData,
       levelId,
       gameMode: "fillBlanks",
@@ -163,10 +168,25 @@ const FillInTheBlank: React.FC<FillInTheBlankProps> = React.memo(
       setBackgroundCompletion,
       isBackgroundCompletion,
     ]);
+    const handleUserExitWithSave = useCallback(async () => {
+      console.log("[FillInBlank] User exit triggered");
+
+      try {
+        const success = await handleUserExit();
+        if (success) {
+          console.log("[FillInBlank] User exit processed successfully");
+        } else {
+          console.error("[FillInBlank] User exit processing failed");
+        }
+      } catch (error) {
+        console.error("[FillInBlank] Error during user exit:", error);
+      }
+    }, [handleUserExit]);
 
     // UPDATED: Game configuration to handle background completion
     const gameConfig = useMemo(() => {
       const currentExercise = exercises[currentExerciseIndex];
+      let isUserExit = false;
 
       const focusArea =
         currentExercise?.focusArea ||
@@ -174,12 +194,35 @@ const FillInTheBlank: React.FC<FillInTheBlankProps> = React.memo(
         exercises?.[0]?.focusArea ||
         "Vocabulary";
 
-      // CRITICAL: Better final time logic
-      let displayTime = 0;
-      if (gameStatus === "completed" && finalTimeRef.current > 0) {
-        displayTime = finalTimeRef.current;
+      // FIXED: Get progress time like MultipleChoice does
+      const progressTime =
+        progress && !Array.isArray(progress) ? progress.totalTimeSpent || 0 : 0;
+
+      // CRITICAL: Better final time logic - FIXED for user exit
+      let displayTime = progressTime; // FIXED: Start with progressTime
+
+      if (gameStatus === "completed") {
+        if (isBackgroundCompletion) {
+          // CRITICAL: For user exits or background completion, use the current timeElapsed
+          displayTime = timeElapsed;
+          console.log(
+            `[FillInTheBlank] User exit/background completion - using timeElapsed: ${timeElapsed}`
+          );
+        } else if (finalTimeRef.current > 0) {
+          // For normal completion, use the captured final time
+          displayTime = finalTimeRef.current;
+          console.log(
+            `[FillInTheBlank] Normal completion - using finalTimeRef: ${finalTimeRef.current}`
+          );
+        } else {
+          // Fallback to current elapsed time
+          displayTime = timeElapsed;
+          console.log(
+            `[FillInTheBlank] Fallback - using timeElapsed: ${timeElapsed}`
+          );
+        }
       } else if (gameStatus === "playing") {
-        displayTime = timeElapsed;
+        displayTime = timeElapsed || progressTime; // FIXED: Fallback to progressTime
       }
 
       // NEW: Handle background completion case
@@ -196,9 +239,10 @@ const FillInTheBlank: React.FC<FillInTheBlankProps> = React.memo(
         focusArea,
         question: exercises[0]?.sentence || "No question available",
         userAnswerDisplay,
-        initialTime: 0,
+        initialTime: progressTime,
         finalTime: displayTime,
-        isBackgroundCompletion, // Pass to completed content
+        isBackgroundCompletion,
+        isUserExit,
       };
     }, [
       exercises,
@@ -206,8 +250,9 @@ const FillInTheBlank: React.FC<FillInTheBlankProps> = React.memo(
       levelData?.focusArea,
       userAnswer,
       gameStatus,
-      timeElapsed,
-      isBackgroundCompletion, // NEW dependency
+      timeElapsed, // CRITICAL: Make sure timeElapsed is in dependencies
+      isBackgroundCompletion,
+      progress,
     ]);
 
     // Memoized toggle functions
@@ -237,17 +282,6 @@ const FillInTheBlank: React.FC<FillInTheBlankProps> = React.memo(
         setTimerRunning(false);
       }
     }, [showFeedback, setTimerRunning]);
-
-    // ADDED: Debug effect to track game state changes
-    useEffect(() => {
-      console.log(`[FillInTheBlank] Game state changed:`, {
-        gameStatus,
-        timerRunning,
-        timeElapsed,
-        isStarted,
-        hasExercises: exercises.length > 0,
-      });
-    }, [gameStatus, timerRunning, timeElapsed, isStarted, exercises.length]);
 
     // ADDED: Force start game if stuck in idle after initialization
     useEffect(() => {
@@ -290,6 +324,7 @@ const FillInTheBlank: React.FC<FillInTheBlankProps> = React.memo(
           levelId={levelId}
           onTimerReset={handleTimerReset}
           isCorrectAnswer={score > 0}
+          onUserExit={handleUserExitWithSave}
         >
           {gameStatus === "playing" ? (
             <GamePlayingContent
@@ -337,8 +372,8 @@ const FillInTheBlank: React.FC<FillInTheBlankProps> = React.memo(
               nextLevelTitle={getNextLevelTitle()}
               isCurrentLevelCompleted={score > 0}
               isCorrectAnswer={score > 0}
-              // NEW: Pass background completion flag
               isBackgroundCompletion={gameConfig.isBackgroundCompletion}
+              isUserExit={gameConfig.isUserExit}
             />
           )}
         </GameContainer>

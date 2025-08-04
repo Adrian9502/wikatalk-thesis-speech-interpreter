@@ -1,21 +1,22 @@
 import React, { useState, useEffect, useRef } from "react";
-import { View, Text, StyleSheet, BackHandler } from "react-native";
-import * as Animatable from "react-native-animatable";
-import { AlertTriangle } from "react-native-feather";
-import { BASE_COLORS } from "@/constant/colors";
+import { BackHandler, ToastAndroid, Platform } from "react-native";
+import useGameStore from "@/store/games/useGameStore";
 
 interface NavigationWarningProps {
   gameStatus: "idle" | "playing" | "completed";
   timerRunning: boolean;
+  onUserExit?: () => void; // NEW: Callback for when user exits intentionally
 }
 
 const NavigationWarning: React.FC<NavigationWarningProps> = ({
   gameStatus,
   timerRunning,
+  onUserExit,
 }) => {
-  const [showWarning, setShowWarning] = useState(false);
+  const [isToastVisible, setIsToastVisible] = useState(false);
   const backPressCountRef = useRef(0);
-  const warningTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const toastTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const resetTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
     // Only show warning during active gameplay
@@ -26,30 +27,67 @@ const NavigationWarning: React.FC<NavigationWarningProps> = ({
     const backHandler = BackHandler.addEventListener(
       "hardwareBackPress",
       () => {
+        console.log(
+          `[NavigationWarning] Back press detected, count: ${
+            backPressCountRef.current + 1
+          }`
+        );
+
         backPressCountRef.current += 1;
 
         if (backPressCountRef.current === 1) {
-          // First back press - show warning
-          setShowWarning(true);
+          // First back press - show toast warning
+          console.log("[NavigationWarning] First back press - showing toast");
 
-          // Auto-hide warning after 3 seconds
-          warningTimeoutRef.current = setTimeout(() => {
-            setShowWarning(false);
+          if (Platform.OS === "android") {
+            ToastAndroid.show(
+              "Press again to exit the game.",
+              ToastAndroid.SHORT
+            );
+          }
+
+          setIsToastVisible(true);
+
+          // Auto-hide toast after 3 seconds
+          toastTimeoutRef.current = setTimeout(() => {
+            setIsToastVisible(false);
+            console.log("[NavigationWarning] Toast auto-hidden");
+          }, 3000);
+
+          // Reset counter after 3 seconds if no second press
+          resetTimeoutRef.current = setTimeout(() => {
             backPressCountRef.current = 0;
+            setIsToastVisible(false);
+            console.log("[NavigationWarning] Back press counter reset");
           }, 3000);
 
           return true; // Prevent navigation
-        } else if (backPressCountRef.current >= 2) {
-          // Second back press - allow navigation
-          setShowWarning(false);
-          backPressCountRef.current = 0;
+        } else if (backPressCountRef.current >= 2 && isToastVisible) {
+          // Second back press while toast is visible - trigger user exit
+          console.log(
+            "[NavigationWarning] Second back press - triggering user exit"
+          );
 
-          if (warningTimeoutRef.current) {
-            clearTimeout(warningTimeoutRef.current);
-            warningTimeoutRef.current = null;
+          // Clear timeouts
+          if (toastTimeoutRef.current) {
+            clearTimeout(toastTimeoutRef.current);
+            toastTimeoutRef.current = null;
+          }
+          if (resetTimeoutRef.current) {
+            clearTimeout(resetTimeoutRef.current);
+            resetTimeoutRef.current = null;
           }
 
-          return false; // Allow default navigation
+          // Reset state
+          setIsToastVisible(false);
+          backPressCountRef.current = 0;
+
+          // Trigger user exit callback
+          if (onUserExit) {
+            onUserExit();
+          }
+
+          return true; // Prevent default navigation
         }
 
         return true; // Prevent navigation by default
@@ -58,74 +96,34 @@ const NavigationWarning: React.FC<NavigationWarningProps> = ({
 
     return () => {
       backHandler.remove();
-      if (warningTimeoutRef.current) {
-        clearTimeout(warningTimeoutRef.current);
+      if (toastTimeoutRef.current) {
+        clearTimeout(toastTimeoutRef.current);
+      }
+      if (resetTimeoutRef.current) {
+        clearTimeout(resetTimeoutRef.current);
       }
     };
-  }, [gameStatus, timerRunning]);
+  }, [gameStatus, timerRunning, isToastVisible, onUserExit]);
 
-  // Reset warning when game status changes
+  // Reset state when game status changes
   useEffect(() => {
     if (gameStatus !== "playing" || !timerRunning) {
-      setShowWarning(false);
+      setIsToastVisible(false);
       backPressCountRef.current = 0;
 
-      if (warningTimeoutRef.current) {
-        clearTimeout(warningTimeoutRef.current);
-        warningTimeoutRef.current = null;
+      if (toastTimeoutRef.current) {
+        clearTimeout(toastTimeoutRef.current);
+        toastTimeoutRef.current = null;
+      }
+      if (resetTimeoutRef.current) {
+        clearTimeout(resetTimeoutRef.current);
+        resetTimeoutRef.current = null;
       }
     }
   }, [gameStatus, timerRunning]);
 
-  if (!showWarning) {
-    return null;
-  }
-
-  return (
-    <Animatable.View
-      animation="slideInUp"
-      duration={300}
-      style={styles.warningContainer}
-    >
-      <View style={styles.warningContent}>
-        <AlertTriangle width={20} height={20} color="#FFA726" />
-        <Text style={styles.warningText}>Press back again to exit game</Text>
-      </View>
-    </Animatable.View>
-  );
+  // This component doesn't render anything visible
+  return null;
 };
-
-const styles = StyleSheet.create({
-  warningContainer: {
-    position: "absolute",
-    bottom: 100,
-    left: 20,
-    right: 20,
-    zIndex: 1000,
-  },
-  warningContent: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    backgroundColor: "rgba(255, 167, 38, 0.9)",
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    borderRadius: 16,
-    gap: 8,
-    borderWidth: 1,
-    borderColor: "rgba(255, 255, 255, 0.3)",
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
-    elevation: 8,
-  },
-  warningText: {
-    color: BASE_COLORS.white,
-    fontSize: 14,
-    fontFamily: "Poppins-Medium",
-    textAlign: "center",
-  },
-});
 
 export default NavigationWarning;

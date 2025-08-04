@@ -29,8 +29,9 @@ interface AnswerReviewProps {
   delay?: number;
   questionLabel?: string;
   answerLabel?: string;
-  // NEW: Add background completion flag
+  // UPDATED: Enhanced background completion flag
   isBackgroundCompletion?: boolean;
+  isUserExit?: boolean; // NEW: Flag for user-initiated exit
 }
 
 const AnswerReview: React.FC<AnswerReviewProps> = ({
@@ -50,7 +51,8 @@ const AnswerReview: React.FC<AnswerReviewProps> = ({
   delay = 300,
   questionLabel = "Question:",
   answerLabel = "Your Answer:",
-  isBackgroundCompletion = false, // NEW
+  isBackgroundCompletion = false,
+  isUserExit = false, // NEW
 }) => {
   // Get game mode gradient for consistency
   const gameGradientColors = useMemo(
@@ -58,8 +60,17 @@ const AnswerReview: React.FC<AnswerReviewProps> = ({
     [gameMode]
   );
 
-  // NEW: Override result colors and text for background completion
+  // ENHANCED: Handle different exit scenarios
   const getResultData = () => {
+    if (isUserExit) {
+      return {
+        title: "Game Exited",
+        message:
+          "You chose to exit the game. Your progress has been saved and you can continue later.",
+        colors: ["#FF9800", "#EF6C00"] as const, // Orange gradient for user exit
+      };
+    }
+
     if (isBackgroundCompletion) {
       return {
         title: "Game Interrupted!",
@@ -124,9 +135,9 @@ const AnswerReview: React.FC<AnswerReviewProps> = ({
         >
           {/* Result Icon */}
           <View style={styles.resultIcon}>
-            {isBackgroundCompletion ? (
+            {isBackgroundCompletion || isUserExit ? (
               <MaterialCommunityIcons
-                name="alert-circle"
+                name={isUserExit ? "exit-to-app" : "alert-circle"}
                 size={32}
                 color={BASE_COLORS.white}
               />
@@ -217,16 +228,16 @@ const AnswerReview: React.FC<AnswerReviewProps> = ({
               <View
                 style={[
                   styles.sectionIconContainer,
-                  isBackgroundCompletion
+                  isBackgroundCompletion || isUserExit
                     ? styles.warningIcon
                     : isCorrect
                     ? styles.correctIcon
                     : styles.incorrectIcon,
                 ]}
               >
-                {isBackgroundCompletion ? (
+                {isBackgroundCompletion || isUserExit ? (
                   <MaterialCommunityIcons
-                    name="alert-circle"
+                    name={isUserExit ? "exit-to-app" : "alert-circle"}
                     size={16}
                     color={BASE_COLORS.white}
                   />
@@ -242,7 +253,8 @@ const AnswerReview: React.FC<AnswerReviewProps> = ({
               <Text
                 style={[
                   styles.answerText,
-                  isBackgroundCompletion && styles.backgroundAnswerText,
+                  (isBackgroundCompletion || isUserExit) &&
+                    styles.backgroundAnswerText,
                 ]}
               >
                 {safeTextRender(userAnswer) || "(No answer provided)"}
@@ -471,16 +483,13 @@ const styles = StyleSheet.create({
     backgroundColor: "rgba(255, 255, 255, 0.03)",
   },
 
-  // NEW: Add warning icon style
   warningIcon: {
     backgroundColor: "rgba(255, 167, 38, 0.6)",
   },
 
-  // NEW: Add background answer text style
   backgroundAnswerText: {
-    fontStyle: "italic",
-    opacity: 0.8,
-    color: "#FFA726", // Orange color to indicate it's a special case
+    fontFamily: "Poppins-SemiBold",
+    color: "#e4a84fff",
   },
 });
 

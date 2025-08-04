@@ -6,7 +6,7 @@ import useThemeStore from "@/store/useThemeStore";
 import gameSharedStyles from "@/styles/gamesSharedStyles";
 import GameHeader from "@/components/games/GameHeader";
 import DotsLoader from "../DotLoader";
-import NavigationWarning from "@/components/games/NavigationWarning"; // Add import
+import NavigationWarning from "@/components/games/NavigationWarning";
 
 interface GameContainerProps {
   title: string;
@@ -14,8 +14,6 @@ interface GameContainerProps {
   gameStatus: "idle" | "playing" | "completed";
   children: React.ReactNode;
   variant?: "double" | "triple";
-
-  // Stats props to pass to header
   difficulty?: string;
   focusArea?: string;
   showTimer?: boolean;
@@ -24,8 +22,9 @@ interface GameContainerProps {
   finalTime?: number;
   levelId?: number | string;
   onTimerReset?: () => void;
-  // NEW: Add isCorrectAnswer prop
   isCorrectAnswer?: boolean;
+  // NEW: Add user exit handler
+  onUserExit?: () => void;
 }
 
 const GameContainer: React.FC<GameContainerProps> = ({
@@ -34,8 +33,6 @@ const GameContainer: React.FC<GameContainerProps> = ({
   gameStatus,
   children,
   variant = "triple",
-
-  // Stats props
   difficulty,
   focusArea,
   showTimer,
@@ -45,6 +42,7 @@ const GameContainer: React.FC<GameContainerProps> = ({
   levelId,
   onTimerReset,
   isCorrectAnswer,
+  onUserExit, // NEW
 }) => {
   const { activeTheme } = useThemeStore();
 
@@ -91,10 +89,11 @@ const GameContainer: React.FC<GameContainerProps> = ({
           children
         )}
 
-        {/* NEW: Add Navigation Warning */}
+        {/* ENHANCED: Add Navigation Warning with user exit handler */}
         <NavigationWarning
           gameStatus={gameStatus}
           timerRunning={timerRunning}
+          onUserExit={onUserExit}
         />
       </SafeAreaView>
     </View>

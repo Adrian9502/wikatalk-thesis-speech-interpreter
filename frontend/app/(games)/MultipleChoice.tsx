@@ -67,7 +67,7 @@ const MultipleChoice: React.FC<MultipleChoiceProps> = React.memo(
     const handleTimerReset = useTimerReset(setTimeElapsed, "MultipleChoice");
 
     // ADD: App state monitoring for auto-save
-    const { resetAutoSaveFlag } = useAppStateProgress({
+    const { resetAutoSaveFlag, handleUserExit } = useAppStateProgress({
       levelData,
       levelId,
       gameMode: "multipleChoice",
@@ -223,7 +223,6 @@ const MultipleChoice: React.FC<MultipleChoiceProps> = React.memo(
         levelData?.questions?.[0]?.focusArea ||
         "Vocabulary";
 
-      // FIXED: Use the EXACT SAME time value for both display and finalTime
       let displayTime = progressTime;
 
       if (gameStatus === "completed") {
@@ -233,7 +232,6 @@ const MultipleChoice: React.FC<MultipleChoiceProps> = React.memo(
             `[MultipleChoice] Background completion - using timeElapsed: ${timeElapsed}`
           );
         } else if (finalTimeRef.current > 0) {
-          // CRITICAL: Use finalTimeRef for BOTH header and answer review
           displayTime = finalTimeRef.current;
           console.log(
             `[MultipleChoice] Normal completion - using finalTimeRef: ${finalTimeRef.current}`
@@ -248,13 +246,17 @@ const MultipleChoice: React.FC<MultipleChoiceProps> = React.memo(
         displayTime = timeElapsed || progressTime;
       }
 
-      // Handle background completion case
+      // Handle different exit scenarios
       let selectedAnswerText = "";
       let isSelectedCorrect = false;
+      let isUserExit = false; // NEW
 
       if (isBackgroundCompletion) {
+        // Check if this was a user-initiated exit vs background
+        // For now, we'll assume background completion from app state changes
         selectedAnswerText = "No answer provided";
         isSelectedCorrect = false;
+        // You could add logic here to distinguish user exit vs background
       } else {
         selectedAnswerText =
           currentQuestion?.options?.find((o) => o.id === selectedOption)
@@ -271,6 +273,7 @@ const MultipleChoice: React.FC<MultipleChoiceProps> = React.memo(
         initialTime: progressTime,
         finalTime: displayTime,
         isBackgroundCompletion,
+        isUserExit, // NEW
       };
     }, [
       currentQuestion,
@@ -306,6 +309,22 @@ const MultipleChoice: React.FC<MultipleChoiceProps> = React.memo(
       }
     }, [gameStatus, gameConfig.initialTime]);
 
+    // NEW: Handle user exit
+    const handleUserExitWithSave = useCallback(async () => {
+      console.log("[MultipleChoice] User exit triggered");
+
+      try {
+        const success = await handleUserExit();
+        if (success) {
+          console.log("[MultipleChoice] User exit processed successfully");
+        } else {
+          console.error("[MultipleChoice] User exit processing failed");
+        }
+      } catch (error) {
+        console.error("[MultipleChoice] Error during user exit:", error);
+      }
+    }, [handleUserExit]);
+
     return (
       <GameContainer
         title="Multiple Choice"
@@ -321,6 +340,7 @@ const MultipleChoice: React.FC<MultipleChoiceProps> = React.memo(
         levelId={levelId}
         onTimerReset={handleTimerReset}
         isCorrectAnswer={gameConfig.isSelectedCorrect}
+        onUserExit={handleUserExitWithSave} // NEW
       >
         {gameStatus === "playing" ? (
           <GamePlayingContent
@@ -361,6 +381,7 @@ const MultipleChoice: React.FC<MultipleChoiceProps> = React.memo(
             isCurrentLevelCompleted={gameConfig.isSelectedCorrect}
             isCorrectAnswer={gameConfig.isSelectedCorrect}
             isBackgroundCompletion={gameConfig.isBackgroundCompletion}
+            isUserExit={gameConfig.isUserExit}
           />
         )}
       </GameContainer>
