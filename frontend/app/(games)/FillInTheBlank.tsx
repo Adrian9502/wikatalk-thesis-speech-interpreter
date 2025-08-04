@@ -142,10 +142,6 @@ const FillInTheBlank: React.FC<FillInTheBlankProps> = React.memo(
         displayTime = timeElapsed;
       }
 
-      console.log(
-        `[FillInTheBlank] Using EXACT final time: ${displayTime} (finalTimeRef: ${finalTimeRef.current})`
-      );
-
       return {
         currentExercise,
         focusArea,

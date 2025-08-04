@@ -178,10 +178,6 @@ const MultipleChoice: React.FC<MultipleChoiceProps> = React.memo(
         displayTime = timeElapsed || progressTime;
       }
 
-      console.log(
-        `[MultipleChoice] Using EXACT final time: ${displayTime} (finalTimeRef: ${finalTimeRef.current})`
-      );
-
       return {
         focusArea,
         selectedAnswerText:

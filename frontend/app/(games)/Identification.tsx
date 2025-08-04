@@ -163,10 +163,6 @@ const Identification: React.FC<IdentificationProps> = React.memo(
         displayTime = timeElapsed;
       }
 
-      console.log(
-        `[Identification] Using EXACT final time: ${displayTime} (finalTimeRef: ${finalTimeRef.current})`
-      );
-
       return {
         currentSentence,
         focusArea,
