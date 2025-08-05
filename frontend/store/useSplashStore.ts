@@ -741,35 +741,56 @@ export const useSplashStore = create<SplashState>((set, get) => ({
     let precomputeTimeout: NodeJS.Timeout | null = null;
 
     // In the precomputeSpecificGameMode function:
-    // ADDED: Debounce to prevent duplicate calls
     if (precomputeTimeout) {
       clearTimeout(precomputeTimeout);
     }
 
     precomputeTimeout = setTimeout(async () => {
       try {
-        if (__DEV__) {
-          console.log(
-            `[SplashStore] Precomputing specific game mode: ${gameMode}`
-          );
+        console.log(
+          `[SplashStore] Starting specific precomputation for ${gameMode}`
+        );
+
+        // Use provided levels or convert from questions
+        let gameLevels: LevelData[] = [];
+
+        if (levels && levels.length > 0) {
+          gameLevels = levels;
+        } else {
+          // Convert from questions if levels not provided
+          const gameStore = useGameStore.getState();
+          const progressStore = useProgressStore.getState();
+
+          const questions = gameStore.questions;
+          const progress = progressData || progressStore.progress || [];
+
+          if (questions && Array.isArray(progress)) {
+            gameLevels = convertQuizToLevels(gameMode, questions, progress);
+          }
         }
 
-        const startTime = Date.now();
-        const filteredLevels = precomputeFilters(levels);
+        // Only proceed if we have levels
+        if (gameLevels.length === 0) {
+          console.warn(`[SplashStore] No levels found for ${gameMode}`);
+          return;
+        }
 
-        const completedCount = levels.filter(
+        const completedCount = gameLevels.filter(
           (level) => level.status === "completed"
         ).length;
         const completionPercentage =
-          levels.length > 0
-            ? Math.round((completedCount / levels.length) * 100)
+          gameLevels.length > 0
+            ? Math.round((completedCount / gameLevels.length) * 100)
             : 0;
 
+        const filteredLevels = precomputeFilters(gameLevels);
+
+        // Update the store
         set((state) => ({
           precomputedLevels: {
             ...state.precomputedLevels,
             [gameMode]: {
-              levels,
+              levels: gameLevels,
               completionPercentage,
               lastUpdated: Date.now(),
               filteredLevels,
@@ -777,19 +798,12 @@ export const useSplashStore = create<SplashState>((set, get) => ({
           },
         }));
 
-        const duration = Date.now() - startTime;
-
-        // REDUCED: Only log summary
-        if (__DEV__) {
-          console.log(
-            `[SplashStore] ✅ ${gameMode} precomputed: ${levels.length} levels (${duration}ms)`
-          );
-        }
-
-        return true;
+        const duration = Date.now() - Date.now();
+        console.log(
+          `[SplashStore] ✅ ${gameMode} precomputed: ${gameLevels.length} levels (${duration}ms)`
+        );
       } catch (error) {
         console.error(`[SplashStore] Error precomputing ${gameMode}:`, error);
-        return false;
       }
     }, 100); // 100ms debounce
   },

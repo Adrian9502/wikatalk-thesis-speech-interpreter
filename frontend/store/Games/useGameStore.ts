@@ -1334,6 +1334,7 @@ const useGameStore = create<QuizState>((set, get) => ({
         timeElapsed: 0,
         levelId: 1,
         currentMode: null,
+        isBackgroundCompletion: false,
       },
       multipleChoiceState: {
         currentQuestion: null,
@@ -1372,6 +1373,7 @@ const useGameStore = create<QuizState>((set, get) => ({
         timeElapsed: 0,
         levelId: 1,
         currentMode: null,
+        isBackgroundCompletion: false,
       },
       multipleChoiceState: {
         currentQuestion: null,

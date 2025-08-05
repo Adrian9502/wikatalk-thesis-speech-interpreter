@@ -142,14 +142,7 @@ const LevelInfoModal: React.FC<GameInfoModalProps> = React.memo(
 
     // FIXED: Update progress info calculation to handle the double loading issue
     const progressInfo = React.useMemo(() => {
-      console.log("[LevelInfoModal] Calculating progress info:", {
-        progress,
-        progressLoading,
-        hasFetchedFresh,
-        fetchInProgress: fetchInProgressRef.current,
-        isArray: Array.isArray(progress),
-        progressType: typeof progress,
-      });
+      console.log("[LevelInfoModal] Calculating progress info");
 
       // Show loading if we're fetching OR if we haven't fetched fresh data yet OR if fetch is in progress
       if (progressLoading || !hasFetchedFresh || fetchInProgressRef.current) {
