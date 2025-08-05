@@ -3,117 +3,68 @@ const router = express.Router();
 const { protect } = require("../middleware/auth.middleware");
 const UserProgress = require("../models/userProgress.model");
 const User = require("../models/user.model");
-// Add the reset cost calculation function
+
+// UPDATED: New cost calculation function with your tiers
 const calculateResetCost = (secondsSpent) => {
-  if (secondsSpent <= 30) return 50;         // 0–30 sec → 50 coins
-  if (secondsSpent <= 120) return 60;        // 30s – 2 mins → 60 coins
-  if (secondsSpent <= 300) return 70;        // 2 – 5 mins → 70 coins
-  if (secondsSpent <= 600) return 85;        // 5 – 10 mins → 85 coins
-  if (secondsSpent <= 1200) return 100;      // 10 – 20 mins → 100 coins
-  return 120;                                // 20+ mins → 120 coins
+  if (secondsSpent <= 10) return 20;          // 0–10 sec → 20 coins
+  if (secondsSpent <= 30) return 40;          // 10–30 sec → 40 coins
+  if (secondsSpent <= 60) return 55;          // 30s – 1 min → 55 coins
+  if (secondsSpent <= 120) return 70;         // 1 – 2 mins → 70 coins
+  if (secondsSpent <= 180) return 90;         // 2 – 3 mins → 90 coins
+  if (secondsSpent <= 240) return 100;        // 3 – 4 mins → 100 coins
+  return 110;                                 // 4+ mins → 110 coins
 };
 
 // More detailed logging for routes
 router.use((req, res, next) => {
-  console.log(`[PROGRESS_ROUTE] ${req.method} ${req.originalUrl}`);
-  console.log(`[PROGRESS_ROUTE] Params:`, req.params);
-  console.log(`[PROGRESS_ROUTE] Query:`, req.query);
-  console.log(`[PROGRESS_ROUTE] Body:`, req.body);
-  next();
-});
-
-// Test route to verify the router is working
-router.get("/test", (req, res) => {
-  console.log("[PROGRESS] Test route hit successfully");
-  res.json({
-    success: true,
-    message: "UserProgress routes are working correctly",
+  console.log(`[USER_PROGRESS] ${req.method} ${req.path}`, {
+    params: req.params,
+    body: req.body ? Object.keys(req.body) : {},
+    query: req.query,
     timestamp: new Date().toISOString()
   });
+  next();
 });
 
 /**
  * @route   GET /api/userprogress
- * @desc    Get all progress for current user
+ * @desc    Get all user progress entries
  * @access  Private
  */
 router.get("/", protect, async (req, res) => {
   try {
-    console.log("[PROGRESS] Getting all progress for user:", req.user._id);
-    const progressEntries = await UserProgress.find({ userId: req.user._id });
+    console.log("[PROGRESS] Fetching all progress for user:", req.user._id);
 
-    const summary = {
-      totalQuizzes: progressEntries.length,
-      completedQuizzes: progressEntries.filter(p => p.completed).length,
-      totalTimeSpent: progressEntries.reduce((sum, p) => sum + (p.totalTimeSpent || 0), 0)
-    };
+    const progressEntries = await UserProgress.find({
+      userId: req.user._id
+    }).sort({ lastAttemptDate: -1 });
 
-    res.json({ success: true, progressEntries, summary });
+    console.log(`[PROGRESS] Found ${progressEntries.length} progress entries`);
+
+    res.json({
+      success: true,
+      progressEntries,
+      count: progressEntries.length
+    });
   } catch (error) {
-    console.error("[PROGRESS] Error getting all progress:", error);
-    res.status(500).json({ success: false, message: error.message });
+    console.error("[PROGRESS] Error fetching all progress:", error);
+    res.status(500).json({
+      success: false,
+      message: "Failed to fetch progress data"
+    });
   }
 });
 
 /**
  * @route   GET /api/userprogress/:quizId
- * @desc    Get progress for a specific quiz
+ * @desc    Get user progress for a specific quiz
  * @access  Private
  */
 router.get("/:quizId", protect, async (req, res) => {
   try {
-    console.log("[PROGRESS] Route handler triggered for GET /:quizId");
+    console.log("[PROGRESS] Fetching progress for quiz:", req.params.quizId);
     const userId = req.user._id;
     let { quizId } = req.params;
-
-    console.log("[PROGRESS] Getting progress for quiz:", quizId, "user:", userId);
-
-    // Handle numeric ID format with prefix instead of slash
-    if (quizId.startsWith('n-')) {
-      quizId = quizId.replace('n-', '');
-      console.log("[PROGRESS] Converted numeric ID to:", quizId);
-    }
-
-    // Find existing progress
-    let progress = await UserProgress.findOne({
-      userId,
-      quizId
-    });
-
-    if (progress) {
-      console.log("[PROGRESS] Found existing progress for quiz:", quizId);
-      return res.json({ success: true, progress });
-    }
-
-    // FIXED: Don't create new progress in GET route
-    // Just return a "not found" response that frontend can handle
-    console.log("[PROGRESS] No progress found for quiz:", quizId);
-    return res.json({
-      success: true,
-      progress: null,
-      message: "No progress found for this quiz"
-    });
-
-  } catch (error) {
-    console.error("[PROGRESS] Error getting quiz progress:", error);
-    res.status(500).json({ success: false, message: error.message });
-  }
-});
-
-/**
- * @route   POST /api/userprogress/:quizId
- * @desc    Update progress for a quiz
- * @access  Private
- */
-router.post("/:quizId", protect, async (req, res) => {
-  try {
-    console.log("[PROGRESS] Route handler triggered for POST /:quizId");
-    const userId = req.user._id;
-    let { quizId } = req.params;
-    const { timeSpent, completed, isCorrect } = req.body;
-
-    console.log("[PROGRESS] Updating progress for quiz:", quizId);
-    console.log("[PROGRESS] Time spent:", timeSpent, "Completed:", completed, "Is correct:", isCorrect);
 
     // Handle numeric ID format with prefix
     if (quizId.startsWith('n-')) {
@@ -121,116 +72,149 @@ router.post("/:quizId", protect, async (req, res) => {
       console.log("[PROGRESS] Converted numeric ID to:", quizId);
     }
 
-    // FIXED: Use a simpler approach - try to update existing, create if doesn't exist
-    let progress = await UserProgress.findOne({ userId, quizId });
+    const progress = await UserProgress.findOne({ userId, quizId });
 
-    if (progress) {
-      // Update existing progress
-      console.log("[PROGRESS] Updating existing progress");
-
-      // Add new attempt if time spent is provided
-      if (timeSpent !== undefined) {
-        const timeSpentNum = parseFloat(timeSpent);
-        if (!isNaN(timeSpentNum)) {
-          const newAttempt = {
-            quizId,
-            timeSpent: timeSpentNum,
-            attemptDate: new Date(),
-            isCorrect: isCorrect || false,
-            attemptNumber: progress.attempts.length + 1,
-            cumulativeTime: timeSpentNum
-          };
-
-          progress.attempts.push(newAttempt);
-          progress.totalTimeSpent = timeSpentNum;
-          progress.lastAttemptTime = timeSpentNum;
-          progress.lastAttemptDate = new Date();
-
-          console.log("[PROGRESS] Adding attempt with time:", timeSpentNum, "isCorrect:", isCorrect);
-        }
-      }
-
-      // Update completion status
-      if (completed !== undefined) {
-        progress.completed = completed;
-        if (completed) {
-          progress.exercisesCompleted = 1;
-          console.log("[PROGRESS] Marking quiz as completed");
-        }
-      }
-
-      // Save the updated progress
-      await progress.save();
-
-    } else {
-      // Create new progress
-      console.log("[PROGRESS] Creating new progress");
-
-      const newProgressData = {
-        userId,
-        quizId,
-        exercisesCompleted: completed ? 1 : 0,
-        totalExercises: 1,
-        completed: completed || false,
-        totalTimeSpent: parseFloat(timeSpent) || 0,
-        lastAttemptTime: parseFloat(timeSpent) || 0,
-        attempts: [],
-        lastAttemptDate: new Date()
-      };
-
-      // Add attempt if time spent is provided
-      if (timeSpent !== undefined) {
-        const timeSpentNum = parseFloat(timeSpent);
-        if (!isNaN(timeSpentNum)) {
-          newProgressData.attempts = [{
-            quizId,
-            timeSpent: timeSpentNum,
-            attemptDate: new Date(),
-            isCorrect: isCorrect || false,
-            attemptNumber: 1,
-            cumulativeTime: timeSpentNum
-          }];
-        }
-      }
-
-      progress = new UserProgress(newProgressData);
-      await progress.save();
+    if (!progress) {
+      console.log("[PROGRESS] No progress found, returning null");
+      return res.json({
+        success: true,
+        progress: null,
+        message: "No progress found for this quiz"
+      });
     }
 
-    console.log("[PROGRESS] Progress updated/created successfully");
-    res.json({ success: true, progress });
+    console.log(`[PROGRESS] Found progress: completed=${progress.completed}, timeSpent=${progress.totalTimeSpent}`);
 
+    res.json({
+      success: true,
+      progress
+    });
   } catch (error) {
-    console.error("[PROGRESS] Error updating progress:", error);
+    console.error("[PROGRESS] Error fetching progress:", error);
+    res.status(500).json({
+      success: false,
+      message: "Failed to fetch progress"
+    });
+  }
+});
 
-    // ENHANCED: Better error handling for different scenarios
-    if (error.code === 11000) {
-      console.log("[PROGRESS] Duplicate key error, attempting to update existing record");
+/**
+ * @route   POST /api/userprogress/:quizId
+ * @desc    Update or create user progress for a quiz
+ * @access  Private
+ */
+router.post("/:quizId", protect, async (req, res) => {
+  const maxRetries = 3;
 
+  for (let attempt = 1; attempt <= maxRetries; attempt++) {
+    try {
+      console.log(`[PROGRESS] Update attempt ${attempt}/${maxRetries} for quiz:`, req.params.quizId);
+
+      const userId = req.user._id;
+      let { quizId } = req.params;
+      const { timeSpent, completed, isCorrect } = req.body;
+
+      // Handle numeric ID format
+      if (quizId.startsWith('n-')) {
+        quizId = quizId.replace('n-', '');
+        console.log("[PROGRESS] Converted numeric ID to:", quizId);
+      }
+
+      // Validate timeSpent
+      const timeSpentNum = parseFloat(timeSpent);
+      if (isNaN(timeSpentNum) || timeSpentNum < 0) {
+        return res.status(400).json({
+          success: false,
+          message: "Invalid timeSpent value"
+        });
+      }
+
+      console.log(`[PROGRESS] Processing: timeSpent=${timeSpentNum}, completed=${completed}, isCorrect=${isCorrect}`);
+
+      // Find existing progress or create new
+      let existingProgress = await UserProgress.findOne({ userId, quizId });
+
+      if (!existingProgress) {
+        console.log("[PROGRESS] Creating new progress entry");
+        existingProgress = new UserProgress({
+          userId,
+          quizId,
+          exercisesCompleted: completed ? 1 : 0,
+          totalExercises: 1,
+          completed: completed || false,
+          totalTimeSpent: timeSpentNum,
+          lastAttemptTime: timeSpentNum,
+          lastAttemptDate: new Date(),
+          attempts: []
+        });
+      } else {
+        console.log(`[PROGRESS] Updating existing progress: current completed=${existingProgress.completed}`);
+
+        // Only update time if it's not already completed OR if this is a reset scenario
+        if (!existingProgress.completed || timeSpentNum === 0) {
+          // Add attempt if time > 0
+          if (timeSpentNum > 0) {
+            console.log(`[PROGRESS] Adding attempt with time: ${timeSpentNum}`);
+            existingProgress.attempts.push({
+              quizId: quizId,
+              attemptDate: new Date(),
+              timeSpent: timeSpentNum,
+              isCorrect: isCorrect || false,
+              attemptNumber: existingProgress.attempts.length + 1,
+              cumulativeTime: timeSpentNum
+            });
+            existingProgress.totalTimeSpent = timeSpentNum;
+            existingProgress.lastAttemptTime = timeSpentNum;
+            existingProgress.lastAttemptDate = new Date();
+          }
+        }
+
+        if (req.body.completed !== undefined) {
+          existingProgress.completed = req.body.completed;
+          if (req.body.completed) {
+            existingProgress.exercisesCompleted = 1;
+          }
+        }
+      }
+
+      await existingProgress.save();
+      return res.json({ success: true, progress: existingProgress });
+
+    } catch (error) {
+      console.error(`[PROGRESS] Attempt ${attempt} failed:`, error);
+
+      if (attempt === maxRetries) {
+        console.error("[PROGRESS] All retry attempts failed");
+        break;
+      }
+
+      // Wait before retry
+      await new Promise(resolve => setTimeout(resolve, 1000 * attempt));
+
+      // Try again
       try {
-        // If we get a duplicate key error, find and update the existing record
         const existingProgress = await UserProgress.findOne({
           userId: req.user._id,
           quizId: req.params.quizId.replace('n-', '')
         });
 
         if (existingProgress) {
-          // Update the existing record directly
-          if (req.body.timeSpent !== undefined) {
-            const timeSpentNum = parseFloat(req.body.timeSpent);
-            if (!isNaN(timeSpentNum)) {
-              existingProgress.attempts.push({
-                quizId: existingProgress.quizId,
-                timeSpent: timeSpentNum,
-                attemptDate: new Date(),
-                isCorrect: req.body.isCorrect || false,
-                attemptNumber: existingProgress.attempts.length + 1,
-                cumulativeTime: timeSpentNum
-              });
-              existingProgress.totalTimeSpent = timeSpentNum;
-              existingProgress.lastAttemptTime = timeSpentNum;
-              existingProgress.lastAttemptDate = new Date();
-            }
+          const timeSpentNum = parseFloat(req.body.timeSpent) || 0;
+
+          // Only update if time > 0
+          if (timeSpentNum > 0) {
+            // FIXED: Add the missing quizId field here too
+            existingProgress.attempts.push({
+              quizId: req.params.quizId.replace('n-', ''), // ADD THIS LINE
+              attemptDate: new Date(),
+              timeSpent: timeSpentNum,
+              isCorrect: req.body.isCorrect || false,
+              attemptNumber: existingProgress.attempts.length + 1,
+              cumulativeTime: timeSpentNum
+            });
+            existingProgress.totalTimeSpent = timeSpentNum;
+            existingProgress.lastAttemptTime = timeSpentNum;
+            existingProgress.lastAttemptDate = new Date();
           }
 
           if (req.body.completed !== undefined) {
@@ -248,7 +232,11 @@ router.post("/:quizId", protect, async (req, res) => {
       }
     }
 
-    res.status(500).json({ success: false, message: error.message });
+    // FIXED: Proper error handling at the end of the loop
+    return res.status(500).json({
+      success: false,
+      message: error?.message || "Failed to update progress after all retries"
+    });
   }
 });
 
@@ -287,7 +275,7 @@ router.post("/:quizId/reset-timer", protect, async (req, res) => {
       });
     }
 
-    // UPDATED: Calculate dynamic cost based on time spent
+    // UPDATED: Calculate dynamic cost based on time spent using new tiers
     const timeSpent = existingProgress.totalTimeSpent || 0;
     const RESET_COST = calculateResetCost(timeSpent);
 
@@ -356,23 +344,25 @@ router.post("/:quizId/reset-timer", protect, async (req, res) => {
   }
 });
 
-// Helper functions for backend
+// UPDATED: Helper functions for backend with new tiers
 function getResetCostMessage(secondsSpent) {
-  if (secondsSpent <= 30) return "Quick reset (under 30 seconds)";
-  if (secondsSpent <= 120) return "Short session (under 2 minutes)";
-  if (secondsSpent <= 300) return "Medium session (2-5 minutes)";
-  if (secondsSpent <= 600) return "Long session (5-10 minutes)";
-  if (secondsSpent <= 1200) return "Extended session (10-20 minutes)";
-  return "Very long session (over 20 minutes)";
+  if (secondsSpent <= 10) return "Ultra quick reset (under 10 seconds)";
+  if (secondsSpent <= 30) return "Quick reset (10-30 seconds)";
+  if (secondsSpent <= 60) return "Short session (30s - 1 minute)";
+  if (secondsSpent <= 120) return "Medium session (1-2 minutes)";
+  if (secondsSpent <= 180) return "Long session (2-3 minutes)";
+  if (secondsSpent <= 240) return "Extended session (3-4 minutes)";
+  return "Very long session (over 4 minutes)";
 }
 
 function getTimeRangeMessage(secondsSpent) {
-  if (secondsSpent <= 30) return "0-30s";
-  if (secondsSpent <= 120) return "30s-2m";
-  if (secondsSpent <= 300) return "2-5m";
-  if (secondsSpent <= 600) return "5-10m";
-  if (secondsSpent <= 1200) return "10-20m";
-  return "20m+";
+  if (secondsSpent <= 10) return "0-10s";
+  if (secondsSpent <= 30) return "10-30s";
+  if (secondsSpent <= 60) return "30s-1m";
+  if (secondsSpent <= 120) return "1-2m";
+  if (secondsSpent <= 180) return "2-3m";
+  if (secondsSpent <= 240) return "3-4m";
+  return "4m+";
 }
 
 module.exports = router;
