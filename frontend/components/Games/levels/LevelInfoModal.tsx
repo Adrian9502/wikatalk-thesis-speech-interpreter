@@ -34,6 +34,7 @@ import {
 import ResetCostInfoModal from "@/components/games/levels/ResetCostInfoModal";
 import DifficultyBadge from "../DifficultyBadge";
 import FocusAreaBadge from "../FocusAreaBadge";
+import ResetButton from "@/components/games/buttons/ResetButton";
 
 type DifficultyLevel = keyof typeof difficultyColors;
 
@@ -548,26 +549,19 @@ const LevelInfoModal: React.FC<GameInfoModalProps> = React.memo(
                       </View>
 
                       {/* Reset Button (only if in progress) */}
-                      {progressInfo.hasProgress &&
-                        !progressInfo.isCompleted && (
-                          <TouchableOpacity
-                            style={styles.resetButton}
-                            onPress={handleShowResetConfirmation}
-                            disabled={isResetting}
-                          >
-                            <RefreshCw width={12} height={12} color="#fff" />
-                            <View style={styles.resetButtonContainer}>
-                              <Text style={styles.resetButtonText}>Reset</Text>
-                              <Image
-                                source={require("@/assets/images/coin.png")}
-                                style={styles.coinImage}
-                              />
-                              <Text style={styles.resetButtonCost}>
-                                {resetCostInfo.cost}
-                              </Text>
-                            </View>
-                          </TouchableOpacity>
-                        )}
+                      <ResetButton
+                        onPress={handleShowResetConfirmation}
+                        disabled={isResetting}
+                        isLoading={isResetting}
+                        cost={resetCostInfo.cost}
+                        variant="expanded"
+                        size="small"
+                        showCostLabel={true}
+                        costLabel="Reset"
+                        showOnlyWhen={
+                          progressInfo.hasProgress && !progressInfo.isCompleted
+                        }
+                      />
                     </View>
                   )}
 
@@ -941,37 +935,13 @@ const styles = StyleSheet.create({
     color: "#fff",
     textAlign: "center",
   },
-  resetButton: {
-    flexDirection: "row",
-    justifyContent: "center",
-    alignItems: "center",
-    backgroundColor: "rgba(245, 47, 47, 0.9)",
-    paddingHorizontal: 10,
-    paddingVertical: 6,
-    borderRadius: 20,
-    borderWidth: 1,
-    borderColor: "rgba(255, 255, 255, 0.3)",
-    gap: 4,
-    alignSelf: "center",
-  },
-  resetButtonText: {
-    fontSize: 12,
-    fontFamily: "Poppins-Medium",
-    color: "#fff",
-    flexDirection: "row",
-    justifyContent: "center",
-    alignItems: "center",
-  },
+
   coinImage: {
     width: 15,
     height: 15,
     alignSelf: "center",
   },
-  resetButtonCost: {
-    fontSize: 12,
-    fontFamily: "Poppins-SemiBold",
-    color: iconColors.brightYellow,
-  },
+
   progressBadge: {
     alignItems: "center",
     justifyContent: "center",
@@ -1062,12 +1032,6 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     gap: 4,
-  },
-  resetButtonContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 4,
-    justifyContent: "center",
   },
   resetConfirmationSeparator: {
     fontSize: 13,

@@ -25,6 +25,7 @@ import useCoinsStore from "@/store/games/useCoinsStore";
 import useGameStore from "@/store/games/useGameStore";
 import useProgressStore from "@/store/games/useProgressStore";
 import { useSplashStore } from "@/store/useSplashStore";
+import ResetButton from "./buttons/ResetButton";
 
 interface StatsContainerProps {
   difficulty: string;
@@ -221,45 +222,21 @@ const StatsContainer: React.FC<StatsContainerProps> = ({
       </View>
 
       {variant === "completed" && levelId && (
-        <View style={styles.resetSection}>
-          <TouchableOpacity
-            style={[
-              styles.resetButton,
-              shouldDisableReset && styles.resetButtonDisabled,
-            ]}
-            onPress={handleResetPress}
-            disabled={shouldDisableReset}
-            activeOpacity={0.8}
-          >
-            <RefreshCw width={12} height={12} color="#fff" />
-            <Text style={styles.resetButtonText}>🪙 {resetCost}</Text>
-          </TouchableOpacity>
-
-          {shouldShowResetSuccess && (
-            <View style={styles.resetStatusContainer}>
-              <MaterialCommunityIcons
-                name="check-circle"
-                size={12}
-                color="#4CAF50"
-              />
-              <Text style={styles.resetStatusText}>
-                Timer Reset Successfully! 🎉
-              </Text>
-            </View>
-          )}
-        </View>
+        <ResetButton
+          onPress={handleResetPress}
+          disabled={shouldDisableReset}
+          cost={resetCost}
+          variant="compact"
+          size="small"
+          showCostLabel={false}
+          showOnlyWhen={variant === "completed" && !!levelId}
+          buttonStyle={
+            shouldDisableReset ? styles.resetButtonDisabled : undefined
+          }
+        />
       )}
     </View>
   );
-
-  // UPDATED: Get reset button disabled reason
-  const getDisabledReason = () => {
-    if (isCorrectAnswer) return "Level completed correctly!";
-    if ((currentTime || finalTime || 0) === 0)
-      return "Timer is already at 0:00";
-    if (!canAfford) return "Insufficient coins";
-    return "";
-  };
 
   return (
     <>

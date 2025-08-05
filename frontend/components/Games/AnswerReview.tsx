@@ -170,20 +170,18 @@ const AnswerReview: React.FC<AnswerReviewProps> = ({
           </View>
 
           {/* Time Taken Section - ALWAYS show if timeElapsed is available */}
-          {timeElapsed !== undefined && timeElapsed > 0 && (
-            <View style={styles.timeInfoContainer}>
-              <View style={styles.timeBadge}>
-                <MaterialCommunityIcons
-                  name="clock"
-                  size={15}
-                  color={BASE_COLORS.white}
-                />
-                <Text style={styles.timeText}>
-                  Time: {formatTimerDisplay(timeElapsed)}
-                </Text>
-              </View>
+          <View style={styles.timeInfoContainer}>
+            <View style={styles.timeBadge}>
+              <MaterialCommunityIcons
+                name="clock"
+                size={15}
+                color={BASE_COLORS.white}
+              />
+              <Text style={styles.timeText}>
+                Time: {formatTimerDisplay(timeElapsed as number)}
+              </Text>
             </View>
-          )}
+          </View>
 
           {/* Decorative Elements */}
           <View style={styles.cardDecoration1} />
