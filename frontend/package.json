@@ -24,6 +24,8 @@
     "@react-native-material/core": "^1.3.7",
     "@react-native-ml-kit/text-recognition": "^1.5.2",
     "@react-native-picker/picker": "2.9.0",
+    "@react-native-vector-icons/evil-icons": "^12.3.0",
+    "@react-native-vector-icons/fontawesome6": "^12.2.0",
     "@react-navigation/bottom-tabs": "^7.2.0",
     "@react-navigation/native": "^7.0.14",
     "@shopify/flash-list": "1.7.3",

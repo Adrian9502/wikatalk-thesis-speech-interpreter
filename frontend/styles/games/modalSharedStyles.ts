@@ -108,6 +108,7 @@ export const modalSharedStyles = StyleSheet.create({
   },
   badgesContainer: {
     flexDirection: "row",
+    alignItems: "center",
     justifyContent: "center",
     marginBottom: 16,
     gap: 14,
@@ -130,20 +131,6 @@ export const modalSharedStyles = StyleSheet.create({
     fontSize: 12,
     fontFamily: "Poppins-SemiBold",
     color: "#fff",
-  },
-  focusAreaBadge: {
-    flexDirection: "row",
-    alignItems: "center",
-    backgroundColor: "rgba(255, 255, 255, 0.2)",
-    paddingHorizontal: 14,
-    paddingVertical: 6,
-    borderRadius: 16,
-  },
-  focusAreaText: {
-    fontSize: 12,
-    fontFamily: "Poppins-Medium",
-    color: "#fff",
-    marginLeft: 6,
   },
 
   // Content Cards

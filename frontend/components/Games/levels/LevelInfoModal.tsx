@@ -15,17 +15,12 @@ import {
   Star,
   Clock,
   CheckCircle,
-  RotateCcw,
   RefreshCw,
   AlertTriangle,
   Info,
 } from "react-native-feather";
 import { difficultyColors, iconColors } from "@/constant/colors";
-import {
-  renderFocusIcon,
-  getFocusAreaText,
-  getGameModeName,
-} from "@/utils/games/renderFocusIcon";
+import { getGameModeName } from "@/utils/games/renderFocusIcon";
 import { formatDifficulty, getStarCount } from "@/utils/games/difficultyUtils";
 import modalSharedStyles from "@/styles/games/modalSharedStyles";
 import { useUserProgress } from "@/hooks/useUserProgress";
@@ -37,6 +32,8 @@ import {
   getTimeRangeForDisplay,
 } from "@/utils/resetCostUtils";
 import ResetCostInfoModal from "@/components/games/levels/ResetCostInfoModal";
+import DifficultyBadge from "../DifficultyBadge";
+import FocusAreaBadge from "../FocusAreaBadge";
 
 type DifficultyLevel = keyof typeof difficultyColors;
 
@@ -519,55 +516,58 @@ const LevelInfoModal: React.FC<GameInfoModalProps> = React.memo(
                   {/* Main Progress Content */}
                   {!showResetConfirmation && !resetMessage && (
                     <View style={styles.progressBadgeContent}>
-                      <View style={styles.progressLeftContent}>
-                        {/* Combined Status and Time */}
-                        <View style={styles.progressLeftContainer}>
-                          {/* Status Icon */}
-                          <Clock
-                            width={15}
-                            height={15}
-                            color={iconColors.brightYellow}
-                          />
-                          <Text style={styles.combinedProgressText}>
-                            In Progress • {formatTime(progressInfo.timeSpent)}
-                            {progressInfo.attempts > 0 &&
-                              ` • ${progressInfo.attempts}x`}
+                      <View style={styles.progressItemsContainer}>
+                        {/* Status Item */}
+                        <View style={styles.progressItem}>
+                          <Text style={styles.progressItemText}>
+                            In Progress
                           </Text>
                         </View>
-                        <TouchableOpacity
-                          style={styles.infoButton}
-                          onPress={() => setShowCostInfoModal(true)}
-                        >
-                          <Info
-                            width={16}
-                            height={16}
-                            color="rgba(255, 255, 255, 0.7)"
-                          />
-                        </TouchableOpacity>
-                        {/* Reset Button (only if in progress) */}
-                        {progressInfo.hasProgress &&
-                          !progressInfo.isCompleted && (
-                            <TouchableOpacity
-                              style={styles.resetButton}
-                              onPress={handleShowResetConfirmation}
-                              disabled={isResetting}
-                            >
-                              <RefreshCw width={12} height={12} color="#fff" />
-                              <View style={styles.resetButtonContainer}>
-                                <Text style={styles.resetButtonText}>
-                                  Reset
-                                </Text>
-                                <Image
-                                  source={require("@/assets/images/coin.png")}
-                                  style={styles.coinImage}
-                                />
-                                <Text style={styles.resetButtonCost}>
-                                  {resetCostInfo.cost}
-                                </Text>
-                              </View>
-                            </TouchableOpacity>
-                          )}
+
+                        {/* Time Item */}
+                        <View style={styles.progressItem}>
+                          <View style={styles.progressItemIcon}>
+                            <Clock width={14} height={14} color="#fff" />
+                          </View>
+                          <Text style={styles.progressItemText}>
+                            {formatTime(progressInfo.timeSpent)}
+                          </Text>
+                        </View>
+
+                        {/* Attempts Item (only show if attempts > 0) */}
+                        {progressInfo.attempts > 0 && (
+                          <View style={styles.progressItem}>
+                            <View style={styles.progressItemIcon}>
+                              <RefreshCw width={14} height={14} color="#fff" />
+                            </View>
+                            <Text style={styles.progressItemText}>
+                              {progressInfo.attempts}x
+                            </Text>
+                          </View>
+                        )}
                       </View>
+
+                      {/* Reset Button (only if in progress) */}
+                      {progressInfo.hasProgress &&
+                        !progressInfo.isCompleted && (
+                          <TouchableOpacity
+                            style={styles.resetButton}
+                            onPress={handleShowResetConfirmation}
+                            disabled={isResetting}
+                          >
+                            <RefreshCw width={12} height={12} color="#fff" />
+                            <View style={styles.resetButtonContainer}>
+                              <Text style={styles.resetButtonText}>Reset</Text>
+                              <Image
+                                source={require("@/assets/images/coin.png")}
+                                style={styles.coinImage}
+                              />
+                              <Text style={styles.resetButtonCost}>
+                                {resetCostInfo.cost}
+                              </Text>
+                            </View>
+                          </TouchableOpacity>
+                        )}
                     </View>
                   )}
 
@@ -785,6 +785,8 @@ const LevelInfoModal: React.FC<GameInfoModalProps> = React.memo(
 
               {/* Badges with difficulty stars and focus area */}
               <View style={modalSharedStyles.badgesContainer}>
+                {/* <DifficultyBadge difficulty={difficulty} /> */}
+
                 <View style={modalSharedStyles.difficultyBadge}>
                   <View style={modalSharedStyles.starContainer}>
                     {Array(3)
@@ -807,13 +809,17 @@ const LevelInfoModal: React.FC<GameInfoModalProps> = React.memo(
                     {formatDifficulty(difficulty)}
                   </Text>
                 </View>
-
-                <View style={modalSharedStyles.focusAreaBadge}>
-                  {renderFocusIcon(levelData.focusArea)}
-                  <Text style={modalSharedStyles.focusAreaText}>
-                    {getFocusAreaText(levelData.focusArea)}
-                  </Text>
-                </View>
+                <FocusAreaBadge focusArea={levelData.focusArea} />
+                <TouchableOpacity
+                  style={styles.infoButton}
+                  onPress={() => setShowCostInfoModal(true)}
+                >
+                  <Info
+                    width={16}
+                    height={16}
+                    color="rgba(255, 255, 255, 0.7)"
+                  />
+                </TouchableOpacity>
               </View>
 
               {/* Enhanced Progress Badge */}
@@ -894,65 +900,46 @@ const styles = StyleSheet.create({
     borderRadius: 50,
     backgroundColor: "rgba(0, 0, 0, 0.1)",
   },
-  progressIcon: {
+  progressBadgeContent: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    width: "100%",
+    gap: 6,
+  },
+  progressItemsContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 6,
+    flexWrap: "wrap",
+  },
+
+  progressItem: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "rgba(255, 255, 255, 0.18)",
+    paddingHorizontal: 8,
+    paddingVertical: 6,
+    borderRadius: 20,
+    gap: 4,
+    borderWidth: 1,
+    borderColor: "rgba(255, 255, 255, 0.1)",
+  },
+
+  progressItemIcon: {
     width: 16,
     height: 16,
     alignItems: "center",
     justifyContent: "center",
   },
-  progressBadgeText: {
-    fontSize: 12,
-    fontFamily: "Poppins-Medium",
-    color: "#fff",
-  },
-  progressTime: {
-    fontSize: 11,
-    fontFamily: "Poppins-SemiBold",
-    color: iconColors.brightYellow,
-    backgroundColor: "rgba(255, 255, 255, 0.2)",
-    paddingHorizontal: 6,
-    paddingVertical: 2,
-    borderRadius: 12,
-  },
-  attemptContainer: {
-    flexDirection: "row",
-    gap: 4,
-    alignItems: "center",
-    justifyContent: "center",
-    backgroundColor: "rgba(255, 255, 255, 0.2)",
-    paddingHorizontal: 6,
-    paddingVertical: 2,
-    borderRadius: 16,
-  },
-  progressAttempts: {
+
+  progressItemText: {
     fontSize: 11,
     fontFamily: "Poppins-Medium",
     color: "#fff",
-  },
-  progressBadgeContent: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "flex-start",
-    width: "100%",
-  },
-  progressLeftContent: {
-    flexDirection: "row",
-    justifyContent: "flex-start",
-    alignItems: "center",
-    gap: 6,
-    flex: 1,
-    flexWrap: "nowrap",
-  },
-  progressLeftContainer: {
-    justifyContent: "center",
-    alignItems: "center",
-    gap: 4,
-    flexDirection: "row",
-    backgroundColor: "rgba(255, 255, 255, 0.18)",
-    paddingHorizontal: 8,
-    paddingVertical: 7,
-    borderRadius: 20,
-    flex: 1,
+    textAlign: "center",
   },
   resetButton: {
     flexDirection: "row",
@@ -960,12 +947,12 @@ const styles = StyleSheet.create({
     alignItems: "center",
     backgroundColor: "rgba(245, 47, 47, 0.9)",
     paddingHorizontal: 10,
-    paddingVertical: 8,
-    borderRadius: 16,
+    paddingVertical: 6,
+    borderRadius: 20,
     borderWidth: 1,
     borderColor: "rgba(255, 255, 255, 0.3)",
     gap: 4,
-    flexShrink: 0,
+    alignSelf: "center",
   },
   resetButtonText: {
     fontSize: 12,
@@ -976,8 +963,8 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   coinImage: {
-    width: 16,
-    height: 16,
+    width: 15,
+    height: 15,
     alignSelf: "center",
   },
   resetButtonCost: {
@@ -986,21 +973,19 @@ const styles = StyleSheet.create({
     color: iconColors.brightYellow,
   },
   progressBadge: {
-    alignSelf: "center",
-    backgroundColor: "rgba(255, 255, 255, 0.1)",
-    borderRadius: 16,
-    paddingHorizontal: 6,
-    paddingVertical: 6,
+    alignItems: "center",
+    justifyContent: "center",
     marginBottom: 12,
-    borderWidth: 1,
-    borderColor: "rgba(255, 255, 255, 0.2)",
   },
   resetConfirmationContent: {
     alignItems: "center",
     justifyContent: "center",
     paddingVertical: 6,
     paddingHorizontal: 12,
-    width: "100%",
+    backgroundColor: "rgba(255, 255, 255, 0.1)",
+    borderWidth: 1,
+    borderRadius: 20,
+    borderColor: "rgba(255, 255, 255, 0.2)",
   },
   resetConfirmationHeader: {
     flexDirection: "row",
@@ -1029,7 +1014,7 @@ const styles = StyleSheet.create({
     backgroundColor: "rgba(255, 255, 255, 0.2)",
     paddingHorizontal: 8,
     paddingVertical: 4,
-    borderRadius: 16,
+    borderRadius: 20,
     minWidth: 60,
     borderWidth: 1,
     borderColor: "rgba(255, 255, 255, 0.3)",
@@ -1044,7 +1029,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#4CAF50",
     paddingHorizontal: 8,
     paddingVertical: 4,
-    borderRadius: 16,
+    borderRadius: 20,
     minWidth: 60,
     borderWidth: 1,
     borderColor: "rgba(255, 255, 255, 0.3)",
@@ -1095,7 +1080,7 @@ const styles = StyleSheet.create({
     paddingVertical: 6,
     paddingHorizontal: 8,
     width: "100%",
-    borderRadius: 16,
+    borderRadius: 20,
   },
   resetMessageHeader: {
     flexDirection: "row",
@@ -1120,7 +1105,7 @@ const styles = StyleSheet.create({
   // Existing styles
   descriptionContainer: {
     width: "100%",
-    marginBottom: 16,
+    marginBottom: 20,
   },
   levelDescription: {
     fontSize: 16,
@@ -1149,14 +1134,14 @@ const styles = StyleSheet.create({
   },
   rulesContainer: {
     backgroundColor: "rgba(255, 255, 255, 0.1)",
-    borderRadius: 16,
+    borderRadius: 20,
     padding: 18,
     marginBottom: 22,
     borderWidth: 1,
     borderColor: "rgba(255, 255, 255, 0.2)",
   },
   rulesTitle: {
-    fontSize: 16,
+    fontSize: 15,
     fontFamily: "Poppins-SemiBold",
     color: "#fff",
     marginBottom: 8,
@@ -1200,12 +1185,6 @@ const styles = StyleSheet.create({
     alignItems: "center",
     borderWidth: 1,
     borderColor: "rgba(255, 255, 255, 0.2)",
-  },
-  combinedProgressText: {
-    fontSize: 12,
-    fontFamily: "Poppins-Medium",
-    color: "#fff",
-    textAlign: "center",
   },
 });
 
