@@ -62,6 +62,8 @@ const StatsContainer: React.FC<StatsContainerProps> = ({
   const [showSuccessMessage, setShowSuccessMessage] = useState(false);
   const [resetMessage, setResetMessage] = useState("");
   const [wasActualReset, setWasActualReset] = useState(false);
+  const [showResetSuccessIndicator, setShowResetSuccessIndicator] =
+    useState(false);
 
   // Get user progress and coins
   const { resetTimer } = useUserProgress(levelId || "");
@@ -112,11 +114,15 @@ const StatsContainer: React.FC<StatsContainerProps> = ({
         setCurrentTime(0);
         // NEW: Mark this as an actual paid reset
         setWasActualReset(true);
+        // NEW: Show permanent success indicator
+        setShowResetSuccessIndicator(true);
         fetchCoinsBalance(true);
 
         // NEW: Call the parent's timer reset callback to update finalTime
         if (onTimerReset) {
-          console.log("[StatsContainer] Calling parent's onTimerReset callback");
+          console.log(
+            "[StatsContainer] Calling parent's onTimerReset callback"
+          );
           onTimerReset();
         }
 
@@ -186,7 +192,7 @@ const StatsContainer: React.FC<StatsContainerProps> = ({
     } finally {
       setIsResetting(false);
     }
-  }, [levelId, resetTimer, fetchCoinsBalance, resetCost, onTimerReset]); // Add onTimerReset to dependencies
+  }, [levelId, resetTimer, fetchCoinsBalance, resetCost, onTimerReset]);
 
   // NEW: Reset the wasActualReset flag when time changes (from retry)
   useEffect(() => {
@@ -194,6 +200,13 @@ const StatsContainer: React.FC<StatsContainerProps> = ({
       setWasActualReset(false);
     }
   }, [finalTime, wasActualReset]);
+
+  // NEW: Reset the success indicator when time changes (from retry)
+  useEffect(() => {
+    if (finalTime !== 0 && showResetSuccessIndicator) {
+      setShowResetSuccessIndicator(false);
+    }
+  }, [finalTime, showResetSuccessIndicator]);
 
   const handleSuccessAcknowledge = useCallback(() => {
     console.log(
@@ -240,6 +253,14 @@ const StatsContainer: React.FC<StatsContainerProps> = ({
             shouldDisableReset ? styles.resetButtonDisabled : undefined
           }
         />
+      )}
+      {/* Show reset success indicator when timer is 0 and was reset */}
+      {showResetSuccessIndicator && (currentTime || finalTime || 0) === 0 && (
+        <View style={styles.resetSuccessIndicator}>
+          <Text style={styles.resetSuccessText}>
+            🎉 Timer Reset Successfully!
+          </Text>
+        </View>
       )}
     </View>
   );
@@ -457,6 +478,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     gap: 6,
+    flexWrap: "wrap", // Allow wrapping for the success message
   },
   timeContainer: {
     flexDirection: "row",
@@ -689,6 +711,23 @@ const styles = StyleSheet.create({
     fontSize: 13,
     fontFamily: "Poppins-Medium",
     color: "#fff",
+    textAlign: "center",
+  },
+
+  resetSuccessIndicator: {
+    backgroundColor: "rgba(76, 175, 80, 0.9)",
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 20,
+    borderWidth: 1,
+    borderColor: "rgba(255, 255, 255, 0.3)",
+    marginLeft: 6,
+  },
+
+  resetSuccessText: {
+    fontSize: 11,
+    fontFamily: "Poppins-Medium",
+    color: BASE_COLORS.white,
     textAlign: "center",
   },
 });
