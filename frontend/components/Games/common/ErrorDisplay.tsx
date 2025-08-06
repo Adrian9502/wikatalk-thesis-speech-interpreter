@@ -37,16 +37,16 @@ const ErrorDisplay = React.memo(
 const styles = StyleSheet.create({
   container: {
     padding: 20,
+    flex: 1,
     justifyContent: "center",
     alignItems: "center",
-    backgroundColor: "rgba(0,0,0,0.1)",
     borderRadius: 20,
     margin: 16,
   },
   text: {
     marginTop: 12,
     marginBottom: 16,
-    fontSize: 16,
+    fontSize: 14,
     fontFamily: "Poppins-Medium",
     color: BASE_COLORS.white,
     textAlign: "center",
@@ -57,11 +57,11 @@ const styles = StyleSheet.create({
     backgroundColor: BASE_COLORS.blue,
     paddingHorizontal: 20,
     paddingVertical: 10,
-    borderRadius: 8,
+    borderRadius: 20,
     gap: 8,
   },
   retryText: {
-    fontSize: 14,
+    fontSize: 12,
     fontFamily: "Poppins-Medium",
     color: "#FFF",
   },
