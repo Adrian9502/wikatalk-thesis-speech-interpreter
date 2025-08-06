@@ -8,6 +8,7 @@ interface ActionButtonProps {
   isAnimating: boolean;
   hasStarted: boolean;
   hasProgress: boolean;
+  progressIsLoading?: boolean;
   styles: any;
 }
 
@@ -17,26 +18,53 @@ const ActionButton: React.FC<ActionButtonProps> = ({
   isAnimating,
   hasStarted,
   hasProgress,
+  progressIsLoading = false,
   styles,
 }) => {
-  const isDisabled = isLoading || isAnimating || hasStarted;
+  const isDisabled =
+    isLoading || isAnimating || hasStarted || progressIsLoading;
+
+  const showLoadingIndicator =
+    isLoading || isAnimating || progressIsLoading || hasStarted;
+
+  // FIXED: Better button text logic
+  const getButtonText = () => {
+    if (progressIsLoading) {
+      return "Loading Progress...";
+    }
+    if (isLoading || isAnimating) {
+      return "Loading...";
+    }
+    if (hasStarted) {
+      return "Starting...";
+    }
+    return hasProgress ? "CONTINUE LEVEL" : "START LEVEL";
+  };
 
   return (
     <View style={styles.buttonContainer}>
       <TouchableOpacity
-        style={[
-          modalSharedStyles.startAndCloseButton,
-          isDisabled && styles.disabledButton,
-        ]}
+        style={[modalSharedStyles.startAndCloseButton]}
         onPress={onStart}
         disabled={isDisabled}
-        activeOpacity={0.8}
+        activeOpacity={isDisabled ? 1 : 0.8}
       >
-        {isLoading ? (
-          <ActivityIndicator size="small" color="#000" />
+        {/* NEW: Show activity indicator when loading */}
+        {showLoadingIndicator ? (
+          <View
+            style={{
+              flexDirection: "row",
+              alignItems: "center",
+              justifyContent: "center",
+            }}
+          >
+            <Text style={modalSharedStyles.startAndCloseText}>
+              {getButtonText()}
+            </Text>
+          </View>
         ) : (
           <Text style={modalSharedStyles.startAndCloseText}>
-            {hasProgress ? "CONTINUE LEVEL" : "START LEVEL"}
+            {getButtonText()}
           </Text>
         )}
       </TouchableOpacity>

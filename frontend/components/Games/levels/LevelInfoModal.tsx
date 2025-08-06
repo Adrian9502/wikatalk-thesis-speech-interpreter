@@ -82,6 +82,24 @@ const LevelInfoModal: React.FC<GameInfoModalProps> = React.memo(
 
     // Handlers
     const handleStart = useCallback(() => {
+      // FIXED: Add comprehensive loading checks
+      const isProgressLoading = progressInfo.isLoading;
+      const isAnyLoading =
+        isLoading || isAnimating || isProgressLoading || hasStarted;
+
+      console.log(`[LevelInfoModal] Start button pressed - Loading checks:`, {
+        isLoading,
+        isAnimating,
+        isProgressLoading,
+        hasStarted,
+        isAnyLoading,
+      });
+
+      if (isAnyLoading) {
+        console.log(`[LevelInfoModal] Start button disabled - still loading`);
+        return;
+      }
+
       animateStart(onStart, isLoading, isAnimating, hasStarted, setHasStarted);
     }, [
       animateStart,
@@ -90,6 +108,7 @@ const LevelInfoModal: React.FC<GameInfoModalProps> = React.memo(
       isAnimating,
       hasStarted,
       setHasStarted,
+      progressInfo.isLoading, // Add this dependency
     ]);
 
     const handleClose = useCallback(() => {
@@ -233,6 +252,7 @@ const LevelInfoModal: React.FC<GameInfoModalProps> = React.memo(
                 isAnimating={isAnimating}
                 hasStarted={hasStarted}
                 hasProgress={progressInfo.hasProgress}
+                progressIsLoading={progressInfo.isLoading}
                 styles={styles}
               />
             </LinearGradient>

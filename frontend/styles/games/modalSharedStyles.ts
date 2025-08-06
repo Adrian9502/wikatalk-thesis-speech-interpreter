@@ -185,21 +185,14 @@ export const modalSharedStyles = StyleSheet.create({
 
   // Close and Start button
   startAndCloseButton: {
-    borderWidth: 1,
     backgroundColor: "rgba(255,255,255,0.9)",
-    borderColor: "rgb(255,255,255)",
     paddingVertical: 8,
     borderRadius: 20,
     alignItems: "center",
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.2,
-    shadowRadius: 6,
-    elevation: 4,
   },
   startAndCloseText: {
     fontSize: 15,
-    fontFamily: "Poppins-Bold",
+    fontFamily: "Poppins-SemiBold",
     color: "#000",
   },
 });
