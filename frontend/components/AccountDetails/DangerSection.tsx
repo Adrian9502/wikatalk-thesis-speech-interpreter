@@ -37,7 +37,7 @@ const styles = StyleSheet.create({
   warningContainer: {
     flexDirection: "row",
     backgroundColor: "#f2f0f0",
-    borderRadius: 12,
+    borderRadius: 16,
     padding: 12,
     marginVertical: 16,
     alignItems: "flex-start",

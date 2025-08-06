@@ -9,28 +9,30 @@ interface ErrorDisplayProps {
   onRetry?: () => void;
 }
 
-const ErrorDisplay = React.memo(({ 
-  message = "Something went wrong. Please try again.", 
-  onRetry 
-}: ErrorDisplayProps) => {
-  return (
-    <Animatable.View 
-      animation="fadeIn" 
-      style={styles.container}
-      useNativeDriver
-    >
-      <AlertCircle width={48} height={48} color={BASE_COLORS.error} />
-      <Text style={styles.text}>{message}</Text>
-      
-      {onRetry && (
-        <TouchableOpacity style={styles.retryButton} onPress={onRetry}>
-          <RefreshCw width={18} height={18} color="#FFF" />
-          <Text style={styles.retryText}>Retry</Text>
-        </TouchableOpacity>
-      )}
-    </Animatable.View>
-  );
-});
+const ErrorDisplay = React.memo(
+  ({
+    message = "Something went wrong. Please try again.",
+    onRetry,
+  }: ErrorDisplayProps) => {
+    return (
+      <Animatable.View
+        animation="fadeIn"
+        style={styles.container}
+        useNativeDriver
+      >
+        <AlertCircle width={48} height={48} color={BASE_COLORS.error} />
+        <Text style={styles.text}>{message}</Text>
+
+        {onRetry && (
+          <TouchableOpacity style={styles.retryButton} onPress={onRetry}>
+            <RefreshCw width={18} height={18} color="#FFF" />
+            <Text style={styles.retryText}>Retry</Text>
+          </TouchableOpacity>
+        )}
+      </Animatable.View>
+    );
+  }
+);
 
 const styles = StyleSheet.create({
   container: {
@@ -38,7 +40,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     backgroundColor: "rgba(0,0,0,0.1)",
-    borderRadius: 12,
+    borderRadius: 20,
     margin: 16,
   },
   text: {
@@ -62,8 +64,8 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontFamily: "Poppins-Medium",
     color: "#FFF",
-  }
+  },
 });
 
-ErrorDisplay.displayName = 'ErrorDisplay';
+ErrorDisplay.displayName = "ErrorDisplay";
 export default ErrorDisplay;

@@ -433,7 +433,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     backgroundColor: "rgba(255, 149, 0, 0.1)",
-    borderRadius: 12,
+    borderRadius: 16,
     padding: 12,
     marginBottom: 16,
   },
@@ -459,7 +459,7 @@ const styles = StyleSheet.create({
   },
   errorContainer: {
     backgroundColor: "rgba(255, 59, 48, 0.1)",
-    borderRadius: 12,
+    borderRadius: 16,
     flexDirection: "row",
     gap: 5,
     justifyContent: "center",

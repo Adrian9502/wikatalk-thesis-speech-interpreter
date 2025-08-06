@@ -80,12 +80,12 @@ const styles = StyleSheet.create({
     zIndex: 200,
   },
   dropdown: {
-    borderRadius: 12,
+    borderRadius: 20,
     height: 40,
     paddingHorizontal: 12,
   },
   dropdownList: {
-    borderRadius: 12,
+    borderRadius: 20,
     backgroundColor: BASE_COLORS.white,
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 6 },

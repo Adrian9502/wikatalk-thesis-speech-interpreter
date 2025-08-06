@@ -284,7 +284,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     backgroundColor: "#F0F8FF",
-    borderRadius: 12,
+    borderRadius: 16,
     padding: 12,
     marginBottom: 16,
     borderWidth: 1,
@@ -297,7 +297,7 @@ const styles = StyleSheet.create({
   },
   noteContainer: {
     backgroundColor: "#F0F8FF",
-    borderRadius: 12,
+    borderRadius: 16,
     padding: 12,
     marginBottom: 16,
     borderWidth: 1,

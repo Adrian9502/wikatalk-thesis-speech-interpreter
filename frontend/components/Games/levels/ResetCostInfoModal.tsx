@@ -164,7 +164,7 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     alignItems: "center",
     backgroundColor: "rgba(255, 255, 255, 0.1)",
-    borderRadius: 12,
+    borderRadius: 20,
     padding: 12,
     marginBottom: 8,
   },
@@ -203,7 +203,7 @@ const styles = StyleSheet.create({
   },
   footer: {
     backgroundColor: "rgba(255, 255, 255, 0.1)",
-    borderRadius: 12,
+    borderRadius: 20,
     padding: 12,
   },
   footerText: {

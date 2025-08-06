@@ -57,7 +57,7 @@ const styles = StyleSheet.create({
   },
   dropdown: {
     height: 48,
-    borderRadius: 12,
+    borderRadius: 20,
     borderWidth: 1,
     borderColor: BASE_COLORS.borderColor,
     paddingHorizontal: 12,
@@ -69,7 +69,7 @@ const styles = StyleSheet.create({
     elevation: 2,
   },
   dropdownList: {
-    borderRadius: 12,
+    borderRadius: 20,
     borderWidth: 0,
     backgroundColor: BASE_COLORS.white,
     shadowColor: "#000",
