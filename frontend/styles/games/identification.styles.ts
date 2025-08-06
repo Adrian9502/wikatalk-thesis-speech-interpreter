@@ -2,6 +2,11 @@ import { StyleSheet } from "react-native";
 import { BASE_COLORS } from "@/constant/colors";
 
 export default StyleSheet.create({
+  scrollContainer: {
+    paddingVertical: 10,
+    paddingBottom: 20,
+  },
+
   // Enhanced Instructions
   instructionsContainer: {
     alignItems: "center",
@@ -23,11 +28,7 @@ export default StyleSheet.create({
   // Enhanced Words Grid
   wordsContainer: {
     flex: 1,
-  },
-  // NEW: ScrollView content container style
-  wordsScrollContent: {
-    flexGrow: 1,
-    paddingBottom: 20,
+    marginBottom: 12,
   },
   wordsGrid: {
     flexDirection: "row",
@@ -128,7 +129,7 @@ export default StyleSheet.create({
 
   // Enhanced Translation Section
   translationSection: {
-    marginTop: 8,
+    marginBottom: 20, // ADDED: Bottom margin for better spacing
   },
   translationButton: {
     flexDirection: "row",

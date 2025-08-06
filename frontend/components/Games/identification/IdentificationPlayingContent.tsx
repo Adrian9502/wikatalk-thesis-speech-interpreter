@@ -1,5 +1,11 @@
 import React, { useState, useEffect, useMemo, useCallback } from "react";
-import { View, Text, TouchableOpacity, ScrollView } from "react-native";
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  ScrollView,
+  Animated,
+} from "react-native";
 import { Eye, EyeOff } from "react-native-feather";
 import { LinearGradient } from "expo-linear-gradient";
 import { BASE_COLORS } from "@/constant/colors";
@@ -33,6 +39,9 @@ const IdentificationPlayingContent: React.FC<IdentificationPlayingContentProps> 
       // Simplified animation state
       const [isAnimating, setIsAnimating] = useState(true);
 
+      // NEW: Translation animation
+      const translationOpacity = React.useRef(new Animated.Value(0)).current;
+
       // Memoized values
       const gameGradientColors = useMemo(
         () => getGameModeGradient("identification"),
@@ -50,6 +59,21 @@ const IdentificationPlayingContent: React.FC<IdentificationPlayingContentProps> 
         return () => clearTimeout(timer);
       }, []);
 
+      // NEW: Animation effect for translation
+      useEffect(() => {
+        if (showTranslation) {
+          // Animate in
+          Animated.timing(translationOpacity, {
+            toValue: 1,
+            duration: 400,
+            useNativeDriver: true,
+          }).start();
+        } else {
+          // Reset for next time
+          translationOpacity.setValue(0);
+        }
+      }, [showTranslation, translationOpacity]);
+
       // Memoized handlers
       const handleWordPress = useCallback(
         (index: number) => {
@@ -65,7 +89,13 @@ const IdentificationPlayingContent: React.FC<IdentificationPlayingContentProps> 
       }, [isAnimating, toggleTranslation]);
 
       return (
-        <View style={gamesSharedStyles.gameContainer}>
+        <ScrollView
+          style={gamesSharedStyles.gameContainer}
+          showsVerticalScrollIndicator={false}
+          nestedScrollEnabled={true}
+          keyboardShouldPersistTaps="handled"
+          contentContainerStyle={styles.scrollContainer}
+        >
           {/* Question Card */}
           <View style={gamesSharedStyles.questionCardContainer}>
             <LinearGradient
@@ -100,54 +130,46 @@ const IdentificationPlayingContent: React.FC<IdentificationPlayingContentProps> 
             </Text>
           </View>
 
-          {/* FIXED: Words Grid using ScrollView */}
+          {/* FIXED: Words Grid - Now part of main ScrollView */}
           <View style={styles.wordsContainer}>
             {wordOptions.length > 0 ? (
-              <ScrollView
-                showsVerticalScrollIndicator={false}
-                contentContainerStyle={styles.wordsScrollContent}
-                nestedScrollEnabled={true}
-              >
-                <View style={styles.wordsGrid}>
-                  {wordOptions.map((word, index) => {
-                    const isSelected = selectedWord === index;
+              <View style={styles.wordsGrid}>
+                {wordOptions.map((word, index) => {
+                  const isSelected = selectedWord === index;
 
-                    return (
-                      <View
-                        key={`word-${index}-${word.text || word.clean}`}
-                        style={styles.wordWrapper}
+                  return (
+                    <View
+                      key={`word-${index}-${word.text || word.clean}`}
+                      style={styles.wordWrapper}
+                    >
+                      <TouchableOpacity
+                        style={[
+                          styles.wordCard,
+                          isSelected && styles.selectedWordCard,
+                        ]}
+                        onPress={() => handleWordPress(index)}
+                        disabled={isAnimating || selectedWord !== null}
+                        activeOpacity={isAnimating ? 1 : 0.8}
                       >
-                        <TouchableOpacity
-                          style={[
-                            styles.wordCard,
-                            isSelected && styles.selectedWordCard,
-                          ]}
-                          onPress={() => handleWordPress(index)}
-                          disabled={isAnimating || selectedWord !== null}
-                          activeOpacity={isAnimating ? 1 : 0.8}
-                        >
-                          {/* Word Number */}
-                          <View style={styles.wordNumber}>
-                            <Text style={styles.wordNumberText}>
-                              {index + 1}
-                            </Text>
-                          </View>
+                        {/* Word Number */}
+                        <View style={styles.wordNumber}>
+                          <Text style={styles.wordNumberText}>{index + 1}</Text>
+                        </View>
 
-                          {/* Word Content */}
-                          <View style={styles.wordContent}>
-                            <Text style={styles.wordText} numberOfLines={2}>
-                              {safeTextRender(word.text)}
-                            </Text>
-                          </View>
+                        {/* Word Content */}
+                        <View style={styles.wordContent}>
+                          <Text style={styles.wordText} numberOfLines={2}>
+                            {safeTextRender(word.text)}
+                          </Text>
+                        </View>
 
-                          {/* Selection Pulse */}
-                          {isSelected && <View style={styles.selectionPulse} />}
-                        </TouchableOpacity>
-                      </View>
-                    );
-                  })}
-                </View>
-              </ScrollView>
+                        {/* Selection Pulse */}
+                        {isSelected && <View style={styles.selectionPulse} />}
+                      </TouchableOpacity>
+                    </View>
+                  );
+                })}
+              </View>
             ) : (
               <View style={styles.noOptionsContainer}>
                 <Text style={styles.noOptionsText}>No options available</Text>
@@ -180,9 +202,16 @@ const IdentificationPlayingContent: React.FC<IdentificationPlayingContentProps> 
               </Text>
             </TouchableOpacity>
 
-            {/* Translation Card - Simple conditional render */}
+            {/* NEW: Animated Translation Card */}
             {showTranslation && (
-              <View style={styles.translationCard}>
+              <Animated.View
+                style={[
+                  styles.translationCard,
+                  {
+                    opacity: translationOpacity,
+                  },
+                ]}
+              >
                 <LinearGradient
                   colors={[
                     "rgba(33, 150, 243, 0.2)",
@@ -199,10 +228,10 @@ const IdentificationPlayingContent: React.FC<IdentificationPlayingContentProps> 
                       "Translation not available"}
                   </Text>
                 </LinearGradient>
-              </View>
+              </Animated.View>
             )}
           </View>
-        </View>
+        </ScrollView>
       );
     }
   );

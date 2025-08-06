@@ -2,6 +2,12 @@ import { StyleSheet } from "react-native";
 import { BASE_COLORS } from "@/constant/colors";
 
 export default StyleSheet.create({
+  // NEW: Scroll container for proper spacing
+  scrollContainer: {
+    paddingVertical: 10,
+    paddingBottom: 20,
+  },
+
   // Attempts Section
   attemptsContainer: {
     alignItems: "center",
@@ -38,7 +44,7 @@ export default StyleSheet.create({
 
   // Enhanced Input Section
   inputSection: {
-    marginBottom: 24,
+    marginBottom: 12,
   },
   inputHeader: {
     marginVertical: 12,
@@ -53,7 +59,7 @@ export default StyleSheet.create({
   inputWrapper: {
     flexDirection: "row",
     gap: 12,
-    marginBottom: 70,
+    marginBottom: 20, // REDUCED: Was 70, now 20 for better scrolling
     alignItems: "stretch",
   },
   inputContainer: {
@@ -148,9 +154,8 @@ export default StyleSheet.create({
   },
   helpCardGradient: {
     borderRadius: 20,
-    padding: 16,
-    borderWidth: 1,
-    borderColor: "rgba(255, 255, 255, 0.1)",
+    paddingVertical: 12,
+    paddingHorizontal: 16,
   },
   helpCardHeader: {
     flexDirection: "row",
@@ -167,18 +172,18 @@ export default StyleSheet.create({
     fontSize: 14,
     fontFamily: "Poppins-Regular",
     color: "rgba(255, 255, 255, 0.9)",
-    lineHeight: 20,
   },
 
   // Enhanced Feedback
   feedbackContainer: {
-    marginTop: 8,
+    marginBottom: 20,
   },
   feedbackCard: {
     flexDirection: "row",
     alignItems: "center",
     borderRadius: 20,
-    padding: 16,
+    paddingVertical: 12,
+    paddingHorizontal: 16,
   },
   feedbackIcon: {
     width: 38,
@@ -204,68 +209,5 @@ export default StyleSheet.create({
     color: BASE_COLORS.white,
     lineHeight: 20,
     opacity: 0.9,
-  },
-
-  // Legacy compatibility
-  sentenceGradient: {
-    borderRadius: 24,
-    padding: 24,
-  },
-  hintCard: {
-    backgroundColor: "rgba(255, 255, 255, 0.1)",
-    borderRadius: 20,
-    padding: 16,
-    marginBottom: 16,
-    borderWidth: 1,
-    borderColor: "rgba(255, 255, 255, 0.1)",
-  },
-  hintLabel: {
-    fontSize: 14,
-    fontFamily: "Poppins-Medium",
-    color: BASE_COLORS.white,
-    marginBottom: 6,
-    opacity: 0.9,
-  },
-  hintText: {
-    fontSize: 14,
-    fontFamily: "Poppins-Regular",
-    color: BASE_COLORS.white,
-    lineHeight: 20,
-    opacity: 0.8,
-  },
-  correctFeedback: {
-    borderColor: "#4CAF50",
-  },
-  incorrectFeedback: {
-    borderColor: "#F44336",
-  },
-  feedbackIconContainer: {
-    marginRight: 12,
-  },
-  attemptsText: {
-    fontSize: 14,
-    fontFamily: "Poppins-Medium",
-    color: BASE_COLORS.white,
-    opacity: 0.9,
-  },
-  helpButtonsContainer: {
-    flexDirection: "row",
-    justifyContent: "center",
-    gap: 12,
-    marginBottom: 20,
-  },
-  hintButton: {
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-    borderRadius: 20,
-    backgroundColor: "rgba(255, 255, 255, 0.15)",
-    borderWidth: 1,
-    borderColor: "rgba(255, 255, 255, 0.2)",
-  },
-  hintButtonText: {
-    fontSize: 12,
-    fontFamily: "Poppins-Medium",
-    color: BASE_COLORS.white,
-    textAlign: "center",
   },
 });
