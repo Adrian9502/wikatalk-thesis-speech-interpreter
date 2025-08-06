@@ -10,14 +10,13 @@ import {
 } from "react-native";
 import * as Animatable from "react-native-animatable";
 import { LinearGradient } from "expo-linear-gradient";
-import { RefreshCw, X, CheckCircle } from "react-native-feather";
-import MaterialCommunityIcons from "react-native-vector-icons/MaterialCommunityIcons";
+import { X } from "react-native-feather";
 import Timer from "@/components/games/Timer";
 import DifficultyBadge from "@/components/games/DifficultyBadge";
 import FocusAreaBadge from "@/components/games/FocusAreaBadge";
 import { Clock } from "react-native-feather";
 import { BASE_COLORS, iconColors } from "@/constant/colors";
-import { formatTime, formatTimerDisplay } from "@/utils/gameUtils";
+import { formatTimerDisplay } from "@/utils/gameUtils";
 import { calculateResetCost } from "@/utils/resetCostUtils";
 import { NAVIGATION_COLORS } from "@/constant/gameConstants";
 import { useUserProgress } from "@/hooks/useUserProgress";
@@ -74,7 +73,7 @@ const StatsContainer: React.FC<StatsContainerProps> = ({
     if (variant === "completed" && (finalTime || currentTime)) {
       return calculateResetCost(finalTime || currentTime);
     }
-    return 50; // Default
+    return 0; // Default
   }, [variant, finalTime, currentTime]);
 
   // Check if user can afford reset
@@ -83,10 +82,6 @@ const StatsContainer: React.FC<StatsContainerProps> = ({
   // UPDATED: Enhanced disable logic
   const shouldDisableReset =
     !canAfford || isCorrectAnswer || (currentTime || finalTime || 0) === 0;
-
-  // FIXED: Only show success message if it was an actual paid reset
-  const shouldShowResetSuccess =
-    (currentTime || finalTime || 0) === 0 && wasActualReset;
 
   // Handle reset button press
   const handleResetPress = useCallback(() => {
@@ -233,7 +228,7 @@ const StatsContainer: React.FC<StatsContainerProps> = ({
       <View style={styles.timeContainer}>
         <Clock width={16} height={16} color={BASE_COLORS.white} />
         <Text style={styles.staticTimerText}>
-          {/* CRITICAL: For background completion, prefer finalTime, but use currentTime as updated */}
+          {/*  For background completion, prefer finalTime, but use currentTime as updated */}
           {formatTimerDisplay(
             finalTime !== undefined ? finalTime : currentTime
           )}
@@ -717,16 +712,14 @@ const styles = StyleSheet.create({
   resetSuccessIndicator: {
     backgroundColor: "rgba(76, 175, 80, 0.9)",
     paddingHorizontal: 12,
-    paddingVertical: 6,
+    paddingVertical: 7,
     borderRadius: 20,
-    borderWidth: 1,
-    borderColor: "rgba(255, 255, 255, 0.3)",
     marginLeft: 6,
   },
 
   resetSuccessText: {
     fontSize: 11,
-    fontFamily: "Poppins-Medium",
+    fontFamily: "Poppins-Regular",
     color: BASE_COLORS.white,
     textAlign: "center",
   },
