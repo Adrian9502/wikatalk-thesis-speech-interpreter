@@ -281,7 +281,7 @@ const styles = StyleSheet.create({
     zIndex: 2,
   },
   resultCard: {
-    borderRadius: 16,
+    borderRadius: 20,
     padding: 16,
     alignItems: "center",
     position: "relative",
@@ -325,7 +325,7 @@ const styles = StyleSheet.create({
   levelBadge: {
     paddingHorizontal: 16,
     paddingVertical: 8,
-    borderRadius: 16,
+    borderRadius: 20,
     backgroundColor: "rgba(255, 255, 255, 0.10)",
     borderWidth: 1,
     borderColor: "rgba(255, 255, 255, 0.3)",
@@ -364,7 +364,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     paddingHorizontal: 14,
     paddingVertical: 6,
-    borderRadius: 14,
+    borderRadius: 20,
     backgroundColor: "rgba(255, 255, 255, 0.10)",
     borderWidth: 1,
     borderColor: "rgba(255, 255, 255, 0.3)",
@@ -400,7 +400,7 @@ const styles = StyleSheet.create({
     marginVertical: 12,
   },
   reviewCard: {
-    borderRadius: 16,
+    borderRadius: 20,
     padding: 20,
     position: "relative",
     overflow: "hidden",
@@ -416,7 +416,7 @@ const styles = StyleSheet.create({
   sectionIconContainer: {
     width: 32,
     height: 32,
-    borderRadius: 16,
+    borderRadius: 20,
     backgroundColor: "rgba(255, 255, 255, 0.15)",
     justifyContent: "center",
     alignItems: "center",
@@ -438,7 +438,7 @@ const styles = StyleSheet.create({
   },
   contentContainer: {
     backgroundColor: "rgba(255, 255, 255, 0.10)",
-    borderRadius: 16,
+    borderRadius: 20,
     padding: 16,
     borderWidth: 1,
     borderColor: "rgba(255, 255, 255, 0.3)",

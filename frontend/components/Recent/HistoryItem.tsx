@@ -200,7 +200,7 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   dateContainer: {
-    borderRadius: 16,
+    borderRadius: 20,
     backgroundColor: BASE_COLORS.blue,
     paddingHorizontal: 8,
     paddingVertical: 4,
@@ -220,11 +220,11 @@ const styles = StyleSheet.create({
   deleteIcon: {
     padding: 5,
     backgroundColor: BASE_COLORS.orange,
-    borderRadius: 16,
+    borderRadius: 20,
   },
   contentContainer: {
     backgroundColor: BASE_COLORS.white,
-    borderRadius: 16,
+    borderRadius: 20,
     overflow: "hidden",
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 4 },
@@ -256,7 +256,7 @@ const styles = StyleSheet.create({
     height: 32,
     borderWidth: 1,
     borderColor: BASE_COLORS.white,
-    borderRadius: 16,
+    borderRadius: 20,
     justifyContent: "center",
     alignItems: "center",
   },

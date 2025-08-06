@@ -448,7 +448,7 @@ const styles = StyleSheet.create({
     backgroundColor: BASE_COLORS.blue,
     paddingHorizontal: 20,
     paddingVertical: 12,
-    borderRadius: 16,
+    borderRadius: 20,
   },
   backButtonText: {
     fontSize: 16,

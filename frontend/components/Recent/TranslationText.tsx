@@ -31,7 +31,7 @@ const styles = StyleSheet.create({
   textSection: {
     flex: 1,
     backgroundColor: BASE_COLORS.white,
-    borderRadius: 16,
+    borderRadius: 20,
     borderWidth: 1,
     borderColor: BASE_COLORS.borderColor,
     padding: 8,

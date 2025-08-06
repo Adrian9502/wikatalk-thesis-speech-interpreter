@@ -125,7 +125,7 @@ const TeamMemberCard: React.FC<TeamMemberCardProps> = ({
 const styles = StyleSheet.create({
   card: {
     backgroundColor: "#fff",
-    borderRadius: 16,
+    borderRadius: 20,
     padding: 16,
     marginBottom: 16,
     shadowColor: "#000",
@@ -193,7 +193,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     backgroundColor: "#f5f5f5",
-    borderRadius: 16,
+    borderRadius: 20,
     paddingHorizontal: 2,
   },
   socialButton: {

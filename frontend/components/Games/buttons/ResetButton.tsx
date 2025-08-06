@@ -170,7 +170,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     backgroundColor: "rgba(245, 47, 47, 0.9)",
-    borderRadius: 16,
+    borderRadius: 20,
     borderWidth: 1,
     borderColor: "rgba(255, 255, 255, 0.3)",
     gap: 4,
@@ -180,7 +180,7 @@ const styles = StyleSheet.create({
   compactButton: {
     paddingHorizontal: 12,
     paddingVertical: 6,
-    borderRadius: 16,
+    borderRadius: 20,
   } as ViewStyle,
 
   expandedButton: {

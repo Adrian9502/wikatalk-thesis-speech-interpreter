@@ -89,7 +89,7 @@ export default PronunciationCard;
 const styles = StyleSheet.create({
   card: {
     marginVertical: 6,
-    borderRadius: 16,
+    borderRadius: 20,
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.05,

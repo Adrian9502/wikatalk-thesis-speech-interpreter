@@ -31,7 +31,7 @@ export const DangerSection = () => {
 
 const styles = StyleSheet.create({
   container: {
-    borderRadius: 16,
+    borderRadius: 20,
     marginBottom: 20,
   },
   warningContainer: {

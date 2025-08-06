@@ -43,7 +43,7 @@ export default StyleSheet.create({
   },
   profileCard: {
     backgroundColor: BASE_COLORS.white,
-    borderRadius: 16,
+    borderRadius: 20,
     paddingHorizontal: 16,
     paddingVertical: 10,
     flexDirection: "row",
@@ -84,7 +84,7 @@ export default StyleSheet.create({
   },
   card: {
     backgroundColor: BASE_COLORS.white,
-    borderRadius: 16,
+    borderRadius: 20,
     overflow: "hidden",
   },
   infoItem: {
@@ -95,7 +95,7 @@ export default StyleSheet.create({
   infoIconContainer: {
     width: 36,
     height: 36,
-    borderRadius: 16,
+    borderRadius: 20,
     justifyContent: "center",
     alignItems: "center",
     marginRight: 12,
@@ -126,7 +126,7 @@ export default StyleSheet.create({
   settingIconContainer: {
     width: 36,
     height: 36,
-    borderRadius: 16,
+    borderRadius: 20,
     justifyContent: "center",
     alignItems: "center",
     marginRight: 16,

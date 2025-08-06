@@ -167,7 +167,7 @@ const GameCard = React.memo(
 
 const styles = StyleSheet.create({
   gameCard: {
-    borderRadius: 16,
+    borderRadius: 20,
     overflow: "hidden",
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 6 },
@@ -191,7 +191,7 @@ const styles = StyleSheet.create({
   gameIconBg: {
     width: 50,
     height: 50,
-    borderRadius: 16,
+    borderRadius: 20,
     backgroundColor: "rgba(255, 255, 255, 0.2)",
     justifyContent: "center",
     alignItems: "center",
@@ -225,7 +225,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     flexDirection: "row",
     gap: 6,
-    borderRadius: 16,
+    borderRadius: 20,
     backgroundColor: "rgba(255, 255, 255, 0.2)",
     borderWidth: 1,
     borderColor: "rgba(255, 255, 255, 0.3)",
@@ -244,7 +244,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     paddingVertical: 12,
-    borderRadius: 16,
+    borderRadius: 20,
     gap: 8,
   },
   playBtnText: {
@@ -259,7 +259,7 @@ const styles = StyleSheet.create({
     backgroundColor: "rgba(255, 255, 255, 0.2)",
     paddingHorizontal: 8,
     paddingVertical: 4,
-    borderRadius: 16,
+    borderRadius: 20,
   },
   difficultyText: {
     fontSize: 10,
@@ -273,7 +273,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     marginBottom: 16,
     backgroundColor: "rgba(255, 255, 255, 0.1)",
-    borderRadius: 16,
+    borderRadius: 20,
     padding: 12,
   },
   statItem: {

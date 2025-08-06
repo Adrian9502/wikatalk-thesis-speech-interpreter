@@ -1,5 +1,5 @@
 import React, { useMemo, useState, useCallback, useEffect } from "react";
-import { View, Text, StyleSheet, ActivityIndicator } from "react-native";
+import { View, Text, StyleSheet } from "react-native";
 import { router } from "expo-router";
 import * as Animatable from "react-native-animatable";
 import { BASE_COLORS, gameModeNavigationColors } from "@/constant/colors";
@@ -625,7 +625,7 @@ const styles = StyleSheet.create({
   // Status Message Styles - Only for retry message now
   statusMessageContainer: {
     backgroundColor: "rgba(255, 255, 255, 0.1)",
-    borderRadius: 16,
+    borderRadius: 20,
     padding: 12,
     marginBottom: 16,
     borderWidth: 1,

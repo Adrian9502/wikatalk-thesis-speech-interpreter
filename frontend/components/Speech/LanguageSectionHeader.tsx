@@ -177,14 +177,14 @@ const styles = StyleSheet.create({
     maxWidth: 160,
   },
   dropdown: {
-    borderRadius: 16,
+    borderRadius: 20,
     borderWidth: 1,
     height: 46,
     backgroundColor: BASE_COLORS.white,
     paddingHorizontal: 12,
   },
   dropdownList: {
-    borderRadius: 16,
+    borderRadius: 20,
     borderWidth: 1,
     backgroundColor: BASE_COLORS.white,
     shadowColor: "#000",

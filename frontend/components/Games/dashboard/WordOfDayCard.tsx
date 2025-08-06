@@ -102,7 +102,7 @@ const styles = StyleSheet.create({
     marginBottom: 40,
   },
   wordOfTheDayCard: {
-    borderRadius: 16,
+    borderRadius: 20,
     overflow: "hidden",
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 8 },
@@ -153,7 +153,7 @@ const styles = StyleSheet.create({
     backgroundColor: "rgba(255, 255, 255, 0.9)",
     paddingHorizontal: 12,
     paddingVertical: 6,
-    borderRadius: 16,
+    borderRadius: 20,
   },
   wordBadgeText: {
     fontSize: 11,
@@ -165,7 +165,7 @@ const styles = StyleSheet.create({
   playButton: {
     width: 40,
     height: 40,
-    borderRadius: 16,
+    borderRadius: 20,
     backgroundColor: "rgba(255, 255, 255, 0.9)",
     justifyContent: "center",
     alignItems: "center",

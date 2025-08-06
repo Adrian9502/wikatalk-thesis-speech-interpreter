@@ -199,7 +199,7 @@ const styles = StyleSheet.create({
     zIndex: 2000,
   },
   dropdown: {
-    borderRadius: 16,
+    borderRadius: 20,
     borderWidth: 1,
     height: 46,
     paddingHorizontal: 12,
@@ -239,7 +239,7 @@ const styles = StyleSheet.create({
   },
   quickPhrasesContainer: {
     marginBottom: 16,
-    borderRadius: 16,
+    borderRadius: 20,
     padding: 10,
     overflow: "hidden",
     backgroundColor: "#e7edfd",

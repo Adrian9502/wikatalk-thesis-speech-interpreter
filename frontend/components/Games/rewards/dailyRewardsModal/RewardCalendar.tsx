@@ -1,5 +1,3 @@
-// cspell:ignore scrollview subviews
-
 import React, { useRef, useEffect, useMemo } from "react";
 import { View, Text, ScrollView } from "react-native";
 import { rewardStyles } from "@/styles/games/rewards.styles";
@@ -8,7 +6,6 @@ import {
   formatDateForComparison,
   getDaysInMonth,
   getDayRewardAmount,
-  RewardDay,
 } from "@/hooks/useRewards";
 
 interface RewardCalendarProps {
@@ -135,29 +132,4 @@ const RewardCalendar: React.FC<RewardCalendarProps> = ({
   );
 };
 
-// Use React.lazy to defer rendering this heavy component
-const LazyRewardCalendar = React.lazy(() => Promise.resolve({
-  default: RewardCalendar
-}));
-
 export default React.memo(RewardCalendar);
-
-// In the DailyRewardsModal render function, replace the calendar section with:
-// {dailyRewardsHistory && contentReady && (
-//   <React.Suspense fallback={<View style={styles.calendarPlaceholder} />}>
-//     <LazyRewardCalendar
-//       monthName={dateInfo.monthName}
-//       year={dateInfo.year}
-//       visible={visible && contentReady}
-//       dailyRewardsHistory={dailyRewardsHistory}
-//     />
-//   </React.Suspense>
-// )}
-
-// Add this style:
-// calendarPlaceholder: {
-//   height: 120,
-//   backgroundColor: 'rgba(255,255,255,0.1)',
-//   borderRadius: 16,
-//   marginVertical: 16,
-// },

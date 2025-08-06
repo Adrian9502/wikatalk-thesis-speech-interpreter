@@ -68,7 +68,7 @@ export const modalSharedStyles = StyleSheet.create({
     marginBottom: 8,
   },
   levelNumberContainer: {
-    borderRadius: 16,
+    borderRadius: 20,
     paddingVertical: 8,
     paddingHorizontal: 18,
     flex: 0,
@@ -103,7 +103,7 @@ export const modalSharedStyles = StyleSheet.create({
     backgroundColor: "rgb(76, 175, 79)",
     paddingVertical: 5,
     paddingHorizontal: 10,
-    borderRadius: 16,
+    borderRadius: 20,
     zIndex: 5,
   },
   badgesContainer: {
@@ -125,7 +125,7 @@ export const modalSharedStyles = StyleSheet.create({
     backgroundColor: "rgba(255, 255, 255, 0.2)",
     paddingHorizontal: 12,
     paddingVertical: 6,
-    borderRadius: 16,
+    borderRadius: 20,
   },
   difficultyText: {
     fontSize: 12,
@@ -136,7 +136,7 @@ export const modalSharedStyles = StyleSheet.create({
   // Content Cards
   contentCard: {
     backgroundColor: "rgba(255, 255, 255, 0.15)",
-    borderRadius: 16,
+    borderRadius: 20,
     padding: 16,
     marginBottom: 16,
     borderWidth: 1,
@@ -158,7 +158,7 @@ export const modalSharedStyles = StyleSheet.create({
   // Action Buttons
   actionButton: {
     backgroundColor: "rgba(255, 255, 255, 0.15)",
-    borderRadius: 16,
+    borderRadius: 20,
     paddingVertical: 16,
     alignItems: "center",
     marginTop: 16,
@@ -189,7 +189,7 @@ export const modalSharedStyles = StyleSheet.create({
     backgroundColor: "rgba(255,255,255,0.9)",
     borderColor: "rgb(255,255,255)",
     paddingVertical: 8,
-    borderRadius: 16,
+    borderRadius: 20,
     alignItems: "center",
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 4 },

@@ -12,7 +12,7 @@ export default StyleSheet.create({
     paddingVertical: 12,
     paddingHorizontal: 16,
     backgroundColor: "rgba(255, 255, 255, 0.08)",
-    borderRadius: 16,
+    borderRadius: 20,
     borderWidth: 1,
     gap: 8,
     borderColor: "rgba(255, 255, 255, 0.12)",
@@ -60,7 +60,7 @@ export default StyleSheet.create({
     flex: 1,
     flexDirection: "row",
     alignItems: "center",
-    borderRadius: 16,
+    borderRadius: 20,
     borderWidth: 2,
     borderColor: "rgba(255, 255, 255, 0.2)",
     paddingHorizontal: 16,
@@ -78,7 +78,7 @@ export default StyleSheet.create({
     marginLeft: 8,
   },
   submitButton: {
-    borderRadius: 16,
+    borderRadius: 20,
     overflow: "hidden",
     minWidth: 80,
   },
@@ -147,7 +147,7 @@ export default StyleSheet.create({
     marginBottom: 16,
   },
   helpCardGradient: {
-    borderRadius: 16,
+    borderRadius: 20,
     padding: 16,
     borderWidth: 1,
     borderColor: "rgba(255, 255, 255, 0.1)",
@@ -177,7 +177,7 @@ export default StyleSheet.create({
   feedbackCard: {
     flexDirection: "row",
     alignItems: "center",
-    borderRadius: 16,
+    borderRadius: 20,
     padding: 16,
   },
   feedbackIcon: {
@@ -213,7 +213,7 @@ export default StyleSheet.create({
   },
   hintCard: {
     backgroundColor: "rgba(255, 255, 255, 0.1)",
-    borderRadius: 16,
+    borderRadius: 20,
     padding: 16,
     marginBottom: 16,
     borderWidth: 1,
@@ -257,7 +257,7 @@ export default StyleSheet.create({
   hintButton: {
     paddingHorizontal: 16,
     paddingVertical: 8,
-    borderRadius: 16,
+    borderRadius: 20,
     backgroundColor: "rgba(255, 255, 255, 0.15)",
     borderWidth: 1,
     borderColor: "rgba(255, 255, 255, 0.2)",

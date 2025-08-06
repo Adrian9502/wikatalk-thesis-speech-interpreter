@@ -35,7 +35,7 @@ export default StyleSheet.create({
     marginBottom: 12,
   },
   wordCard: {
-    borderRadius: 16,
+    borderRadius: 20,
     overflow: "hidden",
     paddingVertical: 8,
     flexDirection: "row",
@@ -92,7 +92,7 @@ export default StyleSheet.create({
   resultIcon: {
     width: 32,
     height: 32,
-    borderRadius: 16,
+    borderRadius: 20,
     backgroundColor: "rgba(0, 0, 0, 0.2)",
     justifyContent: "center",
     alignItems: "center",
@@ -130,7 +130,7 @@ export default StyleSheet.create({
     justifyContent: "center",
     paddingHorizontal: 20,
     paddingVertical: 12,
-    borderRadius: 16,
+    borderRadius: 20,
     backgroundColor: "rgba(255, 255, 255, 0.1)",
     borderWidth: 1,
     borderColor: "rgba(255, 255, 255, 0.2)",
@@ -155,10 +155,10 @@ export default StyleSheet.create({
     marginBottom: 8,
   },
   translationCardGradient: {
-    borderRadius: 16,
+    borderRadius: 20,
     padding: 16,
     borderWidth: 1,
-    borderColor: "rgba(255, 255, 255, 0.1)",
+    borderColor: "rgba(16, 60, 182, 0.1)",
   },
   translationCardHeader: {
     flexDirection: "row",

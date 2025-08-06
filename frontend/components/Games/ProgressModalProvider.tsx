@@ -169,7 +169,7 @@ const styles = StyleSheet.create({
   container: {
     width: "90%",
     height: "60%",
-    borderRadius: 16,
+    borderRadius: 20,
     overflow: "hidden",
   },
   contentContainer: {

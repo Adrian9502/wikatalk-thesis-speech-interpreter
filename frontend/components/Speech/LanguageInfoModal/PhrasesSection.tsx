@@ -69,7 +69,7 @@ const styles = StyleSheet.create({
     gap: 10,
   },
   phraseCard: {
-    borderRadius: 16,
+    borderRadius: 20,
     padding: 16,
     marginBottom: 10,
     shadowColor: "#000",

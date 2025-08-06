@@ -26,7 +26,7 @@ const SubmitButton: React.FC<SubmitButtonProps> = ({
     style={{
       transform: [{ scale: buttonScale }],
       width: "100%",
-      borderRadius: 16,
+      borderRadius: 20,
       overflow: "hidden",
       marginVertical: 8,
       shadowColor: "#000",
@@ -62,7 +62,7 @@ const styles = StyleSheet.create({
     paddingVertical: 8,
     alignItems: "center",
     justifyContent: "center",
-    borderRadius: 16,
+    borderRadius: 20,
   },
   submitButtonContent: {
     flexDirection: "row",

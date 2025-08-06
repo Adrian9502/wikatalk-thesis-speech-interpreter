@@ -87,7 +87,7 @@ const ProgressContent: React.FC<ProgressContentProps> = ({
     if (progressData.recentAttempts && progressData.recentAttempts.length > 0) {
       // Fix the type error by explicitly typing the section
       sections.push({
-        title: "Recent Activity",
+        title: "Game History",
         data: progressData.recentAttempts.slice(0, 5) as any[],
         type: "attempts",
       });
@@ -262,7 +262,7 @@ const styles = StyleSheet.create({
   // Summary card styles
   summaryCard: {
     backgroundColor: "rgba(255, 255, 255, 0.15)",
-    borderRadius: 16,
+    borderRadius: 20,
     padding: 16,
     marginBottom: 10,
     borderWidth: 1,
@@ -283,7 +283,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#4CAF50",
     paddingHorizontal: 8,
     paddingVertical: 4,
-    borderRadius: 16,
+    borderRadius: 20,
   },
   badgeText: {
     fontSize: 11,

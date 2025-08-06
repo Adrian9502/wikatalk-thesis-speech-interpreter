@@ -281,7 +281,7 @@ const styles = StyleSheet.create({
   searchBar: {
     flexDirection: "row",
     alignItems: "center",
-    borderRadius: 16,
+    borderRadius: 20,
     paddingHorizontal: 16,
     backgroundColor: "#ffffff",
   },
@@ -300,7 +300,7 @@ const styles = StyleSheet.create({
     fontFamily: "Poppins-Regular",
   },
   categoryContainer: {
-    borderRadius: 16,
+    borderRadius: 20,
     overflow: "hidden",
     marginHorizontal: 16,
     marginBottom: 16,
@@ -379,7 +379,7 @@ const styles = StyleSheet.create({
   contactButton: {
     paddingVertical: 8,
     paddingHorizontal: 16,
-    borderRadius: 16,
+    borderRadius: 20,
   },
   contactButtonText: {
     fontFamily: "Poppins-Regular",

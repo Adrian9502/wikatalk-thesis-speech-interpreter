@@ -272,7 +272,7 @@ const styles = StyleSheet.create({
     maxWidth: 350,
   },
   formOuterContainer: {
-    borderRadius: 16,
+    borderRadius: 20,
     padding: 16,
     width: "100%",
     shadowColor: "#000",

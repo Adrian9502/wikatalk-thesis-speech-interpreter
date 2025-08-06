@@ -11,7 +11,7 @@ const styles = StyleSheet.create({
   modalContainer: {
     width: "92%",
     maxWidth: 360,
-    borderRadius: 28,
+    borderRadius: 20,
     overflow: "hidden",
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 10 },
@@ -57,7 +57,7 @@ const styles = StyleSheet.create({
   },
   wordCard: {
     backgroundColor: "rgba(255, 255, 255, 0.12)",
-    borderRadius: 22,
+    borderRadius: 20,
     padding: 20,
     marginBottom: 20,
     borderWidth: 1,
@@ -68,7 +68,7 @@ const styles = StyleSheet.create({
     backgroundColor: "rgba(255, 255, 255, 0.25)",
     paddingHorizontal: 18,
     paddingVertical: 7,
-    borderRadius: 16,
+    borderRadius: 20,
     marginBottom: 16,
     transform: [{ translateY: -30 }],
   },
@@ -107,7 +107,7 @@ const styles = StyleSheet.create({
     backgroundColor: "rgba(255, 255, 255, 0.15)",
     paddingHorizontal: 18,
     paddingVertical: 10,
-    borderRadius: 16,
+    borderRadius: 20,
     marginTop: 10,
   },
   pronunciationText: {

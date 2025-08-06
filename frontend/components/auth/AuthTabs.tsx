@@ -70,7 +70,7 @@ const AuthTabs: React.FC<AuthTabsProps> = ({
           width: "50%",
           height: "100%",
           backgroundColor: TITLE_COLORS.customBlue,
-          borderRadius: 16,
+          borderRadius: 20,
           opacity: 0.9,
           zIndex: 0,
           left: tabIndicatorLeft,
@@ -86,7 +86,7 @@ const styles = StyleSheet.create({
     width: "100%",
     position: "relative",
     marginBottom: 16,
-    borderRadius: 16,
+    borderRadius: 20,
     overflow: "hidden",
   },
   tabButton: {

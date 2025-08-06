@@ -164,7 +164,7 @@ const styles = StyleSheet.create({
     height: 35,
     justifyContent: "center",
     alignItems: "center",
-    borderRadius: 16,
+    borderRadius: 20,
     marginLeft: 4,
   },
   textAreaWrapper: {
@@ -174,7 +174,7 @@ const styles = StyleSheet.create({
   textArea: {
     flex: 1,
     backgroundColor: "#F5F5F5",
-    borderRadius: 16,
+    borderRadius: 20,
     minHeight: 100,
     maxHeight: 200,
   },
@@ -207,7 +207,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     backgroundColor: "#F5F5F5",
-    borderRadius: 16,
+    borderRadius: 20,
     minHeight: 100,
   },
 });

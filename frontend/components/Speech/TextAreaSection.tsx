@@ -113,7 +113,7 @@ const styles = StyleSheet.create({
   },
   textArea: {
     backgroundColor: BASE_COLORS.white,
-    borderRadius: 16,
+    borderRadius: 20,
     borderWidth: 1,
     padding: 16,
     minHeight: 120,
@@ -137,7 +137,7 @@ const styles = StyleSheet.create({
     top: 12,
     right: 12,
     backgroundColor: "rgba(255,255,255,0.7)",
-    borderRadius: 16,
+    borderRadius: 20,
     padding: 4,
   },
 });

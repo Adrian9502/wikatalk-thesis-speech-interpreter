@@ -66,7 +66,7 @@ const styles = StyleSheet.create({
     marginLeft: 8,
   },
   culturalBox: {
-    borderRadius: 16,
+    borderRadius: 20,
     padding: 20,
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },

@@ -375,7 +375,7 @@ const Identification: React.FC<IdentificationProps> = React.memo(
               style={{
                 backgroundColor: BASE_COLORS.blue,
                 padding: 12,
-                borderRadius: 16,
+                borderRadius: 20,
               }}
               onPress={() => router.back()}
             >

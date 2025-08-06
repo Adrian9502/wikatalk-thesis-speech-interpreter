@@ -101,7 +101,7 @@ const styles = StyleSheet.create({
   colorPreview: {
     width: 50,
     height: 50,
-    borderRadius: 16,
+    borderRadius: 20,
     padding: 5,
     borderColor: "transparent",
     borderWidth: 2,

@@ -143,7 +143,7 @@ const styles = StyleSheet.create({
   closeButton: {
     width: 32,
     height: 32,
-    borderRadius: 16,
+    borderRadius: 20,
     backgroundColor: "rgba(255, 255, 255, 0.2)",
     justifyContent: "center",
     alignItems: "center",
@@ -193,7 +193,7 @@ const styles = StyleSheet.create({
     backgroundColor: "rgba(255, 193, 7, 0.2)",
     paddingHorizontal: 10,
     paddingVertical: 6,
-    borderRadius: 16,
+    borderRadius: 20,
   },
   costText: {
     fontSize: 13,

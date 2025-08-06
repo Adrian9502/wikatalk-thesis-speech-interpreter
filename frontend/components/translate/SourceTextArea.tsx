@@ -117,7 +117,7 @@ const SourceTextArea = () => {
 const styles = StyleSheet.create({
   textSectionContainer: {
     height: "49%",
-    borderRadius: 16,
+    borderRadius: 20,
     overflow: "hidden",
     backgroundColor: BASE_COLORS.white,
     shadowColor: "#000",
@@ -156,7 +156,7 @@ const styles = StyleSheet.create({
     height: 40,
     justifyContent: "center",
     alignItems: "center",
-    borderRadius: 16,
+    borderRadius: 20,
     marginLeft: 8,
   },
   textAreaWrapper: {
@@ -165,7 +165,7 @@ const styles = StyleSheet.create({
   },
   textArea: {
     backgroundColor: BASE_COLORS.white,
-    borderRadius: 16,
+    borderRadius: 20,
     borderWidth: 1,
     padding: 16,
     flex: 1,

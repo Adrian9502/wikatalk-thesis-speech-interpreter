@@ -163,7 +163,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     backgroundColor: TITLE_COLORS.customWhite,
     padding: 12,
-    borderRadius: 16,
+    borderRadius: 20,
   },
   avatarContainer: {
     width: 64,
@@ -217,7 +217,7 @@ const styles = StyleSheet.create({
   },
   logoutButton: {
     backgroundColor: TITLE_COLORS.customRed,
-    borderRadius: 16,
+    borderRadius: 20,
     padding: 13,
     alignItems: "center",
     justifyContent: "center",

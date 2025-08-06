@@ -149,9 +149,9 @@ const GameButton: React.FC<GameButtonProps> = ({
   const content = (
     <TouchableOpacity
       style={buttonStyle}
-      onPress={handlePress} // Use our wrapper function
+      onPress={handlePress}
       activeOpacity={isFunctionallyDisabled ? 1 : 0.85} // No visual feedback when disabled
-      disabled={isFunctionallyDisabled} // Functionally disabled
+      disabled={isFunctionallyDisabled}
       accessible={true}
       accessibilityLabel={`${title}${subtitle ? `, ${subtitle}` : ""}`}
       accessibilityRole="button"

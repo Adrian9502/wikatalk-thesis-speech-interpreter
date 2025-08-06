@@ -172,7 +172,7 @@ const styles = StyleSheet.create({
   imageContainer: {
     flex: 1,
     height: 90,
-    borderRadius: 16,
+    borderRadius: 20,
     overflow: "hidden",
     position: "relative",
   },
@@ -194,7 +194,7 @@ const styles = StyleSheet.create({
     backgroundColor: "rgba(0,0,0,0.4)",
     paddingHorizontal: 12,
     paddingVertical: 6,
-    borderRadius: 16,
+    borderRadius: 20,
   },
   languageName: {
     color: BASE_COLORS.white,

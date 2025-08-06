@@ -59,7 +59,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     padding: 24,
     zIndex: 10000, // Even higher z-index
-    borderRadius: 16,
+    borderRadius: 20,
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 8 },
     shadowOpacity: 0.4,

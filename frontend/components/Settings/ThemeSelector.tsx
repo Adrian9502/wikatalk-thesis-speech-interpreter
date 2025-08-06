@@ -122,7 +122,7 @@ const ThemeSelector = () => {
 const styles = StyleSheet.create({
   container: {
     backgroundColor: "#fff",
-    borderRadius: 16,
+    borderRadius: 20,
     padding: 12,
   },
 });

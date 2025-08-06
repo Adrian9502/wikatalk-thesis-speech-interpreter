@@ -220,7 +220,7 @@ const styles = StyleSheet.create({
   modalContainer: {
     width: "90%",
     maxWidth: 380,
-    borderRadius: 16,
+    borderRadius: 20,
     overflow: "hidden",
     ...Platform.select({
       ios: {
@@ -266,7 +266,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     backgroundColor: "rgba(0,0,0,0.4)",
-    borderRadius: 16,
+    borderRadius: 20,
   },
   coinAnimation: {
     width: 250,
@@ -275,7 +275,7 @@ const styles = StyleSheet.create({
   calendarPlaceholder: {
     height: 120,
     backgroundColor: "rgba(255,255,255,0.1)",
-    borderRadius: 16,
+    borderRadius: 20,
     marginVertical: 16,
   },
   fullHeightLoader: {

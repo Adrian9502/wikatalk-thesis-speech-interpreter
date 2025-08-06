@@ -276,7 +276,7 @@ const styles = StyleSheet.create({
   permissionButton: {
     padding: 14,
     backgroundColor: BASE_COLORS.lightBlue,
-    borderRadius: 16,
+    borderRadius: 20,
   },
   permissionButtonText: {
     color: BASE_COLORS.blue,
@@ -287,7 +287,7 @@ const styles = StyleSheet.create({
   },
   cameraViewContainer: {
     height: "40%",
-    borderRadius: 16,
+    borderRadius: 20,
     overflow: "hidden",
 
     shadowColor: "#000",
@@ -297,7 +297,7 @@ const styles = StyleSheet.create({
     flex: 1,
     marginVertical: 10,
     backgroundColor: BASE_COLORS.lightBlue,
-    borderRadius: 16,
+    borderRadius: 20,
     padding: 16,
     paddingTop: 20,
     shadowColor: "#000",
@@ -308,7 +308,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     backgroundColor: BASE_COLORS.orange,
-    borderRadius: 16,
+    borderRadius: 20,
     overflow: "hidden",
     position: "relative",
   },

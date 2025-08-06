@@ -118,7 +118,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     marginHorizontal: 8,
-    borderRadius: 16,
+    borderRadius: 20,
   },
   activeTab: {
     backgroundColor: BASE_COLORS.blue,
@@ -144,7 +144,7 @@ const styles = StyleSheet.create({
     borderColor: BASE_COLORS.blue,
     paddingHorizontal: 10,
     paddingVertical: 5,
-    borderRadius: 16,
+    borderRadius: 20,
     marginRight: 6,
     flexDirection: "row",
     alignItems: "center",

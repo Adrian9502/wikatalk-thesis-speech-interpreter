@@ -252,7 +252,7 @@ const styles = StyleSheet.create({
   },
   formOuterContainer: {
     backgroundColor: BASE_COLORS.white,
-    borderRadius: 16,
+    borderRadius: 20,
     padding: 15,
     width: "100%",
     alignItems: "center",
@@ -319,7 +319,7 @@ const styles = StyleSheet.create({
     paddingVertical: 8,
     alignItems: "center",
     justifyContent: "center",
-    borderRadius: 16,
+    borderRadius: 20,
   },
   buttonContent: {
     flexDirection: "row",

@@ -49,7 +49,7 @@ const styles = StyleSheet.create({
     backgroundColor: "rgba(255, 255, 255, 0.25)",
     paddingVertical: 6,
     paddingHorizontal: 12,
-    borderRadius: 16,
+    borderRadius: 20,
   },
   coinIconContainer: {
     position: "relative",

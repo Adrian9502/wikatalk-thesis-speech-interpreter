@@ -21,7 +21,7 @@ const styles = StyleSheet.create({
   statBox: {
     width: "47%",
     backgroundColor: "rgba(255, 255, 255, 0.1)",
-    borderRadius: 12,
+    borderRadius: 20,
     padding: 12,
     alignItems: "center",
     borderWidth: 1,
@@ -42,5 +42,5 @@ const styles = StyleSheet.create({
   },
 });
 
-StatBox.displayName = 'StatBox';
+StatBox.displayName = "StatBox";
 export default StatBox;

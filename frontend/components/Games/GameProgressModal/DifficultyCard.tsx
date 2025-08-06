@@ -8,80 +8,82 @@ interface DifficultyCardProps {
   getDifficultyStars: (diff: string) => string;
 }
 
-const DifficultyCard = React.memo(({
-  diffProgress,
-  getDifficultyColor,
-  getDifficultyStars,
-}: DifficultyCardProps) => {
-  return (
-    <View key={diffProgress.difficulty} style={styles.difficultyCard}>
-      <View style={styles.difficultyHeader}>
-        <View style={styles.difficultyTitleRow}>
-          <Text style={styles.difficultyStars}>
-            {getDifficultyStars(diffProgress.difficulty)}
-          </Text>
-          <Text style={styles.difficultyTitle}>
-            {diffProgress.difficulty.charAt(0).toUpperCase() +
-              diffProgress.difficulty.slice(1)}
-          </Text>
-        </View>
-        <View
-          style={[
-            styles.difficultyBadge,
-            { backgroundColor: getDifficultyColor(diffProgress.difficulty) },
-          ]}
-        >
-          <Text style={styles.difficultyBadgeText}>
-            {diffProgress.completedLevels}/{diffProgress.totalLevels}
-          </Text>
-        </View>
-      </View>
-
-      <View style={styles.difficultyStats}>
-        <View style={styles.difficultyStatItem}>
-          <Text style={styles.difficultyStatLabel}>Completion</Text>
-          <Text style={styles.difficultyStatValue}>
-            {Math.round(diffProgress.completionRate)}%
-          </Text>
-        </View>
-        <View style={styles.difficultyStatItem}>
-          <Text style={styles.difficultyStatLabel}>Attempts</Text>
-          <Text style={styles.difficultyStatValue}>
-            {diffProgress.totalAttempts}
-          </Text>
-        </View>
-        <View style={styles.difficultyStatItem}>
-          <Text style={styles.difficultyStatLabel}>Success Rate</Text>
-          <Text style={styles.difficultyStatValue}>
-            {Math.round(diffProgress.averageScore)}%
-          </Text>
-        </View>
-      </View>
-
-      <View style={styles.progressBarContainer}>
-        <View style={styles.progressBarBackground}>
+const DifficultyCard = React.memo(
+  ({
+    diffProgress,
+    getDifficultyColor,
+    getDifficultyStars,
+  }: DifficultyCardProps) => {
+    return (
+      <View key={diffProgress.difficulty} style={styles.difficultyCard}>
+        <View style={styles.difficultyHeader}>
+          <View style={styles.difficultyTitleRow}>
+            <Text style={styles.difficultyStars}>
+              {getDifficultyStars(diffProgress.difficulty)}
+            </Text>
+            <Text style={styles.difficultyTitle}>
+              {diffProgress.difficulty.charAt(0).toUpperCase() +
+                diffProgress.difficulty.slice(1)}
+            </Text>
+          </View>
           <View
             style={[
-              styles.progressBarFill,
-              {
-                width: `${diffProgress.completionRate}%`,
-                backgroundColor: getDifficultyColor(diffProgress.difficulty),
-              },
+              styles.difficultyBadge,
+              { backgroundColor: getDifficultyColor(diffProgress.difficulty) },
             ]}
-          />
+          >
+            <Text style={styles.difficultyBadgeText}>
+              {diffProgress.completedLevels}/{diffProgress.totalLevels}
+            </Text>
+          </View>
         </View>
-        <Text style={styles.progressBarText}>
-          {Math.round(diffProgress.completionRate)}% Complete
-        </Text>
+
+        <View style={styles.difficultyStats}>
+          <View style={styles.difficultyStatItem}>
+            <Text style={styles.difficultyStatLabel}>Completion</Text>
+            <Text style={styles.difficultyStatValue}>
+              {Math.round(diffProgress.completionRate)}%
+            </Text>
+          </View>
+          <View style={styles.difficultyStatItem}>
+            <Text style={styles.difficultyStatLabel}>Attempts</Text>
+            <Text style={styles.difficultyStatValue}>
+              {diffProgress.totalAttempts}
+            </Text>
+          </View>
+          <View style={styles.difficultyStatItem}>
+            <Text style={styles.difficultyStatLabel}>Success Rate</Text>
+            <Text style={styles.difficultyStatValue}>
+              {Math.round(diffProgress.averageScore)}%
+            </Text>
+          </View>
+        </View>
+
+        <View style={styles.progressBarContainer}>
+          <View style={styles.progressBarBackground}>
+            <View
+              style={[
+                styles.progressBarFill,
+                {
+                  width: `${diffProgress.completionRate}%`,
+                  backgroundColor: getDifficultyColor(diffProgress.difficulty),
+                },
+              ]}
+            />
+          </View>
+          <Text style={styles.progressBarText}>
+            {Math.round(diffProgress.completionRate)}% Complete
+          </Text>
+        </View>
       </View>
-    </View>
-  );
-});
+    );
+  }
+);
 
 const styles = StyleSheet.create({
   difficultyCard: {
     backgroundColor: "rgba(255, 255, 255, 0.1)",
-    borderRadius: 12,
+    borderRadius: 20,
     padding: 16,
     marginBottom: 12,
     borderWidth: 1,
@@ -109,7 +111,7 @@ const styles = StyleSheet.create({
   difficultyBadge: {
     paddingHorizontal: 10,
     paddingVertical: 4,
-    borderRadius: 12,
+    borderRadius: 20,
   },
   difficultyBadgeText: {
     fontSize: 12,
@@ -158,5 +160,5 @@ const styles = StyleSheet.create({
   },
 });
 
-DifficultyCard.displayName = 'DifficultyCard';
+DifficultyCard.displayName = "DifficultyCard";
 export default DifficultyCard;

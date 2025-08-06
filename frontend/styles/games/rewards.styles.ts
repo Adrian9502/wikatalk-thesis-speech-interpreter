@@ -57,7 +57,7 @@ export const rewardStyles = StyleSheet.create({
   // Today's reward card styles
   todayCard: {
     backgroundColor: "rgba(255, 255, 255, 0.15)",
-    borderRadius: 16,
+    borderRadius: 20,
     padding: 16,
     marginBottom: 20,
     borderWidth: 1,
@@ -78,13 +78,13 @@ export const rewardStyles = StyleSheet.create({
     backgroundColor: "#4CAF50",
     paddingHorizontal: 8,
     paddingVertical: 4,
-    borderRadius: 16,
+    borderRadius: 20,
   },
   claimedBadge: {
     backgroundColor: "rgba(255,255,255,0.3)",
     paddingHorizontal: 8,
     paddingVertical: 4,
-    borderRadius: 16,
+    borderRadius: 20,
   },
   badgeText: {
     fontSize: 11,
@@ -128,7 +128,7 @@ export const rewardStyles = StyleSheet.create({
     width: 70,
     height: 90,
     backgroundColor: "rgba(255, 255, 255, 0.1)",
-    borderRadius: 16,
+    borderRadius: 20,
     marginHorizontal: 4,
     justifyContent: "center",
     alignItems: "center",
@@ -180,7 +180,7 @@ export const rewardStyles = StyleSheet.create({
     width: 20,
     height: 20,
     backgroundColor: "#FFD700",
-    borderRadius: 16,
+    borderRadius: 20,
     justifyContent: "center",
     alignItems: "center",
     marginBottom: 4,
@@ -198,7 +198,7 @@ export const rewardStyles = StyleSheet.create({
   // Buttons
   claimButton: {
     backgroundColor: "#FFD700",
-    borderRadius: 16,
+    borderRadius: 20,
     paddingVertical: 12,
     alignItems: "center",
     marginBottom: 16,
@@ -210,7 +210,7 @@ export const rewardStyles = StyleSheet.create({
   },
   alreadyClaimedButton: {
     backgroundColor: "rgba(255,255,255,0.2)",
-    borderRadius: 16,
+    borderRadius: 20,
     paddingVertical: 12,
     alignItems: "center",
     marginBottom: 16,
@@ -230,7 +230,7 @@ export const rewardStyles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     backgroundColor: "rgba(255, 255, 255, 0.1)",
-    borderRadius: 16,
+    borderRadius: 20,
     padding: 12,
     borderWidth: 1,
     borderColor: "rgba(255, 255, 255, 0.15)",
