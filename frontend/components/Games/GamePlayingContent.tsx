@@ -1,7 +1,5 @@
-import React from "react";
-import { ScrollView, View, StyleSheet } from "react-native";
-import * as Animatable from "react-native-animatable";
-import gameSharedStyles from "@/styles/gamesSharedStyles";
+import React, { useRef, useEffect } from "react";
+import { View, StyleSheet, Animated } from "react-native";
 
 interface GamePlayingContentProps {
   timerRunning: boolean;
@@ -17,8 +15,12 @@ interface GamePlayingContentProps {
 }
 
 const GamePlayingContent: React.FC<GamePlayingContentProps> = React.memo(
-  ({ timerRunning, children, initialTime = 0, levelString, actualTitle }) => {
+  ({ timerRunning, children, initialTime = 0 }) => {
     const timerStartedRef = React.useRef(false);
+
+    // Custom animation values
+    const fadeAnim = useRef(new Animated.Value(0)).current;
+    const translateY = useRef(new Animated.Value(30)).current;
 
     // Optimized timer logging - only log state changes
     React.useEffect(() => {
@@ -33,29 +35,44 @@ const GamePlayingContent: React.FC<GamePlayingContentProps> = React.memo(
       }
     }, [timerRunning, initialTime]);
 
+    // Custom animation effect
+    useEffect(() => {
+      // Reset animation values
+      fadeAnim.setValue(0);
+      translateY.setValue(30);
+
+      // Start animation immediately
+      Animated.parallel([
+        Animated.timing(fadeAnim, {
+          toValue: 1,
+          duration: 800,
+          useNativeDriver: true,
+        }),
+        Animated.timing(translateY, {
+          toValue: 0,
+          duration: 800,
+          useNativeDriver: true,
+        }),
+      ]).start();
+    }, []);
+
     return (
       <View style={styles.container}>
-        {/* Floating Decorative Elements */}
+        {/* Simplified decorative elements */}
         <View style={[styles.floatingElement, styles.element1]} />
         <View style={[styles.floatingElement, styles.element2]} />
 
-        <ScrollView
-          showsVerticalScrollIndicator={false}
-          contentContainerStyle={[
-            gameSharedStyles.contentContainer,
-            styles.scrollContent,
+        <Animated.View
+          style={[
+            styles.contentArea,
+            {
+              opacity: fadeAnim,
+              transform: [{ translateY }],
+            },
           ]}
-          keyboardShouldPersistTaps="handled"
         >
-          {/* Content Area - now starts immediately */}
-          <Animatable.View
-            animation="fadeInUp"
-            duration={800}
-            style={styles.contentArea}
-          >
-            {children}
-          </Animatable.View>
-        </ScrollView>
+          {children}
+        </Animated.View>
       </View>
     );
   }
@@ -84,12 +101,10 @@ const styles = StyleSheet.create({
     top: "35%",
     left: -15,
   },
-  scrollContent: {
-    paddingBottom: 40,
-    zIndex: 2,
-  },
   contentArea: {
     flex: 1,
+    paddingBottom: 40,
+    zIndex: 2,
   },
 });
 

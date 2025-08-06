@@ -1,8 +1,7 @@
-import React, { useState, useEffect } from "react";
-import { View, Text, TouchableOpacity } from "react-native";
+import React, { useState, useEffect, useMemo, useCallback } from "react";
+import { View, Text, TouchableOpacity, ScrollView } from "react-native";
 import { Eye, EyeOff } from "react-native-feather";
 import { LinearGradient } from "expo-linear-gradient";
-import * as Animatable from "react-native-animatable";
 import { BASE_COLORS } from "@/constant/colors";
 import { getGameModeGradient } from "@/utils/gameUtils";
 import styles from "@/styles/games/identification.styles";
@@ -21,180 +20,191 @@ interface IdentificationPlayingContentProps {
   handleWordSelect: (index: number) => void;
 }
 
-const IdentificationPlayingContent: React.FC<
-  IdentificationPlayingContentProps
-> = ({
-  currentSentence,
-  words,
-  selectedWord,
-  showTranslation,
-  toggleTranslation,
-  handleWordSelect,
-}) => {
-  // NEW: Simplified animation state
-  const [isAnimating, setIsAnimating] = useState(true);
+const IdentificationPlayingContent: React.FC<IdentificationPlayingContentProps> =
+  React.memo(
+    ({
+      currentSentence,
+      words,
+      selectedWord,
+      showTranslation,
+      toggleTranslation,
+      handleWordSelect,
+    }) => {
+      // Simplified animation state
+      const [isAnimating, setIsAnimating] = useState(true);
 
-  // Get game mode gradient for consistency
-  const gameGradientColors = React.useMemo(
-    () => getGameModeGradient("identification"),
-    []
-  );
+      // Memoized values
+      const gameGradientColors = useMemo(
+        () => getGameModeGradient("identification"),
+        []
+      );
 
-  const wordOptions = React.useMemo(() => words || [], [words]);
+      const wordOptions = useMemo(() => words || [], [words]);
 
-  // NEW: Simplified animation - single duration
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setIsAnimating(false);
-    }, 800); // Single 800ms duration
+      // Simplified animation timing
+      useEffect(() => {
+        const timer = setTimeout(() => {
+          setIsAnimating(false);
+        }, 700); // Consistent timing
 
-    return () => clearTimeout(timer);
-  }, []);
+        return () => clearTimeout(timer);
+      }, []);
 
-  // NEW: Disabled handlers
-  const handleWordPress = (index: number) => {
-    if (isAnimating || selectedWord !== null) return;
-    handleWordSelect(index);
-  };
+      // Memoized handlers
+      const handleWordPress = useCallback(
+        (index: number) => {
+          if (isAnimating || selectedWord !== null) return;
+          handleWordSelect(index);
+        },
+        [isAnimating, selectedWord, handleWordSelect]
+      );
 
-  const handleToggleTranslation = () => {
-    if (isAnimating) return;
-    toggleTranslation();
-  };
+      const handleToggleTranslation = useCallback(() => {
+        if (isAnimating) return;
+        toggleTranslation();
+      }, [isAnimating, toggleTranslation]);
 
-  return (
-    <View style={gamesSharedStyles.gameContainer}>
-      {/* Simplified Question Card - Single fadeIn */}
-      <View style={gamesSharedStyles.questionCardContainer}>
-        <LinearGradient
-          style={gamesSharedStyles.questionCard}
-          colors={gameGradientColors}
-          start={{ x: 0, y: 0 }}
-          end={{ x: 1, y: 1 }}
-        >
-          <LevelTitleHeader
-            levelString={currentSentence?.level}
-            actualTitle={currentSentence?.title}
-            animationDelay={0}
-          />
-          <View style={gamesSharedStyles.questionContainer}>
-            {/* Question Text */}
-            <Text style={gamesSharedStyles.questionText}>
-              {safeTextRender(
-                currentSentence?.sentence || currentSentence?.question
-              )}
+      return (
+        <View style={gamesSharedStyles.gameContainer}>
+          {/* Question Card */}
+          <View style={gamesSharedStyles.questionCardContainer}>
+            <LinearGradient
+              style={gamesSharedStyles.questionCard}
+              colors={gameGradientColors}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 1 }}
+            >
+              <LevelTitleHeader
+                levelString={currentSentence?.level}
+                actualTitle={currentSentence?.title}
+                animationDelay={0}
+              />
+              <View style={gamesSharedStyles.questionContainer}>
+                <Text style={gamesSharedStyles.questionText}>
+                  {safeTextRender(
+                    currentSentence?.sentence || currentSentence?.question
+                  )}
+                </Text>
+              </View>
+              {/* Decorative Elements */}
+              <View style={gamesSharedStyles.cardDecoration1} />
+              <View style={gamesSharedStyles.cardDecoration2} />
+            </LinearGradient>
+          </View>
+
+          {/* Instructions */}
+          <View style={styles.instructionsContainer}>
+            <Text style={styles.instructionsTitle}>Find the correct word:</Text>
+            <Text style={styles.instructionsText}>
+              Tap on the word that best fits the sentence context
             </Text>
           </View>
-          {/* Decorative Elements */}
-          <View style={gamesSharedStyles.cardDecoration1} />
-          <View style={gamesSharedStyles.cardDecoration2} />
-        </LinearGradient>
-      </View>
 
-      {/* Simplified Instructions - Single fadeIn */}
-      <View style={styles.instructionsContainer}>
-        <Text style={styles.instructionsTitle}>Find the correct word:</Text>
-        <Text style={styles.instructionsText}>
-          Tap on the word that best fits the sentence context
-        </Text>
-      </View>
+          {/* FIXED: Words Grid using ScrollView */}
+          <View style={styles.wordsContainer}>
+            {wordOptions.length > 0 ? (
+              <ScrollView
+                showsVerticalScrollIndicator={false}
+                contentContainerStyle={styles.wordsScrollContent}
+                nestedScrollEnabled={true}
+              >
+                <View style={styles.wordsGrid}>
+                  {wordOptions.map((word, index) => {
+                    const isSelected = selectedWord === index;
 
-      {/* Simplified Words Grid - Single fadeIn */}
-      <View style={styles.wordsContainer}>
-        <View style={styles.wordsGrid}>
-          {wordOptions.length > 0 ? (
-            wordOptions.map((word, index) => {
-              const isSelected = selectedWord === index;
+                    return (
+                      <View
+                        key={`word-${index}-${word.text || word.clean}`}
+                        style={styles.wordWrapper}
+                      >
+                        <TouchableOpacity
+                          style={[
+                            styles.wordCard,
+                            isSelected && styles.selectedWordCard,
+                          ]}
+                          onPress={() => handleWordPress(index)}
+                          disabled={isAnimating || selectedWord !== null}
+                          activeOpacity={isAnimating ? 1 : 0.8}
+                        >
+                          {/* Word Number */}
+                          <View style={styles.wordNumber}>
+                            <Text style={styles.wordNumberText}>
+                              {index + 1}
+                            </Text>
+                          </View>
 
-              return (
-                <View
-                  key={`word-${index}-${word.text || word.clean}`}
-                  style={styles.wordWrapper}
-                >
-                  <TouchableOpacity
-                    style={[
-                      styles.wordCard,
-                      isSelected && styles.selectedWordCard,
-                    ]}
-                    onPress={() => handleWordPress(index)}
-                    disabled={isAnimating || selectedWord !== null}
-                    activeOpacity={isAnimating ? 1 : 0.8}
-                  >
-                    {/* Word Number */}
-                    <View style={styles.wordNumber}>
-                      <Text style={styles.wordNumberText}>{index + 1}</Text>
-                    </View>
+                          {/* Word Content */}
+                          <View style={styles.wordContent}>
+                            <Text style={styles.wordText} numberOfLines={2}>
+                              {safeTextRender(word.text)}
+                            </Text>
+                          </View>
 
-                    {/* Word Content */}
-                    <View style={styles.wordContent}>
-                      <Text style={styles.wordText} numberOfLines={2}>
-                        {safeTextRender(word.text)}
-                      </Text>
-                    </View>
-
-                    {/* Selection Pulse */}
-                    {isSelected && <View style={styles.selectionPulse} />}
-                  </TouchableOpacity>
+                          {/* Selection Pulse */}
+                          {isSelected && <View style={styles.selectionPulse} />}
+                        </TouchableOpacity>
+                      </View>
+                    );
+                  })}
                 </View>
-              );
-            })
-          ) : (
-            <View style={styles.noOptionsContainer}>
-              <Text style={styles.noOptionsText}>No options available</Text>
-            </View>
-          )}
-        </View>
-      </View>
-
-      {/* Simplified Translation Section - Single fadeIn */}
-      <View style={styles.translationSection}>
-        <TouchableOpacity
-          style={[
-            styles.translationButton,
-            showTranslation && styles.translationButtonActive,
-          ]}
-          onPress={handleToggleTranslation}
-          disabled={isAnimating}
-        >
-          {showTranslation ? (
-            <EyeOff width={16} height={16} color={BASE_COLORS.white} />
-          ) : (
-            <Eye width={16} height={16} color="rgba(255, 255, 255, 0.7)" />
-          )}
-          <Text
-            style={[
-              styles.translationButtonText,
-              showTranslation && styles.translationButtonTextActive,
-            ]}
-          >
-            {showTranslation ? "Hide Translation" : "Show Translation"}
-          </Text>
-        </TouchableOpacity>
-
-        {/* Translation Card */}
-        {showTranslation && (
-          <Animatable.View
-            animation="fadeIn"
-            duration={400}
-            style={styles.translationCard}
-          >
-            <LinearGradient
-              colors={["rgba(33, 150, 243, 0.2)", "rgba(33, 150, 243, 0.1)"]}
-              style={styles.translationCardGradient}
-            >
-              <View style={styles.translationCardHeader}>
-                <Eye width={18} height={18} color="#2196F3" />
-                <Text style={styles.translationCardTitle}>Translation</Text>
+              </ScrollView>
+            ) : (
+              <View style={styles.noOptionsContainer}>
+                <Text style={styles.noOptionsText}>No options available</Text>
               </View>
-              <Text style={styles.translationCardText}>
-                {currentSentence?.translation || "Translation not available"}
-              </Text>
-            </LinearGradient>
-          </Animatable.View>
-        )}
-      </View>
-    </View>
-  );
-};
+            )}
+          </View>
 
-export default React.memo(IdentificationPlayingContent);
+          {/* Translation Section */}
+          <View style={styles.translationSection}>
+            <TouchableOpacity
+              style={[
+                styles.translationButton,
+                showTranslation && styles.translationButtonActive,
+              ]}
+              onPress={handleToggleTranslation}
+              disabled={isAnimating}
+            >
+              {showTranslation ? (
+                <EyeOff width={16} height={16} color={BASE_COLORS.white} />
+              ) : (
+                <Eye width={16} height={16} color="rgba(255, 255, 255, 0.7)" />
+              )}
+              <Text
+                style={[
+                  styles.translationButtonText,
+                  showTranslation && styles.translationButtonTextActive,
+                ]}
+              >
+                {showTranslation ? "Hide Translation" : "Show Translation"}
+              </Text>
+            </TouchableOpacity>
+
+            {/* Translation Card - Simple conditional render */}
+            {showTranslation && (
+              <View style={styles.translationCard}>
+                <LinearGradient
+                  colors={[
+                    "rgba(33, 150, 243, 0.2)",
+                    "rgba(33, 150, 243, 0.1)",
+                  ]}
+                  style={styles.translationCardGradient}
+                >
+                  <View style={styles.translationCardHeader}>
+                    <Eye width={18} height={18} color="#2196F3" />
+                    <Text style={styles.translationCardTitle}>Translation</Text>
+                  </View>
+                  <Text style={styles.translationCardText}>
+                    {currentSentence?.translation ||
+                      "Translation not available"}
+                  </Text>
+                </LinearGradient>
+              </View>
+            )}
+          </View>
+        </View>
+      );
+    }
+  );
+
+export default IdentificationPlayingContent;

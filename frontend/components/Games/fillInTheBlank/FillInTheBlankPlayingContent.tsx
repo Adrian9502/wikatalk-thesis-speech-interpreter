@@ -14,7 +14,6 @@ import {
 } from "react-native";
 import { Check, X, Eye, EyeOff } from "react-native-feather";
 import { LinearGradient } from "expo-linear-gradient";
-import * as Animatable from "react-native-animatable";
 import { BASE_COLORS } from "@/constant/colors";
 import { getGameModeGradient } from "@/utils/gameUtils";
 import styles from "@/styles/games/fillInTheBlank.styles";
@@ -56,25 +55,25 @@ const FillInTheBlankPlayingContent: React.FC<RenderPlayingContentProps> =
     }) => {
       const inputRef = useRef<TextInput>(null);
 
-      // NEW: Simplified animation state
+      // Simplified animation state
       const [isAnimating, setIsAnimating] = useState(true);
 
-      // Get game mode gradient
+      // Memoized values
       const gameGradientColors = useMemo(
         () => getGameModeGradient("fillBlanks"),
         []
       );
 
-      // NEW: Simplified animation - single duration
+      // Simplified animation timing
       useEffect(() => {
         const timer = setTimeout(() => {
           setIsAnimating(false);
-        }, 800); // Single 800ms duration
+        }, 700);
 
         return () => clearTimeout(timer);
       }, []);
 
-      // Memoize formatted sentence
+      // Memoized formatted sentence
       const formattedSentence = useMemo(() => {
         if (!currentExercise?.sentence || !currentExercise?.answer) {
           return "Loading...";
@@ -87,9 +86,9 @@ const FillInTheBlankPlayingContent: React.FC<RenderPlayingContentProps> =
         return sentence.replace(new RegExp(answer, "gi"), blank);
       }, [currentExercise?.sentence, currentExercise?.answer]);
 
-      // Memoize attempts display
+      // Memoized attempts display
       const attemptsDisplay = useMemo(() => {
-        const hearts = Array(2)
+        return Array(2)
           .fill(0)
           .map((_, index) => (
             <Text
@@ -104,9 +103,9 @@ const FillInTheBlankPlayingContent: React.FC<RenderPlayingContentProps> =
               ♥
             </Text>
           ));
-        return hearts;
       }, [attemptsLeft]);
 
+      // Memoized handlers
       const handleClear = useCallback(() => {
         if (isAnimating) return;
         setUserAnswer("");
@@ -138,7 +137,10 @@ const FillInTheBlankPlayingContent: React.FC<RenderPlayingContentProps> =
           contentContainerStyle={gamesSharedStyles.gameContainer}
           keyboardShouldPersistTaps="handled"
           keyboardDismissMode="on-drag"
+          removeClippedSubviews={true}
+          maxToRenderPerBatch={1}
         >
+          {/* Sentence Card */}
           <View style={gamesSharedStyles.questionCardContainer}>
             <LinearGradient
               colors={gameGradientColors}
@@ -151,9 +153,7 @@ const FillInTheBlankPlayingContent: React.FC<RenderPlayingContentProps> =
                 actualTitle={currentExercise?.title}
                 animationDelay={0}
               />
-              {/* Sentence Text */}
               <View style={gamesSharedStyles.questionContainer}>
-                {/* Question Text */}
                 <Text style={gamesSharedStyles.questionText}>
                   {formattedSentence}
                 </Text>
@@ -170,6 +170,7 @@ const FillInTheBlankPlayingContent: React.FC<RenderPlayingContentProps> =
             <View style={styles.heartsContainer}>{attemptsDisplay}</View>
           </View>
 
+          {/* Input Section */}
           <View style={styles.inputSection}>
             <View style={styles.inputHeader}>
               <Text style={styles.inputLabel}>Your Answer:</Text>
@@ -239,12 +240,8 @@ const FillInTheBlankPlayingContent: React.FC<RenderPlayingContentProps> =
             </View>
           </View>
 
-          {/* Simplified Help Buttons - Single fadeIn */}
-          <Animatable.View
-            animation="fadeIn"
-            duration={400}
-            style={styles.helpSection}
-          >
+          {/* Help Buttons */}
+          <View style={styles.helpSection}>
             <Text style={styles.helpTitle}>Need help?</Text>
             <View style={styles.helpButtons}>
               <TouchableOpacity
@@ -296,15 +293,11 @@ const FillInTheBlankPlayingContent: React.FC<RenderPlayingContentProps> =
                 </Text>
               </TouchableOpacity>
             </View>
-          </Animatable.View>
+          </View>
 
-          {/* Simplified Help Cards - Quick fadeIn when shown */}
+          {/* Help Cards - Simple conditional render */}
           {showHint && currentExercise?.hint && (
-            <Animatable.View
-              animation="fadeIn"
-              duration={400}
-              style={styles.helpCard}
-            >
+            <View style={styles.helpCard}>
               <LinearGradient
                 colors={["rgba(255, 193, 7, 0.2)", "rgba(255, 193, 7, 0.1)"]}
                 style={styles.helpCardGradient}
@@ -315,15 +308,11 @@ const FillInTheBlankPlayingContent: React.FC<RenderPlayingContentProps> =
                 </View>
                 <Text style={styles.helpCardText}>{currentExercise.hint}</Text>
               </LinearGradient>
-            </Animatable.View>
+            </View>
           )}
 
           {showTranslation && currentExercise?.translation && (
-            <Animatable.View
-              animation="fadeIn"
-              duration={400}
-              style={styles.helpCard}
-            >
+            <View style={styles.helpCard}>
               <LinearGradient
                 colors={["rgba(33, 150, 243, 0.2)", "rgba(33, 150, 243, 0.1)"]}
                 style={styles.helpCardGradient}
@@ -336,16 +325,12 @@ const FillInTheBlankPlayingContent: React.FC<RenderPlayingContentProps> =
                   {currentExercise.translation}
                 </Text>
               </LinearGradient>
-            </Animatable.View>
+            </View>
           )}
 
-          {/* Simplified Feedback Card - Quick bounceIn when shown */}
+          {/* Feedback Card - Simple render */}
           {showFeedback && (
-            <Animatable.View
-              animation="bounceIn"
-              duration={400}
-              style={styles.feedbackContainer}
-            >
+            <View style={styles.feedbackContainer}>
               <LinearGradient
                 colors={
                   isCorrect ? ["#4CAF50", "#2E7D32"] : ["#F44336", "#C62828"]
@@ -370,7 +355,7 @@ const FillInTheBlankPlayingContent: React.FC<RenderPlayingContentProps> =
                   </Text>
                 </View>
               </LinearGradient>
-            </Animatable.View>
+            </View>
           )}
         </ScrollView>
       );

@@ -1,22 +1,20 @@
-import React, { useState, useEffect } from "react";
-import { View, Text, TouchableOpacity } from "react-native";
+import React, { useState, useEffect, useMemo, useCallback } from "react";
+import { View, Text, TouchableOpacity, ScrollView } from "react-native";
 import { Circle } from "react-native-feather";
 import { LinearGradient } from "expo-linear-gradient";
-import * as Animatable from "react-native-animatable";
 import { getGameModeGradient } from "@/utils/gameUtils";
 import styles from "@/styles/games/multipleChoice.styles";
 import gamesSharedStyles from "@/styles/gamesSharedStyles";
 import { safeTextRender } from "@/utils/textUtils";
 import LevelTitleHeader from "@/components/games/LevelTitleHeader";
 
-// Define an interface for the option object
+// Define interfaces
 interface Option {
   id: string;
   text: string;
   isCorrect: boolean;
 }
 
-// Define an interface for the question
 interface Question {
   question: string;
   options: Option[];
@@ -35,38 +33,42 @@ interface MultipleChoicePlayingContentProps {
 
 const MultipleChoicePlayingContent: React.FC<MultipleChoicePlayingContentProps> =
   React.memo(({ currentQuestion, selectedOption, handleOptionSelect }) => {
-    // NEW: Track animation state - simplified to single animation
+    // Simplified animation state
     const [isAnimating, setIsAnimating] = useState(true);
 
-    // Get game mode gradient for consistency
-    const gameGradientColors = React.useMemo(
+    // Memoized gradient colors
+    const gameGradientColors = useMemo(
       () => getGameModeGradient("multipleChoice"),
       []
     );
 
-    const options = React.useMemo(
+    // Memoized options
+    const options = useMemo(
       () => currentQuestion?.options || [],
       [currentQuestion?.options]
     );
 
-    // NEW: Simplified animation - single duration
+    // Simplified animation timing
     useEffect(() => {
       const timer = setTimeout(() => {
         setIsAnimating(false);
-      }, 800); // Single 800ms duration
+      }, 700); // Slightly faster
 
       return () => clearTimeout(timer);
     }, []);
 
-    // NEW: Disabled option handler
-    const handleOptionPress = (optionId: string) => {
-      if (isAnimating || selectedOption !== null) return;
-      handleOptionSelect(optionId);
-    };
+    // Memoized option press handler
+    const handleOptionPress = useCallback(
+      (optionId: string) => {
+        if (isAnimating || selectedOption !== null) return;
+        handleOptionSelect(optionId);
+      },
+      [isAnimating, selectedOption, handleOptionSelect]
+    );
 
     return (
       <View style={gamesSharedStyles.gameContainer}>
-        {/* Simplified Question Card - Single fadeIn */}
+        {/* Question Card - No animation, parent handles it */}
         <View style={gamesSharedStyles.questionCardContainer}>
           <LinearGradient
             style={gamesSharedStyles.questionCard}
@@ -80,7 +82,6 @@ const MultipleChoicePlayingContent: React.FC<MultipleChoicePlayingContentProps> 
               animationDelay={0}
             />
             <View style={gamesSharedStyles.questionContainer}>
-              {/* Question Text */}
               <Text style={gamesSharedStyles.questionText}>
                 {safeTextRender(currentQuestion?.question)}
               </Text>
@@ -92,13 +93,9 @@ const MultipleChoicePlayingContent: React.FC<MultipleChoicePlayingContentProps> 
           </LinearGradient>
         </View>
 
-        {/* Simplified Options Section - Single fadeIn */}
+        {/* Options Section */}
         <View style={styles.optionsContainer}>
-          <Animatable.View
-            animation="fadeIn"
-            duration={800}
-            style={styles.optionsHeader}
-          >
+          <View style={styles.optionsHeader}>
             <Text style={styles.optionsTitle}>Choose your answer:</Text>
             <View style={styles.optionsIndicator}>
               {options.map((_, index) => (
@@ -113,13 +110,13 @@ const MultipleChoicePlayingContent: React.FC<MultipleChoicePlayingContentProps> 
                 />
               ))}
             </View>
-          </Animatable.View>
+          </View>
 
-          {/* Simplified Options - All fade in together */}
-          <Animatable.View
-            animation="fadeIn"
-            duration={800}
-            style={{ flex: 1 }}
+          {/* FIXED: Use ScrollView instead of FlatList to avoid nesting */}
+          <ScrollView
+            showsVerticalScrollIndicator={false}
+            contentContainerStyle={{ flexGrow: 1, paddingBottom: 20 }}
+            nestedScrollEnabled={true}
           >
             {options.map((option: Option, index: number) => {
               const isSelected = selectedOption === option.id;
@@ -162,7 +159,7 @@ const MultipleChoicePlayingContent: React.FC<MultipleChoicePlayingContentProps> 
                 </View>
               );
             })}
-          </Animatable.View>
+          </ScrollView>
         </View>
       </View>
     );

@@ -24,11 +24,17 @@ export default StyleSheet.create({
   wordsContainer: {
     flex: 1,
   },
+  // NEW: ScrollView content container style
+  wordsScrollContent: {
+    flexGrow: 1,
+    paddingBottom: 20,
+  },
   wordsGrid: {
     flexDirection: "row",
     flexWrap: "wrap",
     justifyContent: "space-between",
     gap: 12,
+    paddingHorizontal: 4,
   },
   wordWrapper: {
     width: "48%",
