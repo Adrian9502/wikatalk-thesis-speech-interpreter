@@ -12,7 +12,7 @@ import {
   TextInput,
   ScrollView,
 } from "react-native";
-import { Check, X, Eye, EyeOff, Type } from "react-native-feather";
+import { Check, X, Eye, EyeOff } from "react-native-feather";
 import { LinearGradient } from "expo-linear-gradient";
 import * as Animatable from "react-native-animatable";
 import { BASE_COLORS } from "@/constant/colors";
@@ -42,8 +42,6 @@ interface RenderPlayingContentProps {
 const FillInTheBlankPlayingContent: React.FC<RenderPlayingContentProps> =
   React.memo(
     ({
-      difficulty,
-      levelData,
       userAnswer,
       showHint,
       showTranslation,

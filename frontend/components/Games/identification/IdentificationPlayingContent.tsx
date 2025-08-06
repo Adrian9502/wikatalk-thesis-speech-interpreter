@@ -24,8 +24,6 @@ interface IdentificationPlayingContentProps {
 const IdentificationPlayingContent: React.FC<
   IdentificationPlayingContentProps
 > = ({
-  difficulty,
-  levelData,
   currentSentence,
   words,
   selectedWord,
