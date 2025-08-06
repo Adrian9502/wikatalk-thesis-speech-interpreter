@@ -212,7 +212,6 @@ const MultipleChoice: React.FC<MultipleChoiceProps> = React.memo(
       ]
     );
 
-    // FIXED: Game configuration - ensure EXACT SAME VALUE everywhere
     const gameConfig = useMemo(() => {
       const progressTime =
         progress && !Array.isArray(progress) ? progress.totalTimeSpent || 0 : 0;
@@ -227,20 +226,25 @@ const MultipleChoice: React.FC<MultipleChoiceProps> = React.memo(
 
       if (gameStatus === "completed") {
         if (isBackgroundCompletion) {
+          // For user exits or background completion, use the current timeElapsed
           displayTime = timeElapsed;
           console.log(
-            `[MultipleChoice] Background completion - using timeElapsed: ${timeElapsed}`
+            `User exit/background completion - using timeElapsed: ${timeElapsed}`
           );
+        } else if (timeElapsed === 0) {
+          // NEW: If timeElapsed is 0, this indicates a timer reset
+          displayTime = 0;
+          console.log(`Timer reset detected - using 0: ${timeElapsed}`);
         } else if (finalTimeRef.current > 0) {
+          // For normal completion, use the captured final time
           displayTime = finalTimeRef.current;
           console.log(
-            `[MultipleChoice] Normal completion - using finalTimeRef: ${finalTimeRef.current}`
+            `Normal completion - using finalTimeRef: ${finalTimeRef.current}`
           );
         } else {
+          // Fallback to current elapsed time
           displayTime = timeElapsed;
-          console.log(
-            `[MultipleChoice] Fallback - using timeElapsed: ${timeElapsed}`
-          );
+          console.log(`Fallback - using timeElapsed: ${timeElapsed}`);
         }
       } else if (gameStatus === "playing") {
         displayTime = timeElapsed || progressTime;

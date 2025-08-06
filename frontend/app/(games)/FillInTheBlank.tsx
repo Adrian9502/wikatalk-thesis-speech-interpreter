@@ -199,30 +199,32 @@ const FillInTheBlank: React.FC<FillInTheBlankProps> = React.memo(
         progress && !Array.isArray(progress) ? progress.totalTimeSpent || 0 : 0;
 
       // CRITICAL: Better final time logic - FIXED for user exit
-      let displayTime = progressTime; // FIXED: Start with progressTime
+      let displayTime = progressTime;
 
       if (gameStatus === "completed") {
         if (isBackgroundCompletion) {
-          // CRITICAL: For user exits or background completion, use the current timeElapsed
+          // For user exits or background completion, use the current timeElapsed
           displayTime = timeElapsed;
           console.log(
-            `[FillInTheBlank] User exit/background completion - using timeElapsed: ${timeElapsed}`
+            ` User exit/background completion - using timeElapsed: ${timeElapsed}`
           );
+        } else if (timeElapsed === 0) {
+          // NEW: If timeElapsed is 0, this indicates a timer reset
+          displayTime = 0;
+          console.log(` Timer reset detected - using 0: ${timeElapsed}`);
         } else if (finalTimeRef.current > 0) {
           // For normal completion, use the captured final time
           displayTime = finalTimeRef.current;
           console.log(
-            `[FillInTheBlank] Normal completion - using finalTimeRef: ${finalTimeRef.current}`
+            `Normal completion - using finalTimeRef: ${finalTimeRef.current}`
           );
         } else {
           // Fallback to current elapsed time
           displayTime = timeElapsed;
-          console.log(
-            `[FillInTheBlank] Fallback - using timeElapsed: ${timeElapsed}`
-          );
+          console.log(`Fallback - using timeElapsed: ${timeElapsed}`);
         }
       } else if (gameStatus === "playing") {
-        displayTime = timeElapsed || progressTime; // FIXED: Fallback to progressTime
+        displayTime = timeElapsed || progressTime;
       }
 
       // NEW: Handle background completion case
@@ -250,7 +252,7 @@ const FillInTheBlank: React.FC<FillInTheBlankProps> = React.memo(
       levelData?.focusArea,
       userAnswer,
       gameStatus,
-      timeElapsed, // CRITICAL: Make sure timeElapsed is in dependencies
+      timeElapsed,
       isBackgroundCompletion,
       progress,
     ]);

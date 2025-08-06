@@ -114,6 +114,12 @@ const StatsContainer: React.FC<StatsContainerProps> = ({
         setWasActualReset(true);
         fetchCoinsBalance(true);
 
+        // NEW: Call the parent's timer reset callback to update finalTime
+        if (onTimerReset) {
+          console.log("[StatsContainer] Calling parent's onTimerReset callback");
+          onTimerReset();
+        }
+
         const coinsDeducted = result.coinsDeducted || resetCost;
         const successMsg = `Timer reset successfully! 🪙 ${coinsDeducted} coins deducted.`;
 
@@ -180,7 +186,7 @@ const StatsContainer: React.FC<StatsContainerProps> = ({
     } finally {
       setIsResetting(false);
     }
-  }, [levelId, resetTimer, fetchCoinsBalance, resetCost]);
+  }, [levelId, resetTimer, fetchCoinsBalance, resetCost, onTimerReset]); // Add onTimerReset to dependencies
 
   // NEW: Reset the wasActualReset flag when time changes (from retry)
   useEffect(() => {
