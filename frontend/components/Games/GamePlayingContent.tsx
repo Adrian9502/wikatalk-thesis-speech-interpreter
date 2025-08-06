@@ -36,24 +36,8 @@ const GamePlayingContent: React.FC<GamePlayingContentProps> = React.memo(
     return (
       <View style={styles.container}>
         {/* Floating Decorative Elements */}
-        <Animatable.View
-          animation="pulse"
-          iterationCount="infinite"
-          duration={4000}
-          style={[styles.floatingElement, styles.element1]}
-        />
-        <Animatable.View
-          animation="rotate"
-          iterationCount="infinite"
-          duration={8000}
-          style={[styles.floatingElement, styles.element2]}
-        />
-        <Animatable.View
-          animation="bounce"
-          iterationCount="infinite"
-          duration={6000}
-          style={[styles.floatingElement, styles.element3]}
-        />
+        <View style={[styles.floatingElement, styles.element1]} />
+        <View style={[styles.floatingElement, styles.element2]} />
 
         <ScrollView
           showsVerticalScrollIndicator={false}
@@ -67,7 +51,6 @@ const GamePlayingContent: React.FC<GamePlayingContentProps> = React.memo(
           <Animatable.View
             animation="fadeInUp"
             duration={800}
-            delay={200} // Reduced delay since no level section above
             style={styles.contentArea}
           >
             {children}
@@ -92,7 +75,7 @@ const styles = StyleSheet.create({
   element1: {
     width: 80,
     height: 80,
-    top: "15%",
+    top: "65%",
     right: -20,
   },
   element2: {
@@ -100,12 +83,6 @@ const styles = StyleSheet.create({
     height: 60,
     top: "35%",
     left: -15,
-  },
-  element3: {
-    width: 40,
-    height: 40,
-    top: "60%",
-    right: "20%",
   },
   scrollContent: {
     paddingBottom: 40,

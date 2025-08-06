@@ -263,8 +263,8 @@ const StatsContainer: React.FC<StatsContainerProps> = ({
   return (
     <>
       <Animatable.View
-        animation="slideInDown"
-        duration={800}
+        animation="fadeIn" // Changed from "slideInDown"
+        duration={600} // Reduced from 800
         delay={animationDelay}
         style={[
           styles.statsContainer,
@@ -274,9 +274,9 @@ const StatsContainer: React.FC<StatsContainerProps> = ({
         {/* Timer Section - Always show when showTimer is true */}
         {showTimer && (
           <Animatable.View
-            animation="fadeInLeft"
-            duration={600}
-            delay={animationDelay + 100}
+            animation="fadeIn" // Changed from "fadeInLeft"
+            duration={400} // Reduced from 600
+            delay={animationDelay + 50} // Reduced delay
             style={styles.timerSection}
           >
             {variant === "playing" && isStarted ? (
@@ -293,12 +293,12 @@ const StatsContainer: React.FC<StatsContainerProps> = ({
           </Animatable.View>
         )}
 
-        {/* UPDATED: Badges Section - Only show when game is playing */}
+        {/* Badges Section - Only show when game is playing */}
         {variant === "playing" && (
           <Animatable.View
-            animation="fadeInRight"
-            duration={600}
-            delay={animationDelay + (showTimer ? 200 : 100)}
+            animation="fadeIn" // Changed from "fadeInRight"
+            duration={400} // Reduced from 600
+            delay={animationDelay + (showTimer ? 100 : 50)} // Reduced delay
             style={styles.badgesSection}
           >
             <DifficultyBadge difficulty={difficulty} />

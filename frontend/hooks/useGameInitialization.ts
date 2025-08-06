@@ -21,7 +21,7 @@ export const useGameInitialization = (
   const hasStarted = useRef(false);
   const initializationLock = useRef(false);
 
-  // FIXED: Better initialization logic
+  // SIMPLIFIED: Better initialization logic with shorter delays
   useEffect(() => {
     if (
       levelData &&
@@ -35,20 +35,18 @@ export const useGameInitialization = (
 
       initializationLock.current = true;
 
-      // CRITICAL: Use requestAnimationFrame to ensure proper timing
-      requestAnimationFrame(() => {
-        initialize(levelData, levelId, gameMode, difficulty);
-        hasInitialized.current = true;
-        initializationLock.current = false;
+      // OPTIMIZED: Use immediate execution instead of requestAnimationFrame
+      initialize(levelData, levelId, gameMode, difficulty);
+      hasInitialized.current = true;
+      initializationLock.current = false;
 
-        console.log(
-          `[useGameInitialization] ${gameMode} initialized, status should be idle`
-        );
-      });
+      console.log(
+        `[useGameInitialization] ${gameMode} initialized, status should be idle`
+      );
     }
   }, [levelData, levelId, gameMode, difficulty, gameStatus, initialize]);
 
-  // FIXED: Better game start logic
+  // SIMPLIFIED: Better game start logic with minimal delays
   useEffect(() => {
     console.log(
       `[useGameInitialization] Start check - gameStatus: ${gameStatus}, isStarted: ${isStarted}, hasInitialized: ${hasInitialized.current}, hasStarted: ${hasStarted.current}`
@@ -65,8 +63,8 @@ export const useGameInitialization = (
         `[useGameInitialization] Starting ${gameMode} game with initial time: ${initialTime}`
       );
 
-      // CRITICAL: Add longer delay for identification and fillBlanks
-      const startDelay = gameMode === "multipleChoice" ? 100 : 300;
+      // OPTIMIZED: Reduced delay for all game modes
+      const startDelay = 50; // Consistent minimal delay
 
       setTimeout(() => {
         console.log(
@@ -75,12 +73,12 @@ export const useGameInitialization = (
         startGame();
         hasStarted.current = true;
 
-        // Verify the game started
+        // Quick verification
         setTimeout(() => {
           console.log(
             `[useGameInitialization] ${gameMode} should now be playing`
           );
-        }, 100);
+        }, 50);
       }, startDelay);
     }
   }, [

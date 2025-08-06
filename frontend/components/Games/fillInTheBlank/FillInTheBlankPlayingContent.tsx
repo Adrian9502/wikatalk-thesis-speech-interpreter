@@ -56,7 +56,7 @@ const FillInTheBlankPlayingContent: React.FC<RenderPlayingContentProps> =
     }) => {
       const inputRef = useRef<TextInput>(null);
 
-      // NEW: Track animation state
+      // NEW: Simplified animation state
       const [isAnimating, setIsAnimating] = useState(true);
 
       // Get game mode gradient
@@ -65,12 +65,11 @@ const FillInTheBlankPlayingContent: React.FC<RenderPlayingContentProps> =
         []
       );
 
-      // NEW: Enable interactions after animations complete
+      // NEW: Simplified animation - single duration
       useEffect(() => {
-        const animationDuration = 800 + 200 + 400 + 200 + 600 + 200; // Total animation time
         const timer = setTimeout(() => {
           setIsAnimating(false);
-        }, animationDuration);
+        }, 800); // Single 800ms duration
 
         return () => clearTimeout(timer);
       }, []);
@@ -140,13 +139,7 @@ const FillInTheBlankPlayingContent: React.FC<RenderPlayingContentProps> =
           keyboardShouldPersistTaps="handled"
           keyboardDismissMode="on-drag"
         >
-          {/* Enhanced Sentence Card */}
-          <Animatable.View
-            animation="zoomIn"
-            duration={800}
-            delay={200}
-            style={gamesSharedStyles.questionCardContainer}
-          >
+          <View style={gamesSharedStyles.questionCardContainer}>
             <LinearGradient
               colors={gameGradientColors}
               style={gamesSharedStyles.questionCard}
@@ -169,26 +162,15 @@ const FillInTheBlankPlayingContent: React.FC<RenderPlayingContentProps> =
               <View style={gamesSharedStyles.cardDecoration1} />
               <View style={gamesSharedStyles.cardDecoration2} />
             </LinearGradient>
-          </Animatable.View>
+          </View>
 
           {/* Attempts Display */}
-          <Animatable.View
-            animation="fadeInDown"
-            duration={600}
-            delay={400}
-            style={styles.attemptsContainer}
-          >
+          <View style={styles.attemptsContainer}>
             <Text style={styles.attemptsLabel}>Attempts left:</Text>
             <View style={styles.heartsContainer}>{attemptsDisplay}</View>
-          </Animatable.View>
+          </View>
 
-          {/* Enhanced Input Section */}
-          <Animatable.View
-            animation="slideInUp"
-            duration={700}
-            delay={600}
-            style={styles.inputSection}
-          >
+          <View style={styles.inputSection}>
             <View style={styles.inputHeader}>
               <Text style={styles.inputLabel}>Your Answer:</Text>
             </View>
@@ -199,11 +181,7 @@ const FillInTheBlankPlayingContent: React.FC<RenderPlayingContentProps> =
                   "rgba(255, 255, 255, 0.05)",
                   "rgba(255, 255, 255, 0.09)",
                 ]}
-                style={[
-                  styles.inputContainer,
-                  // NEW: Add disabled styling
-                  // isAnimating && styles.inputDisabled,
-                ]}
+                style={styles.inputContainer}
               >
                 <TextInput
                   ref={inputRef}
@@ -259,23 +237,18 @@ const FillInTheBlankPlayingContent: React.FC<RenderPlayingContentProps> =
                 </LinearGradient>
               </TouchableOpacity>
             </View>
-          </Animatable.View>
+          </View>
 
-          {/* Enhanced Help Buttons */}
+          {/* Simplified Help Buttons - Single fadeIn */}
           <Animatable.View
             animation="fadeIn"
-            duration={600}
-            delay={800}
+            duration={400}
             style={styles.helpSection}
           >
             <Text style={styles.helpTitle}>Need help?</Text>
             <View style={styles.helpButtons}>
               <TouchableOpacity
-                style={[
-                  styles.helpButton,
-                  showHint && styles.helpButtonActive,
-                  // isAnimating && styles.helpButtonDisabled,
-                ]}
+                style={[styles.helpButton, showHint && styles.helpButtonActive]}
                 onPress={handleToggleHint}
                 disabled={isAnimating}
               >
@@ -300,7 +273,6 @@ const FillInTheBlankPlayingContent: React.FC<RenderPlayingContentProps> =
                 style={[
                   styles.helpButton,
                   showTranslation && styles.helpButtonActive,
-                  // isAnimating && styles.helpButtonDisabled,
                 ]}
                 onPress={handleToggleTranslation}
                 disabled={isAnimating}
@@ -326,11 +298,11 @@ const FillInTheBlankPlayingContent: React.FC<RenderPlayingContentProps> =
             </View>
           </Animatable.View>
 
-          {/* Animated Help Cards */}
+          {/* Simplified Help Cards - Quick fadeIn when shown */}
           {showHint && currentExercise?.hint && (
             <Animatable.View
-              animation="slideInUp"
-              duration={500}
+              animation="fadeIn"
+              duration={400}
               style={styles.helpCard}
             >
               <LinearGradient
@@ -348,8 +320,8 @@ const FillInTheBlankPlayingContent: React.FC<RenderPlayingContentProps> =
 
           {showTranslation && currentExercise?.translation && (
             <Animatable.View
-              animation="slideInUp"
-              duration={500}
+              animation="fadeIn"
+              duration={400}
               style={styles.helpCard}
             >
               <LinearGradient
@@ -367,11 +339,11 @@ const FillInTheBlankPlayingContent: React.FC<RenderPlayingContentProps> =
             </Animatable.View>
           )}
 
-          {/* Enhanced Feedback Card */}
+          {/* Simplified Feedback Card - Quick bounceIn when shown */}
           {showFeedback && (
             <Animatable.View
               animation="bounceIn"
-              duration={2000}
+              duration={400}
               style={styles.feedbackContainer}
             >
               <LinearGradient

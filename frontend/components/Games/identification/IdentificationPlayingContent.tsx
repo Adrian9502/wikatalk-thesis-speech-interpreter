@@ -31,7 +31,7 @@ const IdentificationPlayingContent: React.FC<
   toggleTranslation,
   handleWordSelect,
 }) => {
-  // NEW: Track animation state
+  // NEW: Simplified animation state
   const [isAnimating, setIsAnimating] = useState(true);
 
   // Get game mode gradient for consistency
@@ -42,15 +42,14 @@ const IdentificationPlayingContent: React.FC<
 
   const wordOptions = React.useMemo(() => words || [], [words]);
 
-  // NEW: Enable interactions after animations complete
+  // NEW: Simplified animation - single duration
   useEffect(() => {
-    const animationDuration = 900 + wordOptions.length * 100 + 300; // Total animation time
     const timer = setTimeout(() => {
       setIsAnimating(false);
-    }, animationDuration);
+    }, 800); // Single 800ms duration
 
     return () => clearTimeout(timer);
-  }, [wordOptions.length]);
+  }, []);
 
   // NEW: Disabled handlers
   const handleWordPress = (index: number) => {
@@ -65,13 +64,8 @@ const IdentificationPlayingContent: React.FC<
 
   return (
     <View style={gamesSharedStyles.gameContainer}>
-      {/* Enhanced Question Card */}
-      <Animatable.View
-        animation="zoomIn"
-        duration={800}
-        delay={200}
-        style={gamesSharedStyles.questionCardContainer}
-      >
+      {/* Simplified Question Card - Single fadeIn */}
+      <View style={gamesSharedStyles.questionCardContainer}>
         <LinearGradient
           style={gamesSharedStyles.questionCard}
           colors={gameGradientColors}
@@ -95,39 +89,26 @@ const IdentificationPlayingContent: React.FC<
           <View style={gamesSharedStyles.cardDecoration1} />
           <View style={gamesSharedStyles.cardDecoration2} />
         </LinearGradient>
-      </Animatable.View>
+      </View>
 
-      {/* Enhanced Instructions */}
-      <Animatable.View
-        animation="fadeIn"
-        duration={600}
-        delay={600}
-        style={styles.instructionsContainer}
-      >
+      {/* Simplified Instructions - Single fadeIn */}
+      <View style={styles.instructionsContainer}>
         <Text style={styles.instructionsTitle}>Find the correct word:</Text>
         <Text style={styles.instructionsText}>
           Tap on the word that best fits the sentence context
         </Text>
-      </Animatable.View>
+      </View>
 
-      {/* Enhanced Words Grid */}
-      <Animatable.View
-        animation="fadeInUp"
-        duration={700}
-        delay={800}
-        style={styles.wordsContainer}
-      >
+      {/* Simplified Words Grid - Single fadeIn */}
+      <View style={styles.wordsContainer}>
         <View style={styles.wordsGrid}>
           {wordOptions.length > 0 ? (
             wordOptions.map((word, index) => {
               const isSelected = selectedWord === index;
 
               return (
-                <Animatable.View
+                <View
                   key={`word-${index}-${word.text || word.clean}`}
-                  animation="slideInUp"
-                  duration={600}
-                  delay={900 + index * 100}
                   style={styles.wordWrapper}
                 >
                   <TouchableOpacity
@@ -154,7 +135,7 @@ const IdentificationPlayingContent: React.FC<
                     {/* Selection Pulse */}
                     {isSelected && <View style={styles.selectionPulse} />}
                   </TouchableOpacity>
-                </Animatable.View>
+                </View>
               );
             })
           ) : (
@@ -163,20 +144,14 @@ const IdentificationPlayingContent: React.FC<
             </View>
           )}
         </View>
-      </Animatable.View>
+      </View>
 
-      {/* Enhanced Translation Section */}
-      <Animatable.View
-        animation="fadeIn"
-        duration={600}
-        delay={1200}
-        style={styles.translationSection}
-      >
+      {/* Simplified Translation Section - Single fadeIn */}
+      <View style={styles.translationSection}>
         <TouchableOpacity
           style={[
             styles.translationButton,
             showTranslation && styles.translationButtonActive,
-            // isAnimating && styles.translationButtonDisabled,
           ]}
           onPress={handleToggleTranslation}
           disabled={isAnimating}
@@ -199,8 +174,8 @@ const IdentificationPlayingContent: React.FC<
         {/* Translation Card */}
         {showTranslation && (
           <Animatable.View
-            animation="slideInUp"
-            duration={500}
+            animation="fadeIn"
+            duration={400}
             style={styles.translationCard}
           >
             <LinearGradient
@@ -217,7 +192,7 @@ const IdentificationPlayingContent: React.FC<
             </LinearGradient>
           </Animatable.View>
         )}
-      </Animatable.View>
+      </View>
     </View>
   );
 };

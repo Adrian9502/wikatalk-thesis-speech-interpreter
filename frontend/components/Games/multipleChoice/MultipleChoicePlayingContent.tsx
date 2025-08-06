@@ -35,7 +35,7 @@ interface MultipleChoicePlayingContentProps {
 
 const MultipleChoicePlayingContent: React.FC<MultipleChoicePlayingContentProps> =
   React.memo(({ currentQuestion, selectedOption, handleOptionSelect }) => {
-    // NEW: Track animation state
+    // NEW: Track animation state - simplified to single animation
     const [isAnimating, setIsAnimating] = useState(true);
 
     // Get game mode gradient for consistency
@@ -49,15 +49,14 @@ const MultipleChoicePlayingContent: React.FC<MultipleChoicePlayingContentProps> 
       [currentQuestion?.options]
     );
 
-    // NEW: Enable interactions after animations complete
+    // NEW: Simplified animation - single duration
     useEffect(() => {
-      const animationDuration = 700 + options.length * 100 + 200; // Total animation time
       const timer = setTimeout(() => {
         setIsAnimating(false);
-      }, animationDuration);
+      }, 800); // Single 800ms duration
 
       return () => clearTimeout(timer);
-    }, [options.length]);
+    }, []);
 
     // NEW: Disabled option handler
     const handleOptionPress = (optionId: string) => {
@@ -67,13 +66,8 @@ const MultipleChoicePlayingContent: React.FC<MultipleChoicePlayingContentProps> 
 
     return (
       <View style={gamesSharedStyles.gameContainer}>
-        {/* Enhanced Question Card */}
-        <Animatable.View
-          animation="zoomIn"
-          duration={800}
-          delay={200}
-          style={gamesSharedStyles.questionCardContainer}
-        >
+        {/* Simplified Question Card - Single fadeIn */}
+        <View style={gamesSharedStyles.questionCardContainer}>
           <LinearGradient
             style={gamesSharedStyles.questionCard}
             colors={gameGradientColors}
@@ -96,14 +90,13 @@ const MultipleChoicePlayingContent: React.FC<MultipleChoicePlayingContentProps> 
             <View style={gamesSharedStyles.cardDecoration1} />
             <View style={gamesSharedStyles.cardDecoration2} />
           </LinearGradient>
-        </Animatable.View>
+        </View>
 
-        {/* Enhanced Options Section */}
+        {/* Simplified Options Section - Single fadeIn */}
         <View style={styles.optionsContainer}>
           <Animatable.View
             animation="fadeIn"
-            duration={600}
-            delay={600}
+            duration={800}
             style={styles.optionsHeader}
           >
             <Text style={styles.optionsTitle}>Choose your answer:</Text>
@@ -122,55 +115,54 @@ const MultipleChoicePlayingContent: React.FC<MultipleChoicePlayingContentProps> 
             </View>
           </Animatable.View>
 
-          {options.map((option: Option, index: number) => {
-            const isSelected = selectedOption === option.id;
+          {/* Simplified Options - All fade in together */}
+          <Animatable.View
+            animation="fadeIn"
+            duration={800}
+            style={{ flex: 1 }}
+          >
+            {options.map((option: Option, index: number) => {
+              const isSelected = selectedOption === option.id;
 
-            return (
-              <Animatable.View
-                key={option.id}
-                animation="slideInUp"
-                duration={600}
-                delay={700 + index * 100}
-                style={styles.optionWrapper}
-              >
-                <TouchableOpacity
-                  style={[
-                    styles.optionCard,
-                    isSelected && styles.selectedOption,
-                    // NEW: Add disabled styling
-                    // isAnimating && styles.optionDisabled,
-                  ]}
-                  onPress={() => handleOptionPress(option.id)}
-                  disabled={isAnimating || selectedOption !== null}
-                  activeOpacity={isAnimating ? 1 : 0.8}
-                >
-                  <LinearGradient
-                    colors={[
-                      "rgba(255, 255, 255, 0.1)",
-                      "rgba(255, 255, 255, 0.05)",
+              return (
+                <View key={option.id} style={styles.optionWrapper}>
+                  <TouchableOpacity
+                    style={[
+                      styles.optionCard,
+                      isSelected && styles.selectedOption,
                     ]}
-                    style={styles.optionGradient}
-                    start={{ x: 0, y: 0 }}
-                    end={{ x: 1, y: 0 }}
+                    onPress={() => handleOptionPress(option.id)}
+                    disabled={isAnimating || selectedOption !== null}
+                    activeOpacity={isAnimating ? 1 : 0.8}
                   >
-                    {/* Option Letter */}
-                    <View style={styles.optionLetter}>
-                      <Text style={styles.optionLetterText}>
-                        {String.fromCharCode(65 + index)}
-                      </Text>
-                    </View>
+                    <LinearGradient
+                      colors={[
+                        "rgba(255, 255, 255, 0.1)",
+                        "rgba(255, 255, 255, 0.05)",
+                      ]}
+                      style={styles.optionGradient}
+                      start={{ x: 0, y: 0 }}
+                      end={{ x: 1, y: 0 }}
+                    >
+                      {/* Option Letter */}
+                      <View style={styles.optionLetter}>
+                        <Text style={styles.optionLetterText}>
+                          {String.fromCharCode(65 + index)}
+                        </Text>
+                      </View>
 
-                    {/* Option Content */}
-                    <View style={styles.optionContent}>
-                      <Text style={styles.optionText} numberOfLines={3}>
-                        {safeTextRender(option.text)}
-                      </Text>
-                    </View>
-                  </LinearGradient>
-                </TouchableOpacity>
-              </Animatable.View>
-            );
-          })}
+                      {/* Option Content */}
+                      <View style={styles.optionContent}>
+                        <Text style={styles.optionText} numberOfLines={3}>
+                          {safeTextRender(option.text)}
+                        </Text>
+                      </View>
+                    </LinearGradient>
+                  </TouchableOpacity>
+                </View>
+              );
+            })}
+          </Animatable.View>
         </View>
       </View>
     );
