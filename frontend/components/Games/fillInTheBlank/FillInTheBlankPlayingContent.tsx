@@ -168,7 +168,6 @@ const FillInTheBlankPlayingContent: React.FC<RenderPlayingContentProps> =
             keyboardShouldPersistTaps="handled"
             keyboardDismissMode="on-drag"
             removeClippedSubviews={true}
-            maxToRenderPerBatch={1}
             contentContainerStyle={styles.scrollContainer}
           >
             {/* Sentence Card */}

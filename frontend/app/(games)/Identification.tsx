@@ -1,20 +1,28 @@
-import React, { useMemo, useCallback, useEffect, useRef } from "react";
+import React, {
+  useCallback,
+  useRef,
+  useMemo,
+  useEffect,
+  useState,
+} from "react";
 import { View, Text, TouchableOpacity } from "react-native";
-import { BASE_COLORS } from "@/constant/colors";
 import useGameStore from "@/store/games/useGameStore";
-import gameSharedStyles from "@/styles/gamesSharedStyles";
 import GameContainer from "@/components/games/GameContainer";
 import GamePlayingContent from "@/components/games/GamePlayingContent";
 import GameCompletedContent from "@/components/games/GameCompletedContent";
 import { useGameInitialization } from "@/hooks/useGameInitialization";
-import { router } from "expo-router";
 import IdentificationPlayingContent from "@/components/games/identification/IdentificationPlayingContent";
 import { useNextLevelData } from "@/utils/games/levelUtils";
 import { useGameProgress } from "@/hooks/games/useGameProgress";
 import { useGameRestart } from "@/hooks/games/useGameRestart";
 import { useTimerReset } from "@/hooks/games/useTimerReset";
-import useProgressStore from "@/store/games/useProgressStore";
 import { useAppStateProgress } from "@/hooks/games/useAppStateProgress";
+import useProgressStore from "@/store/games/useProgressStore";
+import useCoinsStore from "@/store/games/useCoinsStore";
+import RewardNotification from "@/components/games/RewardNotification";
+import { router } from "expo-router";
+import { BASE_COLORS } from "@/constant/colors";
+import gameSharedStyles from "@/styles/gamesSharedStyles";
 
 interface IdentificationProps {
   levelId: number;
@@ -50,8 +58,15 @@ const Identification: React.FC<IdentificationProps> = React.memo(
       toggleIdentificationTranslation: toggleTranslation,
       setTimeElapsed,
       setTimerRunning,
-      setBackgroundCompletion, // ADD THIS
+      setBackgroundCompletion,
     } = useGameStore();
+
+    // NEW: Reward state
+    const [showReward, setShowReward] = useState(false);
+    const [rewardInfo, setRewardInfo] = useState<any>(null);
+
+    // NEW: Coins store for balance refresh
+    const { fetchCoinsBalance } = useCoinsStore();
 
     // Custom hooks for shared logic
     const {
@@ -123,12 +138,10 @@ const Identification: React.FC<IdentificationProps> = React.memo(
       isBackgroundCompletion,
     ]);
 
-    // Handle word selection with progress update
+    // UPDATED: Handle word selection with reward notification
     const handleWordSelectWithProgress = useCallback(
       async (wordIndex: number) => {
         try {
-          console.log(`[Identification] Word selected at index: ${wordIndex}`);
-
           const preciseTime = timeElapsed;
           const exactFinalTime = Math.round(preciseTime * 100) / 100;
           finalTimeRef.current = exactFinalTime;
@@ -149,14 +162,30 @@ const Identification: React.FC<IdentificationProps> = React.memo(
             `[Identification] Updating progress - Time: ${exactFinalTime}, Correct: ${isCorrect}, Completed: ${isCorrect}`
           );
 
+          // UPDATED: Pass difficulty to updateProgress
           const updatedProgress = await updateProgress(
             exactFinalTime,
             isCorrect,
-            isCorrect
+            isCorrect,
+            difficulty // NEW: Pass difficulty for reward calculation
           );
 
           if (updatedProgress) {
             console.log(`[Identification] Progress updated successfully`);
+
+            // NEW: Handle reward display and coins refresh
+            if (
+              updatedProgress.rewardInfo &&
+              updatedProgress.rewardInfo.coins > 0
+            ) {
+              setRewardInfo(updatedProgress.rewardInfo);
+              setShowReward(true);
+
+              // Refresh coins balance to show updated amount
+              setTimeout(() => {
+                fetchCoinsBalance(true);
+              }, 500);
+            }
 
             // ADDED: Force refresh enhanced progress cache for ALL answers (correct AND incorrect)
             const progressStore = useProgressStore.getState();
@@ -179,6 +208,8 @@ const Identification: React.FC<IdentificationProps> = React.memo(
         setTimerRunning,
         handleWordSelect,
         updateProgress,
+        difficulty, // NEW: Add difficulty dependency
+        fetchCoinsBalance, // NEW: Add fetchCoinsBalance dependency
       ]
     );
     const handleUserExitWithSave = useCallback(async () => {
@@ -327,67 +358,83 @@ const Identification: React.FC<IdentificationProps> = React.memo(
       );
     }
 
+    // NEW: Reward Notification handler
+    const handleRewardComplete = useCallback(() => {
+      setShowReward(false);
+      setRewardInfo(null);
+    }, []);
+
     return (
-      <GameContainer
-        title="Word Identification"
-        timerRunning={timerRunning}
-        gameStatus={gameStatus}
-        difficulty={difficulty}
-        focusArea={gameConfig.focusArea}
-        showTimer={true}
-        initialTime={gameConfig.initialTime}
-        isStarted={isStarted}
-        finalTime={gameConfig.finalTime}
-        levelId={levelId}
-        onTimerReset={handleTimerReset}
-        isCorrectAnswer={gameConfig.isCorrect}
-        onUserExit={handleUserExitWithSave}
-      >
-        {gameStatus === "playing" ? (
-          <GamePlayingContent
-            timerRunning={timerRunning}
-            difficulty={difficulty}
-            focusArea={gameConfig.focusArea}
-            isStarted={isStarted}
-            gameStatus={gameStatus}
-            initialTime={gameConfig.initialTime}
-            levelString={gameConfig.currentSentence?.level}
-            actualTitle={gameConfig.currentSentence?.title}
-          >
-            <IdentificationPlayingContent
+      <>
+        <GameContainer
+          title="Identification"
+          timerRunning={timerRunning}
+          gameStatus={gameStatus}
+          variant="triple"
+          difficulty={difficulty}
+          focusArea={gameConfig.focusArea}
+          showTimer={true}
+          initialTime={gameConfig.initialTime}
+          isStarted={isStarted}
+          finalTime={gameConfig.finalTime}
+          levelId={levelId}
+          onTimerReset={handleTimerReset}
+          isCorrectAnswer={gameConfig.isCorrect}
+          onUserExit={handleUserExitWithSave}
+        >
+          {gameStatus === "playing" ? (
+            <GamePlayingContent
+              timerRunning={timerRunning}
               difficulty={difficulty}
-              levelData={levelData}
-              currentSentence={gameConfig.currentSentence}
-              words={words}
-              selectedWord={selectedWord}
-              showTranslation={showTranslation}
-              toggleTranslation={toggleTranslation}
-              handleWordSelect={handleWordSelectWithProgress}
+              isStarted={isStarted}
+              focusArea={gameConfig.focusArea}
+              gameStatus={gameStatus}
+              initialTime={gameConfig.initialTime}
+              levelString={sentences[currentSentenceIndex]?.level}
+              actualTitle={sentences[currentSentenceIndex]?.title}
+            >
+              <IdentificationPlayingContent
+                difficulty={difficulty}
+                levelData={levelData}
+                currentSentence={sentences[currentSentenceIndex]}
+                words={words}
+                selectedWord={selectedWord}
+                showTranslation={showTranslation}
+                toggleTranslation={toggleTranslation}
+                handleWordSelect={handleWordSelectWithProgress}
+              />
+            </GamePlayingContent>
+          ) : (
+            <GameCompletedContent
+              score={score}
+              timeElapsed={gameConfig.finalTime}
+              difficulty={difficulty}
+              question={gameConfig.question}
+              userAnswer={gameConfig.selectedAnswerText}
+              isCorrect={gameConfig.isCorrect}
+              levelId={levelId}
+              gameMode="identification"
+              gameTitle="Identification"
+              onRestart={handleRestartWithProgress}
+              focusArea={gameConfig.focusArea}
+              levelString={sentences[currentSentenceIndex]?.level}
+              actualTitle={sentences[currentSentenceIndex]?.title}
+              nextLevelTitle={getNextLevelTitle()}
+              isCurrentLevelCompleted={gameConfig.isCorrect}
+              isCorrectAnswer={gameConfig.isCorrect}
+              isBackgroundCompletion={gameConfig.isBackgroundCompletion}
+              isUserExit={gameConfig.isUserExit}
             />
-          </GamePlayingContent>
-        ) : (
-          <GameCompletedContent
-            score={score}
-            timeElapsed={gameConfig.finalTime}
-            difficulty={difficulty}
-            question={gameConfig.question}
-            userAnswer={gameConfig.selectedAnswerText}
-            isCorrect={gameConfig.isCorrect}
-            levelId={levelId}
-            gameMode="identification"
-            gameTitle="Word Identification"
-            onRestart={handleRestartWithProgress}
-            focusArea={gameConfig.focusArea}
-            levelString={gameConfig.currentSentence?.level}
-            actualTitle={gameConfig.currentSentence?.title}
-            nextLevelTitle={getNextLevelTitle()}
-            isCurrentLevelCompleted={gameConfig.isCorrect}
-            isCorrectAnswer={gameConfig.isCorrect}
-            isBackgroundCompletion={gameConfig.isBackgroundCompletion}
-            isUserExit={gameConfig.isUserExit}
-          />
-        )}
-      </GameContainer>
+          )}
+        </GameContainer>
+
+        {/* NEW: Reward Notification */}
+        <RewardNotification
+          visible={showReward}
+          rewardInfo={rewardInfo}
+          onComplete={handleRewardComplete}
+        />
+      </>
     );
   }
 );

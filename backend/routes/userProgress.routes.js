@@ -4,6 +4,9 @@ const { protect } = require("../middleware/auth.middleware");
 const UserProgress = require("../models/userProgress.model");
 const User = require("../models/user.model");
 
+// NEW: Import reward calculation function
+const { calculateRewardCoins } = require("../utils/rewardCalculationUtils");
+
 // UPDATED: New cost calculation function with your tiers
 const calculateResetCost = (secondsSpent) => {
   if (secondsSpent <= 10) return 20;          // 0–10 sec → 20 coins
@@ -104,138 +107,159 @@ router.get("/:quizId", protect, async (req, res) => {
  * @access  Private
  */
 router.post("/:quizId", protect, async (req, res) => {
-  const maxRetries = 3;
+  try {
+    const userId = req.user._id;
+    let quizId = req.params.quizId;
+    const { timeSpent, completed, isCorrect, difficulty } = req.body;
 
-  for (let attempt = 1; attempt <= maxRetries; attempt++) {
-    try {
-      console.log(`[PROGRESS] Update attempt ${attempt}/${maxRetries} for quiz:`, req.params.quizId);
+    // Handle numeric ID format
+    if (quizId.startsWith('n-')) {
+      quizId = quizId.replace('n-', '');
+      console.log("[PROGRESS] Converted numeric ID to:", quizId);
+    }
 
-      const userId = req.user._id;
-      let { quizId } = req.params;
-      const { timeSpent, completed, isCorrect } = req.body;
+    // Validate required fields
+    const timeSpentNum = parseFloat(timeSpent);
+    if (isNaN(timeSpentNum) || timeSpentNum < 0) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid timeSpent value"
+      });
+    }
 
-      // Handle numeric ID format
-      if (quizId.startsWith('n-')) {
-        quizId = quizId.replace('n-', '');
-        console.log("[PROGRESS] Converted numeric ID to:", quizId);
-      }
+    // Validate difficulty for reward calculation
+    if (isCorrect && !difficulty) {
+      console.warn("[PROGRESS] No difficulty provided for correct answer, defaulting to 'easy'");
+    }
 
-      // Validate timeSpent
-      const timeSpentNum = parseFloat(timeSpent);
-      if (isNaN(timeSpentNum) || timeSpentNum < 0) {
-        return res.status(400).json({
-          success: false,
-          message: "Invalid timeSpent value"
-        });
-      }
+    console.log(`[PROGRESS] Processing: timeSpent=${timeSpentNum}, completed=${completed}, isCorrect=${isCorrect}, difficulty=${difficulty || 'easy'}`);
 
-      console.log(`[PROGRESS] Processing: timeSpent=${timeSpentNum}, completed=${completed}, isCorrect=${isCorrect}`);
+    // Calculate reward for correct answers
+    let rewardCoins = 0;
+    let rewardInfo = null;
+    
+    if (isCorrect) {
+      const rewardCalculation = calculateRewardCoins(difficulty || 'easy', timeSpentNum, true);
+      rewardCoins = rewardCalculation.coins;
+      rewardInfo = {
+        coins: rewardCalculation.coins,
+        label: rewardCalculation.label,
+        difficulty: difficulty || 'easy',
+        timeSpent: timeSpentNum,
+        tier: rewardCalculation.tier
+      };
+      
+      console.log(`[PROGRESS] Reward calculated: ${rewardCoins} coins for ${difficulty || 'easy'} difficulty in ${timeSpentNum}s`);
+    }
 
-      // Find existing progress or create new
-      let existingProgress = await UserProgress.findOne({ userId, quizId });
+    // Find existing progress or create new
+    let existingProgress = await UserProgress.findOne({ userId, quizId });
 
-      if (!existingProgress) {
-        console.log("[PROGRESS] Creating new progress entry");
-        existingProgress = new UserProgress({
+    if (!existingProgress) {
+      console.log("[PROGRESS] Creating new progress entry");
+      existingProgress = new UserProgress({
+        userId,
+        quizId,
+        exercisesCompleted: completed ? 1 : 0,
+        totalTimeSpent: timeSpentNum,
+        lastAttemptTime: timeSpentNum,
+        lastAttemptDate: new Date(),
+        completed: completed || false,
+        attempts: timeSpentNum > 0 ? [{
+          quizId: quizId,
+          attemptDate: new Date(),
+          timeSpent: timeSpentNum,
+          isCorrect: isCorrect || false,
+          attemptNumber: 1,
+          cumulativeTime: timeSpentNum,
+          rewardEarned: rewardCoins // NEW: Track reward earned
+        }] : []
+      });
+
+      await existingProgress.save();
+
+      // Award coins to user for correct answers
+      if (rewardCoins > 0) {
+        await User.findByIdAndUpdate(
           userId,
-          quizId,
-          exercisesCompleted: completed ? 1 : 0,
-          totalExercises: 1,
-          completed: completed || false,
-          totalTimeSpent: timeSpentNum,
-          lastAttemptTime: timeSpentNum,
-          lastAttemptDate: new Date(),
-          attempts: []
-        });
-      } else {
-        console.log(`[PROGRESS] Updating existing progress: current completed=${existingProgress.completed}`);
+          { $inc: { coins: rewardCoins } },
+          { new: true }
+        );
+        console.log(`[PROGRESS] Awarded ${rewardCoins} coins to user for correct answer`);
+      }
 
-        // Only update time if it's not already completed OR if this is a reset scenario
-        if (!existingProgress.completed || timeSpentNum === 0) {
-          // Add attempt if time > 0
-          if (timeSpentNum > 0) {
-            console.log(`[PROGRESS] Adding attempt with time: ${timeSpentNum}`);
-            existingProgress.attempts.push({
-              quizId: quizId,
-              attemptDate: new Date(),
-              timeSpent: timeSpentNum,
-              isCorrect: isCorrect || false,
-              attemptNumber: existingProgress.attempts.length + 1,
-              cumulativeTime: timeSpentNum
-            });
-            existingProgress.totalTimeSpent = timeSpentNum;
-            existingProgress.lastAttemptTime = timeSpentNum;
-            existingProgress.lastAttemptDate = new Date();
-          }
+      return res.json({ 
+        success: true, 
+        progress: existingProgress,
+        reward: rewardInfo // NEW: Include reward info in response
+      });
+    }
+
+    // Update existing progress with retry logic
+    const maxRetries = 3;
+    for (let attempt = 0; attempt < maxRetries; attempt++) {
+      try {
+        // Only update if time > 0
+        if (timeSpentNum > 0) {
+          // FIXED: Add the missing quizId field here too
+          existingProgress.attempts.push({
+            quizId: quizId, // ADD THIS LINE
+            attemptDate: new Date(),
+            timeSpent: timeSpentNum,
+            isCorrect: isCorrect || false,
+            attemptNumber: existingProgress.attempts.length + 1,
+            cumulativeTime: timeSpentNum,
+            rewardEarned: rewardCoins // NEW: Track reward earned
+          });
+          existingProgress.totalTimeSpent = timeSpentNum;
+          existingProgress.lastAttemptTime = timeSpentNum;
+          existingProgress.lastAttemptDate = new Date();
         }
 
-        if (req.body.completed !== undefined) {
-          existingProgress.completed = req.body.completed;
-          if (req.body.completed) {
+        if (completed !== undefined) {
+          existingProgress.completed = completed;
+          if (completed) {
             existingProgress.exercisesCompleted = 1;
           }
         }
-      }
 
-      await existingProgress.save();
-      return res.json({ success: true, progress: existingProgress });
+        await existingProgress.save();
 
-    } catch (error) {
-      console.error(`[PROGRESS] Attempt ${attempt} failed:`, error);
-
-      if (attempt === maxRetries) {
-        console.error("[PROGRESS] All retry attempts failed");
-        break;
-      }
-
-      // Wait before retry
-      await new Promise(resolve => setTimeout(resolve, 1000 * attempt));
-
-      // Try again
-      try {
-        const existingProgress = await UserProgress.findOne({
-          userId: req.user._id,
-          quizId: req.params.quizId.replace('n-', '')
-        });
-
-        if (existingProgress) {
-          const timeSpentNum = parseFloat(req.body.timeSpent) || 0;
-
-          // Only update if time > 0
-          if (timeSpentNum > 0) {
-            // FIXED: Add the missing quizId field here too
-            existingProgress.attempts.push({
-              quizId: req.params.quizId.replace('n-', ''), // ADD THIS LINE
-              attemptDate: new Date(),
-              timeSpent: timeSpentNum,
-              isCorrect: req.body.isCorrect || false,
-              attemptNumber: existingProgress.attempts.length + 1,
-              cumulativeTime: timeSpentNum
-            });
-            existingProgress.totalTimeSpent = timeSpentNum;
-            existingProgress.lastAttemptTime = timeSpentNum;
-            existingProgress.lastAttemptDate = new Date();
-          }
-
-          if (req.body.completed !== undefined) {
-            existingProgress.completed = req.body.completed;
-            if (req.body.completed) {
-              existingProgress.exercisesCompleted = 1;
-            }
-          }
-
-          await existingProgress.save();
-          return res.json({ success: true, progress: existingProgress });
+        // Award coins to user for correct answers
+        if (rewardCoins > 0) {
+          await User.findByIdAndUpdate(
+            userId,
+            { $inc: { coins: rewardCoins } },
+            { new: true }
+          );
+          console.log(`[PROGRESS] Awarded ${rewardCoins} coins to user for correct answer`);
         }
+
+        return res.json({ 
+          success: true, 
+          progress: existingProgress,
+          reward: rewardInfo // NEW: Include reward info in response
+        });
       } catch (retryError) {
-        console.error("[PROGRESS] Retry failed:", retryError);
+        if (attempt === maxRetries - 1) {
+          throw retryError;
+        }
+        console.log(`[PROGRESS] Retry ${attempt + 1} failed, retrying...`);
+        await new Promise(resolve => setTimeout(resolve, 100));
+        
+        // Refetch the document for next attempt
+        existingProgress = await UserProgress.findOne({ userId, quizId });
+        if (!existingProgress) {
+          throw new Error("Progress document was deleted during update");
+        }
       }
     }
-
-    // FIXED: Proper error handling at the end of the loop
-    return res.status(500).json({
-      success: false,
-      message: error?.message || "Failed to update progress after all retries"
+  } catch (error) {
+    console.error("[PROGRESS] Error updating progress:", error);
+    res.status(500).json({ 
+      success: false, 
+      message: "Server error updating progress",
+      error: error.message 
     });
   }
 });

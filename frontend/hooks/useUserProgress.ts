@@ -27,6 +27,8 @@ export const useUserProgress = (quizId: string | number | "global") => {
   const isFetchingRef = useRef(false);
   const lastFetchTimeRef = useRef(0);
 
+  const abortControllerRef = useRef<AbortController | null>(null);
+
   // Format the ID for API
   const formatQuizId = useCallback((id: string | number): string => {
     if (id === "global") return "global";
@@ -281,36 +283,68 @@ export const useUserProgress = (quizId: string | number | "global") => {
     ]
   );
 
-  // Update the updateProgress function
+  // UPDATED: Enhanced updateProgress function with difficulty support
   const updateProgress = useCallback(
-    async (timeSpent: number, completed?: boolean, isCorrect?: boolean) => {
+    async (
+      timeSpent: number,
+      completed: boolean,
+      isCorrect: boolean,
+      difficulty?: string // NEW: Add difficulty parameter
+    ) => {
+      if (!quizId || quizId === "global") {
+        console.warn(
+          "[useUserProgress] No valid quizId provided for updateProgress"
+        );
+        return null;
+      }
+
       try {
         setIsLoading(true);
+        setError(null);
 
         const token = getToken();
         if (!token) {
-          setIsLoading(false);
-          return null;
+          throw new Error("Authentication token not found");
         }
 
-        const formattedId = formatQuizId(quizId);
-        console.log(
-          `[useUserProgress] Updating progress for: ${formattedId}, time: ${timeSpent}, completed: ${completed}, isCorrect: ${isCorrect}`
-        );
+        const formattedQuizId = formatQuizId(quizId);
 
-        const response = await axios({
-          method: "post",
-          url: `${API_URL}/api/userprogress/${formattedId}`,
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-          },
-          data: { timeSpent, completed, isCorrect },
-          timeout: 10000,
+        console.log(`[useUserProgress] Updating progress:`, {
+          quizId: formattedQuizId,
+          timeSpent,
+          completed,
+          isCorrect,
+          difficulty: difficulty || "easy",
         });
 
-        if (response.data.success) {
-          console.log(`[useUserProgress] Successfully updated progress`);
+        const response = await axios.post(
+          `${API_URL}/api/userprogress/${formattedQuizId}`,
+          {
+            timeSpent: Number(timeSpent.toFixed(2)),
+            completed,
+            isCorrect,
+            difficulty: difficulty || "easy", // NEW: Include difficulty in request
+          },
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+              "Content-Type": "application/json",
+            },
+            timeout: 10000,
+          }
+        );
+
+        if (response.data?.success) {
+          console.log(`[useUserProgress] Progress updated successfully`);
+
+          // NEW: Log reward information if present
+          if (response.data.reward) {
+            console.log(
+              `[useUserProgress] Reward earned:`,
+              response.data.reward
+            );
+          }
+
           const updatedProgress = response.data.progress;
 
           // Update current progress
@@ -325,7 +359,7 @@ export const useUserProgress = (quizId: string | number | "global") => {
           // NEW: Also invalidate the splash store individual cache for this specific quiz
           const splashStore = useSplashStore.getState();
           if (splashStore.setIndividualProgress) {
-            splashStore.setIndividualProgress(formattedId, updatedProgress);
+            splashStore.setIndividualProgress(formattedQuizId, updatedProgress);
           }
 
           // FIXED: Force refresh of global progress in progress store
@@ -349,13 +383,23 @@ export const useUserProgress = (quizId: string | number | "global") => {
             );
           }
 
-          return updatedProgress;
+          return {
+            ...response.data,
+            success: true,
+          };
         }
 
-        return null;
-      } catch (err: any) {
-        console.error(`[useUserProgress] Update error:`, err.message);
-        setError(err.message);
+        throw new Error(response.data?.message || "Failed to update progress");
+      } catch (error: any) {
+        const errorMessage =
+          error.response?.data?.message ||
+          error.message ||
+          "Failed to update progress";
+        console.error(
+          `[useUserProgress] Error updating progress:`,
+          errorMessage
+        );
+        setError(errorMessage);
 
         // FIXED: Better error recovery - try to fetch fresh data
         try {
@@ -373,7 +417,7 @@ export const useUserProgress = (quizId: string | number | "global") => {
           );
         }
 
-        return null;
+        throw error;
       } finally {
         setIsLoading(false);
       }
@@ -491,12 +535,24 @@ export const useUserProgress = (quizId: string | number | "global") => {
     [progress, formatQuizId]
   );
 
+  // Clear progress function
+  const clearProgress = useCallback(() => {
+    console.log(`[useUserProgress] Clearing progress state`);
+    setProgress(null);
+    setError(null);
+    setIsLoading(false);
+    progressCacheRef.current = {};
+    hasInitializedRef.current = false;
+    lastQuizIdRef.current = null;
+  }, []);
+
   return {
     progress,
     isLoading,
     error,
     fetchProgress,
-    updateProgress,
+    updateProgress, // This now supports difficulty parameter
     resetTimer,
+    clearProgress,
   };
 };

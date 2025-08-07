@@ -1,4 +1,10 @@
-import React, { useCallback, useEffect, useMemo, useRef } from "react";
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { KeyboardAvoidingView, Platform } from "react-native";
 import useGameStore from "@/store/games/useGameStore";
 import GameContainer from "@/components/games/GameContainer";
@@ -12,6 +18,8 @@ import { useGameRestart } from "@/hooks/games/useGameRestart";
 import { useTimerReset } from "@/hooks/games/useTimerReset";
 import useProgressStore from "@/store/games/useProgressStore";
 import { useAppStateProgress } from "@/hooks/games/useAppStateProgress";
+import useCoinsStore from "@/store/games/useCoinsStore"; // NEW: Import coins store
+import RewardNotification from "@/components/games/RewardNotification"; // NEW: Import reward component
 
 interface FillInTheBlankProps {
   levelId: number;
@@ -53,6 +61,13 @@ const FillInTheBlank: React.FC<FillInTheBlankProps> = React.memo(
       setBackgroundCompletion,
     } = useGameStore();
 
+    // NEW: Reward state
+    const [showReward, setShowReward] = useState(false);
+    const [rewardInfo, setRewardInfo] = useState<any>(null);
+
+    // NEW: Coins store for balance refresh
+    const { fetchCoinsBalance } = useCoinsStore();
+
     // Custom hooks for shared logic
     const {
       progress,
@@ -84,6 +99,7 @@ const FillInTheBlank: React.FC<FillInTheBlankProps> = React.memo(
       gameMode: "fillBlanks",
     });
 
+    // UPDATED: Check answer with reward notification
     const checkAnswerWithProgress = useCallback(async () => {
       try {
         console.log(`[FillInTheBlank] Checking answer: ${userAnswer}`);
@@ -106,14 +122,30 @@ const FillInTheBlank: React.FC<FillInTheBlankProps> = React.memo(
               `[FillInTheBlank] Updating progress - Time: ${exactFinalTime}, Correct: ${currentState.isCorrect}, Completed: ${currentState.isCorrect}`
             );
 
+            // UPDATED: Pass difficulty to updateProgress
             const updatedProgress = await updateProgress(
               exactFinalTime,
               currentState.isCorrect,
-              currentState.isCorrect
+              currentState.isCorrect,
+              difficulty // NEW: Pass difficulty for reward calculation
             );
 
             if (updatedProgress) {
               console.log(`[FillInTheBlank] Progress updated successfully`);
+
+              // NEW: Handle reward display and coins refresh
+              if (
+                updatedProgress.rewardInfo &&
+                updatedProgress.rewardInfo.coins > 0
+              ) {
+                setRewardInfo(updatedProgress.rewardInfo);
+                setShowReward(true);
+
+                // Refresh coins balance to show updated amount
+                setTimeout(() => {
+                  fetchCoinsBalance(true);
+                }, 500);
+              }
 
               // ADDED: Force refresh enhanced progress cache for ALL answers
               const progressStore = useProgressStore.getState();
@@ -129,7 +161,15 @@ const FillInTheBlank: React.FC<FillInTheBlankProps> = React.memo(
       } catch (error) {
         console.error("[FillInTheBlank] Error in answer check:", error);
       }
-    }, [userAnswer, timeElapsed, setTimerRunning, checkAnswer, updateProgress]);
+    }, [
+      userAnswer,
+      timeElapsed,
+      setTimerRunning,
+      checkAnswer,
+      updateProgress,
+      difficulty, // NEW: Add difficulty dependency
+      fetchCoinsBalance, // NEW: Add fetchCoinsBalance dependency
+    ]);
 
     const handleTimerReset = useTimerReset(setTimeElapsed, "FillInTheBlank");
 
@@ -285,6 +325,12 @@ const FillInTheBlank: React.FC<FillInTheBlankProps> = React.memo(
       }
     }, [showFeedback, setTimerRunning]);
 
+    // NEW: Handle reward notification completion
+    const handleRewardComplete = useCallback(() => {
+      setShowReward(false);
+      setRewardInfo(null);
+    }, []);
+
     return (
       <KeyboardAvoidingView
         style={{ flex: 1 }}
@@ -357,6 +403,13 @@ const FillInTheBlank: React.FC<FillInTheBlankProps> = React.memo(
             />
           )}
         </GameContainer>
+
+        {/* NEW: Reward Notification */}
+        <RewardNotification
+          visible={showReward}
+          rewardInfo={rewardInfo}
+          onComplete={handleRewardComplete}
+        />
       </KeyboardAvoidingView>
     );
   }

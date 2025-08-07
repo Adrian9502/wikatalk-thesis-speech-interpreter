@@ -1,4 +1,10 @@
-import React, { useEffect, useMemo, useCallback, useRef } from "react";
+import React, {
+  useEffect,
+  useMemo,
+  useCallback,
+  useRef,
+  useState,
+} from "react";
 import useGameStore from "@/store/games/useGameStore";
 import GameContainer from "@/components/games/GameContainer";
 import GamePlayingContent from "@/components/games/GamePlayingContent";
@@ -11,6 +17,8 @@ import { useGameRestart } from "@/hooks/games/useGameRestart";
 import { useTimerReset } from "@/hooks/games/useTimerReset";
 import { useAppStateProgress } from "@/hooks/games/useAppStateProgress";
 import useProgressStore from "@/store/games/useProgressStore";
+import useCoinsStore from "@/store/games/useCoinsStore"; // NEW: Import coins store
+import RewardNotification from "@/components/games/RewardNotification"; // NEW: Import reward component
 
 interface MultipleChoiceProps {
   levelId: number;
@@ -39,6 +47,13 @@ const MultipleChoice: React.FC<MultipleChoiceProps> = React.memo(
       setTimerRunning,
       setBackgroundCompletion,
     } = useGameStore();
+
+    // NEW: Reward state
+    const [showReward, setShowReward] = useState(false);
+    const [rewardInfo, setRewardInfo] = useState<any>(null);
+
+    // NEW: Coins store for balance refresh
+    const { fetchCoinsBalance } = useCoinsStore();
 
     // Custom hooks for shared logic
     const {
@@ -148,7 +163,7 @@ const MultipleChoice: React.FC<MultipleChoiceProps> = React.memo(
       }
     }, [progress, setTimeElapsed, isRestartingRef, restartLockRef, gameStatus]); // ADD gameStatus dependency
 
-    // Handle option selection with progress update
+    // UPDATED: Handle option selection with reward notification
     const handleOptionSelectWithProgress = useCallback(
       async (optionId: string) => {
         try {
@@ -182,14 +197,30 @@ const MultipleChoice: React.FC<MultipleChoiceProps> = React.memo(
             `[MultipleChoice] Updating progress - Time: ${exactFinalTime}, Correct: ${isCorrect}, Completed: ${isCorrect}`
           );
 
+          // UPDATED: Pass difficulty to updateProgress
           const updatedProgress = await updateProgress(
             exactFinalTime,
             isCorrect,
-            isCorrect
+            isCorrect,
+            difficulty // NEW: Pass difficulty for reward calculation
           );
 
           if (updatedProgress) {
             console.log(`[MultipleChoice] Progress updated successfully`);
+
+            // NEW: Handle reward display and coins refresh
+            if (
+              updatedProgress.rewardInfo &&
+              updatedProgress.rewardInfo.coins > 0
+            ) {
+              setRewardInfo(updatedProgress.rewardInfo);
+              setShowReward(true);
+
+              // Refresh coins balance to show updated amount
+              setTimeout(() => {
+                fetchCoinsBalance(true);
+              }, 500);
+            }
 
             const progressStore = useProgressStore.getState();
             progressStore.enhancedProgress["multipleChoice"] = null;
@@ -209,8 +240,16 @@ const MultipleChoice: React.FC<MultipleChoiceProps> = React.memo(
         setTimerRunning,
         handleOptionSelect,
         updateProgress,
+        difficulty, // NEW: Add difficulty dependency
+        fetchCoinsBalance, // NEW: Add fetchCoinsBalance dependency
       ]
     );
+
+    // NEW: Handle reward notification completion
+    const handleRewardComplete = useCallback(() => {
+      setShowReward(false);
+      setRewardInfo(null);
+    }, []);
 
     const gameConfig = useMemo(() => {
       const progressTime =
@@ -330,65 +369,74 @@ const MultipleChoice: React.FC<MultipleChoiceProps> = React.memo(
     }, [handleUserExit]);
 
     return (
-      <GameContainer
-        title="Multiple Choice"
-        timerRunning={timerRunning}
-        gameStatus={gameStatus}
-        variant="triple"
-        difficulty={difficulty}
-        focusArea={gameConfig.focusArea}
-        showTimer={true}
-        initialTime={gameConfig.initialTime}
-        isStarted={isStarted}
-        finalTime={gameConfig.finalTime}
-        levelId={levelId}
-        onTimerReset={handleTimerReset}
-        isCorrectAnswer={gameConfig.isSelectedCorrect}
-        onUserExit={handleUserExitWithSave} // NEW
-      >
-        {gameStatus === "playing" ? (
-          <GamePlayingContent
-            timerRunning={timerRunning}
-            difficulty={difficulty}
-            isStarted={isStarted}
-            focusArea={gameConfig.focusArea}
-            gameStatus={gameStatus}
-            initialTime={gameConfig.initialTime}
-            levelString={currentQuestion?.level}
-            actualTitle={currentQuestion?.title}
-          >
-            <MultipleChoicePlayingContent
+      <>
+        <GameContainer
+          title="Multiple Choice"
+          timerRunning={timerRunning}
+          gameStatus={gameStatus}
+          variant="triple"
+          difficulty={difficulty}
+          focusArea={gameConfig.focusArea}
+          showTimer={true}
+          initialTime={gameConfig.initialTime}
+          isStarted={isStarted}
+          finalTime={gameConfig.finalTime}
+          levelId={levelId}
+          onTimerReset={handleTimerReset}
+          isCorrectAnswer={gameConfig.isSelectedCorrect}
+          onUserExit={handleUserExitWithSave}
+        >
+          {gameStatus === "playing" ? (
+            <GamePlayingContent
+              timerRunning={timerRunning}
               difficulty={difficulty}
-              levelData={levelData}
-              currentQuestion={currentQuestion}
-              selectedOption={selectedOption}
-              handleOptionSelect={handleOptionSelectWithProgress}
               isStarted={isStarted}
+              focusArea={gameConfig.focusArea}
+              gameStatus={gameStatus}
+              initialTime={gameConfig.initialTime}
+              levelString={currentQuestion?.level}
+              actualTitle={currentQuestion?.title}
+            >
+              <MultipleChoicePlayingContent
+                difficulty={difficulty}
+                levelData={levelData}
+                currentQuestion={currentQuestion}
+                selectedOption={selectedOption}
+                handleOptionSelect={handleOptionSelectWithProgress}
+                isStarted={isStarted}
+              />
+            </GamePlayingContent>
+          ) : (
+            <GameCompletedContent
+              score={score}
+              timeElapsed={gameConfig.finalTime}
+              difficulty={difficulty}
+              question={currentQuestion?.question || ""}
+              userAnswer={gameConfig.selectedAnswerText}
+              isCorrect={gameConfig.isSelectedCorrect}
+              levelId={levelId}
+              gameMode="multipleChoice"
+              gameTitle="Multiple Choice"
+              onRestart={handleRestartWithProgress}
+              focusArea={gameConfig.focusArea}
+              levelString={currentQuestion?.level}
+              actualTitle={currentQuestion?.title}
+              nextLevelTitle={getNextLevelTitle()}
+              isCurrentLevelCompleted={gameConfig.isSelectedCorrect}
+              isCorrectAnswer={gameConfig.isSelectedCorrect}
+              isBackgroundCompletion={gameConfig.isBackgroundCompletion}
+              isUserExit={gameConfig.isUserExit}
             />
-          </GamePlayingContent>
-        ) : (
-          <GameCompletedContent
-            score={score}
-            timeElapsed={gameConfig.finalTime}
-            difficulty={difficulty}
-            question={currentQuestion?.question || ""}
-            userAnswer={gameConfig.selectedAnswerText}
-            isCorrect={gameConfig.isSelectedCorrect}
-            levelId={levelId}
-            gameMode="multipleChoice"
-            gameTitle="Multiple Choice"
-            onRestart={handleRestartWithProgress}
-            focusArea={gameConfig.focusArea}
-            levelString={currentQuestion?.level}
-            actualTitle={currentQuestion?.title}
-            nextLevelTitle={getNextLevelTitle()}
-            isCurrentLevelCompleted={gameConfig.isSelectedCorrect}
-            isCorrectAnswer={gameConfig.isSelectedCorrect}
-            isBackgroundCompletion={gameConfig.isBackgroundCompletion}
-            isUserExit={gameConfig.isUserExit}
-          />
-        )}
-      </GameContainer>
+          )}
+        </GameContainer>
+
+        {/* NEW: Reward Notification */}
+        <RewardNotification
+          visible={showReward}
+          rewardInfo={rewardInfo}
+          onComplete={handleRewardComplete}
+        />
+      </>
     );
   }
 );
