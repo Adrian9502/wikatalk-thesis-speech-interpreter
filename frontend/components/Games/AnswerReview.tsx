@@ -1,18 +1,25 @@
 import React, { useMemo, useRef, useEffect } from "react";
-import { View, Text, StyleSheet, Animated, Image } from "react-native";
+import {
+  View,
+  Text,
+  StyleSheet,
+  Animated,
+  Image,
+  Dimensions,
+} from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import * as Animatable from "react-native-animatable";
 import { Check, X, Star } from "react-native-feather";
 import MaterialCommunityIcons from "react-native-vector-icons/MaterialCommunityIcons";
-import { BASE_COLORS, difficultyColors } from "@/constant/colors";
+import { BASE_COLORS, difficultyColors, TITLE_COLORS } from "@/constant/colors";
 import { getDifficultyColors } from "@/utils/gameUtils";
-
 import { formatTimerDisplay, getGameModeGradient } from "@/utils/gameUtils";
 import { safeTextRender } from "@/utils/textUtils";
 import { NAVIGATION_COLORS } from "@/constant/gameConstants";
-// NEW: Import badge components
 import DifficultyBadge from "@/components/games/DifficultyBadge";
 import FocusAreaBadge from "@/components/games/FocusAreaBadge";
+
+const { width: screenWidth, height: screenHeight } = Dimensions.get("window");
 
 interface RewardInfo {
   coins: number;
@@ -140,145 +147,184 @@ const AnswerReview: React.FC<AnswerReviewProps> = ({
       delay={delay}
       style={styles.container}
     >
-      {/* Main Result Card */}
+      {/* Hero Result Card - Larger, more prominent */}
       <Animatable.View
         animation="bounceIn"
         duration={1000}
         delay={delay + 200}
-        style={styles.resultCardContainer}
+        style={styles.heroCardContainer}
       >
         <LinearGradient
           colors={resultColors}
-          style={styles.resultCard}
+          style={styles.heroCard}
           start={{ x: 0, y: 0 }}
           end={{ x: 1, y: 1 }}
         >
-          {/* Result Icon */}
-          <View style={styles.resultIcon}>
+          {/* Large Result Icon */}
+          <View style={styles.heroIcon}>
             {isBackgroundCompletion || isUserExit ? (
               <MaterialCommunityIcons
                 name={isUserExit ? "exit-to-app" : "alert-circle"}
-                size={32}
+                size={48}
                 color={BASE_COLORS.white}
               />
             ) : isCorrect ? (
-              <Check width={32} height={32} color={BASE_COLORS.white} />
+              <Check width={48} height={48} color={BASE_COLORS.white} />
             ) : (
-              <X width={32} height={32} color={BASE_COLORS.white} />
+              <X width={48} height={48} color={BASE_COLORS.white} />
             )}
           </View>
 
           {/* Result Title */}
-          <Text style={styles.resultTitle}>{resultData.title}</Text>
+          <Text style={styles.heroTitle}>{resultData.title}</Text>
+          <Text style={styles.heroMessage}>{resultData.message}</Text>
 
-          {/* Result Message */}
-          <Text style={styles.resultMessage}>{resultData.message}</Text>
+          {/* Floating decorative elements */}
+          <View style={styles.heroDecoration1} />
+          <View style={styles.heroDecoration2} />
+          <View style={styles.heroDecoration3} />
+        </LinearGradient>
+      </Animatable.View>
 
-          {/* Level Information */}
-          <View style={styles.levelInfoContainer}>
-            <View style={styles.levelBadge}>
-              <Text style={styles.levelText}>
-                {levelString} - {levelDisplayText}
+      {/* Stats Row - Horizontal layout with rounded cards */}
+      <View style={styles.statsRow}>
+        {/* Level Info Card */}
+        <Animatable.View
+          animation="slideInLeft"
+          duration={600}
+          delay={delay + 400}
+          style={styles.statsCard}
+        >
+          <View style={styles.levelInfoCard}>
+            <Text style={styles.levelTitleLabel}>{levelString}</Text>
+            <Text style={styles.statsValue}>{levelDisplayText}</Text>
+          </View>
+        </Animatable.View>
+
+        {/* Time Card */}
+        {timeElapsed !== undefined && (
+          <Animatable.View
+            animation="slideInRight"
+            duration={600}
+            delay={delay + 500}
+            style={styles.statsCard}
+          >
+            <View style={styles.timeCard}>
+              <MaterialCommunityIcons
+                name="clock"
+                size={18}
+                color={BASE_COLORS.white}
+              />
+              <Text style={styles.statsLabel}>Time Taken</Text>
+              <Text style={styles.statsValue}>
+                {formatTimerDisplay(timeElapsed as number)}
               </Text>
             </View>
-          </View>
+          </Animatable.View>
+        )}
+      </View>
 
-          {/* Level Details Badges */}
-          <View style={styles.levelDetailsContainer}>
-            <DifficultyBadge difficulty={difficulty} />
-            <FocusAreaBadge focusArea={focusArea} />
-          </View>
+      {/* Badges Row - Curved layout */}
+      <Animatable.View
+        animation="fadeInUp"
+        duration={600}
+        delay={delay + 600}
+        style={styles.badgesRow}
+      >
+        <View style={styles.curvedBadgeContainer}>
+          <DifficultyBadge difficulty={difficulty} />
+          <FocusAreaBadge focusArea={focusArea} />
+        </View>
+      </Animatable.View>
 
-          {/* Time Taken Section - ALWAYS show if timeElapsed is available */}
-          {timeElapsed !== undefined && (
-            <View style={styles.timeInfoContainer}>
-              <View style={styles.timeBadge}>
-                <MaterialCommunityIcons
-                  name="clock"
-                  size={15}
-                  color={BASE_COLORS.white}
-                />
-                <Text style={styles.timeText}>
-                  Time: {formatTimerDisplay(timeElapsed as number)}
-                </Text>
-              </View>
+      {/* Reward Card - Special floating design */}
+      {rewardInfo && rewardInfo.coins > 0 && isCorrect && (
+        <Animatable.View
+          animation="bounceIn"
+          duration={800}
+          delay={delay + 800}
+          style={styles.rewardFloatingCard}
+        >
+          <LinearGradient
+            colors={getDifficultyColors(rewardInfo.difficulty)}
+            style={styles.rewardGradient}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 1 }}
+          >
+            <View style={styles.rewardIconBg}>
+              <Star width={24} height={24} color={BASE_COLORS.white} />
             </View>
-          )}
 
-          {/* NEW: Reward Display - Only show for correct answers - MOVED BELOW TIME */}
-          {rewardInfo && rewardInfo.coins > 0 && isCorrect && (
-            <Animatable.View
-              animation="bounceIn"
-              duration={800}
-              delay={delay + 800}
-              style={styles.rewardContainer}
-            >
-              <View style={styles.rewardContent}>
-                <View style={styles.rewardIconContainer}>
-                  <Star width={18} height={18} color={BASE_COLORS.white} />
-                </View>
+            <View style={styles.rewardContent}>
+              <Text style={styles.rewardTitle}>Reward Earned!</Text>
+              <View style={styles.rewardCoinsDisplay}>
                 <Image
                   source={require("@/assets/images/coin.png")}
                   style={styles.rewardCoinImage}
                 />
-                <Text style={styles.rewardCoinsText}>+{rewardInfo.coins}</Text>
-                <Text style={styles.rewardCoinsLabel}>coins</Text>
+                <Text style={styles.rewardCoinsText}>
+                  +{rewardInfo.coins} coins
+                </Text>
               </View>
               <Text style={styles.rewardSubtitle}>{rewardInfo.label}</Text>
-              {/* Reward Badge Decorations */}
-              <View style={styles.rewardDecoration1} />
-              <View style={styles.rewardDecoration2} />
-            </Animatable.View>
-          )}
+            </View>
 
-          {/* Decorative Elements */}
-          <View style={styles.cardDecoration1} />
-          <View style={styles.cardDecoration2} />
-        </LinearGradient>
-      </Animatable.View>
+            {/* Floating particles effect */}
+            <View style={styles.particle1} />
+            <View style={styles.particle2} />
+            <View style={styles.particle3} />
+          </LinearGradient>
+        </Animatable.View>
+      )}
 
-      {/* Review Details Card */}
+      {/* Q&A Section - Asymmetric cards */}
+      {/* Question Card - Tilted left */}
       <Animatable.View
-        animation="slideInUp"
+        animation="fadeInUp"
         duration={700}
-        delay={delay + 600}
-        style={styles.reviewCardContainer}
+        delay={delay + 700}
+        style={styles.combinedCardContainer}
       >
         <LinearGradient
           colors={gameGradientColors}
-          style={styles.reviewCard}
+          style={styles.combinedCard}
           start={{ x: 0, y: 0 }}
           end={{ x: 1, y: 1 }}
         >
+          {/* Level Summary Title*/}
+          <Animatable.View
+            animation="fadeInUp"
+            duration={600}
+            delay={delay + 650}
+            style={styles.sectionTitleContainer}
+          >
+            <Text style={styles.sectionTitleText}>Level Summary</Text>
+          </Animatable.View>
           {/* Question Section */}
-          <View style={styles.reviewSection}>
-            <View style={styles.sectionHeader}>
-              <View style={styles.sectionIconContainer}>
-                <Text style={styles.sectionIcon}>❓</Text>
+          <View style={styles.cardSection}>
+            <View style={styles.cardHeader}>
+              <View style={styles.iconBubble}>
+                <Text style={styles.cardEmoji}>❓</Text>
               </View>
-              <Text style={styles.sectionTitle}>{questionLabel}</Text>
+              <Text style={styles.cardTitle}>Question</Text>
             </View>
-            <View style={styles.contentContainer}>
-              <Text style={styles.questionText}>
-                {safeTextRender(question)}
-              </Text>
-            </View>
+            <Text style={styles.cardContent}>{safeTextRender(question)}</Text>
           </View>
 
           {/* Divider */}
-          <View style={styles.divider} />
+          <View style={styles.sectionDivider} />
 
           {/* Answer Section */}
-          <View style={styles.reviewSection}>
-            <View style={styles.sectionHeader}>
+          <View style={styles.cardSection}>
+            <View style={styles.cardHeader}>
               <View
                 style={[
-                  styles.sectionIconContainer,
+                  styles.iconBubble,
                   isBackgroundCompletion || isUserExit
-                    ? styles.warningIcon
+                    ? styles.warningBubble
                     : isCorrect
-                    ? styles.correctIcon
-                    : styles.incorrectIcon,
+                    ? styles.correctBubble
+                    : styles.incorrectBubble,
                 ]}
               >
                 {isBackgroundCompletion || isUserExit ? (
@@ -293,332 +339,386 @@ const AnswerReview: React.FC<AnswerReviewProps> = ({
                   <X width={16} height={16} color={BASE_COLORS.white} />
                 )}
               </View>
-              <Text style={styles.sectionTitle}>{answerLabel}</Text>
+              <Text style={styles.cardTitle}>Your Answer</Text>
             </View>
-            <View style={styles.contentContainer}>
-              <Text
-                style={[
-                  styles.answerText,
-                  (isBackgroundCompletion || isUserExit) &&
-                    styles.backgroundAnswerText,
-                ]}
-              >
-                {safeTextRender(userAnswer) || "(No answer provided)"}
-              </Text>
-            </View>
+            <Text
+              style={[
+                styles.cardContent,
+                (isBackgroundCompletion || isUserExit) && styles.exitAnswerText,
+              ]}
+            >
+              {safeTextRender(userAnswer) || "No answer provided"}
+            </Text>
           </View>
 
           {/* Card Decorations */}
-          <View style={styles.reviewCardDecoration1} />
-          <View style={styles.reviewCardDecoration2} />
+          <View style={styles.heroDecoration1} />
+          <View style={styles.heroDecoration2} />
+          <View style={styles.heroDecoration3} />
         </LinearGradient>
       </Animatable.View>
+
+      {/* Background decorative elements */}
+      <View style={styles.backgroundDecor1} />
+      <View style={styles.backgroundDecor2} />
+      <View style={styles.backgroundDecor3} />
     </Animatable.View>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
-    marginBottom: 16,
-    position: "relative",
+    flex: 1,
+    paddingHorizontal: 16,
+    paddingBottom: 20,
   },
 
-  // Result Card
-  resultCardContainer: {
-    marginBottom: 12,
-    zIndex: 2,
+  // Hero Card - Main result display
+  heroCardContainer: {
+    marginBottom: 24,
+    alignItems: "center",
   },
-  resultCard: {
+  heroCard: {
+    width: screenWidth - 52,
     borderRadius: 20,
-    padding: 16,
+    padding: 32,
     alignItems: "center",
     position: "relative",
     overflow: "hidden",
-    minHeight: 100,
-    justifyContent: "center",
+    minHeight: 180,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.3,
+    shadowRadius: 16,
+    elevation: 12,
   },
-  resultIcon: {
-    width: 64,
-    height: 64,
-    borderRadius: 32,
+  heroIcon: {
+    width: 80,
+    height: 80,
+    borderRadius: 40,
     backgroundColor: "rgba(255, 255, 255, 0.2)",
     justifyContent: "center",
     alignItems: "center",
-    marginBottom: 12,
+    marginBottom: 16,
+    borderWidth: 3,
+    borderColor: "rgba(255, 255, 255, 0.3)",
   },
-  resultTitle: {
-    fontSize: 22,
+  heroTitle: {
+    fontSize: 28,
     fontFamily: "Poppins-Bold",
     color: BASE_COLORS.white,
     marginBottom: 8,
     textAlign: "center",
   },
-  resultMessage: {
-    fontSize: 14,
-    fontFamily: "Poppins-Medium",
-    color: "rgba(255, 255, 255, 0.9)",
-    textAlign: "center",
-    lineHeight: 22,
-    marginBottom: 16,
-  },
-
-  // Level Information Styles
-  levelInfoContainer: {
-    flexDirection: "row",
-    justifyContent: "center",
-    alignItems: "center",
-    marginBottom: 12,
-    paddingHorizontal: 8,
-  },
-  levelBadge: {
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-    borderRadius: 20,
-    backgroundColor: "rgba(255, 255, 255, 0.10)",
-    borderWidth: 1,
-    borderColor: "rgba(255, 255, 255, 0.3)",
-  },
-  levelText: {
+  heroMessage: {
     fontSize: 16,
-    fontFamily: "Poppins-SemiBold",
-    color: BASE_COLORS.white,
-    textShadowColor: "rgba(0, 0, 0, 0.5)",
-    textShadowOffset: { width: 0, height: 1 },
-    textShadowRadius: 3,
-    textAlign: "center",
-    letterSpacing: 0.3,
-  },
-
-  // NEW: Level Details Badges Container
-  levelDetailsContainer: {
-    flexDirection: "row",
-    justifyContent: "center",
-    alignItems: "center",
-    gap: 12,
-    marginBottom: 12,
-    paddingHorizontal: 8,
-  },
-
-  // Time Information
-  timeInfoContainer: {
-    flexDirection: "row",
-    justifyContent: "center",
-    alignItems: "center",
-    marginBottom: 12,
-    paddingHorizontal: 8,
-  },
-  timeBadge: {
-    flexDirection: "row",
-    alignItems: "center",
-    paddingHorizontal: 14,
-    paddingVertical: 6,
-    borderRadius: 20,
-    backgroundColor: "rgba(255, 255, 255, 0.10)",
-    borderWidth: 1,
-    borderColor: "rgba(255, 255, 255, 0.3)",
-    gap: 6,
-  },
-  timeText: {
-    fontSize: 14,
     fontFamily: "Poppins-Medium",
-    color: BASE_COLORS.white,
-    letterSpacing: 0.3,
-  },
-
-  rewardContainer: {
-    alignItems: "center",
-    flexDirection: "row",
-    alignItems: "center",
-    paddingHorizontal: 14,
-    paddingVertical: 6,
-    borderRadius: 20,
-    backgroundColor: "rgba(255, 255, 255, 0.10)",
-    borderWidth: 1,
-    borderColor: "rgba(255, 255, 255, 0.3)",
-    marginBottom: 6,
-    minWidth: 140,
-  },
-
-  rewardContent: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 6,
-    zIndex: 2,
-  },
-  rewardIconContainer: {
-    width: 28,
-    height: 28,
-    borderRadius: 14,
-    backgroundColor: "rgba(255, 255, 255, 0.2)",
-    justifyContent: "center",
-    alignItems: "center",
-    borderWidth: 1,
-    borderColor: "rgba(255, 255, 255, 0.4)",
-  },
-  rewardCoinImage: {
-    width: 20,
-    height: 20,
-    borderRadius: 10,
-  },
-  rewardCoinsText: {
-    fontSize: 18,
-    fontFamily: "Poppins-Bold",
-    color: BASE_COLORS.white,
-    textShadowColor: "rgba(0, 0, 0, 0.3)",
-    textShadowOffset: { width: 0, height: 1 },
-    textShadowRadius: 2,
-  },
-  rewardCoinsLabel: {
-    fontSize: 14,
-    fontFamily: "Poppins-SemiBold",
     color: "rgba(255, 255, 255, 0.9)",
-    textShadowColor: "rgba(0, 0, 0, 0.3)",
-    textShadowOffset: { width: 0, height: 1 },
-    textShadowRadius: 2,
+    textAlign: "center",
+    lineHeight: 24,
   },
-  rewardSubtitle: {
+  heroDecoration1: {
+    position: "absolute",
+    top: -40,
+    right: -40,
+    width: 120,
+    height: 120,
+    borderRadius: 60,
+    backgroundColor: "rgba(255, 255, 255, 0.1)",
+  },
+  heroDecoration2: {
+    position: "absolute",
+    bottom: -30,
+    left: -30,
+    width: 80,
+    height: 80,
+    borderRadius: 40,
+    backgroundColor: "rgba(255, 255, 255, 0.08)",
+  },
+  heroDecoration3: {
+    position: "absolute",
+    top: 20,
+    left: -20,
+    width: 60,
+    height: 60,
+    borderRadius: 30,
+    backgroundColor: "rgba(255, 255, 255, 0.06)",
+  },
+
+  // Stats Row - Horizontal cards
+  statsRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    marginBottom: 20,
+    gap: 12,
+  },
+  statsCard: {
+    flex: 1,
+  },
+  levelInfoCard: {
+    backgroundColor: "rgba(255, 255, 255, 0.15)",
+    borderRadius: 20,
+    padding: 16,
+    alignItems: "center",
+    borderWidth: 1,
+    borderColor: "rgba(255, 255, 255, 0.2)",
+    transform: [{ rotate: "-3deg" }],
+  },
+  timeCard: {
+    backgroundColor: "rgba(255, 255, 255, 0.15)",
+    borderRadius: 20,
+    padding: 16,
+    alignItems: "center",
+    borderWidth: 1,
+    borderColor: "rgba(255, 255, 255, 0.2)",
+    transform: [{ rotate: "3deg" }],
+  },
+  statsLabel: {
     fontSize: 12,
     fontFamily: "Poppins-Medium",
     color: "rgba(255, 255, 255, 0.8)",
+    marginBottom: 4,
+  },
+  statsValue: {
+    fontSize: 14,
+    fontFamily: "Poppins-SemiBold",
+    color: BASE_COLORS.white,
     textAlign: "center",
-    textShadowColor: "rgba(0, 0, 0, 0.3)",
-    textShadowOffset: { width: 0, height: 1 },
-    textShadowRadius: 2,
   },
-  // Reward Badge Decorations
-  rewardDecoration1: {
-    position: "absolute",
-    top: -10,
-    left: -10,
-    width: 30,
-    height: 30,
-    borderRadius: 15,
+  levelTitleLabel: {
+    fontFamily: "Poppins-Bold",
+    color: TITLE_COLORS.customYellow,
+    textAlign: "center",
+    fontSize: 16,
+  },
+  // Badges Row
+  badgesRow: {
+    alignItems: "center",
+    marginBottom: 24,
+  },
+  curvedBadgeContainer: {
+    flexDirection: "row",
+    gap: 16,
     backgroundColor: "rgba(255, 255, 255, 0.1)",
-  },
-  rewardDecoration2: {
-    position: "absolute",
-    bottom: -8,
-    right: -8,
-    width: 25,
-    height: 25,
-    borderRadius: 12.5,
-    backgroundColor: "rgba(255, 255, 255, 0.08)",
+    borderRadius: 20,
+    paddingHorizontal: 20,
+    paddingVertical: 12,
+    borderWidth: 1,
+    borderColor: "rgba(255, 255, 255, 0.15)",
   },
 
-  // Review Card
-  reviewCardContainer: {
-    zIndex: 2,
-    marginVertical: 12,
+  // Reward Floating Card
+  rewardFloatingCard: {
+    alignSelf: "center",
+    marginBottom: 24,
+    transform: [{ rotate: "-1deg" }],
+    width: screenWidth * 0.65,
+    maxWidth: 280,
   },
-  reviewCard: {
+  rewardGradient: {
+    borderRadius: 20,
+    paddingHorizontal: 16,
+    paddingVertical: 14,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    position: "relative",
+    overflow: "hidden",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.25,
+    shadowRadius: 12,
+    elevation: 8,
+    minHeight: 85,
+  },
+  rewardIconBg: {
+    width: 50,
+    height: 50,
+    borderRadius: 25,
+    backgroundColor: "rgba(255, 255, 255, 0.2)",
+    justifyContent: "center",
+    alignItems: "center",
+    marginRight: 16,
+    flexShrink: 0,
+  },
+  rewardContent: {
+    flex: 1,
+    minWidth: 0,
+  },
+  rewardTitle: {
+    fontSize: 16,
+    fontFamily: "Poppins-SemiBold",
+    color: BASE_COLORS.white,
+    marginBottom: 4,
+  },
+  rewardCoinsDisplay: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+    marginBottom: 4,
+    flexWrap: "wrap", // Allow wrapping if needed
+  },
+  rewardCoinImage: {
+    width: 24,
+    height: 24,
+    flexShrink: 0,
+  },
+  rewardCoinsText: {
+    fontSize: 20,
+    fontFamily: "Poppins-Bold",
+    color: BASE_COLORS.white,
+  },
+  rewardSubtitle: {
+    fontSize: 15,
+    fontFamily: "Poppins-SemiBold",
+    color: "rgba(255, 255, 255, 0.8)",
+    lineHeight: 16,
+    marginTop: 8,
+  },
+  particle1: {
+    position: "absolute",
+    top: 10,
+    right: 20,
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    backgroundColor: "rgba(255, 255, 255, 0.4)",
+  },
+  particle2: {
+    position: "absolute",
+    bottom: 15,
+    right: 40,
+    width: 6,
+    height: 6,
+    borderRadius: 3,
+    backgroundColor: "rgba(255, 255, 255, 0.3)",
+  },
+  particle3: {
+    position: "absolute",
+    top: 30,
+    right: 60,
+    width: 4,
+    height: 4,
+    borderRadius: 2,
+    backgroundColor: "rgba(255, 255, 255, 0.2)",
+  },
+  //  Level title Title Styles
+  sectionTitleContainer: {
+    paddingVertical: 8,
+    borderRadius: 20,
+    alignItems: "center",
+    borderWidth: 1,
+    marginBottom: 20,
+    borderColor: "rgba(255, 255, 255, 0.2)",
+    backgroundColor: "rgba(255, 255, 255, 0.1)",
+  },
+  sectionTitleText: {
+    fontSize: 15,
+    fontFamily: "Poppins-SemiBold",
+    color: BASE_COLORS.white,
+    textAlign: "center",
+    letterSpacing: 0.5,
+  },
+
+  // Q&A Section - Asymmetric cards
+  combinedCardContainer: {
+    alignSelf: "center",
+    width: "95%",
+    marginBottom: 20,
+  },
+  combinedCard: {
     borderRadius: 20,
     padding: 20,
     position: "relative",
     overflow: "hidden",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.25,
+    shadowRadius: 12,
+    elevation: 8,
   },
-  reviewSection: {
-    marginBottom: 8,
+  cardSection: {
+    marginBottom: 5,
   },
-  sectionHeader: {
+  sectionDivider: {
+    height: 1,
+    backgroundColor: "rgba(255, 255, 255, 0.2)",
+    marginVertical: 10,
+    borderRadius: 0.5,
+  },
+  cardHeader: {
     flexDirection: "row",
     alignItems: "center",
-    marginBottom: 8,
+    marginBottom: 12,
   },
-  sectionIconContainer: {
+  iconBubble: {
     width: 32,
     height: 32,
-    borderRadius: 20,
-    backgroundColor: "rgba(255, 255, 255, 0.15)",
+    borderRadius: 16,
+    backgroundColor: "rgba(255, 255, 255, 0.2)",
     justifyContent: "center",
     alignItems: "center",
-    marginRight: 6,
+    marginRight: 12,
   },
-  correctIcon: {
-    backgroundColor: "rgba(0, 255, 8, 0.6)",
+  correctBubble: {
+    backgroundColor: "rgba(76, 175, 80, 0.8)",
   },
-  incorrectIcon: {
-    backgroundColor: "rgba(255, 17, 0, 0.6)",
+  incorrectBubble: {
+    backgroundColor: "rgba(244, 67, 54, 0.8)",
   },
-  sectionIcon: {
+  warningBubble: {
+    backgroundColor: "rgba(255, 152, 0, 0.8)",
+  },
+  cardEmoji: {
     fontSize: 16,
   },
-  sectionTitle: {
-    fontSize: 14,
+  cardTitle: {
+    fontSize: 16,
     fontFamily: "Poppins-SemiBold",
     color: BASE_COLORS.white,
   },
-  contentContainer: {
-    backgroundColor: "rgba(255, 255, 255, 0.10)",
-    borderRadius: 20,
-    padding: 16,
-    borderWidth: 1,
-    borderColor: "rgba(255, 255, 255, 0.3)",
-  },
-  questionText: {
-    fontSize: 16,
-    textAlign: "center",
+  cardContent: {
+    fontSize: 15,
     fontFamily: "Poppins-Medium",
     color: "rgba(255, 255, 255, 0.9)",
     lineHeight: 22,
-  },
-  answerText: {
-    fontSize: 16,
-    color: BASE_COLORS.white,
     textAlign: "center",
-    fontFamily: "Poppins-Medium",
-    lineHeight: 22,
   },
-  divider: {
-    height: 1,
-    backgroundColor: "rgba(255, 255, 255, 0.1)",
-    marginVertical: 8,
-  },
-  reviewCardDecoration1: {
-    position: "absolute",
-    top: -15,
-    left: -15,
-    width: 60,
-    height: 60,
-    borderRadius: 30,
-    backgroundColor: "rgba(255, 255, 255, 0.05)",
-  },
-  reviewCardDecoration2: {
-    position: "absolute",
-    bottom: -20,
-    right: -20,
-    width: 80,
-    height: 80,
-    borderRadius: 40,
-    backgroundColor: "rgba(255, 255, 255, 0.03)",
-  },
-
-  warningIcon: {
-    backgroundColor: "rgba(255, 167, 38, 0.6)",
-  },
-
-  backgroundAnswerText: {
-    fontFamily: "Poppins-SemiBold",
+  exitAnswerText: {
     color: "#e4a84fff",
+    fontFamily: "Poppins-SemiBold",
   },
 
-  // Decorative Elements
-  cardDecoration1: {
+  // Background decorations
+  backgroundDecor1: {
     position: "absolute",
-    top: -20,
-    right: -20,
-    width: 80,
-    height: 80,
-    borderRadius: 40,
-    backgroundColor: "rgba(255, 255, 255, 0.1)",
-  },
-  cardDecoration2: {
-    position: "absolute",
-    bottom: -30,
-    left: -30,
+    top: 300,
+    right: 10,
     width: 100,
     height: 100,
     borderRadius: 50,
-    backgroundColor: "rgba(255, 255, 255, 0.05)",
+    backgroundColor: "rgba(255, 255, 255, 0.03)",
+    zIndex: -1,
+  },
+  backgroundDecor2: {
+    position: "absolute",
+    bottom: 100,
+    left: 0,
+    width: 120,
+    height: 120,
+    borderRadius: 60,
+    backgroundColor: "rgba(255, 255, 255, 0.02)",
+    zIndex: -1,
+  },
+  backgroundDecor3: {
+    position: "absolute",
+    top: "50%",
+    left: 10,
+    width: 80,
+    height: 80,
+    borderRadius: 40,
+    backgroundColor: "rgba(255, 255, 255, 0.04)",
+    zIndex: -1,
   },
 });
 
