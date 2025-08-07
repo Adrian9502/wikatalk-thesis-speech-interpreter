@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useEffect } from "react";
+import React, { useState, useCallback, useEffect, useRef } from "react";
 import {
   View,
   StyleSheet,
@@ -25,6 +25,16 @@ import useGameStore from "@/store/games/useGameStore";
 import useProgressStore from "@/store/games/useProgressStore";
 import { useSplashStore } from "@/store/useSplashStore";
 import ResetButton from "./buttons/ResetButton";
+import { calculateRewardCoins } from "@/utils/rewardCalculationUtils";
+
+// NEW: Interface for reward info
+interface RewardInfo {
+  coins: number;
+  label: string;
+  difficulty: string;
+  timeSpent: number;
+  tier?: any;
+}
 
 interface StatsContainerProps {
   difficulty: string;
@@ -39,6 +49,7 @@ interface StatsContainerProps {
   levelId?: number | string;
   onTimerReset?: () => void;
   isCorrectAnswer?: boolean;
+  currentRewardInfo?: RewardInfo | null;
 }
 
 const StatsContainer: React.FC<StatsContainerProps> = ({
@@ -54,6 +65,7 @@ const StatsContainer: React.FC<StatsContainerProps> = ({
   levelId,
   onTimerReset,
   isCorrectAnswer = false,
+  currentRewardInfo = null,
 }) => {
   const [showResetModal, setShowResetModal] = useState(false);
   const [isResetting, setIsResetting] = useState(false);
@@ -63,6 +75,11 @@ const StatsContainer: React.FC<StatsContainerProps> = ({
   const [wasActualReset, setWasActualReset] = useState(false);
   const [showResetSuccessIndicator, setShowResetSuccessIndicator] =
     useState(false);
+
+  // NEW: Real-time reward preview state
+  const [rewardPreview, setRewardPreview] = useState<RewardInfo | null>(null);
+  const gameTimeRef = useRef<number>(0);
+  const timerRef = useRef<NodeJS.Timeout | null>(null);
 
   // Get user progress and coins
   const { resetTimer } = useUserProgress(levelId || "");
@@ -82,6 +99,72 @@ const StatsContainer: React.FC<StatsContainerProps> = ({
   // UPDATED: Enhanced disable logic
   const shouldDisableReset =
     !canAfford || isCorrectAnswer || (currentTime || finalTime || 0) === 0;
+
+  // NEW: Calculate real-time reward preview
+  const updateRewardPreview = useCallback(() => {
+    if (variant === "playing" && timerRunning && gameTimeRef.current > 0) {
+      try {
+        const reward = calculateRewardCoins(
+          difficulty,
+          gameTimeRef.current,
+          true
+        );
+        if (reward.coins > 0) {
+          setRewardPreview({
+            coins: reward.coins,
+            label: reward.label,
+            difficulty,
+            timeSpent: gameTimeRef.current,
+            tier: reward.tier,
+          });
+        }
+      } catch (error) {
+        console.error(
+          "[StatsContainer] Error calculating reward preview:",
+          error
+        );
+      }
+    } else {
+      setRewardPreview(null);
+    }
+  }, [variant, timerRunning, difficulty]);
+
+  // NEW: Timer to update current time and reward preview
+  useEffect(() => {
+    if (variant === "playing" && timerRunning) {
+      const startTime = Date.now();
+      const baseTime = initialTime || 0;
+
+      timerRef.current = setInterval(() => {
+        const elapsed = (Date.now() - startTime) / 1000;
+        const totalTime = baseTime + elapsed;
+        gameTimeRef.current = totalTime;
+
+        // Update reward preview every second
+        updateRewardPreview();
+      }, 1000);
+
+      return () => {
+        if (timerRef.current) {
+          clearInterval(timerRef.current);
+          timerRef.current = null;
+        }
+      };
+    } else {
+      if (timerRef.current) {
+        clearInterval(timerRef.current);
+        timerRef.current = null;
+      }
+      setRewardPreview(null);
+    }
+  }, [variant, timerRunning, initialTime, updateRewardPreview]);
+
+  // NEW: Clear reward preview when timer stops
+  useEffect(() => {
+    if (!timerRunning) {
+      setRewardPreview(null);
+    }
+  }, [timerRunning]);
 
   // Handle reset button press
   const handleResetPress = useCallback(() => {
@@ -280,12 +363,14 @@ const StatsContainer: React.FC<StatsContainerProps> = ({
             style={styles.timerSection}
           >
             {variant === "playing" && isStarted ? (
-              // Live timer for playing state
-              <Timer
-                isRunning={timerRunning}
-                initialTime={initialTime}
-                key={`timer-${initialTime}`}
-              />
+              // Live timer for playing state with reward preview
+              <View style={styles.timeContainer}>
+                <Timer
+                  isRunning={timerRunning}
+                  initialTime={initialTime}
+                  key={`timer-${initialTime}`}
+                />
+              </View>
             ) : (
               // Static time display for completed state with reset button
               renderStaticTimer()
@@ -295,15 +380,30 @@ const StatsContainer: React.FC<StatsContainerProps> = ({
 
         {/* Badges Section - Only show when game is playing */}
         {variant === "playing" && (
-          <Animatable.View
-            animation="fadeIn" // Changed from "fadeInRight"
-            duration={400} // Reduced from 600
-            delay={animationDelay + (showTimer ? 100 : 50)} // Reduced delay
-            style={styles.badgesSection}
-          >
-            <DifficultyBadge difficulty={difficulty} />
-            <FocusAreaBadge focusArea={focusArea} />
-          </Animatable.View>
+          <>
+            {rewardPreview && rewardPreview.coins > 0 && (
+              <Animatable.View
+                animation="fadeIn"
+                duration={300}
+                style={styles.rewardDisplay}
+              >
+                <Image
+                  source={require("@/assets/images/coin.png")}
+                  style={styles.rewardCoin}
+                />
+                <Text style={styles.rewardText}>+{rewardPreview.coins}</Text>
+              </Animatable.View>
+            )}
+            <Animatable.View
+              animation="fadeInRight"
+              duration={600}
+              delay={animationDelay + (showTimer ? 100 : 50)}
+              style={styles.badgesSection}
+            >
+              <DifficultyBadge difficulty={difficulty} />
+              <FocusAreaBadge focusArea={focusArea} />
+            </Animatable.View>
+          </>
         )}
       </Animatable.View>
 
@@ -493,6 +593,27 @@ const styles = StyleSheet.create({
     fontFamily: "Poppins-Medium",
     marginLeft: 6,
   },
+  // NEW: Reward display styles
+  rewardDisplay: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "rgba(255, 215, 0, 0.2)",
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 15,
+    borderWidth: 1,
+    borderColor: "rgba(255, 215, 0, 0.3)",
+    gap: 4,
+  },
+  rewardCoin: {
+    width: 16,
+    height: 16,
+  },
+  rewardText: {
+    fontSize: 12,
+    fontFamily: "Poppins-SemiBold",
+    color: "#FFD700",
+  },
   badgesSection: {
     flexDirection: "row",
     gap: 6,
@@ -501,7 +622,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     backgroundColor: "rgba(245, 47, 47, 0.9)",
-    paddingHorizontal: 12,
+    paddingHorizontal: 10,
     paddingVertical: 6,
     borderRadius: 20,
     gap: 6,
@@ -513,200 +634,9 @@ const styles = StyleSheet.create({
     opacity: 0.6,
   },
   resetButtonText: {
-    fontSize: 12,
-    fontFamily: "Poppins-Medium",
-    color: "#fff",
-  },
-  resetSection: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 4,
-  },
-  resetStatusContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-    backgroundColor: "rgba(76, 175, 80, 0.2)",
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 20,
-    borderWidth: 1,
-    borderColor: "rgba(255, 255, 255, 0.3)",
-  },
-  resetStatusText: {
-    fontSize: 12,
-    fontFamily: "Poppins-Medium",
-    color: "#4CAF50",
-    marginLeft: 4,
-  },
-
-  // Modal styles
-  modalOverlay: {
-    flex: 1,
-    backgroundColor: "rgba(0, 0, 0, 0.6)",
-    justifyContent: "center",
-    alignItems: "center",
-    padding: 20,
-  },
-  modalContainer: {
-    width: "100%",
-    maxWidth: 320,
-    borderRadius: 20,
-    overflow: "hidden",
-  },
-  modalContent: {
-    padding: 20,
-  },
-  modalHeader: {
-    flexDirection: "row",
-    position: "relative",
-    justifyContent: "center",
-    alignItems: "center",
-    marginBottom: 16,
-  },
-  modalTitle: {
-    fontSize: 18,
-    fontFamily: "Poppins-SemiBold",
     color: BASE_COLORS.white,
-  },
-  closeButton: {
-    position: "absolute",
-    top: -10,
-    right: -10,
-    width: 25,
-    height: 25,
-    borderRadius: 20,
-    backgroundColor: "rgba(255, 255, 255, 0.2)",
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  modalBody: {
-    marginBottom: 12,
-  },
-  modalText: {
-    fontSize: 13,
-    fontFamily: "Poppins-Regular",
-    color: "rgba(255, 255, 255, 0.9)",
-    lineHeight: 20,
-    textAlign: "center",
-    marginBottom: 16,
-  },
-  costInfo: {
-    backgroundColor: "rgba(255, 255, 255, 0.1)",
-    borderRadius: 20,
-    padding: 12,
-    marginBottom: 12,
-  },
-  costRow: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    marginBottom: 8,
-  },
-  costLabel: {
-    fontSize: 13,
-    fontFamily: "Poppins-Medium",
-    color: "rgba(255, 255, 255, 0.8)",
-  },
-  costValue: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 4,
-  },
-  coinImage: {
-    width: 16,
-    height: 16,
-  },
-  costText: {
-    fontSize: 13,
-    fontFamily: "Poppins-SemiBold",
-    color: iconColors.brightYellow,
-  },
-  insufficientText: {
     fontSize: 12,
     fontFamily: "Poppins-Medium",
-    color: "#F44336",
-    textAlign: "center",
-    marginTop: 8,
-  },
-  modalActions: {
-    flexDirection: "row",
-    gap: 12,
-    justifyContent: "center",
-  },
-  cancelButton: {
-    backgroundColor: "rgba(255, 255, 255, 0.2)",
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-    borderRadius: 20,
-    borderWidth: 1,
-    borderColor: "rgba(255, 255, 255, 0.3)",
-    flex: 1,
-  },
-  cancelButtonText: {
-    fontSize: 13,
-    fontFamily: "Poppins-Medium",
-    color: "#fff",
-    textAlign: "center",
-  },
-  confirmButton: {
-    backgroundColor: "#4CAF50",
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-    borderRadius: 20,
-    borderWidth: 1,
-    borderColor: "rgba(255, 255, 255, 0.3)",
-    flex: 1,
-  },
-  confirmButtonDisabled: {
-    backgroundColor: "rgba(255, 255, 255, 0.3)",
-    opacity: 0.6,
-  },
-  confirmButtonText: {
-    fontSize: 13,
-    fontFamily: "Poppins-Medium",
-    color: "#fff",
-    textAlign: "center",
-  },
-
-  successHeader: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    marginBottom: 16,
-  },
-
-  successTitle: {
-    fontSize: 18,
-    fontFamily: "Poppins-SemiBold",
-    color: BASE_COLORS.white,
-  },
-  successBody: {
-    marginBottom: 20,
-  },
-  successText: {
-    fontSize: 13,
-    fontFamily: "Poppins-Regular",
-    color: "rgba(255, 255, 255, 0.9)",
-    lineHeight: 20,
-    textAlign: "center",
-  },
-  successActions: {
-    flexDirection: "row",
-    justifyContent: "center",
-  },
-  successButton: {
-    backgroundColor: "#4CAF50",
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-    borderRadius: 20,
-    borderWidth: 1,
-    borderColor: "rgba(255, 255, 255, 0.3)",
-  },
-  successButtonText: {
-    fontSize: 13,
-    fontFamily: "Poppins-Medium",
-    color: "#fff",
-    textAlign: "center",
   },
 
   resetSuccessIndicator: {
@@ -722,6 +652,148 @@ const styles = StyleSheet.create({
     fontFamily: "Poppins-Regular",
     color: BASE_COLORS.white,
     textAlign: "center",
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: "rgba(0, 0, 0, 0.7)",
+    justifyContent: "center",
+    alignItems: "center",
+    paddingHorizontal: 20,
+  },
+  modalContainer: {
+    width: "100%",
+    maxWidth: 400,
+    borderRadius: 20,
+    overflow: "hidden",
+  },
+  modalContent: {
+    padding: 24,
+  },
+  modalHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 20,
+  },
+  modalTitle: {
+    fontSize: 20,
+    fontFamily: "Poppins-Bold",
+    color: BASE_COLORS.white,
+  },
+  closeButton: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: "rgba(255, 255, 255, 0.1)",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  modalBody: {
+    marginBottom: 24,
+  },
+  modalText: {
+    fontSize: 16,
+    fontFamily: "Poppins-Medium",
+    color: BASE_COLORS.white,
+    lineHeight: 24,
+    textAlign: "center",
+    marginBottom: 16,
+  },
+  costInfo: {
+    backgroundColor: "rgba(255, 255, 255, 0.1)",
+    borderRadius: 12,
+    padding: 16,
+  },
+  costRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 8,
+  },
+  costLabel: {
+    fontSize: 14,
+    fontFamily: "Poppins-Medium",
+    color: "rgba(255, 255, 255, 0.8)",
+  },
+  costValue: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
+  },
+  costText: {
+    fontSize: 14,
+    fontFamily: "Poppins-SemiBold",
+    color: BASE_COLORS.white,
+  },
+  coinImage: {
+    width: 16,
+    height: 16,
+  },
+  modalActions: {
+    flexDirection: "row",
+    gap: 12,
+  },
+  cancelButton: {
+    flex: 1,
+    backgroundColor: "rgba(255, 255, 255, 0.1)",
+    borderRadius: 12,
+    paddingVertical: 12,
+    alignItems: "center",
+  },
+  cancelButtonText: {
+    fontSize: 14,
+    fontFamily: "Poppins-Medium",
+    color: BASE_COLORS.white,
+  },
+  confirmButton: {
+    flex: 1,
+    backgroundColor: "#F44336",
+    borderRadius: 12,
+    paddingVertical: 12,
+    alignItems: "center",
+  },
+  confirmButtonDisabled: {
+    backgroundColor: "rgba(244, 67, 54, 0.5)",
+  },
+  confirmButtonText: {
+    fontSize: 14,
+    fontFamily: "Poppins-SemiBold",
+    color: BASE_COLORS.white,
+  },
+  successHeader: {
+    alignItems: "center",
+    marginBottom: 16,
+  },
+  successTitle: {
+    fontSize: 24,
+    fontFamily: "Poppins-Bold",
+    color: BASE_COLORS.white,
+  },
+  successBody: {
+    marginBottom: 24,
+  },
+  successText: {
+    fontSize: 16,
+    fontFamily: "Poppins-Medium",
+    color: BASE_COLORS.white,
+    textAlign: "center",
+    lineHeight: 24,
+  },
+  successActions: {
+    alignItems: "center",
+  },
+  successButton: {
+    backgroundColor: "#4CAF50",
+    paddingHorizontal: 32,
+    paddingVertical: 12,
+    borderRadius: 12,
+    minWidth: 120,
+    alignItems: "center",
+  },
+  successButtonText: {
+    fontSize: 16,
+    fontFamily: "Poppins-SemiBold",
+    color: BASE_COLORS.white,
   },
 });
 

@@ -8,6 +8,14 @@ import GameHeader from "@/components/games/GameHeader";
 import DotsLoader from "../DotLoader";
 import NavigationWarning from "@/components/games/NavigationWarning";
 
+interface RewardInfo {
+  coins: number;
+  label: string;
+  difficulty: string;
+  timeSpent: number;
+  tier?: any;
+}
+
 interface GameContainerProps {
   title: string;
   timerRunning: boolean;
@@ -23,8 +31,8 @@ interface GameContainerProps {
   levelId?: number | string;
   onTimerReset?: () => void;
   isCorrectAnswer?: boolean;
-  // NEW: Add user exit handler
   onUserExit?: () => void;
+  currentRewardInfo?: RewardInfo | null;
 }
 
 const GameContainer: React.FC<GameContainerProps> = ({
@@ -42,7 +50,8 @@ const GameContainer: React.FC<GameContainerProps> = ({
   levelId,
   onTimerReset,
   isCorrectAnswer,
-  onUserExit, // NEW
+  onUserExit,
+  currentRewardInfo = null,
 }) => {
   const { activeTheme } = useThemeStore();
 
@@ -79,6 +88,7 @@ const GameContainer: React.FC<GameContainerProps> = ({
           levelId={levelId}
           onTimerReset={onTimerReset}
           isCorrectAnswer={isCorrectAnswer}
+          currentRewardInfo={currentRewardInfo}
         />
 
         {gameStatus === "idle" ? (
@@ -89,7 +99,7 @@ const GameContainer: React.FC<GameContainerProps> = ({
           children
         )}
 
-        {/* ENHANCED: Add Navigation Warning with user exit handler */}
+        {/* Navigation Warning with user exit handler */}
         <NavigationWarning
           gameStatus={gameStatus}
           timerRunning={timerRunning}

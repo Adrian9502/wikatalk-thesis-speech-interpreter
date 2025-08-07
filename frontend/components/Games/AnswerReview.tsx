@@ -1,16 +1,26 @@
-import React, { useMemo } from "react";
-import { View, Text, StyleSheet } from "react-native";
+import React, { useMemo, useRef, useEffect } from "react";
+import { View, Text, StyleSheet, Animated, Image } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import * as Animatable from "react-native-animatable";
-import { Check, X } from "react-native-feather";
+import { Check, X, Star } from "react-native-feather";
 import MaterialCommunityIcons from "react-native-vector-icons/MaterialCommunityIcons";
 import { BASE_COLORS, difficultyColors } from "@/constant/colors";
+import { getDifficultyColors } from "@/utils/gameUtils";
+
 import { formatTimerDisplay, getGameModeGradient } from "@/utils/gameUtils";
 import { safeTextRender } from "@/utils/textUtils";
 import { NAVIGATION_COLORS } from "@/constant/gameConstants";
 // NEW: Import badge components
 import DifficultyBadge from "@/components/games/DifficultyBadge";
 import FocusAreaBadge from "@/components/games/FocusAreaBadge";
+
+interface RewardInfo {
+  coins: number;
+  label: string;
+  difficulty: string;
+  timeSpent: number;
+  tier?: any;
+}
 
 interface AnswerReviewProps {
   question: string | any;
@@ -29,9 +39,9 @@ interface AnswerReviewProps {
   delay?: number;
   questionLabel?: string;
   answerLabel?: string;
-  // UPDATED: Enhanced background completion flag
   isBackgroundCompletion?: boolean;
-  isUserExit?: boolean; // NEW: Flag for user-initiated exit
+  isUserExit?: boolean;
+  rewardInfo?: RewardInfo | null;
 }
 
 const AnswerReview: React.FC<AnswerReviewProps> = ({
@@ -52,7 +62,8 @@ const AnswerReview: React.FC<AnswerReviewProps> = ({
   questionLabel = "Question:",
   answerLabel = "Your Answer:",
   isBackgroundCompletion = false,
-  isUserExit = false, // NEW
+  isUserExit = false,
+  rewardInfo = null,
 }) => {
   // Get game mode gradient for consistency
   const gameGradientColors = useMemo(
@@ -67,7 +78,7 @@ const AnswerReview: React.FC<AnswerReviewProps> = ({
         title: "Game Exited",
         message:
           "You chose to exit the game. Your progress has been saved and you can continue later.",
-        colors: ["#FF9800", "#EF6C00"] as const, // Orange gradient for user exit
+        colors: ["#FF9800", "#EF6C00"] as const,
       };
     }
 
@@ -112,6 +123,15 @@ const AnswerReview: React.FC<AnswerReviewProps> = ({
     // Fallback to level ID
     return levelId ? `Level ${levelId}` : "Level";
   }, [actualTitle, levelTitle, levelString, levelId]);
+
+  // NEW: Format time helper
+  const formatTime = (seconds: number): string => {
+    if (seconds < 60) {
+      return `${seconds.toFixed(1)}s`;
+    } else {
+      return `${(seconds / 60).toFixed(1)}m`;
+    }
+  };
 
   return (
     <Animatable.View
@@ -170,18 +190,46 @@ const AnswerReview: React.FC<AnswerReviewProps> = ({
           </View>
 
           {/* Time Taken Section - ALWAYS show if timeElapsed is available */}
-          <View style={styles.timeInfoContainer}>
-            <View style={styles.timeBadge}>
-              <MaterialCommunityIcons
-                name="clock"
-                size={15}
-                color={BASE_COLORS.white}
-              />
-              <Text style={styles.timeText}>
-                Time: {formatTimerDisplay(timeElapsed as number)}
-              </Text>
+          {timeElapsed !== undefined && (
+            <View style={styles.timeInfoContainer}>
+              <View style={styles.timeBadge}>
+                <MaterialCommunityIcons
+                  name="clock"
+                  size={15}
+                  color={BASE_COLORS.white}
+                />
+                <Text style={styles.timeText}>
+                  Time: {formatTimerDisplay(timeElapsed as number)}
+                </Text>
+              </View>
             </View>
-          </View>
+          )}
+
+          {/* NEW: Reward Display - Only show for correct answers - MOVED BELOW TIME */}
+          {rewardInfo && rewardInfo.coins > 0 && isCorrect && (
+            <Animatable.View
+              animation="bounceIn"
+              duration={800}
+              delay={delay + 800}
+              style={styles.rewardContainer}
+            >
+              <View style={styles.rewardContent}>
+                <View style={styles.rewardIconContainer}>
+                  <Star width={18} height={18} color={BASE_COLORS.white} />
+                </View>
+                <Image
+                  source={require("@/assets/images/coin.png")}
+                  style={styles.rewardCoinImage}
+                />
+                <Text style={styles.rewardCoinsText}>+{rewardInfo.coins}</Text>
+                <Text style={styles.rewardCoinsLabel}>coins</Text>
+              </View>
+              <Text style={styles.rewardSubtitle}>{rewardInfo.label}</Text>
+              {/* Reward Badge Decorations */}
+              <View style={styles.rewardDecoration1} />
+              <View style={styles.rewardDecoration2} />
+            </Animatable.View>
+          )}
 
           {/* Decorative Elements */}
           <View style={styles.cardDecoration1} />
@@ -356,7 +404,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "center",
     alignItems: "center",
-    marginBottom: 4,
+    marginBottom: 12,
     paddingHorizontal: 8,
   },
   timeBadge: {
@@ -377,24 +425,87 @@ const styles = StyleSheet.create({
     letterSpacing: 0.3,
   },
 
-  cardDecoration1: {
+  rewardContainer: {
+    alignItems: "center",
+    flexDirection: "row",
+    alignItems: "center",
+    paddingHorizontal: 14,
+    paddingVertical: 6,
+    borderRadius: 20,
+    backgroundColor: "rgba(255, 255, 255, 0.10)",
+    borderWidth: 1,
+    borderColor: "rgba(255, 255, 255, 0.3)",
+    marginBottom: 6,
+    minWidth: 140,
+  },
+
+  rewardContent: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
+    zIndex: 2,
+  },
+  rewardIconContainer: {
+    width: 28,
+    height: 28,
+    borderRadius: 14,
+    backgroundColor: "rgba(255, 255, 255, 0.2)",
+    justifyContent: "center",
+    alignItems: "center",
+    borderWidth: 1,
+    borderColor: "rgba(255, 255, 255, 0.4)",
+  },
+  rewardCoinImage: {
+    width: 20,
+    height: 20,
+    borderRadius: 10,
+  },
+  rewardCoinsText: {
+    fontSize: 18,
+    fontFamily: "Poppins-Bold",
+    color: BASE_COLORS.white,
+    textShadowColor: "rgba(0, 0, 0, 0.3)",
+    textShadowOffset: { width: 0, height: 1 },
+    textShadowRadius: 2,
+  },
+  rewardCoinsLabel: {
+    fontSize: 14,
+    fontFamily: "Poppins-SemiBold",
+    color: "rgba(255, 255, 255, 0.9)",
+    textShadowColor: "rgba(0, 0, 0, 0.3)",
+    textShadowOffset: { width: 0, height: 1 },
+    textShadowRadius: 2,
+  },
+  rewardSubtitle: {
+    fontSize: 12,
+    fontFamily: "Poppins-Medium",
+    color: "rgba(255, 255, 255, 0.8)",
+    textAlign: "center",
+    textShadowColor: "rgba(0, 0, 0, 0.3)",
+    textShadowOffset: { width: 0, height: 1 },
+    textShadowRadius: 2,
+  },
+  // Reward Badge Decorations
+  rewardDecoration1: {
     position: "absolute",
-    top: -20,
-    right: -20,
-    width: 80,
-    height: 80,
-    borderRadius: 40,
+    top: -10,
+    left: -10,
+    width: 30,
+    height: 30,
+    borderRadius: 15,
     backgroundColor: "rgba(255, 255, 255, 0.1)",
   },
-  cardDecoration2: {
+  rewardDecoration2: {
     position: "absolute",
-    bottom: -30,
-    left: -30,
-    width: 100,
-    height: 100,
-    borderRadius: 50,
-    backgroundColor: "rgba(255, 255, 255, 0.05)",
+    bottom: -8,
+    right: -8,
+    width: 25,
+    height: 25,
+    borderRadius: 12.5,
+    backgroundColor: "rgba(255, 255, 255, 0.08)",
   },
+
+  // Review Card
   reviewCardContainer: {
     zIndex: 2,
     marginVertical: 12,
@@ -488,6 +599,26 @@ const styles = StyleSheet.create({
   backgroundAnswerText: {
     fontFamily: "Poppins-SemiBold",
     color: "#e4a84fff",
+  },
+
+  // Decorative Elements
+  cardDecoration1: {
+    position: "absolute",
+    top: -20,
+    right: -20,
+    width: 80,
+    height: 80,
+    borderRadius: 40,
+    backgroundColor: "rgba(255, 255, 255, 0.1)",
+  },
+  cardDecoration2: {
+    position: "absolute",
+    bottom: -30,
+    left: -30,
+    width: 100,
+    height: 100,
+    borderRadius: 50,
+    backgroundColor: "rgba(255, 255, 255, 0.05)",
   },
 });
 

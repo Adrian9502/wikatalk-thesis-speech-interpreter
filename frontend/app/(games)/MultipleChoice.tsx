@@ -17,8 +17,7 @@ import { useGameRestart } from "@/hooks/games/useGameRestart";
 import { useTimerReset } from "@/hooks/games/useTimerReset";
 import { useAppStateProgress } from "@/hooks/games/useAppStateProgress";
 import useProgressStore from "@/store/games/useProgressStore";
-import useCoinsStore from "@/store/games/useCoinsStore"; // NEW: Import coins store
-import RewardNotification from "@/components/games/RewardNotification"; // NEW: Import reward component
+import useCoinsStore from "@/store/games/useCoinsStore";
 
 interface MultipleChoiceProps {
   levelId: number;
@@ -47,10 +46,6 @@ const MultipleChoice: React.FC<MultipleChoiceProps> = React.memo(
       setTimerRunning,
       setBackgroundCompletion,
     } = useGameStore();
-
-    // NEW: Reward state
-    const [showReward, setShowReward] = useState(false);
-    const [rewardInfo, setRewardInfo] = useState<any>(null);
 
     // NEW: Coins store for balance refresh
     const { fetchCoinsBalance } = useCoinsStore();
@@ -87,6 +82,7 @@ const MultipleChoice: React.FC<MultipleChoiceProps> = React.memo(
       levelId,
       gameMode: "multipleChoice",
     });
+    const [rewardInfo, setRewardInfo] = useState<any>(null);
 
     // Track initial setup
     const initialSetupComplete = useRef(false);
@@ -176,8 +172,6 @@ const MultipleChoice: React.FC<MultipleChoiceProps> = React.memo(
 
           const gameStore = useGameStore.getState();
           const preciseTime = gameStore.gameState.timeElapsed;
-
-          // FIXED: Use higher precision rounding for final time
           const exactFinalTime = Math.round(preciseTime * 100) / 100;
           finalTimeRef.current = exactFinalTime;
 
@@ -202,19 +196,22 @@ const MultipleChoice: React.FC<MultipleChoiceProps> = React.memo(
             exactFinalTime,
             isCorrect,
             isCorrect,
-            difficulty // NEW: Pass difficulty for reward calculation
+            difficulty
           );
 
           if (updatedProgress) {
             console.log(`[MultipleChoice] Progress updated successfully`);
 
-            // NEW: Handle reward display and coins refresh
+            // FIXED: Store reward info for display
             if (
               updatedProgress.rewardInfo &&
               updatedProgress.rewardInfo.coins > 0
             ) {
+              console.log(
+                `[MultipleChoice] Setting reward info:`,
+                updatedProgress.rewardInfo
+              );
               setRewardInfo(updatedProgress.rewardInfo);
-              setShowReward(true);
 
               // Refresh coins balance to show updated amount
               setTimeout(() => {
@@ -240,16 +237,10 @@ const MultipleChoice: React.FC<MultipleChoiceProps> = React.memo(
         setTimerRunning,
         handleOptionSelect,
         updateProgress,
-        difficulty, // NEW: Add difficulty dependency
-        fetchCoinsBalance, // NEW: Add fetchCoinsBalance dependency
+        difficulty,
+        fetchCoinsBalance,
       ]
     );
-
-    // NEW: Handle reward notification completion
-    const handleRewardComplete = useCallback(() => {
-      setShowReward(false);
-      setRewardInfo(null);
-    }, []);
 
     const gameConfig = useMemo(() => {
       const progressTime =
@@ -385,6 +376,7 @@ const MultipleChoice: React.FC<MultipleChoiceProps> = React.memo(
           onTimerReset={handleTimerReset}
           isCorrectAnswer={gameConfig.isSelectedCorrect}
           onUserExit={handleUserExitWithSave}
+          currentRewardInfo={rewardInfo}
         >
           {gameStatus === "playing" ? (
             <GamePlayingContent
@@ -426,16 +418,10 @@ const MultipleChoice: React.FC<MultipleChoiceProps> = React.memo(
               isCorrectAnswer={gameConfig.isSelectedCorrect}
               isBackgroundCompletion={gameConfig.isBackgroundCompletion}
               isUserExit={gameConfig.isUserExit}
+              rewardInfo={rewardInfo}
             />
           )}
         </GameContainer>
-
-        {/* NEW: Reward Notification */}
-        <RewardNotification
-          visible={showReward}
-          rewardInfo={rewardInfo}
-          onComplete={handleRewardComplete}
-        />
       </>
     );
   }

@@ -18,8 +18,7 @@ import { useGameRestart } from "@/hooks/games/useGameRestart";
 import { useTimerReset } from "@/hooks/games/useTimerReset";
 import useProgressStore from "@/store/games/useProgressStore";
 import { useAppStateProgress } from "@/hooks/games/useAppStateProgress";
-import useCoinsStore from "@/store/games/useCoinsStore"; // NEW: Import coins store
-import RewardNotification from "@/components/games/RewardNotification"; // NEW: Import reward component
+import useCoinsStore from "@/store/games/useCoinsStore";
 
 interface FillInTheBlankProps {
   levelId: number;
@@ -60,9 +59,6 @@ const FillInTheBlank: React.FC<FillInTheBlankProps> = React.memo(
       setTimeElapsed,
       setBackgroundCompletion,
     } = useGameStore();
-
-    // NEW: Reward state
-    const [showReward, setShowReward] = useState(false);
     const [rewardInfo, setRewardInfo] = useState<any>(null);
 
     // NEW: Coins store for balance refresh
@@ -139,8 +135,6 @@ const FillInTheBlank: React.FC<FillInTheBlankProps> = React.memo(
                 updatedProgress.rewardInfo.coins > 0
               ) {
                 setRewardInfo(updatedProgress.rewardInfo);
-                setShowReward(true);
-
                 // Refresh coins balance to show updated amount
                 setTimeout(() => {
                   fetchCoinsBalance(true);
@@ -325,12 +319,6 @@ const FillInTheBlank: React.FC<FillInTheBlankProps> = React.memo(
       }
     }, [showFeedback, setTimerRunning]);
 
-    // NEW: Handle reward notification completion
-    const handleRewardComplete = useCallback(() => {
-      setShowReward(false);
-      setRewardInfo(null);
-    }, []);
-
     return (
       <KeyboardAvoidingView
         style={{ flex: 1 }}
@@ -403,13 +391,6 @@ const FillInTheBlank: React.FC<FillInTheBlankProps> = React.memo(
             />
           )}
         </GameContainer>
-
-        {/* NEW: Reward Notification */}
-        <RewardNotification
-          visible={showReward}
-          rewardInfo={rewardInfo}
-          onComplete={handleRewardComplete}
-        />
       </KeyboardAvoidingView>
     );
   }

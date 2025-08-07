@@ -1,5 +1,5 @@
-import React, { useMemo } from "react";
-import { ScrollView, View, Text, StyleSheet } from "react-native";
+import React, { useCallback } from "react";
+import { View, Text, ScrollView } from "react-native";
 import * as Animatable from "react-native-animatable";
 import { LinearGradient } from "expo-linear-gradient";
 import { BASE_COLORS, iconColors } from "@/constant/colors";
@@ -10,6 +10,14 @@ import { GameMode } from "@/types/gameTypes";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { NAVIGATION_COLORS } from "@/constant/gameConstants";
 import { renderFocusIcon } from "@/utils/games/renderFocusIcon";
+
+interface RewardInfo {
+  coins: number;
+  label: string;
+  difficulty: string;
+  timeSpent: number;
+  tier?: any;
+}
 
 interface GameCompletedContentProps {
   score: number;
@@ -32,6 +40,7 @@ interface GameCompletedContentProps {
   isCorrectAnswer?: boolean;
   isBackgroundCompletion?: boolean;
   isUserExit?: boolean;
+  rewardInfo?: RewardInfo | null;
 }
 
 const GameCompletedContent: React.FC<GameCompletedContentProps> = ({
@@ -53,43 +62,46 @@ const GameCompletedContent: React.FC<GameCompletedContentProps> = ({
   isCorrectAnswer = false,
   isBackgroundCompletion = false,
   isUserExit = false,
+  rewardInfo = null,
 }) => {
   return (
-    <ScrollView
-      showsVerticalScrollIndicator={false}
-      contentContainerStyle={gameSharedStyles.contentContainer}
-    >
-      {/* Answer Review Section */}
-      <AnswerReview
-        question={question}
-        userAnswer={userAnswer}
-        isCorrect={isCorrect}
-        timeElapsed={timeElapsed}
-        difficulty={difficulty}
-        levelString={levelString}
-        actualTitle={actualTitle}
-        focusArea={focusArea}
-        gameMode={gameMode}
-        levelId={levelId}
-        animation="fadeInUp"
-        duration={800}
-        delay={0}
-        isBackgroundCompletion={isBackgroundCompletion}
-        isUserExit={isUserExit}
-      />
+    <>
+      <ScrollView
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={gameSharedStyles.contentContainer}
+      >
+        <AnswerReview
+          question={question}
+          userAnswer={userAnswer}
+          isCorrect={isCorrect}
+          timeElapsed={timeElapsed}
+          difficulty={difficulty}
+          levelString={levelString}
+          actualTitle={actualTitle}
+          focusArea={focusArea}
+          gameMode={gameMode}
+          levelId={levelId}
+          animation="fadeInUp"
+          duration={800}
+          delay={0}
+          isBackgroundCompletion={isBackgroundCompletion}
+          isUserExit={isUserExit}
+          rewardInfo={rewardInfo}
+        />
 
-      {/* Navigation Section */}
-      <GameNavigation
-        levelId={levelId}
-        gameMode={gameMode}
-        gameTitle={gameTitle}
-        onRestart={onRestart}
-        difficulty={difficulty}
-        nextLevelTitle={nextLevelTitle}
-        isCurrentLevelCompleted={isCurrentLevelCompleted || isCorrect}
-        isCorrectAnswer={isCorrectAnswer || isCorrect}
-      />
-    </ScrollView>
+        {/* Navigation Section */}
+        <GameNavigation
+          levelId={levelId}
+          gameMode={gameMode}
+          gameTitle={gameTitle}
+          onRestart={onRestart}
+          difficulty={difficulty}
+          nextLevelTitle={nextLevelTitle}
+          isCurrentLevelCompleted={isCurrentLevelCompleted || isCorrect}
+          isCorrectAnswer={isCorrectAnswer || isCorrect}
+        />
+      </ScrollView>
+    </>
   );
 };
 

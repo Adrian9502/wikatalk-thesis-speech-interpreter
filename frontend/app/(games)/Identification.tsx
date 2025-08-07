@@ -19,7 +19,6 @@ import { useTimerReset } from "@/hooks/games/useTimerReset";
 import { useAppStateProgress } from "@/hooks/games/useAppStateProgress";
 import useProgressStore from "@/store/games/useProgressStore";
 import useCoinsStore from "@/store/games/useCoinsStore";
-import RewardNotification from "@/components/games/RewardNotification";
 import { router } from "expo-router";
 import { BASE_COLORS } from "@/constant/colors";
 import gameSharedStyles from "@/styles/gamesSharedStyles";
@@ -61,10 +60,6 @@ const Identification: React.FC<IdentificationProps> = React.memo(
       setBackgroundCompletion,
     } = useGameStore();
 
-    // NEW: Reward state
-    const [showReward, setShowReward] = useState(false);
-    const [rewardInfo, setRewardInfo] = useState<any>(null);
-
     // NEW: Coins store for balance refresh
     const { fetchCoinsBalance } = useCoinsStore();
 
@@ -100,6 +95,7 @@ const Identification: React.FC<IdentificationProps> = React.memo(
       levelId,
       gameMode: "identification",
     });
+    const [rewardInfo, setRewardInfo] = useState<any>(null);
 
     // Add finalTimeRef at the top of the component
     const finalTimeRef = useRef<number>(0);
@@ -173,14 +169,11 @@ const Identification: React.FC<IdentificationProps> = React.memo(
           if (updatedProgress) {
             console.log(`[Identification] Progress updated successfully`);
 
-            // NEW: Handle reward display and coins refresh
             if (
               updatedProgress.rewardInfo &&
               updatedProgress.rewardInfo.coins > 0
             ) {
               setRewardInfo(updatedProgress.rewardInfo);
-              setShowReward(true);
-
               // Refresh coins balance to show updated amount
               setTimeout(() => {
                 fetchCoinsBalance(true);
@@ -358,12 +351,6 @@ const Identification: React.FC<IdentificationProps> = React.memo(
       );
     }
 
-    // NEW: Reward Notification handler
-    const handleRewardComplete = useCallback(() => {
-      setShowReward(false);
-      setRewardInfo(null);
-    }, []);
-
     return (
       <>
         <GameContainer
@@ -427,13 +414,6 @@ const Identification: React.FC<IdentificationProps> = React.memo(
             />
           )}
         </GameContainer>
-
-        {/* NEW: Reward Notification */}
-        <RewardNotification
-          visible={showReward}
-          rewardInfo={rewardInfo}
-          onComplete={handleRewardComplete}
-        />
       </>
     );
   }

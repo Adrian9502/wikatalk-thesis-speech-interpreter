@@ -5,6 +5,15 @@ import { BASE_COLORS } from "@/constant/colors";
 import { useNavigation } from "expo-router";
 import StatsContainer from "@/components/games/StatsContainer";
 
+// ADD: RewardInfo interface
+interface RewardInfo {
+  coins: number;
+  label: string;
+  difficulty: string;
+  timeSpent: number;
+  tier?: any;
+}
+
 type HeaderProps = {
   title: string;
   disableBack?: boolean;
@@ -22,6 +31,7 @@ type HeaderProps = {
   variant?: "playing" | "completed";
   finalTime?: number;
   isCorrectAnswer?: boolean;
+  currentRewardInfo?: RewardInfo | null;
 };
 
 const GameHeader = ({
@@ -30,7 +40,7 @@ const GameHeader = ({
   hideBack = false,
   onBackPress,
 
-  // NEW: Stats props
+  // Stats props
   showStats = false,
   difficulty,
   focusArea,
@@ -43,6 +53,7 @@ const GameHeader = ({
   levelId,
   onTimerReset,
   isCorrectAnswer,
+  currentRewardInfo = null, // ADD: Current reward info
 }: HeaderProps & { levelId?: number | string; onTimerReset?: () => void }) => {
   const navigation = useNavigation();
 
@@ -76,98 +87,77 @@ const GameHeader = ({
 
         {/* Center section - Title with game styling */}
         <View style={styles.titleContainer}>
-          <View style={styles.titleWrapper}>
-            <Text style={styles.title} numberOfLines={1}>
-              {title}
-            </Text>
-          </View>
+          <Text style={styles.title}>{title}</Text>
         </View>
 
-        {/* Right section - Placeholder for symmetry */}
+        {/* Right section - Placeholder for balance */}
         <View style={styles.placeholder} />
       </View>
 
-      {/* Stats Container Row */}
+      {/* Stats Section */}
       {showStats && difficulty && (
-        <View>
-          <StatsContainer
-            difficulty={difficulty}
-            focusArea={focusArea}
-            showTimer={showTimer}
-            timerRunning={timerRunning}
-            initialTime={initialTime}
-            isStarted={isStarted}
-            animationDelay={0}
-            variant={variant}
-            finalTime={finalTime}
-            levelId={levelId}
-            onTimerReset={onTimerReset}
-            isCorrectAnswer={isCorrectAnswer}
-          />
-        </View>
+        <StatsContainer
+          difficulty={difficulty}
+          focusArea={focusArea}
+          showTimer={showTimer}
+          timerRunning={timerRunning}
+          initialTime={initialTime}
+          isStarted={isStarted}
+          animationDelay={200}
+          variant={variant}
+          finalTime={finalTime}
+          levelId={levelId}
+          onTimerReset={onTimerReset}
+          isCorrectAnswer={isCorrectAnswer}
+          currentRewardInfo={currentRewardInfo}
+        />
       )}
     </View>
   );
 };
 
-export default React.memo(GameHeader);
-
 const styles = StyleSheet.create({
   headerContainer: {
-    backgroundColor: "transparent",
+    paddingTop: 10,
+    paddingBottom: 15,
   },
-
   headerRow: {
     flexDirection: "row",
-    alignItems: "center",
-    paddingVertical: 6,
     justifyContent: "space-between",
+    alignItems: "center",
+    paddingHorizontal: 4,
   },
-
   backButton: {
-    width: 32,
-    height: 32,
+    width: 40,
+    height: 40,
     borderRadius: 20,
-    backgroundColor: "rgba(255, 255, 255, 0.15)",
+    backgroundColor: "rgba(255, 255, 255, 0.1)",
     justifyContent: "center",
     alignItems: "center",
     borderWidth: 1,
     borderColor: "rgba(255, 255, 255, 0.2)",
-    shadowColor: "#000",
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
   },
   disabledButton: {
-    opacity: 0.4,
-    backgroundColor: "rgba(255, 255, 255, 0.05)",
+    opacity: 0.5,
   },
   titleContainer: {
     flex: 1,
     alignItems: "center",
-    justifyContent: "center",
-    paddingHorizontal: 16,
-  },
-  titleWrapper: {
-    alignItems: "center",
-    position: "relative",
+    paddingHorizontal: 20,
   },
   title: {
-    fontSize: 22,
-    fontFamily: "Poppins-SemiBold",
+    fontSize: 20,
+    fontFamily: "Poppins-Bold",
     color: BASE_COLORS.white,
     textAlign: "center",
     textShadowColor: "rgba(0, 0, 0, 0.3)",
     textShadowOffset: { width: 0, height: 1 },
     textShadowRadius: 2,
-    letterSpacing: 0.5,
   },
   placeholder: {
-    width: 32,
-    height: 32,
+    width: 40,
+    height: 40,
   },
 });
+
+export default GameHeader;
