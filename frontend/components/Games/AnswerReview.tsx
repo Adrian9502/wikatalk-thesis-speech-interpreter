@@ -504,7 +504,6 @@ const AnswerReview: React.FC<AnswerReviewProps> = ({
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    paddingHorizontal: 16,
     paddingBottom: 20,
   },
   heroCardContainer: {
@@ -599,6 +598,7 @@ const styles = StyleSheet.create({
     letterSpacing: 0.5,
   },
   statsRow: {
+    paddingHorizontal: 12,
     flexDirection: "row",
     justifyContent: "center",
     alignItems: "center",
@@ -783,12 +783,13 @@ const styles = StyleSheet.create({
   },
   combinedCardContainer: {
     alignSelf: "center",
-    width: "100%",
     marginBottom: 20,
+    width: "100%",
+    flex: 1,
   },
   combinedCard: {
     borderRadius: 20,
-    padding: 20,
+    padding: 24,
     position: "relative",
     overflow: "hidden",
     shadowColor: "#000",
