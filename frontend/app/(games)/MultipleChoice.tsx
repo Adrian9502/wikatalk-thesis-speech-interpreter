@@ -419,6 +419,7 @@ const MultipleChoice: React.FC<MultipleChoiceProps> = React.memo(
               isBackgroundCompletion={gameConfig.isBackgroundCompletion}
               isUserExit={gameConfig.isUserExit}
               rewardInfo={rewardInfo}
+              onTimerReset={handleTimerReset}
             />
           )}
         </GameContainer>

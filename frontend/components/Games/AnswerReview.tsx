@@ -1,12 +1,5 @@
-import React, { useMemo, useRef, useEffect } from "react";
-import {
-  View,
-  Text,
-  StyleSheet,
-  Animated,
-  Image,
-  Dimensions,
-} from "react-native";
+import React, { useMemo, useState, useCallback } from "react";
+import { View, Text, StyleSheet, Dimensions } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import * as Animatable from "react-native-animatable";
 import { Check, X, Star } from "react-native-feather";
@@ -18,6 +11,18 @@ import { safeTextRender } from "@/utils/textUtils";
 import { NAVIGATION_COLORS } from "@/constant/gameConstants";
 import DifficultyBadge from "@/components/games/DifficultyBadge";
 import FocusAreaBadge from "@/components/games/FocusAreaBadge";
+
+// NEW: Import the ResetButton and ResetTimerModal components
+import ResetButton from "@/components/games/buttons/ResetButton";
+import ResetTimerModal from "@/components/games/modals/ResetTimerModal";
+
+// NEW: Import reset-related utilities
+import { calculateResetCost } from "@/utils/resetCostUtils";
+import { useUserProgress } from "@/hooks/useUserProgress";
+import useCoinsStore from "@/store/games/useCoinsStore";
+import useGameStore from "@/store/games/useGameStore";
+import useProgressStore from "@/store/games/useProgressStore";
+import { useSplashStore } from "@/store/useSplashStore";
 
 const { width: screenWidth, height: screenHeight } = Dimensions.get("window");
 
@@ -49,6 +54,8 @@ interface AnswerReviewProps {
   isBackgroundCompletion?: boolean;
   isUserExit?: boolean;
   rewardInfo?: RewardInfo | null;
+  // NEW: Reset-related props
+  onTimerReset?: () => void;
 }
 
 const AnswerReview: React.FC<AnswerReviewProps> = ({
@@ -71,7 +78,32 @@ const AnswerReview: React.FC<AnswerReviewProps> = ({
   isBackgroundCompletion = false,
   isUserExit = false,
   rewardInfo = null,
+  // NEW: Reset callback
+  onTimerReset,
 }) => {
+  // NEW: Reset-related state
+  const [showResetModal, setShowResetModal] = useState(false);
+  const [isResetting, setIsResetting] = useState(false);
+  const [showSuccessMessage, setShowSuccessMessage] = useState(false);
+  const [resetMessage, setResetMessage] = useState("");
+
+  // NEW: Reset-related hooks (only if levelId exists)
+  const { resetTimer } = useUserProgress(levelId || "");
+  const { coins, fetchCoinsBalance } = useCoinsStore();
+
+  // NEW: Calculate reset cost
+  const resetCost = useMemo(() => {
+    if (levelId && timeElapsed && timeElapsed > 0) {
+      return calculateResetCost(timeElapsed);
+    }
+    return 0;
+  }, [levelId, timeElapsed]);
+
+  // NEW: Check if user can afford reset
+  const canAfford = coins >= resetCost;
+  const shouldDisableReset =
+    !canAfford || isCorrect || !timeElapsed || timeElapsed === 0;
+
   // Get game mode gradient for consistency
   const gameGradientColors = useMemo(
     () => getGameModeGradient(gameMode as any),
@@ -94,7 +126,7 @@ const AnswerReview: React.FC<AnswerReviewProps> = ({
         title: "Game Interrupted!",
         message:
           "You left the game while it was running. Your progress has been saved.",
-        colors: ["#FF9800", "#EF6C00"] as const, // Orange warning gradient
+        colors: ["#FF9800", "#EF6C00"] as const,
       };
     }
 
@@ -114,95 +146,159 @@ const AnswerReview: React.FC<AnswerReviewProps> = ({
 
   // Format the level display text
   const levelDisplayText = useMemo(() => {
-    // Priority order: actualTitle > levelTitle > levelString > fallback
-    if (actualTitle) {
-      return actualTitle;
-    }
-
-    if (levelTitle) {
-      return levelTitle;
-    }
-
-    if (levelString) {
-      return levelString;
-    }
-
-    // Fallback to level ID
+    if (actualTitle) return actualTitle;
+    if (levelTitle) return levelTitle;
+    if (levelString) return levelString;
     return levelId ? `Level ${levelId}` : "Level";
   }, [actualTitle, levelTitle, levelString, levelId]);
 
-  // NEW: Format time helper
-  const formatTime = (seconds: number): string => {
-    if (seconds < 60) {
-      return `${seconds.toFixed(1)}s`;
-    } else {
-      return `${(seconds / 60).toFixed(1)}m`;
+  // NEW: Reset button handlers
+  const handleResetPress = useCallback(() => {
+    if (levelId && timeElapsed && timeElapsed > 0 && !isCorrect) {
+      setShowResetModal(true);
+      setShowSuccessMessage(false);
     }
-  };
+  }, [levelId, timeElapsed, isCorrect]);
+
+  const handleConfirmReset = useCallback(async () => {
+    if (!levelId || isResetting) return;
+
+    try {
+      setIsResetting(true);
+
+      const result = await resetTimer(levelId);
+
+      if (result.success) {
+        fetchCoinsBalance(true);
+
+        if (onTimerReset) {
+          console.log("[AnswerReview] Calling parent's onTimerReset callback");
+          onTimerReset();
+        }
+
+        const coinsDeducted = result.coinsDeducted || resetCost;
+        const successMsg = `Timer reset successfully! 🪙 ${coinsDeducted} coins deducted.`;
+
+        setResetMessage(successMsg);
+        setShowSuccessMessage(true);
+
+        // Clear caches
+        const gameStore = useGameStore.getState();
+        gameStore.resetTimer();
+        gameStore.setTimeElapsed(0);
+
+        const progressStore = useProgressStore.getState();
+        progressStore.clearCache();
+        progressStore.fetchProgress(true);
+
+        const splashStore = useSplashStore.getState();
+        const existingProgress = splashStore.getIndividualProgress
+          ? splashStore.getIndividualProgress(String(levelId))
+          : null;
+
+        if (splashStore.setIndividualProgress) {
+          const resetProgress = existingProgress
+            ? {
+                ...existingProgress,
+                totalTimeSpent: 0,
+                lastAttemptTime: 0,
+                attempts: [],
+              }
+            : {
+                totalTimeSpent: 0,
+                lastAttemptTime: 0,
+                attempts: [],
+                completed: false,
+                quizId: String(levelId),
+              };
+
+          splashStore.setIndividualProgress(String(levelId), resetProgress);
+        }
+      } else {
+        console.error("[AnswerReview] Reset failed:", result.message);
+        setResetMessage("Reset failed. Please try again.");
+        setShowSuccessMessage(true);
+      }
+    } catch (error) {
+      console.error("[AnswerReview] Reset error:", error);
+      setResetMessage("Reset failed. Please try again.");
+      setShowSuccessMessage(true);
+    } finally {
+      setIsResetting(false);
+    }
+  }, [levelId, resetTimer, fetchCoinsBalance, resetCost, onTimerReset]);
+
+  const handleSuccessAcknowledge = useCallback(() => {
+    setShowSuccessMessage(false);
+    setShowResetModal(false);
+  }, []);
+
+  const handleCloseModal = useCallback(() => {
+    if (!isResetting && !showSuccessMessage) {
+      setShowResetModal(false);
+    }
+  }, [isResetting, showSuccessMessage]);
 
   return (
-    <Animatable.View
-      animation={animation}
-      duration={duration}
-      delay={delay}
-      style={styles.container}
-    >
-      {/* Hero Result Card - Larger, more prominent */}
+    <>
       <Animatable.View
-        animation="bounceIn"
-        duration={1000}
-        delay={delay + 200}
-        style={styles.heroCardContainer}
+        animation={animation}
+        duration={duration}
+        delay={delay}
+        style={styles.container}
       >
-        <LinearGradient
-          colors={resultColors}
-          style={styles.heroCard}
-          start={{ x: 0, y: 0 }}
-          end={{ x: 1, y: 1 }}
-        >
-          {/* Large Result Icon */}
-          <View style={styles.heroIcon}>
-            {isBackgroundCompletion || isUserExit ? (
-              <MaterialCommunityIcons
-                name={isUserExit ? "exit-to-app" : "alert-circle"}
-                size={48}
-                color={BASE_COLORS.white}
-              />
-            ) : isCorrect ? (
-              <Check width={48} height={48} color={BASE_COLORS.white} />
-            ) : (
-              <X width={48} height={48} color={BASE_COLORS.white} />
-            )}
-          </View>
-
-          {/* Result Title */}
-          <Text style={styles.heroTitle}>{resultData.title}</Text>
-          <Text style={styles.heroMessage}>{resultData.message}</Text>
-
-          {/* Floating decorative elements */}
-          <View style={styles.heroDecoration1} />
-          <View style={styles.heroDecoration2} />
-          <View style={styles.heroDecoration3} />
-        </LinearGradient>
-      </Animatable.View>
-
-      {/* Stats Row - Horizontal layout with rounded cards */}
-      <View style={styles.statsRow}>
-        {/* Level Info Card */}
+        {/* Hero Result Card - Larger, more prominent */}
         <Animatable.View
-          animation="slideInLeft"
-          duration={600}
-          delay={delay + 400}
-          style={styles.statsCard}
+          animation="bounceIn"
+          duration={1000}
+          delay={delay + 200}
+          style={styles.heroCardContainer}
         >
-          <View style={styles.levelInfoCard}>
-            <Text style={styles.levelTitleLabel}>{levelString}</Text>
-            <Text style={styles.statsValue}>{levelDisplayText}</Text>
-          </View>
+          <LinearGradient
+            colors={resultColors}
+            style={styles.heroCard}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 1 }}
+          >
+            <View style={styles.heroIcon}>
+              {isBackgroundCompletion || isUserExit ? (
+                <MaterialCommunityIcons
+                  name={isUserExit ? "exit-to-app" : "alert-circle"}
+                  size={48}
+                  color={BASE_COLORS.white}
+                />
+              ) : isCorrect ? (
+                <Check width={48} height={48} color={BASE_COLORS.white} />
+              ) : (
+                <X width={48} height={48} color={BASE_COLORS.white} />
+              )}
+            </View>
+
+            <Text style={styles.heroTitle}>{resultData.title}</Text>
+            <Text style={styles.heroMessage}>{resultData.message}</Text>
+
+            <View style={styles.heroDecoration1} />
+            <View style={styles.heroDecoration2} />
+            <View style={styles.heroDecoration3} />
+          </LinearGradient>
         </Animatable.View>
 
-        {/* Time Card */}
-        {timeElapsed !== undefined && (
+        {/* Stats Row - Horizontal layout with rounded cards */}
+        <View style={styles.statsRow}>
+          {/* Level Info Card */}
+          <Animatable.View
+            animation="slideInLeft"
+            duration={600}
+            delay={delay + 400}
+            style={styles.statsCard}
+          >
+            <View style={styles.levelInfoCard}>
+              <Text style={styles.levelTitleLabel}>{levelString}</Text>
+              <Text style={styles.statsValue}>{levelDisplayText}</Text>
+            </View>
+          </Animatable.View>
+
+          {/* Time Card */}
           <Animatable.View
             animation="slideInRight"
             duration={600}
@@ -220,149 +316,174 @@ const AnswerReview: React.FC<AnswerReviewProps> = ({
                 {formatTimerDisplay(timeElapsed as number)}
               </Text>
             </View>
+            {levelId && !isCorrect && (
+              <View style={styles.resetSection}>
+                <ResetButton
+                  onPress={handleResetPress}
+                  disabled={shouldDisableReset}
+                  isLoading={isResetting}
+                  cost={resetCost}
+                  showCostLabel={true}
+                  costLabel="Reset"
+                  variant="expanded"
+                  size="small"
+                  showOnlyWhen={true}
+                />
+              </View>
+            )}
+          </Animatable.View>
+        </View>
+
+        {/* Badges Row - Curved layout */}
+        <Animatable.View
+          animation="fadeInUp"
+          duration={600}
+          delay={delay + 600}
+          style={styles.badgesRow}
+        >
+          <View style={styles.curvedBadgeContainer}>
+            <DifficultyBadge difficulty={difficulty} />
+            <FocusAreaBadge focusArea={focusArea} />
+          </View>
+        </Animatable.View>
+
+        {/* Reward Card - Special floating design */}
+        {rewardInfo && rewardInfo.coins > 0 && isCorrect && (
+          <Animatable.View
+            animation="bounceIn"
+            duration={800}
+            delay={delay + 800}
+            style={styles.rewardFloatingCard}
+          >
+            <LinearGradient
+              colors={getDifficultyColors(rewardInfo.difficulty)}
+              style={styles.rewardGradient}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 1 }}
+            >
+              <View style={styles.rewardIconBg}>
+                <Star width={24} height={24} color={BASE_COLORS.white} />
+              </View>
+
+              <View style={styles.rewardContent}>
+                <Text style={styles.rewardTitle}>Reward Earned!</Text>
+                <View style={styles.rewardCoinsDisplay}>
+                  <Image
+                    source={require("@/assets/images/coin.png")}
+                    style={styles.rewardCoinImage}
+                  />
+                  <Text style={styles.rewardCoinsText}>
+                    +{rewardInfo.coins} coins
+                  </Text>
+                </View>
+                <Text style={styles.rewardSubtitle}>{rewardInfo.label}</Text>
+              </View>
+
+              <View style={styles.particle1} />
+              <View style={styles.particle2} />
+              <View style={styles.particle3} />
+            </LinearGradient>
           </Animatable.View>
         )}
-      </View>
-
-      {/* Badges Row - Curved layout */}
-      <Animatable.View
-        animation="fadeInUp"
-        duration={600}
-        delay={delay + 600}
-        style={styles.badgesRow}
-      >
-        <View style={styles.curvedBadgeContainer}>
-          <DifficultyBadge difficulty={difficulty} />
-          <FocusAreaBadge focusArea={focusArea} />
-        </View>
-      </Animatable.View>
-
-      {/* Reward Card - Special floating design */}
-      {rewardInfo && rewardInfo.coins > 0 && isCorrect && (
+        {/* Combined Q&A Card */}
         <Animatable.View
-          animation="bounceIn"
-          duration={800}
-          delay={delay + 800}
-          style={styles.rewardFloatingCard}
+          animation="fadeInUp"
+          duration={700}
+          delay={delay + 700}
+          style={styles.combinedCardContainer}
         >
           <LinearGradient
-            colors={getDifficultyColors(rewardInfo.difficulty)}
-            style={styles.rewardGradient}
+            colors={gameGradientColors}
+            style={styles.combinedCard}
             start={{ x: 0, y: 0 }}
             end={{ x: 1, y: 1 }}
           >
-            <View style={styles.rewardIconBg}>
-              <Star width={24} height={24} color={BASE_COLORS.white} />
-            </View>
-
-            <View style={styles.rewardContent}>
-              <Text style={styles.rewardTitle}>Reward Earned!</Text>
-              <View style={styles.rewardCoinsDisplay}>
-                <Image
-                  source={require("@/assets/images/coin.png")}
-                  style={styles.rewardCoinImage}
-                />
-                <Text style={styles.rewardCoinsText}>
-                  +{rewardInfo.coins} coins
-                </Text>
+            {/* Level Summary Title*/}
+            <Animatable.View
+              animation="fadeInUp"
+              duration={600}
+              delay={delay + 650}
+              style={styles.sectionTitleContainer}
+            >
+              <Text style={styles.sectionTitleText}>Level Summary</Text>
+            </Animatable.View>
+            {/* Question Section */}
+            <View style={styles.cardSection}>
+              <View style={styles.cardHeader}>
+                <View style={styles.iconBubble}>
+                  <Text style={styles.cardEmoji}>❔</Text>
+                </View>
+                <Text style={styles.cardTitle}>Question</Text>
               </View>
-              <Text style={styles.rewardSubtitle}>{rewardInfo.label}</Text>
+              <Text style={styles.cardContent}>{safeTextRender(question)}</Text>
             </View>
 
-            {/* Floating particles effect */}
-            <View style={styles.particle1} />
-            <View style={styles.particle2} />
-            <View style={styles.particle3} />
-          </LinearGradient>
-        </Animatable.View>
-      )}
+            <View style={styles.sectionDivider} />
 
-      {/* Q&A Section - Asymmetric cards */}
-      {/* Question Card - Tilted left */}
-      <Animatable.View
-        animation="fadeInUp"
-        duration={700}
-        delay={delay + 700}
-        style={styles.combinedCardContainer}
-      >
-        <LinearGradient
-          colors={gameGradientColors}
-          style={styles.combinedCard}
-          start={{ x: 0, y: 0 }}
-          end={{ x: 1, y: 1 }}
-        >
-          {/* Level Summary Title*/}
-          <Animatable.View
-            animation="fadeInUp"
-            duration={600}
-            delay={delay + 650}
-            style={styles.sectionTitleContainer}
-          >
-            <Text style={styles.sectionTitleText}>Level Summary</Text>
-          </Animatable.View>
-          {/* Question Section */}
-          <View style={styles.cardSection}>
-            <View style={styles.cardHeader}>
-              <View style={styles.iconBubble}>
-                <Text style={styles.cardEmoji}>❓</Text>
+            {/* Answer Section */}
+            <View style={styles.cardSection}>
+              <View style={styles.cardHeader}>
+                <View
+                  style={[
+                    styles.iconBubble,
+                    isBackgroundCompletion || isUserExit
+                      ? styles.warningBubble
+                      : isCorrect
+                      ? styles.correctBubble
+                      : styles.incorrectBubble,
+                  ]}
+                >
+                  {isBackgroundCompletion || isUserExit ? (
+                    <MaterialCommunityIcons
+                      name={isUserExit ? "exit-to-app" : "alert-circle"}
+                      size={16}
+                      color={BASE_COLORS.white}
+                    />
+                  ) : isCorrect ? (
+                    <Check width={16} height={16} color={BASE_COLORS.white} />
+                  ) : (
+                    <X width={16} height={16} color={BASE_COLORS.white} />
+                  )}
+                </View>
+                <Text style={styles.cardTitle}>Your Answer</Text>
               </View>
-              <Text style={styles.cardTitle}>Question</Text>
-            </View>
-            <Text style={styles.cardContent}>{safeTextRender(question)}</Text>
-          </View>
-
-          {/* Divider */}
-          <View style={styles.sectionDivider} />
-
-          {/* Answer Section */}
-          <View style={styles.cardSection}>
-            <View style={styles.cardHeader}>
-              <View
+              <Text
                 style={[
-                  styles.iconBubble,
-                  isBackgroundCompletion || isUserExit
-                    ? styles.warningBubble
-                    : isCorrect
-                    ? styles.correctBubble
-                    : styles.incorrectBubble,
+                  styles.cardContent,
+                  (isBackgroundCompletion || isUserExit) &&
+                    styles.exitAnswerText,
                 ]}
               >
-                {isBackgroundCompletion || isUserExit ? (
-                  <MaterialCommunityIcons
-                    name={isUserExit ? "exit-to-app" : "alert-circle"}
-                    size={16}
-                    color={BASE_COLORS.white}
-                  />
-                ) : isCorrect ? (
-                  <Check width={16} height={16} color={BASE_COLORS.white} />
-                ) : (
-                  <X width={16} height={16} color={BASE_COLORS.white} />
-                )}
-              </View>
-              <Text style={styles.cardTitle}>Your Answer</Text>
+                {safeTextRender(userAnswer) || "No answer provided"}
+              </Text>
             </View>
-            <Text
-              style={[
-                styles.cardContent,
-                (isBackgroundCompletion || isUserExit) && styles.exitAnswerText,
-              ]}
-            >
-              {safeTextRender(userAnswer) || "No answer provided"}
-            </Text>
-          </View>
 
-          {/* Card Decorations */}
-          <View style={styles.heroDecoration1} />
-          <View style={styles.heroDecoration2} />
-          <View style={styles.heroDecoration3} />
-        </LinearGradient>
+            <View style={styles.heroDecoration1} />
+            <View style={styles.heroDecoration2} />
+            <View style={styles.heroDecoration3} />
+          </LinearGradient>
+        </Animatable.View>
+
+        {/* Background decorative elements */}
+        <View style={styles.backgroundDecor1} />
+        <View style={styles.backgroundDecor2} />
+        <View style={styles.backgroundDecor3} />
       </Animatable.View>
 
-      {/* Background decorative elements */}
-      <View style={styles.backgroundDecor1} />
-      <View style={styles.backgroundDecor2} />
-      <View style={styles.backgroundDecor3} />
-    </Animatable.View>
+      {/* NEW: Reset Timer Modal */}
+      <ResetTimerModal
+        visible={showResetModal}
+        onClose={handleCloseModal}
+        onConfirmReset={handleConfirmReset}
+        showSuccessMessage={showSuccessMessage}
+        resetMessage={resetMessage}
+        isResetting={isResetting}
+        shouldDisableReset={shouldDisableReset}
+        resetCost={resetCost}
+        coins={coins}
+        onSuccessAcknowledge={handleSuccessAcknowledge}
+      />
+    </>
   );
 };
 
@@ -372,8 +493,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingBottom: 20,
   },
-
-  // Hero Card - Main result display
   heroCardContainer: {
     marginBottom: 24,
     alignItems: "center",
@@ -444,10 +563,10 @@ const styles = StyleSheet.create({
     borderRadius: 30,
     backgroundColor: "rgba(255, 255, 255, 0.06)",
   },
-
-  // Stats Row - Horizontal cards
   statsRow: {
     flexDirection: "row",
+    justifyContent: "center",
+    alignItems: "center",
     justifyContent: "space-between",
     marginBottom: 20,
     gap: 12,
@@ -458,7 +577,7 @@ const styles = StyleSheet.create({
   levelInfoCard: {
     backgroundColor: "rgba(255, 255, 255, 0.15)",
     borderRadius: 20,
-    padding: 16,
+    padding: 24,
     alignItems: "center",
     borderWidth: 1,
     borderColor: "rgba(255, 255, 255, 0.2)",
@@ -470,8 +589,10 @@ const styles = StyleSheet.create({
     padding: 16,
     alignItems: "center",
     borderWidth: 1,
+    position: "relative",
     borderColor: "rgba(255, 255, 255, 0.2)",
     transform: [{ rotate: "3deg" }],
+    minHeight: 135,
   },
   statsLabel: {
     fontSize: 12,
@@ -480,7 +601,7 @@ const styles = StyleSheet.create({
     marginBottom: 4,
   },
   statsValue: {
-    fontSize: 14,
+    fontSize: 15,
     fontFamily: "Poppins-SemiBold",
     color: BASE_COLORS.white,
     textAlign: "center",
@@ -491,7 +612,16 @@ const styles = StyleSheet.create({
     textAlign: "center",
     fontSize: 16,
   },
-  // Badges Row
+
+  // Reset Section Styles - Only the positioning style, ResetButton handles the rest
+  resetSection: {
+    position: "absolute",
+    bottom: 16,
+    left: 0,
+    right: 0,
+    alignItems: "center",
+    transform: [{ rotate: "3deg" }],
+  },
   badgesRow: {
     alignItems: "center",
     marginBottom: 24,
@@ -506,8 +636,6 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: "rgba(255, 255, 255, 0.15)",
   },
-
-  // Reward Floating Card
   rewardFloatingCard: {
     alignSelf: "center",
     marginBottom: 24,
@@ -556,7 +684,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     gap: 8,
     marginBottom: 4,
-    flexWrap: "wrap", // Allow wrapping if needed
+    flexWrap: "wrap",
   },
   rewardCoinImage: {
     width: 24,
@@ -602,7 +730,6 @@ const styles = StyleSheet.create({
     borderRadius: 2,
     backgroundColor: "rgba(255, 255, 255, 0.2)",
   },
-  //  Level title Title Styles
   sectionTitleContainer: {
     paddingVertical: 8,
     borderRadius: 20,
@@ -619,8 +746,6 @@ const styles = StyleSheet.create({
     textAlign: "center",
     letterSpacing: 0.5,
   },
-
-  // Q&A Section - Asymmetric cards
   combinedCardContainer: {
     alignSelf: "center",
     width: "95%",
@@ -671,6 +796,7 @@ const styles = StyleSheet.create({
   },
   cardEmoji: {
     fontSize: 16,
+    color: BASE_COLORS.white,
   },
   cardTitle: {
     fontSize: 16,
@@ -688,8 +814,6 @@ const styles = StyleSheet.create({
     color: "#e4a84fff",
     fontFamily: "Poppins-SemiBold",
   },
-
-  // Background decorations
   backgroundDecor1: {
     position: "absolute",
     top: 300,

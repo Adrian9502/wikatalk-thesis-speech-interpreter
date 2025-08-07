@@ -41,6 +41,7 @@ interface GameCompletedContentProps {
   isBackgroundCompletion?: boolean;
   isUserExit?: boolean;
   rewardInfo?: RewardInfo | null;
+  onTimerReset?: () => void; // NEW: Add onTimerReset prop
 }
 
 const GameCompletedContent: React.FC<GameCompletedContentProps> = ({
@@ -63,6 +64,7 @@ const GameCompletedContent: React.FC<GameCompletedContentProps> = ({
   isBackgroundCompletion = false,
   isUserExit = false,
   rewardInfo = null,
+  onTimerReset, // NEW: Add onTimerReset
 }) => {
   return (
     <>
@@ -87,6 +89,7 @@ const GameCompletedContent: React.FC<GameCompletedContentProps> = ({
           isBackgroundCompletion={isBackgroundCompletion}
           isUserExit={isUserExit}
           rewardInfo={rewardInfo}
+          onTimerReset={onTimerReset}
         />
 
         {/* Navigation Section */}
