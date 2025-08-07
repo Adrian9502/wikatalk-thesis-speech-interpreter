@@ -36,7 +36,7 @@ export const gameSharedStyles = StyleSheet.create({
   },
 
   questionText: {
-    fontSize: 18,
+    fontSize: 20,
     fontFamily: "Poppins-SemiBold",
     color: BASE_COLORS.white,
     marginBottom: 10,
