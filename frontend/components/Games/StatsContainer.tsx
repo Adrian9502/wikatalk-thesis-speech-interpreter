@@ -149,7 +149,7 @@ const StatsContainer: React.FC<StatsContainerProps> = ({
           delay={animationDelay + 50}
           style={styles.timerSection}
         >
-          {variant === "playing" && isStarted ? (
+          {variant === "playing" && isStarted && (
             // Live timer for playing state with reward preview
             <View style={styles.timeContainer}>
               <Timer
@@ -158,9 +158,6 @@ const StatsContainer: React.FC<StatsContainerProps> = ({
                 key={`timer-${initialTime}`}
               />
             </View>
-          ) : (
-            // Static time display for completed state (no reset button)
-            renderStaticTimer()
           )}
         </Animatable.View>
       )}

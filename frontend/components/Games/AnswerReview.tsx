@@ -277,6 +277,20 @@ const AnswerReview: React.FC<AnswerReviewProps> = ({
             <Text style={styles.heroTitle}>{resultData.title}</Text>
             <Text style={styles.heroMessage}>{resultData.message}</Text>
 
+            {timeElapsed === 0 && (
+              <Animatable.View
+                animation="bounceIn"
+                duration={800}
+                style={styles.resetSuccessContainer}
+              >
+                <View style={styles.resetSuccessIndicator}>
+                  <Text style={styles.resetSuccessText}>
+                    🎉 Timer Reset Successfully!
+                  </Text>
+                </View>
+              </Animatable.View>
+            )}
+
             <View style={styles.heroDecoration1} />
             <View style={styles.heroDecoration2} />
             <View style={styles.heroDecoration3} />
@@ -563,6 +577,27 @@ const styles = StyleSheet.create({
     borderRadius: 30,
     backgroundColor: "rgba(255, 255, 255, 0.06)",
   },
+
+  // Timer reset successful message
+  resetSuccessContainer: {
+    marginTop: 16,
+    alignItems: "center",
+  },
+  resetSuccessIndicator: {
+    backgroundColor: "rgba(255,255,255 ,0.1)",
+    paddingHorizontal: 20,
+    paddingVertical: 8,
+    borderRadius: 20,
+    borderWidth: 1,
+    borderColor: "rgba(255, 255, 255, 0.3)",
+  },
+  resetSuccessText: {
+    fontSize: 13,
+    fontFamily: "Poppins-SemiBold",
+    color: BASE_COLORS.white,
+    textAlign: "center",
+    letterSpacing: 0.5,
+  },
   statsRow: {
     flexDirection: "row",
     justifyContent: "center",
@@ -748,7 +783,7 @@ const styles = StyleSheet.create({
   },
   combinedCardContainer: {
     alignSelf: "center",
-    width: "95%",
+    width: "100%",
     marginBottom: 20,
   },
   combinedCard: {

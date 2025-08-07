@@ -146,9 +146,10 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
   },
   title: {
-    fontSize: 20,
-    fontFamily: "Poppins-Bold",
+    fontSize: 22,
+    fontFamily: "Poppins-SemiBold",
     color: BASE_COLORS.white,
+    letterSpacing: 0.7,
     textAlign: "center",
     textShadowColor: "rgba(0, 0, 0, 0.3)",
     textShadowOffset: { width: 0, height: 1 },
