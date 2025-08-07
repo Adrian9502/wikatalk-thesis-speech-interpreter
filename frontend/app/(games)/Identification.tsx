@@ -354,7 +354,7 @@ const Identification: React.FC<IdentificationProps> = React.memo(
     return (
       <>
         <GameContainer
-          title="Identification"
+          title="Word Identification"
           timerRunning={timerRunning}
           gameStatus={gameStatus}
           variant="triple"
@@ -401,7 +401,7 @@ const Identification: React.FC<IdentificationProps> = React.memo(
               isCorrect={gameConfig.isCorrect}
               levelId={levelId}
               gameMode="identification"
-              gameTitle="Identification"
+              gameTitle="Word Identification"
               onRestart={handleRestartWithProgress}
               focusArea={gameConfig.focusArea}
               levelString={sentences[currentSentenceIndex]?.level}
