@@ -2,7 +2,6 @@ import { Zap, BookOpen, Search, Edit2 } from "react-native-feather";
 import { BASE_COLORS } from "./colors";
 import React from "react";
 
-// Define IconProps type since it's not exported from react-native-feather
 type IconProps = {
   width?: number;
   height?: number;
@@ -59,4 +58,10 @@ export const NAVIGATION_COLORS = {
   purple: ["#9C27B0", "#6A0080"] as const,
   indigo: ["#4361EE", "#3A0CA3"] as const,
   disabled: ["rgba(255, 255, 255, 0.15)", "rgba(255, 255, 255, 0.08)"] as const,
+};
+
+export const GAME_RESULT_COLORS = {
+  userExit: ["#FF9800", "#EF6C00"] as const,
+  correctAnswer: NAVIGATION_COLORS.green,
+  incorrectAnswer: ["#FF2919", "#B80D5F"] as const,
 };

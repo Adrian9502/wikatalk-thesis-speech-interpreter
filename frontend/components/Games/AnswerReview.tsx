@@ -2,10 +2,10 @@ import React, { useMemo, useState, useCallback } from "react";
 import { View, Text, StyleSheet, Dimensions, Image } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import * as Animatable from "react-native-animatable";
-import { Check, X, Star } from "react-native-feather";
+import { Check, X, Award } from "react-native-feather";
 import MaterialCommunityIcons from "react-native-vector-icons/MaterialCommunityIcons";
 import { BASE_COLORS, difficultyColors, TITLE_COLORS } from "@/constant/colors";
-import { getDifficultyColors } from "@/utils/gameUtils";
+import { GAME_RESULT_COLORS } from "@/constant/gameConstants";
 import { formatTimerDisplay, getGameModeGradient } from "@/utils/gameUtils";
 import { safeTextRender } from "@/utils/textUtils";
 import { NAVIGATION_COLORS } from "@/constant/gameConstants";
@@ -54,7 +54,6 @@ interface AnswerReviewProps {
   isBackgroundCompletion?: boolean;
   isUserExit?: boolean;
   rewardInfo?: RewardInfo | null;
-  // NEW: Reset-related props
   onTimerReset?: () => void;
 }
 
@@ -78,10 +77,8 @@ const AnswerReview: React.FC<AnswerReviewProps> = ({
   isBackgroundCompletion = false,
   isUserExit = false,
   rewardInfo = null,
-  // NEW: Reset callback
   onTimerReset,
 }) => {
-  // NEW: Reset-related state
   const [showResetModal, setShowResetModal] = useState(false);
   const [isResetting, setIsResetting] = useState(false);
   const [showSuccessMessage, setShowSuccessMessage] = useState(false);
@@ -117,7 +114,7 @@ const AnswerReview: React.FC<AnswerReviewProps> = ({
         title: "Game Exited",
         message:
           "You chose to exit the game. Your progress has been saved and you can continue later.",
-        colors: ["#FF9800", "#EF6C00"] as const,
+        colors: GAME_RESULT_COLORS.userExit,
       };
     }
 
@@ -126,7 +123,7 @@ const AnswerReview: React.FC<AnswerReviewProps> = ({
         title: "Game Interrupted!",
         message:
           "You left the game while it was running. Your progress has been saved.",
-        colors: ["#FF9800", "#EF6C00"] as const,
+        colors: GAME_RESULT_COLORS.userExit,
       };
     }
 
@@ -136,8 +133,8 @@ const AnswerReview: React.FC<AnswerReviewProps> = ({
         ? "You got it right! Well done."
         : "Keep practicing to improve your skills.",
       colors: isCorrect
-        ? (NAVIGATION_COLORS.green as readonly [string, string])
-        : (difficultyColors.Hard as readonly [string, string]),
+        ? GAME_RESULT_COLORS.correctAnswer
+        : GAME_RESULT_COLORS.incorrectAnswer,
     };
   };
 
@@ -297,6 +294,52 @@ const AnswerReview: React.FC<AnswerReviewProps> = ({
           </LinearGradient>
         </Animatable.View>
 
+        {/* Reward Card */}
+        {rewardInfo && rewardInfo.coins > 0 && isCorrect && (
+          <Animatable.View
+            animation="bounceIn"
+            duration={800}
+            delay={delay + 800}
+            style={styles.rewardFloatingCard}
+          >
+            <LinearGradient
+              colors={NAVIGATION_COLORS.green}
+              style={styles.rewardGradient}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 1 }}
+            >
+              {/* Top Row - Title with decorative emojis */}
+              <View style={styles.rewardTopRow}>
+                <Text style={styles.rewardEmoji}>🎉</Text>
+                <Text style={styles.rewardTitle}>Reward Earned!</Text>
+                <Text style={styles.rewardEmoji}>✨</Text>
+              </View>
+
+              {/* Main Content Row */}
+              <View style={styles.rewardMainRow}>
+                <View style={styles.rewardCoinsSection}>
+                  <View style={styles.rewardCoinsDisplay}>
+                    <Image
+                      source={require("@/assets/images/coin.png")}
+                      style={styles.rewardCoinImage}
+                    />
+                    <Text style={styles.rewardCoinsText}>
+                      +{rewardInfo.coins} coins
+                    </Text>
+                  </View>
+                </View>
+              </View>
+
+              {/* Bottom Row - Tier Badge */}
+              <Text style={styles.rewardSubtitle}>{rewardInfo.label}</Text>
+              {/* decor */}
+              <View style={styles.heroDecoration1} />
+              <View style={styles.heroDecoration2} />
+              <View style={styles.heroDecoration3} />
+            </LinearGradient>
+          </Animatable.View>
+        )}
+
         {/* Stats Row - Horizontal layout with rounded cards */}
         <View style={styles.statsRow}>
           {/* Level Info Card */}
@@ -330,21 +373,19 @@ const AnswerReview: React.FC<AnswerReviewProps> = ({
                 {formatTimerDisplay(timeElapsed as number)}
               </Text>
             </View>
-            {levelId && !isCorrect && (
-              <View style={styles.resetSection}>
-                <ResetButton
-                  onPress={handleResetPress}
-                  disabled={shouldDisableReset}
-                  isLoading={isResetting}
-                  cost={resetCost}
-                  showCostLabel={true}
-                  costLabel="Reset"
-                  variant="expanded"
-                  size="small"
-                  showOnlyWhen={true}
-                />
-              </View>
-            )}
+            <View style={styles.resetSection}>
+              <ResetButton
+                onPress={handleResetPress}
+                disabled={shouldDisableReset}
+                isLoading={isResetting}
+                cost={resetCost}
+                showCostLabel={true}
+                costLabel="Reset"
+                variant="expanded"
+                size="small"
+                showOnlyWhen={true}
+              />
+            </View>
           </Animatable.View>
         </View>
 
@@ -360,45 +401,6 @@ const AnswerReview: React.FC<AnswerReviewProps> = ({
             <FocusAreaBadge focusArea={focusArea} />
           </View>
         </Animatable.View>
-
-        {/* Reward Card - Special floating design */}
-        {rewardInfo && rewardInfo.coins > 0 && isCorrect && (
-          <Animatable.View
-            animation="bounceIn"
-            duration={800}
-            delay={delay + 800}
-            style={styles.rewardFloatingCard}
-          >
-            <LinearGradient
-              colors={getDifficultyColors(rewardInfo.difficulty)}
-              style={styles.rewardGradient}
-              start={{ x: 0, y: 0 }}
-              end={{ x: 1, y: 1 }}
-            >
-              <View style={styles.rewardIconBg}>
-                <Star width={24} height={24} color={BASE_COLORS.white} />
-              </View>
-
-              <View style={styles.rewardContent}>
-                <Text style={styles.rewardTitle}>Reward Earned!</Text>
-                <View style={styles.rewardCoinsDisplay}>
-                  <Image
-                    source={require("@/assets/images/coin.png")}
-                    style={styles.rewardCoinImage}
-                  />
-                  <Text style={styles.rewardCoinsText}>
-                    +{rewardInfo.coins} coins
-                  </Text>
-                </View>
-                <Text style={styles.rewardSubtitle}>{rewardInfo.label}</Text>
-              </View>
-
-              <View style={styles.particle1} />
-              <View style={styles.particle2} />
-              <View style={styles.particle3} />
-            </LinearGradient>
-          </Animatable.View>
-        )}
         {/* Combined Q&A Card */}
         <Animatable.View
           animation="fadeInUp"
@@ -505,24 +507,20 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     paddingBottom: 20,
+    alignItems: "center",
   },
   heroCardContainer: {
     marginBottom: 24,
     alignItems: "center",
   },
   heroCard: {
-    width: screenWidth - 52,
+    width: screenWidth - 62,
     borderRadius: 20,
     padding: 32,
     alignItems: "center",
     position: "relative",
     overflow: "hidden",
     minHeight: 180,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.3,
-    shadowRadius: 16,
-    elevation: 12,
   },
   heroIcon: {
     width: 80,
@@ -611,7 +609,7 @@ const styles = StyleSheet.create({
   levelInfoCard: {
     backgroundColor: "rgba(255, 255, 255, 0.15)",
     borderRadius: 20,
-    padding: 24,
+    padding: 16,
     alignItems: "center",
     borderWidth: 1,
     borderColor: "rgba(255, 255, 255, 0.2)",
@@ -670,100 +668,68 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: "rgba(255, 255, 255, 0.15)",
   },
+  // Reward style
   rewardFloatingCard: {
-    alignSelf: "center",
     marginBottom: 24,
-    transform: [{ rotate: "-1deg" }],
-    width: screenWidth * 0.65,
-    maxWidth: 280,
+    alignItems: "center",
   },
   rewardGradient: {
     borderRadius: 20,
-    paddingHorizontal: 16,
+    paddingHorizontal: 20,
     paddingVertical: 14,
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
     position: "relative",
     overflow: "hidden",
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.25,
-    shadowRadius: 12,
-    elevation: 8,
-    minHeight: 85,
+    width: "100%",
   },
-  rewardIconBg: {
-    width: 50,
-    height: 50,
-    borderRadius: 25,
-    backgroundColor: "rgba(255, 255, 255, 0.2)",
-    justifyContent: "center",
+  // Top Row Layout
+  rewardTopRow: {
+    flexDirection: "row",
     alignItems: "center",
-    marginRight: 16,
-    flexShrink: 0,
-  },
-  rewardContent: {
-    flex: 1,
-    minWidth: 0,
+    gap: 5,
+    justifyContent: "center",
   },
   rewardTitle: {
     fontSize: 16,
     fontFamily: "Poppins-SemiBold",
     color: BASE_COLORS.white,
-    marginBottom: 4,
+    textAlign: "center",
+  },
+  // Main Content Row
+  rewardMainRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    paddingHorizontal: 8,
+  },
+  rewardCoinsSection: {
+    alignItems: "center",
+    flex: 1,
   },
   rewardCoinsDisplay: {
     flexDirection: "row",
     alignItems: "center",
     gap: 8,
-    marginBottom: 4,
-    flexWrap: "wrap",
   },
   rewardCoinImage: {
-    width: 24,
-    height: 24,
-    flexShrink: 0,
+    width: 22,
+    height: 22,
   },
   rewardCoinsText: {
     fontSize: 20,
     fontFamily: "Poppins-Bold",
     color: BASE_COLORS.white,
+    textShadowColor: "rgba(0, 0, 0, 0.3)",
+    textShadowOffset: { width: 0, height: 2 },
+    textShadowRadius: 4,
   },
   rewardSubtitle: {
-    fontSize: 15,
-    fontFamily: "Poppins-SemiBold",
-    color: "rgba(255, 255, 255, 0.8)",
-    lineHeight: 16,
-    marginTop: 8,
+    fontSize: 11,
+    fontFamily: "Poppins-Medium",
+    color: "rgba(255, 255, 255, 0.95)",
+    letterSpacing: 0.3,
+    textAlign: "center",
   },
-  particle1: {
-    position: "absolute",
-    top: 10,
-    right: 20,
-    width: 8,
-    height: 8,
-    borderRadius: 4,
-    backgroundColor: "rgba(255, 255, 255, 0.4)",
-  },
-  particle2: {
-    position: "absolute",
-    bottom: 15,
-    right: 40,
-    width: 6,
-    height: 6,
-    borderRadius: 3,
-    backgroundColor: "rgba(255, 255, 255, 0.3)",
-  },
-  particle3: {
-    position: "absolute",
-    top: 30,
-    right: 60,
-    width: 4,
-    height: 4,
-    borderRadius: 2,
-    backgroundColor: "rgba(255, 255, 255, 0.2)",
-  },
+
   sectionTitleContainer: {
     paddingVertical: 8,
     borderRadius: 20,
