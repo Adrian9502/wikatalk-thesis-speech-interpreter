@@ -5,6 +5,7 @@ import { LevelData } from "@/types/gameTypes";
 import { getStarCount, formatDifficulty } from "@/utils/games/difficultyUtils";
 import { renderFocusIcon } from "@/utils/games/renderFocusIcon";
 import modalSharedStyles from "@/styles/games/modalSharedStyles";
+import FocusAreaBadge from "@/components/games/FocusAreaBadge";
 
 interface LevelHeaderProps {
   level: LevelData;
@@ -52,11 +53,7 @@ const LevelHeader: React.FC<LevelHeaderProps> = ({ level }) => {
           </Text>
         </View>
 
-        {/* Focus area badge */}
-        <View style={modalSharedStyles.focusAreaBadge}>
-          {renderFocusIcon(level.focusArea)}
-          <Text style={modalSharedStyles.focusAreaText}>{level.focusArea}</Text>
-        </View>
+        <FocusAreaBadge focusArea={level.focusArea} />
       </View>
 
       {/* Completed badge */}
