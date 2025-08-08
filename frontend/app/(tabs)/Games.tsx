@@ -7,6 +7,8 @@ import useThemeStore from "@/store/useThemeStore";
 import { getGlobalStyles } from "@/styles/globalStyles";
 import WordOfDayModal from "@/components/games/WordOfDayModal";
 import DailyRewardsModal from "@/components/games/rewards/DailyRewardsModal";
+
+import RankingsModal from "@/components/games/rankings/RankingsModal";
 // Component imports
 import BackgroundEffects from "@/components/games/dashboard/BackgroundEffects";
 import DashboardHeader from "@/components/games/dashboard/DashboardHeader";
@@ -43,7 +45,10 @@ const Games = () => {
   const [preloadedGameModes, setPreloadedGameModes] = useState<Set<string>>(
     new Set()
   );
-  const lastClickRef = useRef<number>(0); // <-- Add this line to declare the missing ref
+  const lastClickRef = useRef<number>(0);
+
+  // NEW: Rankings modal state
+  const [showRankingsModal, setShowRankingsModal] = useState(false);
 
   // Get progress from centralized store
   const { fetchProgress, isLoading: progressLoading } = useProgressStore();
@@ -75,6 +80,15 @@ const Games = () => {
 
   // Combined loading state
   const isLoading = progressLoading || dashboardLoading;
+
+  // NEW: Rankings handlers
+  const handleShowRankings = useCallback(() => {
+    setShowRankingsModal(true);
+  }, []);
+
+  const handleCloseRankings = useCallback(() => {
+    setShowRankingsModal(false);
+  }, []);
 
   // Initialize progress data - check if all data is ready
   useEffect(() => {
@@ -288,6 +302,7 @@ const Games = () => {
           <GamesList
             onGamePress={handleGamePress}
             onProgressPress={handleProgressPress}
+            onRankingsPress={handleShowRankings}
           />
 
           {/* Progress Summary section */}
@@ -309,6 +324,12 @@ const Games = () => {
         <DailyRewardsModal
           visible={isDailyRewardsModalVisible}
           onClose={hideDailyRewardsModal}
+        />
+
+        {/* NEW: Rankings modal */}
+        <RankingsModal
+          visible={showRankingsModal}
+          onClose={handleCloseRankings}
         />
       </SafeAreaView>
     </View>

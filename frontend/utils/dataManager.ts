@@ -1,4 +1,5 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { useRankingsStore } from "@/store/games/useRankingsStore";
 
 // Define interfaces for the stores to avoid importing them
 interface SplashStoreActions {
@@ -18,11 +19,16 @@ interface CoinsStoreActions {
   resetState: () => void;
 }
 
+interface RankingsStoreActions {
+  clearCache: () => void;
+}
+
 // Store references that will be set at runtime
 let splashStoreRef: SplashStoreActions | null = null;
 let progressStoreRef: ProgressStoreActions | null = null;
 let gameStoreRef: GameStoreActions | null = null;
 let coinsStoreRef: CoinsStoreActions | null = null;
+let registeredRankingsStore: RankingsStoreActions | null = null;
 
 // Functions to register store references
 export const registerSplashStore = (store: SplashStoreActions) => {
@@ -41,9 +47,13 @@ export const registerCoinsStore = (store: CoinsStoreActions) => {
   coinsStoreRef = store;
 };
 
+export const registerRankingsStore = (store: RankingsStoreActions) => {
+  registeredRankingsStore = store;
+};
+
 // Data management functions
 export const clearAllAccountData = async () => {
-  console.log("[DataManager] Clearing all account-specific data");
+  console.log("[DataManager] Clearing all account data");
 
   try {
     // 1. Clear splash store precomputed data
@@ -72,6 +82,13 @@ export const clearAllAccountData = async () => {
       coinsStoreRef.resetState();
     } else {
       console.warn("[DataManager] CoinsStore not registered");
+    }
+
+    // 5. Clear rankings cache
+    if (registeredRankingsStore) {
+      registeredRankingsStore.clearCache();
+    } else {
+      console.warn("[DataManager] RankingsStore not registered");
     }
 
     console.log("[DataManager] All account data cleared successfully");

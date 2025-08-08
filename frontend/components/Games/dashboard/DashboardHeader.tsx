@@ -1,72 +1,31 @@
 import React from "react";
-import { View, Text, StyleSheet } from "react-native";
-import * as Animatable from "react-native-animatable";
-import { BASE_COLORS } from "@/constant/colors";
+import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
 import CoinsDisplay from "@/components/games/rewards/CoinsDisplay";
+import { BASE_COLORS, iconColors } from "@/constant/colors";
 
 interface DashboardHeaderProps {
   onCoinsPress: () => void;
-  onRefresh?: () => void; // Add this optional prop
 }
 
-const DashboardHeader = React.memo(({ onCoinsPress }: DashboardHeaderProps) => {
+const DashboardHeader: React.FC<DashboardHeaderProps> = ({ onCoinsPress }) => {
   return (
-    <Animatable.View
-      animation="fadeInDown"
-      duration={1000}
-      style={styles.headerSection}
-      useNativeDriver
-    >
-      <View style={styles.welcomeContainer}>
-        <Text style={styles.welcomeText}>Welcome back!</Text>
-        <Text style={styles.mainTitle}>Game Challenges</Text>
-        <Text style={styles.subtitle}>
-          Choose your adventure and level up your skills
-        </Text>
-      </View>
-      <Animatable.View 
-        animation="bounceIn" 
-        delay={500}
-        useNativeDriver
-      >
-        <CoinsDisplay onPress={onCoinsPress} />
-      </Animatable.View>
-    </Animatable.View>
+    <View style={styles.headerContainer}>
+      {/* Actions Section */}
+      {/* Coins Display */}
+      <CoinsDisplay onPress={onCoinsPress} />
+    </View>
   );
-});
+};
 
 const styles = StyleSheet.create({
-  headerSection: {
+  headerContainer: {
     flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "flex-start",
-    marginTop: 10,
-    marginBottom: 30,
-  },
-  welcomeContainer: {
-    flex: 1,
-  },
-  welcomeText: {
-    fontSize: 14,
-    fontFamily: "Poppins-Medium",
-    color: BASE_COLORS.white,
-    opacity: 0.8,
-    marginBottom: 2,
-  },
-  mainTitle: {
-    fontSize: 28,
-    fontFamily: "Poppins-Bold",
-    color: BASE_COLORS.white,
-    marginBottom: 4,
-  },
-  subtitle: {
-    fontSize: 14,
-    fontFamily: "Poppins-Regular",
-    color: BASE_COLORS.white,
-    opacity: 0.7,
-    lineHeight: 20,
+    justifyContent: "flex-end",
+    alignItems: "center",
+    paddingHorizontal: 5,
+    paddingVertical: 5,
   },
 });
 
-DashboardHeader.displayName = 'DashboardHeader';
+DashboardHeader.displayName = "DashboardHeader";
 export default DashboardHeader;

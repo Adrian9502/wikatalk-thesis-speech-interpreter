@@ -46,23 +46,25 @@ const styles = StyleSheet.create({
   container: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "rgba(255, 255, 255, 0.25)",
     paddingVertical: 6,
     paddingHorizontal: 12,
+    backgroundColor: "rgba(255, 255, 255, 0.15)",
     borderRadius: 20,
+    borderWidth: 1,
+    borderColor: "rgba(255, 255, 255, 0.2)",
   },
   coinIconContainer: {
     position: "relative",
     marginRight: 8,
   },
   coinImage: {
-    width: 20,
-    height: 20,
+    width: 17,
+    height: 17,
   },
   coinsText: {
     color: BASE_COLORS.white,
     fontFamily: "Poppins-Medium",
-    fontSize: 15,
+    fontSize: 13,
   },
   notificationBadge: {
     position: "absolute",
