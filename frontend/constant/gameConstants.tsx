@@ -1,4 +1,4 @@
-import { Award, BookOpen, Target } from "react-native-feather";
+import { Zap, BookOpen, Search, Edit2 } from "react-native-feather";
 import { BASE_COLORS } from "./colors";
 import React from "react";
 
@@ -30,13 +30,13 @@ export const GAME_TITLES = {
 
 export const GAME_ICONS = {
   [GAME_MODES.MULTIPLE_CHOICE]: (props: IconProps) => (
-    <Award {...props} color="#FFF" />
+    <Zap {...props} color="#FFF" />
   ),
   [GAME_MODES.IDENTIFICATION]: (props: IconProps) => (
-    <Target {...props} color="#FFF" />
+    <Search {...props} color="#FFF" />
   ),
   [GAME_MODES.FILL_BLANKS]: (props: IconProps) => (
-    <BookOpen {...props} color="#FFF" />
+    <Edit2 {...props} color="#FFF" />
   ),
 };
 
@@ -58,4 +58,5 @@ export const NAVIGATION_COLORS = {
   blue: ["#2196F3", "#0D47A1"] as const,
   purple: ["#9C27B0", "#6A0080"] as const,
   indigo: ["#4361EE", "#3A0CA3"] as const,
+  disabled: ["rgba(255, 255, 255, 0.15)", "rgba(255, 255, 255, 0.08)"] as const,
 };

@@ -1,16 +1,42 @@
 import React, { useMemo, useState, useCallback, useEffect } from "react";
-import { View, Text, StyleSheet } from "react-native";
+import {
+  View,
+  Text,
+  StyleSheet,
+  Dimensions,
+  TouchableOpacity,
+} from "react-native";
 import { router } from "expo-router";
+import { Ionicons } from "@expo/vector-icons";
 import * as Animatable from "react-native-animatable";
+import { LinearGradient } from "expo-linear-gradient";
 import { BASE_COLORS, gameModeNavigationColors } from "@/constant/colors";
 import { GameMode } from "@/types/gameTypes";
 import useGameStore from "@/store/games/useGameStore";
-import { NAVIGATION_COLORS } from "@/constant/gameConstants";
-import GameButton from "@/components/games/GameButton";
+import {
+  NAVIGATION_COLORS,
+  GAME_ICONS,
+  GAME_MODES,
+} from "@/constant/gameConstants";
+import { iconColors } from "@/constant/colors";
 import { useLevelData } from "@/hooks/useLevelData";
 import LevelInfoModal from "@/components/games/levels/LevelInfoModal";
 import useProgressStore from "@/store/games/useProgressStore";
 import { useSplashStore } from "@/store/useSplashStore";
+import {
+  Home,
+  RotateCcw,
+  ChevronRight,
+  Lock,
+  CheckCircle,
+  Star,
+  Grid,
+  Play,
+  Zap,
+} from "react-native-feather";
+import MaterialCommunityIcons from "react-native-vector-icons/MaterialCommunityIcons";
+
+const { width: screenWidth } = Dimensions.get("window");
 
 interface GameNavigationProps {
   levelId: number;
@@ -38,43 +64,28 @@ const GameNavigation: React.FC<GameNavigationProps> = ({
   const [nextLevelData, setNextLevelData] = useState<any>(null);
   const [isRetryLoading, setIsRetryLoading] = useState(false);
 
-  // NEW: Track animation state
+  // Animation state
   const [isAnimating, setIsAnimating] = useState(true);
 
-  // NEW: Enable interactions after animations complete
+  // Enable interactions after animations complete
   useEffect(() => {
-    // Calculate total animation duration based on your existing delays
-    const totalAnimationDuration = 800 + 300 + 500; // slideInUp + fadeInUp + fadeIn delays
-
     const timer = setTimeout(() => {
       setIsAnimating(false);
-    }, totalAnimationDuration);
-
+    }, 1500);
     return () => clearTimeout(timer);
   }, []);
 
-  // Ensure levelId is parsed as a number
   const numericLevelId = Number(levelId);
-
-  // Get level data to check next level availability and lock status
   const { levels, isLoading } = useLevelData(gameMode);
 
-  // ENHANCED: Calculate navigation state with comprehensive checks
+  // Calculate navigation state (keeping existing logic)
   const navigationState = useMemo(() => {
-    // Find current level in the levels array
     const currentLevel = levels.find((level) => level.id === numericLevelId);
-
-    // Find next level
     const nextLevelId = numericLevelId + 1;
     const nextLevel = levels.find((level) => level.id === nextLevelId);
-
-    // FIXED: Don't use simple comparison - check if next level actually exists
-    const isLastLevel = !nextLevel; // Only true if no next level exists
-
-    // Get total levels count for this game mode
+    const isLastLevel = !nextLevel;
     const totalLevels = levels.length;
 
-    // Calculate completion stats for difficulty-based locking
     const difficultyStats = {
       easy: { total: 0, completed: 0 },
       medium: { total: 0, completed: 0 },
@@ -98,58 +109,44 @@ const GameNavigation: React.FC<GameNavigationProps> = ({
       difficultyStats.medium.total > 0 &&
       difficultyStats.medium.completed >= difficultyStats.medium.total;
 
-    // Get current and next level difficulties
     const currentDifficulty =
       currentLevel?.difficultyCategory?.toLowerCase() || "easy";
     const nextDifficulty =
       nextLevel?.difficultyCategory?.toLowerCase() || "easy";
 
-    // Helper function to create next level display text
     const createNextLevelText = (level: any) => {
       const levelString =
         level?.levelString ||
         level?.questionData?.level ||
         `Level ${nextLevelId}`;
       const title = level?.title || level?.questionData?.title;
-
-      if (title) {
-        return `${levelString} - ${title}`;
-      }
-      return levelString;
+      return title ? `${levelString} - ${title}` : levelString;
     };
 
-    // Determine next level status and reasons
     let nextLevelStatus = "available";
     let nextLevelTitle = "";
     let nextLevelSubtitle = "";
     let retryStatus = "available";
     let retryMessage = "";
 
-    // FIXED: Enhanced next level availability check
     if (isLastLevel) {
       nextLevelStatus = "disabled";
-      nextLevelTitle = "All Levels Complete!";
-      nextLevelSubtitle = `🎉 You've completed all ${totalLevels} levels in ${gameTitle}`;
+      nextLevelTitle = "All Complete! 🎉";
+      nextLevelSubtitle = `You've mastered all ${totalLevels} levels`;
     } else if (nextLevel) {
-      // Next level exists, check its status and conditions
-
-      // CASE 1: Next level is locked due to difficulty progression
       if (nextLevel.status === "locked") {
         nextLevelStatus = "disabled";
-
         if (nextDifficulty === "medium" && !isEasyComplete) {
-          nextLevelTitle = "Next Level Locked";
-          nextLevelSubtitle = "🔒 Complete all Easy levels first";
+          nextLevelTitle = "Locked Level";
+          nextLevelSubtitle = "Complete all Easy levels first";
         } else if (nextDifficulty === "hard" && !isMediumComplete) {
-          nextLevelTitle = "Next Level Locked";
-          nextLevelSubtitle = "🔒 Complete all Medium levels first";
+          nextLevelTitle = "Locked Level";
+          nextLevelSubtitle = "Complete all Medium levels first";
         } else {
-          nextLevelTitle = "Next Level Locked";
-          nextLevelSubtitle = "🔒 This level is currently locked";
+          nextLevelTitle = "Locked Level";
+          nextLevelSubtitle = "This level is currently locked";
         }
-      }
-      // CASE 2: Check progression rules based on difficulty transition
-      else {
+      } else {
         const isSameDifficulty = currentDifficulty === nextDifficulty;
         const isDifficultyIncrease =
           (currentDifficulty === "easy" && nextDifficulty === "medium") ||
@@ -158,39 +155,36 @@ const GameNavigation: React.FC<GameNavigationProps> = ({
         if (isSameDifficulty) {
           nextLevelTitle = "Next Level";
           nextLevelSubtitle = createNextLevelText(nextLevel);
-
           if (nextLevel.status === "completed") {
-            nextLevelTitle = "Next Level (Completed)";
-            nextLevelSubtitle = "You'll be redirected to level selection";
+            nextLevelTitle = "Completed Level";
+            nextLevelSubtitle = "Redirects to level selection";
           }
         } else if (isDifficultyIncrease) {
           if (!isCurrentLevelCompleted || !isCorrectAnswer) {
             nextLevelStatus = "disabled";
-            nextLevelTitle = "Complete Current Level";
-            nextLevelSubtitle = "✅ Answer correctly to unlock next difficulty";
+            nextLevelTitle = "Complete Current";
+            nextLevelSubtitle = "Answer correctly to unlock";
           } else {
-            nextLevelTitle = "Next Level";
+            nextLevelTitle = "Next Difficulty";
             const levelText = createNextLevelText(nextLevel);
             const difficultyText =
               nextDifficulty.charAt(0).toUpperCase() + nextDifficulty.slice(1);
             nextLevelSubtitle = `${levelText} (${difficultyText})`;
           }
         } else {
-          nextLevelTitle = "Next Level";
+          nextLevelTitle = "Next Challenge";
           nextLevelSubtitle = createNextLevelText(nextLevel);
         }
       }
     } else {
       nextLevelStatus = "disabled";
       nextLevelTitle = "No More Levels";
-      nextLevelSubtitle = "🎯 Try other difficulty modes";
+      nextLevelSubtitle = "Try other difficulty modes";
     }
 
-    // ENHANCED: Check Retry availability with better logic
     if (isCurrentLevelCompleted && isCorrectAnswer) {
       retryStatus = "disabled";
-      retryMessage =
-        "🌟 Level completed correctly! Try the next level or explore other game modes.";
+      retryMessage = "Level completed perfectly!";
     } else if (isCurrentLevelCompleted && !isCorrectAnswer) {
       retryStatus = "available";
       retryMessage = "";
@@ -223,15 +217,9 @@ const GameNavigation: React.FC<GameNavigationProps> = ({
     isLoading,
   ]);
 
-  // Enhanced handlers with validation
+  // Handlers (keeping existing logic)
   const handleBackToLevels = useCallback(() => {
-    if (isAnimating) {
-      console.log("[GameNavigation] Back to levels disabled during animation");
-      return;
-    }
-
-    console.log("[GameNavigation] Navigating back to levels with replace");
-
+    if (isAnimating) return;
     const gameStore = useGameStore.getState();
     gameStore.setGameStatus("idle");
     gameStore.setScore(0);
@@ -243,26 +231,15 @@ const GameNavigation: React.FC<GameNavigationProps> = ({
       pathname: "/(games)/LevelSelection",
       params: { gameMode, gameTitle, difficulty },
     });
-  }, [isAnimating]);
+  }, [isAnimating, gameMode, gameTitle, difficulty]);
 
-  // UPDATED: Show modal instead of direct navigation
   const handleNextLevel = useCallback(() => {
-    if (isAnimating || navigationState.nextLevel.status === "disabled") {
-      console.log("[GameNavigation] Next level disabled or animating");
-      return;
-    }
+    if (isAnimating || navigationState.nextLevel.status === "disabled") return;
 
     const nextLevelId = numericLevelId + 1;
     const nextLevel = levels.find((level) => level.id === nextLevelId);
 
-    console.log(`[GameNavigation] Showing modal for level ${nextLevelId}`);
-
-    // ENHANCED: Handle already completed levels
     if (nextLevel?.status === "completed") {
-      console.log(
-        `[GameNavigation] Next level ${nextLevelId} is already completed - going to level selection instead`
-      );
-
       router.replace({
         pathname: "/(games)/LevelSelection",
         params: {
@@ -284,29 +261,25 @@ const GameNavigation: React.FC<GameNavigationProps> = ({
           title: nextLevel.title || nextLevel.questionData?.title,
           levelNumber: nextLevelId,
         };
-
-        console.log(`[GameNavigation] Prepared modal data:`, {
-          levelString: modalLevelData.levelString,
-          title: modalLevelData.title,
-          levelNumber: modalLevelData.levelNumber,
-        });
-
         setNextLevelData(modalLevelData);
         setShowNextLevelModal(true);
       }
     }
-  }, [isAnimating, navigationState.nextLevel.status /* ...other deps */]);
+  }, [
+    isAnimating,
+    navigationState.nextLevel.status,
+    levels,
+    numericLevelId,
+    gameMode,
+    gameTitle,
+    difficulty,
+  ]);
 
-  // Handle modal start - this is where actual navigation happens
   const handleModalStart = () => {
     const nextLevelId = numericLevelId + 1;
-    console.log(`[GameNavigation] Starting level ${nextLevelId} from modal`);
-
-    // Close modal first
     setShowNextLevelModal(false);
     setNextLevelData(null);
 
-    // Reset game store state
     const gameStore = useGameStore.getState();
     gameStore.setGameStatus("idle");
     gameStore.setScore(0);
@@ -314,7 +287,6 @@ const GameNavigation: React.FC<GameNavigationProps> = ({
     gameStore.resetTimer();
     gameStore.handleRestart();
 
-    // FIXED: Add fromGameNavigation parameter to prevent double modal
     router.replace({
       pathname: "/(games)/Questions",
       params: {
@@ -327,90 +299,54 @@ const GameNavigation: React.FC<GameNavigationProps> = ({
     });
   };
 
-  // Handle modal close
   const handleModalClose = () => {
     setShowNextLevelModal(false);
     setNextLevelData(null);
   };
 
-  // FIXED: Properly access stores without breaking hooks rules
   const handleRetry = useCallback(async () => {
     if (
       isAnimating ||
       navigationState.retry.status === "disabled" ||
       isRetryLoading
-    ) {
-      console.log("[GameNavigation] Retry disabled or animating");
+    )
       return;
-    }
-
-    console.log("[GameNavigation] Retrying current level - forcing fresh data");
 
     try {
-      // NEW: Set loading state FIRST
       setIsRetryLoading(true);
-
-      // CRITICAL: Add delay to prevent race conditions
       await new Promise((resolve) => setTimeout(resolve, 100));
 
-      // 1. Clean up game store state FIRST
       const gameStore = useGameStore.getState();
       gameStore.setGameStatus("idle");
       gameStore.setScore(0);
       gameStore.setTimerRunning(false);
 
-      // 2. Clear progress store cache
       const progressStore = useProgressStore.getState();
       progressStore.clearCache();
-
-      // 3. SEQUENTIAL: Wait for cache clear before fetching
       await new Promise((resolve) => setTimeout(resolve, 200));
-
-      // 4. Force refresh progress
       await progressStore.fetchProgress(true);
 
-      // 5. Clear splash store
       const splashStore = useSplashStore.getState();
       splashStore.reset();
 
-      // 6. CRITICAL: Wait for all operations to complete
       await new Promise((resolve) => setTimeout(resolve, 500));
-
-      // 7. Now call restart in a controlled manner
-      console.log("[GameNavigation] All caches cleared, calling onRestart");
       onRestart();
 
-      // 8. ENHANCED: Longer loading state to prevent force start interference
       setTimeout(() => {
         setIsRetryLoading(false);
-        console.log("[GameNavigation] Retry process completed");
-      }, 1800); // INCREASED: From 1200ms to 1800ms to prevent force start
+      }, 1800);
     } catch (error) {
-      console.error("[GameNavigation] Error during retry preparation:", error);
-      // Always call onRestart as fallback and reset loading
+      console.error("[GameNavigation] Error during retry:", error);
       onRestart();
       setTimeout(() => {
         setIsRetryLoading(false);
-      }, 1800); // INCREASED: Match the success timeout
+      }, 1800);
     }
-  }, [
-    isAnimating,
-    navigationState.retry.status,
-    navigationState.retry.message,
-    onRestart,
-    isRetryLoading,
-  ]);
+  }, [isAnimating, navigationState.retry.status, onRestart, isRetryLoading]);
 
   const handleGameModeNavigation = useCallback(
     (newGameMode: string, newGameTitle: string) => {
-      if (isAnimating) {
-        console.log(
-          "[GameNavigation] Game mode navigation disabled during animation"
-        );
-        return;
-      }
-
-      console.log(`[GameNavigation] Switching to ${newGameMode}`);
+      if (isAnimating) return;
 
       const gameStore = useGameStore.getState();
       gameStore.setGameStatus("idle");
@@ -431,161 +367,277 @@ const GameNavigation: React.FC<GameNavigationProps> = ({
     [isAnimating, difficulty]
   );
 
-  // FIXED: Filter game modes based on current mode
+  // Available game modes
   const availableGameModes = useMemo(() => {
     const currentMode =
       typeof gameMode === "string" ? gameMode : String(gameMode);
     const allModes = [
       {
-        mode: "multipleChoice",
+        mode: GAME_MODES.MULTIPLE_CHOICE,
         title: "Multiple Choice",
         subtitle: "Pick the right answer",
-        iconName: "format-list-bulleted",
         colors: gameModeNavigationColors.multipleChoice,
       },
       {
-        mode: "identification",
+        mode: GAME_MODES.IDENTIFICATION,
         title: "Word Identification",
         subtitle: "Find the correct word",
-        iconName: "crosshairs-gps",
         colors: gameModeNavigationColors.identification,
       },
       {
-        mode: "fillBlanks",
+        mode: GAME_MODES.FILL_BLANKS,
         title: "Fill in the Blank",
         subtitle: "Complete the sentence",
-        iconName: "pencil",
         colors: gameModeNavigationColors.fillBlanks,
       },
     ];
-
-    // Filter out current mode
     return allModes.filter((mode) => mode.mode !== currentMode);
   }, [gameMode]);
 
   return (
     <>
       <View style={styles.container}>
-        {/* Floating Decorative Elements */}
+        {/* Primary Actions Row - Next Level & Retry */}
         <Animatable.View
-          animation="pulse"
-          iterationCount="infinite"
-          duration={4000}
-          style={[styles.floatingElement, styles.element1]}
-        />
-        <Animatable.View
-          animation="rotate"
-          iterationCount="infinite"
-          duration={8000}
-          style={[styles.floatingElement, styles.element2]}
-        />
-
-        {/* Primary Section */}
-        <Animatable.View
-          animation="slideInUp"
-          duration={800}
-          delay={100}
-          style={styles.primarySection}
+          animation="fadeInUp"
+          duration={600}
+          delay={200}
+          style={styles.primaryActionsContainer}
         >
-          <GameButton
-            variant="primary"
-            title={navigationState.nextLevel.title}
-            subtitle={navigationState.nextLevel.subtitle}
-            iconName={"play"}
-            iconSize={26}
-            colors={
-              navigationState.nextLevel.status === "disabled"
-                ? (["#666666", "#444444"] as const)
-                : NAVIGATION_COLORS.green
-            }
-            onPress={handleNextLevel}
-            disabled={navigationState.nextLevel.status === "disabled"}
-          />
-        </Animatable.View>
-
-        {/* Status Message - Only show retry message now */}
-        {navigationState.retry.message && (
-          <Animatable.View
-            animation="fadeIn"
-            duration={600}
-            delay={200}
-            style={styles.statusMessageContainer}
-          >
-            <Text style={styles.statusMessage}>
-              {navigationState.retry.message}
-            </Text>
-          </Animatable.View>
-        )}
-
-        {/* Secondary Actions Grid */}
-        <Animatable.View animation="fadeInUp" duration={700} delay={300}>
-          <View style={styles.secondaryGrid}>
-            <GameButton
-              variant="secondary"
-              title="Retry"
-              iconName="rotate-left"
-              colors={
-                navigationState.retry.status === "disabled" || isRetryLoading
-                  ? (["#666666", "#444444"] as const)
-                  : NAVIGATION_COLORS.yellow
-              }
-              onPress={handleRetry}
-              flex={1}
+          <View style={styles.primaryActionsRow}>
+            <TouchableOpacity
+              style={[
+                styles.primaryActionCard,
+                styles.nextLevelCard,
+                navigationState.nextLevel.status === "disabled" &&
+                  styles.disabledCard,
+              ]}
+              onPress={handleNextLevel}
               disabled={
-                navigationState.retry.status === "disabled" || isRetryLoading
+                navigationState.nextLevel.status === "disabled" || isAnimating
               }
-              isLoading={isRetryLoading}
-            />
+              activeOpacity={0.8}
+            >
+              <LinearGradient
+                colors={
+                  navigationState.nextLevel.status === "disabled"
+                    ? NAVIGATION_COLORS.disabled
+                    : NAVIGATION_COLORS.green
+                }
+                style={styles.primaryActionGradient}
+              >
+                <View style={styles.primaryActionIcon}>
+                  {navigationState.nextLevel.status === "disabled" ? (
+                    <Lock
+                      width={20}
+                      height={20}
+                      color="rgba(255, 255, 255, 0.5)"
+                    />
+                  ) : (
+                    <Play width={20} height={20} color={BASE_COLORS.white} />
+                  )}
+                </View>
+                <View style={styles.primaryActionContent}>
+                  <Text
+                    style={[
+                      styles.primaryActionTitle,
+                      navigationState.nextLevel.status === "disabled" &&
+                        styles.disabledText,
+                    ]}
+                  >
+                    {navigationState.nextLevel.title}
+                  </Text>
+                  <Text
+                    style={[
+                      styles.primaryActionSubtitle,
+                      navigationState.nextLevel.status === "disabled" &&
+                        styles.disabledText,
+                    ]}
+                  >
+                    {navigationState.nextLevel.subtitle}
+                  </Text>
+                </View>
+                {navigationState.nextLevel.status !== "disabled" && (
+                  <ChevronRight
+                    width={16}
+                    height={16}
+                    color={BASE_COLORS.white}
+                  />
+                )}
+              </LinearGradient>
+            </TouchableOpacity>
 
-            <GameButton
-              variant="secondary"
-              title="Levels"
-              iconName="view-grid"
-              colors={NAVIGATION_COLORS.blue}
-              onPress={handleBackToLevels}
-              flex={1}
-            />
+            <TouchableOpacity
+              style={[
+                styles.primaryActionCard,
+                styles.retryCard,
+                (navigationState.retry.status === "disabled" ||
+                  isRetryLoading) &&
+                  styles.disabledCard,
+              ]}
+              onPress={handleRetry}
+              disabled={
+                navigationState.retry.status === "disabled" ||
+                isRetryLoading ||
+                isAnimating
+              }
+              activeOpacity={0.8}
+            >
+              <LinearGradient
+                colors={
+                  navigationState.retry.status === "disabled" || isRetryLoading
+                    ? NAVIGATION_COLORS.disabled
+                    : NAVIGATION_COLORS.yellow
+                }
+                style={styles.primaryActionGradient}
+              >
+                <View style={styles.primaryActionIcon}>
+                  <RotateCcw
+                    width={18}
+                    height={18}
+                    color={
+                      navigationState.retry.status === "disabled" ||
+                      isRetryLoading
+                        ? "rgba(255, 255, 255, 0.5)"
+                        : BASE_COLORS.white
+                    }
+                  />
+                </View>
+                <View style={styles.primaryActionContent}>
+                  <Text
+                    style={[
+                      styles.primaryActionTitle,
+                      (navigationState.retry.status === "disabled" ||
+                        isRetryLoading) &&
+                        styles.disabledText,
+                    ]}
+                  >
+                    {navigationState.retry.status === "disabled"
+                      ? "Perfect!"
+                      : "Try Again"}
+                  </Text>
+                  <Text
+                    style={[
+                      styles.primaryActionSubtitle,
+                      (navigationState.retry.status === "disabled" ||
+                        isRetryLoading) &&
+                        styles.disabledText,
+                    ]}
+                  >
+                    {navigationState.retry.status === "disabled"
+                      ? "Level completed!"
+                      : "Timer will continue from where you left off."}
+                  </Text>
+                </View>
+              </LinearGradient>
+            </TouchableOpacity>
           </View>
         </Animatable.View>
 
-        {/* FIXED: Game Mode Navigation - Only show other modes */}
-        <Animatable.View animation="fadeIn" duration={600} delay={500}>
-          <View style={styles.divider} />
+        {/* Quick Navigation Row */}
+        <Animatable.View
+          animation="fadeInUp"
+          duration={600}
+          delay={300}
+          style={styles.quickNavContainer}
+        >
+          <View style={styles.quickNavRow}>
+            <TouchableOpacity
+              style={styles.quickNavCard}
+              onPress={handleBackToLevels}
+              disabled={isAnimating}
+              activeOpacity={0.8}
+            >
+              <LinearGradient
+                colors={NAVIGATION_COLORS.purple}
+                style={styles.quickNavGradient}
+              >
+                <Grid width={18} height={18} color={BASE_COLORS.white} />
+                <Text style={styles.quickNavText}>Level Selection</Text>
+              </LinearGradient>
+            </TouchableOpacity>
 
-          <Text style={styles.sectionTitle}>Other Game Modes</Text>
-          <Text style={styles.sectionSubtitle}>
-            Try different learning styles
-          </Text>
+            <TouchableOpacity
+              style={styles.quickNavCard}
+              onPress={() => router.replace("/(tabs)/Games")}
+              disabled={isAnimating}
+              activeOpacity={0.8}
+            >
+              <LinearGradient
+                colors={NAVIGATION_COLORS.indigo}
+                style={styles.quickNavGradient}
+              >
+                <Ionicons
+                  name="game-controller-outline"
+                  size={18}
+                  color={BASE_COLORS.white}
+                />
+                <Text style={styles.quickNavText}>Back to Home</Text>
+              </LinearGradient>
+            </TouchableOpacity>
+          </View>
+        </Animatable.View>
 
-          <View style={styles.gameModeGrid}>
-            {availableGameModes.map((mode) => (
-              <GameButton
-                key={mode.mode}
-                variant="gameMode"
-                title={mode.title}
-                subtitle={mode.subtitle}
-                iconName={mode.iconName}
-                colors={mode.colors}
-                onPress={() => handleGameModeNavigation(mode.mode, mode.title)}
-              />
-            ))}
+        {/* Game Modes Section */}
+        <Animatable.View
+          animation="fadeInUp"
+          duration={600}
+          delay={400}
+          style={styles.gameModesContainer}
+        >
+          <View style={styles.gameModesHeader}>
+            <Zap width={16} height={16} color={iconColors.brightYellow} />
+            <Text style={styles.gameModesTitle}>Try Other Modes</Text>
+          </View>
+
+          <View style={styles.gameModesGrid}>
+            {availableGameModes.map((mode, index) => {
+              // Get the icon component from GAME_ICONS
+              const IconComponent = GAME_ICONS[mode.mode];
+
+              return (
+                <TouchableOpacity
+                  key={mode.mode}
+                  style={styles.gameModeCard}
+                  onPress={() =>
+                    handleGameModeNavigation(mode.mode, mode.title)
+                  }
+                  disabled={isAnimating}
+                  activeOpacity={0.8}
+                >
+                  <LinearGradient
+                    colors={[mode.colors[0], mode.colors[1]]}
+                    style={styles.gameModeGradient}
+                  >
+                    <View
+                      style={[
+                        styles.gameModeIcon,
+                        { backgroundColor: mode.colors[0] },
+                      ]}
+                    >
+                      {/* Use the icon component from GAME_ICONS */}
+                      <IconComponent width={20} height={20} />
+                    </View>
+                    <Text style={styles.gameModeTitle}>{mode.title}</Text>
+                    <Text style={styles.gameModeSubtitle}>{mode.subtitle}</Text>
+                  </LinearGradient>
+                </TouchableOpacity>
+              );
+            })}
           </View>
         </Animatable.View>
       </View>
 
       {/* Next Level Modal */}
       {showNextLevelModal && nextLevelData && (
-        <View style={styles.modalOverlay}>
-          <LevelInfoModal
-            visible={showNextLevelModal}
-            onClose={handleModalClose}
-            onStart={handleModalStart}
-            levelData={nextLevelData}
-            gameMode={gameMode}
-            isLoading={false}
-            difficulty={nextLevelData?.difficultyCategory || difficulty}
-          />
-        </View>
+        <LevelInfoModal
+          visible={showNextLevelModal}
+          onClose={handleModalClose}
+          onStart={handleModalStart}
+          levelData={nextLevelData}
+          gameMode={gameMode}
+          difficulty={difficulty}
+        />
       )}
     </>
   );
@@ -593,90 +645,140 @@ const GameNavigation: React.FC<GameNavigationProps> = ({
 
 const styles = StyleSheet.create({
   container: {
-    position: "relative",
+    flex: 1,
+    paddingHorizontal: 16,
   },
 
-  // Floating Elements
-  floatingElement: {
-    position: "absolute",
-    backgroundColor: "rgba(255, 255, 255, 0.05)",
-    borderRadius: 50,
-    zIndex: 1,
-  },
-  element1: {
-    width: 60,
-    height: 60,
-    top: -10,
-    right: -20,
-  },
-  element2: {
-    width: 40,
-    height: 40,
-    bottom: 20,
-    left: -15,
-  },
-
-  // Primary Section
-  primarySection: {
-    marginBottom: 12,
-    zIndex: 2,
-  },
-
-  // Status Message Styles - Only for retry message now
-  statusMessageContainer: {
-    backgroundColor: "rgba(255, 255, 255, 0.1)",
-    borderRadius: 20,
-    padding: 12,
+  // Primary Actions
+  primaryActionsContainer: {
     marginBottom: 16,
+  },
+  primaryActionsRow: {
+    gap: 12,
+  },
+  primaryActionCard: {
+    borderRadius: 20,
+    overflow: "hidden",
+    marginBottom: 8,
+  },
+  disabledCard: {
+    shadowOpacity: 0.1,
+    elevation: 4,
+  },
+  primaryActionGradient: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingHorizontal: 16,
+    paddingVertical: 14,
+  },
+  primaryActionIcon: {
+    width: 36,
+    height: 36,
+    borderRadius: 20,
+    backgroundColor: "rgba(255, 255, 255, 0.2)",
+    justifyContent: "center",
+    alignItems: "center",
+    marginRight: 12,
+  },
+  primaryActionContent: {
+    flex: 1,
+  },
+  primaryActionTitle: {
+    fontSize: 15,
+    fontFamily: "Poppins-Bold",
+    color: BASE_COLORS.white,
+  },
+  primaryActionSubtitle: {
+    fontSize: 12,
+    fontFamily: "Poppins-Medium",
+    color: "rgba(255, 255, 255, 0.85)",
+  },
+  disabledText: {
+    color: "rgba(255, 255, 255, 0.5)",
+  },
+
+  // Quick Navigation
+  quickNavContainer: {
+    marginBottom: 20,
+  },
+  quickNavRow: {
+    flexDirection: "row",
+    gap: 12,
+  },
+  quickNavCard: {
+    flex: 1,
+    borderRadius: 20,
+    overflow: "hidden",
+  },
+  quickNavGradient: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    gap: 8,
+  },
+  quickNavText: {
+    fontSize: 12,
+    fontFamily: "Poppins-Medium",
+    color: BASE_COLORS.white,
+  },
+
+  // Game Modes
+  gameModesContainer: {
+    marginBottom: 20,
+  },
+  gameModesHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    marginBottom: 14,
+    gap: 6,
+  },
+  gameModesTitle: {
+    fontSize: 15,
+    fontFamily: "Poppins-SemiBold",
+    color: BASE_COLORS.white,
+  },
+  gameModesGrid: {
+    flexDirection: "row",
+    gap: 10,
+    justifyContent: "space-between",
+  },
+  gameModeCard: {
+    flex: 1,
+    overflow: "hidden",
+  },
+  gameModeGradient: {
+    paddingVertical: 14,
+    paddingHorizontal: 16,
+    alignItems: "center",
+    borderRadius: 20,
+    position: "relative",
+    minHeight: 60,
+  },
+  gameModeIcon: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    justifyContent: "center",
+    alignItems: "center",
+    marginBottom: 8,
     borderWidth: 1,
     borderColor: "rgba(255, 255, 255, 0.2)",
   },
-  statusMessage: {
-    fontSize: 14,
-    fontFamily: "Poppins-Medium",
-    color: BASE_COLORS.white,
-    textAlign: "center",
-    lineHeight: 20,
-  },
-
-  // Secondary Section
-  secondaryGrid: {
-    flexDirection: "row",
-    justifyContent: "center",
-    gap: 12,
-    marginBottom: 16,
-  },
-
-  divider: {
-    height: 1,
-    backgroundColor: "rgba(255, 255, 255, 0.1)",
-    margin: 16,
-  },
-  sectionTitle: {
-    fontSize: 14,
-    fontFamily: "Poppins-Medium",
-    color: BASE_COLORS.white,
-    textAlign: "center",
-  },
-  sectionSubtitle: {
+  gameModeTitle: {
     fontSize: 12,
-    fontFamily: "Poppins-Regular",
-    color: "rgba(255, 255, 255, 0.7)",
+    fontFamily: "Poppins-Medium",
+    color: BASE_COLORS.white,
     textAlign: "center",
-    marginBottom: 16,
+    lineHeight: 14,
   },
-  gameModeGrid: {
-    gap: 8,
-  },
-
-  // Modal overlay
-  modalOverlay: {
-    position: "absolute",
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    zIndex: 1000,
+  gameModeSubtitle: {
+    fontSize: 10,
+    fontFamily: "Poppins-Regular",
+    color: "rgba(255, 255, 255, 0.60)",
+    textAlign: "center",
   },
 });
 
