@@ -4,8 +4,6 @@ export interface RankingUser {
   avatar?: string;
   value: number;
   lastActive?: string;
-
-  // Additional fields based on ranking type
   coins?: number;
   totalCompleted?: number;
   avgTime?: number;
@@ -22,6 +20,12 @@ export interface RankingUser {
   currentStreak?: number;
   longestStreak?: number;
   hoursSpent?: number;
+  correctAttempts?: number;
+  totalAttempts?: number;
+  firstTryCorrect?: number;
+  totalFirstTries?: number;
+  avgAttempts?: number;
+  perfectScorers?: number;
 }
 
 export interface UserRank {

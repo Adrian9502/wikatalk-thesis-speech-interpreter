@@ -1,10 +1,7 @@
 import React from "react";
 import { ScrollView, TouchableOpacity, Text, StyleSheet } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
-import {
-  RANKING_CATEGORIES,
-  RankingCategory,
-} from "@/constant/rankingConstants";
+import { RANKING_CATEGORIES } from "@/constant/rankingConstants";
 
 interface RankingCategorySelectorProps {
   selectedCategory: string;

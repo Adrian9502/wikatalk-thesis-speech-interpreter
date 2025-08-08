@@ -1,6 +1,3 @@
-import AsyncStorage from "@react-native-async-storage/async-storage";
-import { useRankingsStore } from "@/store/games/useRankingsStore";
-
 // Define interfaces for the stores to avoid importing them
 interface SplashStoreActions {
   reset: () => void;

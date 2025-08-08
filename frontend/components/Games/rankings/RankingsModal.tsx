@@ -16,11 +16,8 @@ import * as Animatable from "react-native-animatable";
 import { Ionicons } from "@expo/vector-icons";
 import { useRankings } from "@/hooks/useRankings";
 import { RankingType } from "@/types/rankingTypes";
-import {
-  RANKING_CATEGORIES,
-  getRankingCategory,
-} from "@/constant/rankingConstants";
-import { BASE_COLORS, iconColors } from "@/constant/colors";
+import { getRankingCategory } from "@/constant/rankingConstants";
+import { iconColors } from "@/constant/colors";
 
 import RankingCategorySelector from "./RankingCategorySelector";
 import RankingItem from "./RankingItem";

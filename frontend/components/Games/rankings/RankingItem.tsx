@@ -53,7 +53,7 @@ const RankingItem: React.FC<RankingItemProps> = ({
         return `${user.weeklyProgress || user.value} this week`;
 
       case "perfectScorers":
-        return `${user.perfectScores || user.value} perfect`;
+        return `${user.perfectScorers || user.value} perfect`;
 
       case "timeWarriors":
         return `${
@@ -74,7 +74,9 @@ const RankingItem: React.FC<RankingItemProps> = ({
         return user.bestTime ? `Best: ${formatTime(user.bestTime)}` : null;
 
       case "consistencyKings":
-        return `${user.correctAttempts}/${user.totalAttempts} attempts`;
+        return `${user.correctAttempts || 0}/${
+          user.totalAttempts || 0
+        } attempts`;
 
       case "progressLeaders":
         return `${user.gameModesCount || 1} game modes`;
@@ -83,7 +85,9 @@ const RankingItem: React.FC<RankingItemProps> = ({
         return user.longestStreak ? `Longest: ${user.longestStreak}` : null;
 
       case "precisionPros":
-        return `${user.firstTryCorrect}/${user.totalFirstTries} first tries`;
+        return `${user.firstTryCorrect || 0}/${
+          user.totalFirstTries || 0
+        } first tries`;
 
       case "weeklyWarriors":
         return user.weeklyTimeSpent
@@ -98,6 +102,20 @@ const RankingItem: React.FC<RankingItemProps> = ({
 
       default:
         return null;
+    }
+  };
+
+  // Helper function to get dynamic styles for badges
+  const getBadgeStyle = (rank: number) => {
+    switch (rank) {
+      case 1:
+        return styles.badge1;
+      case 2:
+        return styles.badge2;
+      case 3:
+        return styles.badge3;
+      default:
+        return {};
     }
   };
 
@@ -150,9 +168,7 @@ const RankingItem: React.FC<RankingItemProps> = ({
 
       {/* Badge for top 3 */}
       {rank <= 3 && (
-        <View
-          style={[styles.badge, styles[`badge${rank}` as keyof typeof styles]]}
-        >
+        <View style={[styles.badge, getBadgeStyle(rank)]}>
           <Text style={styles.badgeText}>TOP {rank}</Text>
         </View>
       )}
