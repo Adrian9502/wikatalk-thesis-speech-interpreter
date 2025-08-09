@@ -4,6 +4,7 @@ import { X, Star, Info } from "react-native-feather";
 import { getStarCount, formatDifficulty } from "@/utils/games/difficultyUtils";
 import FocusAreaBadge from "@/components/games/FocusAreaBadge";
 import modalSharedStyles from "@/styles/games/modalSharedStyles";
+import CloseButton from "../../buttons/CloseButton";
 
 interface LevelHeaderProps {
   levelData: any;
@@ -21,21 +22,11 @@ const LevelHeader: React.FC<LevelHeaderProps> = ({
   starCount,
   onClose,
   onShowCostInfo,
-  isAnimating,
   styles,
 }) => {
   return (
     <>
-      {/* Close button */}
-      <TouchableOpacity
-        onPress={onClose}
-        style={modalSharedStyles.closeButton}
-        disabled={isAnimating}
-        hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
-      >
-        <X width={20} height={20} color="#fff" />
-      </TouchableOpacity>
-
+      <CloseButton size={17} onPress={onClose}></CloseButton>
       {/* Level header */}
       <View style={modalSharedStyles.levelHeader}>
         <View style={modalSharedStyles.levelNumberContainer}>

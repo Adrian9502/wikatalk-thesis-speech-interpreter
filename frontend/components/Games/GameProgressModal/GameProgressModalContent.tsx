@@ -14,6 +14,7 @@ import useProgressStore from "@/store/games/useProgressStore";
 // utility function
 import { getGameModeGradient } from "@/utils/gameUtils";
 import ModalLoading from "@/components/ModalLoading";
+import CloseButton from "../buttons/CloseButton";
 
 interface GameProgressModalContentProps {
   gameMode: string;
@@ -157,17 +158,10 @@ const GameProgressModalContent: React.FC<GameProgressModalContentProps> = ({
       start={{ x: 0, y: 0 }}
       end={{ x: 1, y: 1 }}
     >
+      <CloseButton size={17} onPress={handleClose}></CloseButton>
       {/* Header - Always render this immediately */}
       <View style={styles.header}>
         <Text style={styles.title}>{gameTitle} Progress</Text>
-        <TouchableOpacity
-          style={styles.closeButton}
-          onPress={handleClose}
-          hitSlop={{ top: 15, bottom: 15, left: 15, right: 15 }}
-          activeOpacity={0.7}
-        >
-          <X width={20} height={20} color="#FFF" />
-        </TouchableOpacity>
       </View>
 
       {/* Content - Show loading indicator or actual content */}
@@ -201,13 +195,6 @@ const styles = StyleSheet.create({
     fontFamily: "Poppins-SemiBold",
     color: "#FFF",
     textAlign: "center",
-  },
-  closeButton: {
-    position: "absolute",
-    right: 0,
-    padding: 8,
-    backgroundColor: "rgba(0,0,0,0.2)",
-    borderRadius: 20,
   },
 });
 

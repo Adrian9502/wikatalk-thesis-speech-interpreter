@@ -231,7 +231,7 @@ export const rewardStyles = StyleSheet.create({
     justifyContent: "center",
     backgroundColor: "rgba(255, 255, 255, 0.1)",
     borderRadius: 20,
-    padding: 12,
+    padding: 8,
     borderWidth: 1,
     borderColor: "rgba(255, 255, 255, 0.15)",
   },

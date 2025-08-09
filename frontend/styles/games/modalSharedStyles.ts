@@ -48,20 +48,6 @@ export const modalSharedStyles = StyleSheet.create({
     backgroundColor: "rgba(255, 255, 255, 0.08)",
   },
 
-  // Close Button
-  closeButton: {
-    position: "absolute",
-    top: 16,
-    right: 16,
-    width: 38,
-    height: 38,
-    borderRadius: 19,
-    backgroundColor: "rgba(0, 0, 0, 0.3)",
-    justifyContent: "center",
-    alignItems: "center",
-    zIndex: 10,
-  },
-
   // Level Header
   levelHeader: {
     alignItems: "center",

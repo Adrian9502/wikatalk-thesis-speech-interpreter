@@ -25,6 +25,7 @@ import ClaimButton from "./dailyRewardsModal/ClaimButton";
 import BalanceCard from "./dailyRewardsModal/BalanceCard";
 import { getDayRewardAmount } from "@/hooks/useRewards";
 import ModalLoading from "@/components/ModalLoading";
+import CloseButton from "../buttons/CloseButton";
 
 interface DailyRewardsModalProps {
   visible: boolean;
@@ -142,17 +143,11 @@ const DailyRewardsModal: React.FC<DailyRewardsModalProps> = ({
             end={{ x: 1, y: 1 }}
             style={styles.gradientBackground}
           >
-            {/* Header - Always show immediately */}
+            <CloseButton size={17} onPress={handleClose}></CloseButton>
+            {/* Header */}
             <View style={styles.header}>
               <Text style={styles.title}>Daily Rewards</Text>
-              <TouchableOpacity
-                style={styles.closeButton}
-                onPress={handleClose}
-              >
-                <X width={18} height={18} color="#FFF" />
-              </TouchableOpacity>
             </View>
-
             {isLoading ? (
               <View style={styles.fullHeightLoader}>
                 <ModalLoading />
@@ -241,7 +236,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "center",
     alignItems: "center",
-    marginBottom: 20,
+    marginBottom: 12,
     position: "relative",
   },
   title: {

@@ -186,7 +186,7 @@ const styles = StyleSheet.create({
   avatarText: {
     fontSize: 16,
     fontFamily: "Poppins-Bold",
-    color: BASE_COLORS.customWhite,
+    color: BASE_COLORS.white,
   },
   userInfo: {
     flex: 1,

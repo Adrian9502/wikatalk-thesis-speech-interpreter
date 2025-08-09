@@ -4,11 +4,10 @@ import {
   View,
   Image,
   StyleSheet,
-  TouchableOpacity,
   ActivityIndicator,
 } from "react-native";
-import { X } from "react-native-feather";
 import { BASE_COLORS } from "@/constant/colors";
+import CloseButton from "../games/buttons/CloseButton";
 
 interface ProfilePictureModalProps {
   visible: boolean;
@@ -29,22 +28,21 @@ const ProfilePictureModal: React.FC<ProfilePictureModalProps> = ({
       transparent
       animationType="fade"
       onRequestClose={onClose}
-      statusBarTranslucent={true}
+      statusBarTranslucent
     >
       <View style={styles.modalOverlay}>
-        <TouchableOpacity style={styles.closeButton} onPress={onClose}>
-          <X width={24} height={24} color="white" />
-        </TouchableOpacity>
-
         <View style={styles.imageContainer}>
           {isLoading ? (
             <ActivityIndicator size="large" color={BASE_COLORS.blue} />
           ) : (
-            <Image
-              source={{ uri: imageUrl }}
-              style={styles.profileImage}
-              resizeMode="contain"
-            />
+            <>
+              <Image
+                source={{ uri: imageUrl }}
+                resizeMode="contain"
+                style={styles.profileImage}
+              />
+              <CloseButton onPress={onClose} />
+            </>
           )}
         </View>
       </View>
@@ -60,26 +58,15 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   imageContainer: {
-    width: "90%",
-    height: "70%",
-    justifyContent: "center",
+    width: "70%",
+    height: 300,
+    position: "relative",
     alignItems: "center",
+    justifyContent: "center",
   },
   profileImage: {
     width: "100%",
     height: "100%",
-  },
-  closeButton: {
-    position: "absolute",
-    top: 40,
-    right: 20,
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: "rgba(0, 0, 0, 0.5)",
-    justifyContent: "center",
-    alignItems: "center",
-    zIndex: 10,
   },
 });
 

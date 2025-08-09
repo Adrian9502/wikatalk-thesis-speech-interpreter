@@ -1,6 +1,7 @@
 import React from "react";
 import { StyleSheet, View, Text, TouchableOpacity } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
+import CloseButton from "./games/buttons/CloseButton";
 
 interface FormMessageProps {
   message: string;
@@ -62,9 +63,12 @@ const FormMessage: React.FC<FormMessageProps> = ({
         </Text>
       </View>
       {onDismiss && (
-        <TouchableOpacity onPress={onDismiss} style={styles.closeButton}>
-          <Ionicons name="close" size={17} color={getTextColor()} />
-        </TouchableOpacity>
+        <CloseButton
+          size={17}
+          onPress={onDismiss}
+          color={getTextColor()}
+          hasBackground={false}
+        ></CloseButton>
       )}
     </View>
   );

@@ -12,6 +12,7 @@ import { X, Mail, Github } from "react-native-feather";
 import { BASE_COLORS } from "@/constant/colors";
 import useThemeStore from "@/store/useThemeStore";
 import { Feather } from "@expo/vector-icons";
+import CloseButton from "../games/buttons/CloseButton";
 
 interface ContactSupportModalProps {
   visible: boolean;
@@ -57,24 +58,15 @@ const ContactSupportModal = ({
             onStartShouldSetResponder={() => true}
             onTouchEnd={(e) => e.stopPropagation()}
           >
+            <CloseButton size={17} onPress={onClose}></CloseButton>
             <View
               style={[
                 styles.modalHeader,
                 { backgroundColor: activeTheme.backgroundColor },
               ]}
             >
-              {/* Added empty View for proper layout balance */}
-              <View style={styles.placeholderView} />
-
               {/* Centered title */}
-              <View style={styles.titleContainer}>
-                <Text style={styles.modalTitle}>Contact Support</Text>
-              </View>
-
-              {/* Close button on right */}
-              <TouchableOpacity onPress={onClose} style={styles.closeButton}>
-                <X width={20} height={20} color="#fff" />
-              </TouchableOpacity>
+              <Text style={styles.modalTitle}>Contact Support</Text>
             </View>
 
             <View style={styles.modalBody}>
@@ -88,7 +80,7 @@ const ContactSupportModal = ({
                   style={[styles.iconButton, { backgroundColor: "#DB4437" }]}
                   onPress={handleEmailPress}
                 >
-                  <Mail width={26} height={26} color="#fff" />
+                  <Mail width={26} height={26} color={BASE_COLORS.white} />
                   <Text style={styles.iconText}>Email</Text>
                 </TouchableOpacity>
 
@@ -97,7 +89,11 @@ const ContactSupportModal = ({
                   style={[styles.iconButton, { backgroundColor: "#4267B2" }]}
                   onPress={handleFacebookPress}
                 >
-                  <Feather name="facebook" size={26} color="#fff" />
+                  <Feather
+                    name="facebook"
+                    size={26}
+                    color={BASE_COLORS.white}
+                  />
                   <Text style={styles.iconText}>Facebook</Text>
                 </TouchableOpacity>
 
@@ -106,7 +102,7 @@ const ContactSupportModal = ({
                   style={[styles.iconButton, { backgroundColor: "#333" }]}
                   onPress={handleGitHubPress}
                 >
-                  <Github width={26} height={26} color="#fff" />
+                  <Github width={26} height={26} color={BASE_COLORS.white} />
                   <Text style={styles.iconText}>GitHub</Text>
                 </TouchableOpacity>
               </View>
@@ -131,44 +127,34 @@ const styles = StyleSheet.create({
   modalContainer: {
     width: "90%",
     maxWidth: 500,
-    backgroundColor: "#fff",
+    backgroundColor: BASE_COLORS.white,
     borderRadius: 20,
     overflow: "hidden",
+    position: "relative",
   },
   modalHeader: {
     flexDirection: "row",
-    justifyContent: "space-between",
+    justifyContent: "center",
     alignItems: "center",
-    paddingVertical: 12,
+    paddingTop: 16,
+    paddingBottom: 16,
     paddingHorizontal: 16,
   },
-  placeholderView: {
-    width: 28, // Same width as closeButton for balance
-  },
-  titleContainer: {
-    flex: 1,
-    alignItems: "center",
-  },
+
   modalTitle: {
-    color: "#fff",
+    color: BASE_COLORS.white,
     fontFamily: "Poppins-Medium",
     fontSize: 16,
     textAlign: "center",
   },
-  closeButton: {
-    padding: 4,
-    width: 28,
-    height: 28,
-    alignItems: "center",
-    justifyContent: "center",
-  },
+
   modalBody: {
     padding: 26,
     alignItems: "center",
   },
   contactText: {
     fontFamily: "Poppins-Regular",
-    fontSize: 14,
+    fontSize: 13,
     color: BASE_COLORS.darkText,
     textAlign: "center",
     marginBottom: 26,

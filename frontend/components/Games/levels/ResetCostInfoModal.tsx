@@ -1,19 +1,12 @@
 import React from "react";
-import {
-  Modal,
-  View,
-  Text,
-  TouchableOpacity,
-  StyleSheet,
-  ScrollView,
-  Image,
-} from "react-native";
+import { Modal, View, Text, StyleSheet, ScrollView, Image } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
-import { X, Info, Clock } from "react-native-feather";
+import { Clock } from "react-native-feather";
 import * as Animatable from "react-native-animatable";
 import { BASE_COLORS, iconColors } from "@/constant/colors";
 import { NAVIGATION_COLORS } from "@/constant/gameConstants";
 import costTiers from "@/utils/games/costTiers";
+import CloseButton from "../buttons/CloseButton";
 interface ResetCostInfoModalProps {
   visible: boolean;
   onClose: () => void;
@@ -40,15 +33,10 @@ const ResetCostInfoModal: React.FC<ResetCostInfoModalProps> = ({
             colors={NAVIGATION_COLORS.indigo}
             style={styles.modalContent}
           >
+            <CloseButton size={17} onPress={onClose}></CloseButton>
             {/* Header */}
             <View style={styles.header}>
-              <View style={styles.headerIcon}>
-                <Info width={20} height={20} color={BASE_COLORS.white} />
-              </View>
               <Text style={styles.title}>Reset Cost Information</Text>
-              <TouchableOpacity style={styles.closeButton} onPress={onClose}>
-                <X width={20} height={20} color={BASE_COLORS.white} />
-              </TouchableOpacity>
             </View>
 
             {/* Description */}
@@ -119,34 +107,16 @@ const styles = StyleSheet.create({
     alignItems: "center",
     marginBottom: 16,
   },
-  headerIcon: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: "rgba(255, 255, 255, 0.2)",
-    justifyContent: "center",
-    alignItems: "center",
-    marginRight: 12,
-  },
   coinImage: {
     width: 16,
     height: 16,
     alignSelf: "center",
   },
   title: {
-    flex: 1,
-    fontSize: 17,
+    fontSize: 20,
+    fontFamily: "Poppins-SemiBold",
+    color: "#FFF",
     textAlign: "center",
-    fontFamily: "Poppins-Medium",
-    color: BASE_COLORS.white,
-  },
-  closeButton: {
-    width: 32,
-    height: 32,
-    borderRadius: 20,
-    backgroundColor: "rgba(255, 255, 255, 0.2)",
-    justifyContent: "center",
-    alignItems: "center",
   },
   description: {
     fontSize: 13,

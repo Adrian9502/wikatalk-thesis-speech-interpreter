@@ -20,6 +20,7 @@ import RankingCategorySelector from "./RankingCategorySelector";
 import RankingItem from "./RankingItem";
 import { NAVIGATION_COLORS } from "@/constant/gameConstants";
 import { iconColors } from "@/constant/colors";
+import CloseButton from "../buttons/CloseButton";
 
 interface RankingsModalProps {
   visible: boolean;
@@ -179,26 +180,16 @@ const RankingsModal: React.FC<RankingsModalProps> = ({ visible, onClose }) => {
             end={{ x: 1, y: 1 }}
             style={styles.gradientBackground}
           >
+            <CloseButton size={17} onPress={onClose}></CloseButton>
             {/* Header with close button */}
-            <View style={styles.header}>
-              <View style={styles.headerContent}>
-                <Text style={styles.title}>Rankings</Text>
-                <TouchableOpacity
-                  style={styles.closeButton}
-                  onPress={onClose}
-                  hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
-                >
-                  <X width={18} height={18} color="#fff" />
-                </TouchableOpacity>
-              </View>
+            <View style={styles.headerContent}>
+              <Text style={styles.title}>Rankings</Text>
             </View>
-
             {/* Category Selector */}
             <RankingCategorySelector
               selectedCategory={selectedCategory}
               onCategorySelect={handleCategorySelect}
             />
-
             {/* Content Area */}
             {renderContent()}
           </LinearGradient>
@@ -225,28 +216,18 @@ const styles = StyleSheet.create({
   gradientBackground: {
     flex: 1,
     padding: 20,
-  },
-  header: {
-    paddingBottom: 16,
+    position: "relative",
   },
   headerContent: {
     flexDirection: "row",
     justifyContent: "center",
     alignItems: "center",
-    position: "relative",
   },
   title: {
     fontSize: 20,
     fontFamily: "Poppins-SemiBold",
     color: "#FFF",
     textAlign: "center",
-  },
-  closeButton: {
-    position: "absolute",
-    right: 0,
-    padding: 8,
-    backgroundColor: "rgba(0,0,0,0.2)",
-    borderRadius: 20,
   },
   contentContainer: {
     flex: 1,

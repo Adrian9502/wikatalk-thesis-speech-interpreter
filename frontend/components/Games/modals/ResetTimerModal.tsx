@@ -13,6 +13,7 @@ import * as Animatable from "react-native-animatable";
 import { BASE_COLORS } from "@/constant/colors";
 import { NAVIGATION_COLORS } from "@/constant/gameConstants";
 import { StyleSheet } from "react-native";
+import CloseButton from "../buttons/CloseButton";
 
 interface ResetTimerModalProps {
   visible: boolean;
@@ -82,15 +83,13 @@ const ResetTimerModal: React.FC<ResetTimerModalProps> = ({
             ) : (
               // Reset Confirmation View
               <>
+                <CloseButton
+                  size={17}
+                  onPress={onClose}
+                  isResetting={isResetting}
+                />
                 <View style={styles.modalHeader}>
                   <Text style={styles.modalTitle}>Reset Timer?</Text>
-                  <TouchableOpacity
-                    style={styles.closeButton}
-                    onPress={onClose}
-                    disabled={isResetting}
-                  >
-                    <X width={20} height={20} color={BASE_COLORS.white} />
-                  </TouchableOpacity>
                 </View>
 
                 <View style={styles.modalBody}>
@@ -193,6 +192,7 @@ const styles = StyleSheet.create({
   },
   modalContent: {
     padding: 24,
+    position: "relative",
   },
   modalHeader: {
     flexDirection: "row",
@@ -205,17 +205,6 @@ const styles = StyleSheet.create({
     fontSize: 20,
     fontFamily: "Poppins-SemiBold",
     color: BASE_COLORS.white,
-  },
-  closeButton: {
-    position: "absolute",
-    top: 0,
-    right: 0,
-    width: 32,
-    height: 32,
-    borderRadius: 16,
-    backgroundColor: "rgba(255, 255, 255, 0.1)",
-    justifyContent: "center",
-    alignItems: "center",
   },
   modalBody: {
     marginBottom: 24,

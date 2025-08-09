@@ -6,11 +6,11 @@ import {
   TouchableOpacity,
   ActivityIndicator,
 } from "react-native";
-import { X, Calendar } from "react-native-feather";
 import * as Animatable from "react-native-animatable";
 import { LinearGradient } from "expo-linear-gradient";
 import LottieView from "lottie-react-native";
 import styles from "@/styles/wordOfDayStyles";
+import CloseButton from "./buttons/CloseButton";
 
 interface WordOfDayModalProps {
   visible: boolean;
@@ -79,19 +79,10 @@ const WordOfDayModal: React.FC<WordOfDayModalProps> = ({
             style={styles.gradientBackground}
           >
             {/* Close Button */}
-            <TouchableOpacity
-              style={styles.closeButton}
-              onPress={onClose}
-              activeOpacity={0.7}
-            >
-              <X width={17} height={17} color="#FFF" />
-            </TouchableOpacity>
+            <CloseButton size={17} onPress={onClose}></CloseButton>
 
             {/* Header Section */}
             <View style={styles.headerSection}>
-              <View style={styles.calendarIconContainer}>
-                <Calendar width={24} height={24} color="#FFF" />
-              </View>
               <Text style={styles.headerTitle}>Word of the Day</Text>
             </View>
 

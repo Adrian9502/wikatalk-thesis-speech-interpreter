@@ -14,6 +14,7 @@ import { LANGUAGE_INFO } from "@/constant/languages";
 import useThemeStore from "@/store/useThemeStore";
 import SectionRenderer from "@/components/speech/languageInfoModal/SectionRenderer";
 import { createSections } from "@/utils/speech/languageInfoSection";
+import CloseButton from "../games/buttons/CloseButton";
 
 interface LanguageInfoModalProps {
   visible: boolean;
@@ -75,6 +76,7 @@ const LanguageInfoModal: React.FC<LanguageInfoModalProps> = ({
             },
           ]}
         >
+          <CloseButton size={17} onPress={onClose}></CloseButton>
           {/* Fixed Header */}
           <View
             style={[
@@ -85,20 +87,7 @@ const LanguageInfoModal: React.FC<LanguageInfoModalProps> = ({
             <Text style={[styles.titleText, { color: colors.background }]}>
               {languageName} Dialect
             </Text>
-            <TouchableOpacity
-              onPress={onClose}
-              style={styles.closeButton}
-              hitSlop={{ top: 15, right: 15, bottom: 15, left: 15 }}
-            >
-              <X
-                width={18}
-                height={18}
-                strokeWidth={2}
-                stroke={colors.background}
-              />
-            </TouchableOpacity>
           </View>
-
           {/* Content using FlatList with the extracted renderer */}
           <FlatList
             data={sections}
@@ -130,6 +119,7 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 8 },
     shadowOpacity: 0.3,
     shadowRadius: 12,
+    position: "relative",
     elevation: 24,
   },
   header: {
@@ -137,24 +127,11 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "center",
     alignItems: "center",
-    paddingHorizontal: 16,
-    position: "relative",
   },
   titleText: {
     fontSize: 18,
-    fontFamily: "Poppins-Medium",
+    fontFamily: "Poppins-SemiBold",
     textAlign: "center",
-  },
-  closeButton: {
-    position: "absolute",
-    right: 16,
-    width: 30,
-    height: 30,
-    borderRadius: 15,
-    backgroundColor: "rgba(255, 255, 255, 0.2)",
-    justifyContent: "center",
-    alignItems: "center",
-    zIndex: 5,
   },
   listContent: {
     paddingBottom: 20,

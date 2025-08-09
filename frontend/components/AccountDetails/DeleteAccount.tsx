@@ -10,6 +10,7 @@ import { AlertCircle, AlertTriangle, KeyRound, X } from "lucide-react-native";
 import useThemeStore from "@/store/useThemeStore";
 import { BASE_COLORS, TITLE_COLORS } from "@/constant/colors";
 import ConfirmationModal from "@/components/ConfirmationModal";
+import CloseButton from "../games/buttons/CloseButton";
 
 // Define validation schema
 const verificationCodeSchema = yup.object({
@@ -337,16 +338,9 @@ const DeleteAccount = () => {
       >
         <View style={styles.modalOverlay}>
           <View style={styles.modalContainer}>
-            <View style={[styles.headerContainer]}>
+            <View style={styles.headerContainer}>
               <Text style={styles.headerTitle}>Delete Account</Text>
-
-              {/* button to close modal */}
-              <TouchableOpacity
-                style={styles.closeButton}
-                onPress={handleAttemptClose}
-              >
-                <X width={17} height={17} color="white" />
-              </TouchableOpacity>
+              <CloseButton size={17} onPress={handleAttemptClose}></CloseButton>
             </View>
 
             <View style={{ padding: 16 }}>
@@ -411,17 +405,12 @@ const styles = StyleSheet.create({
     alignItems: "center",
     backgroundColor: TITLE_COLORS.customRed,
     justifyContent: "center",
-    position: "relative", // For absolute positioning of close button
+    position: "relative",
   },
   headerTitle: {
     fontSize: 18,
     fontFamily: "Poppins-Medium",
     color: "white",
-  },
-  closeButton: {
-    position: "absolute",
-    right: 12,
-    padding: 4,
   },
   description: {
     fontSize: 14,
