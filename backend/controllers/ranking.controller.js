@@ -27,13 +27,13 @@ const setCachedRanking = (key, data) => {
 
 const getRankings = async (req, res) => {
   try {
-    const { type, gameMode, limit = 50 } = req.query;
+    const { type, limit = 50 } = req.query;
     const userId = req.user._id;
 
-    console.log(`[Rankings] Fetching ${type} rankings${gameMode ? ` for ${gameMode}` : ''}`);
+    console.log(`[Rankings] Fetching ${type} rankings`);
 
     // Check cache first
-    const cacheKey = getRankingKey(type, gameMode);
+    const cacheKey = getRankingKey(type);
     const cached = getCachedRanking(cacheKey);
 
     if (cached) {
@@ -49,64 +49,24 @@ const getRankings = async (req, res) => {
 
     // Get rankings based on type
     switch (type) {
+      case 'quizChampions':
+        rankings = await getQuizChampions(limit);
+        userRank = await getUserQuizRank(userId);
+        break;
+
       case 'coinMasters':
         rankings = await getCoinMasters(limit);
         userRank = await getUserCoinRank(userId);
         break;
 
-      case 'quizChampions':
-        rankings = await getQuizChampions(limit, gameMode);
-        userRank = await getUserQuizRank(userId, gameMode);
-        break;
-
       case 'speedDemons':
-        rankings = await getSpeedDemons(limit, gameMode);
-        userRank = await getUserSpeedRank(userId, gameMode);
-        break;
-
-      case 'lightningFast':
-        rankings = await getLightningFast(limit, gameMode);
-        userRank = await getUserFastestRank(userId, gameMode);
+        rankings = await getSpeedDemons(limit);
+        userRank = await getUserSpeedRank(userId);
         break;
 
       case 'consistencyKings':
-        rankings = await getConsistencyKings(limit, gameMode);
-        userRank = await getUserConsistencyRank(userId, gameMode);
-        break;
-
-      case 'progressLeaders':
-        rankings = await getProgressLeaders(limit);
-        userRank = await getUserProgressRank(userId);
-        break;
-
-      case 'streakMasters':
-        rankings = await getStreakMasters(limit, gameMode);
-        userRank = await getUserStreakRank(userId, gameMode);
-        break;
-
-      case 'precisionPros':
-        rankings = await getPrecisionPros(limit, gameMode);
-        userRank = await getUserPrecisionRank(userId, gameMode);
-        break;
-
-      case 'weeklyWarriors':
-        rankings = await getWeeklyWarriors(limit);
-        userRank = await getUserWeeklyRank(userId);
-        break;
-
-      case 'perfectScorers':
-        rankings = await getPerfectScorers(limit, gameMode);
-        userRank = await getUserPerfectRank(userId, gameMode);
-        break;
-
-      case 'timeWarriors':
-        rankings = await getTimeWarriors(limit, gameMode);
-        userRank = await getUserTimeRank(userId, gameMode);
-        break;
-
-      case 'comebackKings':
-        rankings = await getComebackKings(limit);
-        userRank = await getUserComebackRank(userId);
+        rankings = await getConsistencyKings(limit);
+        userRank = await getUserConsistencyRank(userId);
         break;
 
       default:
@@ -140,39 +100,15 @@ const getRankings = async (req, res) => {
   }
 };
 
-// FIXED: Use User model instead of Coins model
-const getCoinMasters = async (limit) => {
-  return await User.aggregate([
-    { $match: { coins: { $exists: true, $gte: 0 } } },
-    {
-      $project: {
-        _id: 0,
-        userId: '$_id',
-        username: '$username',
-        avatar: '$profilePicture',
-        value: '$coins',
-        coins: '$coins',
-        lastActive: '$lastLoginDate'
-      }
-    },
-    { $sort: { value: -1 } },
-    { $limit: parseInt(limit) }
-  ]);
-};
-
-const getQuizChampions = async (limit, gameMode) => {
-  const matchStage = gameMode ?
-    { gameMode, completed: true } :
-    { completed: true };
-
+// Quiz Champions - Most quizzes completed
+const getQuizChampions = async (limit) => {
   return await UserProgress.aggregate([
-    { $match: matchStage },
+    { $match: { completed: true } },
     {
       $group: {
         _id: '$userId',
         totalCompleted: { $sum: 1 },
-        totalTimeSpent: { $sum: '$totalTimeSpent' },
-        avgScore: { $avg: '$correctAttempts' }
+        totalTimeSpent: { $sum: '$totalTimeSpent' }
       }
     },
     {
@@ -192,23 +128,38 @@ const getQuizChampions = async (limit, gameMode) => {
         avatar: '$user.profilePicture',
         value: '$totalCompleted',
         totalCompleted: '$totalCompleted',
-        totalTimeSpent: '$totalTimeSpent',
-        avgScore: { $round: ['$avgScore', 1] },
         lastActive: '$user.lastLoginDate'
       }
     },
-    { $sort: { value: -1, avgScore: -1 } },
+    { $sort: { value: -1 } },
     { $limit: parseInt(limit) }
   ]);
 };
 
-const getSpeedDemons = async (limit, gameMode) => {
-  const matchStage = gameMode ?
-    { gameMode, completed: true, totalTimeSpent: { $gt: 0 } } :
-    { completed: true, totalTimeSpent: { $gt: 0 } };
+// Coin Masters - Highest coin balances
+const getCoinMasters = async (limit) => {
+  return await User.aggregate([
+    { $match: { coins: { $exists: true, $gte: 0 } } },
+    {
+      $project: {
+        _id: 0,
+        userId: '$_id',
+        username: '$username',
+        avatar: '$profilePicture',
+        value: '$coins',
+        coins: '$coins',
+        lastActive: '$lastLoginDate'
+      }
+    },
+    { $sort: { value: -1 } },
+    { $limit: parseInt(limit) }
+  ]);
+};
 
+// Speed Demons - Best average completion times
+const getSpeedDemons = async (limit) => {
   return await UserProgress.aggregate([
-    { $match: matchStage },
+    { $match: { completed: true, totalTimeSpent: { $gt: 0 } } },
     {
       $group: {
         _id: '$userId',
@@ -217,7 +168,7 @@ const getSpeedDemons = async (limit, gameMode) => {
         bestTime: { $min: '$totalTimeSpent' }
       }
     },
-    { $match: { totalCompleted: { $gte: 5 } } },
+    { $match: { totalCompleted: { $gte: 5 } } }, // Only users with at least 5 completions
     {
       $lookup: {
         from: 'users',
@@ -240,26 +191,32 @@ const getSpeedDemons = async (limit, gameMode) => {
         lastActive: '$user.lastLoginDate'
       }
     },
-    { $sort: { value: 1 } },
+    { $sort: { value: 1 } }, // Ascending order (faster is better)
     { $limit: parseInt(limit) }
   ]);
 };
 
-const getLightningFast = async (limit, gameMode) => {
-  const matchStage = gameMode ?
-    { gameMode, completed: true, totalTimeSpent: { $gt: 0 } } :
-    { completed: true, totalTimeSpent: { $gt: 0 } };
-
+// Consistency Kings - Highest completion rates
+const getConsistencyKings = async (limit) => {
   return await UserProgress.aggregate([
-    { $match: matchStage },
     {
       $group: {
         _id: '$userId',
-        fastestTime: { $min: '$totalTimeSpent' },
-        totalCompleted: { $sum: 1 }
+        totalAttempts: { $sum: 1 },
+        correctAttempts: { $sum: { $cond: [{ $eq: ['$completed', true] }, 1, 0] } }
       }
     },
-    { $match: { totalCompleted: { $gte: 1 } } },
+    { $match: { totalAttempts: { $gte: 10 } } }, // Only users with at least 10 attempts
+    {
+      $addFields: {
+        completionRate: {
+          $round: [
+            { $multiply: [{ $divide: ['$correctAttempts', '$totalAttempts'] }, 100] },
+            1
+          ]
+        }
+      }
+    },
     {
       $lookup: {
         from: 'users',
@@ -275,43 +232,24 @@ const getLightningFast = async (limit, gameMode) => {
         userId: '$_id',
         username: '$user.username',
         avatar: '$user.profilePicture',
-        value: { $round: ['$fastestTime', 2] },
-        fastestTime: { $round: ['$fastestTime', 2] },
-        totalCompleted: '$totalCompleted',
+        value: '$completionRate',
+        completionRate: '$completionRate',
+        correctAttempts: '$correctAttempts',
+        totalAttempts: '$totalAttempts',
         lastActive: '$user.lastLoginDate'
       }
     },
-    { $sort: { value: 1 } },
+    { $sort: { value: -1, correctAttempts: -1 } },
     { $limit: parseInt(limit) }
   ]);
 };
 
-// FIXED: User rank functions using User model
-const getUserCoinRank = async (userId) => {
+// User ranking functions
+const getUserQuizRank = async (userId) => {
   if (!userId) return null;
-
-  const user = await User.findById(userId);
-  if (!user) return null;
-
-  const rank = await User.countDocuments({
-    coins: { $gt: user.coins }
-  });
-
-  return {
-    rank: rank + 1,
-    value: user.coins
-  };
-};
-
-const getUserQuizRank = async (userId, gameMode) => {
-  if (!userId) return null;
-
-  const matchStage = gameMode ?
-    { gameMode, completed: true } :
-    { completed: true };
 
   const userStats = await UserProgress.aggregate([
-    { $match: { ...matchStage, userId: new mongoose.Types.ObjectId(userId) } },
+    { $match: { userId: new mongoose.Types.ObjectId(userId), completed: true } },
     {
       $group: {
         _id: '$userId',
@@ -325,7 +263,7 @@ const getUserQuizRank = async (userId, gameMode) => {
   const userCompleted = userStats[0].totalCompleted;
 
   const rank = await UserProgress.aggregate([
-    { $match: matchStage },
+    { $match: { completed: true } },
     {
       $group: {
         _id: '$userId',
@@ -346,44 +284,119 @@ const getUserQuizRank = async (userId, gameMode) => {
   };
 };
 
-const getUserSpeedRank = async (userId, gameMode) => {
-  return { rank: 1, value: 0 };
+const getUserCoinRank = async (userId) => {
+  if (!userId) return null;
+
+  const user = await User.findById(userId);
+  if (!user) return null;
+
+  const rank = await User.countDocuments({
+    coins: { $gt: user.coins }
+  });
+
+  return {
+    rank: rank + 1,
+    value: user.coins
+  };
 };
 
-const getUserFastestRank = async (userId, gameMode) => {
-  return { rank: 1, value: 0 };
+const getUserSpeedRank = async (userId) => {
+  if (!userId) return null;
+
+  const userStats = await UserProgress.aggregate([
+    {
+      $match: {
+        userId: new mongoose.Types.ObjectId(userId),
+        completed: true,
+        totalTimeSpent: { $gt: 0 }
+      }
+    },
+    {
+      $group: {
+        _id: '$userId',
+        avgTime: { $avg: '$totalTimeSpent' },
+        totalCompleted: { $sum: 1 }
+      }
+    }
+  ]);
+
+  if (!userStats.length || userStats[0].totalCompleted < 5) return null;
+
+  const userAvgTime = userStats[0].avgTime;
+
+  const rank = await UserProgress.aggregate([
+    { $match: { completed: true, totalTimeSpent: { $gt: 0 } } },
+    {
+      $group: {
+        _id: '$userId',
+        avgTime: { $avg: '$totalTimeSpent' },
+        totalCompleted: { $sum: 1 }
+      }
+    },
+    { $match: { totalCompleted: { $gte: 5 } } },
+    {
+      $match: {
+        avgTime: { $lt: userAvgTime }
+      }
+    },
+    { $count: 'count' }
+  ]);
+
+  return {
+    rank: (rank[0]?.count || 0) + 1,
+    value: Math.round(userAvgTime * 100) / 100
+  };
 };
 
-const getUserConsistencyRank = async (userId, gameMode) => {
-  return { rank: 1, value: 0 };
-};
+const getUserConsistencyRank = async (userId) => {
+  if (!userId) return null;
 
-const getUserProgressRank = async (userId) => {
-  return { rank: 1, value: 0 };
-};
+  const userStats = await UserProgress.aggregate([
+    { $match: { userId: new mongoose.Types.ObjectId(userId) } },
+    {
+      $group: {
+        _id: '$userId',
+        totalAttempts: { $sum: 1 },
+        correctAttempts: { $sum: { $cond: [{ $eq: ['$completed', true] }, 1, 0] } }
+      }
+    }
+  ]);
 
-const getUserStreakRank = async (userId, gameMode) => {
-  return { rank: 1, value: 0 };
-};
+  if (!userStats.length || userStats[0].totalAttempts < 10) return null;
 
-const getUserPrecisionRank = async (userId, gameMode) => {
-  return { rank: 1, value: 0 };
-};
+  const userRate = Math.round((userStats[0].correctAttempts / userStats[0].totalAttempts) * 100 * 10) / 10;
 
-const getUserWeeklyRank = async (userId) => {
-  return { rank: 1, value: 0 };
-};
+  const rank = await UserProgress.aggregate([
+    {
+      $group: {
+        _id: '$userId',
+        totalAttempts: { $sum: 1 },
+        correctAttempts: { $sum: { $cond: [{ $eq: ['$completed', true] }, 1, 0] } }
+      }
+    },
+    { $match: { totalAttempts: { $gte: 10 } } },
+    {
+      $addFields: {
+        completionRate: {
+          $round: [
+            { $multiply: [{ $divide: ['$correctAttempts', '$totalAttempts'] }, 100] },
+            1
+          ]
+        }
+      }
+    },
+    {
+      $match: {
+        completionRate: { $gt: userRate }
+      }
+    },
+    { $count: 'count' }
+  ]);
 
-const getUserPerfectRank = async (userId, gameMode) => {
-  return { rank: 1, value: 0 };
-};
-
-const getUserTimeRank = async (userId, gameMode) => {
-  return { rank: 1, value: 0 };
-};
-
-const getUserComebackRank = async (userId) => {
-  return { rank: 1, value: 0 };
+  return {
+    rank: (rank[0]?.count || 0) + 1,
+    value: userRate
+  };
 };
 
 module.exports = {

@@ -1,31 +1,22 @@
+import React from "react";
+
 export interface RankingUser {
   userId: string;
   username: string;
   avatar?: string;
   value: number;
   lastActive?: string;
-  coins?: number;
+  // Quiz Champions
   totalCompleted?: number;
+  // Coin Masters
+  coins?: number;
+  // Speed Demons
   avgTime?: number;
   bestTime?: number;
-  fastestTime?: number;
+  // Consistency Kings
   completionRate?: number;
-  accuracy?: number;
-  perfectScores?: number;
-  totalProgress?: number;
-  gameModesCount?: number;
-  weeklyProgress?: number;
-  weeklyTimeSpent?: number;
-  comebacks?: number;
-  currentStreak?: number;
-  longestStreak?: number;
-  hoursSpent?: number;
   correctAttempts?: number;
   totalAttempts?: number;
-  firstTryCorrect?: number;
-  totalFirstTries?: number;
-  avgAttempts?: number;
-  perfectScorers?: number;
 }
 
 export interface UserRank {
@@ -44,21 +35,11 @@ export interface RankingCategory {
   id: string;
   title: string;
   description: string;
-  icon: string;
-  gameMode?: string;
-  color: readonly [string, string];
+  icon: React.ReactNode;
 }
 
 export type RankingType =
-  | "coinMasters"
   | "quizChampions"
+  | "coinMasters"
   | "speedDemons"
-  | "lightningFast"
-  | "consistencyKings"
-  | "progressLeaders"
-  | "streakMasters"
-  | "precisionPros"
-  | "weeklyWarriors"
-  | "perfectScorers"
-  | "timeWarriors"
-  | "comebackKings";
+  | "consistencyKings";

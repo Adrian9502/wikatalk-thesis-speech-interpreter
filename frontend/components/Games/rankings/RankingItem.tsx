@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { View, Text, StyleSheet, Image } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { RankingUser } from "@/types/rankingTypes";
@@ -18,13 +18,15 @@ const RankingItem: React.FC<RankingItemProps> = ({
   type,
   isCurrentUser = false,
 }) => {
+  const [imageLoadError, setImageLoadError] = useState(false);
+
   const getRankDisplay = (rank: number): React.ReactNode => {
     if (rank === 1)
-      return <Ionicons name="trophy" size={20} color={iconColors.gold} />; // gold
+      return <Ionicons name="trophy" size={20} color={iconColors.gold} />;
     if (rank === 2)
-      return <Ionicons name="trophy" size={20} color={iconColors.silver} />; // Silver
+      return <Ionicons name="trophy" size={20} color={iconColors.silver} />;
     if (rank === 3)
-      return <Ionicons name="trophy" size={20} color={iconColors.bronze} />; // Bronze
+      return <Ionicons name="trophy" size={20} color={iconColors.bronze} />;
     return (
       <Text style={[styles.rankText, getRankStyle(rank)]}>{`${rank}`}.</Text>
     );
@@ -56,32 +58,14 @@ const RankingItem: React.FC<RankingItemProps> = ({
 
   const getValueDisplay = (user: RankingUser, type: string): string => {
     switch (type) {
-      case "coinMasters":
-        return `${user.coins?.toLocaleString() || user.value} coins`;
       case "quizChampions":
         return `${user.totalCompleted || user.value} completed`;
+      case "coinMasters":
+        return `${user.coins?.toLocaleString() || user.value} coins`;
       case "speedDemons":
         return `${formatTime(user.avgTime || user.value)} avg`;
-      case "lightningFast":
-        return `${formatTime(user.fastestTime || user.value)}`;
       case "consistencyKings":
         return `${user.completionRate || user.value}% rate`;
-      case "progressLeaders":
-        return `${user.totalProgress || user.value} points`;
-      case "streakMasters":
-        return `${user.currentStreak || user.value} streak`;
-      case "precisionPros":
-        return `${user.accuracy || user.value}% accuracy`;
-      case "weeklyWarriors":
-        return `${user.weeklyProgress || user.value} this week`;
-      case "perfectScorers":
-        return `${user.perfectScorers || user.value} perfect`;
-      case "timeWarriors":
-        return `${
-          user.hoursSpent || Math.round(((user.value || 0) / 3600) * 10) / 10
-        }h spent`;
-      case "comebackKings":
-        return `${user.comebacks || user.value} comebacks`;
       default:
         return user.value?.toString() || "0";
     }
@@ -95,22 +79,6 @@ const RankingItem: React.FC<RankingItemProps> = ({
         return `${user.correctAttempts || 0}/${
           user.totalAttempts || 0
         } attempts`;
-      case "progressLeaders":
-        return `${user.gameModesCount || 1} game modes`;
-      case "streakMasters":
-        return user.longestStreak ? `Longest: ${user.longestStreak}` : null;
-      case "precisionPros":
-        return `${user.firstTryCorrect || 0}/${
-          user.totalFirstTries || 0
-        } first tries`;
-      case "weeklyWarriors":
-        return user.weeklyTimeSpent
-          ? `${Math.round(user.weeklyTimeSpent / 60)}m spent`
-          : null;
-      case "timeWarriors":
-        return `${user.totalCompleted || 0} completed`;
-      case "comebackKings":
-        return `Avg ${user.avgAttempts || 1} attempts`;
       default:
         return null;
     }
@@ -129,8 +97,12 @@ const RankingItem: React.FC<RankingItemProps> = ({
 
       {/* Avatar */}
       <View style={styles.avatarContainer}>
-        {user.avatar ? (
-          <Image source={{ uri: user.avatar }} style={styles.avatar} />
+        {user.avatar && !imageLoadError ? (
+          <Image
+            source={{ uri: user.avatar }}
+            style={styles.avatar}
+            onError={() => setImageLoadError(true)}
+          />
         ) : (
           <View style={styles.defaultAvatar}>
             <Text style={styles.avatarText}>
@@ -180,7 +152,7 @@ const styles = StyleSheet.create({
     borderColor: iconColors.gold,
   },
   rankContainer: {
-    width: 40,
+    minWidth: 40,
     alignItems: "center",
     justifyContent: "center",
   },
@@ -222,12 +194,11 @@ const styles = StyleSheet.create({
   username: {
     fontSize: 13,
     fontFamily: "Poppins-SemiBold",
-    color: BASE_COLORS.customWhite,
+    color: BASE_COLORS.white,
     marginBottom: 3,
   },
   valueText: {
     fontSize: 12,
-
     fontFamily: "Poppins-Medium",
     color: "rgba(255, 255, 255, 0.85)",
     marginBottom: 2,

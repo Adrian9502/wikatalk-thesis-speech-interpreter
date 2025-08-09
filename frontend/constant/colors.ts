@@ -92,6 +92,9 @@ export const difficultyColors = {
   Medium: ["#FF8E2B", "#B52A00"] as const,
   Hard: ["#FF2919", "#B80D5F"] as const,
 };
+export const rankingButtonColors = {
+  yellow: ["#e4ac05ff", "#b36b00ff"] as const,
+};
 
 // Game mode navigation
 export const gameModeNavigationColors = {

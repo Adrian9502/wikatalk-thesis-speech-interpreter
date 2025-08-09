@@ -1,7 +1,18 @@
 import React from "react";
-import { ScrollView, TouchableOpacity, Text, StyleSheet } from "react-native";
+import {
+  ScrollView,
+  TouchableOpacity,
+  Text,
+  StyleSheet,
+  View,
+} from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { RANKING_CATEGORIES } from "@/constant/rankingConstants";
+import {
+  GAME_RESULT_COLORS,
+  NAVIGATION_COLORS,
+} from "@/constant/gameConstants";
+import { rankingButtonColors } from "@/constant/colors";
 
 interface RankingCategorySelectorProps {
   selectedCategory: string;
@@ -32,12 +43,12 @@ const RankingCategorySelector: React.FC<RankingCategorySelectorProps> = ({
             <LinearGradient
               colors={
                 isSelected
-                  ? ["#FFD700", "#FF8C00"]
+                  ? rankingButtonColors.yellow
                   : ["rgba(255,255,255,0.08)", "rgba(255,255,255,0.02)"]
               }
-              style={[styles.categoryButton]}
+              style={[styles.categoryButton, isSelected && { borderWidth: 0 }]}
             >
-              <Text style={styles.categoryIcon}>{category.icon}</Text>
+              <View style={styles.categoryIcon}>{category.icon}</View>
               <Text
                 style={[
                   styles.categoryTitle,
@@ -78,8 +89,9 @@ const styles = StyleSheet.create({
     borderColor: "rgba(255, 255, 255, 0.15)",
   },
   categoryIcon: {
-    fontSize: 18,
     marginBottom: 4,
+    alignItems: "center",
+    justifyContent: "center",
   },
   categoryTitle: {
     fontSize: 11,

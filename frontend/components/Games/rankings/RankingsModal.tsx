@@ -19,6 +19,7 @@ import { getRankingCategory } from "@/constant/rankingConstants";
 import RankingCategorySelector from "./RankingCategorySelector";
 import RankingItem from "./RankingItem";
 import { NAVIGATION_COLORS } from "@/constant/gameConstants";
+import { iconColors } from "@/constant/colors";
 
 interface RankingsModalProps {
   visible: boolean;
@@ -27,7 +28,7 @@ interface RankingsModalProps {
 
 const RankingsModal: React.FC<RankingsModalProps> = ({ visible, onClose }) => {
   const [selectedCategory, setSelectedCategory] =
-    useState<string>("coinMasters");
+    useState<string>("quizChampions");
 
   // Parse selected category to get type and game mode
   const { rankingType, gameMode } = useMemo(() => {
@@ -60,7 +61,7 @@ const RankingsModal: React.FC<RankingsModalProps> = ({ visible, onClose }) => {
     if (isLoading) {
       return (
         <View style={styles.centerContainer}>
-          <ActivityIndicator size="large" color="#FFD700" />
+          <ActivityIndicator size="small" color="#FFD700" />
           <Text style={styles.loadingText}>Loading rankings...</Text>
         </View>
       );
@@ -99,9 +100,14 @@ const RankingsModal: React.FC<RankingsModalProps> = ({ visible, onClose }) => {
             duration={300}
             style={styles.categoryInfoHeader}
           >
-            <Text style={styles.categoryTitle}>
-              {selectedCategoryData.title}
-            </Text>
+            <View style={styles.categoryTitleRow}>
+              <View style={styles.categoryIconContainer}>
+                {selectedCategoryData.icon}
+              </View>
+              <Text style={styles.categoryTitle}>
+                {selectedCategoryData.title}
+              </Text>
+            </View>
             <Text style={styles.categoryDescription}>
               {selectedCategoryData.description}
             </Text>
@@ -167,7 +173,6 @@ const RankingsModal: React.FC<RankingsModalProps> = ({ visible, onClose }) => {
           duration={300}
           style={styles.modalContainer}
         >
-          {/* Fixed background gradient */}
           <LinearGradient
             colors={NAVIGATION_COLORS.indigo}
             start={{ x: 0, y: 0 }}
@@ -213,7 +218,7 @@ const styles = StyleSheet.create({
   },
   modalContainer: {
     width: "95%",
-    height: "80%",
+    height: "60%",
     borderRadius: 20,
     overflow: "hidden",
   },
@@ -251,25 +256,32 @@ const styles = StyleSheet.create({
   },
   categoryInfoHeader: {
     backgroundColor: "rgba(255, 255, 255, 0.1)",
-    borderColor: "rgba(255, 255, 255, 0.1)",
+    borderColor: "rgba(255, 255, 255, 0.3)",
     borderWidth: 1,
     borderRadius: 20,
-    padding: 8,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
     margin: 16,
+  },
+  categoryTitleRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    marginBottom: 6,
+  },
+  categoryIconContainer: {
+    marginRight: 8,
   },
   categoryTitle: {
     fontSize: 14,
     fontFamily: "Poppins-SemiBold",
-    color: "#FFD700",
-    marginBottom: 4,
-    textAlign: "center",
+    color: iconColors.brightYellow,
   },
   categoryDescription: {
     fontSize: 11,
-    fontFamily: "Poppins-Regular",
+    fontFamily: "Poppins-Medium",
     color: "rgba(255, 255, 255, 0.8)",
     textAlign: "center",
-    lineHeight: 18,
   },
   centerContainer: {
     flex: 1,
@@ -284,8 +296,8 @@ const styles = StyleSheet.create({
     marginTop: 12,
   },
   errorText: {
-    fontSize: 14,
-    fontFamily: "Poppins-SemiBold",
+    fontSize: 12,
+    fontFamily: "Poppins-Medium",
     color: "#fff",
     textAlign: "center",
     marginBottom: 6,
