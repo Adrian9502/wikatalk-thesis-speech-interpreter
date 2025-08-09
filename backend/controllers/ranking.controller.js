@@ -35,7 +35,7 @@ const getRankings = async (req, res) => {
     // Check cache first
     const cacheKey = getRankingKey(type, gameMode);
     const cached = getCachedRanking(cacheKey);
-    
+
     if (cached) {
       console.log(`[Rankings] Returning cached ${type} rankings`);
       return res.json({
@@ -149,7 +149,7 @@ const getCoinMasters = async (limit) => {
         _id: 0,
         userId: '$_id',
         username: '$username',
-        avatar: '$avatar',
+        avatar: '$profilePicture',
         value: '$coins',
         coins: '$coins',
         lastActive: '$lastLoginDate'
@@ -160,7 +160,6 @@ const getCoinMasters = async (limit) => {
   ]);
 };
 
-// Continue with the other ranking functions...
 const getQuizChampions = async (limit, gameMode) => {
   const matchStage = gameMode ?
     { gameMode, completed: true } :
@@ -190,7 +189,7 @@ const getQuizChampions = async (limit, gameMode) => {
         _id: 0,
         userId: '$_id',
         username: '$user.username',
-        avatar: '$user.avatar',
+        avatar: '$user.profilePicture',
         value: '$totalCompleted',
         totalCompleted: '$totalCompleted',
         totalTimeSpent: '$totalTimeSpent',
@@ -202,9 +201,6 @@ const getQuizChampions = async (limit, gameMode) => {
     { $limit: parseInt(limit) }
   ]);
 };
-
-// Add all other ranking functions here (speedDemons, lightningFast, etc.)
-// I'll provide a few key ones:
 
 const getSpeedDemons = async (limit, gameMode) => {
   const matchStage = gameMode ?
@@ -236,10 +232,51 @@ const getSpeedDemons = async (limit, gameMode) => {
         _id: 0,
         userId: '$_id',
         username: '$user.username',
-        avatar: '$user.avatar',
+        avatar: '$user.profilePicture',
         value: { $round: ['$avgTime', 2] },
         avgTime: { $round: ['$avgTime', 2] },
         bestTime: { $round: ['$bestTime', 2] },
+        totalCompleted: '$totalCompleted',
+        lastActive: '$user.lastLoginDate'
+      }
+    },
+    { $sort: { value: 1 } },
+    { $limit: parseInt(limit) }
+  ]);
+};
+
+const getLightningFast = async (limit, gameMode) => {
+  const matchStage = gameMode ?
+    { gameMode, completed: true, totalTimeSpent: { $gt: 0 } } :
+    { completed: true, totalTimeSpent: { $gt: 0 } };
+
+  return await UserProgress.aggregate([
+    { $match: matchStage },
+    {
+      $group: {
+        _id: '$userId',
+        fastestTime: { $min: '$totalTimeSpent' },
+        totalCompleted: { $sum: 1 }
+      }
+    },
+    { $match: { totalCompleted: { $gte: 1 } } },
+    {
+      $lookup: {
+        from: 'users',
+        localField: '_id',
+        foreignField: '_id',
+        as: 'user'
+      }
+    },
+    { $unwind: '$user' },
+    {
+      $project: {
+        _id: 0,
+        userId: '$_id',
+        username: '$user.username',
+        avatar: '$user.profilePicture',
+        value: { $round: ['$fastestTime', 2] },
+        fastestTime: { $round: ['$fastestTime', 2] },
         totalCompleted: '$totalCompleted',
         lastActive: '$user.lastLoginDate'
       }
@@ -309,55 +346,6 @@ const getUserQuizRank = async (userId, gameMode) => {
   };
 };
 
-// Add more ranking functions as needed...
-// For brevity, I'll add placeholders for the remaining functions
-
-const getLightningFast = async (limit, gameMode) => {
-  // Implementation similar to getSpeedDemons but for single fastest times
-  return [];
-};
-
-const getConsistencyKings = async (limit, gameMode) => {
-  // Implementation for consistency rankings
-  return [];
-};
-
-const getProgressLeaders = async (limit) => {
-  // Implementation for progress rankings
-  return [];
-};
-
-const getStreakMasters = async (limit, gameMode) => {
-  // Implementation for streak rankings
-  return [];
-};
-
-const getPrecisionPros = async (limit, gameMode) => {
-  // Implementation for precision rankings
-  return [];
-};
-
-const getWeeklyWarriors = async (limit) => {
-  // Implementation for weekly rankings
-  return [];
-};
-
-const getPerfectScorers = async (limit, gameMode) => {
-  // Implementation for perfect score rankings
-  return [];
-};
-
-const getTimeWarriors = async (limit, gameMode) => {
-  // Implementation for time spent rankings
-  return [];
-};
-
-const getComebackKings = async (limit) => {
-  // Implementation for comeback rankings
-  return [];
-};
-
-// Add corresponding user rank functions
 const getUserSpeedRank = async (userId, gameMode) => {
   return { rank: 1, value: 0 };
 };

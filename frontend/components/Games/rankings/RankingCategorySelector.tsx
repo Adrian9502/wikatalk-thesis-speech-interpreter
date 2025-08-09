@@ -17,6 +17,7 @@ const RankingCategorySelector: React.FC<RankingCategorySelectorProps> = ({
       horizontal
       showsHorizontalScrollIndicator={false}
       contentContainerStyle={styles.container}
+      style={styles.scrollView}
     >
       {RANKING_CATEGORIES.map((category) => {
         const isSelected = selectedCategory === category.id;
@@ -31,13 +32,10 @@ const RankingCategorySelector: React.FC<RankingCategorySelectorProps> = ({
             <LinearGradient
               colors={
                 isSelected
-                  ? category.color
-                  : ["rgba(255,255,255,0.1)", "rgba(255,255,255,0.05)"]
+                  ? ["#FFD700", "#FF8C00"]
+                  : ["rgba(255,255,255,0.08)", "rgba(255,255,255,0.02)"]
               }
-              style={[
-                styles.categoryButton,
-                isSelected && styles.selectedCategoryButton,
-              ]}
+              style={[styles.categoryButton]}
             >
               <Text style={styles.categoryIcon}>{category.icon}</Text>
               <Text
@@ -58,41 +56,37 @@ const RankingCategorySelector: React.FC<RankingCategorySelectorProps> = ({
 };
 
 const styles = StyleSheet.create({
+  scrollView: {
+    maxHeight: 76,
+  },
   container: {
-    paddingHorizontal: 16,
-    paddingVertical: 8,
+    padding: 8,
+    alignItems: "center",
   },
   categoryWrapper: {
-    marginRight: 12,
+    marginRight: 8,
   },
   categoryButton: {
-    paddingHorizontal: 16,
+    paddingHorizontal: 14,
     paddingVertical: 12,
-    borderRadius: 20,
+    borderRadius: 16,
     alignItems: "center",
     justifyContent: "center",
-    minWidth: 100,
-    maxWidth: 120,
+    minWidth: 90,
+    height: 60,
     borderWidth: 1,
-    borderColor: "rgba(255, 255, 255, 0.2)",
-  },
-  selectedCategoryButton: {
-    borderColor: "rgba(255, 255, 255, 0.4)",
-    elevation: 4,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.25,
-    shadowRadius: 4,
+    borderColor: "rgba(255, 255, 255, 0.15)",
   },
   categoryIcon: {
-    fontSize: 20,
+    fontSize: 18,
     marginBottom: 4,
   },
   categoryTitle: {
     fontSize: 11,
     fontFamily: "Poppins-Medium",
-    color: "rgba(255, 255, 255, 0.8)",
+    color: "rgba(255, 255, 255, 0.7)",
     textAlign: "center",
+    lineHeight: 12,
   },
   selectedCategoryTitle: {
     color: "#fff",

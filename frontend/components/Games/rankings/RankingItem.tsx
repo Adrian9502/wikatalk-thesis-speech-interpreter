@@ -1,7 +1,9 @@
 import React from "react";
 import { View, Text, StyleSheet, Image } from "react-native";
+import { Ionicons } from "@expo/vector-icons";
 import { RankingUser } from "@/types/rankingTypes";
 import { formatTime } from "@/utils/gameUtils";
+import { iconColors, BASE_COLORS } from "@/constant/colors";
 
 interface RankingItemProps {
   user: RankingUser;
@@ -16,53 +18,70 @@ const RankingItem: React.FC<RankingItemProps> = ({
   type,
   isCurrentUser = false,
 }) => {
-  const getRankDisplay = (rank: number): string => {
-    if (rank === 1) return "🥇";
-    if (rank === 2) return "🥈";
-    if (rank === 3) return "🥉";
-    return `#${rank}`;
+  const getRankDisplay = (rank: number): React.ReactNode => {
+    if (rank === 1)
+      return <Ionicons name="trophy" size={20} color={iconColors.gold} />; // gold
+    if (rank === 2)
+      return <Ionicons name="trophy" size={20} color={iconColors.silver} />; // Silver
+    if (rank === 3)
+      return <Ionicons name="trophy" size={20} color={iconColors.bronze} />; // Bronze
+    return (
+      <Text style={[styles.rankText, getRankStyle(rank)]}>{`${rank}`}.</Text>
+    );
+  };
+
+  const getRankStyle = (rank: number) => {
+    switch (rank) {
+      case 1:
+        return { color: iconColors.gold, fontSize: 24 as const };
+      case 2:
+        return { color: iconColors.silver, fontSize: 24 as const };
+      case 3:
+        return { color: iconColors.bronze, fontSize: 24 as const };
+      default:
+        return { color: BASE_COLORS.white, fontSize: 14 as const };
+    }
+  };
+
+  const getContainerStyle = (rank: number) => {
+    if (rank <= 3) {
+      return {
+        backgroundColor: "rgba(255, 215, 0, 0.12)",
+        borderColor: "rgba(255, 215, 0, 0.25)",
+        borderWidth: 1,
+      };
+    }
+    return {};
   };
 
   const getValueDisplay = (user: RankingUser, type: string): string => {
     switch (type) {
       case "coinMasters":
         return `${user.coins?.toLocaleString() || user.value} coins`;
-
       case "quizChampions":
         return `${user.totalCompleted || user.value} completed`;
-
       case "speedDemons":
         return `${formatTime(user.avgTime || user.value)} avg`;
-
       case "lightningFast":
         return `${formatTime(user.fastestTime || user.value)}`;
-
       case "consistencyKings":
         return `${user.completionRate || user.value}% rate`;
-
       case "progressLeaders":
         return `${user.totalProgress || user.value} points`;
-
       case "streakMasters":
         return `${user.currentStreak || user.value} streak`;
-
       case "precisionPros":
         return `${user.accuracy || user.value}% accuracy`;
-
       case "weeklyWarriors":
         return `${user.weeklyProgress || user.value} this week`;
-
       case "perfectScorers":
         return `${user.perfectScorers || user.value} perfect`;
-
       case "timeWarriors":
         return `${
           user.hoursSpent || Math.round(((user.value || 0) / 3600) * 10) / 10
         }h spent`;
-
       case "comebackKings":
         return `${user.comebacks || user.value} comebacks`;
-
       default:
         return user.value?.toString() || "0";
     }
@@ -72,65 +91,41 @@ const RankingItem: React.FC<RankingItemProps> = ({
     switch (type) {
       case "speedDemons":
         return user.bestTime ? `Best: ${formatTime(user.bestTime)}` : null;
-
       case "consistencyKings":
         return `${user.correctAttempts || 0}/${
           user.totalAttempts || 0
         } attempts`;
-
       case "progressLeaders":
         return `${user.gameModesCount || 1} game modes`;
-
       case "streakMasters":
         return user.longestStreak ? `Longest: ${user.longestStreak}` : null;
-
       case "precisionPros":
         return `${user.firstTryCorrect || 0}/${
           user.totalFirstTries || 0
         } first tries`;
-
       case "weeklyWarriors":
         return user.weeklyTimeSpent
           ? `${Math.round(user.weeklyTimeSpent / 60)}m spent`
           : null;
-
       case "timeWarriors":
         return `${user.totalCompleted || 0} completed`;
-
       case "comebackKings":
         return `Avg ${user.avgAttempts || 1} attempts`;
-
       default:
         return null;
     }
   };
 
-  // Helper function to get dynamic styles for badges
-  const getBadgeStyle = (rank: number) => {
-    switch (rank) {
-      case 1:
-        return styles.badge1;
-      case 2:
-        return styles.badge2;
-      case 3:
-        return styles.badge3;
-      default:
-        return {};
-    }
-  };
-
   return (
     <View
-      style={[styles.container, isCurrentUser && styles.currentUserContainer]}
+      style={[
+        styles.container,
+        getContainerStyle(rank),
+        isCurrentUser && styles.currentUserContainer,
+      ]}
     >
-      {/* Rank */}
-      <View style={styles.rankContainer}>
-        <Text
-          style={[styles.rankText, isCurrentUser && styles.currentUserText]}
-        >
-          {getRankDisplay(rank)}
-        </Text>
-      </View>
+      {/* Rank - Trophy or Number */}
+      <View style={styles.rankContainer}>{getRankDisplay(rank)}</View>
 
       {/* Avatar */}
       <View style={styles.avatarContainer}>
@@ -165,13 +160,6 @@ const RankingItem: React.FC<RankingItemProps> = ({
           <Text style={styles.subText}>{getSubDisplay(user, type)}</Text>
         )}
       </View>
-
-      {/* Badge for top 3 */}
-      {rank <= 3 && (
-        <View style={[styles.badge, getBadgeStyle(rank)]}>
-          <Text style={styles.badgeText}>TOP {rank}</Text>
-        </View>
-      )}
     </View>
   );
 };
@@ -180,29 +168,28 @@ const styles = StyleSheet.create({
   container: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "rgba(255, 255, 255, 0.05)",
-    borderRadius: 12,
-    padding: 12,
+    backgroundColor: "rgba(255, 255, 255, 0.06)",
+    borderRadius: 20,
+    padding: 10,
     marginBottom: 8,
     borderWidth: 1,
     borderColor: "rgba(255, 255, 255, 0.1)",
   },
   currentUserContainer: {
-    backgroundColor: "rgba(255, 215, 0, 0.1)",
-    borderColor: "rgba(255, 215, 0, 0.3)",
-    borderWidth: 2,
+    backgroundColor: "rgba(0, 0, 0, 0.4)",
+    borderColor: iconColors.gold,
   },
   rankContainer: {
     width: 40,
     alignItems: "center",
+    justifyContent: "center",
   },
   rankText: {
-    fontSize: 16,
-    fontFamily: "Poppins-Bold",
-    color: "#fff",
+    fontFamily: "Poppins-Medium",
+    textAlign: "center",
   },
   currentUserText: {
-    color: "#FFD700",
+    color: iconColors.gold,
   },
   avatarContainer: {
     marginHorizontal: 12,
@@ -212,71 +199,48 @@ const styles = StyleSheet.create({
     height: 40,
     borderRadius: 20,
     borderWidth: 2,
-    borderColor: "rgba(255, 255, 255, 0.2)",
+    borderColor: "rgba(255, 255, 255, 0.25)",
   },
   defaultAvatar: {
     width: 40,
     height: 40,
     borderRadius: 20,
-    backgroundColor: "rgba(255, 255, 255, 0.2)",
+    backgroundColor: "rgba(255, 255, 255, 0.15)",
     justifyContent: "center",
     alignItems: "center",
-    borderWidth: 2,
-    borderColor: "rgba(255, 255, 255, 0.3)",
+    borderWidth: 1,
+    borderColor: "rgba(255, 255, 255, 0.25)",
   },
   avatarText: {
-    fontSize: 18,
+    fontSize: 16,
     fontFamily: "Poppins-Bold",
-    color: "#fff",
+    color: BASE_COLORS.customWhite,
   },
   userInfo: {
     flex: 1,
   },
   username: {
-    fontSize: 16,
+    fontSize: 13,
     fontFamily: "Poppins-SemiBold",
-    color: "#fff",
-    marginBottom: 2,
+    color: BASE_COLORS.customWhite,
+    marginBottom: 3,
   },
   valueText: {
-    fontSize: 14,
+    fontSize: 12,
+
     fontFamily: "Poppins-Medium",
-    color: "rgba(255, 255, 255, 0.8)",
+    color: "rgba(255, 255, 255, 0.85)",
     marginBottom: 2,
   },
   currentUserValue: {
-    color: "#FFD700",
+    color: iconColors.gold,
+    fontFamily: "Poppins-SemiBold",
+    fontSize: 13,
   },
   subText: {
-    fontSize: 12,
-    fontFamily: "Poppins-Regular",
+    fontSize: 11,
+    fontFamily: "Poppins-Medium",
     color: "rgba(255, 255, 255, 0.6)",
-  },
-  badge: {
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 12,
-    marginLeft: 8,
-  },
-  badge1: {
-    backgroundColor: "rgba(255, 215, 0, 0.2)",
-    borderWidth: 1,
-    borderColor: "rgba(255, 215, 0, 0.4)",
-  },
-  badge2: {
-    backgroundColor: "rgba(192, 192, 192, 0.2)",
-    borderWidth: 1,
-    borderColor: "rgba(192, 192, 192, 0.4)",
-  },
-  badge3: {
-    backgroundColor: "rgba(205, 127, 50, 0.2)",
-    borderWidth: 1,
-    borderColor: "rgba(205, 127, 50, 0.4)",
-  },
-  badgeText: {
-    fontSize: 10,
-    fontFamily: "Poppins-Bold",
-    color: "#fff",
   },
 });
 
