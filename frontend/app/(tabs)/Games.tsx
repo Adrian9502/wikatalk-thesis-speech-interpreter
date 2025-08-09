@@ -282,7 +282,6 @@ const Games = () => {
       <BackgroundEffects />
 
       <SafeAreaView style={[dynamicStyles.container, styles.container]}>
-        {/* Dashboard header with welcome message and coins */}
         <DashboardHeader onCoinsPress={openRewardsModal} />
 
         <ScrollView
@@ -326,7 +325,6 @@ const Games = () => {
           onClose={hideDailyRewardsModal}
         />
 
-        {/* NEW: Rankings modal */}
         <RankingsModal
           visible={showRankingsModal}
           onClose={handleCloseRankings}

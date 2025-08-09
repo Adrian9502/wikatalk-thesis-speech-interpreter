@@ -1,13 +1,13 @@
 import React, { useCallback } from "react";
-import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
+import { View, Text, StyleSheet } from "react-native";
 import * as Animatable from "react-native-animatable";
 import { Target, Zap } from "react-native-feather";
-import { Ionicons } from "@expo/vector-icons";
 import { SectionHeader } from "@/components/games/common/AnimatedSection";
 import GameCard from "./GameCard";
 import gameOptions from "@/utils/games/gameOptions";
 import { GameOption } from "@/types/gameTypes";
 import { BASE_COLORS, iconColors } from "@/constant/colors";
+import RankingButton from "../rankings/RankingButton";
 
 interface GamesListProps {
   onGamePress: (gameId: string, gameTitle: string) => void;
@@ -63,18 +63,7 @@ const GamesList = React.memo(
 
           {/* Rankings Button */}
           {onRankingsPress && (
-            <TouchableOpacity
-              style={styles.rankingsButton}
-              onPress={onRankingsPress}
-              activeOpacity={0.8}
-            >
-              <Ionicons
-                name="trophy"
-                size={24}
-                color={iconColors.brightYellow}
-              />
-              <Text style={styles.rankingsButtonText}>Rankings</Text>
-            </TouchableOpacity>
+            <RankingButton onRankingsPress={onRankingsPress} />
           )}
         </View>
 
@@ -112,22 +101,6 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontFamily: "Poppins-SemiBold",
     color: BASE_COLORS.white,
-  },
-  rankingsButton: {
-    flexDirection: "row",
-    alignItems: "center",
-    backgroundColor: "rgba(255, 215, 0, 0.1)",
-    borderWidth: 1,
-    borderColor: "rgba(255, 215, 0, 0.3)",
-    borderRadius: 20,
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    gap: 6,
-  },
-  rankingsButtonText: {
-    fontSize: 12,
-    fontFamily: "Poppins-Medium",
-    color: "#FFD700",
   },
 });
 
