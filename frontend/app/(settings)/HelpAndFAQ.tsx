@@ -21,6 +21,7 @@ import { FAQItem } from "@/types/faqItems";
 import categories from "@/utils/helpAndFAQ/categories";
 import ContactSupportModal from "@/components/helpAndFAQ/ContactSupportModal";
 import { Header } from "@/components/Header";
+import { useHardwareBack } from "@/hooks/useHardwareBack";
 
 const HelpFAQ = () => {
   // Get the dynamic styles based on the current theme
@@ -58,6 +59,13 @@ const HelpFAQ = () => {
     }
   };
 
+  // Hardware back button handling - ADD this while keeping Header functionality
+  useHardwareBack({
+    enabled: true,
+    fallbackRoute: "/(tabs)/Settings",
+    useExistingHeaderLogic: true, // Use same logic as Header component
+  });
+
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
       <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
@@ -71,6 +79,7 @@ const HelpFAQ = () => {
             backgroundColor={activeTheme.backgroundColor}
             barStyle="light-content"
           />
+          {/* Header - KEEP existing functionality */}
           <View style={styles.headerContainer}>
             <Header title="Help & FAQ" />
           </View>

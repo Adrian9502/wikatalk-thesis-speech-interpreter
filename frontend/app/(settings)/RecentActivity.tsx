@@ -1,14 +1,9 @@
-import React, { useState, useEffect, useCallback } from "react";
-import { StatusBar } from "expo-status-bar";
-import {
-  View,
-  StyleSheet,
-  ScrollView,
-  RefreshControl,
-  Text,
-  TouchableOpacity,
-} from "react-native";
+import React, { useState, useCallback, useEffect } from "react";
+import { View, ScrollView, RefreshControl, StyleSheet } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { StatusBar } from "expo-status-bar";
+import { Platform } from "react-native";
+import { TouchableOpacity, Text } from "react-native";
 import useThemeStore from "@/store/useThemeStore";
 import { getGlobalStyles } from "@/styles/globalStyles";
 import ConfirmationModal from "@/components/ConfirmationModal";
@@ -21,6 +16,8 @@ import { BASE_COLORS } from "@/constant/colors";
 import createAuthenticatedApi from "@/lib/api";
 import { showToast } from "@/lib/showToast";
 import { Header } from "@/components/Header";
+import { useHardwareBack } from "@/hooks/useHardwareBack";
+
 interface TranslationAPIItem {
   _id: string;
   type: TabType;
@@ -31,10 +28,9 @@ interface TranslationAPIItem {
   translatedText: string;
 }
 
-const RecentActivity: React.FC = () => {
+export const RecentActivity: React.FC = () => {
   // Theme store
   const { activeTheme } = useThemeStore();
-  const dynamicStyles = getGlobalStyles(activeTheme.backgroundColor);
 
   // State to track active tab
   const [activeTab, setActiveTab] = useState<TabType>("Speech");
@@ -160,11 +156,27 @@ const RecentActivity: React.FC = () => {
     setItemToDelete(null);
   };
 
+  // Hardware back button handling
+  useHardwareBack({
+    enabled: true,
+    fallbackRoute: "/(tabs)/Settings",
+    useExistingHeaderLogic: true, // Use same logic as Header component
+  });
+
+  // Update the header to remove custom back handling since hardware back now handles it
   return (
-    <View style={dynamicStyles.container}>
-      <StatusBar style="light" />
+    <View
+      style={[
+        styles.safeAreaView,
+        { backgroundColor: activeTheme.backgroundColor },
+      ]}
+    >
       <SafeAreaView style={styles.safeAreaView}>
+        <StatusBar style="light" />
+
+        {/* Header - KEEP existing functionality, don't remove onBackPress */}
         <Header title="Recent Activity" />
+
         {/* Tabs */}
         <TabSelector activeTab={activeTab} onTabChange={setActiveTab} />
 

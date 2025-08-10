@@ -7,9 +7,18 @@ import { Header } from "@/components/Header";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { StatusBar } from "react-native";
 import teamMembers from "@/utils/about/teamMembers";
+import { useHardwareBack } from "@/hooks/useHardwareBack";
+
 const About: React.FC = () => {
   const { activeTheme } = useThemeStore();
   const dynamicStyles = getGlobalStyles(activeTheme.backgroundColor);
+
+  // Hardware back button handling - ADD this while keeping Header functionality
+  useHardwareBack({
+    enabled: true,
+    fallbackRoute: "/(tabs)/Settings",
+    useExistingHeaderLogic: true, // Use same logic as Header component
+  });
 
   return (
     <SafeAreaView style={{ flex: 1 }}>

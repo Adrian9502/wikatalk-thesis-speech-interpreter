@@ -1,5 +1,12 @@
-import { StyleSheet, Text, View, TouchableOpacity, Modal } from "react-native";
-import React from "react";
+import {
+  StyleSheet,
+  Text,
+  View,
+  TouchableOpacity,
+  Modal,
+  BackHandler,
+} from "react-native";
+import React, { useEffect } from "react";
 import { TITLE_COLORS, BASE_COLORS } from "@/constant/colors";
 import { AlertTriangle } from "react-native-feather";
 interface ConfirmationModalProps {
@@ -18,6 +25,21 @@ const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
   onCancel,
   onConfirm,
 }) => {
+  // Handle hardware back button for modal
+  useEffect(() => {
+    if (!visible) return;
+
+    const backHandler = BackHandler.addEventListener(
+      "hardwareBackPress",
+      () => {
+        onCancel(); // Same as pressing Cancel button
+        return true; // Prevent default behavior
+      }
+    );
+
+    return () => backHandler.remove();
+  }, [visible, onCancel]);
+
   return (
     <Modal
       transparent
