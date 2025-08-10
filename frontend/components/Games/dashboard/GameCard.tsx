@@ -24,79 +24,53 @@ const GameCard: React.FC<GameCardProps> = ({
 }) => {
   const { getGameModeProgress, lastUpdated } = useProgressStore();
 
-  // Get progress data for this game mode
-  const progress = getGameModeProgress(game.id);
+  // NUCLEAR FIX: Freeze progress data after component mounts to prevent flicker
+  const [frozenProgress] = useState(() => {
+    // Capture progress data ONCE on mount and never change it
+    const initialProgress = getGameModeProgress(game.id);
+    console.log(
+      `[GameCard] FREEZING progress for ${game.id}:`,
+      initialProgress
+    );
+    return initialProgress;
+  });
 
-  // SIMPLE FIX: Just prevent all progress updates for 5 seconds after component mount
-  const [componentMountTime] = useState(() => Date.now());
-  const [allowProgressUpdates, setAllowProgressUpdates] = useState(false);
+  // NUCLEAR FIX: Disable ALL dynamic updates and re-renders
+  const [allowAnyUpdates] = useState(false); // Always false = no updates ever
 
-  // Enable progress updates after 5 seconds
+  // NUCLEAR FIX: Only do background preloading, NO state updates, NO logs
   useEffect(() => {
-    const timer = setTimeout(() => {
-      setAllowProgressUpdates(true);
-      console.log(`[GameCard] Enabling progress updates for ${game.id}`);
-    }, 3000);
+    // Only preload data silently, no state changes
+    const timer = setTimeout(async () => {
+      try {
+        // Silent preload - no logs, no state updates
+        await useProgressStore.getState().getEnhancedGameProgress(game.id);
+      } catch (error) {
+        // Silent failure
+      }
+    }, 5000);
 
     return () => clearTimeout(timer);
   }, [game.id]);
 
-  // ONLY update progress display when allowed
-  useEffect(() => {
-    if (!allowProgressUpdates) return;
-
-    console.log(
-      `[GameCard] ${game.id} progress updated:`,
-      { completed: progress.completed, total: progress.total },
-      `at ${new Date(lastUpdated).toISOString()}`
-    );
-  }, [
-    progress.completed,
-    progress.total,
-    game.id,
-    lastUpdated,
-    allowProgressUpdates,
-  ]);
-
-  // Preload data (also delayed)
-  useEffect(() => {
-    if (!allowProgressUpdates) return;
-
-    let isMounted = true;
-    const timeoutId = setTimeout(async () => {
-      try {
-        if (!isMounted) return;
-
-        await useProgressStore.getState().getEnhancedGameProgress(game.id);
-
-        if (isMounted) {
-          console.log(`[GameCard] Preloaded data for ${game.id}`);
+  // NUCLEAR FIX: Memoize everything to prevent ANY re-renders
+  const memoizedHandlers = useMemo(
+    () => ({
+      handleProgressPress: () => {
+        if (Platform.OS === "ios" && "Haptics" in window) {
+          // @ts-ignore
+          Haptics?.selectionAsync?.();
         }
-      } catch (error) {
-        // Silently ignore errors
-      }
-    }, 500);
+        onProgressPress();
+      },
+      handleGamePress: () => {
+        onGamePress();
+      },
+    }),
+    [onGamePress, onProgressPress]
+  );
 
-    return () => {
-      isMounted = false;
-      clearTimeout(timeoutId);
-    };
-  }, [game.id, allowProgressUpdates]);
-
-  // Memoized handlers
-  const handleProgressPress = useCallback(() => {
-    if (Platform.OS === "ios" && "Haptics" in window) {
-      // @ts-ignore
-      Haptics?.selectionAsync?.();
-    }
-    onProgressPress();
-  }, [onProgressPress]);
-
-  const handleGamePress = useCallback(() => {
-    onGamePress();
-  }, [onGamePress]);
-
-  const dynamicStyles = useMemo(
+  const staticStyles = useMemo(
     () => ({
       playBtn: [styles.playBtn, { backgroundColor: game.color }],
     }),
@@ -104,10 +78,10 @@ const GameCard: React.FC<GameCardProps> = ({
   );
 
   const completionPercentage = useMemo(() => {
-    return progress.total > 0
-      ? Math.round((progress.completed / progress.total) * 100)
+    return frozenProgress.total > 0
+      ? Math.round((frozenProgress.completed / frozenProgress.total) * 100)
       : 0;
-  }, [progress.completed, progress.total]);
+  }, [frozenProgress.completed, frozenProgress.total]);
 
   const gradientColors = useMemo(() => {
     return getGameModeGradient(
@@ -116,6 +90,7 @@ const GameCard: React.FC<GameCardProps> = ({
     );
   }, [game.id, game.gradientColors]);
 
+  // NUCLEAR FIX: Use frozen progress data - never changes
   return (
     <View style={styles.gameCard}>
       <LinearGradient
@@ -142,9 +117,10 @@ const GameCard: React.FC<GameCardProps> = ({
           </View>
         </View>
 
+        {/* FROZEN PROGRESS DATA - NEVER UPDATES */}
         <View style={styles.gameStatsRow}>
           <View style={styles.statItem}>
-            <Text style={styles.statValue}>{progress.completed}</Text>
+            <Text style={styles.statValue}>{frozenProgress.completed}</Text>
             <Text style={styles.statLabel}>Completed</Text>
           </View>
           <View style={styles.statDivider} />
@@ -157,17 +133,16 @@ const GameCard: React.FC<GameCardProps> = ({
         <View style={styles.gameActionsRow}>
           <TouchableOpacity
             style={styles.progressBtn}
-            onPress={handleProgressPress}
+            onPress={memoizedHandlers.handleProgressPress}
             activeOpacity={0.7}
-            delayPressIn={0}
           >
             <TrendingUp width={14} height={14} color="#fff" />
             <Text style={styles.progressBtnText}>View Progress</Text>
           </TouchableOpacity>
 
           <TouchableOpacity
-            style={dynamicStyles.playBtn}
-            onPress={handleGamePress}
+            style={staticStyles.playBtn}
+            onPress={memoizedHandlers.handleGamePress}
           >
             <Play width={14} height={14} color="#fff" />
             <Text style={styles.playBtnText}>PLAY</Text>

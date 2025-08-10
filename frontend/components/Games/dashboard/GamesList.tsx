@@ -1,6 +1,5 @@
-import React, { useCallback } from "react";
-import { View, Text, StyleSheet } from "react-native";
-import * as Animatable from "react-native-animatable";
+import React, { useCallback, useState, useMemo, useEffect } from "react";
+import { View, Text, StyleSheet, Animated } from "react-native";
 import { Target, Zap } from "react-native-feather";
 import { SectionHeader } from "@/components/games/common/AnimatedSection";
 import GameCard from "./GameCard";
@@ -15,38 +14,79 @@ interface GamesListProps {
   onRankingsPress?: () => void;
 }
 
+// SIMPLE: Global flag to track if animations have played ONCE per app session
+let HAS_ANIMATED_ONCE = false;
+
 const GamesList = React.memo(
   ({ onGamePress, onProgressPress, onRankingsPress }: GamesListProps) => {
-    // Render game card function
+    // Simple animation state - only animate if never animated before
+    const [shouldAnimate] = useState(!HAS_ANIMATED_ONCE);
+
+    // Simple animated values
+    const fadeAnim = useState(
+      () => new Animated.Value(shouldAnimate ? 0 : 1)
+    )[0];
+    const slideAnim = useState(
+      () => new Animated.Value(shouldAnimate ? 30 : 0)
+    )[0];
+
+    // SIMPLE: Force consistent ordering
+    const sortedGameOptions = useMemo(() => {
+      const gameOrder = ["multipleChoice", "identification", "fillBlanks"];
+      return [...gameOptions].sort((a, b) => {
+        const aIndex = gameOrder.indexOf(a.id);
+        const bIndex = gameOrder.indexOf(b.id);
+        return aIndex - bIndex;
+      });
+    }, []);
+
+    // SIMPLE: One animation for the entire container
+    useEffect(() => {
+      if (!shouldAnimate) return;
+
+      // Simple slide-up + fade animation
+      Animated.timing(fadeAnim, {
+        toValue: 1,
+        duration: 800,
+        useNativeDriver: true,
+      }).start();
+
+      Animated.timing(slideAnim, {
+        toValue: 0,
+        duration: 800,
+        useNativeDriver: true,
+      }).start(() => {
+        // Mark as animated globally
+        HAS_ANIMATED_ONCE = true;
+        console.log("[GamesList] Simple animation completed");
+      });
+    }, [shouldAnimate, fadeAnim, slideAnim]);
+
+    // Simple render function - no complex animations
     const renderGameCard = useCallback(
       (item: GameOption, index: number) => {
         return (
-          <Animatable.View
-            key={item.id}
-            animation="fadeInUp"
-            delay={600 + index * 100}
-            duration={800}
-            style={styles.gameCardWrapper}
-            useNativeDriver
-          >
+          <View key={`game-card-${item.id}`} style={styles.gameCardWrapper}>
             <GameCard
               game={item}
               onGamePress={() => onGamePress(item.id, item.title)}
               onProgressPress={() => onProgressPress(item.id, item.title)}
             />
-          </Animatable.View>
+          </View>
         );
       },
       [onGamePress, onProgressPress]
     );
 
     return (
-      <Animatable.View
-        animation="fadeInUp"
-        duration={1000}
-        delay={400}
-        style={styles.gamesSection}
-        useNativeDriver
+      <Animated.View
+        style={[
+          styles.gamesSection,
+          {
+            opacity: fadeAnim,
+            transform: [{ translateY: slideAnim }],
+          },
+        ]}
       >
         <SectionHeader
           icon={<Target width={20} height={20} color="#4CAF50" />}
@@ -54,24 +94,21 @@ const GamesList = React.memo(
           subtitle="Master different skills through interactive challenges"
         />
 
-        {/* Header with Rankings Button */}
         <View style={styles.headerRow}>
           <View style={styles.titleSection}>
             <Zap width={18} height={18} color={iconColors.brightYellow} />
             <Text style={styles.sectionTitle}>Game Modes</Text>
           </View>
 
-          {/* Rankings Button */}
           {onRankingsPress && (
             <RankingButton onRankingsPress={onRankingsPress} />
           )}
         </View>
 
-        {/* Game Cards */}
         <View style={styles.gamesGrid}>
-          {gameOptions.map((item, index) => renderGameCard(item, index))}
+          {sortedGameOptions.map((item, index) => renderGameCard(item, index))}
         </View>
-      </Animatable.View>
+      </Animated.View>
     );
   }
 );

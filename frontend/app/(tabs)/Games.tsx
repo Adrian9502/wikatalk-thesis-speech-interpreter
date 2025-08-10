@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useCallback, useRef } from "react";
-import { StyleSheet, View, ScrollView, Dimensions } from "react-native";
+import { StyleSheet, View, ScrollView } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useFocusEffect } from "@react-navigation/native";
 
@@ -26,6 +26,10 @@ import useProgressStore from "@/store/games/useProgressStore";
 import useGameStore from "@/store/games/useGameStore";
 import { isAllDataReady } from "@/store/useSplashStore";
 
+// GLOBAL state to persist across component remounts
+let GAMES_INITIALIZED = false;
+let INITIALIZATION_PROMISE: Promise<void> | null = null;
+
 const Games = () => {
   // Performance monitoring for development
   const finishLoadTracking = useComponentLoadTime("Games");
@@ -37,15 +41,13 @@ const Games = () => {
   const { activeTheme } = useThemeStore();
   const dynamicStyles = getGlobalStyles(activeTheme.backgroundColor);
 
-  // Track loading and error states
-  const [isInitializing, setIsInitializing] = useState(true);
+  // FIXED: Use global state + local state
+  const [hasInitialized, setHasInitialized] = useState(GAMES_INITIALIZED);
   const [hasError, setHasError] = useState(false);
-  // Add a data readiness tracker
-  const [dataReady, setDataReady] = useState(false);
-  const [preloadedGameModes, setPreloadedGameModes] = useState<Set<string>>(
-    new Set()
-  );
+
+  // FIXED: Persistent refs that don't reset
   const lastClickRef = useRef<number>(0);
+  const focusRefreshInProgress = useRef(false);
 
   // Get the rankings modal functions
   const { showRankingsModal } = useRankingsModal();
@@ -55,26 +57,17 @@ const Games = () => {
 
   // Custom hook for dashboard logic (excluding progress)
   const {
-    // Word of day state
     wordOfTheDay,
     wordOfDayModalVisible,
     isWordOfDayPlaying,
     isAudioLoading,
     setWordOfDayModalVisible,
     playWordOfDayAudio,
-
-    // Rewards state
     isDailyRewardsModalVisible,
     hideDailyRewardsModal,
     openRewardsModal,
-
-    // Game-related handlers
     handleGamePress,
-
-    // Add error retry handler
     retryDataLoading,
-
-    // Add loading state from hook
     isLoading: dashboardLoading,
   } = useGameDashboard();
 
@@ -87,166 +80,139 @@ const Games = () => {
     showRankingsModal();
   }, [showRankingsModal]);
 
-  // Initialize progress data - check if all data is ready
+  // FIXED: Global initialization that persists across remounts
   useEffect(() => {
-    if (!isAllDataReady()) {
-      console.log("[Games] Data not fully precomputed, fetching now");
-      fetchProgress();
-    } else {
-      console.log("[Games] Using fully precomputed game and progress data");
-      setDataReady(true);
-    }
-  }, [fetchProgress]);
-
-  // Track when data becomes available
-  useEffect(() => {
-    if (isAllDataReady()) {
-      setDataReady(true);
+    // If already globally initialized, just sync local state
+    if (GAMES_INITIALIZED) {
+      console.log("[Games] Already globally initialized, syncing local state");
+      setHasInitialized(true);
+      if (finishLoadTracking) finishLoadTracking();
       return;
     }
 
-    const { questions } = useGameStore.getState();
-    const hasQuestions = Object.values(questions).some((mode) =>
-      Object.values(mode).some((diff) => Array.isArray(diff) && diff.length > 0)
-    );
-
-    if (wordOfTheDay && hasQuestions) {
-      setDataReady(true);
-    }
-  }, [wordOfTheDay]);
-
-  // IMPROVED: Coordinated loading state management
-  useEffect(() => {
-    // If data is preloaded, make initialization quicker
-    if (isAllDataReady()) {
-      const timer = setTimeout(() => {
-        setIsInitializing(false);
+    // If initialization is in progress, wait for it
+    if (INITIALIZATION_PROMISE) {
+      console.log("[Games] Initialization in progress, waiting...");
+      INITIALIZATION_PROMISE.then(() => {
+        setHasInitialized(true);
         if (finishLoadTracking) finishLoadTracking();
-      }, 100); // Much shorter delay if data is preloaded
-
-      return () => clearTimeout(timer);
+      });
+      return;
     }
 
-    // Original behavior for non-preloaded data
-    const timer = setTimeout(() => {
-      if (!isLoading && dataReady) {
-        setIsInitializing(false);
-        if (finishLoadTracking) finishLoadTracking();
-      }
-    }, 500);
+    // Start initialization
+    const initializeOnce = async () => {
+      console.log("[Games] Starting one-time global initialization...");
 
-    return () => clearTimeout(timer);
-  }, [isLoading, dataReady, finishLoadTracking]);
+      try {
+        if (isAllDataReady()) {
+          console.log("[Games] Using fully precomputed game and progress data");
+        } else {
+          console.log("[Games] Loading required data");
 
-  // IMPROVED: Error detection logic with delay
-  useEffect(() => {
-    // Only check for errors after we've stopped loading but data isn't ready after a reasonable time
-    if (!isInitializing && !isLoading && !dataReady) {
-      // Add a small delay before showing error to avoid flicker
-      const errorTimer = setTimeout(() => {
-        if (!dataReady && !isLoading) {
-          setHasError(true);
-        }
-      }, 300); // Small delay to ensure data isn't about to arrive
+          // Ensure questions are loaded
+          const gameStore = useGameStore.getState();
+          if (
+            !gameStore.questions ||
+            Object.keys(gameStore.questions).length === 0
+          ) {
+            await gameStore.fetchQuestions();
+          }
 
-      return () => clearTimeout(errorTimer);
-    } else if (dataReady) {
-      // If data becomes ready, make sure to clear error state
-      setHasError(false);
-    }
-  }, [isInitializing, isLoading, dataReady]);
+          // Refresh quiz counts
+          const progressStore = useProgressStore.getState();
+          if (progressStore.refreshQuizCounts) {
+            progressStore.refreshQuizCounts();
+          }
 
-  // Add this effect to preload data for commonly accessed game modes
-  useEffect(() => {
-    if (!dataReady) return;
-
-    // Preload most common game modes
-    const preloadData = async () => {
-      const commonModes = ["multipleChoice", "identification"];
-
-      for (const mode of commonModes) {
-        if (!preloadedGameModes.has(mode)) {
-          try {
-            console.log(`[Games] Preloading data for ${mode}...`);
-            await useProgressStore.getState().getEnhancedGameProgress(mode);
-            setPreloadedGameModes((prev) => new Set([...prev, mode]));
-          } catch (error) {
-            // Ignore errors in background loading
+          // Single progress fetch if needed
+          if (!progressStore.progress || progressStore.progress.length === 0) {
+            await fetchProgress(true);
           }
         }
+
+        // Mark as globally initialized
+        GAMES_INITIALIZED = true;
+        setHasInitialized(true);
+        if (finishLoadTracking) finishLoadTracking();
+      } catch (error) {
+        console.error("[Games] Initialization error:", error);
+        setHasError(true);
+      } finally {
+        INITIALIZATION_PROMISE = null;
       }
     };
 
-    // Run in background
-    preloadData();
-  }, [dataReady, preloadedGameModes]);
+    INITIALIZATION_PROMISE = initializeOnce();
+  }, []); // Run only once per app session
 
-  useEffect(() => {
-    const refreshData = async () => {
-      // Ensure questions are loaded first
-      const gameStore = useGameStore.getState();
-      if (
-        !gameStore.questions ||
-        Object.keys(gameStore.questions).length === 0
-      ) {
-        console.log("[Games] Loading questions first...");
-        await gameStore.fetchQuestions();
-      }
-
-      // Then refresh progress and quiz counts
-      const progressStore = useProgressStore.getState();
-      if (progressStore.refreshQuizCounts) {
-        progressStore.refreshQuizCounts();
-      }
-
-      // Force refresh progress
-      await progressStore.fetchProgress(true);
-    };
-
-    refreshData();
-  }, []);
-
-  // Refresh progress data when screen is focused
+  // FIXED: Smart focus refresh - but don't re-initialize
   useFocusEffect(
     React.useCallback(() => {
-      console.log("[Games] Screen focused, refreshing progress data");
-      fetchProgress(true); // Force refresh on focus
+      if (!hasInitialized || focusRefreshInProgress.current) {
+        console.log(
+          "[Games] Skipping focus refresh - not ready or in progress"
+        );
+        return;
+      }
+
+      // Check if we need to refresh progress data
+      const progressStore = useProgressStore.getState();
+      const lastFetched = progressStore.lastFetched || 0;
+      const now = Date.now();
+      const timeSinceLastFetch = now - lastFetched;
+
+      // Only refresh if more than 2 minutes since last fetch
+      const shouldRefresh = timeSinceLastFetch > 2 * 60 * 1000;
+
+      if (shouldRefresh) {
+        console.log(
+          `[Games] Screen focused, refreshing progress data (${timeSinceLastFetch}ms since last fetch)`
+        );
+        focusRefreshInProgress.current = true;
+
+        fetchProgress(true).finally(() => {
+          setTimeout(() => {
+            focusRefreshInProgress.current = false;
+          }, 1000);
+        });
+      } else {
+        console.log(
+          `[Games] Screen focused, data is fresh (${timeSinceLastFetch}ms old)`
+        );
+      }
 
       return () => {}; // Cleanup function
-    }, [fetchProgress])
+    }, [fetchProgress, hasInitialized])
   );
 
   // Handle retry
   const handleRetry = () => {
-    setIsInitializing(true);
     setHasError(false);
-
-    // Call retry handler from hook and fetch progress
-    Promise.all([retryDataLoading(), fetchProgress(true)]).finally(() => {
-      setIsInitializing(false);
-    });
+    // Reset global state on manual retry
+    GAMES_INITIALIZED = false;
+    INITIALIZATION_PROMISE = null;
+    setHasInitialized(false);
   };
 
-  // Replace handleProgressPress
+  // FIXED: Optimized progress press handler
   const handleProgressPress = useCallback(
     (gameId: string, gameTitle: string) => {
       const now = Date.now();
 
-      // Use the ref from component level
-      if (now - lastClickRef.current < 300) {
+      if (now - lastClickRef.current < 500) {
         console.log(`[Games] Ignoring duplicate progress button press`);
         return;
       }
       lastClickRef.current = now;
 
-      // Use the context method instead of store
       showProgressModal(gameId, gameTitle);
     },
     [showProgressModal]
   );
 
-  // Render loading state
-  if (isInitializing) {
+  // SIMPLIFIED: Show loading only during initial load
+  if (!hasInitialized && !hasError) {
     return <AppLoading />;
   }
 
@@ -270,7 +236,7 @@ const Games = () => {
     );
   }
 
-  // Render main content
+  // FIXED: Main content - no re-initialization
   return (
     <View
       style={[styles.wrapper, { backgroundColor: activeTheme.backgroundColor }]}
@@ -294,8 +260,9 @@ const Games = () => {
             onPlayPress={playWordOfDayAudio}
           />
 
-          {/* Game modes list */}
+          {/* Game modes list - Add key to prevent re-mounting */}
           <GamesList
+            key="games-list-persistent"
             onGamePress={handleGamePress}
             onProgressPress={handleProgressPress}
             onRankingsPress={handleShowRankings}

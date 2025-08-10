@@ -1,6 +1,11 @@
-import React from "react";
-import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
-import * as Animatable from "react-native-animatable";
+import React, { useState, useEffect } from "react";
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  StyleSheet,
+  Animated,
+} from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { Calendar, Volume2, Star } from "react-native-feather";
 import { SectionHeader } from "@/components/games/common/AnimatedSection";
@@ -13,6 +18,9 @@ interface WordOfDayCardProps {
   onPlayPress: () => void;
 }
 
+// SIMPLE: Global flag - animate only once per app session
+let WORD_ANIMATION_PLAYED = false;
+
 const WordOfDayCard = React.memo(
   ({
     wordOfTheDay,
@@ -21,13 +29,45 @@ const WordOfDayCard = React.memo(
     onCardPress,
     onPlayPress,
   }: WordOfDayCardProps) => {
+    const [shouldAnimate] = useState(!WORD_ANIMATION_PLAYED);
+
+    // Simple animated values
+    const fadeAnim = useState(
+      () => new Animated.Value(shouldAnimate ? 0 : 1)
+    )[0];
+    const slideAnim = useState(
+      () => new Animated.Value(shouldAnimate ? 20 : 0)
+    )[0];
+
+    // SIMPLE: One animation for the card
+    useEffect(() => {
+      if (!shouldAnimate) return;
+
+      Animated.timing(fadeAnim, {
+        toValue: 1,
+        duration: 500,
+        useNativeDriver: true,
+      }).start();
+
+      Animated.timing(slideAnim, {
+        toValue: 0,
+        duration: 500,
+        useNativeDriver: true,
+      }).start(() => {
+        WORD_ANIMATION_PLAYED = true;
+        console.log("[WordOfDayCard] Simple animation completed");
+      });
+    }, [shouldAnimate, fadeAnim, slideAnim]);
+
     return (
-      <Animatable.View
-        animation="fadeInUp"
-        duration={1000}
-        delay={200}
-        style={styles.featuredSection}
-        useNativeDriver
+      <Animated.View
+        style={[
+          styles.featuredSection,
+          {
+            opacity: fadeAnim,
+            transform: [{ translateY: slideAnim }],
+          },
+        ]}
       >
         <SectionHeader
           icon={<Star width={20} height={20} color="#FFD700" />}
@@ -58,14 +98,20 @@ const WordOfDayCard = React.memo(
               </View>
               <TouchableOpacity style={styles.playButton} onPress={onPlayPress}>
                 {isLoading && isPlaying ? (
-                  <Animatable.View
-                    animation="rotate"
-                    iterationCount="infinite"
-                    duration={1000}
-                    useNativeDriver
+                  <Animated.View
+                    style={{
+                      transform: [
+                        {
+                          rotate: fadeAnim.interpolate({
+                            inputRange: [0, 1],
+                            outputRange: ["0deg", "360deg"],
+                          }),
+                        },
+                      ],
+                    }}
                   >
                     <Volume2 width={16} height={16} color="#667eea" />
-                  </Animatable.View>
+                  </Animated.View>
                 ) : (
                   <Volume2 width={16} height={16} color="#667eea" />
                 )}
@@ -91,75 +137,52 @@ const WordOfDayCard = React.memo(
             </View>
           </LinearGradient>
         </TouchableOpacity>
-      </Animatable.View>
+      </Animated.View>
     );
   }
 );
 
-// Include all styles from the original component
+// ... keep all your existing styles ...
 const styles = StyleSheet.create({
   featuredSection: {
-    marginBottom: 40,
+    marginBottom: 12,
   },
   wordOfTheDayCard: {
     borderRadius: 20,
-    overflow: "hidden",
+    marginBottom: 8,
     shadowColor: "#000",
-    shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.3,
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.15,
     shadowRadius: 12,
-    elevation: 10,
+    elevation: 8,
   },
   wordCardGradient: {
     padding: 20,
-    minHeight: 160,
-    position: "relative",
-  },
-  wordDecoPattern1: {
-    position: "absolute",
-    top: -30,
-    right: -30,
-    width: 100,
-    height: 100,
-    borderRadius: 50,
-    backgroundColor: "rgba(255, 255, 255, 0.1)",
-  },
-  wordDecoPattern2: {
-    position: "absolute",
-    bottom: -20,
-    left: -20,
-    width: 80,
-    height: 80,
-    borderRadius: 40,
-    backgroundColor: "rgba(255, 255, 255, 0.05)",
-  },
-  wordDecoPattern3: {
-    position: "absolute",
-    top: 40,
-    right: 20,
-    width: 40,
-    height: 40,
     borderRadius: 20,
-    backgroundColor: "rgba(255, 255, 255, 0.08)",
+    position: "relative",
+    minHeight: 120,
+    overflow: "hidden",
   },
   wordCardHeader: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
+    marginBottom: 16,
   },
   wordBadge: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "rgba(255, 255, 255, 0.9)",
-    paddingHorizontal: 12,
+    backgroundColor: "rgba(255, 255, 255, 0.2)",
+    paddingHorizontal: 10,
     paddingVertical: 6,
     borderRadius: 20,
+    gap: 6,
   },
   wordBadgeText: {
-    fontSize: 11,
-    fontFamily: "Poppins-Bold",
-    color: "#667eea",
-    marginLeft: 6,
+    fontSize: 10,
+    fontFamily: "Poppins-Medium",
+    color: "#fff",
+    textTransform: "uppercase",
     letterSpacing: 0.5,
   },
   playButton: {
@@ -198,9 +221,9 @@ const styles = StyleSheet.create({
     color: "rgba(255, 255, 255, 0.8)",
   },
   arrowContainer: {
-    width: 30,
-    height: 30,
-    borderRadius: 15,
+    width: 28,
+    height: 28,
+    borderRadius: 14,
     backgroundColor: "rgba(255, 255, 255, 0.2)",
     justifyContent: "center",
     alignItems: "center",
@@ -208,7 +231,34 @@ const styles = StyleSheet.create({
   arrow: {
     fontSize: 16,
     color: "#fff",
-    fontFamily: "Poppins-Bold",
+    fontFamily: "Poppins-Medium",
+  },
+  wordDecoPattern1: {
+    position: "absolute",
+    top: -10,
+    right: -10,
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: "rgba(255, 255, 255, 0.05)",
+  },
+  wordDecoPattern2: {
+    position: "absolute",
+    bottom: -15,
+    left: -15,
+    width: 60,
+    height: 60,
+    borderRadius: 30,
+    backgroundColor: "rgba(255, 255, 255, 0.03)",
+  },
+  wordDecoPattern3: {
+    position: "absolute",
+    top: 20,
+    right: 40,
+    width: 20,
+    height: 20,
+    borderRadius: 10,
+    backgroundColor: "rgba(255, 255, 255, 0.08)",
   },
 });
 

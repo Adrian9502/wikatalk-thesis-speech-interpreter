@@ -1,6 +1,5 @@
-import React, { useEffect } from "react";
-import { View, Text, StyleSheet } from "react-native";
-import * as Animatable from "react-native-animatable";
+import React, { useEffect, useState } from "react";
+import { View, Text, StyleSheet, Animated } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { Target, Award } from "react-native-feather";
 import { SectionHeader } from "@/components/games/common/AnimatedSection";
@@ -8,12 +7,22 @@ import useProgressStore from "@/store/games/useProgressStore";
 import { GAME_GRADIENTS, GAME_MODES } from "@/constant/gameConstants";
 import { BASE_COLORS } from "@/constant/colors";
 
+// SIMPLE: Global flag
+let PROGRESS_ANIMATION_PLAYED = false;
+
 const ProgressStats = React.memo(() => {
-  // Get progress data from the centralized store with lastUpdated
   const { totalCompletedCount, totalQuizCount, lastUpdated } =
     useProgressStore();
 
-  // Log updates to help with debugging
+  const [shouldAnimate] = useState(!PROGRESS_ANIMATION_PLAYED);
+
+  // Simple animated values
+  const fadeAnim = useState(() => new Animated.Value(shouldAnimate ? 0 : 1))[0];
+  const slideAnim = useState(
+    () => new Animated.Value(shouldAnimate ? 25 : 0)
+  )[0];
+
+  // Log updates (no state changes to prevent re-renders)
   useEffect(() => {
     console.log("[ProgressStats] Progress updated:", {
       totalCompletedCount,
@@ -22,12 +31,38 @@ const ProgressStats = React.memo(() => {
     });
   }, [totalCompletedCount, totalQuizCount, lastUpdated]);
 
+  // SIMPLE: One animation
+  useEffect(() => {
+    if (!shouldAnimate) return;
+
+    // Delay this animation slightly so it comes after word of day
+    setTimeout(() => {
+      Animated.timing(fadeAnim, {
+        toValue: 1,
+        duration: 600,
+        useNativeDriver: true,
+      }).start();
+
+      Animated.timing(slideAnim, {
+        toValue: 0,
+        duration: 600,
+        useNativeDriver: true,
+      }).start(() => {
+        PROGRESS_ANIMATION_PLAYED = true;
+        console.log("[ProgressStats] Simple animation completed");
+      });
+    }, 200);
+  }, [shouldAnimate, fadeAnim, slideAnim]);
+
   return (
-    <Animatable.View
-      animation="fadeInUp"
-      duration={1000}
-      delay={800}
-      useNativeDriver
+    <Animated.View
+      style={[
+        styles.container,
+        {
+          opacity: fadeAnim,
+          transform: [{ translateY: slideAnim }],
+        },
+      ]}
     >
       <SectionHeader
         icon={<Award width={20} height={20} color="#FF6B6B" />}
@@ -63,12 +98,7 @@ const ProgressStats = React.memo(() => {
         </View>
       </View>
 
-      <Animatable.View
-        animation="fadeIn"
-        delay={1000}
-        style={styles.progressSummaryContainer}
-        useNativeDriver
-      >
+      <View style={styles.progressSummaryContainer}>
         <Text style={styles.progressSummaryText}>
           {totalCompletedCount === 0
             ? `Start playing to track your progress! ${totalQuizCount} quizzes available`
@@ -76,12 +106,16 @@ const ProgressStats = React.memo(() => {
                 (totalCompletedCount / totalQuizCount) * 100
               )}% completion rate across all game modes (${totalCompletedCount}/${totalQuizCount})`}
         </Text>
-      </Animatable.View>
-    </Animatable.View>
+      </View>
+    </Animated.View>
   );
 });
 
+// Keep all existing styles the same
 const styles = StyleSheet.create({
+  container: {
+    // Add any container styles if needed
+  },
   statsGrid: {
     flexDirection: "row",
     gap: 20,
