@@ -77,6 +77,10 @@ const server = app.listen(PORT, "0.0.0.0", () => {
   console.log(`Server available on local network at http://192.168.18.82:${PORT}`);
 });
 
+console.log('SMTP_USER:', process.env.GMAIL_USER);
+console.log('SMTP_PASS:', process.env.GMAIL_APP_PASSWORD ? '***' : 'MISSING');
+
+
 // Error handling middleware 
 app.use((err, req, res, next) => {
   console.error(`[ERROR] ${err.stack}`);
