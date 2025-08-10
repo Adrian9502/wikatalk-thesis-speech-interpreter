@@ -25,11 +25,6 @@ interface StatsContainerProps {
   isStarted?: boolean;
   animationDelay?: number;
   variant?: "playing" | "completed";
-  finalTime?: number;
-  levelId?: number | string;
-  onTimerReset?: () => void;
-  isCorrectAnswer?: boolean;
-  currentRewardInfo?: RewardInfo | null;
 }
 
 const StatsContainer: React.FC<StatsContainerProps> = ({
@@ -40,11 +35,6 @@ const StatsContainer: React.FC<StatsContainerProps> = ({
   isStarted = true,
   animationDelay = 100,
   variant = "playing",
-  finalTime,
-  levelId,
-  onTimerReset,
-  isCorrectAnswer = false,
-  currentRewardInfo = null,
 }) => {
   // Real-time reward preview state
   const [rewardPreview, setRewardPreview] = useState<RewardInfo | null>(null);
@@ -116,18 +106,6 @@ const StatsContainer: React.FC<StatsContainerProps> = ({
     }
   }, [timerRunning]);
 
-  // UPDATED: Simplified static timer without reset button
-  const renderStaticTimer = () => (
-    <View style={styles.staticTimerContainer}>
-      <View style={styles.timeContainer}>
-        <Clock width={16} height={16} color={BASE_COLORS.white} />
-        <Text style={styles.staticTimerText}>
-          {formatTimerDisplay(finalTime !== undefined ? finalTime : 0)}
-        </Text>
-      </View>
-    </View>
-  );
-
   return (
     <Animatable.View
       animation="fadeIn"
@@ -147,13 +125,28 @@ const StatsContainer: React.FC<StatsContainerProps> = ({
           style={styles.timerSection}
         >
           {variant === "playing" && isStarted && (
-            // Live timer for playing state with reward preview
-            <View style={styles.timeContainer}>
-              <Timer
-                isRunning={timerRunning}
-                initialTime={initialTime}
-                key={`timer-${initialTime}`}
-              />
+            // FIXED: Improved layout with fixed widths
+            <View style={styles.timeAndRewardContainer}>
+              <View style={styles.timeContainer}>
+                <Timer
+                  isRunning={timerRunning}
+                  initialTime={initialTime}
+                  key={`timer-${initialTime}`}
+                />
+              </View>
+              {rewardPreview && rewardPreview.coins > 0 && (
+                <Animatable.View
+                  animation="fadeIn"
+                  duration={300}
+                  style={styles.rewardDisplay}
+                >
+                  <Image
+                    source={require("@/assets/images/coin.png")}
+                    style={styles.rewardCoin}
+                  />
+                  <Text style={styles.rewardText}>+{rewardPreview.coins}</Text>
+                </Animatable.View>
+              )}
             </View>
           )}
         </Animatable.View>
@@ -162,19 +155,6 @@ const StatsContainer: React.FC<StatsContainerProps> = ({
       {/* Badges Section - Only show when game is playing */}
       {variant === "playing" && (
         <>
-          {rewardPreview && rewardPreview.coins > 0 && (
-            <Animatable.View
-              animation="fadeIn"
-              duration={300}
-              style={styles.rewardDisplay}
-            >
-              <Image
-                source={require("@/assets/images/coin.png")}
-                style={styles.rewardCoin}
-              />
-              <Text style={styles.rewardText}>+{rewardPreview.coins}</Text>
-            </Animatable.View>
-          )}
           <Animatable.View
             animation="fadeInRight"
             duration={600}
@@ -182,7 +162,6 @@ const StatsContainer: React.FC<StatsContainerProps> = ({
             style={styles.badgesSection}
           >
             <DifficultyBadge difficulty={difficulty} />
-            {/* REMOVED: <FocusAreaBadge ocusArea={focusArea} /> */}
           </Animatable.View>
         </>
       )}
@@ -197,11 +176,17 @@ const styles = StyleSheet.create({
     marginBottom: 8,
     alignItems: "center",
   },
+  // FIXED: Improved container layout
+  timeAndRewardContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8, // Reduced gap for better spacing
+  },
   completedStatsContainer: {
     justifyContent: "space-between",
   },
   timerSection: {
-    minWidth: 110,
+    // REMOVED: minWidth to let it size naturally
   },
   staticTimerContainer: {
     flexDirection: "row",
@@ -209,15 +194,16 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     gap: 6,
   },
+  // FIXED: Set fixed width for consistent timer container
   timeContainer: {
     flexDirection: "row",
     alignItems: "center",
-    justifyContent: "center",
+    justifyContent: "space-between",
     backgroundColor: "rgba(0, 0, 0, 0.2)",
     paddingHorizontal: 12,
     paddingVertical: 6,
     borderWidth: 1,
-    minWidth: 90,
+    width: 100,
     borderRadius: 20,
     borderColor: "rgba(255, 255, 255, 0.12)",
   },
@@ -227,7 +213,7 @@ const styles = StyleSheet.create({
     fontFamily: "Poppins-Medium",
     marginLeft: 6,
   },
-  // Reward display styles
+  // FIXED: Consistent reward display sizing
   rewardDisplay: {
     flexDirection: "row",
     alignItems: "center",
@@ -238,6 +224,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: "rgba(255, 215, 0, 0.3)",
     gap: 4,
+    minWidth: 50, // FIXED: Set minimum width for consistency
   },
   rewardCoin: {
     width: 16,

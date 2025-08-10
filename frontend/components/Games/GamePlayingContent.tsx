@@ -1,4 +1,4 @@
-import React, { useRef, useEffect } from "react";
+import React, { useRef, useEffect, useCallback } from "react";
 import { View, StyleSheet, Animated } from "react-native";
 
 interface GamePlayingContentProps {
@@ -14,12 +14,16 @@ interface GamePlayingContentProps {
 }
 
 const GamePlayingContent: React.FC<GamePlayingContentProps> = React.memo(
-  ({ timerRunning, children, initialTime = 0 }) => {
+  ({ timerRunning, children, initialTime = 0, gameStatus = "idle" }) => {
     const timerStartedRef = React.useRef(false);
 
     // Custom animation values
     const fadeAnim = useRef(new Animated.Value(0)).current;
     const translateY = useRef(new Animated.Value(30)).current;
+
+    // CRITICAL: Add refs to prevent multiple animations
+    const animationStartedRef = useRef(false);
+    const isMountedRef = useRef(true);
 
     // Optimized timer logging - only log state changes
     React.useEffect(() => {
@@ -34,13 +38,23 @@ const GamePlayingContent: React.FC<GamePlayingContentProps> = React.memo(
       }
     }, [timerRunning, initialTime]);
 
-    // Custom animation effect
-    useEffect(() => {
+    // FIXED: Stable animation function with proper cleanup
+    const startAnimation = useCallback(() => {
+      if (animationStartedRef.current || !isMountedRef.current) {
+        console.log(
+          `[GamePlayingContent] Animation already started or component unmounted`
+        );
+        return;
+      }
+
+      console.log(`[GamePlayingContent] Starting entrance animation`);
+      animationStartedRef.current = true;
+
       // Reset animation values
       fadeAnim.setValue(0);
       translateY.setValue(30);
 
-      // Start animation immediately
+      // Start animation
       Animated.parallel([
         Animated.timing(fadeAnim, {
           toValue: 1,
@@ -52,8 +66,56 @@ const GamePlayingContent: React.FC<GamePlayingContentProps> = React.memo(
           duration: 800,
           useNativeDriver: true,
         }),
-      ]).start();
-    }, []);
+      ]).start((finished) => {
+        if (finished && isMountedRef.current) {
+          console.log(`[GamePlayingContent] Animation completed`);
+        }
+      });
+    }, [fadeAnim, translateY]);
+
+    // FIXED: Only animate when game status changes to playing
+    useEffect(() => {
+      // Reset animation flag when component mounts or game restarts
+      if (gameStatus === "idle" || gameStatus === "ready") {
+        console.log(
+          `[GamePlayingContent] Game status: ${gameStatus}, resetting animation flag`
+        );
+        animationStartedRef.current = false;
+
+        // Reset values immediately for idle/ready states
+        fadeAnim.setValue(0);
+        translateY.setValue(30);
+      } else if (gameStatus === "playing" && !animationStartedRef.current) {
+        console.log(
+          `[GamePlayingContent] Game status changed to playing, starting animation`
+        );
+        // Small delay to ensure the component is fully rendered
+        const animationTimer = setTimeout(() => {
+          if (isMountedRef.current) {
+            startAnimation();
+          }
+        }, 50);
+
+        return () => clearTimeout(animationTimer);
+      }
+    }, [gameStatus, startAnimation, fadeAnim, translateY]);
+
+    // FIXED: Cleanup on unmount
+    useEffect(() => {
+      isMountedRef.current = true;
+
+      return () => {
+        console.log(
+          `[GamePlayingContent] Component unmounting, stopping animations`
+        );
+        isMountedRef.current = false;
+        animationStartedRef.current = false;
+
+        // Stop any running animations
+        fadeAnim.stopAnimation();
+        translateY.stopAnimation();
+      };
+    }, [fadeAnim, translateY]);
 
     return (
       <View style={styles.container}>
