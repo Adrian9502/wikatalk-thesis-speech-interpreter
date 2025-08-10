@@ -29,8 +29,8 @@ const GameProgressModalContent: React.FC<GameProgressModalContentProps> = ({
   preloadedData,
   onClose,
 }) => {
-  // Load state
-  const [isDataLoading, setIsDataLoading] = useState(!preloadedData);
+  // Load state - simplified since provider handles initial loading
+  const [isDataLoading, setIsDataLoading] = useState(false);
   const [progressData, setProgressData] =
     useState<EnhancedGameModeProgress | null>(preloadedData);
 
@@ -50,7 +50,6 @@ const GameProgressModalContent: React.FC<GameProgressModalContentProps> = ({
             `[GameProgressModalContent] Using preloaded data for ${gameMode}`
           );
           setProgressData(preloadedData);
-          setIsDataLoading(false);
           return;
         }
 
@@ -75,7 +74,6 @@ const GameProgressModalContent: React.FC<GameProgressModalContentProps> = ({
           .getState()
           .getEnhancedGameProgress(gameMode);
         setProgressData(data);
-        setIsDataLoading(false);
 
         console.log(`[GameProgressModalContent] Data loaded for ${gameMode}:`, {
           totalAttempts: data?.totalAttempts || 0,
@@ -83,6 +81,7 @@ const GameProgressModalContent: React.FC<GameProgressModalContentProps> = ({
         });
       } catch (error) {
         console.error("[GameProgressModalContent] Error loading data:", error);
+      } finally {
         setIsDataLoading(false);
       }
     };
@@ -151,6 +150,9 @@ const GameProgressModalContent: React.FC<GameProgressModalContentProps> = ({
     onClose();
   }, [onClose]);
 
+  // Determine if we should show content or loading
+  const hasProgressData = !isDataLoading && progressData;
+
   return (
     <LinearGradient
       colors={gradientColors}
@@ -158,21 +160,24 @@ const GameProgressModalContent: React.FC<GameProgressModalContentProps> = ({
       start={{ x: 0, y: 0 }}
       end={{ x: 1, y: 1 }}
     >
-      <CloseButton size={17} onPress={handleClose}></CloseButton>
-      {/* Header - Always render this immediately */}
-      <View style={styles.header}>
-        <Text style={styles.title}>{gameTitle} Progress</Text>
-      </View>
+      <CloseButton size={17} onPress={handleClose} />
+
+      {/* Show header only when progress is loaded */}
+      {hasProgressData && (
+        <View style={styles.header}>
+          <Text style={styles.title}>{gameTitle} Progress</Text>
+        </View>
+      )}
 
       {/* Content - Show loading indicator or actual content */}
-      {isDataLoading ? (
-        <ModalLoading />
-      ) : (
+      {hasProgressData ? (
         <ProgressContent
           progressData={progressData}
           isLoading={isDataLoading}
           gameMode={gameMode}
         />
+      ) : (
+        <ModalLoading />
       )}
     </LinearGradient>
   );

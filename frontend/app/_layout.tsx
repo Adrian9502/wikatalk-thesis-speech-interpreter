@@ -17,6 +17,7 @@ import { useSplashStore } from "@/store/useSplashStore";
 import { GoogleSignin } from "@react-native-google-signin/google-signin";
 import { initializeToken } from "@/lib/authTokenManager";
 import { ProgressModalProvider } from "@/components/games/ProgressModalProvider";
+import { RankingsModalProvider } from "@/components/games/RankingsModalProvider";
 import {
   registerSplashStore,
   registerProgressStore,
@@ -218,29 +219,31 @@ const RootLayout = () => {
     <AuthProvider>
       <ThemeProvider onThemeReady={handleThemeReady}>
         <ProgressModalProvider>
-          <PaperProvider>
-            <ValidationProvider>
-              <SafeAreaProvider>
-                <View style={{ flex: 1 }}>
-                  <Stack screenOptions={{ headerShown: false }}>
-                    <Stack.Screen
-                      name="index"
-                      options={{ headerShown: false }}
-                    />
-                    <Stack.Screen
-                      name="(auth)"
-                      options={{ headerShown: false }}
-                    />
-                    <Stack.Screen
-                      name="(tabs)"
-                      options={{ headerShown: false }}
-                    />
-                  </Stack>
-                  <Toast />
-                </View>
-              </SafeAreaProvider>
-            </ValidationProvider>
-          </PaperProvider>
+          <RankingsModalProvider>
+            <PaperProvider>
+              <ValidationProvider>
+                <SafeAreaProvider>
+                  <View style={{ flex: 1 }}>
+                    <Stack screenOptions={{ headerShown: false }}>
+                      <Stack.Screen
+                        name="index"
+                        options={{ headerShown: false }}
+                      />
+                      <Stack.Screen
+                        name="(auth)"
+                        options={{ headerShown: false }}
+                      />
+                      <Stack.Screen
+                        name="(tabs)"
+                        options={{ headerShown: false }}
+                      />
+                    </Stack>
+                    <Toast />
+                  </View>
+                </SafeAreaProvider>
+              </ValidationProvider>
+            </PaperProvider>
+          </RankingsModalProvider>
         </ProgressModalProvider>
       </ThemeProvider>
     </AuthProvider>

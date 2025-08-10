@@ -8,7 +8,6 @@ import { getGlobalStyles } from "@/styles/globalStyles";
 import WordOfDayModal from "@/components/games/WordOfDayModal";
 import DailyRewardsModal from "@/components/games/rewards/DailyRewardsModal";
 
-import RankingsModal from "@/components/games/rankings/RankingsModal";
 // Component imports
 import BackgroundEffects from "@/components/games/dashboard/BackgroundEffects";
 import DashboardHeader from "@/components/games/dashboard/DashboardHeader";
@@ -17,6 +16,7 @@ import GamesList from "@/components/games/dashboard/GamesList";
 import ProgressStats from "@/components/games/dashboard/ProgressStats";
 import ErrorDisplay from "@/components/games/common/ErrorDisplay";
 import { useProgressModal } from "@/components/games/ProgressModalProvider";
+import { useRankingsModal } from "@/components/games/RankingsModalProvider";
 
 // Custom hooks
 import useGameDashboard from "@/hooks/games/useGameDashboard";
@@ -47,8 +47,8 @@ const Games = () => {
   );
   const lastClickRef = useRef<number>(0);
 
-  // NEW: Rankings modal state
-  const [showRankingsModal, setShowRankingsModal] = useState(false);
+  // Get the rankings modal functions
+  const { showRankingsModal } = useRankingsModal();
 
   // Get progress from centralized store
   const { fetchProgress, isLoading: progressLoading } = useProgressStore();
@@ -81,14 +81,11 @@ const Games = () => {
   // Combined loading state
   const isLoading = progressLoading || dashboardLoading;
 
-  // NEW: Rankings handlers
+  // Update the rankings handlers
   const handleShowRankings = useCallback(() => {
-    setShowRankingsModal(true);
-  }, []);
-
-  const handleCloseRankings = useCallback(() => {
-    setShowRankingsModal(false);
-  }, []);
+    console.log("[Games] Opening rankings modal");
+    showRankingsModal();
+  }, [showRankingsModal]);
 
   // Initialize progress data - check if all data is ready
   useEffect(() => {
@@ -323,11 +320,6 @@ const Games = () => {
         <DailyRewardsModal
           visible={isDailyRewardsModalVisible}
           onClose={hideDailyRewardsModal}
-        />
-
-        <RankingsModal
-          visible={showRankingsModal}
-          onClose={handleCloseRankings}
         />
       </SafeAreaView>
     </View>

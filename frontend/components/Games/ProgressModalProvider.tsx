@@ -15,6 +15,7 @@ import { EnhancedGameModeProgress } from "@/types/gameProgressTypes";
 import { InteractionManager } from "react-native";
 import { getGameModeGradient } from "@/utils/gameUtils";
 import ModalLoading from "../ModalLoading";
+import CloseButton from "@/components/games/buttons/CloseButton";
 
 // Create context for modal control
 const ProgressModalContext = createContext<{
@@ -74,17 +75,28 @@ export const ProgressModalProvider: React.FC<{ children: React.ReactNode }> = ({
       // Show modal immediately
       setVisible(true);
 
-      // IMPORTANT: Defer heavy content rendering until after animation completes
+      // IMPORTANT: Check if progress data is preloaded, if so render immediately
       InteractionManager.runAfterInteractions(() => {
         const interactionDelay = Date.now() - startTime;
         console.log(
           `[ProgressModal] Interactions completed in ${interactionDelay}ms`
         );
 
-        // Add a small timeout to ensure animation has completed
-        setTimeout(() => {
+        // Check if progress data is already preloaded
+        const hasPreloadedData = preloadedData !== null;
+
+        if (hasPreloadedData) {
+          // If data is preloaded, show content immediately
+          console.log(
+            `[ProgressModal] Using preloaded data, showing content immediately`
+          );
           setContentReady(true);
-        }, 100);
+        } else {
+          // If not preloaded, add small delay
+          setTimeout(() => {
+            setContentReady(true);
+          }, 100);
+        }
       });
     },
     []
@@ -92,11 +104,12 @@ export const ProgressModalProvider: React.FC<{ children: React.ReactNode }> = ({
 
   // Hide modal function
   const hideProgressModal = useCallback(() => {
+    console.log(`[ProgressModalProvider] Closing progress modal`);
     // Hide immediately - animate out using Modal's built-in animation
     setVisible(false);
   }, []);
 
-  // Replace the existing gradientColors code with:
+  // Memoized gradient colors
   const gradientColors = React.useMemo(
     () => getGameModeGradient(gameMode),
     [gameMode]
@@ -124,7 +137,7 @@ export const ProgressModalProvider: React.FC<{ children: React.ReactNode }> = ({
             useNativeDriver
             style={styles.container}
           >
-            {/* First phase: show loading spinner with gradient */}
+            {/* First phase: show loading spinner with gradient - NO HEADER */}
             {!contentReady && (
               <LinearGradient
                 colors={gradientColors}
@@ -132,25 +145,21 @@ export const ProgressModalProvider: React.FC<{ children: React.ReactNode }> = ({
                 start={{ x: 0, y: 0 }}
                 end={{ x: 1, y: 1 }}
               >
+                <CloseButton size={17} onPress={hideProgressModal} />
                 <ModalLoading />
               </LinearGradient>
             )}
 
-            {/* Second phase: render actual content */}
+            {/* Second phase: render actual content - NO SEPARATE ANIMATION */}
             {contentReady && (
-              <Animatable.View
-                animation="fadeIn"
-                duration={300}
-                useNativeDriver
-                style={styles.contentContainer}
-              >
+              <View style={styles.contentContainer}>
                 <GameProgressModalContent
                   gameMode={gameMode}
                   gameTitle={gameTitle}
                   preloadedData={preloadedData}
                   onClose={hideProgressModal}
                 />
-              </Animatable.View>
+              </View>
             )}
           </Animatable.View>
         </View>
@@ -165,6 +174,7 @@ const styles = StyleSheet.create({
     backgroundColor: "rgba(0, 0, 0, 0.6)",
     justifyContent: "center",
     alignItems: "center",
+    paddingHorizontal: 16,
   },
   container: {
     width: "90%",
@@ -177,8 +187,26 @@ const styles = StyleSheet.create({
   },
   loadingContainer: {
     flex: 1,
+    padding: 20,
+    position: "relative",
     justifyContent: "center",
     alignItems: "center",
+  },
+  headerContent: {
+    flexDirection: "row",
+    justifyContent: "center",
+    alignItems: "center",
+    marginBottom: 20,
+    position: "absolute",
+    top: 60,
+    left: 0,
+    right: 0,
+  },
+  title: {
+    fontSize: 20,
+    fontFamily: "Poppins-SemiBold",
+    color: "#FFF",
+    textAlign: "center",
   },
   loadingText: {
     color: "#fff",
