@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect } from "react";
+import React, { useCallback, useEffect, useState, useMemo } from "react";
 import {
   View,
   Text,
@@ -12,158 +12,174 @@ import useProgressStore from "@/store/games/useProgressStore";
 import { getGameModeGradient } from "@/utils/gameUtils";
 
 interface GameCardProps {
-  game: any;
+  game: GameOption;
   onGamePress: () => void;
   onProgressPress: () => void;
 }
 
-const GameCard = React.memo(
-  ({ game, onGamePress, onProgressPress }: GameCardProps) => {
-    const { getGameModeProgress, lastUpdated } = useProgressStore();
+const GameCard: React.FC<GameCardProps> = ({
+  game,
+  onGamePress,
+  onProgressPress,
+}) => {
+  const { getGameModeProgress, lastUpdated } = useProgressStore();
 
-    // Get progress data for this game mode
-    const progress = getGameModeProgress(game.id);
+  // Get progress data for this game mode
+  const progress = getGameModeProgress(game.id);
 
-    // Log when progress updates for this specific game card
-    useEffect(() => {
-      console.log(
-        `[GameCard] ${game.id} progress updated:`,
-        { completed: progress.completed, total: progress.total },
-        `at ${new Date(lastUpdated).toISOString()}`
-      );
-    }, [progress.completed, progress.total, game.id, lastUpdated]);
+  // SIMPLE FIX: Just prevent all progress updates for 5 seconds after component mount
+  const [componentMountTime] = useState(() => Date.now());
+  const [allowProgressUpdates, setAllowProgressUpdates] = useState(false);
 
-    // Calculate completion percentage
-    const completionPercentage =
-      progress.total > 0
-        ? Math.round((progress.completed / progress.total) * 100)
-        : 0;
+  // Enable progress updates after 5 seconds
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setAllowProgressUpdates(true);
+      console.log(`[GameCard] Enabling progress updates for ${game.id}`);
+    }, 3000);
 
-    // Update the preload effect in GameCard
-    useEffect(() => {
-      let isMounted = true;
+    return () => clearTimeout(timer);
+  }, [game.id]);
 
-      // This should only run on mount and when game.id changes
-      const preloadData = async () => {
-        try {
-          if (!isMounted) return;
+  // ONLY update progress display when allowed
+  useEffect(() => {
+    if (!allowProgressUpdates) return;
 
-          // FIXED: Don't update lastUpdated here
-          // Only clear this specific game's enhanced progress
-          useProgressStore.setState((state) => ({
-            enhancedProgress: {
-              ...state.enhancedProgress,
-              [game.id]: null,
-            },
-          }));
-
-          // Still preload data
-          await useProgressStore.getState().getEnhancedGameProgress(game.id);
-          console.log(`[GameCard] Preloaded data for ${game.id}`);
-        } catch (error) {
-          // Ignore errors
-        }
-      };
-
-      preloadData();
-
-      return () => {
-        isMounted = false;
-      };
-    }, [game.id]); // FIXED: Remove lastUpdated from dependencies
-
-    // Ultra-fast progress press handler with haptic feedback
-    const handleProgressPress = useCallback(() => {
-      // Native feedback immediately (if available)
-      if (Platform && Platform.OS === "ios" && "Haptics" in window) {
-        // @ts-ignore - Expo's haptics might be available
-        Haptics?.selectionAsync?.();
-      }
-
-      // Call immediately without any async operations
-      onProgressPress();
-    }, [onProgressPress]);
-
-    // Get the consistent gradient colors from the same source as GameProgressModal
-    const getCardGradientColors = () => {
-      // Get gradient from shared utility or fallback to game-specific ones
-      return getGameModeGradient(
-        game.id,
-        game.gradientColors as [string, string]
-      );
-    };
-
-    const gradientColors = getCardGradientColors();
-
-    return (
-      <View style={styles.gameCard}>
-        <LinearGradient
-          colors={gradientColors}
-          start={{ x: 0, y: 0 }}
-          end={{ x: 1, y: 1 }}
-          style={styles.gameCardGradient}
-        >
-          {/* Difficulty Badge */}
-          <View style={styles.difficultyBadge}>
-            <Text style={styles.difficultyText}>{game.difficulty}</Text>
-          </View>
-
-          {/* Game Header */}
-          <View style={styles.gameHeader}>
-            <View style={styles.gameIconContainer}>
-              <View style={styles.gameIconBg}>{game.icon}</View>
-            </View>
-            <View style={styles.gameInfo}>
-              <Text style={styles.gameTitle} numberOfLines={1}>
-                {game.title}
-              </Text>
-              <Text style={styles.gameDescription} numberOfLines={1}>
-                {game.description}
-              </Text>
-            </View>
-          </View>
-
-          {/* Stats Row */}
-          <View style={styles.gameStatsRow}>
-            <View style={styles.statItem}>
-              <Text style={styles.statValue}>{progress.completed}</Text>
-              <Text style={styles.statLabel}>Completed</Text>
-            </View>
-            <View style={styles.statDivider} />
-            <View style={styles.statItem}>
-              <Text style={styles.statValue}>{completionPercentage}%</Text>
-              <Text style={styles.statLabel}>Progress</Text>
-            </View>
-          </View>
-
-          {/* Action Buttons */}
-          <View style={styles.gameActionsRow}>
-            <TouchableOpacity
-              style={styles.progressBtn}
-              onPress={handleProgressPress}
-              activeOpacity={0.7} // Better touch feedback
-              delayPressIn={0} // Immediate response
-            >
-              <TrendingUp width={14} height={14} color="#fff" />
-              <Text style={styles.progressBtnText}>View Progress</Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              style={[styles.playBtn, { backgroundColor: game.color }]}
-              onPress={onGamePress}
-            >
-              <Play width={14} height={14} color="#fff" />
-              <Text style={styles.playBtnText}>PLAY</Text>
-            </TouchableOpacity>
-          </View>
-
-          <View style={styles.gameDecoShape1} />
-          <View style={styles.gameDecoShape2} />
-        </LinearGradient>
-      </View>
+    console.log(
+      `[GameCard] ${game.id} progress updated:`,
+      { completed: progress.completed, total: progress.total },
+      `at ${new Date(lastUpdated).toISOString()}`
     );
-  }
-);
+  }, [
+    progress.completed,
+    progress.total,
+    game.id,
+    lastUpdated,
+    allowProgressUpdates,
+  ]);
+
+  // Preload data (also delayed)
+  useEffect(() => {
+    if (!allowProgressUpdates) return;
+
+    let isMounted = true;
+    const timeoutId = setTimeout(async () => {
+      try {
+        if (!isMounted) return;
+
+        await useProgressStore.getState().getEnhancedGameProgress(game.id);
+
+        if (isMounted) {
+          console.log(`[GameCard] Preloaded data for ${game.id}`);
+        }
+      } catch (error) {
+        // Silently ignore errors
+      }
+    }, 500);
+
+    return () => {
+      isMounted = false;
+      clearTimeout(timeoutId);
+    };
+  }, [game.id, allowProgressUpdates]);
+
+  // Memoized handlers
+  const handleProgressPress = useCallback(() => {
+    if (Platform.OS === "ios" && "Haptics" in window) {
+      // @ts-ignore
+      Haptics?.selectionAsync?.();
+    }
+    onProgressPress();
+  }, [onProgressPress]);
+
+  const handleGamePress = useCallback(() => {
+    onGamePress();
+  }, [onGamePress]);
+
+  const dynamicStyles = useMemo(
+    () => ({
+      playBtn: [styles.playBtn, { backgroundColor: game.color }],
+    }),
+    [game.color]
+  );
+
+  const completionPercentage = useMemo(() => {
+    return progress.total > 0
+      ? Math.round((progress.completed / progress.total) * 100)
+      : 0;
+  }, [progress.completed, progress.total]);
+
+  const gradientColors = useMemo(() => {
+    return getGameModeGradient(
+      game.id,
+      game.gradientColors as [string, string]
+    );
+  }, [game.id, game.gradientColors]);
+
+  return (
+    <View style={styles.gameCard}>
+      <LinearGradient
+        colors={gradientColors}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 1, y: 1 }}
+        style={styles.gameCardGradient}
+      >
+        <View style={styles.difficultyBadge}>
+          <Text style={styles.difficultyText}>{game.difficulty}</Text>
+        </View>
+
+        <View style={styles.gameHeader}>
+          <View style={styles.gameIconContainer}>
+            <View style={styles.gameIconBg}>{game.icon}</View>
+          </View>
+          <View style={styles.gameInfo}>
+            <Text style={styles.gameTitle} numberOfLines={1}>
+              {game.title}
+            </Text>
+            <Text style={styles.gameDescription} numberOfLines={1}>
+              {game.description}
+            </Text>
+          </View>
+        </View>
+
+        <View style={styles.gameStatsRow}>
+          <View style={styles.statItem}>
+            <Text style={styles.statValue}>{progress.completed}</Text>
+            <Text style={styles.statLabel}>Completed</Text>
+          </View>
+          <View style={styles.statDivider} />
+          <View style={styles.statItem}>
+            <Text style={styles.statValue}>{completionPercentage}%</Text>
+            <Text style={styles.statLabel}>Progress</Text>
+          </View>
+        </View>
+
+        <View style={styles.gameActionsRow}>
+          <TouchableOpacity
+            style={styles.progressBtn}
+            onPress={handleProgressPress}
+            activeOpacity={0.7}
+            delayPressIn={0}
+          >
+            <TrendingUp width={14} height={14} color="#fff" />
+            <Text style={styles.progressBtnText}>View Progress</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={dynamicStyles.playBtn}
+            onPress={handleGamePress}
+          >
+            <Play width={14} height={14} color="#fff" />
+            <Text style={styles.playBtnText}>PLAY</Text>
+          </TouchableOpacity>
+        </View>
+
+        <View style={styles.gameDecoShape1} />
+        <View style={styles.gameDecoShape2} />
+      </LinearGradient>
+    </View>
+  );
+};
 
 const styles = StyleSheet.create({
   gameCard: {
@@ -229,9 +245,6 @@ const styles = StyleSheet.create({
     backgroundColor: "rgba(255, 255, 255, 0.2)",
     borderWidth: 1,
     borderColor: "rgba(255, 255, 255, 0.3)",
-  },
-  progressBtnLoading: {
-    backgroundColor: "rgba(255, 255, 255, 0.3)",
   },
   progressBtnText: {
     fontSize: 12,
@@ -318,4 +331,4 @@ const styles = StyleSheet.create({
 });
 
 GameCard.displayName = "GameCard";
-export default GameCard;
+export default React.memo(GameCard);
