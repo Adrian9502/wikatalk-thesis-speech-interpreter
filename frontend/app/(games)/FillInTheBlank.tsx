@@ -330,7 +330,6 @@ const FillInTheBlank: React.FC<FillInTheBlankProps> = React.memo(
           timerRunning={timerRunning}
           gameStatus={gameStatus}
           difficulty={difficulty}
-          focusArea={gameConfig.focusArea}
           showTimer={true}
           initialTime={gameConfig.initialTime}
           isStarted={isStarted}
@@ -344,7 +343,6 @@ const FillInTheBlank: React.FC<FillInTheBlankProps> = React.memo(
             <GamePlayingContent
               timerRunning={timerRunning}
               difficulty={difficulty}
-              focusArea={gameConfig.focusArea}
               isStarted={isStarted}
               gameStatus={gameStatus}
               initialTime={gameConfig.initialTime}

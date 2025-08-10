@@ -23,7 +23,6 @@ interface GameContainerProps {
   children: React.ReactNode;
   variant?: "double" | "triple";
   difficulty?: string;
-  focusArea?: string;
   showTimer?: boolean;
   initialTime?: number;
   isStarted?: boolean;
@@ -42,7 +41,6 @@ const GameContainer: React.FC<GameContainerProps> = ({
   children,
   variant = "triple",
   difficulty,
-  focusArea,
   showTimer,
   initialTime,
   isStarted,
@@ -78,7 +76,6 @@ const GameContainer: React.FC<GameContainerProps> = ({
           hideBack={true}
           showStats={showStats as boolean}
           difficulty={difficulty}
-          focusArea={focusArea}
           showTimer={showTimer}
           timerRunning={timerRunning}
           initialTime={initialTime}

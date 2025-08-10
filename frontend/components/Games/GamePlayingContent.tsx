@@ -4,7 +4,6 @@ import { View, StyleSheet, Animated } from "react-native";
 interface GamePlayingContentProps {
   timerRunning: boolean;
   difficulty: string;
-  focusArea?: string;
   children: React.ReactNode;
   isStarted?: boolean;
   gameStatus?: "idle" | "ready" | "playing" | "completed";

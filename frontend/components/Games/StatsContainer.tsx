@@ -3,7 +3,6 @@ import { View, StyleSheet, Text, Image } from "react-native";
 import * as Animatable from "react-native-animatable";
 import Timer from "@/components/games/Timer";
 import DifficultyBadge from "@/components/games/DifficultyBadge";
-import FocusAreaBadge from "@/components/games/FocusAreaBadge";
 import { Clock } from "react-native-feather";
 import { BASE_COLORS } from "@/constant/colors";
 import { formatTimerDisplay } from "@/utils/gameUtils";
@@ -20,7 +19,6 @@ interface RewardInfo {
 
 interface StatsContainerProps {
   difficulty: string;
-  focusArea?: string;
   showTimer?: boolean;
   timerRunning?: boolean;
   initialTime?: number;
@@ -36,7 +34,6 @@ interface StatsContainerProps {
 
 const StatsContainer: React.FC<StatsContainerProps> = ({
   difficulty,
-  focusArea = "Vocabulary",
   showTimer = false,
   timerRunning = false,
   initialTime = 0,
@@ -185,7 +182,7 @@ const StatsContainer: React.FC<StatsContainerProps> = ({
             style={styles.badgesSection}
           >
             <DifficultyBadge difficulty={difficulty} />
-            <FocusAreaBadge focusArea={focusArea} />
+            {/* REMOVED: <FocusAreaBadge ocusArea={focusArea} /> */}
           </Animatable.View>
         </>
       )}
@@ -193,7 +190,6 @@ const StatsContainer: React.FC<StatsContainerProps> = ({
   );
 };
 
-// UPDATED: Simplified styles without reset-related styles
 const styles = StyleSheet.create({
   statsContainer: {
     flexDirection: "row",
