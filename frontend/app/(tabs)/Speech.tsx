@@ -8,7 +8,7 @@ import {
   TouchableWithoutFeedback,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import React, { useEffect, useState, useRef } from "react";
+import React, { useEffect, useState, useRef, useCallback } from "react";
 import { StatusBar } from "expo-status-bar";
 import { LANGUAGE_INFO } from "@/constant/languages";
 import SwapButton from "@/components/speech/SwapButton";
@@ -30,6 +30,7 @@ const Speech = () => {
   const dynamicStyles = getGlobalStyles(activeTheme.backgroundColor);
   // Get safe area insets
   const insets = useSafeAreaInsets();
+
   // Zustand store
   const {
     language1,
@@ -55,6 +56,10 @@ const Speech = () => {
   const [isBottomActive, setIsBottomActive] = useState(false);
   // Track content position
   const contentPosition = useRef(new Animated.Value(0)).current;
+
+  // NEW: Simple animation refs - only fade animation
+  const fadeAnim = useRef(new Animated.Value(0)).current;
+  const animationStartedRef = useRef(false);
 
   // Handle text field updates based on user
   const handleTextfield = (translatedText: string, transcribedText: string) => {
@@ -106,7 +111,26 @@ const Speech = () => {
     setIsBottomActive(position === "bottom");
   };
 
-  // Track keyboard visibility
+  // NEW: Optimized swap handler with callback to prevent re-renders
+  const handleSwapLanguages = useCallback(() => {
+    swapLanguages();
+  }, [swapLanguages]);
+
+  // NEW: Simple fade-in animation on component mount
+  useEffect(() => {
+    if (!animationStartedRef.current) {
+      animationStartedRef.current = true;
+
+      // Simple fade-in animation
+      Animated.timing(fadeAnim, {
+        toValue: 1,
+        duration: 1200,
+        useNativeDriver: true,
+      }).start();
+    }
+  }, [fadeAnim]);
+
+  // Track keyboard visibility - UNCHANGED
   useEffect(() => {
     const keyboardDidShowListener = Keyboard.addListener(
       "keyboardDidShow",
@@ -140,14 +164,14 @@ const Speech = () => {
     };
   }, [isBottomActive]);
 
-  // clear text on component mount
+  // clear text on component mount - UNCHANGED
   useEffect(() => {
     clearText("top");
     clearText("bottom");
     clearTranslationError(); // Clear any errors on component mount
   }, []);
 
-  // Calculate keyboard offset based on platform and tab bar height
+  // Calculate keyboard offset based on platform and tab bar height - UNCHANGED
   const keyboardOffset =
     Platform.OS === "ios"
       ? 90 + insets.bottom // For iOS include the bottom inset
@@ -166,13 +190,17 @@ const Speech = () => {
           keyboardVerticalOffset={keyboardOffset}
           enabled={true}
         >
+          {/* NEW: Simple fade animation wrapper - no other changes */}
           <Animated.View
             style={[
               styles.contentContainer,
-              { transform: [{ translateY: contentPosition }] },
+              {
+                opacity: fadeAnim, // Only add fade animation
+                transform: [{ translateY: contentPosition }], // Keep existing keyboard animation
+              },
             ]}
           >
-            {/* Top section */}
+            {/* Top section - UNCHANGED */}
             <LanguageSection
               position="top"
               handlePress={handleMicPress}
@@ -181,15 +209,15 @@ const Speech = () => {
               onTextAreaFocus={handleTextAreaFocus}
             />
 
-            {/* Middle Section - Exchange icon */}
+            {/* Middle Section - Exchange icon - UNCHANGED except for callback */}
             <View style={styles.middleSection}>
               <SwapButton
-                onPress={swapLanguages}
+                onPress={handleSwapLanguages}
                 borderStyle={styles.swapButtonBorder}
               />
             </View>
 
-            {/* Bottom section */}
+            {/* Bottom section - UNCHANGED */}
             <LanguageSection
               position="bottom"
               handlePress={handleMicPress}
@@ -200,7 +228,8 @@ const Speech = () => {
           </Animated.View>
         </KeyboardAvoidingView>
       </TouchableWithoutFeedback>
-      {/* Language Information Modal */}
+
+      {/* Language Information Modal - UNCHANGED */}
       {showLanguageInfo &&
         activeLanguageInfo &&
         LANGUAGE_INFO[activeLanguageInfo] && (
@@ -213,7 +242,7 @@ const Speech = () => {
           />
         )}
 
-      {/* Loading Indicator */}
+      {/* Loading Indicator - UNCHANGED */}
       {loading && <SpeechLoading />}
     </SafeAreaView>
   );
@@ -221,6 +250,7 @@ const Speech = () => {
 
 export default Speech;
 
+// Styles - COMPLETELY UNCHANGED
 const styles = StyleSheet.create({
   keyboardAvoidingView: {
     flex: 1,
