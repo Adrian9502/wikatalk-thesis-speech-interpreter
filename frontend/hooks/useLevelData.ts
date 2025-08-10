@@ -25,6 +25,8 @@ export const useLevelData = (gameMode: string | string[] | undefined) => {
 
   // NEW: Track current user to detect account changes
   const [lastUserId, setLastUserId] = useState<string | null>(null);
+  const [isProcessingInBackground, setIsProcessingInBackground] =
+    useState(false);
 
   const {
     fetchQuestionsByMode,
@@ -38,6 +40,13 @@ export const useLevelData = (gameMode: string | string[] | undefined) => {
 
   // ENHANCED: Main effect to get levels data with better precomputed data usage
   useEffect(() => {
+    if (isProcessingInBackground) {
+      console.log(
+        `[useLevelData] Background processing in progress, skipping duplicate request`
+      );
+      return;
+    }
+
     const loadLevels = async () => {
       try {
         setIsLoading(true);
@@ -105,7 +114,7 @@ export const useLevelData = (gameMode: string | string[] | undefined) => {
                 await progressStore.fetchProgress(false);
                 const progressArray: any[] = progressStore.progress || [];
 
-                const currentLevels = convertQuizToLevels(
+                const currentLevels = await convertQuizToLevels(
                   safeGameMode,
                   questions,
                   progressArray
@@ -186,7 +195,7 @@ export const useLevelData = (gameMode: string | string[] | undefined) => {
         );
 
         // Convert to levels with fresh progress data
-        const currentLevels = convertQuizToLevels(
+        const currentLevels = await convertQuizToLevels(
           safeGameMode,
           questions,
           progressArray
@@ -228,6 +237,13 @@ export const useLevelData = (gameMode: string | string[] | undefined) => {
         );
         setError(err instanceof Error ? err.message : String(err));
         setIsLoading(false);
+      } finally {
+        if (isProcessingInBackground) {
+          // Add delay before allowing next background process
+          setTimeout(() => {
+            setIsProcessingInBackground(false);
+          }, 1000);
+        }
       }
     };
 
@@ -239,6 +255,7 @@ export const useLevelData = (gameMode: string | string[] | undefined) => {
     questions,
     fetchQuestionsByMode,
     lastUserId,
+    isProcessingInBackground,
     // REMOVED: globalProgress dependency to prevent unnecessary reloads
   ]);
 

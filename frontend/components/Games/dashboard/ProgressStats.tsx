@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { View, Text, StyleSheet, Animated } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { Target, Award } from "react-native-feather";
@@ -16,19 +16,47 @@ const ProgressStats = React.memo(() => {
 
   const [shouldAnimate] = useState(!PROGRESS_ANIMATION_PLAYED);
 
+  // OPTIMIZED: Debounced state for smooth updates
+  const [displayStats, setDisplayStats] = useState({
+    completed: totalCompletedCount,
+    total: totalQuizCount,
+  });
+
+  // Debounce timer ref
+  const updateTimerRef = useRef<NodeJS.Timeout | null>(null);
+
   // Simple animated values
   const fadeAnim = useState(() => new Animated.Value(shouldAnimate ? 0 : 1))[0];
   const slideAnim = useState(
     () => new Animated.Value(shouldAnimate ? 25 : 0)
   )[0];
 
-  // Log updates (no state changes to prevent re-renders)
+  // OPTIMIZED: Debounce progress updates to prevent rapid re-renders during animation
   useEffect(() => {
-    console.log("[ProgressStats] Progress updated:", {
-      totalCompletedCount,
-      totalQuizCount,
-      timestamp: new Date(lastUpdated).toISOString(),
-    });
+    // Clear existing timer
+    if (updateTimerRef.current) {
+      clearTimeout(updateTimerRef.current);
+    }
+
+    // Debounce the update - only update UI after values stabilize
+    updateTimerRef.current = setTimeout(() => {
+      console.log("[ProgressStats] Progress updated:", {
+        totalCompletedCount,
+        totalQuizCount,
+        timestamp: new Date(lastUpdated).toISOString(),
+      });
+
+      setDisplayStats({
+        completed: totalCompletedCount,
+        total: totalQuizCount,
+      });
+    }, 500); // 500ms debounce to let animation complete
+
+    return () => {
+      if (updateTimerRef.current) {
+        clearTimeout(updateTimerRef.current);
+      }
+    };
   }, [totalCompletedCount, totalQuizCount, lastUpdated]);
 
   // SIMPLE: One animation
@@ -53,6 +81,21 @@ const ProgressStats = React.memo(() => {
       });
     }, 200);
   }, [shouldAnimate, fadeAnim, slideAnim]);
+
+  // OPTIMIZED: Memoized completion percentage
+  const completionPercentage = React.useMemo(() => {
+    return displayStats.total > 0
+      ? Math.round((displayStats.completed / displayStats.total) * 100)
+      : 0;
+  }, [displayStats.completed, displayStats.total]);
+
+  // OPTIMIZED: Memoized summary text
+  const summaryText = React.useMemo(() => {
+    if (displayStats.completed === 0) {
+      return `Start playing to track your progress! ${displayStats.total} quizzes available`;
+    }
+    return `${completionPercentage}% completion rate across all game modes (${displayStats.completed}/${displayStats.total})`;
+  }, [displayStats.completed, displayStats.total, completionPercentage]);
 
   return (
     <Animated.View
@@ -79,7 +122,7 @@ const ProgressStats = React.memo(() => {
             <View style={styles.statIconContainer}>
               <Target width={24} height={24} color="#fff" />
             </View>
-            <Text style={styles.statNumber}>{totalCompletedCount}</Text>
+            <Text style={styles.statNumber}>{displayStats.completed}</Text>
             <Text style={styles.statText}>Levels Completed</Text>
           </LinearGradient>
         </View>
@@ -92,20 +135,14 @@ const ProgressStats = React.memo(() => {
             <View style={styles.statIconContainer}>
               <Award width={24} height={24} color="#fff" />
             </View>
-            <Text style={styles.statNumber}>{totalQuizCount}</Text>
+            <Text style={styles.statNumber}>{displayStats.total}</Text>
             <Text style={styles.statText}>Total Quizzes</Text>
           </LinearGradient>
         </View>
       </View>
 
       <View style={styles.progressSummaryContainer}>
-        <Text style={styles.progressSummaryText}>
-          {totalCompletedCount === 0
-            ? `Start playing to track your progress! ${totalQuizCount} quizzes available`
-            : `${Math.round(
-                (totalCompletedCount / totalQuizCount) * 100
-              )}% completion rate across all game modes (${totalCompletedCount}/${totalQuizCount})`}
-        </Text>
+        <Text style={styles.progressSummaryText}>{summaryText}</Text>
       </View>
     </Animated.View>
   );

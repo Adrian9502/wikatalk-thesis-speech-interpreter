@@ -628,7 +628,7 @@ export const useSplashStore = create<SplashState>((set, get) => ({
           const progressArray = Array.isArray(globalProgress)
             ? globalProgress
             : [];
-          const levels = convertQuizToLevels(
+          const levels = await convertQuizToLevels(
             mode,
             questions as QuizQuestions,
             progressArray
@@ -890,7 +890,11 @@ export const useSplashStore = create<SplashState>((set, get) => ({
           const progress = progressData || progressStore.progress || [];
 
           if (questions && Array.isArray(progress)) {
-            gameLevels = convertQuizToLevels(gameMode, questions, progress);
+            gameLevels = await convertQuizToLevels(
+              gameMode,
+              questions,
+              progress
+            );
           }
         }
 

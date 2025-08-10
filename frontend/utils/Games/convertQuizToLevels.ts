@@ -1,10 +1,10 @@
 import { LevelData, QuizQuestions } from "@/types/gameTypes";
 
-export const convertQuizToLevels = (
+export const convertQuizToLevels = async (
   gameMode: string,
   quizData: QuizQuestions,
   userProgressData: any[] = []
-): LevelData[] => {
+): Promise<LevelData[]> => {
   // REDUCED: Only log in development and less frequently
   if (__DEV__ && Math.random() < 0.1) {
     // Only 10% of calls in dev
@@ -200,10 +200,17 @@ export const convertQuizToLevels = (
     }
   };
 
-  // Convert to level objects
-  const allLevels: LevelData[] = allQuestions.map(
-    (item: any, index: number) => {
-      const questionId = item.questionId || item.id || index + 1;
+  // OPTIMIZED: Batch process large datasets
+  const BATCH_SIZE = 20;
+  const allLevels: LevelData[] = [];
+
+  // Process questions in batches to avoid blocking main thread
+  for (let i = 0; i < allQuestions.length; i += BATCH_SIZE) {
+    const batch = allQuestions.slice(i, i + BATCH_SIZE);
+
+    const batchLevels = batch.map((item: any, index: number) => {
+      const globalIndex = i + index;
+      const questionId = item.questionId || item.id || globalIndex + 1;
       const difficulty = item.difficultyCategory || "easy";
       const levelStatus = getLevelStatus(questionId, difficulty);
 
@@ -229,8 +236,16 @@ export const convertQuizToLevels = (
       };
 
       return level;
+    });
+
+    allLevels.push(...batchLevels);
+
+    // OPTIMIZATION: Yield control periodically for large datasets
+    if (i > 0 && i % (BATCH_SIZE * 5) === 0) {
+      // Let React Native render frame before continuing
+      await new Promise((resolve) => setTimeout(resolve, 0));
     }
-  );
+  }
 
   const completedCount = allLevels.filter(
     (l) => l.status === "completed"

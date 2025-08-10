@@ -69,9 +69,9 @@ const AnswerReview: React.FC<AnswerReviewProps> = ({
   levelTitle,
   levelString,
   actualTitle,
-  animation = "fadeInUp",
-  duration = 800,
-  delay = 300,
+  animation = "fadeIn", // CHANGED: Use simpler animation
+  duration = 600, // CHANGED: Reduced duration
+  delay = 100, // CHANGED: Reduced delay
   questionLabel = "Question:",
   answerLabel = "Your Answer:",
   isBackgroundCompletion = false,
@@ -169,7 +169,6 @@ const AnswerReview: React.FC<AnswerReviewProps> = ({
         fetchCoinsBalance(true);
 
         if (onTimerReset) {
-          console.log("[AnswerReview] Calling parent's onTimerReset callback");
           onTimerReset();
         }
 
@@ -181,33 +180,18 @@ const AnswerReview: React.FC<AnswerReviewProps> = ({
 
         // Clear caches
         const gameStore = useGameStore.getState();
-        gameStore.resetTimer();
-        gameStore.setTimeElapsed(0);
-
-        const progressStore = useProgressStore.getState();
-        progressStore.clearCache();
-        progressStore.fetchProgress(true);
+        gameStore.clearEnhancedProgressCache?.();
 
         const splashStore = useSplashStore.getState();
-        const existingProgress = splashStore.getIndividualProgress
-          ? splashStore.getIndividualProgress(String(levelId))
-          : null;
-
         if (splashStore.setIndividualProgress) {
-          const resetProgress = existingProgress
-            ? {
-                ...existingProgress,
-                totalTimeSpent: 0,
-                lastAttemptTime: 0,
-                attempts: [],
-              }
-            : {
-                totalTimeSpent: 0,
-                lastAttemptTime: 0,
-                attempts: [],
-                completed: false,
-                quizId: String(levelId),
-              };
+          const resetProgress = {
+            quizId: String(levelId),
+            timeSpent: 0,
+            lastAttemptTime: 0,
+            attempts: [],
+            completed: false,
+            quizId: String(levelId),
+          };
 
           splashStore.setIndividualProgress(String(levelId), resetProgress);
         }
@@ -238,13 +222,14 @@ const AnswerReview: React.FC<AnswerReviewProps> = ({
 
   return (
     <>
+      {/* SIMPLIFIED: Main container with single fadeIn animation */}
       <Animatable.View
         animation={animation}
         duration={duration}
         delay={delay}
         style={styles.container}
       >
-        {/* Hero Result Card - Larger, more prominent */}
+        {/* Hero Result Card - KEEP bounceIn animation */}
         <Animatable.View
           animation="bounceIn"
           duration={1000}
@@ -275,17 +260,13 @@ const AnswerReview: React.FC<AnswerReviewProps> = ({
             <Text style={styles.heroMessage}>{resultData.message}</Text>
 
             {timeElapsed === 0 && (
-              <Animatable.View
-                animation="bounceIn"
-                duration={800}
-                style={styles.resetSuccessContainer}
-              >
+              <View style={styles.resetSuccessContainer}>
                 <View style={styles.resetSuccessIndicator}>
                   <Text style={styles.resetSuccessText}>
                     🎉 Timer Reset Successfully!
                   </Text>
                 </View>
-              </Animatable.View>
+              </View>
             )}
 
             <View style={styles.heroDecoration1} />
@@ -294,12 +275,12 @@ const AnswerReview: React.FC<AnswerReviewProps> = ({
           </LinearGradient>
         </Animatable.View>
 
-        {/* Reward Card */}
+        {/* Reward Card - SIMPLIFIED: Single fadeIn with slight delay */}
         {rewardInfo && rewardInfo.coins > 0 && isCorrect && (
           <Animatable.View
-            animation="bounceIn"
-            duration={800}
-            delay={delay + 800}
+            animation="fadeIn"
+            duration={500}
+            delay={delay + 400}
             style={styles.rewardFloatingCard}
           >
             <LinearGradient
@@ -308,14 +289,12 @@ const AnswerReview: React.FC<AnswerReviewProps> = ({
               start={{ x: 0, y: 0 }}
               end={{ x: 1, y: 1 }}
             >
-              {/* Top Row - Title with decorative emojis */}
               <View style={styles.rewardTopRow}>
-                <Text style={styles.rewardEmoji}>🎉</Text>
+                <Text>🎉</Text>
                 <Text style={styles.rewardTitle}>Reward Earned!</Text>
-                <Text style={styles.rewardEmoji}>✨</Text>
+                <Text>✨</Text>
               </View>
 
-              {/* Main Content Row */}
               <View style={styles.rewardMainRow}>
                 <View style={styles.rewardCoinsSection}>
                   <View style={styles.rewardCoinsDisplay}>
@@ -330,9 +309,7 @@ const AnswerReview: React.FC<AnswerReviewProps> = ({
                 </View>
               </View>
 
-              {/* Bottom Row - Tier Badge */}
               <Text style={styles.rewardSubtitle}>{rewardInfo.label}</Text>
-              {/* decor */}
               <View style={styles.heroDecoration1} />
               <View style={styles.heroDecoration2} />
               <View style={styles.heroDecoration3} />
@@ -340,13 +317,12 @@ const AnswerReview: React.FC<AnswerReviewProps> = ({
           </Animatable.View>
         )}
 
-        {/* Stats Row - Horizontal layout with rounded cards */}
+        {/* Stats Row - SIMPLIFIED: Single fadeIn */}
         <View style={styles.statsRow}>
-          {/* Level Info Card */}
           <Animatable.View
-            animation="slideInLeft"
-            duration={600}
-            delay={delay + 400}
+            animation="fadeIn"
+            duration={400}
+            delay={delay + 500}
             style={styles.statsCard}
           >
             <View style={styles.levelInfoCard}>
@@ -355,11 +331,10 @@ const AnswerReview: React.FC<AnswerReviewProps> = ({
             </View>
           </Animatable.View>
 
-          {/* Time Card */}
           <Animatable.View
-            animation="slideInRight"
-            duration={600}
-            delay={delay + 500}
+            animation="fadeIn"
+            duration={400}
+            delay={delay + 600}
             style={styles.statsCard}
           >
             <View style={styles.timeCard}>
@@ -389,11 +364,11 @@ const AnswerReview: React.FC<AnswerReviewProps> = ({
           </Animatable.View>
         </View>
 
-        {/* Badges Row - Curved layout */}
+        {/* Badges Row - SIMPLIFIED: Single fadeIn */}
         <Animatable.View
-          animation="fadeInUp"
-          duration={600}
-          delay={delay + 600}
+          animation="fadeIn"
+          duration={400}
+          delay={delay + 700}
           style={styles.badgesRow}
         >
           <View style={styles.curvedBadgeContainer}>
@@ -401,11 +376,12 @@ const AnswerReview: React.FC<AnswerReviewProps> = ({
             <FocusAreaBadge focusArea={focusArea} />
           </View>
         </Animatable.View>
-        {/* Combined Q&A Card */}
+
+        {/* Combined Q&A Card - SIMPLIFIED: Single fadeIn */}
         <Animatable.View
-          animation="fadeInUp"
-          duration={700}
-          delay={delay + 700}
+          animation="fadeIn"
+          duration={500}
+          delay={delay + 800}
           style={styles.combinedCardContainer}
         >
           <LinearGradient
@@ -414,15 +390,11 @@ const AnswerReview: React.FC<AnswerReviewProps> = ({
             start={{ x: 0, y: 0 }}
             end={{ x: 1, y: 1 }}
           >
-            {/* Level Summary Title*/}
-            <Animatable.View
-              animation="fadeInUp"
-              duration={600}
-              delay={delay + 650}
-              style={styles.sectionTitleContainer}
-            >
+            {/* Level Summary Title - NO separate animation */}
+            <View style={styles.sectionTitleContainer}>
               <Text style={styles.sectionTitleText}>Level Summary</Text>
-            </Animatable.View>
+            </View>
+
             {/* Question Section */}
             <View style={styles.cardSection}>
               <View style={styles.cardHeader}>
@@ -574,8 +546,6 @@ const styles = StyleSheet.create({
     borderRadius: 30,
     backgroundColor: "rgba(255, 255, 255, 0.06)",
   },
-
-  // Timer reset successful message
   resetSuccessContainer: {
     marginTop: 16,
     alignItems: "center",
@@ -644,8 +614,6 @@ const styles = StyleSheet.create({
     textAlign: "center",
     fontSize: 16,
   },
-
-  // Reset Section Styles - Only the positioning style, ResetButton handles the rest
   resetSection: {
     position: "absolute",
     bottom: 16,
@@ -668,7 +636,6 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: "rgba(255, 255, 255, 0.15)",
   },
-  // Reward style
   rewardFloatingCard: {
     marginBottom: 24,
     alignItems: "center",
@@ -681,7 +648,6 @@ const styles = StyleSheet.create({
     overflow: "hidden",
     width: "100%",
   },
-  // Top Row Layout
   rewardTopRow: {
     flexDirection: "row",
     alignItems: "center",
@@ -694,7 +660,6 @@ const styles = StyleSheet.create({
     color: BASE_COLORS.white,
     textAlign: "center",
   },
-  // Main Content Row
   rewardMainRow: {
     flexDirection: "row",
     alignItems: "center",
@@ -729,7 +694,6 @@ const styles = StyleSheet.create({
     letterSpacing: 0.3,
     textAlign: "center",
   },
-
   sectionTitleContainer: {
     paddingVertical: 8,
     borderRadius: 20,

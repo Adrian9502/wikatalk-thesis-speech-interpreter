@@ -287,9 +287,9 @@ export const useUserProgress = (quizId: string | number | "global") => {
   const updateProgress = useCallback(
     async (
       timeSpent: number,
-      completed: boolean,
       isCorrect: boolean,
-      difficulty?: string // NEW: Add difficulty parameter
+      completed: boolean,
+      difficulty: string
     ) => {
       if (!quizId || quizId === "global") {
         console.warn(
