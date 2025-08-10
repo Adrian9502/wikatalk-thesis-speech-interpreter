@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback, useRef } from "react";
 import {
   View,
   Text,
@@ -7,6 +7,7 @@ import {
   StyleSheet,
   TouchableWithoutFeedback,
   ActivityIndicator,
+  Animated, // NEW: Added Animated import
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import useThemeStore from "@/store/useThemeStore";
@@ -47,6 +48,57 @@ interface PronunciationStyles {
   loadingText: TextStyle;
 }
 
+// NEW: Animated PronunciationCard wrapper component
+const AnimatedPronunciationCard = React.memo(
+  ({
+    item,
+    index,
+    delay,
+    ...props
+  }: {
+    item: PronunciationItem;
+    index: number;
+    delay: number;
+    currentPlayingIndex: number | null;
+    isAudioLoading: boolean;
+    onPlayPress: (index: number, text: string) => void;
+  }) => {
+    const fadeAnim = useRef(new Animated.Value(0)).current;
+    const slideAnim = useRef(new Animated.Value(20)).current;
+
+    useEffect(() => {
+      // Start animation with the specified delay
+      const timer = setTimeout(() => {
+        Animated.parallel([
+          Animated.timing(fadeAnim, {
+            toValue: 1,
+            duration: 500,
+            useNativeDriver: true,
+          }),
+          Animated.timing(slideAnim, {
+            toValue: 0,
+            duration: 500,
+            useNativeDriver: true,
+          }),
+        ]).start();
+      }, delay);
+
+      return () => clearTimeout(timer);
+    }, [delay, fadeAnim, slideAnim]);
+
+    return (
+      <Animated.View
+        style={{
+          opacity: fadeAnim,
+          transform: [{ translateY: slideAnim }],
+        }}
+      >
+        <PronunciationCard {...props} item={item} index={index} />
+      </Animated.View>
+    );
+  }
+);
+
 const Pronounce = () => {
   const { activeTheme } = useThemeStore();
   const dynamicStyles = getGlobalStyles(activeTheme.backgroundColor);
@@ -58,6 +110,12 @@ const Pronounce = () => {
   const [allPronunciationData, setAllPronunciationData] = useState<
     PronunciationItem[]
   >([]);
+
+  // NEW: Animation state
+  const headerFadeAnim = useRef(new Animated.Value(0)).current;
+  const controlsFadeAnim = useRef(new Animated.Value(0)).current;
+  const listHeaderFadeAnim = useRef(new Animated.Value(0)).current;
+  const animationStartedRef = useRef(false);
 
   const {
     fetchPronunciations,
@@ -92,9 +150,54 @@ const Pronounce = () => {
     }
   }, [selectedLanguage, searchInput, isLoading]);
 
+  // NEW: Start header animations when data is ready
+  useEffect(() => {
+    if (
+      !isLoading &&
+      !animationStartedRef.current &&
+      allPronunciationData.length > 0
+    ) {
+      animationStartedRef.current = true;
+
+      // Staggered header animations
+      Animated.sequence([
+        // First: Header title
+        Animated.timing(headerFadeAnim, {
+          toValue: 1,
+          duration: 600,
+          useNativeDriver: true,
+        }),
+        // Then: Controls (search + dropdown)
+        Animated.timing(controlsFadeAnim, {
+          toValue: 1,
+          duration: 400,
+          useNativeDriver: true,
+        }),
+        // Finally: List header
+        Animated.timing(listHeaderFadeAnim, {
+          toValue: 1,
+          duration: 400,
+          useNativeDriver: true,
+        }),
+      ]).start();
+    }
+  }, [
+    isLoading,
+    allPronunciationData.length,
+    headerFadeAnim,
+    controlsFadeAnim,
+    listHeaderFadeAnim,
+  ]);
+
   const handleLanguageChange = (language: string) => {
     stopAudio();
     setSelectedLanguage(language);
+
+    // Reset animation when language changes
+    animationStartedRef.current = false;
+    headerFadeAnim.setValue(0);
+    controlsFadeAnim.setValue(0);
+    listHeaderFadeAnim.setValue(0);
   };
 
   const loadMoreData = useCallback(async () => {
@@ -125,10 +228,19 @@ const Pronounce = () => {
     getFilteredPronunciations,
   ]);
 
-  const handleSearchChange = useCallback((text: string) => {
-    setSearchInput(text);
-    debouncedSetSearchTerm(text);
-  }, []);
+  const handleSearchChange = useCallback(
+    (text: string) => {
+      setSearchInput(text);
+      debouncedSetSearchTerm(text);
+
+      // Reset animation when searching
+      animationStartedRef.current = false;
+      headerFadeAnim.setValue(0);
+      controlsFadeAnim.setValue(0);
+      listHeaderFadeAnim.setValue(0);
+    },
+    [headerFadeAnim, controlsFadeAnim, listHeaderFadeAnim]
+  );
 
   const handleEndReached = () => {
     if (hasMoreData && !isLoadingMore) {
@@ -147,16 +259,25 @@ const Pronounce = () => {
     );
   };
 
+  // NEW: Enhanced renderItem with staggered animation
   const renderItem = useCallback(
-    ({ item, index }: { item: PronunciationItem; index: number }) => (
-      <PronunciationCard
-        item={item}
-        index={index}
-        currentPlayingIndex={currentPlayingIndex}
-        isAudioLoading={isAudioLoading}
-        onPlayPress={playAudio}
-      />
-    ),
+    ({ item, index }: { item: PronunciationItem; index: number }) => {
+      // Calculate delay: base delay + staggered delay for each item
+      const baseDelay = 1400; // Wait for header animations to complete
+      const itemDelay = index * 100; // 100ms delay between each item
+      const totalDelay = baseDelay + itemDelay;
+
+      return (
+        <AnimatedPronunciationCard
+          item={item}
+          index={index}
+          delay={totalDelay}
+          currentPlayingIndex={currentPlayingIndex}
+          isAudioLoading={isAudioLoading}
+          onPlayPress={playAudio}
+        />
+      );
+    },
     [currentPlayingIndex, isAudioLoading, playAudio]
   );
 
@@ -178,11 +299,15 @@ const Pronounce = () => {
   return (
     <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
       <SafeAreaView style={dynamicStyles.container}>
-        <View style={styles.header}>
+        {/* NEW: Animated Header */}
+        <Animated.View style={[styles.header, { opacity: headerFadeAnim }]}>
           <Text style={styles.headerTitle}>Pronunciation Guide</Text>
-        </View>
+        </Animated.View>
 
-        <View style={styles.controlsContainer}>
+        {/* NEW: Animated Controls */}
+        <Animated.View
+          style={[styles.controlsContainer, { opacity: controlsFadeAnim }]}
+        >
           <SearchBar
             searchInput={searchInput}
             setSearchInput={handleSearchChange}
@@ -192,9 +317,14 @@ const Pronounce = () => {
             selectedLanguage={selectedLanguage}
             handleLanguageChange={handleLanguageChange}
           />
-        </View>
+        </Animated.View>
 
-        <Text style={styles.listHeaderTitle}>{selectedLanguage} Phrases</Text>
+        {/* NEW: Animated List Header */}
+        <Animated.Text
+          style={[styles.listHeaderTitle, { opacity: listHeaderFadeAnim }]}
+        >
+          {selectedLanguage} Phrases
+        </Animated.Text>
 
         <View style={styles.listContainer}>
           <FlatList

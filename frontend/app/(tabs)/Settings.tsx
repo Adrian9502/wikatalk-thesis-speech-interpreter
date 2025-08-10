@@ -1,5 +1,5 @@
-import React, { useState } from "react";
-import { FlatList } from "react-native";
+import React, { useState, useCallback, useRef, useEffect } from "react";
+import { FlatList, Animated } from "react-native"; // NEW: Added Animated import
 import { SafeAreaView } from "react-native-safe-area-context";
 import { StatusBar } from "expo-status-bar";
 import { useAuth } from "@/context/AuthContext";
@@ -48,7 +48,172 @@ type ListItem = {
   type: "header" | "profile" | "appearance" | "section" | "item" | "logout";
   data: any;
   key: string;
+  sectionIndex?: number; // NEW: Add section index for animation timing
+  itemIndex?: number; // NEW: Add item index for animation timing
 };
+
+// NEW: Animated components with fade-in effects
+const AnimatedHeader = React.memo(({ delay }: { delay: number }) => {
+  const fadeAnim = useRef(new Animated.Value(0)).current;
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      Animated.timing(fadeAnim, {
+        toValue: 1,
+        duration: 600,
+        useNativeDriver: true,
+      }).start();
+    }, delay);
+
+    return () => clearTimeout(timer);
+  }, [delay, fadeAnim]);
+
+  return (
+    <Animated.View style={{ opacity: fadeAnim }}>
+      <Header />
+    </Animated.View>
+  );
+});
+
+const AnimatedProfileSection = React.memo(
+  ({
+    userData,
+    themeColor,
+    delay,
+  }: {
+    userData: any;
+    themeColor: string;
+    delay: number;
+  }) => {
+    const fadeAnim = useRef(new Animated.Value(0)).current;
+
+    useEffect(() => {
+      const timer = setTimeout(() => {
+        Animated.timing(fadeAnim, {
+          toValue: 1,
+          duration: 400,
+          useNativeDriver: true,
+        }).start();
+      }, delay);
+
+      return () => clearTimeout(timer);
+    }, [delay, fadeAnim]);
+
+    return (
+      <Animated.View style={{ opacity: fadeAnim }}>
+        <ProfileSection userData={userData} themeColor={themeColor} />
+      </Animated.View>
+    );
+  }
+);
+
+const AnimatedAppearanceSection = React.memo(({ delay }: { delay: number }) => {
+  const fadeAnim = useRef(new Animated.Value(0)).current;
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      Animated.timing(fadeAnim, {
+        toValue: 1,
+        duration: 400,
+        useNativeDriver: true,
+      }).start();
+    }, delay);
+
+    return () => clearTimeout(timer);
+  }, [delay, fadeAnim]);
+
+  return (
+    <Animated.View style={{ opacity: fadeAnim }}>
+      <AppearanceSection />
+    </Animated.View>
+  );
+});
+
+const AnimatedSectionTitle = React.memo(
+  ({ title, delay }: { title: string; delay: number }) => {
+    const fadeAnim = useRef(new Animated.Value(0)).current;
+
+    useEffect(() => {
+      const timer = setTimeout(() => {
+        Animated.timing(fadeAnim, {
+          toValue: 1,
+          duration: 500,
+          useNativeDriver: true,
+        }).start();
+      }, delay);
+
+      return () => clearTimeout(timer);
+    }, [delay, fadeAnim]);
+
+    return (
+      <Animated.View style={{ opacity: fadeAnim }}>
+        <SectionTitle title={title} />
+      </Animated.View>
+    );
+  }
+);
+
+const AnimatedSettingItem = React.memo(
+  ({
+    item,
+    isLast,
+    isFirstItem,
+    delay,
+  }: {
+    item: any;
+    isLast: boolean;
+    isFirstItem: boolean;
+    delay: number;
+  }) => {
+    const fadeAnim = useRef(new Animated.Value(0)).current;
+
+    useEffect(() => {
+      const timer = setTimeout(() => {
+        Animated.timing(fadeAnim, {
+          toValue: 1,
+          duration: 600,
+          useNativeDriver: true,
+        }).start();
+      }, delay);
+
+      return () => clearTimeout(timer);
+    }, [delay, fadeAnim]);
+
+    return (
+      <Animated.View style={{ opacity: fadeAnim }}>
+        <SettingItemComponent
+          item={item}
+          isLast={isLast}
+          isFirstItem={isFirstItem}
+        />
+      </Animated.View>
+    );
+  }
+);
+
+const AnimatedLogoutButton = React.memo(
+  ({ onPressLogout, delay }: { onPressLogout: () => void; delay: number }) => {
+    const fadeAnim = useRef(new Animated.Value(0)).current;
+
+    useEffect(() => {
+      const timer = setTimeout(() => {
+        Animated.timing(fadeAnim, {
+          toValue: 1,
+          duration: 600,
+          useNativeDriver: true,
+        }).start();
+      }, delay);
+
+      return () => clearTimeout(timer);
+    }, [delay, fadeAnim]);
+
+    return (
+      <Animated.View style={{ opacity: fadeAnim }}>
+        <LogoutButton onPressLogout={onPressLogout} />
+      </Animated.View>
+    );
+  }
+);
 
 const Settings = () => {
   // auth context
@@ -149,6 +314,7 @@ const Settings = () => {
         type: "section",
         data: section.title,
         key: `section-${sectionIndex}`,
+        sectionIndex, // NEW: Add for animation timing
       });
 
       // Add section items
@@ -162,6 +328,8 @@ const Settings = () => {
             sectionIndex,
           },
           key: `item-${sectionIndex}-${itemIndex}`,
+          sectionIndex, // NEW: Add for animation timing
+          itemIndex, // NEW: Add for animation timing
         });
       });
     });
@@ -176,38 +344,64 @@ const Settings = () => {
     return items;
   };
 
-  const renderItem = ({ item }: { item: ListItem }) => {
+  const renderItem = ({ item, index }: { item: ListItem; index: number }) => {
+    // NEW: Calculate animation delays
+    const baseDelay = 100; // Initial delay
+    const sectionDelay = 300; // Delay between sections
+    const itemDelay = 150; // Delay between items within a section
+
     switch (item.type) {
       case "header":
-        return <Header />;
+        return <AnimatedHeader delay={baseDelay} />;
 
       case "profile":
         return (
-          <ProfileSection
+          <AnimatedProfileSection
             userData={userData}
             themeColor={activeTheme.secondaryColor}
+            delay={baseDelay + 200}
           />
         );
 
       case "appearance":
-        return <AppearanceSection />;
+        return <AnimatedAppearanceSection delay={baseDelay + 400} />;
 
       case "section":
-        return <SectionTitle title={item.data} />;
+        const sectionAnimationDelay =
+          baseDelay + 600 + (item.sectionIndex || 0) * sectionDelay;
+        return (
+          <AnimatedSectionTitle
+            title={item.data}
+            delay={sectionAnimationDelay}
+          />
+        );
 
       case "item":
         const { item: settingItem, isLast, isFirstItem } = item.data;
+        const itemAnimationDelay =
+          baseDelay +
+          600 +
+          (item.sectionIndex || 0) * sectionDelay +
+          100 + // Add delay after section title
+          (item.itemIndex || 0) * itemDelay;
+
         return (
-          <SettingItemComponent
+          <AnimatedSettingItem
             item={settingItem}
             isLast={isLast}
             isFirstItem={isFirstItem}
+            delay={itemAnimationDelay}
           />
         );
 
       case "logout":
+        const logoutDelay =
+          baseDelay + 600 + sections.length * sectionDelay + 400;
         return (
-          <LogoutButton onPressLogout={() => setLogoutModalVisible(true)} />
+          <AnimatedLogoutButton
+            onPressLogout={() => setLogoutModalVisible(true)}
+            delay={logoutDelay}
+          />
         );
 
       default:
@@ -247,6 +441,7 @@ const Settings = () => {
         renderItem={renderItem}
         keyExtractor={(item) => item.key}
         showsVerticalScrollIndicator={false}
+        contentContainerStyle={{ paddingBottom: 32 }} // NEW: Add padding for better spacing
       />
     </SafeAreaView>
   );

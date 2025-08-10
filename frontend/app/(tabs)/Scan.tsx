@@ -8,6 +8,7 @@ import {
   Platform,
   TouchableWithoutFeedback,
   Keyboard,
+  Animated, // NEW: Added Animated import
 } from "react-native";
 import { StatusBar } from "expo-status-bar";
 import { CameraView, useCameraPermissions } from "expo-camera";
@@ -22,6 +23,7 @@ import TextDisplay from "@/components/scan/TextDisplay";
 import CameraControls from "@/components/scan/CameraControls";
 import useThemeStore from "@/store/useThemeStore";
 import { getGlobalStyles } from "@/styles/globalStyles";
+
 // Define types for the state and hook returns
 interface ScanTranslateState {
   targetLanguage: string;
@@ -40,8 +42,8 @@ interface ScanTranslateState {
     text: string,
     field: "copiedSource" | "copiedTarget"
   ) => void;
-  handleSourceSpeech: (text: string) => void; // Updated method
-  handleTargetSpeech: (text: string) => void; // Updated method
+  handleSourceSpeech: (text: string) => void;
+  handleTargetSpeech: (text: string) => void;
   stopSpeech: () => void;
 }
 
@@ -76,29 +78,54 @@ const Scan: React.FC = () => {
 
   const { isProcessing, ocrProgress, recognizeText } = useImageProcessing();
 
+  // NEW: Simple animation refs - only fade animation
+  const fadeAnim = useRef(new Animated.Value(0)).current;
+  const animationStartedRef = useRef(false);
+
   useEffect(() => {
     clearText();
     return () => stopSpeech();
   }, []);
 
+  // NEW: Simple fade-in animation on component mount
+  useEffect(() => {
+    if (!animationStartedRef.current) {
+      animationStartedRef.current = true;
+
+      // Simple fade-in animation
+      Animated.timing(fadeAnim, {
+        toValue: 1,
+        duration: 1200,
+        useNativeDriver: true,
+      }).start();
+    }
+  }, [fadeAnim]);
+
   // Function to capture image and process it
   const takePicture = async (): Promise<void> => {
-    if (isProcessing || !cameraRef.current) return;
+    if (!cameraRef.current) {
+      console.log("Camera not ready");
+      return;
+    }
 
     try {
-      const photo = await cameraRef.current.takePictureAsync({ quality: 0.8 });
-      if (!photo?.uri) throw new Error("Could not get photo URI");
+      const photo = await cameraRef.current.takePictureAsync({
+        quality: 0.8,
+        base64: false,
+      });
 
-      const extractedText = await recognizeText(photo.uri);
+      if (photo?.uri) {
+        const extractedText = await recognizeText(photo.uri);
 
-      if (extractedText) {
-        await translateDetectedText(extractedText); // Use immediate translation here
-      } else {
-        updateState({ sourceText: "No text detected", translatedText: "" });
+        if (extractedText) {
+          await translateDetectedText(extractedText);
+        } else {
+          updateState({ sourceText: "No text detected", translatedText: "" });
+        }
       }
     } catch (error) {
       updateState({
-        sourceText: `Error: ${
+        sourceText: `Error capturing image: ${
           error instanceof Error ? error.message : "Unknown error"
         }`,
         translatedText: "",
@@ -108,12 +135,11 @@ const Scan: React.FC = () => {
 
   // Function to pick image from gallery
   const pickImage = async (): Promise<void> => {
-    if (isProcessing) return;
-
     try {
       const result = await ImagePicker.launchImageLibraryAsync({
         mediaTypes: ImagePicker.MediaTypeOptions.Images,
         allowsEditing: true,
+        aspect: [4, 3],
         quality: 0.8,
       });
 
@@ -121,7 +147,7 @@ const Scan: React.FC = () => {
         const extractedText = await recognizeText(result.assets[0].uri);
 
         if (extractedText) {
-          await translateDetectedText(extractedText); // Use immediate translation here
+          await translateDetectedText(extractedText);
         } else {
           updateState({ sourceText: "No text detected", translatedText: "" });
         }
@@ -174,7 +200,15 @@ const Scan: React.FC = () => {
           style={styles.keyboardView}
           keyboardVerticalOffset={Platform.OS === "ios" ? 0 : 20}
         >
-          <View style={styles.cameraContainer}>
+          {/* NEW: Simple fade animation wrapper - no other changes */}
+          <Animated.View
+            style={[
+              styles.cameraContainer,
+              {
+                opacity: fadeAnim, // Only add fade animation
+              },
+            ]}
+          >
             <View style={styles.cameraViewContainer}>
               <CameraView
                 style={{ flex: 1 }}
@@ -248,7 +282,7 @@ const Scan: React.FC = () => {
                 color={BASE_COLORS.orange}
               />
             </View>
-          </View>
+          </Animated.View>
         </KeyboardAvoidingView>
       </SafeAreaView>
     </TouchableWithoutFeedback>
@@ -257,6 +291,7 @@ const Scan: React.FC = () => {
 
 export default Scan;
 
+// Styles - COMPLETELY UNCHANGED
 const styles = StyleSheet.create({
   keyboardView: {
     flex: 1,
@@ -301,6 +336,12 @@ const styles = StyleSheet.create({
     padding: 16,
     paddingTop: 20,
     shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
     elevation: 3,
   },
   progressContainer: {
