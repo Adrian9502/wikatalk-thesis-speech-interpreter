@@ -1,5 +1,6 @@
 # Development dependencies and tools
 node_modules/.cache/
+node_modules/
 .expo/
 .expo-shared/
 
@@ -20,15 +21,16 @@ ehthumbs.db
 Thumbs.db
 
 # Logs
-logs
+logs/
 *.log
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 lerna-debug.log*
+.npmrc
 
 # Runtime data
-pids
+pids/
 *.pid
 *.seed
 *.pid.lock
@@ -38,17 +40,18 @@ coverage/
 *.lcov
 
 # nyc test coverage
-.nyc_output
+.nyc_output/
 
-# Dependency directories
+# Dependency directories - MORE COMPREHENSIVE
 node_modules/
 jspm_packages/
+bower_components/
 
 # TypeScript cache
 *.tsbuildinfo
 
 # Optional npm cache directory
-.npm
+.npm/
 
 # Optional eslint cache
 .eslintcache
@@ -70,30 +73,27 @@ jspm_packages/
 
 # dotenv environment variables file
 .env
-.env.test
-.env.local
-.env.development.local
-.env.test.local
-.env.production.local
+.env.*
 
 # parcel-bundler cache (https://parceljs.org/)
-.cache
-.parcel-cache
+.cache/
+.parcel-cache/
 
 # Next.js build output
-.next
+.next/
 
 # Nuxt.js build / generate output
-.nuxt
-dist
+.nuxt/
+dist/
 
 # Gatsby files
 .cache/
-public
+public/
 
 # Storybook build outputs
-.out
-.storybook-out
+.out/
+.storybook-out/
+storybook-static/
 
 # Temporary folders
 tmp/
@@ -133,8 +133,8 @@ Icon
 .com.apple.timemachine.donotpresent
 .AppleDB
 .AppleDesktop
-Network Trash Folder
-Temporary Items
+Network\ Trash\ Folder
+Temporary\ Items
 .apdisk
 
 # Windows
@@ -151,6 +151,8 @@ $RECYCLE.BIN/
 # Git
 .git/
 .gitignore
+.gitattributes
+.gitmodules
 
 # Build artifacts
 build/
@@ -168,19 +170,21 @@ __tests__/
 *.spec.ts
 *.spec.tsx
 
-# Documentation
+# Documentation - BE MORE SPECIFIC
 docs/
 documentation/
-*.md
-README*
-CHANGELOG*
-LICENSE*
-CONTRIBUTING*
+README.md
+CHANGELOG.md
+LICENSE
+CONTRIBUTING.md
+CODE_OF_CONDUCT.md
+SECURITY.md
 
 # Backup files
 *.bak
 *.backup
 *.old
+*.orig
 
 # Large media files that aren't needed for build
 *.mp4
@@ -188,23 +192,30 @@ CONTRIBUTING*
 *.avi
 *.mkv
 *.webm
-# Keep small images but exclude large ones
-# *.png
-# *.jpg
-# *.jpeg
-# Keep app icons and required images
+*.flv
+*.wmv
+
+# NEW: Large image files (keep essential app icons)
+# Exclude large images but keep small ones for the app
+assets/images/large/
+assets/videos/
+assets/audio/large/
+# Keep app icons and essential UI images
 
 # Development databases
 *.sqlite
+*.sqlite3
 *.db
+*.db-journal
 
 # Metro bundler cache
 .metro-health-check*
 
-# Expo
+# Expo - MORE COMPREHENSIVE
 .expo/
 .expo-shared/
 expo-env.d.ts
+.expo-cli/
 
 # React Native
 .react-native/
@@ -212,12 +223,13 @@ expo-env.d.ts
 # Flipper
 .flipper/
 
-# CocoaPods (iOS)
+# CocoaPods (iOS) - MORE COMPREHENSIVE
 ios/Pods/
 ios/build/
 ios/DerivedData/
+ios/.xcode.env*
 
-# Android
+# Android - MORE COMPREHENSIVE
 android/build/
 android/app/build/
 android/.gradle/
@@ -225,12 +237,14 @@ android/gradle/
 android/gradlew
 android/gradlew.bat
 android/local.properties
+android/.cxx/
+android/app/release/
 
 # Fastlane
 fastlane/report.xml
 fastlane/Preview.html
-fastlane/screenshots
-fastlane/test_output
+fastlane/screenshots/
+fastlane/test_output/
 
 # Bundle artifacts
 *.jsbundle
@@ -244,24 +258,24 @@ fastlane/test_output
 !default.mode2v3
 *.perspectivev3
 !default.perspectivev3
-xcuserdata
+xcuserdata/
 *.xccheckout
 *.moved-aside
-DerivedData
+DerivedData/
 *.hmap
 *.ipa
 *.xcuserstate
-project.xcworkspace
+project.xcworkspace/
 
 # Gradle (Android)
-.gradle
+.gradle/
 /build/
 gradle-app.setting
 !gradle-wrapper.jar
 !gradle-wrapper.properties
 
 # IntelliJ IDEA
-.idea
+.idea/
 *.iws
 *.iml
 *.ipr
@@ -270,18 +284,23 @@ gradle-app.setting
 .vscode/
 .history/
 
-# Yarn
-.yarn/cache
-.yarn/unplugged
+# Yarn - MORE COMPREHENSIVE
+.yarn/cache/
+.yarn/unplugged/
 .yarn/build-state.yml
 .yarn/install-state.gz
 .pnp.*
+yarn.lock
+
+# NEW: NPM
+package-lock.json
 
 # ESLint
 .eslintcache
 
 # Prettier
 .prettierignore
+.prettierrc*
 
 # Stylelint
 .stylelintcache
@@ -298,7 +317,7 @@ gradle-app.setting
 # Yarn Integrity file
 .yarn-integrity/
 
-# Parcel-bundler cache (https://parceljs.org/)
+# Parcel-bundler cache
 .cache/
 .parcel-cache/
 
@@ -314,7 +333,7 @@ temp/
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json
-.idea
+.idea/
 *.suo
 *.ntvs*
 *.njsproj
@@ -372,7 +391,7 @@ tmtags
 *.iml
 
 # Eclipse
-.metadata
+.metadata/
 bin/
 tmp/
 *.tmp
@@ -382,7 +401,7 @@ tmp/
 local.properties
 .settings/
 .loadpath
-.recommenders
+.recommenders/
 
 # External tool builders
 .externalToolBuilders/
@@ -429,14 +448,49 @@ local.properties
 .scala_dependencies
 .worksheet
 
-# Uncomment this line if you wish to ignore the project description file.
-# Typically, this file would be tracked if it contains build/dependency configurations:
-#.project
+# NEW: Additional exclusions that might be large
+# Exclude any demo or sample directories
+demos/
+samples/
+examples/
 
-# FINAL: Large directories that are definitely not needed for builds
+# Exclude source maps in development
+*.map
+
+# Exclude compiled JavaScript in TypeScript projects (if any)
+# Only if you have a separate build process
+# lib/
+# es/
+
+# NEW: Platform specific build files
+web-build/
+dist-web/
+
+# NEW: Expo generated files
+.expo-cli/
+
+# NEW: Lock files (keep one, exclude others)
+# Keep package-lock.json or yarn.lock, not both
+# If using npm:
+# yarn.lock
+# If using yarn:
+package-lock.json
+
+# NEW: Large directories that are definitely not needed
 dist/
 build/
 out/
 coverage/
 .nyc_output/
 node_modules/
+
+# NEW: Exclude any uploaded or cached assets
+uploads/
+cached/
+assets/cache/
+
+# NEW: Exclude any local environment files
+.env.local*
+.env.development*
+.env.test*
+.env.production*
