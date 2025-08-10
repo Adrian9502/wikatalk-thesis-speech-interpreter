@@ -408,7 +408,6 @@ const GameNavigation: React.FC<GameNavigationProps> = ({
             <TouchableOpacity
               style={[
                 styles.primaryActionCard,
-                styles.nextLevelCard,
                 navigationState.nextLevel.status === "disabled" &&
                   styles.disabledCard,
               ]}
@@ -470,7 +469,6 @@ const GameNavigation: React.FC<GameNavigationProps> = ({
             <TouchableOpacity
               style={[
                 styles.primaryActionCard,
-                styles.retryCard,
                 (navigationState.retry.status === "disabled" ||
                   isRetryLoading) &&
                   styles.disabledCard,

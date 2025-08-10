@@ -169,6 +169,7 @@ const AnswerReview: React.FC<AnswerReviewProps> = ({
         fetchCoinsBalance(true);
 
         if (onTimerReset) {
+          console.log("[AnswerReview] Calling parent's onTimerReset callback");
           onTimerReset();
         }
 
@@ -180,18 +181,33 @@ const AnswerReview: React.FC<AnswerReviewProps> = ({
 
         // Clear caches
         const gameStore = useGameStore.getState();
-        gameStore.clearEnhancedProgressCache?.();
+        gameStore.resetTimer();
+        gameStore.setTimeElapsed(0);
+
+        const progressStore = useProgressStore.getState();
+        progressStore.clearCache();
+        progressStore.fetchProgress(true);
 
         const splashStore = useSplashStore.getState();
+        const existingProgress = splashStore.getIndividualProgress
+          ? splashStore.getIndividualProgress(String(levelId))
+          : null;
+
         if (splashStore.setIndividualProgress) {
-          const resetProgress = {
-            quizId: String(levelId),
-            timeSpent: 0,
-            lastAttemptTime: 0,
-            attempts: [],
-            completed: false,
-            quizId: String(levelId),
-          };
+          const resetProgress = existingProgress
+            ? {
+                ...existingProgress,
+                totalTimeSpent: 0,
+                lastAttemptTime: 0,
+                attempts: [],
+              }
+            : {
+                totalTimeSpent: 0,
+                lastAttemptTime: 0,
+                attempts: [],
+                completed: false,
+                quizId: String(levelId),
+              };
 
           splashStore.setIndividualProgress(String(levelId), resetProgress);
         }
