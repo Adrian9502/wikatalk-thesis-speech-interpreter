@@ -1,3 +1,7 @@
+; android
+/android
+/ios
+
 # Development dependencies and tools
 node_modules/.cache/
 node_modules/
@@ -493,4 +497,6 @@ assets/cache/
 .env.local*
 .env.development*
 .env.test*
-.env.production*
+.env.production*ios
+android
+ios
