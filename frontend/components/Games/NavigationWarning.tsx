@@ -1,11 +1,10 @@
 import React, { useState, useEffect, useRef } from "react";
 import { BackHandler, ToastAndroid, Platform } from "react-native";
-import useGameStore from "@/store/games/useGameStore";
 
 interface NavigationWarningProps {
   gameStatus: "idle" | "playing" | "completed";
   timerRunning: boolean;
-  onUserExit?: () => void; // NEW: Callback for when user exits intentionally
+  onUserExit?: () => void;
 }
 
 const NavigationWarning: React.FC<NavigationWarningProps> = ({

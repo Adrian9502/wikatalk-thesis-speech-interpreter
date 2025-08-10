@@ -38,7 +38,7 @@ interface SplashState {
   progressDataPrecomputed: boolean;
   levelsPrecomputed: boolean;
   levelDetailsPrecomputed: boolean;
-  rankingsPreloaded: boolean; // ADD: New property
+  rankingsPreloaded: boolean;
 
   // Store precomputed levels for each game mode with filters
   precomputedLevels: {
@@ -60,12 +60,10 @@ interface SplashState {
     [quizId: string]: any;
   };
 
-  // ADD: Missing enhancedProgress property
   enhancedProgress: {
     [gameMode: string]: any;
   };
 
-  // ADD: Store preloaded rankings data
   preloadedRankings: {
     [category: string]: {
       data: RankingData;
@@ -79,12 +77,13 @@ interface SplashState {
   markProgressDataPrecomputed: () => void;
   markLevelsPrecomputed: () => void;
   markLevelDetailsPrecomputed: () => void;
-  markRankingsPreloaded: () => void; // ADD: New method
+  markRankingsPreloaded: () => void;
   preloadGameData: () => Promise<boolean>;
   precomputeAllProgressData: () => Promise<boolean>;
   precomputeAllLevels: () => Promise<boolean>;
   precomputeAllLevelDetails: () => Promise<boolean>;
-  preloadAllRankings: () => Promise<boolean>; // ADD: New method
+  preloadAllRankings: () => Promise<boolean>;
+  getRankingsData: (category: string) => RankingData | null;
   getLevelsForMode: (gameMode: string) => {
     levels: LevelData[];
     completionPercentage: number;

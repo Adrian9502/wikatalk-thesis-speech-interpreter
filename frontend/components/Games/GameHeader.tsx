@@ -98,18 +98,12 @@ const GameHeader = ({
       {showStats && difficulty && (
         <StatsContainer
           difficulty={difficulty}
-          focusArea={focusArea}
           showTimer={showTimer}
           timerRunning={timerRunning}
           initialTime={initialTime}
           isStarted={isStarted}
           animationDelay={200}
           variant={variant}
-          finalTime={finalTime}
-          levelId={levelId}
-          onTimerReset={onTimerReset}
-          isCorrectAnswer={isCorrectAnswer}
-          currentRewardInfo={currentRewardInfo}
         />
       )}
     </View>
