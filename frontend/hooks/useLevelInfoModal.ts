@@ -20,11 +20,8 @@ export const useLevelInfoModal = (visible: boolean, levelData: any) => {
     description: string;
   } | null>(null);
   const [showCostInfoModal, setShowCostInfoModal] = useState(false);
-  const [hasFetchedFresh, setHasFetchedFresh] = useState(false);
 
   // Refs
-  const fetchInProgressRef = useRef(false);
-  const modalSessionRef = useRef<string | null>(null);
   const overlayOpacity = useRef(new Animated.Value(0)).current;
   const modalTranslateY = useRef(new Animated.Value(300)).current;
   const progressOpacity = useRef(new Animated.Value(1)).current;
@@ -33,7 +30,10 @@ export const useLevelInfoModal = (visible: boolean, levelData: any) => {
   const resetMessageOpacity = useRef(new Animated.Value(0)).current;
   const resetMessageScale = useRef(new Animated.Value(0.8)).current;
 
-  // Hooks
+  // Add ref to prevent multiple effect runs
+  const mountedRef = useRef(false);
+
+  // Hooks - FIXED: Don't force refresh on initial load
   const {
     progress,
     isLoading: progressLoading,
@@ -42,51 +42,35 @@ export const useLevelInfoModal = (visible: boolean, levelData: any) => {
   } = useUserProgress(levelData?.questionId || levelData?.id);
   const { coins, fetchCoinsBalance } = useCoinsStore();
 
-  // Prevent multiple fetches with session tracking
+  // SIMPLIFIED: Only fetch fresh data when modal is first opened, not on every render
   useEffect(() => {
-    if (visible && !fetchInProgressRef.current) {
-      const sessionId = Date.now().toString();
-      modalSessionRef.current = sessionId;
+    if (visible && !mountedRef.current) {
+      mountedRef.current = true;
 
-      console.log(`[LevelInfoModal] Modal opened (session: ${sessionId})`);
-      fetchCoinsBalance(true);
+      console.log(`[LevelInfoModal] Modal opened - fetching coins only`);
 
-      if (!hasFetchedFresh) {
-        fetchInProgressRef.current = true;
+      // Fetch coins balance (lightweight operation)
+      fetchCoinsBalance(false);
 
-        const fetchTimer = setTimeout(() => {
-          if (modalSessionRef.current === sessionId) {
-            console.log(
-              `[LevelInfoModal] Fetching fresh progress data (session: ${sessionId})`
-            );
-
-            fetchProgress(true).finally(() => {
-              if (modalSessionRef.current === sessionId) {
-                setHasFetchedFresh(true);
-                fetchInProgressRef.current = false;
-              }
-            });
-          }
-        }, 300);
-
-        return () => {
-          clearTimeout(fetchTimer);
-          fetchInProgressRef.current = false;
-        };
+      // Only fetch progress in background if we don't have any cached data
+      if (!progress) {
+        console.log(
+          `[LevelInfoModal] No cached progress, fetching in background`
+        );
+        setTimeout(() => {
+          fetchProgress(false); // Don't force refresh
+        }, 100);
       }
     } else if (!visible) {
+      mountedRef.current = false;
       console.log(`[LevelInfoModal] Modal closed, resetting state`);
-      setHasFetchedFresh(false);
-      fetchInProgressRef.current = false;
-      modalSessionRef.current = null;
     }
-  }, [visible, fetchCoinsBalance, fetchProgress, hasFetchedFresh]);
+  }, [visible, fetchCoinsBalance, fetchProgress, progress]);
 
-  // Progress info calculation
+  // SIMPLIFIED: Progress info calculation with better default handling
   const progressInfo = React.useMemo(() => {
-    console.log("[LevelInfoModal] Calculating progress info");
-
-    if (progressLoading || !hasFetchedFresh || fetchInProgressRef.current) {
+    // Show default state immediately if loading or no data
+    if (progressLoading) {
       return {
         hasProgress: false,
         timeSpent: 0,
@@ -97,7 +81,6 @@ export const useLevelInfoModal = (visible: boolean, levelData: any) => {
     }
 
     if (!progress || Array.isArray(progress)) {
-      console.log("[LevelInfoModal] No valid progress data");
       return {
         hasProgress: false,
         timeSpent: 0,
@@ -111,13 +94,6 @@ export const useLevelInfoModal = (visible: boolean, levelData: any) => {
     const timeSpent = progress.totalTimeSpent || 0;
     const isCompleted = progress.completed || false;
 
-    console.log("[LevelInfoModal] Progress info calculated:", {
-      attempts,
-      timeSpent: Number(timeSpent.toFixed(2)),
-      isCompleted,
-      hasProgress: timeSpent > 0 || attempts > 0,
-    });
-
     return {
       hasProgress: timeSpent > 0 || attempts > 0,
       timeSpent: Number(timeSpent.toFixed(2)),
@@ -125,7 +101,7 @@ export const useLevelInfoModal = (visible: boolean, levelData: any) => {
       isCompleted,
       isLoading: false,
     };
-  }, [progress, progressLoading, hasFetchedFresh]);
+  }, [progress, progressLoading]);
 
   // Calculate dynamic reset cost
   const resetCostInfo = React.useMemo(() => {
@@ -179,7 +155,7 @@ export const useLevelInfoModal = (visible: boolean, levelData: any) => {
     resetMessageScale,
   ]);
 
-  // Reset state when modal visibility changes
+  // OPTIMIZED: Start animation immediately when visible changes
   useEffect(() => {
     if (visible) {
       setIsAnimating(true);
@@ -192,16 +168,16 @@ export const useLevelInfoModal = (visible: boolean, levelData: any) => {
       setShowResetConfirmation(false);
       setResetMessage(null);
 
-      // Start entrance animation
+      // OPTIMIZED: Start entrance animation immediately, don't wait for data
       Animated.parallel([
         Animated.timing(overlayOpacity, {
           toValue: 1,
-          duration: 600,
+          duration: 400, // Reduced duration for snappier feel
           useNativeDriver: true,
         }),
         Animated.spring(modalTranslateY, {
           toValue: 0,
-          tension: 100,
+          tension: 120, // Increased tension for snappier animation
           friction: 8,
           useNativeDriver: true,
         }),
@@ -211,17 +187,7 @@ export const useLevelInfoModal = (visible: boolean, levelData: any) => {
     } else {
       resetAnimationValues();
     }
-  }, [
-    visible,
-    resetAnimationValues,
-    overlayOpacity,
-    modalTranslateY,
-    progressOpacity,
-    confirmationOpacity,
-    confirmationScale,
-    resetMessageOpacity,
-    resetMessageScale,
-  ]);
+  }, [visible, resetAnimationValues]);
 
   return {
     // State

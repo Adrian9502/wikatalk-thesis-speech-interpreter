@@ -275,7 +275,6 @@ const LevelSelection = () => {
       if (level.status === "locked") {
         console.log(`[LevelSelection] Level ${level.id} is locked`);
 
-        // NEW: Show specific lock reason
         const difficulty = level.difficultyCategory?.toLowerCase();
         let lockMessage = "This level is locked.";
 
@@ -285,12 +284,7 @@ const LevelSelection = () => {
           lockMessage = "Complete all Medium levels to unlock Hard difficulty.";
         }
 
-        // You can show a toast or alert here instead of just haptic feedback
         Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
-
-        // Optional: Show an alert with the lock reason
-        // Alert.alert("Level Locked", lockMessage);
-
         return;
       }
 
@@ -298,6 +292,8 @@ const LevelSelection = () => {
         `[LevelSelection] Level ${level.id} selected, status: ${level.status}`
       );
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+
+      // OPTIMIZED: Set selected level and show modal immediately
       setSelectedLevel(level);
 
       if (level.status === "completed") {
@@ -311,7 +307,7 @@ const LevelSelection = () => {
           `[LevelSelection] Opening game modal for level ${level.id}`
         );
 
-        // NEW: Show modal immediately, don't wait for data
+        // CRITICAL: Show modal immediately without any delays
         setShowGameModal(true);
         setShowReviewModal(false);
       }

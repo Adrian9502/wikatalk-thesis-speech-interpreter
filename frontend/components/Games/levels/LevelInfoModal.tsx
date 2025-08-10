@@ -82,15 +82,12 @@ const LevelInfoModal: React.FC<GameInfoModalProps> = React.memo(
 
     // Handlers
     const handleStart = useCallback(() => {
-      // FIXED: Add comprehensive loading checks
-      const isProgressLoading = progressInfo.isLoading;
-      const isAnyLoading =
-        isLoading || isAnimating || isProgressLoading || hasStarted;
+      // SIMPLIFIED: Only check critical loading states, not progress loading
+      const isAnyLoading = isLoading || isAnimating || hasStarted;
 
       console.log(`[LevelInfoModal] Start button pressed - Loading checks:`, {
         isLoading,
         isAnimating,
-        isProgressLoading,
         hasStarted,
         isAnyLoading,
       });
@@ -108,7 +105,6 @@ const LevelInfoModal: React.FC<GameInfoModalProps> = React.memo(
       isAnimating,
       hasStarted,
       setHasStarted,
-      progressInfo.isLoading, // Add this dependency
     ]);
 
     const handleClose = useCallback(() => {
@@ -168,11 +164,12 @@ const LevelInfoModal: React.FC<GameInfoModalProps> = React.memo(
       return ["#2563EB", "#1E40AF"] as const;
     };
 
-    // Early return if not ready to render
-    if (!visible || !levelData || hasStarted) {
+    // FIXED: Don't block modal rendering while progress is loading
+    if (!visible || !levelData) {
       return null;
     }
 
+    // FIXED: Allow modal to show even if hasStarted is true (for smooth transitions)
     return (
       <Modal
         visible={visible}
@@ -220,7 +217,7 @@ const LevelInfoModal: React.FC<GameInfoModalProps> = React.memo(
                 styles={styles}
               />
 
-              {/* Progress Badge */}
+              {/* Progress Badge - This will handle its own loading state */}
               <ProgressBadge
                 progressInfo={progressInfo}
                 isResetting={isResetting}
