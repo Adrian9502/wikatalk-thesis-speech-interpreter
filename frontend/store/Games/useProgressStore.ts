@@ -821,4 +821,20 @@ const useProgressStore = create<ProgressState>((set, get) => ({
   currentUserId: null,
 }));
 
+// Add debouncing to ProgressStats updates
+
+let progressStatsTimeout: NodeJS.Timeout | null = null;
+
+const updateProgressStats = (stats: any) => {
+  if (progressStatsTimeout) {
+    clearTimeout(progressStatsTimeout);
+  }
+
+  progressStatsTimeout = setTimeout(() => {
+    console.log("[ProgressStats] Progress updated:", stats);
+    // Your existing progress stats logic
+    progressStatsTimeout = null;
+  }, 500); // 500ms debounce
+};
+
 export default useProgressStore;

@@ -283,7 +283,6 @@ export const useUserProgress = (quizId: string | number | "global") => {
     ]
   );
 
-  // UPDATED: Enhanced updateProgress function with difficulty support
   const updateProgress = useCallback(
     async (
       timeSpent: number,
@@ -368,18 +367,40 @@ export const useUserProgress = (quizId: string | number | "global") => {
               `[useUserProgress] Level completed! Invalidating ALL caches including global progress...`
             );
 
-            // Clear progress store cache completely
+            // Clear progress store cache
             const progressStore = useProgressStore.getState();
             progressStore.clearCache();
 
-            // Force fetch fresh global progress
-            progressStore.fetchProgress(true);
+            // CRITICAL: Wait for cache clear, then fetch fresh data
+            await new Promise((resolve) => setTimeout(resolve, 100));
 
-            // Reset splash store to force recomputation
-            splashStore.reset();
+            // Force fresh fetch
+            const freshProgress = await progressStore.fetchProgress(true);
+            console.log(
+              `[useUserProgress] Fresh progress fetched after completion:`,
+              {
+                type: Array.isArray(freshProgress)
+                  ? "array"
+                  : typeof freshProgress,
+                length: Array.isArray(freshProgress)
+                  ? freshProgress.length
+                  : "not array",
+              }
+            );
+
+            // FIXED: Update individual cache with the correct variable name
+            if (splashStore.setIndividualProgress && updatedProgress) {
+              console.log(
+                `[useUserProgress] Updating individual cache with completed level data`
+              );
+              splashStore.setIndividualProgress(
+                String(quizId),
+                updatedProgress
+              );
+            }
 
             console.log(
-              `[useUserProgress] All caches invalidated - levels and filters will be recomputed`
+              "[useUserProgress] All caches invalidated - levels and filters will be recomputed"
             );
           }
 

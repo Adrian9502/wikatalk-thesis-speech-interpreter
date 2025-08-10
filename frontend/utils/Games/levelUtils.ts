@@ -1,5 +1,6 @@
 import useGameStore from "@/store/games/useGameStore";
-import React from 'react';
+import React from "react";
+
 /**
  * Helper function to get next level title with level string
  * @param gameMode - The game mode (multipleChoice, identification, fillBlanks)
@@ -85,4 +86,37 @@ export const useNextLevelData = (
     nextLevelData,
     getNextLevelTitle: getTitle,
   };
+};
+
+// FIXED: Replace undefined findLevelData with proper implementation
+const findLevelData = (levelId: number, difficulty: string) => {
+  const { getLevelData } = useGameStore.getState();
+
+  // Use the existing getLevelData method from the game store
+  return (
+    getLevelData("multipleChoice", levelId, difficulty) ||
+    getLevelData("identification", levelId, difficulty) ||
+    getLevelData("fillBlanks", levelId, difficulty) ||
+    null
+  );
+};
+
+// Add memoization to prevent duplicate level data calls
+const levelDataCache = new Map<string, any>();
+
+export const getLevelData = (levelId: number, difficulty: string) => {
+  const cacheKey = `${levelId}-${difficulty}`;
+
+  if (levelDataCache.has(cacheKey)) {
+    return levelDataCache.get(cacheKey);
+  }
+
+  // FIXED: Use the proper function
+  const result = findLevelData(levelId, difficulty);
+
+  // Cache for 30 seconds
+  levelDataCache.set(cacheKey, result);
+  setTimeout(() => levelDataCache.delete(cacheKey), 30000);
+
+  return result;
 };
