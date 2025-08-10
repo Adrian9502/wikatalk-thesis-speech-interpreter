@@ -6,6 +6,11 @@ import { usePronunciationStore } from "@/store/usePronunciationStore";
 import useCoinsStore from "@/store/games/useCoinsStore";
 import { convertQuizToLevels } from "@/utils/games/convertQuizToLevels";
 import { LevelData, QuizQuestions } from "@/types/gameTypes";
+import { RankingData } from "@/types/rankingTypes";
+import axios from "axios";
+import { getToken } from "@/lib/authTokenManager";
+
+const API_URL = process.env.EXPO_PUBLIC_BACKEND_URL || "http://localhost:5000";
 
 interface FilteredLevels {
   all: LevelData[];
@@ -33,6 +38,7 @@ interface SplashState {
   progressDataPrecomputed: boolean;
   levelsPrecomputed: boolean;
   levelDetailsPrecomputed: boolean;
+  rankingsPreloaded: boolean; // ADD: New property
 
   // Store precomputed levels for each game mode with filters
   precomputedLevels: {
@@ -59,16 +65,26 @@ interface SplashState {
     [gameMode: string]: any;
   };
 
+  // ADD: Store preloaded rankings data
+  preloadedRankings: {
+    [category: string]: {
+      data: RankingData;
+      timestamp: number;
+    };
+  };
+
   markLoadingComplete: () => void;
   markSplashShown: () => void;
   markGameDataPreloaded: () => void;
   markProgressDataPrecomputed: () => void;
   markLevelsPrecomputed: () => void;
   markLevelDetailsPrecomputed: () => void;
+  markRankingsPreloaded: () => void; // ADD: New method
   preloadGameData: () => Promise<boolean>;
   precomputeAllProgressData: () => Promise<boolean>;
   precomputeAllLevels: () => Promise<boolean>;
   precomputeAllLevelDetails: () => Promise<boolean>;
+  preloadAllRankings: () => Promise<boolean>; // ADD: New method
   getLevelsForMode: (gameMode: string) => {
     levels: LevelData[];
     completionPercentage: number;
@@ -223,9 +239,11 @@ export const useSplashStore = create<SplashState>((set, get) => ({
   progressDataPrecomputed: false,
   levelsPrecomputed: false,
   levelDetailsPrecomputed: false,
+  rankingsPreloaded: false, // ADD: Initialize rankings state
   precomputedLevels: {},
   precomputedLevelDetails: {},
   individualProgressCache: {},
+  preloadedRankings: {}, // ADD: Initialize preloaded rankings cache
   enhancedProgress: {},
   markLoadingComplete: () => set({ isLoadingComplete: true }),
   markSplashShown: () => set({ splashShown: true }),
@@ -233,6 +251,7 @@ export const useSplashStore = create<SplashState>((set, get) => ({
   markProgressDataPrecomputed: () => set({ progressDataPrecomputed: true }),
   markLevelsPrecomputed: () => set({ levelsPrecomputed: true }),
   markLevelDetailsPrecomputed: () => set({ levelDetailsPrecomputed: true }),
+  markRankingsPreloaded: () => set({ rankingsPreloaded: true }), // ADD: Mark rankings as preloaded
 
   reset: () =>
     set({
@@ -242,10 +261,118 @@ export const useSplashStore = create<SplashState>((set, get) => ({
       progressDataPrecomputed: false,
       levelsPrecomputed: false,
       levelDetailsPrecomputed: false,
+      rankingsPreloaded: false, // ADD: Reset rankings state
       precomputedLevels: {},
       precomputedLevelDetails: {},
       individualProgressCache: {},
+      preloadedRankings: {}, // ADD: Reset preloaded rankings cache
     }),
+
+  // ADD: Method to get preloaded rankings data
+  getRankingsData: (category: string): RankingData | null => {
+    const { preloadedRankings } = get();
+    const cached = preloadedRankings[category];
+
+    if (cached && Date.now() - cached.timestamp < 5 * 60 * 1000) {
+      // 5 minutes cache
+      return cached.data;
+    }
+
+    return null;
+  },
+
+  // ADD: Method to preload all rankings data
+  preloadAllRankings: async (): Promise<boolean> => {
+    try {
+      console.log("[SplashStore] Starting rankings preload");
+
+      const token = getToken();
+      if (!token) {
+        console.log("[SplashStore] No auth token, skipping rankings preload");
+        return false;
+      }
+
+      // All ranking categories to preload
+      const rankingCategories = [
+        "quizChampions",
+        "coinMasters",
+        "speedDemons",
+        "consistencyKings",
+      ];
+
+      const preloadedRankings: {
+        [category: string]: { data: RankingData; timestamp: number };
+      } = {};
+
+      // Preload all rankings in parallel
+      const rankingPromises = rankingCategories.map(async (category) => {
+        try {
+          console.log(`[SplashStore] Preloading ${category} rankings`);
+
+          const params = new URLSearchParams({ type: category, limit: "50" });
+          if (category.includes("_")) {
+            const [type, gameMode] = category.split("_");
+            params.set("type", type);
+            params.append("gameMode", gameMode);
+          }
+
+          const response = await axios.get(
+            `${API_URL}/api/rankings?${params.toString()}`,
+            {
+              headers: {
+                Authorization: `Bearer ${token}`,
+                "Content-Type": "application/json",
+              },
+              timeout: 8000, // Shorter timeout for splash screen
+            }
+          );
+
+          if (response.data?.data) {
+            preloadedRankings[category] = {
+              data: response.data.data,
+              timestamp: Date.now(),
+            };
+            console.log(`[SplashStore] ✅ ${category} rankings preloaded`);
+            return { category, success: true };
+          } else {
+            console.warn(`[SplashStore] Invalid response for ${category}`);
+            return { category, success: false };
+          }
+        } catch (error: any) {
+          console.warn(
+            `[SplashStore] Failed to preload ${category}:`,
+            error.message
+          );
+          return { category, success: false };
+        }
+      });
+
+      // Wait for all rankings to complete (or fail)
+      const results = await Promise.allSettled(rankingPromises);
+
+      // Count successful preloads
+      let successCount = 0;
+      results.forEach((result, index) => {
+        if (result.status === "fulfilled" && result.value.success) {
+          successCount++;
+        }
+      });
+
+      // Update store with preloaded rankings
+      set({
+        preloadedRankings,
+        rankingsPreloaded: successCount > 0, // Mark as preloaded if at least one succeeded
+      });
+
+      console.log(
+        `[SplashStore] ✅ Rankings preload complete: ${successCount}/${rankingCategories.length} successful`
+      );
+      return successCount > 0;
+    } catch (error) {
+      console.error("[SplashStore] Error preloading rankings:", error);
+      return false;
+    }
+  },
 
   // ADD: Missing individual progress cache methods
   getIndividualProgress: (quizId: string) => {
@@ -270,7 +397,7 @@ export const useSplashStore = create<SplashState>((set, get) => ({
     }));
   },
 
-  // NEW: Add a method to clear individual progress cache entry
+  // NEW: Add a method to clear individual progress cache
   clearIndividualProgress: (quizId: string) => {
     const formattedId = quizId.replace(/^n-/, "");
 
@@ -698,14 +825,12 @@ export const useSplashStore = create<SplashState>((set, get) => ({
       const levelDetailsPrecomputeSuccess =
         await get().precomputeAllLevelDetails();
 
-      if (individualProgressSuccess) {
-        console.log("[SplashStore] Individual progress cached successfully");
-      } else {
-        console.warn("[SplashStore] Individual progress caching failed");
-      }
+      // Phase 6: Preload all rankings data
+      console.log("[SplashStore] Phase 6: Preloading all rankings");
+      const rankingsPreloadSuccess = await get().preloadAllRankings();
 
-      // Phase 6: Load other data in background (don't wait)
-      console.log("[SplashStore] Phase 6: Loading background data");
+      // Phase 7: Load other data in background (don't wait)
+      console.log("[SplashStore] Phase 7: Loading background data");
       const backgroundPromises = [];
       const pronunciationStore = usePronunciationStore.getState();
 
@@ -715,7 +840,7 @@ export const useSplashStore = create<SplashState>((set, get) => ({
 
       // Don't wait for background data
       Promise.allSettled(backgroundPromises).then(() => {
-        console.log("[SplashStore] Phase 6 complete: Background data loaded");
+        console.log("[SplashStore] Phase 7 complete: Background data loaded");
       });
 
       set({ gameDataPreloaded: true });
@@ -826,12 +951,24 @@ export const isLevelDetailsPrecomputed = (): boolean => {
   return useSplashStore.getState().levelDetailsPrecomputed;
 };
 
+// ADD: Helper function to check if rankings are preloaded
+export const isRankingsDataPreloaded = (): boolean => {
+  return useSplashStore.getState().rankingsPreloaded;
+};
+
+// ADD: Helper function to get preloaded rankings
+export const getPreloadedRankings = (category: string): RankingData | null => {
+  return useSplashStore.getState().getRankingsData(category);
+};
+
+// Update your existing isAllDataReady function to include rankings
 export const isAllDataReady = (): boolean => {
   const state = useSplashStore.getState();
   return (
     state.gameDataPreloaded &&
     state.progressDataPrecomputed &&
-    state.levelsPrecomputed
+    state.levelsPrecomputed &&
+    state.rankingsPreloaded // ADD: Include rankings in "all data ready" check
   );
 };
 

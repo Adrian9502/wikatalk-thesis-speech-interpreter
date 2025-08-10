@@ -53,7 +53,7 @@ export const clearAllAccountData = async () => {
   console.log("[DataManager] Clearing all account data");
 
   try {
-    // 1. Clear splash store precomputed data
+    // 1. Clear splash store precomputed data (including preloaded rankings)
     if (splashStoreRef) {
       splashStoreRef.reset();
     } else {
@@ -81,12 +81,10 @@ export const clearAllAccountData = async () => {
       console.warn("[DataManager] CoinsStore not registered");
     }
 
-    // 5. Clear rankings cache
-    if (registeredRankingsStore) {
-      registeredRankingsStore.clearCache();
-    } else {
-      console.warn("[DataManager] RankingsStore not registered");
-    }
+    // 5. Clear rankings hook cache
+    const { clearRankingsCache } = await import("@/hooks/useRankings");
+    clearRankingsCache();
+    console.log("[DataManager] Rankings cache cleared");
 
     console.log("[DataManager] All account data cleared successfully");
   } catch (error) {

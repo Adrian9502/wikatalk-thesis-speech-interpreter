@@ -1,111 +1,169 @@
-import { useState, useEffect, useCallback } from "react";
-import { RankingData, RankingType } from "@/types/rankingTypes";
-import { useRankingsStore } from "@/store/games/useRankingsStore";
+import { useState, useEffect, useRef } from "react";
+import axios from "axios";
+import { getToken } from "@/lib/authTokenManager";
+import { RankingData, RankingUser } from "@/types/rankingTypes";
+// ADD: Import splash store helpers
+import {
+  isRankingsDataPreloaded,
+  getPreloadedRankings,
+} from "@/store/useSplashStore";
 
-interface UseRankingsReturn {
+const API_URL = process.env.EXPO_PUBLIC_BACKEND_URL || "http://localhost:5000";
+
+// Simple in-memory cache for fallback
+const rankingsCache = new Map<
+  string,
+  { data: RankingData; timestamp: number }
+>();
+const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
+
+interface UseRankingsResult {
   data: RankingData | null;
   isLoading: boolean;
   error: string | null;
-  refetch: () => Promise<void>;
+  refresh: () => void;
 }
 
 export const useRankings = (
-  type: RankingType,
-  gameMode?: string,
-  limit: number = 50
-): UseRankingsReturn => {
+  category: string,
+  enabled: boolean = true
+): UseRankingsResult => {
   const [data, setData] = useState<RankingData | null>(null);
-
-  const { getRankings, loadingStates, errorStates, getCachedRankings } =
-    useRankingsStore();
-
-  const cacheKey = gameMode ? `${type}_${gameMode}` : type;
-  const isLoading = loadingStates[cacheKey] || false;
-  const error = errorStates[cacheKey] || null;
-
-  const fetchRankings = useCallback(async () => {
-    console.log(
-      `[useRankings] Fetching rankings for ${type}${
-        gameMode ? ` (${gameMode})` : ""
-      }`
-    );
-
-    const result = await getRankings(type, gameMode, limit);
-    if (result) {
-      setData(result);
-    }
-  }, [type, gameMode, limit, getRankings]);
-
-  // Check for cached data first
-  useEffect(() => {
-    const cached = getCachedRankings(type, gameMode);
-    if (cached) {
-      setData(cached);
-    } else {
-      fetchRankings();
-    }
-  }, [type, gameMode, limit, fetchRankings, getCachedRankings]);
-
-  return {
-    data,
-    isLoading,
-    error,
-    refetch: fetchRankings,
-  };
-};
-
-// Hook for fetching multiple ranking categories
-export const useMultipleRankings = (
-  categories: Array<{ type: RankingType; gameMode?: string }>
-) => {
-  const [data, setData] = useState<Record<string, RankingData>>({});
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const { getRankings } = useRankingsStore();
+  const abortControllerRef = useRef<AbortController | null>(null);
+  const fetchingRef = useRef(false);
+  const hasCheckedPreloaded = useRef(false);
 
-  const fetchAllRankings = useCallback(async () => {
-    setIsLoading(true);
-    setError(null);
+  const fetchRankings = async (skipCache = false) => {
+    if (!enabled || fetchingRef.current) return;
 
+    // PRIORITY 1: Check preloaded data first (from splash screen)
+    if (!skipCache && isRankingsDataPreloaded()) {
+      const preloadedData = getPreloadedRankings(category);
+      if (preloadedData) {
+        console.log(`[useRankings] Using preloaded data for ${category}`);
+        setData(preloadedData);
+        return;
+      }
+    }
+
+    // PRIORITY 2: Check hook's own cache
+    if (!skipCache) {
+      const cached = rankingsCache.get(category);
+      if (cached && Date.now() - cached.timestamp < CACHE_DURATION) {
+        console.log(`[useRankings] Using hook cached data for ${category}`);
+        setData(cached.data);
+        return;
+      }
+    }
+
+    // PRIORITY 3: Fetch fresh data from API
     try {
-      const promises = categories.map(async ({ type, gameMode }) => {
-        const result = await getRankings(type, gameMode, 10); // Fewer items for overview
-        return {
-          key: gameMode ? `${type}_${gameMode}` : type,
-          data: result,
-        };
-      });
+      fetchingRef.current = true;
+      setIsLoading(true);
+      setError(null);
 
-      const results = await Promise.all(promises);
+      // Cancel previous request
+      if (abortControllerRef.current) {
+        abortControllerRef.current.abort();
+      }
 
-      const rankingsData = results.reduce((acc, { key, data }) => {
-        if (data) {
-          acc[key] = data;
+      abortControllerRef.current = new AbortController();
+
+      const token = getToken();
+      if (!token) {
+        throw new Error("Authentication required");
+      }
+
+      // Build query parameters
+      const params = new URLSearchParams({ type: category, limit: "50" });
+      if (category.includes("_")) {
+        const [type, gameMode] = category.split("_");
+        params.set("type", type);
+        params.append("gameMode", gameMode);
+      }
+
+      console.log(`[useRankings] Fetching fresh data for ${category}`);
+
+      const response = await axios.get(
+        `${API_URL}/api/rankings?${params.toString()}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+          timeout: 10000,
+          signal: abortControllerRef.current.signal,
         }
-        return acc;
-      }, {} as Record<string, RankingData>);
+      );
 
-      setData(rankingsData);
+      if (response.data?.data) {
+        const rankingData = response.data.data;
+
+        // Cache the result in hook's own cache
+        rankingsCache.set(category, {
+          data: rankingData,
+          timestamp: Date.now(),
+        });
+
+        setData(rankingData);
+        console.log(`[useRankings] Fetched and cached ${category} rankings`);
+      } else {
+        throw new Error("Invalid response format");
+      }
     } catch (err: any) {
-      const errorMessage = err.message || "Failed to fetch rankings";
-      console.error("[useMultipleRankings] Error:", errorMessage);
-      setError(errorMessage);
+      if (err.name !== "AbortError") {
+        console.error(`[useRankings] Error fetching ${category}:`, err);
+        setError(err.message || "Failed to fetch rankings");
+      }
     } finally {
-      setIsLoading(false);
+      if (
+        abortControllerRef.current &&
+        !abortControllerRef.current.signal.aborted
+      ) {
+        setIsLoading(false);
+        fetchingRef.current = false;
+      }
     }
-  }, [categories, getRankings]);
-
-  useEffect(() => {
-    if (categories.length > 0) {
-      fetchAllRankings();
-    }
-  }, [fetchAllRankings]);
-
-  return {
-    data,
-    isLoading,
-    error,
-    refetch: fetchAllRankings,
   };
+
+  // Initial fetch - check preloaded data first
+  useEffect(() => {
+    if (!enabled) return;
+
+    // First, immediately check if we have preloaded data
+    if (isRankingsDataPreloaded() && !hasCheckedPreloaded.current) {
+      const preloadedData = getPreloadedRankings(category);
+      if (preloadedData) {
+        console.log(`[useRankings] Found preloaded data for ${category}`);
+        setData(preloadedData);
+        hasCheckedPreloaded.current = true;
+        return;
+      }
+    }
+
+    // If no preloaded data, fetch normally
+    fetchRankings();
+
+    return () => {
+      if (abortControllerRef.current) {
+        abortControllerRef.current.abort();
+      }
+      fetchingRef.current = false;
+    };
+  }, [category, enabled]);
+
+  const refresh = () => {
+    hasCheckedPreloaded.current = false; // Reset preload check on manual refresh
+    fetchRankings(true);
+  };
+
+  return { data, isLoading, error, refresh };
+};
+
+// Utility to clear cache
+export const clearRankingsCache = () => {
+  rankingsCache.clear();
 };

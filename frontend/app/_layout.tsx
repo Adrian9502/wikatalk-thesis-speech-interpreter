@@ -29,7 +29,6 @@ import useProgressStore from "@/store/games/useProgressStore";
 import useGameStore from "@/store/games/useGameStore";
 import useCoinsStore from "@/store/games/useCoinsStore";
 import { useAuthStore } from "@/store/useAuthStore";
-import { useRankingsStore } from "@/store/games/useRankingsStore";
 
 // Prevent the splash screen from auto-hiding
 SplashScreen.preventAutoHideAsync();
@@ -191,7 +190,6 @@ const RootLayout = () => {
     registerProgressStore(useProgressStore.getState());
     registerGameStore(useGameStore.getState());
     registerCoinsStore(useCoinsStore.getState());
-    registerRankingsStore(useRankingsStore.getState()); // NEW: Register rankings store
 
     // Set initial user ID
     const authState = useAuthStore.getState();

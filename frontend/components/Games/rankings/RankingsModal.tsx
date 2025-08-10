@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useMemo } from "react";
+import React, { useState } from "react";
 import {
   Modal,
   View,
@@ -10,12 +10,11 @@ import {
   RefreshControl,
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
-import { X, RefreshCw } from "react-native-feather";
+import { RefreshCw } from "react-native-feather";
 import * as Animatable from "react-native-animatable";
 import { useRankings } from "@/hooks/useRankings";
-import { RankingType } from "@/types/rankingTypes";
+import { RankingType, RankingUser } from "@/types/rankingTypes";
 import { getRankingCategory } from "@/constant/rankingConstants";
-
 import RankingCategorySelector from "./RankingCategorySelector";
 import RankingItem from "./RankingItem";
 import { NAVIGATION_COLORS } from "@/constant/gameConstants";
@@ -31,32 +30,38 @@ const RankingsModal: React.FC<RankingsModalProps> = ({ visible, onClose }) => {
   const [selectedCategory, setSelectedCategory] =
     useState<string>("quizChampions");
 
-  // Parse selected category to get type and game mode
-  const { rankingType, gameMode } = useMemo(() => {
+  // Only fetch when modal is visible
+  const { data, isLoading, error, refresh } = useRankings(
+    selectedCategory,
+    visible
+  );
+
+  // Don't render anything if modal is not visible
+  if (!visible) {
+    return null;
+  }
+
+  const categoryConfig = (() => {
     const parts = selectedCategory.split("_");
     return {
       rankingType: parts[0] as RankingType,
       gameMode: parts[1] || undefined,
     };
-  }, [selectedCategory]);
+  })();
 
-  const { data, isLoading, error, refetch } = useRankings(
-    rankingType,
-    gameMode,
-    10 // Limit to 10 users
-  );
+  const selectedCategoryData = getRankingCategory(selectedCategory);
 
-  const selectedCategoryData = useMemo(() => {
-    return getRankingCategory(selectedCategory);
-  }, [selectedCategory]);
+  const handleCategorySelect = (categoryId: string) => {
+    if (categoryId !== selectedCategory) {
+      console.log(`[RankingsModal] Switching to category: ${categoryId}`);
+      setSelectedCategory(categoryId);
+    }
+  };
 
-  const handleCategorySelect = useCallback((categoryId: string) => {
-    setSelectedCategory(categoryId);
-  }, []);
-
-  const handleRefresh = useCallback(async () => {
-    await refetch();
-  }, [refetch]);
+  const handleRefresh = () => {
+    console.log(`[RankingsModal] Refreshing ${selectedCategory} rankings`);
+    refresh();
+  };
 
   const renderContent = () => {
     if (isLoading) {
@@ -81,7 +86,7 @@ const RankingsModal: React.FC<RankingsModalProps> = ({ visible, onClose }) => {
       );
     }
 
-    if (!data || data.rankings.length === 0) {
+    if (!data || !data.rankings || data.rankings.length === 0) {
       return (
         <View style={styles.centerContainer}>
           <Text style={styles.emptyText}>No rankings available</Text>
@@ -94,13 +99,8 @@ const RankingsModal: React.FC<RankingsModalProps> = ({ visible, onClose }) => {
 
     return (
       <View style={styles.contentContainer}>
-        {/* Category Info Header */}
         {selectedCategoryData && (
-          <Animatable.View
-            animation="fadeIn"
-            duration={300}
-            style={styles.categoryInfoHeader}
-          >
+          <View style={styles.categoryInfoHeader}>
             <View style={styles.categoryTitleRow}>
               <View style={styles.categoryIconContainer}>
                 {selectedCategoryData.icon}
@@ -112,10 +112,9 @@ const RankingsModal: React.FC<RankingsModalProps> = ({ visible, onClose }) => {
             <Text style={styles.categoryDescription}>
               {selectedCategoryData.description}
             </Text>
-          </Animatable.View>
+          </View>
         )}
 
-        {/* Rankings List */}
         <ScrollView
           style={styles.rankingsList}
           showsVerticalScrollIndicator={false}
@@ -129,18 +128,19 @@ const RankingsModal: React.FC<RankingsModalProps> = ({ visible, onClose }) => {
           }
         >
           <View style={styles.rankingsContainer}>
-            {data.rankings.slice(0, 10).map((user, index) => (
-              <RankingItem
-                key={`${user.userId}-${index}`}
-                user={user}
-                rank={index + 1}
-                type={rankingType}
-                isCurrentUser={data.userRank?.rank === index + 1}
-              />
-            ))}
+            {data.rankings
+              .slice(0, 10)
+              .map((user: RankingUser, index: number) => (
+                <RankingItem
+                  key={`${user.userId}-${index}`}
+                  user={user}
+                  rank={index + 1}
+                  type={categoryConfig.rankingType}
+                  isCurrentUser={data.userRank?.rank === index + 1}
+                />
+              ))}
           </View>
 
-          {/* User's rank (if not in top 10) */}
           {data.userRank && data.userRank.rank > 10 && (
             <View style={styles.userRankSection}>
               <View style={styles.userRankDivider}>
@@ -167,7 +167,6 @@ const RankingsModal: React.FC<RankingsModalProps> = ({ visible, onClose }) => {
       transparent={true}
       onRequestClose={onClose}
     >
-      {/* Modal Overlay */}
       <View style={styles.overlay}>
         <Animatable.View
           animation="zoomIn"
@@ -180,17 +179,14 @@ const RankingsModal: React.FC<RankingsModalProps> = ({ visible, onClose }) => {
             end={{ x: 1, y: 1 }}
             style={styles.gradientBackground}
           >
-            <CloseButton size={17} onPress={onClose}></CloseButton>
-            {/* Header with close button */}
+            <CloseButton size={17} onPress={onClose} />
             <View style={styles.headerContent}>
               <Text style={styles.title}>Rankings</Text>
             </View>
-            {/* Category Selector */}
             <RankingCategorySelector
               selectedCategory={selectedCategory}
               onCategorySelect={handleCategorySelect}
             />
-            {/* Content Area */}
             {renderContent()}
           </LinearGradient>
         </Animatable.View>
