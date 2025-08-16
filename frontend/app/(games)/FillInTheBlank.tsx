@@ -381,6 +381,7 @@ const FillInTheBlank: React.FC<FillInTheBlankProps> = React.memo(
             isCorrectAnswer={score > 0}
             isBackgroundCompletion={gameConfig.isBackgroundCompletion}
             isUserExit={gameConfig.isUserExit}
+            rewardInfo={rewardInfo}
             onTimerReset={handleTimerReset}
           />
         )}

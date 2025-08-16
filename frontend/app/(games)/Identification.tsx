@@ -409,6 +409,7 @@ const Identification: React.FC<IdentificationProps> = React.memo(
               isCorrectAnswer={gameConfig.isCorrect}
               isBackgroundCompletion={gameConfig.isBackgroundCompletion}
               isUserExit={gameConfig.isUserExit}
+              rewardInfo={rewardInfo}
               onTimerReset={handleTimerReset}
             />
           )}
