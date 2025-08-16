@@ -8,7 +8,7 @@ import {
   Platform,
   TouchableWithoutFeedback,
   Keyboard,
-  Animated, // NEW: Added Animated import
+  Animated,
 } from "react-native";
 import { StatusBar } from "expo-status-bar";
 import { CameraView, useCameraPermissions } from "expo-camera";
@@ -192,106 +192,111 @@ const Scan: React.FC = () => {
   }
 
   return (
-    <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-      <SafeAreaView style={dynamicStyles.container}>
-        <StatusBar style="light" />
-        <KeyboardAvoidingView
-          behavior={Platform.OS === "ios" ? "padding" : "height"}
-          style={styles.keyboardView}
-          keyboardVerticalOffset={Platform.OS === "ios" ? 0 : 20}
-        >
-          {/* NEW: Simple fade animation wrapper - no other changes */}
-          <Animated.View
-            style={[
-              styles.cameraContainer,
-              {
-                opacity: fadeAnim, // Only add fade animation
-              },
-            ]}
+    <SafeAreaView
+      style={dynamicStyles.container}
+      onStartShouldSetResponder={() => true}
+    >
+      <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
+        <View style={{ flex: 1 }}>
+          <StatusBar style="light" />
+          <KeyboardAvoidingView
+            behavior={Platform.OS === "ios" ? "padding" : "height"}
+            style={styles.keyboardView}
+            keyboardVerticalOffset={Platform.OS === "ios" ? 0 : 20}
+            enabled={true}
           >
-            <View style={styles.cameraViewContainer}>
-              <CameraView
-                style={{ flex: 1 }}
-                facing="back"
-                ref={cameraRef}
-                onMountError={(event) => {
-                  const error = event as unknown as Error;
-                  updateState({
-                    sourceText: `Camera mount error: ${error.message}`,
-                  });
-                }}
-              />
+            {/* NEW: Simple fade animation wrapper - no other changes */}
+            <Animated.View
+              style={[
+                styles.cameraContainer,
+                {
+                  opacity: fadeAnim, // Only add fade animation
+                },
+              ]}
+            >
+              <View style={styles.cameraViewContainer}>
+                <CameraView
+                  style={{ flex: 1 }}
+                  facing="back"
+                  ref={cameraRef}
+                  onMountError={(event) => {
+                    const error = event as unknown as Error;
+                    updateState({
+                      sourceText: `Camera mount error: ${error.message}`,
+                    });
+                  }}
+                />
 
-              <CameraControls
-                takePicture={takePicture}
-                pickImage={pickImage}
-                isProcessing={isProcessing}
-              />
-            </View>
+                <CameraControls
+                  takePicture={takePicture}
+                  pickImage={pickImage}
+                  isProcessing={isProcessing}
+                />
+              </View>
 
-            <View style={styles.translationContainer}>
-              <LanguageSelector
-                targetLanguage={targetLanguage}
-                onLanguageChange={(language: string) => {
-                  updateState({ targetLanguage: language });
-                  if (sourceText) translateDetectedText(sourceText);
-                }}
-              />
+              <View style={styles.translationContainer}>
+                <LanguageSelector
+                  targetLanguage={targetLanguage}
+                  onLanguageChange={(language: string) => {
+                    updateState({ targetLanguage: language });
+                    if (sourceText) translateDetectedText(sourceText);
+                  }}
+                />
 
-              {isProcessing && (
-                <View style={styles.progressContainer}>
-                  <View
-                    style={[
-                      styles.progressBar,
-                      { width: `${ocrProgress * 100}%` },
-                    ]}
-                  />
-                  <Text style={styles.progressText}>
-                    {Math.round(ocrProgress * 100)}% - Recognizing text...
-                  </Text>
-                </View>
-              )}
+                {isProcessing && (
+                  <View style={styles.progressContainer}>
+                    <View
+                      style={[
+                        styles.progressBar,
+                        { width: `${ocrProgress * 100}%` },
+                      ]}
+                    />
+                    <Text style={styles.progressText}>
+                      {Math.round(ocrProgress * 100)}% - Recognizing text...
+                    </Text>
+                  </View>
+                )}
 
-              <TextDisplay
-                title="Detected Text"
-                text={sourceText}
-                placeholder="Scan or select an image to detect text"
-                isLoading={isProcessing}
-                isSpeaking={isSourceSpeaking}
-                copied={copiedSource}
-                onChangeText={(text: string) => {
-                  debouncedTranslateText(text);
-                }}
-                onCopy={() => copyToClipboard(sourceText, "copiedSource")}
-                onSpeak={() => handleSourceSpeech(sourceText)}
-                onClear={clearText}
-                editable={true}
-                color={BASE_COLORS.blue}
-              />
+                <TextDisplay
+                  title="Detected Text"
+                  text={sourceText}
+                  placeholder="Scan or select an image to detect text"
+                  isLoading={isProcessing}
+                  isSpeaking={isSourceSpeaking}
+                  copied={copiedSource}
+                  onChangeText={(text: string) => {
+                    debouncedTranslateText(text);
+                  }}
+                  onCopy={() => copyToClipboard(sourceText, "copiedSource")}
+                  onSpeak={() => handleSourceSpeech(sourceText)}
+                  onClear={clearText}
+                  editable={true}
+                  color={BASE_COLORS.blue}
+                />
 
-              <TextDisplay
-                title="Translation"
-                text={translatedText}
-                placeholder="Translation will appear here"
-                isLoading={isTranslating}
-                isSpeaking={isTargetSpeaking}
-                copied={copiedTarget}
-                onCopy={() => copyToClipboard(translatedText, "copiedTarget")}
-                onSpeak={() => handleTargetSpeech(translatedText)}
-                editable={false}
-                color={BASE_COLORS.orange}
-              />
-            </View>
-          </Animated.View>
-        </KeyboardAvoidingView>
-      </SafeAreaView>
-    </TouchableWithoutFeedback>
+                <TextDisplay
+                  title="Translation"
+                  text={translatedText}
+                  placeholder="Translation will appear here"
+                  isLoading={isTranslating}
+                  isSpeaking={isTargetSpeaking}
+                  copied={copiedTarget}
+                  onCopy={() => copyToClipboard(translatedText, "copiedTarget")}
+                  onSpeak={() => handleTargetSpeech(translatedText)}
+                  editable={false}
+                  color={BASE_COLORS.orange}
+                />
+              </View>
+            </Animated.View>
+          </KeyboardAvoidingView>
+        </View>
+      </TouchableWithoutFeedback>
+    </SafeAreaView>
   );
 };
 
 export default Scan;
 
-// Styles - COMPLETELY UNCHANGED
 const styles = StyleSheet.create({
   keyboardView: {
     flex: 1,
@@ -321,16 +326,15 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   cameraViewContainer: {
-    height: "40%",
+    height: "35%",
     borderRadius: 20,
     overflow: "hidden",
-
     shadowColor: "#000",
     elevation: 3,
   },
   translationContainer: {
     flex: 1,
-    marginVertical: 10,
+    marginVertical: 16,
     backgroundColor: BASE_COLORS.lightBlue,
     borderRadius: 20,
     padding: 16,
@@ -343,6 +347,8 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.25,
     shadowRadius: 3.84,
     elevation: 3,
+    minHeight: 350, // Increased minimum height for better text display
+    maxHeight: "65%", // Limit maximum height to prevent overflow
   },
   progressContainer: {
     height: 20,
@@ -352,6 +358,7 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     overflow: "hidden",
     position: "relative",
+    marginBottom: 8, // Add margin for better spacing
   },
   progressBar: {
     height: "100%",

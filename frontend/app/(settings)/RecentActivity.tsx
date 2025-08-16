@@ -31,6 +31,7 @@ interface TranslationAPIItem {
 export const RecentActivity: React.FC = () => {
   // Theme store
   const { activeTheme } = useThemeStore();
+  const dynamicStyles = getGlobalStyles(activeTheme.backgroundColor);
 
   // State to track active tab
   const [activeTab, setActiveTab] = useState<TabType>("Speech");
@@ -165,81 +166,77 @@ export const RecentActivity: React.FC = () => {
 
   // Update the header to remove custom back handling since hardware back now handles it
   return (
-    <View
+    <SafeAreaView
       style={[
         styles.safeAreaView,
+        dynamicStyles.container,
         { backgroundColor: activeTheme.backgroundColor },
       ]}
     >
-      <SafeAreaView style={styles.safeAreaView}>
-        <StatusBar style="light" />
+      <StatusBar style="light" />
 
-        {/* Header - KEEP existing functionality, don't remove onBackPress */}
-        <Header title="Recent Activity" />
+      {/* Header - KEEP existing functionality, don't remove onBackPress */}
+      <Header title="Recent Activity" />
 
-        {/* Tabs */}
-        <TabSelector activeTab={activeTab} onTabChange={setActiveTab} />
+      {/* Tabs */}
+      <TabSelector activeTab={activeTab} onTabChange={setActiveTab} />
 
-        {/* Loading State */}
-        {loading ? (
-          <View style={styles.loadingContainer}>
-            <DotsLoader />
-          </View>
-        ) : error ? (
-          <View style={styles.errorContainer}>
-            <Text
-              style={[styles.errorText, { color: activeTheme.tabActiveColor }]}
-            >
-              {error}
-            </Text>
-            <TouchableOpacity
-              style={[
-                styles.retryButton,
-                { backgroundColor: BASE_COLORS.blue },
-              ]}
-              onPress={() => fetchHistory(activeTab)}
-            >
-              <Text style={styles.retryButtonText}>Retry</Text>
-            </TouchableOpacity>
-          </View>
-        ) : (
-          /* History Items */
-          <ScrollView
-            style={styles.scrollView}
-            contentContainerStyle={[
-              styles.scrollContent,
-              historyItems[activeTab].length === 0 && styles.emptyScrollContent,
-            ]}
-            showsVerticalScrollIndicator={false}
-            refreshControl={
-              <RefreshControl
-                refreshing={refreshing}
-                onRefresh={onRefresh}
-                colors={[BASE_COLORS.white]} // Color of the refresh spinner
-                tintColor={activeTheme.tabActiveColor} // For iOS
-                progressBackgroundColor={activeTheme.secondaryColor} // For Android
-              />
-            }
+      {/* Loading State */}
+      {loading ? (
+        <View style={styles.loadingContainer}>
+          <DotsLoader />
+        </View>
+      ) : error ? (
+        <View style={styles.errorContainer}>
+          <Text
+            style={[styles.errorText, { color: activeTheme.tabActiveColor }]}
           >
-            <HistoryList
-              items={historyItems[activeTab]}
-              activeTab={activeTab}
-              onDeletePress={handleDeletePress}
+            {error}
+          </Text>
+          <TouchableOpacity
+            style={[styles.retryButton, { backgroundColor: BASE_COLORS.blue }]}
+            onPress={() => fetchHistory(activeTab)}
+          >
+            <Text style={styles.retryButtonText}>Retry</Text>
+          </TouchableOpacity>
+        </View>
+      ) : (
+        /* History Items */
+        <ScrollView
+          style={styles.scrollView}
+          contentContainerStyle={[
+            styles.scrollContent,
+            historyItems[activeTab].length === 0 && styles.emptyScrollContent,
+          ]}
+          showsVerticalScrollIndicator={false}
+          refreshControl={
+            <RefreshControl
+              refreshing={refreshing}
+              onRefresh={onRefresh}
+              colors={[BASE_COLORS.white]} // Color of the refresh spinner
+              tintColor={activeTheme.tabActiveColor} // For iOS
+              progressBackgroundColor={activeTheme.secondaryColor} // For Android
             />
-          </ScrollView>
-        )}
+          }
+        >
+          <HistoryList
+            items={historyItems[activeTab]}
+            activeTab={activeTab}
+            onDeletePress={handleDeletePress}
+          />
+        </ScrollView>
+      )}
 
-        {/* Delete Confirmation Modal */}
-        <ConfirmationModal
-          visible={deleteConfirmVisible}
-          title="Delete Translation"
-          text="Are you sure you want to delete this translation? This action cannot be undone."
-          onCancel={handleDeleteCancel}
-          onConfirm={handleDeleteConfirm}
-          confirmButtonText="Delete"
-        />
-      </SafeAreaView>
-    </View>
+      {/* Delete Confirmation Modal */}
+      <ConfirmationModal
+        visible={deleteConfirmVisible}
+        title="Delete Translation"
+        text="Are you sure you want to delete this translation? This action cannot be undone."
+        onCancel={handleDeleteCancel}
+        onConfirm={handleDeleteConfirm}
+        confirmButtonText="Delete"
+      />
+    </SafeAreaView>
   );
 };
 

@@ -1,12 +1,12 @@
-import React from "react";
+import React, { useRef } from "react";
 import {
   View,
   Text,
   TouchableOpacity,
   StyleSheet,
-  ScrollView,
   TextInput,
   ActivityIndicator,
+  Platform,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { BASE_COLORS } from "@/constant/colors";
@@ -40,6 +40,31 @@ const TextDisplay: React.FC<TextDisplayProps> = ({
   editable = false,
   color = BASE_COLORS.blue,
 }) => {
+  // Store the original value for non-editable fields
+  const originalValue = useRef(text);
+
+  // Update the ref when text changes
+  React.useEffect(() => {
+    if (!editable) {
+      originalValue.current = text;
+    }
+  }, [text, editable]);
+
+  // Handler to prevent editing for non-editable fields
+  const handleChangeText = (newText: string) => {
+    if (editable && onChangeText) {
+      onChangeText(newText);
+    }
+    // For non-editable, do nothing - text won't change
+  };
+
+  // Prevent keyboard from showing for non-editable fields
+  const handleFocus = (e: any) => {
+    if (!editable) {
+      e.target.blur();
+    }
+  };
+
   return (
     <View style={styles.textSection}>
       <View style={styles.sectionHeader}>
@@ -53,7 +78,7 @@ const TextDisplay: React.FC<TextDisplayProps> = ({
           >
             <Ionicons
               name={isSpeaking ? "volume-high" : "volume-medium-outline"}
-              size={22}
+              size={18}
               color={isSpeaking ? BASE_COLORS.success : color}
             />
           </TouchableOpacity>
@@ -65,7 +90,7 @@ const TextDisplay: React.FC<TextDisplayProps> = ({
           >
             <Ionicons
               name={copied ? "checkmark-circle" : "copy-outline"}
-              size={22}
+              size={18}
               color={copied ? BASE_COLORS.success : color}
             />
           </TouchableOpacity>
@@ -76,7 +101,7 @@ const TextDisplay: React.FC<TextDisplayProps> = ({
               onPress={onClear}
               disabled={!text || isLoading}
             >
-              <Ionicons name="trash-outline" size={22} color={color} />
+              <Ionicons name="trash-outline" size={18} color={color} />
             </TouchableOpacity>
           )}
         </View>
@@ -85,54 +110,42 @@ const TextDisplay: React.FC<TextDisplayProps> = ({
       <View style={styles.textAreaWrapper}>
         {isLoading ? (
           <View style={styles.loaderContainer}>
-            <ActivityIndicator size="large" color={color} />
+            <ActivityIndicator size="small" color={color} />
           </View>
-        ) : editable ? (
-          <ScrollView
-            style={styles.textArea}
-            contentContainerStyle={styles.scrollContent}
-            showsVerticalScrollIndicator={true}
-            nestedScrollEnabled={true}
-          >
-            <TextInput
-              value={text}
-              onChangeText={onChangeText}
-              multiline
-              style={styles.textField}
-              placeholder={placeholder}
-              placeholderTextColor={BASE_COLORS.placeholderText}
-              editable={editable}
-            />
-          </ScrollView>
         ) : (
-          <ScrollView
-            style={styles.textArea}
-            contentContainerStyle={styles.scrollContent}
-            showsVerticalScrollIndicator={true}
-            nestedScrollEnabled={true}
-          >
-            {text ? (
-              <TextInput
-                value={text}
-                onChangeText={onChangeText}
-                multiline
-                style={styles.textField}
-                placeholder={placeholder}
-                placeholderTextColor={BASE_COLORS.placeholderText}
-                editable={false}
-              />
-            ) : (
-              <TextInput
-                value={text}
-                onChangeText={onChangeText}
-                multiline
-                style={styles.textField}
-                placeholder={placeholder}
-                placeholderTextColor={BASE_COLORS.placeholderText}
-                editable={false}
-              />
-            )}
-          </ScrollView>
+          <TextInput
+            value={text || (editable ? "" : placeholder)}
+            onChangeText={handleChangeText}
+            multiline
+            style={[
+              styles.textArea,
+              styles.textField,
+              !text && !editable
+                ? styles.placeholderText
+                : styles.translatedText,
+            ]}
+            placeholder={editable ? placeholder : undefined}
+            placeholderTextColor={BASE_COLORS.placeholderText}
+            editable={true} // Always true for scrolling to work
+            scrollEnabled={true}
+            textAlignVertical="top"
+            // These props help make it "fake" non-editable
+            selectTextOnFocus={false}
+            showSoftInputOnFocus={editable} // Only show keyboard for editable
+            onFocus={handleFocus}
+            caretHidden={!editable} // Hide cursor for non-editable
+            contextMenuHidden={!editable} // Hide context menu for non-editable
+            selection={!editable ? { start: 0, end: 0 } : undefined} // Prevent selection for non-editable
+            // Android specific
+            importantForAutofill={editable ? "auto" : "no"}
+            keyboardType={
+              editable
+                ? "default"
+                : Platform.OS === "android"
+                ? "visible-password"
+                : "default"
+            }
+          />
         )}
       </View>
     </View>
@@ -143,7 +156,7 @@ const styles = StyleSheet.create({
   textSection: {
     flex: 1,
     marginVertical: 6,
-    minHeight: 120,
+    minHeight: 140,
   },
   sectionHeader: {
     flexDirection: "row",
@@ -152,8 +165,8 @@ const styles = StyleSheet.create({
     marginBottom: 4,
   },
   sectionTitle: {
-    fontSize: 16,
-    fontFamily: "Poppins-Regular",
+    fontSize: 14,
+    fontFamily: "Poppins-Medium",
   },
   controls: {
     flexDirection: "row",
@@ -169,36 +182,31 @@ const styles = StyleSheet.create({
   },
   textAreaWrapper: {
     flex: 1,
-    minHeight: 100,
+    minHeight: 120,
+    maxHeight: 200,
   },
   textArea: {
     flex: 1,
     backgroundColor: "#F5F5F5",
     borderRadius: 20,
-    minHeight: 100,
+    minHeight: 120,
     maxHeight: 200,
-  },
-  scrollContent: {
-    flexGrow: 1,
-    minHeight: 80,
-    padding: 10,
+    padding: 12,
   },
   textField: {
     fontFamily: "Poppins-Regular",
-    fontSize: 17,
-    lineHeight: 24,
+    fontSize: 14,
     color: BASE_COLORS.darkText,
     textAlignVertical: "top",
-    minHeight: 80,
   },
   translatedText: {
-    fontSize: 17,
-    lineHeight: 24,
+    fontSize: 14,
     fontFamily: "Poppins-Regular",
-    color: "#333",
+    color: BASE_COLORS.darkText,
+    lineHeight: 20,
   },
   placeholderText: {
-    fontSize: 17,
+    fontSize: 14,
     fontFamily: "Poppins-Regular",
     color: BASE_COLORS.placeholderText,
   },
@@ -208,7 +216,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     backgroundColor: "#F5F5F5",
     borderRadius: 20,
-    minHeight: 100,
+    minHeight: 120,
   },
 });
 
