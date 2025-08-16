@@ -12,6 +12,9 @@ import {
   TextInput,
   ScrollView,
   Animated,
+  Platform,
+  Keyboard,
+  Dimensions,
 } from "react-native";
 import { Check, X, Eye, EyeOff } from "react-native-feather";
 import { LinearGradient } from "expo-linear-gradient";
@@ -55,13 +58,20 @@ const FillInTheBlankPlayingContent: React.FC<RenderPlayingContentProps> =
       checkAnswer,
     }) => {
       const inputRef = useRef<TextInput>(null);
+      const scrollViewRef = useRef<ScrollView>(null);
 
       // Simplified animation state
       const [isAnimating, setIsAnimating] = useState(true);
+      const [keyboardHeight, setKeyboardHeight] = useState(0);
+      const [isKeyboardVisible, setIsKeyboardVisible] = useState(false);
 
       // NEW: Animation refs for hint and translation
       const hintOpacity = useRef(new Animated.Value(0)).current;
       const translationOpacity = useRef(new Animated.Value(0)).current;
+
+      // NEW: Animation for smooth keyboard transitions
+      const keyboardAnim = useRef(new Animated.Value(0)).current;
+      const containerTranslateY = useRef(new Animated.Value(0)).current;
 
       // Memoized values
       const gameGradientColors = useMemo(
@@ -78,7 +88,68 @@ const FillInTheBlankPlayingContent: React.FC<RenderPlayingContentProps> =
         return () => clearTimeout(timer);
       }, []);
 
-      // NEW: Animation effects for hint and translation
+      // NEW: Keyboard event listeners
+      useEffect(() => {
+        const keyboardDidShowListener = Keyboard.addListener(
+          "keyboardDidShow",
+          (e) => {
+            const { height } = e.endCoordinates;
+            setKeyboardHeight(height);
+            setIsKeyboardVisible(true);
+
+            // Smooth animation when keyboard appears
+            Animated.parallel([
+              Animated.timing(keyboardAnim, {
+                toValue: 1,
+                duration: 300,
+                useNativeDriver: false,
+              }),
+              Animated.timing(containerTranslateY, {
+                toValue: -50, // Slight upward movement
+                duration: 300,
+                useNativeDriver: true,
+              }),
+            ]).start();
+
+            // Auto-scroll to input section when keyboard appears
+            setTimeout(() => {
+              scrollViewRef.current?.scrollTo({
+                y: 200,
+                animated: true,
+              });
+            }, 350);
+          }
+        );
+
+        const keyboardDidHideListener = Keyboard.addListener(
+          "keyboardDidHide",
+          () => {
+            setKeyboardHeight(0);
+            setIsKeyboardVisible(false);
+
+            // Smooth animation when keyboard disappears
+            Animated.parallel([
+              Animated.timing(keyboardAnim, {
+                toValue: 0,
+                duration: 250,
+                useNativeDriver: false,
+              }),
+              Animated.timing(containerTranslateY, {
+                toValue: 0,
+                duration: 250,
+                useNativeDriver: true,
+              }),
+            ]).start();
+          }
+        );
+
+        return () => {
+          keyboardDidShowListener.remove();
+          keyboardDidHideListener.remove();
+        };
+      }, [keyboardAnim, containerTranslateY]);
+
+      // Animation effects for hint and translation
       useEffect(() => {
         if (showHint) {
           Animated.timing(hintOpacity, {
@@ -148,6 +219,7 @@ const FillInTheBlankPlayingContent: React.FC<RenderPlayingContentProps> =
 
       const handleCheckAnswer = useCallback(() => {
         if (isAnimating || !canSubmit) return;
+        Keyboard.dismiss();
         checkAnswer();
       }, [checkAnswer, isAnimating, canSubmit]);
 
@@ -161,14 +233,33 @@ const FillInTheBlankPlayingContent: React.FC<RenderPlayingContentProps> =
         toggleTranslation();
       }, [toggleTranslation, isAnimating]);
 
+      // NEW: Focus handler for input
+      const handleInputFocus = useCallback(() => {
+        setTimeout(() => {
+          scrollViewRef.current?.scrollTo({
+            y: 150,
+            animated: true,
+          });
+        }, 300);
+      }, []);
+
       return (
-        <View style={gamesSharedStyles.gameContainer}>
+        <Animated.View
+          style={[
+            gamesSharedStyles.gameContainer,
+            {
+              transform: [{ translateY: containerTranslateY }],
+            },
+          ]}
+        >
           <ScrollView
+            ref={scrollViewRef}
             showsVerticalScrollIndicator={false}
             keyboardShouldPersistTaps="handled"
-            keyboardDismissMode="on-drag"
-            removeClippedSubviews={true}
-            contentContainerStyle={styles.scrollContainer}
+            keyboardDismissMode="interactive"
+            removeClippedSubviews={false}
+            contentContainerStyle={[styles.scrollContainer]}
+            style={{ flex: 1 }}
           >
             {/* Sentence Card */}
             <View style={gamesSharedStyles.questionCardContainer}>
@@ -207,13 +298,7 @@ const FillInTheBlankPlayingContent: React.FC<RenderPlayingContentProps> =
               </View>
 
               <View style={styles.inputWrapper}>
-                <LinearGradient
-                  colors={[
-                    "rgba(255, 255, 255, 0.05)",
-                    "rgba(255, 255, 255, 0.09)",
-                  ]}
-                  style={styles.inputContainer}
-                >
+                <View style={styles.inputContainer}>
                   <TextInput
                     ref={inputRef}
                     style={styles.input}
@@ -225,21 +310,25 @@ const FillInTheBlankPlayingContent: React.FC<RenderPlayingContentProps> =
                     selectionColor={BASE_COLORS.white}
                     multiline={false}
                     editable={!isAnimating}
+                    returnKeyType="done"
+                    onSubmitEditing={handleCheckAnswer}
+                    onFocus={handleInputFocus}
                   />
 
                   {userAnswer.length > 0 && !isAnimating && (
                     <TouchableOpacity
                       style={styles.clearButton}
                       onPress={handleClear}
+                      activeOpacity={0.7}
                     >
                       <X
-                        width={18}
-                        height={18}
+                        width={14}
+                        height={14}
                         color="rgba(255, 255, 255, 0.7)"
                       />
                     </TouchableOpacity>
                   )}
-                </LinearGradient>
+                </View>
 
                 <TouchableOpacity
                   style={[
@@ -248,6 +337,7 @@ const FillInTheBlankPlayingContent: React.FC<RenderPlayingContentProps> =
                   ]}
                   onPress={handleCheckAnswer}
                   disabled={!canSubmit}
+                  activeOpacity={0.8}
                 >
                   <LinearGradient
                     colors={
@@ -284,6 +374,7 @@ const FillInTheBlankPlayingContent: React.FC<RenderPlayingContentProps> =
                   ]}
                   onPress={handleToggleHint}
                   disabled={isAnimating}
+                  activeOpacity={0.7}
                 >
                   <Icon
                     name="activity"
@@ -309,6 +400,7 @@ const FillInTheBlankPlayingContent: React.FC<RenderPlayingContentProps> =
                   ]}
                   onPress={handleToggleTranslation}
                   disabled={isAnimating}
+                  activeOpacity={0.7}
                 >
                   {showTranslation ? (
                     <EyeOff width={16} height={16} color={BASE_COLORS.white} />
@@ -331,7 +423,7 @@ const FillInTheBlankPlayingContent: React.FC<RenderPlayingContentProps> =
               </View>
             </View>
 
-            {/* NEW: Animated Help Cards */}
+            {/* Help Cards */}
             {showHint && currentExercise?.hint && (
               <Animated.View
                 style={[
@@ -383,7 +475,7 @@ const FillInTheBlankPlayingContent: React.FC<RenderPlayingContentProps> =
               </Animated.View>
             )}
 
-            {/* Feedback Card - Simple render */}
+            {/* Feedback Card */}
             {showFeedback && (
               <View style={styles.feedbackContainer}>
                 <LinearGradient
@@ -413,7 +505,7 @@ const FillInTheBlankPlayingContent: React.FC<RenderPlayingContentProps> =
               </View>
             )}
           </ScrollView>
-        </View>
+        </Animated.View>
       );
     }
   );

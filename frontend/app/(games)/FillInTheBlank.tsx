@@ -320,77 +320,71 @@ const FillInTheBlank: React.FC<FillInTheBlankProps> = React.memo(
     }, [showFeedback, setTimerRunning]);
 
     return (
-      <KeyboardAvoidingView
-        style={{ flex: 1 }}
-        behavior={Platform.OS === "ios" ? "padding" : undefined}
-        keyboardVerticalOffset={Platform.OS === "ios" ? 0 : 20}
+      <GameContainer
+        title="Fill in the Blank"
+        timerRunning={timerRunning}
+        gameStatus={gameStatus}
+        difficulty={difficulty}
+        showTimer={true}
+        initialTime={gameConfig.initialTime}
+        isStarted={isStarted}
+        finalTime={gameConfig.finalTime}
+        levelId={levelId}
+        onTimerReset={handleTimerReset}
+        isCorrectAnswer={score > 0}
+        onUserExit={handleUserExitWithSave}
       >
-        <GameContainer
-          title="Fill in the Blank"
-          timerRunning={timerRunning}
-          gameStatus={gameStatus}
-          difficulty={difficulty}
-          showTimer={true}
-          initialTime={gameConfig.initialTime}
-          isStarted={isStarted}
-          finalTime={gameConfig.finalTime}
-          levelId={levelId}
-          onTimerReset={handleTimerReset}
-          isCorrectAnswer={score > 0}
-          onUserExit={handleUserExitWithSave}
-        >
-          {gameStatus === "playing" ? (
-            <GamePlayingContent
+        {gameStatus === "playing" ? (
+          <GamePlayingContent
+            timerRunning={timerRunning}
+            difficulty={difficulty}
+            isStarted={isStarted}
+            gameStatus={gameStatus}
+            initialTime={gameConfig.initialTime}
+            levelString={gameConfig.currentExercise?.level}
+            actualTitle={gameConfig.currentExercise?.title}
+          >
+            <FillInTheBlankPlayingContent
+              difficulty={difficulty}
+              levelData={levelData}
               timerRunning={timerRunning}
-              difficulty={difficulty}
-              isStarted={isStarted}
-              gameStatus={gameStatus}
-              initialTime={gameConfig.initialTime}
-              levelString={gameConfig.currentExercise?.level}
-              actualTitle={gameConfig.currentExercise?.title}
-            >
-              <FillInTheBlankPlayingContent
-                difficulty={difficulty}
-                levelData={levelData}
-                timerRunning={timerRunning}
-                userAnswer={userAnswer}
-                showHint={showHint}
-                showTranslation={showTranslation}
-                showFeedback={showFeedback}
-                isCorrect={isCorrect}
-                attemptsLeft={attemptsLeft}
-                currentExercise={gameConfig.currentExercise}
-                setUserAnswer={setUserAnswer}
-                toggleHint={memoizedToggleHint}
-                toggleTranslation={memoizedToggleTranslation}
-                checkAnswer={checkAnswerWithProgress}
-              />
-            </GamePlayingContent>
-          ) : (
-            <GameCompletedContent
-              score={score}
-              timeElapsed={gameConfig.finalTime}
-              difficulty={difficulty}
-              question={gameConfig.question}
-              userAnswer={gameConfig.userAnswerDisplay}
-              isCorrect={score > 0}
-              levelId={levelId}
-              gameMode="fillBlanks"
-              gameTitle="Fill in the Blank"
-              onRestart={handleRestartWithProgress}
-              focusArea={gameConfig.focusArea}
-              levelString={gameConfig.currentExercise?.level}
-              actualTitle={gameConfig.currentExercise?.title}
-              nextLevelTitle={getNextLevelTitle()}
-              isCurrentLevelCompleted={score > 0}
-              isCorrectAnswer={score > 0}
-              isBackgroundCompletion={gameConfig.isBackgroundCompletion}
-              isUserExit={gameConfig.isUserExit}
-              onTimerReset={handleTimerReset}
+              userAnswer={userAnswer}
+              showHint={showHint}
+              showTranslation={showTranslation}
+              showFeedback={showFeedback}
+              isCorrect={isCorrect}
+              attemptsLeft={attemptsLeft}
+              currentExercise={gameConfig.currentExercise}
+              setUserAnswer={setUserAnswer}
+              toggleHint={memoizedToggleHint}
+              toggleTranslation={memoizedToggleTranslation}
+              checkAnswer={checkAnswerWithProgress}
             />
-          )}
-        </GameContainer>
-      </KeyboardAvoidingView>
+          </GamePlayingContent>
+        ) : (
+          <GameCompletedContent
+            score={score}
+            timeElapsed={gameConfig.finalTime}
+            difficulty={difficulty}
+            question={gameConfig.question}
+            userAnswer={gameConfig.userAnswerDisplay}
+            isCorrect={score > 0}
+            levelId={levelId}
+            gameMode="fillBlanks"
+            gameTitle="Fill in the Blank"
+            onRestart={handleRestartWithProgress}
+            focusArea={gameConfig.focusArea}
+            levelString={gameConfig.currentExercise?.level}
+            actualTitle={gameConfig.currentExercise?.title}
+            nextLevelTitle={getNextLevelTitle()}
+            isCurrentLevelCompleted={score > 0}
+            isCorrectAnswer={score > 0}
+            isBackgroundCompletion={gameConfig.isBackgroundCompletion}
+            isUserExit={gameConfig.isUserExit}
+            onTimerReset={handleTimerReset}
+          />
+        )}
+      </GameContainer>
     );
   }
 );

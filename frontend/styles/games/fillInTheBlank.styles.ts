@@ -2,10 +2,11 @@ import { StyleSheet } from "react-native";
 import { BASE_COLORS } from "@/constant/colors";
 
 export default StyleSheet.create({
-  // NEW: Scroll container for proper spacing
+  // Scroll container for proper spacing
   scrollContainer: {
     paddingVertical: 10,
-    paddingBottom: 20,
+    flexGrow: 1,
+    minHeight: "100%",
   },
 
   // Attempts Section
@@ -42,9 +43,10 @@ export default StyleSheet.create({
     color: "rgba(255, 255, 255, 0.31)",
   },
 
-  // Enhanced Input Section
+  // Input Section - UPDATED
   inputSection: {
-    marginBottom: 12,
+    marginBottom: 20,
+    zIndex: 1,
   },
   inputHeader: {
     marginVertical: 12,
@@ -59,7 +61,7 @@ export default StyleSheet.create({
   inputWrapper: {
     flexDirection: "row",
     gap: 12,
-    marginBottom: 20, // REDUCED: Was 70, now 20 for better scrolling
+    marginBottom: 20,
     alignItems: "stretch",
   },
   inputContainer: {
@@ -67,6 +69,7 @@ export default StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     borderRadius: 20,
+    backgroundColor: "rgba(255, 255, 255, 0.1)",
     borderWidth: 2,
     borderColor: "rgba(255, 255, 255, 0.2)",
     paddingHorizontal: 16,
@@ -74,22 +77,32 @@ export default StyleSheet.create({
   },
   input: {
     flex: 1,
-    fontSize: 16,
+    fontSize: 14,
     fontFamily: "Poppins-Regular",
     color: BASE_COLORS.white,
     paddingVertical: 12,
+    textAlignVertical: "center",
   },
   clearButton: {
     padding: 8,
     marginLeft: 8,
+    borderRadius: 12,
+    backgroundColor: "rgba(255, 255, 255, 0.1)",
   },
   submitButton: {
     borderRadius: 20,
     overflow: "hidden",
     minWidth: 80,
+    elevation: 2,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
   },
   submitButtonDisabled: {
     opacity: 0.8,
+    elevation: 0,
+    shadowOpacity: 0,
   },
   submitGradient: {
     paddingHorizontal: 20,
@@ -108,7 +121,7 @@ export default StyleSheet.create({
     color: "rgba(255, 255, 255, 0.6)",
   },
 
-  // Enhanced Help Section
+  // Help Section
   helpSection: {
     marginBottom: 20,
   },
@@ -123,6 +136,7 @@ export default StyleSheet.create({
     flexDirection: "row",
     justifyContent: "center",
     gap: 12,
+    flexWrap: "wrap",
   },
   helpButton: {
     flexDirection: "row",
@@ -148,7 +162,7 @@ export default StyleSheet.create({
     color: BASE_COLORS.white,
   },
 
-  // Enhanced Help Cards
+  // Help Cards
   helpCard: {
     marginBottom: 16,
   },
@@ -172,9 +186,10 @@ export default StyleSheet.create({
     fontSize: 14,
     fontFamily: "Poppins-Regular",
     color: "rgba(255, 255, 255, 0.9)",
+    lineHeight: 20,
   },
 
-  // Enhanced Feedback
+  // Feedback
   feedbackContainer: {
     marginBottom: 20,
   },

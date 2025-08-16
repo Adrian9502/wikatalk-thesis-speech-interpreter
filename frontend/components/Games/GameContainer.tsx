@@ -93,7 +93,7 @@ const GameContainer: React.FC<GameContainerProps> = ({
             <DotsLoader />
           </View>
         ) : (
-          children
+          <View style={{ flex: 1 }}>{children}</View>
         )}
 
         {/* Navigation Warning with user exit handler */}

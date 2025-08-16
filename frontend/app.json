@@ -24,6 +24,7 @@
     },
     "android": {
       "jsEngine": "hermes",
+      "softwareKeyboardLayoutMode": "pan",
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/icon.png",
         "backgroundColor": "#0a0f28"
