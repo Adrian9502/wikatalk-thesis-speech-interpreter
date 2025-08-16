@@ -10,37 +10,36 @@ import { router } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import * as Animatable from "react-native-animatable";
 import { LinearGradient } from "expo-linear-gradient";
-import { BASE_COLORS, gameModeNavigationColors } from "@/constant/colors";
-import { GameMode } from "@/types/gameTypes";
-import useGameStore from "@/store/games/useGameStore";
 import {
-  NAVIGATION_COLORS,
-  GAME_ICONS,
-  GAME_MODES,
-} from "@/constant/gameConstants";
-import { iconColors } from "@/constant/colors";
-import { useLevelData } from "@/hooks/useLevelData";
-import LevelInfoModal from "@/components/games/levels/LevelInfoModal";
-import useProgressStore from "@/store/games/useProgressStore";
-import { useSplashStore } from "@/store/useSplashStore";
-import {
-  Home,
-  RotateCcw,
-  ChevronRight,
   Lock,
-  CheckCircle,
-  Star,
-  Grid,
   Play,
+  ChevronRight,
+  RotateCcw,
+  Grid,
   Zap,
 } from "react-native-feather";
-import MaterialCommunityIcons from "react-native-vector-icons/MaterialCommunityIcons";
+import { BASE_COLORS, iconColors } from "@/constant/colors";
+import {
+  NAVIGATION_COLORS,
+  GAME_MODES,
+  GAME_ICONS,
+} from "@/constant/gameConstants";
+import { useLevelData } from "@/hooks/useLevelData";
+import useGameStore from "@/store/games/useGameStore";
+import useProgressStore from "@/store/games/useProgressStore";
+import { useSplashStore } from "@/store/useSplashStore";
+import LevelInfoModal from "@/components/games/levels/LevelInfoModal";
 
 const { width: screenWidth } = Dimensions.get("window");
 
+// Helper function to format difficulty
+const formatDifficulty = (difficulty: string): string => {
+  return difficulty.charAt(0).toUpperCase() + difficulty.slice(1).toLowerCase();
+};
+
 interface GameNavigationProps {
   levelId: number;
-  gameMode: GameMode | string;
+  gameMode: string;
   gameTitle: string;
   difficulty: string;
   onRestart: () => void;
@@ -78,7 +77,7 @@ const GameNavigation: React.FC<GameNavigationProps> = ({
   const numericLevelId = Number(levelId);
   const { levels, isLoading } = useLevelData(gameMode);
 
-  // Calculate navigation state (keeping existing logic)
+  // SIMPLIFIED: Calculate navigation state with FIXED difficulty completion logic
   const navigationState = useMemo(() => {
     const currentLevel = levels.find((level) => level.id === numericLevelId);
     const nextLevelId = numericLevelId + 1;
@@ -86,12 +85,31 @@ const GameNavigation: React.FC<GameNavigationProps> = ({
     const isLastLevel = !nextLevel;
     const totalLevels = levels.length;
 
+    // Get current difficulty normalized
+    const currentDifficulty = (
+      currentLevel?.difficultyCategory?.toLowerCase() ||
+      difficulty.toLowerCase()
+    ).trim();
+    const nextDifficulty = nextLevel?.difficultyCategory?.toLowerCase()?.trim();
+
+    console.log("[GameNavigation] Navigation state calculation:", {
+      currentLevelId: numericLevelId,
+      nextLevelId,
+      currentDifficulty,
+      nextDifficulty,
+      isLastLevel,
+      nextLevelExists: !!nextLevel,
+      nextLevelStatus: nextLevel?.status,
+    });
+
+    // FIXED: Calculate difficulty completion stats
     const difficultyStats = {
       easy: { total: 0, completed: 0 },
       medium: { total: 0, completed: 0 },
       hard: { total: 0, completed: 0 },
     };
 
+    // Count total and completed levels per difficulty
     levels.forEach((level) => {
       const diff = level.difficultyCategory?.toLowerCase() || "easy";
       if (difficultyStats[diff as keyof typeof difficultyStats]) {
@@ -102,26 +120,20 @@ const GameNavigation: React.FC<GameNavigationProps> = ({
       }
     });
 
-    const isEasyComplete =
-      difficultyStats.easy.total > 0 &&
-      difficultyStats.easy.completed >= difficultyStats.easy.total;
-    const isMediumComplete =
-      difficultyStats.medium.total > 0 &&
-      difficultyStats.medium.completed >= difficultyStats.medium.total;
+    // Check if current difficulty is actually completed (ALL levels)
+    const currentDifficultyCompleted =
+      difficultyStats[currentDifficulty as keyof typeof difficultyStats]
+        ?.total > 0 &&
+      difficultyStats[currentDifficulty as keyof typeof difficultyStats]
+        ?.completed >=
+        difficultyStats[currentDifficulty as keyof typeof difficultyStats]
+          ?.total;
 
-    const currentDifficulty =
-      currentLevel?.difficultyCategory?.toLowerCase() || "easy";
-    const nextDifficulty =
-      nextLevel?.difficultyCategory?.toLowerCase() || "easy";
-
-    const createNextLevelText = (level: any) => {
-      const levelString =
-        level?.levelString ||
-        level?.questionData?.level ||
-        `Level ${nextLevelId}`;
-      const title = level?.title || level?.questionData?.title;
-      return title ? `${levelString} - ${title}` : levelString;
-    };
+    console.log("[GameNavigation] Difficulty completion stats:", {
+      difficultyStats,
+      currentDifficulty,
+      currentDifficultyCompleted,
+    });
 
     let nextLevelStatus = "available";
     let nextLevelTitle = "";
@@ -130,58 +142,62 @@ const GameNavigation: React.FC<GameNavigationProps> = ({
     let retryMessage = "";
 
     if (isLastLevel) {
+      // SIMPLIFIED: No more levels in this game mode
       nextLevelStatus = "disabled";
-      nextLevelTitle = "All Complete! 🎉";
-      nextLevelSubtitle = `You've mastered all ${totalLevels} levels`;
+      nextLevelTitle = "All Levels Complete! 🎉";
+      nextLevelSubtitle = `You've mastered all ${totalLevels} levels in ${gameTitle}`;
     } else if (nextLevel) {
-      if (nextLevel.status === "locked") {
-        nextLevelStatus = "disabled";
-        if (nextDifficulty === "medium" && !isEasyComplete) {
-          nextLevelTitle = "Locked Level";
-          nextLevelSubtitle = "Complete all Easy levels first";
-        } else if (nextDifficulty === "hard" && !isMediumComplete) {
-          nextLevelTitle = "Locked Level";
-          nextLevelSubtitle = "Complete all Medium levels first";
+      // Check if next level has different difficulty
+      const isDifferentDifficulty = currentDifficulty !== nextDifficulty;
+
+      if (isDifferentDifficulty) {
+        // FIXED: Check if current difficulty is ACTUALLY completed
+        if (currentDifficultyCompleted) {
+          // All levels in current difficulty are completed
+          nextLevelStatus = "available";
+          nextLevelTitle = `All ${formatDifficulty(
+            currentDifficulty
+          )} Levels Complete!`;
+          nextLevelSubtitle = "Navigate to level selection to continue";
         } else {
+          // Not all levels in current difficulty are completed
+          nextLevelStatus = "disabled";
           nextLevelTitle = "Locked Level";
-          nextLevelSubtitle = "This level is currently locked";
+          nextLevelSubtitle = `Complete all ${formatDifficulty(
+            currentDifficulty
+          )} levels to unlock`;
         }
       } else {
-        const isSameDifficulty = currentDifficulty === nextDifficulty;
-        const isDifficultyIncrease =
-          (currentDifficulty === "easy" && nextDifficulty === "medium") ||
-          (currentDifficulty === "medium" && nextDifficulty === "hard");
-
-        if (isSameDifficulty) {
+        // Same difficulty - continue to next level
+        if (nextLevel.status === "locked") {
+          nextLevelStatus = "disabled";
+          nextLevelTitle = "Locked Level";
+          nextLevelSubtitle = `Complete previous levels to unlock`;
+        } else {
+          nextLevelStatus = "available";
           nextLevelTitle = "Next Level";
-          nextLevelSubtitle = createNextLevelText(nextLevel);
+
+          // Create level text
+          const levelString =
+            nextLevel?.levelString ||
+            nextLevel?.questionData?.level ||
+            `Level ${nextLevelId}`;
+          const title = nextLevel?.title || nextLevel?.questionData?.title;
+          nextLevelSubtitle = title ? `${levelString} - ${title}` : levelString;
+
           if (nextLevel.status === "completed") {
-            nextLevelTitle = "Completed Level";
+            nextLevelTitle = "Next Level Already Completed!";
             nextLevelSubtitle = "Redirects to level selection";
           }
-        } else if (isDifficultyIncrease) {
-          if (!isCurrentLevelCompleted || !isCorrectAnswer) {
-            nextLevelStatus = "disabled";
-            nextLevelTitle = "Complete Current";
-            nextLevelSubtitle = "Answer correctly to unlock";
-          } else {
-            nextLevelTitle = "Next Difficulty";
-            const levelText = createNextLevelText(nextLevel);
-            const difficultyText =
-              nextDifficulty.charAt(0).toUpperCase() + nextDifficulty.slice(1);
-            nextLevelSubtitle = `${levelText} (${difficultyText})`;
-          }
-        } else {
-          nextLevelTitle = "Next Challenge";
-          nextLevelSubtitle = createNextLevelText(nextLevel);
         }
       }
     } else {
       nextLevelStatus = "disabled";
       nextLevelTitle = "No More Levels";
-      nextLevelSubtitle = "Try other difficulty modes";
+      nextLevelSubtitle = "Try other game modes";
     }
 
+    // Retry logic remains the same
     if (isCurrentLevelCompleted && isCorrectAnswer) {
       retryStatus = "disabled";
       retryMessage = "Level completed perfectly!";
@@ -197,6 +213,10 @@ const GameNavigation: React.FC<GameNavigationProps> = ({
         subtitle: nextLevelSubtitle,
         exists: !isLastLevel && !!nextLevel,
         data: nextLevel,
+        isDifferentDifficulty: nextLevel
+          ? currentDifficulty !== nextDifficulty
+          : false,
+        currentDifficultyCompleted, // NEW: Add this for the handler
       },
       retry: {
         status: retryStatus,
@@ -205,19 +225,83 @@ const GameNavigation: React.FC<GameNavigationProps> = ({
       currentLevel,
       totalLevels,
       isLastLevel,
-      difficultyStats,
+      currentDifficulty,
+      difficultyStats, // NEW: Add this for debugging
     };
   }, [
     levels,
     numericLevelId,
     gameTitle,
-    nextLevelTitle,
+    difficulty,
     isCurrentLevelCompleted,
     isCorrectAnswer,
     isLoading,
   ]);
 
-  // Handlers (keeping existing logic)
+  // SIMPLIFIED: Handle next level action
+  const handleNextLevel = useCallback(() => {
+    if (isAnimating || navigationState.nextLevel.status === "disabled") return;
+
+    const nextLevelId = numericLevelId + 1;
+    const nextLevel = levels.find((level) => level.id === nextLevelId);
+
+    // FIXED: Only redirect to level selection if difficulty is actually completed OR level is already completed
+    if (
+      (navigationState.nextLevel.isDifferentDifficulty &&
+        navigationState.nextLevel.currentDifficultyCompleted) ||
+      nextLevel?.status === "completed"
+    ) {
+      console.log(
+        "[GameNavigation] Redirecting to level selection - difficulty fully completed or level already completed"
+      );
+
+      router.replace({
+        pathname: "/(games)/LevelSelection",
+        params: {
+          gameMode,
+          gameTitle,
+          difficulty: nextLevel?.difficultyCategory || difficulty,
+          message: navigationState.nextLevel.currentDifficultyCompleted
+            ? `${formatDifficulty(
+                navigationState.currentDifficulty
+              )} difficulty completed!`
+            : `Level ${nextLevelId} already completed!`,
+        },
+      });
+    } else if (nextLevel && nextLevel.status !== "locked") {
+      // Same difficulty or available next level - show modal
+      console.log(
+        "[GameNavigation] Showing modal for next level in same difficulty"
+      );
+
+      const modalLevelData = {
+        ...nextLevel.questionData,
+        ...nextLevel,
+        levelString:
+          nextLevel.levelString ||
+          nextLevel.questionData?.level ||
+          `Level ${nextLevelId}`,
+        title: nextLevel.title || nextLevel.questionData?.title,
+        levelNumber: nextLevelId,
+      };
+      setNextLevelData(modalLevelData);
+      setShowNextLevelModal(true);
+    }
+    // If next level is locked, do nothing (button should be disabled anyway)
+  }, [
+    isAnimating,
+    navigationState.nextLevel.status,
+    navigationState.nextLevel.isDifferentDifficulty,
+    navigationState.nextLevel.currentDifficultyCompleted,
+    navigationState.currentDifficulty,
+    levels,
+    numericLevelId,
+    gameMode,
+    gameTitle,
+    difficulty,
+  ]);
+
+  // Other handlers remain the same
   const handleBackToLevels = useCallback(() => {
     if (isAnimating) return;
     const gameStore = useGameStore.getState();
@@ -232,48 +316,6 @@ const GameNavigation: React.FC<GameNavigationProps> = ({
       params: { gameMode, gameTitle, difficulty },
     });
   }, [isAnimating, gameMode, gameTitle, difficulty]);
-
-  const handleNextLevel = useCallback(() => {
-    if (isAnimating || navigationState.nextLevel.status === "disabled") return;
-
-    const nextLevelId = numericLevelId + 1;
-    const nextLevel = levels.find((level) => level.id === nextLevelId);
-
-    if (nextLevel?.status === "completed") {
-      router.replace({
-        pathname: "/(games)/LevelSelection",
-        params: {
-          gameMode,
-          gameTitle,
-          difficulty,
-          message: `Level ${nextLevelId} already completed!`,
-        },
-      });
-    } else {
-      if (nextLevel) {
-        const modalLevelData = {
-          ...nextLevel.questionData,
-          ...nextLevel,
-          levelString:
-            nextLevel.levelString ||
-            nextLevel.questionData?.level ||
-            `Level ${nextLevelId}`,
-          title: nextLevel.title || nextLevel.questionData?.title,
-          levelNumber: nextLevelId,
-        };
-        setNextLevelData(modalLevelData);
-        setShowNextLevelModal(true);
-      }
-    }
-  }, [
-    isAnimating,
-    navigationState.nextLevel.status,
-    levels,
-    numericLevelId,
-    gameMode,
-    gameTitle,
-    difficulty,
-  ]);
 
   const handleModalStart = () => {
     const nextLevelId = numericLevelId + 1;
@@ -376,19 +418,19 @@ const GameNavigation: React.FC<GameNavigationProps> = ({
         mode: GAME_MODES.MULTIPLE_CHOICE,
         title: "Multiple Choice",
         subtitle: "Pick the right answer",
-        colors: gameModeNavigationColors.multipleChoice,
+        colors: ["#4361EE", "#3A0CA3"],
       },
       {
         mode: GAME_MODES.IDENTIFICATION,
         title: "Word Identification",
         subtitle: "Find the correct word",
-        colors: gameModeNavigationColors.identification,
+        colors: ["#e01f78", "#6a03ad"],
       },
       {
         mode: GAME_MODES.FILL_BLANKS,
         title: "Fill in the Blank",
         subtitle: "Complete the sentence",
-        colors: gameModeNavigationColors.fillBlanks,
+        colors: ["#22C216", "#007F3B"],
       },
     ];
     return allModes.filter((mode) => mode.mode !== currentMode);
@@ -626,17 +668,19 @@ const GameNavigation: React.FC<GameNavigationProps> = ({
         </Animatable.View>
       </View>
 
-      {/* Next Level Modal */}
-      {showNextLevelModal && nextLevelData && (
-        <LevelInfoModal
-          visible={showNextLevelModal}
-          onClose={handleModalClose}
-          onStart={handleModalStart}
-          levelData={nextLevelData}
-          gameMode={gameMode}
-          difficulty={difficulty}
-        />
-      )}
+      {/* Next Level Modal - Only for same difficulty */}
+      {showNextLevelModal &&
+        nextLevelData &&
+        !navigationState.nextLevel.isDifferentDifficulty && (
+          <LevelInfoModal
+            visible={showNextLevelModal}
+            onClose={handleModalClose}
+            onStart={handleModalStart}
+            levelData={nextLevelData}
+            gameMode={gameMode}
+            difficulty={difficulty}
+          />
+        )}
     </>
   );
 };
@@ -682,8 +726,8 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   primaryActionTitle: {
-    fontSize: 15,
-    fontFamily: "Poppins-Bold",
+    fontSize: 14,
+    fontFamily: "Poppins-SemiBold",
     color: BASE_COLORS.white,
   },
   primaryActionSubtitle: {
