@@ -4,6 +4,7 @@ import React, {
   useCallback,
   useState,
   useEffect,
+  useLayoutEffect,
 } from "react";
 import {
   View,
@@ -24,6 +25,7 @@ import styles from "@/styles/games/fillInTheBlank.styles";
 import gamesSharedStyles from "@/styles/gamesSharedStyles";
 import LevelTitleHeader from "@/components/games/LevelTitleHeader";
 import Icon from "react-native-vector-icons/Feather";
+import { useNavigation } from "expo-router";
 
 interface RenderPlayingContentProps {
   difficulty: string;
@@ -57,6 +59,14 @@ const FillInTheBlankPlayingContent: React.FC<RenderPlayingContentProps> =
       toggleTranslation,
       checkAnswer,
     }) => {
+      const navigation = useNavigation();
+
+      useLayoutEffect(() => {
+        navigation.setOptions({
+          // 👇 disables layout resizing when keyboard shows/hides
+          windowSoftInputMode: "adjustNothing",
+        });
+      }, [navigation]);
       const inputRef = useRef<TextInput>(null);
       const scrollViewRef = useRef<ScrollView>(null);
 
@@ -105,7 +115,7 @@ const FillInTheBlankPlayingContent: React.FC<RenderPlayingContentProps> =
                 useNativeDriver: false,
               }),
               Animated.timing(containerTranslateY, {
-                toValue: -50, // Slight upward movement
+                toValue: -20, // Slight upward movement
                 duration: 300,
                 useNativeDriver: true,
               }),
@@ -131,12 +141,12 @@ const FillInTheBlankPlayingContent: React.FC<RenderPlayingContentProps> =
             Animated.parallel([
               Animated.timing(keyboardAnim, {
                 toValue: 0,
-                duration: 250,
+                duration: 150,
                 useNativeDriver: false,
               }),
               Animated.timing(containerTranslateY, {
                 toValue: 0,
-                duration: 250,
+                duration: 150,
                 useNativeDriver: true,
               }),
             ]).start();
@@ -249,6 +259,7 @@ const FillInTheBlankPlayingContent: React.FC<RenderPlayingContentProps> =
             gamesSharedStyles.gameContainer,
             {
               transform: [{ translateY: containerTranslateY }],
+              minHeight: "100%",
             },
           ]}
         >
