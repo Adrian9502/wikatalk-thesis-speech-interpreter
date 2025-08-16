@@ -308,7 +308,7 @@ export const useLevelData = (gameMode: string) => {
       // Update the reference
       lastUpdateRef.current = progressLastUpdated;
 
-      // CRITICAL FIX: Debounce rapid progress updates
+      // CRITICAL FIX: Faster debounce for immediate UI updates
       debounceTimeoutRef.current = setTimeout(() => {
         console.log(
           `[useLevelData] Debounced refresh executing for ${safeGameMode}`
@@ -322,7 +322,7 @@ export const useLevelData = (gameMode: string) => {
             `[useLevelData] Skipping debounced refresh - already in progress`
           );
         }
-      }, 500); // REDUCED: From 1000ms to 500ms for better responsiveness
+      }, 200); // REDUCED: From 500ms to 200ms for faster UI updates
     }
 
     return () => {

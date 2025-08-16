@@ -66,20 +66,53 @@ const LevelSelection = () => {
   const [dataReady, setDataReady] = useState(false);
   const [initialLoad, setInitialLoad] = useState(true);
 
+  // NEW: Add loading state for progress updates
+  const [isProgressUpdating, setIsProgressUpdating] = useState(false);
+
   const [animationKey, setAnimationKey] = useState("initial");
   const [shouldAnimateCards, setShouldAnimateCards] = useState(false);
+
+  // FIXED: Add timeout ref to prevent infinite loops
+  const timeoutRef = React.useRef<NodeJS.Timeout | null>(null);
+  const checkAttemptCountRef = React.useRef(0);
+
+  // NEW: Track progress store updates to show loading during refresh
+  const progressStore = useProgressStore();
+  const progressLastUpdated = progressStore.lastUpdated;
+  const progressIsLoading = progressStore.isLoading;
 
   useEffect(() => {
     const checkDataReady = async () => {
       try {
+        // CRITICAL: Prevent infinite loops with attempt counter
+        checkAttemptCountRef.current += 1;
+
+        if (checkAttemptCountRef.current > 10) {
+          console.warn(
+            `[LevelSelection] Too many check attempts, forcing data ready`
+          );
+          setDataReady(true);
+          setIsProgressUpdating(false);
+          setInitialLoad(false);
+          return;
+        }
+
         // FIXED: Better stale data detection with null checks
         const progressStore = useProgressStore.getState();
         const splashStore = useSplashStore.getState();
 
         // CRITICAL: Add null checks to prevent "Cannot convert undefined value to object" error
         if (!progressStore || !splashStore) {
-          console.log(`[LevelSelection] Store not ready, retrying...`);
-          setTimeout(checkDataReady, 100);
+          console.log(
+            `[LevelSelection] Store not ready, retrying... (attempt ${checkAttemptCountRef.current})`
+          );
+
+          // FIXED: Use timeout with cleanup to prevent memory leaks
+          if (timeoutRef.current) {
+            clearTimeout(timeoutRef.current);
+          }
+
+          timeoutRef.current = setTimeout(checkDataReady, 100);
           return;
         }
 
@@ -97,6 +130,8 @@ const LevelSelection = () => {
           levelsCount: hasPrecomputedLevels?.length || 0,
           precomputedLevelsKeys: Object.keys(precomputedLevelsData),
           enhancedProgressKeys: Object.keys(enhancedProgressData),
+          progressIsLoading,
+          checkAttempts: checkAttemptCountRef.current,
         });
 
         if (!hasPrecomputedLevels) {
@@ -109,7 +144,12 @@ const LevelSelection = () => {
             console.log(
               `[LevelSelection] Splash store still precomputing, waiting...`
             );
-            setTimeout(checkDataReady, 200);
+
+            if (timeoutRef.current) {
+              clearTimeout(timeoutRef.current);
+            }
+
+            timeoutRef.current = setTimeout(checkDataReady, 200);
             return;
           } else {
             console.log(
@@ -119,7 +159,11 @@ const LevelSelection = () => {
             try {
               const success = await splashStore.preloadGameData();
               if (success) {
-                setTimeout(checkDataReady, 100);
+                if (timeoutRef.current) {
+                  clearTimeout(timeoutRef.current);
+                }
+
+                timeoutRef.current = setTimeout(checkDataReady, 100);
                 return;
               } else {
                 console.warn(
@@ -136,44 +180,91 @@ const LevelSelection = () => {
           }
         }
 
-        // FIXED: More intelligent stale detection with null checks
+        // ENHANCED: Better stale detection with progress update consideration
         const lastProgressUpdate = progressStore.lastUpdated || 0;
         const lastSplashUpdate =
           precomputedLevelsData[gameMode]?.lastUpdated || 0;
 
-        // Only consider data stale if the difference is significant (more than 2 minutes)
+        // NEW: Consider data stale if progress is significantly newer than precomputed data
         const timeDifference = lastProgressUpdate - lastSplashUpdate;
-        const isSignificantlyStale = timeDifference > 120000; // 2 minutes instead of 30 seconds
+        const isSignificantlyStale = timeDifference > 5000; // 5 seconds
 
         console.log(`[LevelSelection] Data freshness check:`, {
           lastProgressUpdate: new Date(lastProgressUpdate).toISOString(),
           lastSplashUpdate: new Date(lastSplashUpdate).toISOString(),
           timeDifference: `${timeDifference}ms`,
           isSignificantlyStale,
+          progressIsLoading,
         });
 
-        // CRITICAL FIX: Set data as ready FIRST, then do background refresh if needed
-        setDataReady(true);
-
-        // OPTIONAL: Background refresh if data is stale (don't block on this)
-        if (isSignificantlyStale && hasPrecomputedLevels) {
+        // CRITICAL FIX: Only show loading if progress is actually updating AND we haven't waited too long
+        if (progressIsLoading && checkAttemptCountRef.current <= 5) {
           console.log(
-            `[LevelSelection] Data is significantly stale (${timeDifference}ms), doing background refresh`
+            `[LevelSelection] Progress is updating, showing loading state (attempt ${checkAttemptCountRef.current})`
+          );
+          setIsProgressUpdating(true);
+          setDataReady(false);
+
+          // FIXED: Set a maximum wait time for progress loading
+          if (timeoutRef.current) {
+            clearTimeout(timeoutRef.current);
+          }
+
+          timeoutRef.current = setTimeout(checkDataReady, 300);
+          return;
+        }
+
+        // FIXED: Only trigger refresh if data is actually stale AND we're not already loading
+        if (
+          isSignificantlyStale &&
+          !progressIsLoading &&
+          checkAttemptCountRef.current <= 3
+        ) {
+          console.log(
+            `[LevelSelection] Refreshing stale data (${timeDifference}ms difference)`
           );
 
-          // Do background refresh without blocking UI
-          setTimeout(async () => {
-            try {
-              await progressStore.fetchProgress(true);
-              console.log(`[LevelSelection] Background refresh completed`);
-            } catch (error) {
-              console.error(
-                `[LevelSelection] Background refresh error:`,
-                error
-              );
+          setIsProgressUpdating(true);
+          setDataReady(false);
+
+          try {
+            // FIXED: Add timeout to prevent hanging
+            const refreshPromise = Promise.race([
+              progressStore.fetchProgress(true),
+              new Promise((_, reject) =>
+                setTimeout(
+                  () => reject(new Error("Progress fetch timeout")),
+                  5000
+                )
+              ),
+            ]);
+
+            await refreshPromise;
+            console.log(`[LevelSelection] Progress refresh completed`);
+
+            // Trigger precomputation refresh
+            await splashStore.precomputeSpecificGameMode(gameMode);
+            console.log(`[LevelSelection] Precomputation refresh completed`);
+
+            setIsProgressUpdating(false);
+
+            if (timeoutRef.current) {
+              clearTimeout(timeoutRef.current);
             }
-          }, 100);
+
+            timeoutRef.current = setTimeout(checkDataReady, 100);
+            return;
+          } catch (error) {
+            console.error(`[LevelSelection] Error refreshing data:`, error);
+            setIsProgressUpdating(false);
+            // Continue with existing data
+          }
         }
+
+        // CRITICAL FIX: Set data as ready when everything is fresh OR we've tried enough times
+        console.log(`[LevelSelection] Setting data as ready`);
+        setDataReady(true);
+        setIsProgressUpdating(false);
 
         // Trigger initial animation when data is ready
         if (initialLoad) {
@@ -191,15 +282,22 @@ const LevelSelection = () => {
 
           setInitialLoad(false);
         }
+
+        // Reset attempt counter on success
+        checkAttemptCountRef.current = 0;
       } catch (error) {
         console.error(`[LevelSelection] Error in checkDataReady:`, error);
 
         // CRITICAL: Always set data as ready to prevent infinite loading, even on error
         setDataReady(true);
+        setIsProgressUpdating(false);
 
         if (initialLoad) {
           setInitialLoad(false);
         }
+
+        // Reset attempt counter
+        checkAttemptCountRef.current = 0;
 
         // Log more details about the error for debugging
         if (error instanceof Error) {
@@ -213,7 +311,20 @@ const LevelSelection = () => {
     };
 
     checkDataReady();
-  }, [shouldPlayAnimation, gameMode, initialLoad]);
+
+    // CRITICAL: Cleanup timeout on unmount
+    return () => {
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+      }
+    };
+  }, [
+    shouldPlayAnimation,
+    gameMode,
+    initialLoad,
+    progressLastUpdated,
+    progressIsLoading,
+  ]);
 
   const filteredLevels = useMemo(() => {
     if (!showLevels || !getFilteredLevels) {
@@ -383,6 +494,15 @@ const LevelSelection = () => {
   const stableDifficultyColors = useMemo(() => difficultyColors, []);
 
   const renderContent = useMemo(() => {
+    // NEW: Show loading for progress updates
+    if (isProgressUpdating) {
+      return (
+        <View style={styles.loadingContainer}>
+          <AppLoading />
+        </View>
+      );
+    }
+
     // Wait for data to be ready
     if (!dataReady) {
       return <AppLoading />;
@@ -445,6 +565,7 @@ const LevelSelection = () => {
     // Fallback loading state
     return <AppLoading />;
   }, [
+    isProgressUpdating, // NEW: Add to dependencies
     dataReady,
     componentError,
     error,

@@ -4,6 +4,12 @@ import { BASE_COLORS } from "@/constant/colors";
 const { width, height } = Dimensions.get("window");
 
 export const levelStyles = StyleSheet.create({
+  loadingContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    paddingVertical: 40,
+  },
   container: {
     flex: 1,
     backgroundColor: "#111B21",
