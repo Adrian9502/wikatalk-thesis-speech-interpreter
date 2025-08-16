@@ -4,19 +4,26 @@ import * as Speech from "expo-speech";
 import { DIALECTS } from "@/constant/languages";
 import { debounce } from "lodash";
 import { pronunciationService } from "@/services/api";
-// Define the types
+
+// Types remain the same
 interface TranslationEntry {
+  english: string;
   translation: string;
   pronunciation: string;
 }
 
 interface Translations {
-  [language: string]: TranslationEntry;
+  [key: string]: TranslationEntry[];
 }
 
 interface PronunciationDataItem {
   english: string;
-  translations: Translations;
+  translations: {
+    [language: string]: {
+      translation: string;
+      pronunciation: string;
+    };
+  };
 }
 
 interface PronunciationItem {
@@ -26,7 +33,7 @@ interface PronunciationItem {
 }
 
 interface PronunciationData {
-  [key: string]: PronunciationItem[];
+  [language: string]: PronunciationItem[];
 }
 
 interface PronunciationState {
@@ -39,7 +46,12 @@ interface PronunciationState {
   currentPlayingIndex: number | null;
   isAudioLoading: boolean;
 
-  // New properties for Word of Day feature
+  // Cache management
+  lastFetched: number;
+  cacheExpiry: number;
+  isDataCached: boolean;
+
+  // Word of Day feature
   wordOfTheDay: {
     english: string;
     translation: string;
@@ -49,20 +61,76 @@ interface PronunciationState {
   isWordOfDayPlaying: boolean;
 
   // Actions
-  fetchPronunciations: () => Promise<void>;
+  fetchPronunciations: (forceRefresh?: boolean) => Promise<void>;
   setSearchTerm: (term: string) => void;
   getFilteredPronunciations: (
     language: string,
     page?: number,
     limit?: number
   ) => PronunciationItem[];
+  getTotalCount: (language: string) => number;
   playAudio: (index: number, text: string) => Promise<void>;
   stopAudio: () => Promise<void>;
-
-  // New actions for Word of Day feature
   getWordOfTheDay: () => void;
-  playWordOfDayAudio: () => Promise<void>;
+  playWordOfDay: () => void;
+  clearCache: () => void;
+  isCacheValid: () => boolean;
 }
+
+// FIXED: Transform pronunciation data with proper language key mapping
+const transformPronunciationData = (
+  data: PronunciationDataItem[]
+): PronunciationData => {
+  console.log("[PronunciationStore] Transforming pronunciation data");
+  const transformed: PronunciationData = {};
+
+  // Language key mapping for consistency
+  const languageKeyMapping: { [key: string]: string[] } = {
+    Tagalog: ["tagalog", "filipino"],
+    Cebuano: ["cebuano", "bisaya"],
+    Hiligaynon: ["hiligaynon"],
+    Ilocano: ["ilocano"],
+    Bicol: ["bicol"],
+    Waray: ["waray"],
+    Pangasinan: ["pangasinan"],
+    Maguindanao: ["maguindanao"],
+    Kapampangan: ["kapampangan"],
+    Bisaya: ["bisaya", "cebuano"],
+  };
+
+  // Initialize all expected language keys
+  Object.keys(languageKeyMapping).forEach((lang) => {
+    transformed[lang] = [];
+  });
+
+  data.forEach((item) => {
+    Object.entries(item.translations).forEach(([language, translationData]) => {
+      const normalizedLanguage = language.toLowerCase();
+
+      // Find which UI language key this data belongs to
+      for (const [uiKey, possibleKeys] of Object.entries(languageKeyMapping)) {
+        if (possibleKeys.includes(normalizedLanguage)) {
+          if (!transformed[uiKey]) {
+            transformed[uiKey] = [];
+          }
+
+          transformed[uiKey].push({
+            english: item.english,
+            translation: translationData.translation,
+            pronunciation: translationData.pronunciation,
+          });
+        }
+      }
+    });
+  });
+
+  console.log("[PronunciationStore] Data transformation complete:");
+  Object.entries(transformed).forEach(([lang, items]) => {
+    console.log(`  ${lang}: ${items.length} items`);
+  });
+
+  return transformed;
+};
 
 export const usePronunciationStore = create<PronunciationState>((set, get) => ({
   // Initial state
@@ -76,9 +144,59 @@ export const usePronunciationStore = create<PronunciationState>((set, get) => ({
   wordOfTheDay: null,
   isWordOfDayPlaying: false,
 
-  // Actions
-  fetchPronunciations: async () => {
+  // Cache state
+  lastFetched: 0,
+  cacheExpiry: 7 * 24 * 60 * 60 * 1000, // 7 days
+  isDataCached: false,
+
+  // Check if cache is valid
+  isCacheValid: () => {
+    const { lastFetched, cacheExpiry, isDataCached } = get();
+    const now = Date.now();
+    const isValid = isDataCached && now - lastFetched < cacheExpiry;
+
+    console.log("[PronunciationStore] Cache validity check:", {
+      isDataCached,
+      lastFetched: new Date(lastFetched).toISOString(),
+      timeSinceLastFetch: `${((now - lastFetched) / 1000 / 60).toFixed(
+        1
+      )} minutes`,
+      isValid,
+    });
+
+    return isValid;
+  },
+
+  // Clear cache
+  clearCache: () => {
+    console.log("[PronunciationStore] Clearing cache");
+    set({
+      pronunciationData: [],
+      transformedData: {},
+      lastFetched: 0,
+      isDataCached: false,
+      error: null,
+    });
+  },
+
+  // Fetch pronunciations with caching
+  fetchPronunciations: async (forceRefresh = false) => {
+    const { isCacheValid } = get();
+
+    // Check cache validity first unless forced refresh
+    if (!forceRefresh && isCacheValid()) {
+      console.log("[PronunciationStore] Using cached pronunciation data");
+      return;
+    }
+
+    console.log(
+      forceRefresh
+        ? "[PronunciationStore] Force refreshing pronunciation data"
+        : "[PronunciationStore] Fetching fresh pronunciation data"
+    );
+
     set({ isLoading: true, error: null });
+
     try {
       const data = await pronunciationService.getAllPronunciations();
 
@@ -86,9 +204,19 @@ export const usePronunciationStore = create<PronunciationState>((set, get) => ({
         pronunciationData: data,
         transformedData: transformPronunciationData(data),
         isLoading: false,
+        lastFetched: Date.now(),
+        isDataCached: true,
+        error: null,
       });
+
+      console.log(
+        "[PronunciationStore] ✅ Pronunciation data fetched and cached successfully"
+      );
     } catch (error: any) {
-      console.error("Error fetching pronunciation data:", error);
+      console.error(
+        "[PronunciationStore] Error fetching pronunciation data:",
+        error
+      );
       set({
         error: error?.message || "Failed to fetch pronunciation data",
         isLoading: false,
@@ -98,9 +226,34 @@ export const usePronunciationStore = create<PronunciationState>((set, get) => ({
 
   setSearchTerm: (term) => set({ searchTerm: term }),
 
+  // FIXED: Better language key lookup
   getFilteredPronunciations: (language: string, page = 1, limit = 25) => {
     const { transformedData, searchTerm } = get();
-    const languageData = transformedData[language] || [];
+
+    // Try exact match first, then fallback to case-insensitive search
+    let languageData = transformedData[language] || [];
+
+    if (languageData.length === 0) {
+      // Try case-insensitive lookup
+      const languageKey = Object.keys(transformedData).find(
+        (key) => key.toLowerCase() === language.toLowerCase()
+      );
+      if (languageKey) {
+        languageData = transformedData[languageKey] || [];
+      }
+    }
+
+    console.log("[PronunciationStore] getFilteredPronunciations called:", {
+      language,
+      page,
+      limit,
+      searchTerm,
+      availableLanguages: Object.keys(transformedData),
+      languageDataLength: languageData.length,
+      sampleData: languageData.slice(0, 3),
+      exactMatch: !!transformedData[language],
+    });
+
     const filtered = searchTerm.trim()
       ? languageData.filter((item) => {
           const lowercaseSearchTerm = searchTerm.toLowerCase();
@@ -111,14 +264,35 @@ export const usePronunciationStore = create<PronunciationState>((set, get) => ({
           );
         })
       : languageData;
+
     const startIndex = (page - 1) * limit;
     const endIndex = startIndex + limit;
-    return filtered.slice(startIndex, endIndex);
+    const result = filtered.slice(startIndex, endIndex);
+
+    console.log("[PronunciationStore] getFilteredPronunciations result:", {
+      filteredLength: filtered.length,
+      resultLength: result.length,
+      startIndex,
+      endIndex,
+    });
+
+    return result;
   },
 
   getTotalCount: (language: string) => {
     const { transformedData, searchTerm } = get();
-    const languageData = transformedData[language] || [];
+
+    // Try exact match first, then fallback to case-insensitive search
+    let languageData = transformedData[language] || [];
+
+    if (languageData.length === 0) {
+      const languageKey = Object.keys(transformedData).find(
+        (key) => key.toLowerCase() === language.toLowerCase()
+      );
+      if (languageKey) {
+        languageData = transformedData[languageKey] || [];
+      }
+    }
 
     if (!searchTerm.trim()) return languageData.length;
 
@@ -163,7 +337,6 @@ export const usePronunciationStore = create<PronunciationState>((set, get) => ({
     try {
       set({ isLoading: true, error: null });
 
-      // Get word from API
       const response = await pronunciationService.getWordOfTheDay();
 
       if (response.success) {
@@ -183,149 +356,55 @@ export const usePronunciationStore = create<PronunciationState>((set, get) => ({
       console.error("Error getting word of the day:", error);
 
       // Fallback to local generation if API fails
-      const { pronunciationData } = get();
-      if (pronunciationData.length > 0) {
-        const randomIndex = Math.floor(
-          Math.random() * pronunciationData.length
-        );
-        const randomWord = pronunciationData[randomIndex];
-        const languages = Object.keys(randomWord.translations);
+      const { transformedData } = get();
+      const languages = Object.keys(transformedData);
+      if (languages.length > 0) {
         const randomLanguage =
           languages[Math.floor(Math.random() * languages.length)];
-        const translationData = randomWord.translations[randomLanguage];
-        const formattedLanguage =
-          randomLanguage.charAt(0).toUpperCase() + randomLanguage.slice(1);
-
-        set({
-          wordOfTheDay: {
-            english: randomWord.english,
-            translation: translationData.translation,
-            pronunciation: translationData.pronunciation,
-            language: formattedLanguage,
-          },
-          isLoading: false,
-          error: "Using local fallback: " + (error?.message || "Unknown error"),
-        });
+        const wordsForLanguage = transformedData[randomLanguage];
+        if (wordsForLanguage.length > 0) {
+          const randomWord =
+            wordsForLanguage[
+              Math.floor(Math.random() * wordsForLanguage.length)
+            ];
+          set({
+            wordOfTheDay: {
+              english: randomWord.english,
+              translation: randomWord.translation,
+              pronunciation: randomWord.pronunciation,
+              language: randomLanguage,
+            },
+            isLoading: false,
+          });
+        }
       } else {
         set({
-          error: error?.message || "Failed to get word of the day",
+          error: "Failed to get word of the day",
           isLoading: false,
         });
       }
     }
   },
 
-  playWordOfDayAudio: async () => {
+  playWordOfDay: async () => {
     const { wordOfTheDay } = get();
     if (!wordOfTheDay) return;
 
-    await get().stopAudio();
-
-    set({ isWordOfDayPlaying: true, isAudioLoading: true });
-
-    Speech.speak(wordOfTheDay.translation, {
-      language: "fil",
-      rate: 0.45,
-      onStart: () => {
-        set({ isAudioLoading: false });
-      },
-      onDone: () => {
-        set({ isWordOfDayPlaying: false });
-      },
-      onError: () => {
-        set({ isAudioLoading: false, isWordOfDayPlaying: false });
-      },
-    });
+    set({ isWordOfDayPlaying: true });
+    try {
+      await Speech.speak(wordOfTheDay.translation, {
+        language: "fil",
+        rate: 0.45,
+        onDone: () => set({ isWordOfDayPlaying: false }),
+        onError: () => set({ isWordOfDayPlaying: false }),
+      });
+    } catch (error) {
+      set({ isWordOfDayPlaying: false });
+    }
   },
 }));
 
-const transformPronunciationData = (
-  data: PronunciationDataItem[]
-): PronunciationData => {
-  const result: PronunciationData = {};
-
-  DIALECTS.forEach((dialect) => {
-    result[dialect.value] = [];
-  });
-
-  const addedEntries: Record<string, Set<string>> = {};
-  DIALECTS.forEach((dialect) => {
-    addedEntries[dialect.value] = new Set();
-  });
-
-  data.forEach((item) => {
-    Object.entries(item.translations).forEach(([language, translationData]) => {
-      const dialectKey = language.charAt(0).toUpperCase() + language.slice(1);
-
-      if (language === "bisaya") {
-        if (result["Bisaya"] && !addedEntries["Bisaya"].has(item.english)) {
-          result["Bisaya"].push({
-            english: item.english,
-            translation: translationData.translation,
-            pronunciation: translationData.pronunciation,
-          });
-          addedEntries["Bisaya"].add(item.english);
-        }
-
-        if (result["Cebuano"] && !addedEntries["Cebuano"].has(item.english)) {
-          result["Cebuano"].push({
-            english: item.english,
-            translation: translationData.translation,
-            pronunciation: translationData.pronunciation,
-          });
-          addedEntries["Cebuano"].add(item.english);
-        }
-      } else if (
-        language === "cebuano" &&
-        result["Cebuano"] &&
-        !addedEntries["Cebuano"].has(item.english)
-      ) {
-        result["Cebuano"].push({
-          english: item.english,
-          translation: translationData.translation,
-          pronunciation: translationData.pronunciation,
-        });
-        addedEntries["Cebuano"].add(item.english);
-      } else if (language === "tagalog") {
-        if (result["Filipino"] && !addedEntries["Filipino"].has(item.english)) {
-          result["Filipino"].push({
-            english: item.english,
-            translation: translationData.translation,
-            pronunciation: translationData.pronunciation,
-          });
-          addedEntries["Filipino"].add(item.english);
-        }
-
-        if (result["Tagalog"] && !addedEntries["Tagalog"].has(item.english)) {
-          result["Tagalog"].push({
-            english: item.english,
-            translation: translationData.translation,
-            pronunciation: translationData.pronunciation,
-          });
-          addedEntries["Tagalog"].add(item.english);
-        }
-      } else {
-        const standardKey = dialectKey;
-
-        if (
-          result[standardKey] &&
-          !addedEntries[standardKey].has(item.english)
-        ) {
-          result[standardKey].push({
-            english: item.english,
-            translation: translationData.translation,
-            pronunciation: translationData.pronunciation,
-          });
-          addedEntries[standardKey].add(item.english);
-        }
-      }
-    });
-  });
-
-  return result;
-};
-
-export const debouncedSetSearchTerm = debounce(
-  (term: string) => usePronunciationStore.getState().setSearchTerm(term),
-  300
-);
+// Create debounced search function
+export const debouncedSetSearchTerm = debounce((term: string) => {
+  usePronunciationStore.getState().setSearchTerm(term);
+}, 300);

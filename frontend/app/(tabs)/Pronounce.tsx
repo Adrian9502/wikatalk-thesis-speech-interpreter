@@ -7,7 +7,8 @@ import {
   StyleSheet,
   TouchableWithoutFeedback,
   ActivityIndicator,
-  Animated, // NEW: Added Animated import
+  Animated,
+  RefreshControl,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import useThemeStore from "@/store/useThemeStore";
@@ -111,11 +112,19 @@ const Pronounce = () => {
     PronunciationItem[]
   >([]);
 
-  // NEW: Animation state
+  // Animation refs
   const headerFadeAnim = useRef(new Animated.Value(0)).current;
   const controlsFadeAnim = useRef(new Animated.Value(0)).current;
   const listHeaderFadeAnim = useRef(new Animated.Value(0)).current;
   const animationStartedRef = useRef(false);
+  const componentMountedRef = useRef(false);
+  const dataLoadedRef = useRef(false);
+
+  // NEW: Add refreshing state for pull-to-refresh
+  const [isRefreshing, setIsRefreshing] = useState(false);
+
+  // FIXED: Prevent multiple refresh calls
+  const refreshingRef = useRef(false);
 
   const {
     fetchPronunciations,
@@ -127,17 +136,48 @@ const Pronounce = () => {
     error,
     currentPlayingIndex,
     isAudioLoading,
+    isCacheValid,
+    clearCache,
+    transformedData, // NEW: Get transformedData directly from store
   } = usePronunciationStore();
 
+  // CRITICAL FIX: Initialize data with caching on mount
   useEffect(() => {
-    fetchPronunciations();
+    componentMountedRef.current = true;
+
+    const initializeData = async () => {
+      console.log("[Pronounce] Initializing pronunciation data");
+
+      // Check if we have valid cached data
+      if (isCacheValid()) {
+        console.log("[Pronounce] Using cached data, skipping fetch");
+        dataLoadedRef.current = true;
+        return;
+      }
+
+      // Fetch fresh data if no valid cache
+      await fetchPronunciations(false); // Don't force refresh, respect cache
+      dataLoadedRef.current = true;
+    };
+
+    initializeData();
+
     return () => {
+      componentMountedRef.current = false;
       stopAudio();
     };
   }, []);
 
+  // CRITICAL FIX: Update data when store changes or search/language changes
   useEffect(() => {
-    if (!isLoading) {
+    if (!isLoading && dataLoadedRef.current) {
+      console.log("[Pronounce] Updating pronunciation data", {
+        selectedLanguage,
+        searchInput,
+        transformedDataKeys: Object.keys(transformedData || {}),
+        transformedDataSize: transformedData?.[selectedLanguage]?.length || 0,
+      });
+
       setCurrentPage(1);
       setHasMoreData(true);
       const ITEMS_PER_PAGE = 25;
@@ -146,34 +186,49 @@ const Pronounce = () => {
         1,
         ITEMS_PER_PAGE
       );
+
+      console.log("[Pronounce] Filtered data result:", {
+        selectedLanguage,
+        searchTerm: searchInput,
+        resultCount: newData.length,
+        sampleItems: newData.slice(0, 3).map((item) => ({
+          english: item.english,
+          translation: item.translation,
+        })),
+      });
+
       setAllPronunciationData(newData);
     }
-  }, [selectedLanguage, searchInput, isLoading]);
+  }, [
+    selectedLanguage,
+    searchInput,
+    isLoading,
+    transformedData,
+    getFilteredPronunciations,
+  ]); // FIXED: Add transformedData dependency
 
-  // NEW: Start header animations when data is ready
+  // FIXED: Start animations when component is ready with data
   useEffect(() => {
     if (
+      componentMountedRef.current &&
       !isLoading &&
       !animationStartedRef.current &&
-      allPronunciationData.length > 0
+      dataLoadedRef.current
     ) {
       animationStartedRef.current = true;
+      console.log("[Pronounce] Starting header animations");
 
-      // Staggered header animations
       Animated.sequence([
-        // First: Header title
         Animated.timing(headerFadeAnim, {
           toValue: 1,
           duration: 600,
           useNativeDriver: true,
         }),
-        // Then: Controls (search + dropdown)
         Animated.timing(controlsFadeAnim, {
           toValue: 1,
           duration: 400,
           useNativeDriver: true,
         }),
-        // Finally: List header
         Animated.timing(listHeaderFadeAnim, {
           toValue: 1,
           duration: 400,
@@ -181,23 +236,15 @@ const Pronounce = () => {
         }),
       ]).start();
     }
-  }, [
-    isLoading,
-    allPronunciationData.length,
-    headerFadeAnim,
-    controlsFadeAnim,
-    listHeaderFadeAnim,
-  ]);
+  }, [isLoading, headerFadeAnim, controlsFadeAnim, listHeaderFadeAnim]);
 
+  // FIXED: Language change handler - don't reset animations unless data changes
   const handleLanguageChange = (language: string) => {
     stopAudio();
     setSelectedLanguage(language);
 
-    // Reset animation when language changes
-    animationStartedRef.current = false;
-    headerFadeAnim.setValue(0);
-    controlsFadeAnim.setValue(0);
-    listHeaderFadeAnim.setValue(0);
+    // Don't reset animations for language change
+    console.log(`[Pronounce] Language changed to: ${language}`);
   };
 
   const loadMoreData = useCallback(async () => {
@@ -205,7 +252,6 @@ const Pronounce = () => {
 
     try {
       setIsLoadingMore(true);
-
       const nextPage = currentPage + 1;
       const newData = getFilteredPronunciations(selectedLanguage, nextPage, 25);
 
@@ -228,19 +274,42 @@ const Pronounce = () => {
     getFilteredPronunciations,
   ]);
 
-  const handleSearchChange = useCallback(
-    (text: string) => {
-      setSearchInput(text);
-      debouncedSetSearchTerm(text);
+  const handleSearchChange = useCallback((text: string) => {
+    setSearchInput(text);
+    debouncedSetSearchTerm(text);
+    console.log(`[Pronounce] Search term: ${text}`);
+  }, []);
 
-      // Reset animation when searching
-      animationStartedRef.current = false;
-      headerFadeAnim.setValue(0);
-      controlsFadeAnim.setValue(0);
-      listHeaderFadeAnim.setValue(0);
-    },
-    [headerFadeAnim, controlsFadeAnim, listHeaderFadeAnim]
-  );
+  // FIXED: Prevent multiple refresh calls
+  const handleRefresh = useCallback(async () => {
+    if (refreshingRef.current) {
+      console.log("[Pronounce] Refresh already in progress, skipping");
+      return;
+    }
+
+    refreshingRef.current = true;
+    setIsRefreshing(true);
+
+    try {
+      console.log("[Pronounce] Refreshing pronunciation data");
+
+      // Clear cache and fetch fresh data
+      clearCache();
+      await fetchPronunciations(true); // Force refresh
+
+      // Reset pagination
+      setCurrentPage(1);
+      setHasMoreData(true);
+
+      // Load fresh data will happen automatically via useEffect when transformedData changes
+      console.log("[Pronounce] Refresh completed");
+    } catch (error) {
+      console.error("Error refreshing data:", error);
+    } finally {
+      setIsRefreshing(false);
+      refreshingRef.current = false;
+    }
+  }, [clearCache, fetchPronunciations]);
 
   const handleEndReached = () => {
     if (hasMoreData && !isLoadingMore) {
@@ -263,7 +332,7 @@ const Pronounce = () => {
   const renderItem = useCallback(
     ({ item, index }: { item: PronunciationItem; index: number }) => {
       // Calculate delay: base delay + staggered delay for each item
-      const baseDelay = 1400; // Wait for header animations to complete
+      const baseDelay = 400; // Wait for header animations to complete
       const itemDelay = index * 100; // 100ms delay between each item
       const totalDelay = baseDelay + itemDelay;
 
@@ -282,16 +351,18 @@ const Pronounce = () => {
   );
 
   const keyExtractor = useCallback(
-    (item: PronunciationItem, index: number) => `pronunciation-${index}`,
+    (item: PronunciationItem, index: number) =>
+      `pronunciation-${index}-${item.english}`,
     []
   );
 
-  if (isLoading) return <AppLoading />;
+  // FIXED: Show loading only on initial load
+  if (isLoading && !dataLoadedRef.current) return <AppLoading />;
 
-  if (error) {
+  if (error && !dataLoadedRef.current) {
     return (
       <SafeAreaView style={[dynamicStyles.container, styles.centerContainer]}>
-        <ErrorState onRetry={fetchPronunciations} />
+        <ErrorState onRetry={() => fetchPronunciations(true)} />
       </SafeAreaView>
     );
   }
@@ -299,12 +370,10 @@ const Pronounce = () => {
   return (
     <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
       <SafeAreaView style={dynamicStyles.container}>
-        {/* NEW: Animated Header */}
         <Animated.View style={[styles.header, { opacity: headerFadeAnim }]}>
           <Text style={styles.headerTitle}>Pronunciation Guide</Text>
         </Animated.View>
 
-        {/* NEW: Animated Controls */}
         <Animated.View
           style={[styles.controlsContainer, { opacity: controlsFadeAnim }]}
         >
@@ -319,7 +388,7 @@ const Pronounce = () => {
           />
         </Animated.View>
 
-        {/* NEW: Animated List Header */}
+        {/* FIXED: Always show list header with proper opacity */}
         <Animated.Text
           style={[styles.listHeaderTitle, { opacity: listHeaderFadeAnim }]}
         >
@@ -331,7 +400,7 @@ const Pronounce = () => {
             data={allPronunciationData}
             renderItem={renderItem}
             keyExtractor={keyExtractor}
-            ListEmptyComponent={EmptyState}
+            ListEmptyComponent={() => <EmptyState onRefresh={handleRefresh} />}
             contentContainerStyle={styles.flatListContent}
             initialNumToRender={5}
             maxToRenderPerBatch={3}
@@ -350,6 +419,15 @@ const Pronounce = () => {
             maintainVisibleContentPosition={{
               minIndexForVisible: 0,
             }}
+            refreshControl={
+              <RefreshControl
+                refreshing={isRefreshing}
+                onRefresh={handleRefresh}
+                tintColor={BASE_COLORS.white}
+                titleColor={BASE_COLORS.white}
+                title="Pull to refresh"
+              />
+            }
           />
         </View>
       </SafeAreaView>
