@@ -1,43 +1,126 @@
-import React from "react";
-import { View, StyleSheet, Animated, Dimensions } from "react-native";
+import React, { useEffect, useRef } from "react";
+import {
+  View,
+  StyleSheet,
+  Animated,
+  Dimensions,
+  TouchableOpacity,
+  Text,
+} from "react-native";
+import { X } from "react-native-feather";
 import DotsLoader from "@/components/DotLoader";
 import useThemeStore from "@/store/useThemeStore";
 
-const SpeechLoading: React.FC = () => {
+interface SpeechLoadingProps {
+  onCancel?: () => void;
+}
+
+const SpeechLoading: React.FC<SpeechLoadingProps> = ({ onCancel }) => {
   const { activeTheme } = useThemeStore();
-  const colors: string[] = ["#FCD116", "#4785ff", "#ce1126", "#FCD116"];
+
+  // Animation references
+  const pulseAnim = useRef(new Animated.Value(1)).current;
+  const rotateAnim = useRef(new Animated.Value(0)).current;
+  const scaleAnim = useRef(new Animated.Value(0.8)).current;
+  const fadeInAnim = useRef(new Animated.Value(0)).current;
 
   // Get screen dimensions to ensure full coverage
   const { height, width } = Dimensions.get("window");
 
+  useEffect(() => {
+    // Entrance animation
+    Animated.sequence([
+      Animated.timing(fadeInAnim, {
+        toValue: 1,
+        duration: 300,
+        useNativeDriver: true,
+      }),
+      Animated.spring(scaleAnim, {
+        toValue: 1,
+        tension: 100,
+        friction: 8,
+        useNativeDriver: true,
+      }),
+    ]).start();
+
+    // Continuous pulse animation
+    const pulseAnimation = Animated.loop(
+      Animated.sequence([
+        Animated.timing(pulseAnim, {
+          toValue: 1.05,
+          duration: 2000,
+          useNativeDriver: true,
+        }),
+        Animated.timing(pulseAnim, {
+          toValue: 1,
+          duration: 2000,
+          useNativeDriver: true,
+        }),
+      ])
+    );
+
+    // Continuous rotation animation for accent elements
+    const rotateAnimation = Animated.loop(
+      Animated.timing(rotateAnim, {
+        toValue: 1,
+        duration: 10000,
+        useNativeDriver: true,
+      })
+    );
+
+    pulseAnimation.start();
+    rotateAnimation.start();
+
+    return () => {
+      pulseAnimation.stop();
+      rotateAnimation.stop();
+    };
+  }, []);
+
+  const spin = rotateAnim.interpolate({
+    inputRange: [0, 1],
+    outputRange: ["0deg", "360deg"],
+  });
+
   return (
-    <View
-      style={[
-        styles.overlay,
-        { width, height }, // Ensure full screen coverage
-      ]}
-      // This ensures touch events are captured by this view
+    <Animated.View
+      style={[styles.overlay, { width, height, opacity: fadeInAnim }]}
       pointerEvents="auto"
     >
-      <View
+      <Animated.View
         style={[
           styles.container,
-          { backgroundColor: activeTheme.backgroundColor },
+          {
+            backgroundColor: activeTheme.backgroundColor,
+            transform: [{ scale: scaleAnim }],
+          },
         ]}
       >
+        {/* Main content area with improved spacing */}
         <Animated.Text style={[styles.loadingText]}>
-          Translating...
+          Translating your speech...
         </Animated.Text>
 
-        <DotsLoader colors={colors} />
-      </View>
-    </View>
+        {/* Dots loader with improved positioning */}
+        <View style={styles.loaderContainer}>
+          <DotsLoader />
+        </View>
+        {onCancel && (
+          <TouchableOpacity
+            style={styles.cancelButton}
+            onPress={onCancel}
+            activeOpacity={0.8}
+          >
+            <Text style={styles.cancelButtonText}>Cancel</Text>
+          </TouchableOpacity>
+        )}
+      </Animated.View>
+    </Animated.View>
   );
 };
 
 export default SpeechLoading;
 
-// Styles
 const styles = StyleSheet.create({
   overlay: {
     position: "absolute",
@@ -45,29 +128,23 @@ const styles = StyleSheet.create({
     bottom: 0,
     left: 0,
     right: 0,
-    flex: 1,
     zIndex: 9999,
     alignItems: "center",
     justifyContent: "center",
-    backgroundColor: "rgba(0, 0, 0, 0.5)",
+    backgroundColor: "rgba(0, 0, 0, 0.7)",
   },
   container: {
-    backgroundColor: "#0a0f28",
-    width: "75%",
-    maxWidth: 350,
+    maxWidth: 400,
     alignItems: "center",
     justifyContent: "center",
-    padding: 24,
-    zIndex: 10000, // Even higher z-index
+    zIndex: 10000,
     borderRadius: 20,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.4,
-    shadowRadius: 12,
-    elevation: 16,
     borderWidth: 1,
-    borderColor: "rgba(255, 255, 255, 0.1)",
+    padding: 32,
+    maxHeight: 250,
+    borderColor: "rgba(255, 255, 255, 0.15)",
   },
+  // Text styles
   loadingText: {
     fontFamily: "Poppins-Medium",
     color: "#ffffff",
@@ -75,5 +152,25 @@ const styles = StyleSheet.create({
     fontSize: 14,
     marginBottom: 20,
     letterSpacing: 0.5,
+  },
+  // Loader container
+  loaderContainer: {
+    marginBottom: 20,
+  },
+  // Enhanced cancel button
+  cancelButton: {
+    justifyContent: "center",
+    alignItems: "center",
+    paddingVertical: 7,
+    backgroundColor: "rgba(255, 255, 255, 0.1)",
+    borderRadius: 20,
+    paddingHorizontal: 24,
+    borderWidth: 1,
+    borderColor: "rgba(255, 255, 255, 0.2)",
+  },
+  cancelButtonText: {
+    fontSize: 12,
+    fontFamily: "Poppins-Regular",
+    color: "white",
   },
 });

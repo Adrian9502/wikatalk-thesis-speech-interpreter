@@ -48,7 +48,12 @@ const Speech = () => {
 
   // Custom hooks
   const { recording, startRecording, stopRecording } = useRecording();
-  const { loading, translateAudio, speakText } = useRecordingTranslation();
+  const { loading, wasCancelled, translateAudio, speakText } =
+    useRecordingTranslation();
+
+  // NEW: State for tracking current translation controller
+  const [currentTranslationController, setCurrentTranslationController] =
+    useState<AbortController | null>(null);
 
   // track which user is recording
   const [recordingUser, setRecordingUser] = useState<number | null>(null);
@@ -77,34 +82,81 @@ const Speech = () => {
     setActiveUser(userNum);
 
     if (recording) {
-      setRecordingUser(null); // Clear recording user when stopping
+      setRecordingUser(null);
       const uri = await stopRecording();
       if (uri) {
         const sourceLang = userNum === 1 ? language1 : language2;
         const targetLang = userNum === 1 ? language2 : language1;
 
-        const result = await translateAudio(uri, sourceLang, targetLang);
-        if (result) {
-          handleTextfield(result.translatedText, result.transcribedText);
-          speakText(result.translatedText);
+        // NEW: Create abort controller for this translation
+        const controller = new AbortController();
+        setCurrentTranslationController(controller);
 
-          // Save to history - only if we have actual text
-          if (result.transcribedText && result.translatedText) {
-            await saveTranslationHistory({
-              type: "Speech",
-              fromLanguage: sourceLang,
-              toLanguage: targetLang,
-              originalText: result.transcribedText,
-              translatedText: result.translatedText,
-            });
+        try {
+          const result = await translateAudio(
+            uri,
+            sourceLang,
+            targetLang,
+            controller.signal
+          );
+
+          // Check if the request was cancelled
+          if (controller.signal.aborted || wasCancelled) {
+            console.log("[Speech] Translation was cancelled by user");
+            return; // Don't show error for user-initiated cancellation
           }
+
+          if (result) {
+            handleTextfield(result.translatedText, result.transcribedText);
+            speakText(result.translatedText);
+
+            // Save to history - only if we have actual text
+            if (result.transcribedText && result.translatedText) {
+              await saveTranslationHistory({
+                type: "Speech",
+                fromLanguage: sourceLang,
+                toLanguage: targetLang,
+                originalText: result.transcribedText,
+                translatedText: result.translatedText,
+              });
+            }
+          }
+        } catch (error) {
+          // Only show error if not cancelled by user
+          if (!controller.signal.aborted && !wasCancelled) {
+            console.error("[Speech] Translation error:", error);
+            // Error will be handled by the hook's showTranslationError
+          } else {
+            console.log(
+              "[Speech] Translation cancelled by user - no error shown"
+            );
+          }
+        } finally {
+          // Clear the controller
+          setCurrentTranslationController(null);
         }
       }
     } else {
-      setRecordingUser(userNum); // Set which user is recording
+      setRecordingUser(userNum);
       startRecording();
     }
   };
+
+  // NEW: Handle cancel translation
+  const handleCancelTranslation = useCallback(() => {
+    console.log("[Speech] User requested to cancel translation");
+
+    if (currentTranslationController) {
+      // Abort the current translation request
+      currentTranslationController.abort();
+      setCurrentTranslationController(null);
+    }
+
+    // Clear any error states - user cancelled intentionally
+    clearTranslationError();
+
+    console.log("[Speech] Translation cancelled by user request");
+  }, [currentTranslationController, clearTranslationError]);
 
   // Listen for text input focus to track which section is active
   const handleTextAreaFocus = (position: "top" | "bottom") => {
@@ -242,8 +294,8 @@ const Speech = () => {
           />
         )}
 
-      {/* Loading Indicator - UNCHANGED */}
-      {loading && <SpeechLoading />}
+      {/* UPDATED: Loading Indicator with Cancel Button */}
+      {loading && <SpeechLoading onCancel={handleCancelTranslation} />}
     </SafeAreaView>
   );
 };

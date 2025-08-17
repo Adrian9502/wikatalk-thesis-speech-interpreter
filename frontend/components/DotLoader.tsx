@@ -68,9 +68,9 @@ const styles = StyleSheet.create({
     height: 30,
   },
   dot: {
-    width: 12,
-    height: 12,
-    borderRadius: 24,
+    width: 10,
+    height: 10,
+    borderRadius: 20,
     marginHorizontal: 3,
   },
 });

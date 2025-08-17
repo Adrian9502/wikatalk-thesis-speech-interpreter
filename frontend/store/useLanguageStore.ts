@@ -162,10 +162,10 @@ const useLanguageStore = create<LanguageStore>((set, get) => ({
     });
   },
 
+  // ENHANCED: Clear translation error method
   clearTranslationError: () => {
     set({
       translationError: false,
-      // Reset text fields to empty when clearing error
       upperTextfield: "",
       bottomTextfield: "",
     });

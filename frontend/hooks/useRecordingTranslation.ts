@@ -11,29 +11,31 @@ interface TranslationResult {
 interface TranslationState {
   loading: boolean;
   error: Error | null;
+  wasCancelled: boolean; // NEW: Track if user cancelled
 }
 
 export const useRecordingTranslation = () => {
   const [state, setState] = useState<TranslationState>({
     loading: false,
     error: null,
+    wasCancelled: false, // NEW: Initialize cancelled state
   });
 
-  // Get the showTranslationError function from the language store
   const { showTranslationError } = useLanguageStore();
 
   const translateAudio = useCallback(
     async (
       uri: string | undefined,
       srcLang: string,
-      tgtLang: string
+      tgtLang: string,
+      signal?: AbortSignal // NEW: Add AbortSignal parameter
     ): Promise<TranslationResult | null> => {
       const FILEUPLOAD_URL =
         process.env.EXPO_PUBLIC_NLP_TRANSLATE_AUDIO_API_URL;
 
       if (!FILEUPLOAD_URL || !uri) {
         const error = new Error("No file upload URL or recording URI found");
-        setState({ loading: false, error });
+        setState({ loading: false, error, wasCancelled: false });
         showTranslationError(); // Show error in text area
         return null;
       }
@@ -42,7 +44,7 @@ export const useRecordingTranslation = () => {
       const filetype = uri.split(".").pop();
       const filename = uri.split("/").pop();
 
-      setState({ loading: true, error: null });
+      setState({ loading: true, error: null, wasCancelled: false });
 
       formData.append("file", {
         uri: uri,
@@ -57,19 +59,42 @@ export const useRecordingTranslation = () => {
           headers: {
             "Content-Type": "multipart/form-data",
           },
+          signal, // NEW: Pass the abort signal to axios
         });
 
-        setState({ loading: false, error: null });
+        // Check if request was cancelled after successful response
+        if (signal?.aborted) {
+          setState({ loading: false, error: null, wasCancelled: true });
+          return null;
+        }
+
+        setState({ loading: false, error: null, wasCancelled: false });
 
         return {
           translatedText: response?.data["translated_text"] || "",
           transcribedText: response?.data["transcribed_text"] || "",
         };
-      } catch (error) {
+      } catch (error: any) {
+        // NEW: Enhanced cancellation detection
+        const isCancelled =
+          signal?.aborted ||
+          error.name === "CancelledError" ||
+          error.code === "ERR_CANCELED" ||
+          axios.isCancel(error);
+
+        if (isCancelled) {
+          console.log(
+            "[useRecordingTranslation] Translation was cancelled by user"
+          );
+          setState({ loading: false, error: null, wasCancelled: true });
+          return null;
+        }
+
         console.log("Error translating record: ", error);
         setState({
           loading: false,
           error: error instanceof Error ? error : new Error(String(error)),
+          wasCancelled: false,
         });
         showTranslationError(); // Show error in text area
         return null;
@@ -93,6 +118,7 @@ export const useRecordingTranslation = () => {
   return {
     loading: state.loading,
     error: state.error,
+    wasCancelled: state.wasCancelled, // NEW: Expose cancelled state
     translateAudio,
     speakText,
   };
