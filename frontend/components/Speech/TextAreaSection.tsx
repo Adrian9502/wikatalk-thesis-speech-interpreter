@@ -130,7 +130,7 @@ const TextAreaSection: React.FC<TextAreaSectionProps> = ({
       isError: false,
       isEditable: true,
       displayText: isInitialText ? "" : textField, // FIXED: Show empty value for initial text
-      placeholderText: isInitialText ? INITIAL_TEXT : "Start typing...", // FIXED: Use as placeholder
+      placeholderText: INITIAL_TEXT,
       textColor: COLORS.text,
       showAsText: false,
     };
