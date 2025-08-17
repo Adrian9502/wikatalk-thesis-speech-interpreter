@@ -1,7 +1,6 @@
-import React from "react";
+import React, { useRef } from "react";
 import {
   View,
-  ScrollView,
   StyleSheet,
   TextInput,
   ActivityIndicator,
@@ -25,6 +24,9 @@ const TextAreaSection: React.FC<TextAreaSectionProps> = ({
   position,
   onTextAreaFocus,
 }) => {
+  const isScrolling = useRef(false);
+  const scrollTimer = useRef<NodeJS.Timeout | null>(null);
+
   const {
     setUpperText,
     setBottomText,
@@ -60,6 +62,28 @@ const TextAreaSection: React.FC<TextAreaSectionProps> = ({
     }
   };
 
+  const handleFocus = () => {
+    // Only trigger focus callback if not currently scrolling
+    if (!isScrolling.current && onTextAreaFocus) {
+      onTextAreaFocus(position);
+    }
+  };
+
+  const handleScroll = () => {
+    // Set scrolling state to true
+    isScrolling.current = true;
+
+    // Clear any existing timer
+    if (scrollTimer.current) {
+      clearTimeout(scrollTimer.current);
+    }
+
+    // Set timer to reset scrolling state after scroll ends
+    scrollTimer.current = setTimeout(() => {
+      isScrolling.current = false;
+    }, 150); // 150ms delay after scrolling stops
+  };
+
   // If there's an error and no text, show the error message
   const displayValue = translationError
     ? "Translation failed. Please try again."
@@ -67,32 +91,37 @@ const TextAreaSection: React.FC<TextAreaSectionProps> = ({
 
   return (
     <View style={styles.textAreaWrapper}>
-      <ScrollView
-        style={[styles.textArea, { borderColor: COLORS.border }]}
-        scrollEnabled={true}
-        nestedScrollEnabled={true}
-        showsVerticalScrollIndicator={true}
-        contentContainerStyle={styles.scrollContent}
-      >
-        {translationError ? (
-          // Show error message in red text when there's an error
+      {translationError ? (
+        // Show error message in a non-editable text area when there's an error
+        <View style={[styles.textArea, { borderColor: COLORS.border }]}>
           <Text style={[styles.textField, styles.errorText]}>
-            Translation failed. Please try again.
+            {displayValue}
           </Text>
-        ) : (
-          // Show normal text input when there's no error
-          <TextInput
-            value={textField}
-            multiline={true}
-            editable={!translationError}
-            style={[styles.textField, { color: COLORS.text }]}
-            placeholder={INITIAL_TEXT}
-            placeholderTextColor={COLORS.placeholder}
-            onChangeText={handleTextChange}
-            onFocus={() => onTextAreaFocus && onTextAreaFocus(position)}
-          />
-        )}
-      </ScrollView>
+        </View>
+      ) : (
+        // Show scrollable text input when there's no error
+        <TextInput
+          value={displayValue}
+          onChangeText={handleTextChange}
+          multiline
+          style={[
+            styles.textArea,
+            styles.textField,
+            {
+              borderColor: COLORS.border,
+              color: COLORS.text,
+            },
+          ]}
+          placeholder={INITIAL_TEXT}
+          placeholderTextColor={COLORS.placeholder}
+          editable={true} // Always true for scrolling to work
+          scrollEnabled={true}
+          textAlignVertical="top"
+          onFocus={handleFocus}
+          onScroll={handleScroll}
+          showSoftInputOnFocus={true} // Show keyboard since all are editable
+        />
+      )}
 
       {/* Show loading indicator when translating */}
       {isTranslating && (
@@ -117,10 +146,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     padding: 16,
     minHeight: 120,
-  },
-  scrollContent: {
-    flexGrow: 1,
-    paddingBottom: 20,
+    flex: 1,
   },
   textField: {
     fontFamily: "Poppins-Regular",
