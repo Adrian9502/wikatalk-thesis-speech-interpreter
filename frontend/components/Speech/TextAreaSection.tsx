@@ -8,8 +8,7 @@ import {
 } from "react-native";
 import { BASE_COLORS } from "@/constant/colors";
 import useLanguageStore from "@/store/useLanguageStore";
-import { INITIAL_TEXT } from "@/store/useLanguageStore";
-import { Ionicons } from "@expo/vector-icons";
+import { INITIAL_TEXT, ERROR_TEXT } from "@/store/useLanguageStore";
 
 interface TextAreaSectionProps {
   textField: string;
@@ -32,22 +31,12 @@ const TextAreaSection: React.FC<TextAreaSectionProps> = ({
     setBottomText,
     debouncedTranslate,
     isTranslating,
-    isTopSpeaking,
-    isBottomSpeaking,
     translationError,
   } = useLanguageStore();
 
-  // Determine if this section is currently speaking
-  const isSpeaking = position === "top" ? isTopSpeaking : isBottomSpeaking;
-
   const handleTextChange = (text: string) => {
-    // If there's an error, don't allow editing
-    if (translationError) return;
-
-    // If initial text, clear it when user starts typing
-    if (textField === INITIAL_TEXT && text !== INITIAL_TEXT) {
-      text = text.replace(INITIAL_TEXT, "");
-    }
+    // Don't allow editing if there's an error or if it's a user-friendly message
+    if (translationError || isUserFriendlyMessage(textField)) return;
 
     // Update text in store
     if (position === "top") {
@@ -57,12 +46,21 @@ const TextAreaSection: React.FC<TextAreaSectionProps> = ({
     }
 
     // Trigger debounced translation if text is not empty
-    if (text && text !== INITIAL_TEXT) {
+    if (text && text.trim() !== "") {
       debouncedTranslate(text, position);
     }
   };
 
   const handleFocus = () => {
+    // Clear initial text when user focuses
+    if (textField === INITIAL_TEXT) {
+      if (position === "top") {
+        setUpperText("");
+      } else {
+        setBottomText("");
+      }
+    }
+
     // Only trigger focus callback if not currently scrolling
     if (!isScrolling.current && onTextAreaFocus) {
       onTextAreaFocus(position);
@@ -84,24 +82,75 @@ const TextAreaSection: React.FC<TextAreaSectionProps> = ({
     }, 150); // 150ms delay after scrolling stops
   };
 
-  // If there's an error and no text, show the error message
-  const displayValue = translationError
-    ? "Translation failed. Please try again."
-    : textField;
+  // Function to detect user-friendly messages
+  const isUserFriendlyMessage = (text: string): boolean => {
+    const userFriendlyMessages = [
+      "Recording too short",
+      "Recording too long",
+      "No speech detected",
+      "Server could not process",
+      "Invalid audio format",
+      "Request timed out",
+      "Translation failed",
+    ];
+
+    return userFriendlyMessages.some((message) =>
+      text.toLowerCase().includes(message.toLowerCase())
+    );
+  };
+
+  // Determine display state
+  const getDisplayState = () => {
+    // Check if it's a user-friendly error message
+    if (isUserFriendlyMessage(textField)) {
+      return {
+        isError: true,
+        isEditable: false,
+        displayText: textField,
+        textColor: BASE_COLORS.orange,
+        showAsText: true,
+      };
+    }
+
+    // Check if it's the generic translation error
+    if (translationError) {
+      return {
+        isError: true,
+        isEditable: false,
+        displayText: ERROR_TEXT,
+        textColor: BASE_COLORS.orange,
+        showAsText: true,
+      };
+    }
+
+    // FIXED: Handle initial text properly
+    const isInitialText = textField === INITIAL_TEXT;
+
+    return {
+      isError: false,
+      isEditable: true,
+      displayText: isInitialText ? "" : textField, // FIXED: Show empty value for initial text
+      placeholderText: isInitialText ? INITIAL_TEXT : "Start typing...", // FIXED: Use as placeholder
+      textColor: COLORS.text,
+      showAsText: false,
+    };
+  };
+
+  const displayState = getDisplayState();
 
   return (
     <View style={styles.textAreaWrapper}>
-      {translationError ? (
-        // Show error message in a non-editable text area when there's an error
+      {displayState.showAsText ? (
+        // Show error message in a non-editable text area
         <View style={[styles.textArea, { borderColor: COLORS.border }]}>
-          <Text style={[styles.textField, styles.errorText]}>
-            {displayValue}
+          <Text style={[styles.textField, { color: displayState.textColor }]}>
+            {displayState.displayText}
           </Text>
         </View>
       ) : (
-        // Show scrollable text input when there's no error
+        // Show normal editable text input
         <TextInput
-          value={displayValue}
+          value={displayState.displayText}
           onChangeText={handleTextChange}
           multiline
           style={[
@@ -109,17 +158,17 @@ const TextAreaSection: React.FC<TextAreaSectionProps> = ({
             styles.textField,
             {
               borderColor: COLORS.border,
-              color: COLORS.text,
+              color: displayState.textColor,
             },
           ]}
-          placeholder={INITIAL_TEXT}
-          placeholderTextColor={COLORS.placeholder}
-          editable={true} // Always true for scrolling to work
+          placeholder={displayState.placeholderText} // FIXED: Use proper placeholder
+          placeholderTextColor={COLORS.placeholder} // This will now work properly
+          editable={displayState.isEditable}
           scrollEnabled={true}
           textAlignVertical="top"
           onFocus={handleFocus}
           onScroll={handleScroll}
-          showSoftInputOnFocus={true} // Show keyboard since all are editable
+          showSoftInputOnFocus={displayState.isEditable}
         />
       )}
 
@@ -150,13 +199,10 @@ const styles = StyleSheet.create({
   },
   textField: {
     fontFamily: "Poppins-Regular",
-    fontSize: 17,
-    lineHeight: 24,
+    fontSize: 14,
+    lineHeight: 20,
     textAlignVertical: "top",
     minHeight: 80,
-  },
-  errorText: {
-    color: BASE_COLORS.orange,
   },
   loadingContainer: {
     position: "absolute",

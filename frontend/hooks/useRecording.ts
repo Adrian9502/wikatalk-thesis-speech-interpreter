@@ -6,6 +6,8 @@ interface RecordingState {
   error: Error | null;
   status: "idle" | "recording" | "error";
   hasPermission: boolean;
+  recordingDuration: number;
+  startTime: number | null;
 }
 
 export const useRecording = () => {
@@ -14,9 +16,32 @@ export const useRecording = () => {
     error: null,
     status: "idle",
     hasPermission: false,
+    recordingDuration: 0,
+    startTime: null,
   });
 
   const [permissionResponse, requestPermission] = Audio.usePermissions();
+
+  // NEW: Duration tracking effect
+  useEffect(() => {
+    let interval: NodeJS.Timeout | null = null;
+
+    if (state.recording && state.startTime) {
+      interval = setInterval(() => {
+        const currentDuration = (Date.now() - state.startTime!) / 1000;
+        setState((prev) => ({
+          ...prev,
+          recordingDuration: currentDuration,
+        }));
+      }, 100); // Update every 100ms for smooth progress
+    }
+
+    return () => {
+      if (interval) {
+        clearInterval(interval);
+      }
+    };
+  }, [state.recording, state.startTime]);
 
   // Check permission on mount
   useEffect(() => {
@@ -55,11 +80,15 @@ export const useRecording = () => {
         Audio.RecordingOptionsPresets.HIGH_QUALITY
       );
 
+      // NEW: Set start time and reset duration
+      const now = Date.now();
       setState({
         recording,
         error: null,
         status: "recording",
         hasPermission: true,
+        recordingDuration: 0,
+        startTime: now,
       });
 
       console.log("Recording started");
@@ -71,23 +100,29 @@ export const useRecording = () => {
         error: error instanceof Error ? error : new Error(String(error)),
         status: "error",
         hasPermission: permissionResponse?.status === "granted",
+        recordingDuration: 0,
+        startTime: null,
       });
       return null;
     }
   };
 
   const stopRecording = async (): Promise<string | null> => {
-    if (!state.recording) return null;
+    if (!state.recording || !state.startTime) return null;
 
     try {
       console.log("Stopping recording..");
       const tempRecording = state.recording;
+      const finalDuration = (Date.now() - state.startTime) / 1000;
 
+      // IMPORTANT: Always allow stopping, just update the state
       setState({
         recording: null,
         error: null,
         status: "idle",
         hasPermission: permissionResponse?.status === "granted",
+        recordingDuration: finalDuration, // Keep the final duration for validation
+        startTime: null,
       });
 
       await tempRecording.stopAndUnloadAsync();
@@ -96,7 +131,11 @@ export const useRecording = () => {
       });
 
       const uri = tempRecording.getURI();
-      console.log("Recording stopped and stored at", uri);
+      console.log(
+        `Recording stopped and stored at ${uri}, duration: ${finalDuration.toFixed(
+          2
+        )}s`
+      );
       return uri;
     } catch (error) {
       console.error("Error stopping recording", error);
@@ -105,9 +144,15 @@ export const useRecording = () => {
         error: error instanceof Error ? error : new Error(String(error)),
         status: "error",
         hasPermission: permissionResponse?.status === "granted",
+        recordingDuration: 0,
+        startTime: null,
       });
       return null;
     }
+  };
+  // NEW: Get formatted duration for display
+  const getFormattedDuration = (): string => {
+    return state.recordingDuration.toFixed(1);
   };
 
   return {
@@ -115,7 +160,10 @@ export const useRecording = () => {
     error: state.error,
     status: state.status,
     hasPermission: state.hasPermission,
+    recordingDuration: state.recordingDuration,
+    startTime: state.startTime,
     startRecording,
     stopRecording,
+    getFormattedDuration,
   };
 };

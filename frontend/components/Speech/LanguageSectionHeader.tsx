@@ -35,6 +35,9 @@ const LanguageSectionHeader: React.FC<LanguageSectionHeaderProps> = ({
     isBottomSpeaking,
   } = useLanguageStore();
 
+  const defaultMessage: string =
+    "Tap the microphone icon to begin recording. Tap again to stop.";
+
   // Determine if this section is currently speaking
   const isSpeaking = position === "top" ? isTopSpeaking : isBottomSpeaking;
 
@@ -49,11 +52,7 @@ const LanguageSectionHeader: React.FC<LanguageSectionHeaderProps> = ({
   const handleSpeakerPress = async () => {
     if (isSpeaking) {
       await stopSpeech();
-    } else if (
-      textField &&
-      textField !==
-        "Tap the microphone icon to begin recording. Tap again to stop."
-    ) {
+    } else if (textField && textField !== defaultMessage) {
       await speakText(textField, position === "top" ? "top" : "bottom");
     }
   };
@@ -94,7 +93,7 @@ const LanguageSectionHeader: React.FC<LanguageSectionHeaderProps> = ({
           renderRightIcon={() => (
             <Ionicons
               name={isFocus ? "chevron-up" : "chevron-down"}
-              size={18}
+              size={20}
               color={COLORS.primary}
             />
           )}
@@ -107,15 +106,11 @@ const LanguageSectionHeader: React.FC<LanguageSectionHeaderProps> = ({
         <TouchableOpacity
           style={styles.controlButton}
           onPress={handleSpeakerPress}
-          disabled={
-            !textField ||
-            textField ===
-              "Tap the microphone icon to begin recording. Tap again to stop."
-          }
+          disabled={!textField || textField === defaultMessage}
         >
           <Ionicons
             name={isSpeaking ? "volume-high" : "volume-medium-outline"}
-            size={22}
+            size={20}
             color={isSpeaking ? COLORS.success : COLORS.primary}
           />
         </TouchableOpacity>
@@ -126,7 +121,7 @@ const LanguageSectionHeader: React.FC<LanguageSectionHeaderProps> = ({
         >
           <Ionicons
             name="information-circle-outline"
-            size={22}
+            size={20}
             color={COLORS.primary}
           />
         </TouchableOpacity>
@@ -134,15 +129,11 @@ const LanguageSectionHeader: React.FC<LanguageSectionHeaderProps> = ({
         <TouchableOpacity
           style={styles.controlButton}
           onPress={handleCopy}
-          disabled={
-            !textField ||
-            textField ===
-              "Tap the microphone icon to begin recording. Tap again to stop."
-          }
+          disabled={!textField || textField === defaultMessage}
         >
           <Ionicons
             name={copySuccess ? "checkmark-circle" : "copy-outline"}
-            size={22}
+            size={20}
             color={copySuccess ? COLORS.success : COLORS.primary}
           />
         </TouchableOpacity>
@@ -150,13 +141,9 @@ const LanguageSectionHeader: React.FC<LanguageSectionHeaderProps> = ({
         <TouchableOpacity
           style={styles.controlButton}
           onPress={() => clearText(position)}
-          disabled={
-            !textField ||
-            textField ===
-              "Tap the microphone icon to begin recording. Tap again to stop."
-          }
+          disabled={!textField || textField === defaultMessage}
         >
-          <Ionicons name="trash-outline" size={22} color={COLORS.primary} />
+          <Ionicons name="trash-outline" size={20} color={COLORS.primary} />
         </TouchableOpacity>
       </View>
     </View>
@@ -195,7 +182,7 @@ const styles = StyleSheet.create({
     borderColor: BASE_COLORS.borderColor,
   },
   dropdownText: {
-    fontSize: 16,
+    fontSize: 14,
     fontFamily: "Poppins-Regular",
   },
   controls: {

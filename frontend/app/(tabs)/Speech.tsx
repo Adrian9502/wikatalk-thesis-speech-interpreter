@@ -47,7 +47,9 @@ const Speech = () => {
   } = useLanguageStore();
 
   // Custom hooks
-  const { recording, startRecording, stopRecording } = useRecording();
+  const { recording, startRecording, stopRecording, recordingDuration } =
+    useRecording();
+
   const { loading, wasCancelled, translateAudio, speakText } =
     useRecordingTranslation();
 
@@ -77,18 +79,37 @@ const Speech = () => {
 
   // Handle microphone press
   const handleMicPress = async (userNum: number) => {
-    // Clear any previous error when starting a new recording
+    // Clear any previous messages when starting a new recording
     clearTranslationError();
     setActiveUser(userNum);
 
     if (recording) {
       setRecordingUser(null);
       const uri = await stopRecording();
+
       if (uri) {
+        // Check duration after stopping and show user-friendly message
+        if (recordingDuration < 2.0) {
+          console.log(
+            `[Speech] Recording too short: ${recordingDuration.toFixed(
+              1
+            )}s (minimum 2s required)`
+          );
+
+          // NEW: Use the enhanced method to set user-friendly messages
+          const { setUserFriendlyMessage } = useLanguageStore.getState();
+          const message = `Recording too short (${recordingDuration.toFixed(
+            1
+          )}s). Please record for at least 2 seconds.`;
+          setUserFriendlyMessage(message);
+
+          return; // Don't proceed with translation
+        }
+
         const sourceLang = userNum === 1 ? language1 : language2;
         const targetLang = userNum === 1 ? language2 : language1;
 
-        // NEW: Create abort controller for this translation
+        // Create abort controller for this translation
         const controller = new AbortController();
         setCurrentTranslationController(controller);
 
@@ -97,13 +118,14 @@ const Speech = () => {
             uri,
             sourceLang,
             targetLang,
-            controller.signal
+            controller.signal,
+            recordingDuration
           );
 
           // Check if the request was cancelled
           if (controller.signal.aborted || wasCancelled) {
             console.log("[Speech] Translation was cancelled by user");
-            return; // Don't show error for user-initiated cancellation
+            return;
           }
 
           if (result) {
@@ -122,17 +144,14 @@ const Speech = () => {
             }
           }
         } catch (error) {
-          // Only show error if not cancelled by user
           if (!controller.signal.aborted && !wasCancelled) {
             console.error("[Speech] Translation error:", error);
-            // Error will be handled by the hook's showTranslationError
           } else {
             console.log(
               "[Speech] Translation cancelled by user - no error shown"
             );
           }
         } finally {
-          // Clear the controller
           setCurrentTranslationController(null);
         }
       }
@@ -182,7 +201,6 @@ const Speech = () => {
     }
   }, [fadeAnim]);
 
-  // Track keyboard visibility - UNCHANGED
   useEffect(() => {
     const keyboardDidShowListener = Keyboard.addListener(
       "keyboardDidShow",
@@ -216,14 +234,12 @@ const Speech = () => {
     };
   }, [isBottomActive]);
 
-  // clear text on component mount - UNCHANGED
   useEffect(() => {
     clearText("top");
     clearText("bottom");
     clearTranslationError(); // Clear any errors on component mount
   }, []);
 
-  // Calculate keyboard offset based on platform and tab bar height - UNCHANGED
   const keyboardOffset =
     Platform.OS === "ios"
       ? 90 + insets.bottom // For iOS include the bottom inset
@@ -252,16 +268,17 @@ const Speech = () => {
               },
             ]}
           >
-            {/* Top section - UNCHANGED */}
+            {/* Top section*/}
             <LanguageSection
               position="top"
               handlePress={handleMicPress}
               recording={!!recording && recordingUser === 2}
               userId={2}
               onTextAreaFocus={handleTextAreaFocus}
+              recordingDuration={recordingDuration}
             />
 
-            {/* Middle Section - Exchange icon - UNCHANGED except for callback */}
+            {/* Middle Section - Exchange icon */}
             <View style={styles.middleSection}>
               <SwapButton
                 onPress={handleSwapLanguages}
@@ -269,19 +286,20 @@ const Speech = () => {
               />
             </View>
 
-            {/* Bottom section - UNCHANGED */}
+            {/* Bottom section */}
             <LanguageSection
               position="bottom"
               handlePress={handleMicPress}
               recording={!!recording && recordingUser === 1}
               userId={1}
               onTextAreaFocus={handleTextAreaFocus}
+              recordingDuration={recordingDuration}
             />
           </Animated.View>
         </KeyboardAvoidingView>
       </TouchableWithoutFeedback>
 
-      {/* Language Information Modal - UNCHANGED */}
+      {/* Language Information Modal*/}
       {showLanguageInfo &&
         activeLanguageInfo &&
         LANGUAGE_INFO[activeLanguageInfo] && (

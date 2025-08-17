@@ -13,6 +13,7 @@ interface LanguageSectionProps {
   recording?: boolean;
   userId: number;
   onTextAreaFocus?: (position: "top" | "bottom") => void;
+  recordingDuration?: number; // NEW: Add duration prop
 }
 
 const LanguageSection: React.FC<LanguageSectionProps> = ({
@@ -21,6 +22,7 @@ const LanguageSection: React.FC<LanguageSectionProps> = ({
   recording,
   userId,
   onTextAreaFocus,
+  recordingDuration = 0,
 }) => {
   // Animation for microphone button
   const [micAnimation] = useState(new Animated.Value(1));
@@ -156,7 +158,7 @@ const LanguageSection: React.FC<LanguageSectionProps> = ({
         onTextAreaFocus={onTextAreaFocus}
       />
 
-      {/* Bottom Section - Hide when keyboard is visible */}
+      {/* Bottom Section - UPDATED: Pass recording duration */}
       {(!keyboardVisible || position === "top") && (
         <LanguageBottomSection
           language={language}
@@ -166,6 +168,7 @@ const LanguageSection: React.FC<LanguageSectionProps> = ({
           colors={COLORS}
           showLanguageDetails={showLanguageDetails}
           micAnimation={micAnimation}
+          recordingDuration={recordingDuration} // NEW: Pass duration
         />
       )}
     </View>

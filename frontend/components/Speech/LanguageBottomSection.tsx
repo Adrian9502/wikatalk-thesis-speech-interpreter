@@ -23,6 +23,7 @@ interface LanguageBottomSectionProps {
   colors: any;
   showLanguageDetails: (language: string) => void;
   micAnimation: Animated.Value;
+  recordingDuration?: number;
 }
 
 const LanguageBottomSection: React.FC<LanguageBottomSectionProps> = ({
@@ -33,6 +34,7 @@ const LanguageBottomSection: React.FC<LanguageBottomSectionProps> = ({
   colors: COLORS,
   showLanguageDetails,
   micAnimation,
+  recordingDuration = 0,
 }) => {
   // Animation for microphone icon scaling
   const micAnimationPulse = useRef(new Animated.Value(1)).current;
@@ -81,23 +83,31 @@ const LanguageBottomSection: React.FC<LanguageBottomSectionProps> = ({
   return (
     <View style={styles.bottomSection}>
       <TouchableOpacity
-        activeOpacity={0.8}
-        onPress={() => handlePress(userId)}
         style={[
           styles.micButton,
           {
             backgroundColor: recording ? "#F82C2C" : COLORS.primary,
           },
         ]}
+        onPress={() => handlePress(userId)}
+        activeOpacity={0.8}
       >
+        {/* Recording Duration Display */}
+        {recording && (
+          <View style={styles.recordingInfo}>
+            <Text style={styles.durationText}>
+              {recordingDuration.toFixed(1)}s
+            </Text>
+          </View>
+        )}
         {recording && (
           <Animated.View
             style={{
               position: "absolute",
               width: "100%",
               height: "100%",
-              borderRadius: 50, // Matches button's border radius
-              backgroundColor: "rgba(248, 44, 44, 0.2)", // Translucent red
+              borderRadius: 50,
+              backgroundColor: "rgba(248, 44, 44, 0.2)",
               transform: [
                 {
                   scale: pulseAnim.interpolate({
@@ -199,6 +209,27 @@ const styles = StyleSheet.create({
   languageName: {
     color: BASE_COLORS.white,
     fontSize: 14,
+    fontFamily: "Poppins-Regular",
+  },
+  // Add styles for recording info
+  recordingInfo: {
+    position: "absolute",
+    top: -35,
+    alignSelf: "center",
+    alignItems: "center",
+    backgroundColor: "rgba(0, 0, 0, 0.7)",
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 20,
+  },
+  durationText: {
+    color: BASE_COLORS.white,
+    fontSize: 10,
+    fontFamily: "Poppins-SemiBold",
+  },
+  minimumText: {
+    color: "rgba(255, 255, 255, 0.7)",
+    fontSize: 11,
     fontFamily: "Poppins-Regular",
   },
 });

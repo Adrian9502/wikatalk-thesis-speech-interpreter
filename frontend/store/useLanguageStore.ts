@@ -10,6 +10,20 @@ export const INITIAL_TEXT =
   "Tap the microphone icon to begin recording. Tap again to stop.";
 export const ERROR_TEXT = "Translation failed. Please try again.";
 
+// NEW: Add user-friendly message constants
+export const USER_FRIENDLY_MESSAGES = {
+  RECORDING_TOO_SHORT:
+    "Recording too short. Please record for at least 2 seconds.",
+  RECORDING_TOO_LONG: "Recording too long. Please keep it under 30 seconds.",
+  NO_SPEECH_DETECTED: "No speech detected. Please speak clearly and try again.",
+  SERVER_ERROR:
+    "Server could not process the audio. Please speak clearly and try again.",
+  INVALID_AUDIO: "Invalid audio format. Please try recording again.",
+  TIMEOUT_ERROR:
+    "Request timed out. Please check your connection and try again.",
+  GENERIC_ERROR: "Translation failed. Please try again.",
+};
+
 type LanguageStore = {
   // State
   language1: string;
@@ -56,6 +70,7 @@ type LanguageStore = {
   stopSpeech: () => Promise<void>;
   setTranslationError: (hasError: boolean) => void;
   showTranslationError: () => void;
+  setUserFriendlyMessage: (lang: string) => void;
   clearTranslationError: () => void;
 };
 
@@ -80,21 +95,25 @@ const useLanguageStore = create<LanguageStore>((set, get) => ({
   setLanguage2: (lang) => set({ language2: lang }),
 
   setUpperText: (text) => {
-    // Don't update text if there's an error
-    if (get().translationError) return;
-    set({ upperTextfield: text });
+    set({
+      upperTextfield: text,
+      translationError: false, // Clear generic error when setting specific message
+    });
   },
 
   setBottomText: (text) => {
-    // Don't update text if there's an error
-    if (get().translationError) return;
-    set({ bottomTextfield: text });
+    set({
+      bottomTextfield: text,
+      translationError: false, // Clear generic error when setting specific message
+    });
   },
 
   setBothTexts: (upper, bottom) => {
-    // Don't update text if there's an error
-    if (get().translationError) return;
-    set({ upperTextfield: upper, bottomTextfield: bottom });
+    set({
+      upperTextfield: upper,
+      bottomTextfield: bottom,
+      translationError: false, // Clear generic error when setting specific messages
+    });
   },
 
   setActiveUser: (userId) => set({ activeUser: userId }),
@@ -166,8 +185,9 @@ const useLanguageStore = create<LanguageStore>((set, get) => ({
   clearTranslationError: () => {
     set({
       translationError: false,
-      upperTextfield: "",
-      bottomTextfield: "",
+      upperTextfield: INITIAL_TEXT,
+      bottomTextfield: INITIAL_TEXT,
+      isTranslating: false,
     });
   },
 
@@ -293,6 +313,20 @@ const useLanguageStore = create<LanguageStore>((set, get) => ({
   debouncedTranslate: debounce((text, position) => {
     get().translateEditedText(text, position);
   }, 2000),
+  setUserFriendlyMessage: (message: string) => {
+    set({
+      upperTextfield: message,
+      bottomTextfield: message,
+      translationError: false, // Don't use generic error flag
+      isTranslating: false,
+    });
+  },
+  // NEW: Method to check if current text is a user-friendly message
+  isUserFriendlyMessage: (text: string): boolean => {
+    return Object.values(USER_FRIENDLY_MESSAGES).some(
+      (message) => text.includes(message) || message.includes(text)
+    );
+  },
 }));
 
 export default useLanguageStore;
