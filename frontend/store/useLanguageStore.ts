@@ -4,6 +4,7 @@ import { debounce } from "lodash";
 import { translateText } from "@/lib/translationService";
 import * as Speech from "expo-speech";
 import { saveTranslationHistory } from "@/utils/saveTranslationHistory";
+import { AppState } from "react-native";
 
 // Constants
 export const INITIAL_TEXT =
@@ -39,6 +40,7 @@ type LanguageStore = {
   isTopSpeaking: boolean;
   isBottomSpeaking: boolean;
   translationError: boolean;
+  autoSpeechEnabled: boolean;
 
   // Actions
   setLanguage1: (lang: string) => void;
@@ -66,267 +68,368 @@ type LanguageStore = {
     newLang: string
   ) => Promise<void>;
   debouncedTranslate: (text: string, position: "top" | "bottom") => void;
-  speakText: (text: string, language: string) => Promise<void>;
+  speakText: (
+    text: string,
+    position: "top" | "bottom",
+    autoTriggered?: boolean
+  ) => Promise<void>;
   stopSpeech: () => Promise<void>;
   setTranslationError: (hasError: boolean) => void;
   showTranslationError: () => void;
   setUserFriendlyMessage: (lang: string) => void;
   clearTranslationError: () => void;
+  setAutoSpeechEnabled: (enabled: boolean) => void;
 };
 
-const useLanguageStore = create<LanguageStore>((set, get) => ({
-  // Initial state
-  language1: "Tagalog",
-  language2: "Cebuano",
-  upperTextfield: INITIAL_TEXT,
-  bottomTextfield: INITIAL_TEXT,
-  activeUser: 1,
-  showLanguageInfo: false,
-  activeLanguageInfo: "",
-  openTopDropdown: false,
-  openBottomDropdown: false,
-  isTranslating: false,
-  isTopSpeaking: false,
-  isBottomSpeaking: false,
-  translationError: false,
-
-  // Actions
-  setLanguage1: (lang) => set({ language1: lang }),
-  setLanguage2: (lang) => set({ language2: lang }),
-
-  setUpperText: (text) => {
-    set({
-      upperTextfield: text,
-      translationError: false, // Clear generic error when setting specific message
-    });
-  },
-
-  setBottomText: (text) => {
-    set({
-      bottomTextfield: text,
-      translationError: false, // Clear generic error when setting specific message
-    });
-  },
-
-  setBothTexts: (upper, bottom) => {
-    set({
-      upperTextfield: upper,
-      bottomTextfield: bottom,
-      translationError: false, // Clear generic error when setting specific messages
-    });
-  },
-
-  setActiveUser: (userId) => set({ activeUser: userId }),
-
-  toggleLanguageInfo: (isVisible) => set({ showLanguageInfo: isVisible }),
-
-  setActiveLanguageInfo: (language) => set({ activeLanguageInfo: language }),
-
-  toggleTopDropdown: (isOpen) =>
-    set((state) => ({
-      openTopDropdown: isOpen,
-      openBottomDropdown: isOpen ? false : state.openBottomDropdown,
-    })),
-
-  toggleBottomDropdown: (isOpen) =>
-    set((state) => ({
-      openBottomDropdown: isOpen,
-      openTopDropdown: isOpen ? false : state.openTopDropdown,
-    })),
-
-  clearText: (section) => {
-    // Clear error state when clearing text
-    set({ translationError: false });
-
-    if (section === "top") {
-      set({ upperTextfield: "" });
-    } else {
-      set({ bottomTextfield: "" });
+const useLanguageStore = create<LanguageStore>((set, get) => {
+  // NEW: App state change handler
+  const handleAppStateChange = (nextAppState: string) => {
+    if (nextAppState === "background" || nextAppState === "inactive") {
+      console.log(
+        `[useLanguageStore] App state changed to ${nextAppState}, stopping speech`
+      );
+      get().stopSpeech();
     }
-  },
+  };
 
-  swapLanguages: () => {
-    // Don't swap if there's an error
-    if (get().translationError) return;
+  // NEW: Set up app state listener
+  AppState.addEventListener("change", handleAppStateChange);
 
-    set((state) => ({
-      language1: state.language2,
-      language2: state.language1,
-      upperTextfield: state.bottomTextfield,
-      bottomTextfield: state.upperTextfield,
-    }));
-  },
+  return {
+    // Initial state
+    language1: "Tagalog",
+    language2: "Cebuano",
+    upperTextfield: INITIAL_TEXT,
+    bottomTextfield: INITIAL_TEXT,
+    activeUser: 1,
+    showLanguageInfo: false,
+    activeLanguageInfo: "",
+    openTopDropdown: false,
+    openBottomDropdown: false,
+    isTranslating: false,
+    isTopSpeaking: false,
+    isBottomSpeaking: false,
+    translationError: false,
+    autoSpeechEnabled: true,
 
-  copyToClipboard: async (text) => {
-    try {
-      await Clipboard.setStringAsync(text);
-    } catch (error) {
-      console.error("Failed to copy text: ", error);
-    }
-  },
+    // Actions
+    setLanguage1: (lang) => set({ language1: lang }),
+    setLanguage2: (lang) => set({ language2: lang }),
 
-  showLanguageDetails: (language) =>
-    set({
-      activeLanguageInfo: language,
-      showLanguageInfo: true,
-    }),
+    setUpperText: (text) => {
+      // NEW: Stop speech if text is being cleared or changed significantly
+      const currentState = get();
+      if (currentState.isTopSpeaking && text !== currentState.upperTextfield) {
+        console.log("[useLanguageStore] Upper text changed, stopping speech");
+        get().stopSpeech();
+      }
 
-  // Error management
-  setTranslationError: (hasError) => set({ translationError: hasError }),
+      set({
+        upperTextfield: text,
+        translationError: false,
+      });
+    },
 
-  showTranslationError: () => {
-    set({
-      translationError: true,
-      isTranslating: false,
-    });
-  },
+    setBottomText: (text) => {
+      // NEW: Stop speech if text is being cleared or changed significantly
+      const currentState = get();
+      if (
+        currentState.isBottomSpeaking &&
+        text !== currentState.bottomTextfield
+      ) {
+        console.log("[useLanguageStore] Bottom text changed, stopping speech");
+        get().stopSpeech();
+      }
 
-  // ENHANCED: Clear translation error method
-  clearTranslationError: () => {
-    set({
-      translationError: false,
-      upperTextfield: INITIAL_TEXT,
-      bottomTextfield: INITIAL_TEXT,
-      isTranslating: false,
-    });
-  },
+      set({
+        bottomTextfield: text,
+        translationError: false,
+      });
+    },
 
-  // Stop any ongoing speech
-  stopSpeech: async () => {
-    if (await Speech.isSpeakingAsync()) {
-      await Speech.stop();
-      set({ isTopSpeaking: false, isBottomSpeaking: false });
-    }
-    return Promise.resolve();
-  },
+    setBothTexts: (upper, bottom) => {
+      // NEW: Stop any ongoing speech when both texts are set
+      const currentState = get();
+      if (currentState.isTopSpeaking || currentState.isBottomSpeaking) {
+        console.log("[useLanguageStore] Both texts changed, stopping speech");
+        get().stopSpeech();
+      }
 
-  // Speak text with TTS
-  speakText: async (text, positionOrLanguage) => {
-    if (!text || text === INITIAL_TEXT || text === ERROR_TEXT)
+      set({
+        upperTextfield: upper,
+        bottomTextfield: bottom,
+        translationError: false,
+      });
+    },
+
+    setActiveUser: (userId) => set({ activeUser: userId }),
+
+    toggleLanguageInfo: (isVisible) => set({ showLanguageInfo: isVisible }),
+
+    setActiveLanguageInfo: (language) => set({ activeLanguageInfo: language }),
+
+    toggleTopDropdown: (isOpen) =>
+      set((state) => ({
+        openTopDropdown: isOpen,
+        openBottomDropdown: isOpen ? false : state.openBottomDropdown,
+      })),
+
+    toggleBottomDropdown: (isOpen) =>
+      set((state) => ({
+        openBottomDropdown: isOpen,
+        openTopDropdown: isOpen ? false : state.openTopDropdown,
+      })),
+
+    clearText: (section) => {
+      // NEW: Stop speech when clearing text
+      const currentState = get();
+      if (
+        (section === "top" && currentState.isTopSpeaking) ||
+        (section === "bottom" && currentState.isBottomSpeaking)
+      ) {
+        console.log(
+          `[useLanguageStore] Clearing ${section} text, stopping speech`
+        );
+        get().stopSpeech();
+      }
+
+      // Clear error state when clearing text
+      set({ translationError: false });
+
+      if (section === "top") {
+        set({ upperTextfield: "" });
+      } else {
+        set({ bottomTextfield: "" });
+      }
+    },
+
+    swapLanguages: () => {
+      // Don't swap if there's an error
+      if (get().translationError) return;
+
+      // NEW: Stop speech before swapping
+      get().stopSpeech();
+
+      set((state) => ({
+        language1: state.language2,
+        language2: state.language1,
+        upperTextfield: state.bottomTextfield,
+        bottomTextfield: state.upperTextfield,
+      }));
+    },
+
+    copyToClipboard: async (text) => {
+      try {
+        await Clipboard.setStringAsync(text);
+      } catch (error) {
+        console.error("Failed to copy text: ", error);
+      }
+    },
+
+    showLanguageDetails: (language) =>
+      set({
+        activeLanguageInfo: language,
+        showLanguageInfo: true,
+      }),
+
+    // Error management
+    setTranslationError: (hasError) => set({ translationError: hasError }),
+
+    showTranslationError: () => {
+      set({
+        translationError: true,
+        isTranslating: false,
+      });
+    },
+
+    clearTranslationError: () => {
+      set({
+        translationError: false,
+        upperTextfield: INITIAL_TEXT,
+        bottomTextfield: INITIAL_TEXT,
+        isTranslating: false,
+      });
+    },
+
+    setAutoSpeechEnabled: (enabled) => set({ autoSpeechEnabled: enabled }),
+
+    // ENHANCED: Stop speech with better cleanup
+    stopSpeech: async () => {
+      try {
+        if (await Speech.isSpeakingAsync()) {
+          console.log("[useLanguageStore] Stopping ongoing speech");
+          await Speech.stop();
+        }
+        set({ isTopSpeaking: false, isBottomSpeaking: false });
+      } catch (error) {
+        console.error("[useLanguageStore] Error stopping speech:", error);
+        // Still update state even if stop fails
+        set({ isTopSpeaking: false, isBottomSpeaking: false });
+      }
       return Promise.resolve();
+    },
 
-    // Stop any ongoing speech first
-    await get().stopSpeech();
+    // ENHANCED: Speak text with better section management
+    speakText: async (text, position, autoTriggered = false) => {
+      if (!text || text === INITIAL_TEXT || text === ERROR_TEXT)
+        return Promise.resolve();
 
-    // Determine if this is a position or a language
-    let isTop;
-    if (positionOrLanguage === "top" || positionOrLanguage === "bottom") {
-      isTop = positionOrLanguage === "top";
-    } else {
-      isTop = positionOrLanguage === get().language2;
-    }
+      console.log(
+        `[useLanguageStore] speakText called - position: ${position}, autoTriggered: ${autoTriggered}, text: "${text.substring(
+          0,
+          50
+        )}..."`
+      );
 
-    set({
-      isTopSpeaking: isTop,
-      isBottomSpeaking: !isTop,
-    });
+      // NEW: Always stop any ongoing speech first
+      await get().stopSpeech();
 
-    return new Promise((resolve) => {
-      Speech.speak(text, {
-        language: "fil", // Default Filipino language code
-        rate: 0.75,
-        onDone: () => {
-          set({ isTopSpeaking: false, isBottomSpeaking: false });
-          resolve();
-        },
-        onError: () => {
-          set({ isTopSpeaking: false, isBottomSpeaking: false });
-          resolve();
-        },
+      // Determine which section is speaking
+      const isTop = position === "top";
+
+      // NEW: Set speaking state BEFORE starting speech
+      set({
+        isTopSpeaking: isTop,
+        isBottomSpeaking: !isTop,
       });
-    });
-  },
 
-  // Translation function for edited text
-  translateEditedText: async (text, position) => {
-    if (!text || text === INITIAL_TEXT || text === ERROR_TEXT) return;
+      return new Promise((resolve) => {
+        Speech.speak(text, {
+          language: "fil", // Default Filipino language code
+          rate: 0.75,
+          onDone: () => {
+            console.log(`[useLanguageStore] Speech completed for ${position}`);
+            set({ isTopSpeaking: false, isBottomSpeaking: false });
+            resolve();
+          },
+          onError: (error) => {
+            console.error(`[useLanguageStore] Speech error:`, error);
+            set({ isTopSpeaking: false, isBottomSpeaking: false });
+            resolve();
+          },
+          onStopped: () => {
+            console.log(`[useLanguageStore] Speech stopped for ${position}`);
+            set({ isTopSpeaking: false, isBottomSpeaking: false });
+            resolve();
+          },
+        });
+      });
+    },
 
-    const srcLang = position === "top" ? get().language2 : get().language1;
-    const tgtLang = position === "top" ? get().language1 : get().language2;
+    // ENHANCED: Translation function with better auto-speech management
+    translateEditedText: async (text, position) => {
+      if (!text || text === INITIAL_TEXT || text === ERROR_TEXT) return;
 
-    set({ isTranslating: true, translationError: false });
+      const srcLang = position === "top" ? get().language2 : get().language1;
+      const tgtLang = position === "top" ? get().language1 : get().language2;
 
-    try {
-      const translatedText = await translateText(text, srcLang, tgtLang);
+      set({ isTranslating: true, translationError: false });
 
-      if (position === "top") {
-        set({ bottomTextfield: translatedText });
-        // Auto-speak bottom text when editing top text
-        await get().speakText(translatedText, get().language1);
-      } else {
-        set({ upperTextfield: translatedText });
-        // Auto-speak top text when editing bottom text
-        await get().speakText(translatedText, get().language2);
+      try {
+        const translatedText = await translateText(text, srcLang, tgtLang);
+
+        if (position === "top") {
+          set({ bottomTextfield: translatedText });
+
+          // NEW: Auto-speak translated text if enabled
+          if (get().autoSpeechEnabled) {
+            console.log(
+              "[useLanguageStore] Auto-speaking translated text (bottom)"
+            );
+            setTimeout(() => {
+              get().speakText(translatedText, "bottom", true);
+            }, 500);
+          }
+        } else {
+          set({ upperTextfield: translatedText });
+
+          // NEW: Auto-speak translated text if enabled
+          if (get().autoSpeechEnabled) {
+            console.log(
+              "[useLanguageStore] Auto-speaking translated text (top)"
+            );
+            setTimeout(() => {
+              get().speakText(translatedText, "top", true);
+            }, 500);
+          }
+        }
+
+        // Save the edited translation to history
+        await saveTranslationHistory({
+          type: "Speech",
+          fromLanguage: srcLang,
+          toLanguage: tgtLang,
+          originalText: text,
+          translatedText: translatedText,
+        });
+      } catch (error) {
+        console.error("Translation error:", error);
+        get().showTranslationError();
+      } finally {
+        set({ isTranslating: false });
       }
+    },
 
-      // Save the edited translation to history
-      await saveTranslationHistory({
-        type: "Speech",
-        fromLanguage: srcLang,
-        toLanguage: tgtLang,
-        originalText: text,
-        translatedText: translatedText,
-      });
-    } catch (error) {
-      console.error("Translation error:", error);
-      get().showTranslationError();
-    } finally {
-      set({ isTranslating: false });
-    }
-  },
-  translateOnLanguageChange: async (text, position, prevLang, newLang) => {
-    // Don't translate if text is empty or placeholder
-    if (!text || text === INITIAL_TEXT || text === ERROR_TEXT) return;
+    translateOnLanguageChange: async (text, position, prevLang, newLang) => {
+      // Don't translate if text is empty or placeholder
+      if (!text || text === INITIAL_TEXT || text === ERROR_TEXT) return;
 
-    // Determine target language based on position
-    const tgtLang = position === "top" ? get().language1 : get().language2;
+      // Determine target language based on position
+      const tgtLang = position === "top" ? get().language1 : get().language2;
 
-    set({ isTranslating: true, translationError: false });
+      set({ isTranslating: true, translationError: false });
 
-    try {
-      // Translate the text from previous language to the new language
-      const translatedText = await translateText(text, prevLang, newLang);
+      try {
+        // Translate the text from previous language to the new language
+        const translatedText = await translateText(text, prevLang, newLang);
 
-      // Update the appropriate text field
-      if (position === "top") {
-        set({ upperTextfield: translatedText });
-      } else {
-        set({ bottomTextfield: translatedText });
+        // Update the appropriate text field
+        if (position === "top") {
+          set({ upperTextfield: translatedText });
+        } else {
+          set({ bottomTextfield: translatedText });
+        }
+
+        // Save this translation to history
+        await saveTranslationHistory({
+          type: "Speech",
+          fromLanguage: prevLang,
+          toLanguage: newLang,
+          originalText: text,
+          translatedText: translatedText,
+        });
+      } catch (error) {
+        console.error("Translation error after language change:", error);
+        get().showTranslationError();
+      } finally {
+        set({ isTranslating: false });
       }
+    },
 
-      // Save this translation to history
-      await saveTranslationHistory({
-        type: "Speech",
-        fromLanguage: prevLang,
-        toLanguage: newLang,
-        originalText: text,
-        translatedText: translatedText,
+    // Debounced version to limit API calls
+    debouncedTranslate: debounce((text, position) => {
+      get().translateEditedText(text, position);
+    }, 2000),
+
+    setUserFriendlyMessage: (message: string) => {
+      // NEW: Stop speech when setting error messages
+      get().stopSpeech();
+
+      set({
+        upperTextfield: message,
+        bottomTextfield: message,
+        translationError: false,
+        isTranslating: false,
       });
-    } catch (error) {
-      console.error("Translation error after language change:", error);
-      get().showTranslationError();
-    } finally {
-      set({ isTranslating: false });
-    }
-  },
-  // Debounced version to limit API calls
-  debouncedTranslate: debounce((text, position) => {
-    get().translateEditedText(text, position);
-  }, 2000),
-  setUserFriendlyMessage: (message: string) => {
-    set({
-      upperTextfield: message,
-      bottomTextfield: message,
-      translationError: false, // Don't use generic error flag
-      isTranslating: false,
-    });
-  },
-  // NEW: Method to check if current text is a user-friendly message
-  isUserFriendlyMessage: (text: string): boolean => {
-    return Object.values(USER_FRIENDLY_MESSAGES).some(
-      (message) => text.includes(message) || message.includes(text)
-    );
-  },
-}));
+    },
+
+    // Method to check if current text is a user-friendly message
+    isUserFriendlyMessage: (text: string): boolean => {
+      return Object.values(USER_FRIENDLY_MESSAGES).some(
+        (message) => text.includes(message) || message.includes(text)
+      );
+    },
+  };
+});
 
 export default useLanguageStore;

@@ -1,5 +1,5 @@
-import React, { useState } from "react";
-import { View, StyleSheet, TouchableOpacity } from "react-native";
+import React, { useState, useEffect } from "react";
+import { View, StyleSheet, TouchableOpacity, AppState } from "react-native";
 import { Dropdown } from "react-native-element-dropdown";
 import { Ionicons } from "@expo/vector-icons";
 import { DIALECTS } from "@/constant/languages";
@@ -41,6 +41,27 @@ const LanguageSectionHeader: React.FC<LanguageSectionHeaderProps> = ({
   // Determine if this section is currently speaking
   const isSpeaking = position === "top" ? isTopSpeaking : isBottomSpeaking;
 
+  // NEW: Stop speech when app goes to background or becomes inactive
+  useEffect(() => {
+    const handleAppStateChange = (nextAppState: string) => {
+      if (nextAppState === "background" || nextAppState === "inactive") {
+        console.log(
+          `[LanguageSectionHeader] App state changed to ${nextAppState}, stopping speech`
+        );
+        stopSpeech();
+      }
+    };
+
+    const subscription = AppState.addEventListener(
+      "change",
+      handleAppStateChange
+    );
+
+    return () => {
+      subscription?.remove();
+    };
+  }, [stopSpeech]);
+
   // Handle copy with animation
   const handleCopy = async () => {
     await copyToClipboard(textField);
@@ -48,13 +69,49 @@ const LanguageSectionHeader: React.FC<LanguageSectionHeaderProps> = ({
     setTimeout(() => setCopySuccess(false), 2000);
   };
 
-  // Handle speaker button press
+  // UPDATED: Enhanced speaker button press handler with better section handling
   const handleSpeakerPress = async () => {
+    console.log(
+      `[LanguageSectionHeader] Speaker pressed - isSpeaking: ${isSpeaking}, position: ${position}`
+    );
+
     if (isSpeaking) {
+      // If currently speaking, stop the speech
+      console.log(`[LanguageSectionHeader] Stopping speech for ${position}`);
       await stopSpeech();
     } else if (textField && textField !== defaultMessage) {
-      await speakText(textField, position === "top" ? "top" : "bottom");
+      // If not speaking and has valid text, start speaking
+      console.log(
+        `[LanguageSectionHeader] Starting speech for ${position}: "${textField.substring(
+          0,
+          50
+        )}..."`
+      );
+
+      // NEW: Stop any ongoing speech before starting new one
+      await stopSpeech();
+
+      // NEW: Add small delay to ensure previous speech is fully stopped
+      setTimeout(async () => {
+        await speakText(textField, position, false); // Mark as manual trigger
+      }, 100);
     }
+  };
+
+  // NEW: Enhanced clear text handler that stops speech
+  const handleClearText = async () => {
+    console.log(`[LanguageSectionHeader] Clearing text for ${position}`);
+
+    // Stop speech immediately when clearing text
+    if (isSpeaking) {
+      console.log(
+        `[LanguageSectionHeader] Stopping speech due to text clear for ${position}`
+      );
+      await stopSpeech();
+    }
+
+    // Clear the text
+    clearText(position);
   };
 
   return (
@@ -103,8 +160,12 @@ const LanguageSectionHeader: React.FC<LanguageSectionHeaderProps> = ({
       </View>
 
       <View style={styles.controls}>
+        {/* UPDATED: Enhanced speaker button with visual feedback */}
         <TouchableOpacity
-          style={styles.controlButton}
+          style={[
+            styles.controlButton,
+            isSpeaking && styles.controlButtonActive, // NEW: Active state styling
+          ]}
           onPress={handleSpeakerPress}
           disabled={!textField || textField === defaultMessage}
         >
@@ -138,9 +199,10 @@ const LanguageSectionHeader: React.FC<LanguageSectionHeaderProps> = ({
           />
         </TouchableOpacity>
 
+        {/* UPDATED: Clear button that stops speech */}
         <TouchableOpacity
           style={styles.controlButton}
-          onPress={() => clearText(position)}
+          onPress={handleClearText}
           disabled={!textField || textField === defaultMessage}
         >
           <Ionicons name="trash-outline" size={20} color={COLORS.primary} />
@@ -195,6 +257,11 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     marginLeft: 4,
+    borderRadius: 18,
+  },
+  // NEW: Active state for speaker button
+  controlButtonActive: {
+    backgroundColor: "rgba(16, 185, 129, 0.1)", // Light green background when speaking
   },
 });
 

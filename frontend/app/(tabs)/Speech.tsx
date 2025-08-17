@@ -6,6 +6,7 @@ import {
   Keyboard,
   Animated,
   TouchableWithoutFeedback,
+  AppState,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import React, { useEffect, useState, useRef, useCallback } from "react";
@@ -44,6 +45,7 @@ const Speech = () => {
     toggleLanguageInfo,
     clearText,
     clearTranslationError,
+    stopSpeech, // NEW: Add stopSpeech from store
   } = useLanguageStore();
 
   // Custom hooks
@@ -77,8 +79,11 @@ const Speech = () => {
     }
   };
 
-  // Handle microphone press
+  // ENHANCED: Handle microphone press with speech management
   const handleMicPress = async (userNum: number) => {
+    // NEW: Stop any ongoing speech when starting a new recording
+    await stopSpeech();
+
     // Clear any previous messages when starting a new recording
     clearTranslationError();
     setActiveUser(userNum);
@@ -130,7 +135,11 @@ const Speech = () => {
 
           if (result) {
             handleTextfield(result.translatedText, result.transcribedText);
-            speakText(result.translatedText);
+
+            // NEW: Auto-speech will be handled by the store automatically when setBothTexts is called
+            console.log(
+              "[Speech] Translation completed, auto-speech will be triggered by store"
+            );
 
             // Save to history - only if we have actual text
             if (result.transcribedText && result.translatedText) {
@@ -240,6 +249,35 @@ const Speech = () => {
     clearTranslationError(); // Clear any errors on component mount
   }, []);
 
+  // NEW: Stop speech when component unmounts or user navigates away
+  useEffect(() => {
+    return () => {
+      console.log("[Speech] Component unmounting, stopping speech");
+      stopSpeech();
+    };
+  }, [stopSpeech]);
+
+  // NEW: Stop speech when app goes to background
+  useEffect(() => {
+    const handleAppStateChange = (nextAppState: string) => {
+      if (nextAppState === "background" || nextAppState === "inactive") {
+        console.log(
+          `[Speech] App state changed to ${nextAppState}, stopping speech`
+        );
+        stopSpeech();
+      }
+    };
+
+    const subscription = AppState.addEventListener(
+      "change",
+      handleAppStateChange
+    );
+
+    return () => {
+      subscription?.remove();
+    };
+  }, [stopSpeech]);
+
   const keyboardOffset =
     Platform.OS === "ios"
       ? 90 + insets.bottom // For iOS include the bottom inset
@@ -258,17 +296,16 @@ const Speech = () => {
           keyboardVerticalOffset={keyboardOffset}
           enabled={true}
         >
-          {/* NEW: Simple fade animation wrapper - no other changes */}
           <Animated.View
             style={[
               styles.contentContainer,
               {
-                opacity: fadeAnim, // Only add fade animation
-                transform: [{ translateY: contentPosition }], // Keep existing keyboard animation
+                opacity: fadeAnim,
+                transform: [{ translateY: contentPosition }],
               },
             ]}
           >
-            {/* Top section*/}
+            {/* Top section */}
             <LanguageSection
               position="top"
               handlePress={handleMicPress}
@@ -299,7 +336,7 @@ const Speech = () => {
         </KeyboardAvoidingView>
       </TouchableWithoutFeedback>
 
-      {/* Language Information Modal*/}
+      {/* Language Information Modal */}
       {showLanguageInfo &&
         activeLanguageInfo &&
         LANGUAGE_INFO[activeLanguageInfo] && (
@@ -312,7 +349,7 @@ const Speech = () => {
           />
         )}
 
-      {/* UPDATED: Loading Indicator with Cancel Button */}
+      {/* Loading Indicator with Cancel Button */}
       {loading && <SpeechLoading onCancel={handleCancelTranslation} />}
     </SafeAreaView>
   );

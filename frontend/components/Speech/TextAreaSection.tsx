@@ -32,11 +32,33 @@ const TextAreaSection: React.FC<TextAreaSectionProps> = ({
     debouncedTranslate,
     isTranslating,
     translationError,
+    stopSpeech,
+    isTopSpeaking,
+    isBottomSpeaking,
   } = useLanguageStore();
+
+  // NEW: Determine if this section is currently speaking
+  const isSpeaking = position === "top" ? isTopSpeaking : isBottomSpeaking;
 
   const handleTextChange = (text: string) => {
     // Don't allow editing if there's an error or if it's a user-friendly message
     if (translationError || isUserFriendlyMessage(textField)) return;
+
+    // NEW: Stop speech when text is being changed
+    if (isSpeaking && text !== textField) {
+      console.log(
+        `[TextAreaSection] Text changing in ${position}, stopping speech`
+      );
+      stopSpeech();
+    }
+
+    // NEW: Stop speech when text is cleared/becomes empty
+    if (text.trim() === "" && textField.trim() !== "") {
+      console.log(
+        `[TextAreaSection] Text cleared in ${position}, stopping speech`
+      );
+      stopSpeech();
+    }
 
     // Update text in store
     if (position === "top") {
