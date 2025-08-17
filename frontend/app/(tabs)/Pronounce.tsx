@@ -138,7 +138,7 @@ const Pronounce = () => {
     isAudioLoading,
     isCacheValid,
     clearCache,
-    transformedData, // NEW: Get transformedData directly from store
+    transformedData,
   } = usePronunciationStore();
 
   // CRITICAL FIX: Initialize data with caching on mount
@@ -146,15 +146,12 @@ const Pronounce = () => {
     componentMountedRef.current = true;
 
     const initializeData = async () => {
-      console.log("[Pronounce] Initializing pronunciation data");
-
       // Check if we have valid cached data
       if (isCacheValid()) {
         console.log("[Pronounce] Using cached data, skipping fetch");
         dataLoadedRef.current = true;
         return;
       }
-
       // Fetch fresh data if no valid cache
       await fetchPronunciations(false); // Don't force refresh, respect cache
       dataLoadedRef.current = true;

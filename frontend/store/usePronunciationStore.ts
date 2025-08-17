@@ -81,7 +81,6 @@ interface PronunciationState {
 const transformPronunciationData = (
   data: PronunciationDataItem[]
 ): PronunciationData => {
-  console.log("[PronunciationStore] Transforming pronunciation data");
   const transformed: PronunciationData = {};
 
   // Language key mapping for consistency
@@ -243,17 +242,6 @@ export const usePronunciationStore = create<PronunciationState>((set, get) => ({
       }
     }
 
-    console.log("[PronunciationStore] getFilteredPronunciations called:", {
-      language,
-      page,
-      limit,
-      searchTerm,
-      availableLanguages: Object.keys(transformedData),
-      languageDataLength: languageData.length,
-      sampleData: languageData.slice(0, 3),
-      exactMatch: !!transformedData[language],
-    });
-
     const filtered = searchTerm.trim()
       ? languageData.filter((item) => {
           const lowercaseSearchTerm = searchTerm.toLowerCase();
@@ -268,13 +256,6 @@ export const usePronunciationStore = create<PronunciationState>((set, get) => ({
     const startIndex = (page - 1) * limit;
     const endIndex = startIndex + limit;
     const result = filtered.slice(startIndex, endIndex);
-
-    console.log("[PronunciationStore] getFilteredPronunciations result:", {
-      filteredLength: filtered.length,
-      resultLength: result.length,
-      startIndex,
-      endIndex,
-    });
 
     return result;
   },
