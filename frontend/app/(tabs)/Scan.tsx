@@ -23,6 +23,8 @@ import TextDisplay from "@/components/scan/TextDisplay";
 import CameraControls from "@/components/scan/CameraControls";
 import useThemeStore from "@/store/useThemeStore";
 import { getGlobalStyles } from "@/styles/globalStyles";
+import { globalSpeechManager } from "@/utils/globalSpeechManager";
+import { useFocusEffect } from "@react-navigation/native";
 
 // Define types for the state and hook returns
 interface ScanTranslateState {
@@ -48,6 +50,18 @@ interface ScanTranslateState {
 }
 
 const Scan: React.FC = () => {
+  // stop ongoing speech
+  useFocusEffect(
+    React.useCallback(() => {
+      console.log("[Scan] Tab focused, stopping all speech");
+      globalSpeechManager.stopAllSpeech();
+
+      return () => {
+        console.log("[Scan] Tab losing focus");
+        globalSpeechManager.stopAllSpeech();
+      };
+    }, [])
+  );
   // Theme store
   const { activeTheme } = useThemeStore();
 

@@ -18,6 +18,8 @@ import {
   debouncedSetSearchTerm,
 } from "@/store/usePronunciationStore";
 import AppLoading from "@/components/AppLoading";
+import { globalSpeechManager } from "@/utils/globalSpeechManager";
+import { useFocusEffect } from "@react-navigation/native";
 
 // Import components
 import PronunciationCard from "@/components/pronunciation/PronunciationCard";
@@ -101,6 +103,18 @@ const AnimatedPronunciationCard = React.memo(
 );
 
 const Pronounce = () => {
+  // stop speech if there's any
+  useFocusEffect(
+    React.useCallback(() => {
+      console.log("[Pronounce] Tab focused, stopping all speech");
+      globalSpeechManager.stopAllSpeech();
+
+      return () => {
+        console.log("[Pronounce] Tab losing focus");
+        globalSpeechManager.stopAllSpeech();
+      };
+    }, [])
+  );
   const { activeTheme } = useThemeStore();
   const dynamicStyles = getGlobalStyles(activeTheme.backgroundColor);
   const [selectedLanguage, setSelectedLanguage] = useState("Cebuano");

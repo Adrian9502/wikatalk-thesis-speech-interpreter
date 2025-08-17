@@ -17,6 +17,7 @@ import ProgressStats from "@/components/games/dashboard/ProgressStats";
 import ErrorDisplay from "@/components/games/common/ErrorDisplay";
 import { useProgressModal } from "@/components/games/ProgressModalProvider";
 import { useRankingsModal } from "@/components/games/RankingsModalProvider";
+import { globalSpeechManager } from "@/utils/globalSpeechManager";
 
 // Custom hooks
 import useGameDashboard from "@/hooks/games/useGameDashboard";
@@ -31,6 +32,18 @@ let GAMES_INITIALIZED = false;
 let INITIALIZATION_PROMISE: Promise<void> | null = null;
 
 const Games = () => {
+  // stop speech
+  useFocusEffect(
+    React.useCallback(() => {
+      console.log("[Games] Tab focused, stopping all speech");
+      globalSpeechManager.stopAllSpeech();
+
+      return () => {
+        console.log("[Games] Tab losing focus");
+        globalSpeechManager.stopAllSpeech();
+      };
+    }, [])
+  );
   // Performance monitoring for development
   const finishLoadTracking = useComponentLoadTime("Games");
 

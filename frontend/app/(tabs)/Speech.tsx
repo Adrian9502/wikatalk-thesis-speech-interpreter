@@ -23,8 +23,22 @@ import useThemeStore from "@/store/useThemeStore";
 import { getGlobalStyles } from "@/styles/globalStyles";
 import { saveTranslationHistory } from "@/utils/saveTranslationHistory";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { globalSpeechManager } from "@/utils/globalSpeechManager";
+import { useFocusEffect } from "@react-navigation/native";
 
 const Speech = () => {
+  // stop ongoing speech
+  useFocusEffect(
+    React.useCallback(() => {
+      console.log("[Speech] Tab focused, stopping all speech");
+      globalSpeechManager.stopAllSpeech();
+
+      return () => {
+        console.log("[Speech] Tab losing focus");
+        globalSpeechManager.stopAllSpeech();
+      };
+    }, [])
+  );
   // Theme store
   const { activeTheme } = useThemeStore();
   // Get the dynamic styles based on the current theme

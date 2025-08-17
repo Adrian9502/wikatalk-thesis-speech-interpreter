@@ -14,8 +14,22 @@ import {
 } from "@/store/useTranslateStore";
 import useThemeStore from "@/store/useThemeStore";
 import { getGlobalStyles } from "@/styles/globalStyles";
+import { globalSpeechManager } from "@/utils/globalSpeechManager";
+import { useFocusEffect } from "@react-navigation/native";
 
 const Translate = () => {
+  // stop ongoing speech
+  useFocusEffect(
+    React.useCallback(() => {
+      console.log("[Translate] Tab focused, stopping all speech");
+      globalSpeechManager.stopAllSpeech();
+
+      return () => {
+        console.log("[Translate] Tab losing focus");
+        globalSpeechManager.stopAllSpeech();
+      };
+    }, [])
+  );
   // Theme store
   const { activeTheme } = useThemeStore();
 
