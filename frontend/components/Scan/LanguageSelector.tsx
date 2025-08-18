@@ -69,8 +69,8 @@ const styles = StyleSheet.create({
     zIndex: 100,
   },
   languageLabel: {
-    fontSize: 16,
-    fontFamily: "Poppins-Regular",
+    fontSize: 14,
+    fontFamily: "Poppins-Medium",
     color: BASE_COLORS.blue,
     marginRight: 12,
     minWidth: 100,
@@ -94,7 +94,7 @@ const styles = StyleSheet.create({
     elevation: 6,
   },
   dropdownText: {
-    fontSize: 15,
+    fontSize: 14,
     fontFamily: "Poppins-Regular",
   },
 });
