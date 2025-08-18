@@ -50,15 +50,15 @@ const TabIcon: React.FC<TabIconProps> = ({ Icon, color, name, focused }) => {
       >
         <Icon
           stroke={color}
-          width={focused ? 22 : 21}
-          height={focused ? 22 : 21}
-          strokeWidth={1.5}
+          width={focused ? 19 : 18}
+          height={focused ? 19 : 18}
+          strokeWidth={focused ? 1 : 1.5}
           color={color}
         />
 
         <Animated.Text
           style={{
-            fontSize: 12,
+            fontSize: 11,
             textAlign: "center",
             color: color,
             fontFamily: focused ? "Poppins-Medium" : "Poppins-Regular",
@@ -81,7 +81,6 @@ const GameIcon: React.FC<IconProps> = ({ color, width }) => (
 export default function TabsLayout() {
   // Get the active theme from the store
   const { activeTheme } = useThemeStore();
-  // Modern active color with better contrast against dark navy
   const activeColor = activeTheme.tabActiveColor;
   const inactiveColor = activeTheme.tabInactiveColor;
 
@@ -93,7 +92,7 @@ export default function TabsLayout() {
         tabBarInactiveTintColor: inactiveColor,
         tabBarStyle: {
           backgroundColor: activeTheme.tabBarColor,
-          height: 68,
+          height: 60,
           paddingTop: 10,
           borderTopWidth: 0,
         },
