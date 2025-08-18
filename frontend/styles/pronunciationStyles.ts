@@ -25,13 +25,13 @@ export const pronunciationStyles = StyleSheet.create({
     paddingHorizontal: 12,
   },
   listContainer: {
-    flex: 1,
     shadowColor: "#000",
     shadowOffset: { width: 0, height: -4 },
     shadowOpacity: 0.1,
     shadowRadius: 8,
     elevation: 8,
-    overflow: "hidden",
+    overflow: "hidden", // keeps rounded corners clean
+    height: "80%", // or any fixed percentage/px height
   },
   flatListContent: {
     paddingBottom: 20,

@@ -237,7 +237,7 @@ const styles = StyleSheet.create({
     position: "relative",
   },
   englishText: {
-    fontSize: 16,
+    fontSize: 15,
     fontFamily: "Poppins-Medium",
     color: BASE_COLORS.darkText,
     flex: 1,
