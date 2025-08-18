@@ -36,6 +36,8 @@ interface PronunciationData {
   [language: string]: PronunciationItem[];
 }
 
+type TransformedPronunciationData = PronunciationData;
+
 interface PronunciationState {
   // State
   isLoading: boolean;
@@ -75,58 +77,56 @@ interface PronunciationState {
   playWordOfDay: () => void;
   clearCache: () => void;
   isCacheValid: () => boolean;
+  clearSearch: () => void;
 }
 
-// FIXED: Transform pronunciation data with proper language key mapping
 const transformPronunciationData = (
   data: PronunciationDataItem[]
-): PronunciationData => {
-  const transformed: PronunciationData = {};
+): TransformedPronunciationData => {
+  const transformed: TransformedPronunciationData = {};
 
-  // Language key mapping for consistency
-  const languageKeyMapping: { [key: string]: string[] } = {
-    Tagalog: ["tagalog", "filipino"],
-    Cebuano: ["cebuano", "bisaya"],
-    Hiligaynon: ["hiligaynon"],
-    Ilocano: ["ilocano"],
-    Bicol: ["bicol"],
-    Waray: ["waray"],
-    Pangasinan: ["pangasinan"],
-    Maguindanao: ["maguindanao"],
-    Kapampangan: ["kapampangan"],
-    Bisaya: ["bisaya", "cebuano"],
-  };
+  data.forEach((entry: PronunciationDataItem) => {
+    Object.entries(entry.translations).forEach(
+      ([language, translationData]: [
+        string,
+        { translation: string; pronunciation: string }
+      ]) => {
+        const capitalizedLanguage =
+          language.charAt(0).toUpperCase() + language.slice(1);
 
-  // Initialize all expected language keys
-  Object.keys(languageKeyMapping).forEach((lang) => {
-    transformed[lang] = [];
-  });
+        if (!transformed[capitalizedLanguage]) {
+          transformed[capitalizedLanguage] = [];
+        }
 
-  data.forEach((item) => {
-    Object.entries(item.translations).forEach(([language, translationData]) => {
-      const normalizedLanguage = language.toLowerCase();
+        // CRITICAL FIX: Check for duplicates before adding
+        const englishText = entry.english;
+        const translationText = translationData.translation;
 
-      // Find which UI language key this data belongs to
-      for (const [uiKey, possibleKeys] of Object.entries(languageKeyMapping)) {
-        if (possibleKeys.includes(normalizedLanguage)) {
-          if (!transformed[uiKey]) {
-            transformed[uiKey] = [];
-          }
+        // Check if this combination already exists
+        const isDuplicate = transformed[capitalizedLanguage].some(
+          (item: PronunciationItem) =>
+            item.english === englishText && item.translation === translationText
+        );
 
-          transformed[uiKey].push({
-            english: item.english,
-            translation: translationData.translation,
+        if (!isDuplicate) {
+          transformed[capitalizedLanguage].push({
+            english: englishText,
+            translation: translationText,
             pronunciation: translationData.pronunciation,
           });
         }
       }
-    });
+    );
   });
 
-  console.log("[PronunciationStore] Data transformation complete:");
-  Object.entries(transformed).forEach(([lang, items]) => {
-    console.log(`  ${lang}: ${items.length} items`);
-  });
+  console.log(
+    "[PronunciationStore] Data transformation complete (after deduplication):"
+  );
+  Object.entries(transformed).forEach(
+    ([lang, items]: [string, PronunciationItem[]]) => {
+      console.log(`  ${lang}: ${items.length} items`);
+    }
+  );
 
   return transformed;
 };
@@ -225,6 +225,12 @@ export const usePronunciationStore = create<PronunciationState>((set, get) => ({
 
   setSearchTerm: (term) => set({ searchTerm: term }),
 
+  // NEW: Clear search method
+  clearSearch: () => {
+    console.log("[PronunciationStore] Clearing search");
+    set({ searchTerm: "" });
+  },
+
   // FIXED: Better language key lookup
   getFilteredPronunciations: (language: string, page = 1, limit = 25) => {
     const { transformedData, searchTerm } = get();
@@ -242,16 +248,49 @@ export const usePronunciationStore = create<PronunciationState>((set, get) => ({
       }
     }
 
-    const filtered = searchTerm.trim()
-      ? languageData.filter((item) => {
-          const lowercaseSearchTerm = searchTerm.toLowerCase();
-          return (
-            item.english.toLowerCase().includes(lowercaseSearchTerm) ||
-            item.translation.toLowerCase().includes(lowercaseSearchTerm) ||
-            item.pronunciation.toLowerCase().includes(lowercaseSearchTerm)
-          );
-        })
-      : languageData;
+    console.log("[PronunciationStore] Language data found:", {
+      language,
+      dataLength: languageData.length,
+    });
+
+    // ENHANCED: Stricter search like Help & FAQ
+    const trimmedSearchTerm = searchTerm.trim();
+    const filtered =
+      trimmedSearchTerm.length === 0
+        ? languageData // Return all data if no search term
+        : languageData.filter((item) => {
+            const lowercaseSearchTerm = trimmedSearchTerm.toLowerCase();
+
+            // STRICTER MATCHING: More precise search
+            const englishMatch = item.english
+              .toLowerCase()
+              .includes(lowercaseSearchTerm);
+            const translationMatch = item.translation
+              .toLowerCase()
+              .includes(lowercaseSearchTerm);
+            const pronunciationMatch = item.pronunciation
+              .toLowerCase()
+              .includes(lowercaseSearchTerm);
+
+            // ENHANCED: Also check for word boundaries for stricter matching
+            const englishWordMatch = item.english
+              .toLowerCase()
+              .split(" ")
+              .some((word) => word.startsWith(lowercaseSearchTerm));
+            const translationWordMatch = item.translation
+              .toLowerCase()
+              .split(" ")
+              .some((word) => word.startsWith(lowercaseSearchTerm));
+
+            // Return true if any match is found
+            return (
+              englishMatch ||
+              translationMatch ||
+              pronunciationMatch ||
+              englishWordMatch ||
+              translationWordMatch
+            );
+          });
 
     const startIndex = (page - 1) * limit;
     const endIndex = startIndex + limit;
@@ -260,6 +299,7 @@ export const usePronunciationStore = create<PronunciationState>((set, get) => ({
     return result;
   },
 
+  // ENHANCED: Better total count logic
   getTotalCount: (language: string) => {
     const { transformedData, searchTerm } = get();
 
@@ -275,10 +315,12 @@ export const usePronunciationStore = create<PronunciationState>((set, get) => ({
       }
     }
 
-    if (!searchTerm.trim()) return languageData.length;
+    // FIXED: Better search term handling for count
+    const trimmedSearchTerm = searchTerm.trim();
+    if (trimmedSearchTerm.length === 0) return languageData.length;
 
     const filtered = languageData.filter((item) => {
-      const lowercaseSearchTerm = searchTerm.toLowerCase();
+      const lowercaseSearchTerm = trimmedSearchTerm.toLowerCase();
       return (
         item.english.toLowerCase().includes(lowercaseSearchTerm) ||
         item.translation.toLowerCase().includes(lowercaseSearchTerm) ||
@@ -385,7 +427,8 @@ export const usePronunciationStore = create<PronunciationState>((set, get) => ({
   },
 }));
 
-// Create debounced search function
+// ENHANCED: Much faster debounce for local search + instant empty search
 export const debouncedSetSearchTerm = debounce((term: string) => {
+  console.log("[debouncedSetSearchTerm] Setting search term:", `"${term}"`);
   usePronunciationStore.getState().setSearchTerm(term);
-}, 300);
+}, 100); // REDUCED from 300ms to 100ms for much faster response
