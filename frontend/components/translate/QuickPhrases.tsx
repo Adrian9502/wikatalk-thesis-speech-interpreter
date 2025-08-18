@@ -124,11 +124,12 @@ const styles = StyleSheet.create({
     backgroundColor: BASE_COLORS.blue,
   },
   inactiveTab: {
-    borderWidth: 1,
+    borderWidth: 2,
     borderColor: BASE_COLORS.lightBlue,
   },
   categoryText: {
     fontFamily: "Poppins-Regular",
+    fontSize: 13,
   },
   activeTabText: {
     color: BASE_COLORS.white,
@@ -151,6 +152,7 @@ const styles = StyleSheet.create({
   },
   phraseText: {
     color: BASE_COLORS.blue,
+    fontSize: 12,
     fontFamily: "Poppins-Regular",
   },
 });

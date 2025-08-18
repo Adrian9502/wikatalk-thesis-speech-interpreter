@@ -216,7 +216,7 @@ const styles = StyleSheet.create({
     borderColor: BASE_COLORS.borderColor,
   },
   dropdownText: {
-    fontSize: 16,
+    fontSize: 14,
     fontFamily: "Poppins-Regular",
   },
   swapButtonContainer: {

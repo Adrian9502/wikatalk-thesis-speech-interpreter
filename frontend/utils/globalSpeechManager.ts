@@ -17,8 +17,6 @@ class GlobalSpeechManager {
 
   async stopAllSpeech(): Promise<void> {
     try {
-      console.log("[GlobalSpeechManager] Stopping all speech globally");
-
       if (await Speech.isSpeakingAsync()) {
         await Speech.stop();
       }

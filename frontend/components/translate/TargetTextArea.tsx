@@ -2,16 +2,16 @@ import React from "react";
 import {
   View,
   TextInput,
-  ScrollView,
   TouchableOpacity,
   Text,
-  StyleSheet,
+  Platform,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import { BASE_COLORS } from "@/constant/colors";
 import { useTranslateStore } from "@/store/useTranslateStore";
 import DotsLoader from "@/components/DotLoader";
+import { textAreaStyles } from "@/styles/translate/textArea.styles";
 
 const TargetTextArea = () => {
   const {
@@ -25,30 +25,42 @@ const TargetTextArea = () => {
     copyToClipboard,
   } = useTranslateStore();
 
+  // Handler to prevent editing for non-editable fields
+  const handleChangeText = (newText: string) => {
+    // For non-editable, do nothing - text won't change
+  };
+
+  // Prevent keyboard from showing for non-editable fields
+  const handleFocus = (e: any) => {
+    e.target.blur();
+  };
+
   return (
-    <View style={styles.textSectionContainer}>
+    <View style={textAreaStyles.textSectionContainer}>
       <LinearGradient
         colors={[BASE_COLORS.lightPink, BASE_COLORS.white]}
         start={{ x: 0, y: 0 }}
         end={{ x: 1, y: 1 }}
-        style={styles.gradientBackground}
+        style={textAreaStyles.gradientBackground}
       />
 
       {/* Header Controls */}
-      <View style={styles.sectionHeader}>
-        <Text style={[styles.sectionTitle, { color: BASE_COLORS.orange }]}>
+      <View style={textAreaStyles.sectionHeader}>
+        <Text
+          style={[textAreaStyles.sectionTitle, { color: BASE_COLORS.orange }]}
+        >
           {targetLanguage}
         </Text>
 
-        <View style={styles.controls}>
+        <View style={textAreaStyles.controls}>
           <TouchableOpacity
-            style={styles.controlButton}
+            style={textAreaStyles.controlButton}
             onPress={handleTranslatedSpeech}
             disabled={!translatedText || isTranslating}
           >
             <Ionicons
               name={isTargetSpeaking ? "volume-high" : "volume-medium-outline"}
-              size={22}
+              size={20}
               color={
                 isTargetSpeaking ? BASE_COLORS.success : BASE_COLORS.orange
               }
@@ -56,13 +68,13 @@ const TargetTextArea = () => {
           </TouchableOpacity>
 
           <TouchableOpacity
-            style={styles.controlButton}
+            style={textAreaStyles.controlButton}
             onPress={() => copyToClipboard(translatedText, "copiedTarget")}
             disabled={!translatedText || isTranslating}
           >
             <Ionicons
               name={copiedTarget ? "checkmark-circle" : "copy-outline"}
-              size={22}
+              size={20}
               color={copiedTarget ? BASE_COLORS.success : BASE_COLORS.orange}
             />
           </TouchableOpacity>
@@ -70,131 +82,54 @@ const TargetTextArea = () => {
       </View>
 
       {/* Text Output Area */}
-      <View style={styles.textAreaWrapper}>
-        <ScrollView
-          style={[styles.textArea, { borderColor: BASE_COLORS.borderColor }]}
-          scrollEnabled={true}
-          nestedScrollEnabled={true}
-          showsVerticalScrollIndicator={false}
-          contentContainerStyle={[
-            styles.scrollContent,
-            isTranslating ? { flex: 1 } : {},
-          ]}
-        >
-          {isTranslating ? (
-            <View style={styles.loadingContainer}>
-              <DotsLoader />
-            </View>
-          ) : error ? (
-            <Text style={styles.errorText}>
+      <View style={textAreaStyles.textAreaWrapper}>
+        {isTranslating ? (
+          <View style={textAreaStyles.loadingContainer}>
+            <DotsLoader />
+          </View>
+        ) : error ? (
+          <View style={textAreaStyles.errorContainer}>
+            <Text
+              style={[textAreaStyles.errorText, { color: BASE_COLORS.orange }]}
+            >
               {typeof error === "string"
                 ? error
                 : error.toString() || "An unknown error occurred"}
             </Text>
-          ) : (
-            <TextInput
-              value={translatedText}
-              multiline={true}
-              editable={false}
-              style={[
-                styles.textField,
-                {
-                  color: BASE_COLORS.darkText,
-                  flex: 1,
-                  minHeight: 100,
-                },
-              ]}
-              placeholder="Translation will appear here..."
-              placeholderTextColor={BASE_COLORS.placeholderText}
-              textAlignVertical="top"
-            />
-          )}
-        </ScrollView>
+          </View>
+        ) : (
+          <TextInput
+            value={translatedText || "Translation will appear here..."}
+            onChangeText={handleChangeText}
+            multiline={true}
+            editable={true} // Always true for scrolling to work
+            style={[
+              textAreaStyles.textArea,
+              textAreaStyles.textField,
+              { borderColor: BASE_COLORS.borderColor },
+              !translatedText ? { color: BASE_COLORS.placeholderText } : {},
+            ]}
+            placeholder={undefined}
+            placeholderTextColor={BASE_COLORS.placeholderText}
+            textAlignVertical="top"
+            scrollEnabled={true}
+            // These props help make it "fake" non-editable
+            selectTextOnFocus={false}
+            showSoftInputOnFocus={false} // Don't show keyboard
+            onFocus={handleFocus}
+            caretHidden={true} // Hide cursor for non-editable
+            contextMenuHidden={true} // Hide context menu for non-editable
+            selection={{ start: 0, end: 0 }} // Prevent selection for non-editable
+            // Android specific
+            importantForAutofill="no"
+            keyboardType={
+              Platform.OS === "android" ? "visible-password" : "default"
+            }
+          />
+        )}
       </View>
     </View>
   );
 };
-
-const styles = StyleSheet.create({
-  textSectionContainer: {
-    height: "49%",
-    borderRadius: 20,
-    overflow: "hidden",
-    backgroundColor: BASE_COLORS.white,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 10 },
-    shadowOpacity: 0.1,
-    shadowRadius: 15,
-    elevation: 8,
-    position: "relative",
-    padding: 20,
-    marginBottom: 10,
-  },
-  gradientBackground: {
-    position: "absolute",
-    left: 0,
-    right: 0,
-    top: 0,
-    bottom: 0,
-  },
-  sectionHeader: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    marginBottom: 12,
-    zIndex: 100,
-  },
-  sectionTitle: {
-    fontSize: 18,
-    fontFamily: "Poppins-Regular",
-  },
-  controls: {
-    flexDirection: "row",
-    alignItems: "center",
-  },
-  controlButton: {
-    width: 40,
-    height: 40,
-    justifyContent: "center",
-    alignItems: "center",
-    borderRadius: 20,
-    marginLeft: 8,
-  },
-  textAreaWrapper: {
-    flex: 1,
-    marginVertical: 8,
-  },
-  textArea: {
-    backgroundColor: BASE_COLORS.white,
-    borderRadius: 20,
-    borderWidth: 1,
-    padding: 16,
-    maxHeight: "100%",
-  },
-  scrollContent: {
-    overflow: "hidden",
-    paddingBottom: 20,
-    minHeight: 50,
-  },
-  textField: {
-    fontFamily: "Poppins-Regular",
-    fontSize: 17,
-    lineHeight: 24,
-  },
-  loadingContainer: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    height: "100%",
-    width: "100%",
-  },
-  errorText: {
-    color: BASE_COLORS.orange,
-    fontSize: 16,
-    textAlign: "center",
-    marginTop: 20,
-    fontFamily: "Poppins-Regular",
-  },
-});
 
 export default TargetTextArea;
