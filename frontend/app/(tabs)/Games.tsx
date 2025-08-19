@@ -18,6 +18,7 @@ import ErrorDisplay from "@/components/games/common/ErrorDisplay";
 import { useProgressModal } from "@/components/games/ProgressModalProvider";
 import { useRankingsModal } from "@/components/games/RankingsModalProvider";
 import { globalSpeechManager } from "@/utils/globalSpeechManager";
+import { usePronunciationStore } from "@/store/usePronunciationStore";
 
 // Custom hooks
 import useGameDashboard from "@/hooks/games/useGameDashboard";
@@ -68,14 +69,22 @@ const Games = () => {
   // Get progress from centralized store
   const { fetchProgress, isLoading: progressLoading } = useProgressStore();
 
-  // Custom hook for dashboard logic (excluding progress)
+  // ADD: Get the correct Word of Day functions from pronunciation store
   const {
     wordOfTheDay,
-    wordOfDayModalVisible,
     isWordOfDayPlaying,
+    getWordOfTheDay,
+    playWordOfDay, // This is the correct function name
+  } = usePronunciationStore();
+
+  // Custom hook for dashboard logic (excluding Word of Day which we handle here)
+  const {
+    // Remove wordOfTheDay from here since we're getting it from pronunciation store
+    wordOfDayModalVisible,
+    // Remove isWordOfDayPlaying from here
     isAudioLoading,
     setWordOfDayModalVisible,
-    playWordOfDayAudio,
+    // Remove playWordOfDayAudio since we'll use playWordOfDay
     isDailyRewardsModalVisible,
     hideDailyRewardsModal,
     openRewardsModal,
@@ -83,6 +92,14 @@ const Games = () => {
     retryDataLoading,
     isLoading: dashboardLoading,
   } = useGameDashboard();
+
+  // ADD: Initialize Word of the Day when component mounts
+  useEffect(() => {
+    if (hasInitialized && !wordOfTheDay) {
+      console.log("[Games] Loading Word of the Day");
+      getWordOfTheDay();
+    }
+  }, [hasInitialized, wordOfTheDay, getWordOfTheDay]);
 
   // Combined loading state
   const isLoading = progressLoading || dashboardLoading;
@@ -249,7 +266,7 @@ const Games = () => {
     );
   }
 
-  // FIXED: Main content - no re-initialization
+  // FIXED: Main content with correct function name
   return (
     <View
       style={[styles.wrapper, { backgroundColor: activeTheme.backgroundColor }]}
@@ -264,16 +281,16 @@ const Games = () => {
           showsVerticalScrollIndicator={false}
           contentContainerStyle={styles.scrollContent}
         >
-          {/* Word of the Day card */}
+          {/* Word of the Day card - FIXED function name */}
           <WordOfDayCard
             wordOfTheDay={wordOfTheDay}
             isPlaying={isWordOfDayPlaying}
             isLoading={isAudioLoading && isWordOfDayPlaying}
             onCardPress={() => setWordOfDayModalVisible(true)}
-            onPlayPress={playWordOfDayAudio}
+            onPlayPress={playWordOfDay}
           />
 
-          {/* Game modes list - Add key to prevent re-mounting */}
+          {/* Game modes list */}
           <GamesList
             key="games-list-persistent"
             onGamePress={handleGamePress}
@@ -285,13 +302,13 @@ const Games = () => {
           <ProgressStats />
         </ScrollView>
 
-        {/* Modals */}
+        {/* Modals - FIXED function name */}
         {wordOfTheDay && (
           <WordOfDayModal
             visible={wordOfDayModalVisible}
             onClose={() => setWordOfDayModalVisible(false)}
             word={wordOfTheDay}
-            onPlayPress={playWordOfDayAudio}
+            onPlayPress={playWordOfDay}
             isPlaying={isWordOfDayPlaying}
             isLoading={isAudioLoading && isWordOfDayPlaying}
           />

@@ -17,13 +17,12 @@ export default function useGameDashboard() {
   );
   const [isLoading, setIsLoading] = useState(true);
 
-  // Pronunciation store for Word of the Day
   const {
     wordOfTheDay,
     isWordOfDayPlaying,
     isAudioLoading,
     getWordOfTheDay,
-    playWordOfDayAudio,
+    playWordOfDay,
     fetchPronunciations,
     pronunciationData,
   } = usePronunciationStore();
@@ -126,7 +125,9 @@ export default function useGameDashboard() {
       ])
         .then(() => {
           console.log(
-            `[RewardsModal] Data loaded in background in ${Date.now() - startTime}ms`
+            `[RewardsModal] Data loaded in background in ${
+              Date.now() - startTime
+            }ms`
           );
         })
         .catch((error) => {
@@ -223,13 +224,13 @@ export default function useGameDashboard() {
   ]);
 
   return {
-    // Word of day state
+    // FIXED: Word of day state - use correct function name
     wordOfTheDay,
     wordOfDayModalVisible,
     isWordOfDayPlaying,
     isAudioLoading,
     setWordOfDayModalVisible,
-    playWordOfDayAudio,
+    playWordOfDay, // FIXED: Changed from playWordOfDayAudio to playWordOfDay
 
     // Rewards state
     isDailyRewardsModalVisible,
