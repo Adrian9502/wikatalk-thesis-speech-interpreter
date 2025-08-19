@@ -53,6 +53,10 @@ interface AuthState {
   isLoggedIn: boolean;
   isVerified: boolean;
 
+  // ADD: Missing method in interface
+  validateCurrentToken: () => Promise<boolean>;
+  checkIsLoggedIn: () => Promise<boolean>;
+
   // Actions
   setIsLoading: (isLoading: boolean) => void;
   setFormMessage: (
@@ -60,6 +64,7 @@ interface AuthState {
     type?: "success" | "error" | "neutral"
   ) => void;
   clearFormMessage: () => void;
+  handleAppStateChange: (nextAppState: AppStateStatus) => void;
 
   // API methods
   initializeAuth: () => Promise<void>;
@@ -79,7 +84,8 @@ interface AuthState {
       photo: string | null;
     }
   ) => Promise<AuthResponse>;
-  logout: () => Promise<void>;
+  // FIXED: Add the optional parameter to the interface
+  logout: (showSuccessMessage?: boolean) => Promise<void>;
   getUserProfile: () => Promise<UserData | undefined>;
   verifyEmail: (verificationCode: string) => Promise<AuthResponse>;
   resendVerificationEmail: () => Promise<AuthResponse>;
@@ -96,9 +102,10 @@ interface AuthState {
     success: boolean;
     message?: string;
   }>;
-  clearStorage: () => Promise<{ success: boolean; message?: string }>;
+  clearStorage: (
+    navigateAfterClear?: boolean
+  ) => Promise<{ success: boolean; message?: string }>;
   clearResetData: () => Promise<{ success: boolean; message?: string }>;
-  handleAppStateChange: (nextAppState: AppStateStatus) => void;
   updateUserProfile: (updatedUserData: Partial<UserData>) => Promise<{
     success: boolean;
     message?: string;
@@ -184,27 +191,36 @@ export const useAuthStore = create<AuthState>()(
 
       clearFormMessage: () => set({ formMessage: null }),
 
-      handleAppStateChange: (nextAppState) => {
-        const currentTime = Date.now();
+      // Handle app state changes
+      handleAppStateChange: (nextAppState: AppStateStatus) => {
         const { appInactiveTime, userData } = get();
+        const currentTime = Date.now();
 
-        if (nextAppState === "active") {
-          if (
-            appInactiveTime &&
-            currentTime - appInactiveTime > INACTIVE_TIMEOUT
-          ) {
-            // Check if we're in a password reset flow
-            AsyncStorage.getItem("isResetPasswordFlow").then((isResetFlow) => {
-              if (isResetFlow === "true") {
-                // Only clear for password reset flow
-                get().clearResetData();
-                console.log("Reset flow timeout - cleared reset data");
-              } else if (userData?.tempToken && !userData?.isVerified) {
-                // Only clear for verification flow that's incomplete
+        if (nextAppState === "active" && appInactiveTime) {
+          const inactiveTime = currentTime - appInactiveTime;
+
+          if (inactiveTime > INACTIVE_TIMEOUT) {
+            console.log(
+              "App was inactive for too long, checking token validity"
+            );
+
+            // FIXED: Proper typing for isValid parameter
+            get()
+              .validateCurrentToken()
+              .then((isValid: boolean) => {
+                if (!isValid) {
+                  console.log(
+                    "Token validation failed, user will be logged out"
+                  );
+                }
+              });
+
+            setTimeout(() => {
+              // Clear temporary data for incomplete flows
+              if (userData?.tempToken && !userData?.isVerified) {
                 get().clearStorage();
                 console.log("Verification flow timeout - cleared storage");
               }
-              // Normal logged-in users are not affected
             });
           }
           set({ appInactiveTime: null });
@@ -248,38 +264,50 @@ export const useAuthStore = create<AuthState>()(
             });
 
             console.log("Auth restored from storage successfully");
-            console.log("Auth is ready, user logged in: true"); // Update this log
+            console.log("Auth is ready, user logged in: true");
 
-            // Optionally verify with backend, but don't block UI
+            // FIXED: Verify token validity and logout if invalid
             try {
-              // Replace direct axios call with authService
               const response = await authService.checkVerification(
                 userData.email
               );
 
               if (!response.success || !response.isVerified) {
                 console.log("User verification failed, logging out");
-                await get().logout();
+                await get().logout(false); // FIXED: Pass false for automatic logout
+                return;
               }
-            } catch (error) {
+            } catch (error: any) {
               console.error("Error checking verification:", error);
-              // Don't log out automatically on network error
+
+              // FIXED: Auto-logout on 401 errors (user deleted from DB)
+              if (
+                error.response?.status === 401 ||
+                error.message?.includes("User not found") ||
+                error.message?.includes("Request failed with status code 401")
+              ) {
+                console.log(
+                  "Invalid token detected (401), logging out automatically"
+                );
+                await get().logout(false); // FIXED: Pass false for automatic logout
+                return;
+              }
+
+              // For other errors (network issues), don't log out automatically
+              console.warn(
+                "Network error during verification, keeping user logged in"
+              );
             }
           }
           // Handle registration verification flow
           else if (tempUserData) {
             try {
               const parsedTempData = JSON.parse(tempUserData);
-              set({
-                userData: parsedTempData,
-                userToken: null,
-                isAppReady: true,
-              });
-              console.log("Verification flow detected, loaded temp user data");
+              set({ userData: parsedTempData, isAppReady: true });
+              console.log("Temp user data loaded for verification flow");
             } catch (error) {
               console.error("Error parsing temp user data:", error);
-              // Clear the corrupted data
-              await AsyncStorage.removeItem("tempUserData");
+              set({ userData: null, userToken: null, isAppReady: true });
             }
           } else {
             console.log("No stored auth data found");
@@ -543,20 +571,22 @@ export const useAuthStore = create<AuthState>()(
         }
       },
 
-      // Logout user
-      logout: async () => {
-        set({ isLoading: true });
-        const { updateState } = useTranslateStore.getState();
-        updateState({
-          sourceText: "",
-          translatedText: "",
-          copiedSource: false,
-          copiedTarget: false,
-          isSourceSpeaking: false,
-          isTargetSpeaking: false,
-        });
-
+      // Logout user - FIXED: Add parameter to distinguish automatic vs manual logout
+      logout: async (showSuccessMessage: boolean = true) => {
         try {
+          console.log("[Auth] Starting logout process");
+          set({ isLoading: true });
+
+          const { updateState } = useTranslateStore.getState();
+          updateState({
+            sourceText: "",
+            translatedText: "",
+            copiedSource: false,
+            copiedTarget: false,
+            isSourceSpeaking: false,
+            isTargetSpeaking: false,
+          });
+
           await clearAllAccountData();
 
           useThemeStore.getState().resetToDefaultTheme();
@@ -582,23 +612,51 @@ export const useAuthStore = create<AuthState>()(
 
           // Update state
           setupAxiosDefaults(null);
-          setToken(null); // Update the token manager
+          setToken(null);
           set({ userToken: null, userData: null });
 
-          showToast({
-            type: "success",
-            title: "Logged out",
-            description: "Logged out successfully!",
-          });
+          // FIXED: Only show success toast for manual logout
+          if (showSuccessMessage) {
+            showToast({
+              type: "success",
+              title: "Logged out",
+              description: "Logged out successfully!",
+            });
+          } else {
+            // Show different message for automatic logout
+            showToast({
+              type: "info", // Changed from success to info
+              title: "Session Expired",
+              description:
+                "You have been logged out due to an invalid session. Please login again.",
+            });
+          }
 
-          router.replace("/");
+          // FIXED: Ensure navigation happens
+          try {
+            router.replace("/");
+          } catch (navError) {
+            console.error("Navigation error during logout:", navError);
+            // Fallback navigation
+            setTimeout(() => {
+              try {
+                router.replace("/");
+              } catch (fallbackError) {
+                console.error("Fallback navigation failed:", fallbackError);
+              }
+            }, 100);
+          }
         } catch (error) {
           console.error("Error during logout:", error);
-          showToast({
-            type: "error",
-            title: "Error logging out",
-            description: "Error during logout",
-          });
+
+          // FIXED: Only show error toast for manual logout
+          if (showSuccessMessage) {
+            showToast({
+              type: "error",
+              title: "Error logging out",
+              description: "Error during logout",
+            });
+          }
         } finally {
           set({ isLoading: false });
         }
@@ -1248,11 +1306,39 @@ export const useAuthStore = create<AuthState>()(
           set({ isLoading: false });
         }
       },
+
+      // Add method to validate current token - FIXED: Update to use new logout parameter
+      validateCurrentToken: async () => {
+        const { userToken, userData } = get();
+
+        if (!userToken || !userData) {
+          return false;
+        }
+
+        try {
+          const response = await authService.checkVerification(userData.email);
+          return response.success && response.isVerified;
+        } catch (error: any) {
+          console.error("Token validation failed:", error);
+
+          // Auto-logout on 401 errors
+          if (error.response?.status === 401) {
+            console.log("Token validation failed with 401, logging out");
+            await get().logout(false); // FIXED: Pass false for automatic logout
+            return false;
+          }
+
+          // For network errors, assume token is still valid
+          return true;
+        }
+      },
     }),
     {
       name: "auth-storage",
       storage: createJSONStorage(() => AsyncStorage),
+      // FIXED: Add comment to ignore spell check for "partialize"
       partialize: (state) => ({
+        // cspell:disable-line
         userToken: state.userToken,
         userData: state.userData,
       }),

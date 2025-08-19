@@ -74,11 +74,11 @@ const Settings = () => {
 
   const handleLogout = async () => {
     try {
-      console.log("[Settings] Logging out user"); // Clear all account data before logout
-
+      console.log("[Settings] Logging out user");
       await clearAllAccountData();
 
-      await logout();
+      // FIXED: Use the logout function correctly with optional parameter
+      await logout(true); // Pass true for manual logout (shows success message)
     } catch (error) {
       console.error("Logout error:", error);
     }
@@ -265,7 +265,7 @@ const Settings = () => {
           renderItem={renderItem}
           keyExtractor={(item) => item.key}
           showsVerticalScrollIndicator={false}
-          removeClippedSubviews={false}
+          removeClippedSubviews={false} // cspell:disable-line
           initialNumToRender={10}
           maxToRenderPerBatch={5}
           windowSize={10}
