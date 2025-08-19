@@ -1,11 +1,19 @@
 import axios, { AxiosInstance, InternalAxiosRequestConfig } from "axios";
 import { getToken } from "@/lib/authTokenManager";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { useAuthStore } from "@/store/useAuthStore";
 import { router } from "expo-router";
 
 const BACKEND_URL: string =
   process.env.EXPO_PUBLIC_BACKEND_URL || "http://localhost:5000";
+
+// Add a callback for logout without importing useAuthStore
+let logoutCallback: ((showMessage?: boolean) => Promise<void>) | null = null;
+
+export const setLogoutCallback = (
+  callback: (showMessage?: boolean) => Promise<void>
+) => {
+  logoutCallback = callback;
+};
 
 // check if the backend is set
 export const testAPIConnection = async (): Promise<boolean> => {
@@ -55,7 +63,7 @@ export const createApi = (withAuth = true): AxiosInstance => {
 
             console.log("Auth error detected - 401 Unauthorized");
 
-            // FIXED: Auto-logout for authenticated users with invalid tokens
+            // FIXED: Use callback instead of direct import
             if (
               userToken &&
               !tempData &&
@@ -66,8 +74,10 @@ export const createApi = (withAuth = true): AxiosInstance => {
                 "Valid token but 401 error - user likely deleted from database"
               );
 
-              // FIXED: Use the logout function correctly
-              await useAuthStore.getState().logout(false);
+              // Use the logout callback if available
+              if (logoutCallback) {
+                await logoutCallback(false);
+              }
 
               return Promise.reject(error);
             }

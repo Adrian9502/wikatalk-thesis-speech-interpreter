@@ -92,6 +92,7 @@ export const difficultyColors = {
   Medium: ["#FF8E2B", "#B52A00"] as const,
   Hard: ["#FF2919", "#B80D5F"] as const,
 };
+
 export const rankingButtonColors = {
   yellow: ["#e4ac05ff", "#b36b00ff"] as const,
 };
@@ -102,3 +103,6 @@ export const gameModeNavigationColors = {
   fillBlanks: ["#F97316", "#C2410C"] as const,
   multipleChoice: ["#22C55E", "#15803D"] as const,
 };
+
+// Word of the Day card gradient
+export const WORD_OF_DAY_GRADIENT = ["#667eea", "#764ba2"] as const;

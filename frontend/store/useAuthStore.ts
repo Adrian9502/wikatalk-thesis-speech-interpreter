@@ -12,6 +12,7 @@ import { GoogleSignin } from "@react-native-google-signin/google-signin";
 import useCoinsStore from "./games/useCoinsStore";
 import { authService, testAPIConnection } from "@/services/api";
 import { clearAllAccountData, refreshAccountData } from "@/utils/dataManager";
+import { setLogoutCallback } from "@/services/api/baseApi"; // Add this import
 
 // Types
 interface UserData {
@@ -232,6 +233,9 @@ export const useAuthStore = create<AuthState>()(
       // Initialize auth state
       initializeAuth: async () => {
         try {
+          // Register the logout callback to break the cycle
+          setLogoutCallback(get().logout);
+
           // Test API connection
           await testAPIConnection();
 
