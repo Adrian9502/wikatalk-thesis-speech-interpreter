@@ -1,7 +1,7 @@
 import React, { useCallback, useState, useMemo, useEffect } from "react";
 import { View, Text, StyleSheet, Animated } from "react-native";
 import { Target, Zap } from "react-native-feather";
-import { SectionHeader } from "@/components/games/common/AnimatedSection";
+import { SectionHeader } from "@/components/games/common/SectionHeader";
 import GameCard from "./GameCard";
 import gameOptions from "@/utils/games/gameOptions";
 import { GameOption } from "@/types/gameTypes";

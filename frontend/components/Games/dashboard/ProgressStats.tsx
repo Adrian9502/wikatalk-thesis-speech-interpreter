@@ -2,7 +2,7 @@ import React, { useEffect, useState, useRef } from "react";
 import { View, Text, StyleSheet, Animated } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { Target, Award } from "react-native-feather";
-import { SectionHeader } from "@/components/games/common/AnimatedSection";
+import { SectionHeader } from "@/components/games/common/SectionHeader";
 import useProgressStore from "@/store/games/useProgressStore";
 import { GAME_GRADIENTS, GAME_MODES } from "@/constant/gameConstants";
 import { BASE_COLORS } from "@/constant/colors";

@@ -9,9 +9,7 @@ import WordOfDayModal from "@/components/games/WordOfDayModal";
 import DailyRewardsModal from "@/components/games/rewards/DailyRewardsModal";
 
 // Component imports
-import BackgroundEffects from "@/components/games/dashboard/BackgroundEffects";
-import DashboardHeader from "@/components/games/dashboard/DashboardHeader";
-import WordOfDayCard from "@/components/games/dashboard/WordOfDayCard";
+import WordOfTheDayCard from "@/components/games/dashboard/WordOfTheDayCard";
 import GamesList from "@/components/games/dashboard/GamesList";
 import ProgressStats from "@/components/games/dashboard/ProgressStats";
 import ErrorDisplay from "@/components/games/common/ErrorDisplay";
@@ -89,8 +87,6 @@ const Games = () => {
     hideDailyRewardsModal,
     openRewardsModal,
     handleGamePress,
-    retryDataLoading,
-    isLoading: dashboardLoading,
   } = useGameDashboard();
 
   // ADD: Initialize Word of the Day when component mounts
@@ -100,9 +96,6 @@ const Games = () => {
       getWordOfTheDay();
     }
   }, [hasInitialized, wordOfTheDay, getWordOfTheDay]);
-
-  // Combined loading state
-  const isLoading = progressLoading || dashboardLoading;
 
   // Update the rankings handlers
   const handleShowRankings = useCallback(() => {
@@ -255,7 +248,6 @@ const Games = () => {
           { backgroundColor: activeTheme.backgroundColor },
         ]}
       >
-        <BackgroundEffects />
         <SafeAreaView style={[dynamicStyles.container, styles.container]}>
           <ErrorDisplay
             message="Unable to load game data. Please check your connection and try again."
@@ -266,28 +258,25 @@ const Games = () => {
     );
   }
 
-  // FIXED: Main content with correct function name
   return (
     <View
       style={[styles.wrapper, { backgroundColor: activeTheme.backgroundColor }]}
     >
-      {/* Background elements */}
-      <BackgroundEffects />
-
       <SafeAreaView style={[dynamicStyles.container, styles.container]}>
-        <DashboardHeader onCoinsPress={openRewardsModal} />
+        {/* Removed standalone DashboardHeader */}
 
         <ScrollView
           showsVerticalScrollIndicator={false}
           contentContainerStyle={styles.scrollContent}
         >
-          {/* Word of the Day card - FIXED function name */}
-          <WordOfDayCard
+          {/* Word of the Day card with integrated header */}
+          <WordOfTheDayCard
             wordOfTheDay={wordOfTheDay}
             isPlaying={isWordOfDayPlaying}
             isLoading={isAudioLoading && isWordOfDayPlaying}
             onCardPress={() => setWordOfDayModalVisible(true)}
             onPlayPress={playWordOfDay}
+            onCoinsPress={openRewardsModal} // Pass the coins press handler
           />
 
           {/* Game modes list */}
@@ -302,7 +291,7 @@ const Games = () => {
           <ProgressStats />
         </ScrollView>
 
-        {/* Modals - FIXED function name */}
+        {/* Modals */}
         {wordOfTheDay && (
           <WordOfDayModal
             visible={wordOfDayModalVisible}

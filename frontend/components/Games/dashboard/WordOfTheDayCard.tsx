@@ -8,27 +8,30 @@ import {
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { Calendar, Volume2, Star } from "react-native-feather";
-import { SectionHeader } from "@/components/games/common/AnimatedSection";
+import { SectionHeader } from "@/components/games/common/SectionHeader";
+import CoinsDisplay from "@/components/games/rewards/CoinsDisplay"; // Import CoinsDisplay directly
 
-interface WordOfDayCardProps {
+interface WordOfTheDayCardProps {
   wordOfTheDay: any;
   isPlaying: boolean;
   isLoading: boolean;
   onCardPress: () => void;
   onPlayPress: () => void;
+  onCoinsPress: () => void; // Add coins press handler
 }
 
 // SIMPLE: Global flag - animate only once per app session
 let WORD_ANIMATION_PLAYED = false;
 
-const WordOfDayCard = React.memo(
+const WordOfTheDayCard = React.memo(
   ({
     wordOfTheDay,
     isPlaying,
     isLoading,
     onCardPress,
     onPlayPress,
-  }: WordOfDayCardProps) => {
+    onCoinsPress, // Add to props
+  }: WordOfTheDayCardProps) => {
     const [shouldAnimate] = useState(!WORD_ANIMATION_PLAYED);
 
     // Simple animated values
@@ -69,11 +72,15 @@ const WordOfDayCard = React.memo(
           },
         ]}
       >
-        <SectionHeader
-          icon={<Star width={20} height={20} color="#FFD700" />}
-          title="Word of the Day"
-          subtitle="Expand your vocabulary daily"
-        />
+        {/* FIXED: Inline header with section header and coins display */}
+        <View style={styles.inlineHeaderContainer}>
+          <SectionHeader
+            icon={<Star width={20} height={20} color="#FFD700" />}
+            title="Word of the Day"
+            subtitle="Expand your vocabulary daily"
+          />
+          <CoinsDisplay onPress={onCoinsPress} />
+        </View>
 
         <TouchableOpacity
           style={styles.wordOfTheDayCard}
@@ -93,7 +100,7 @@ const WordOfDayCard = React.memo(
 
             <View style={styles.wordCardHeader}>
               <View style={styles.wordBadge}>
-                <Calendar width={14} height={14} color="#667eea" />
+                <Calendar width={14} height={14} color="#fff" />
                 <Text style={styles.wordBadgeText}>TODAY'S WORD</Text>
               </View>
               <TouchableOpacity style={styles.playButton} onPress={onPlayPress}>
@@ -142,10 +149,17 @@ const WordOfDayCard = React.memo(
   }
 );
 
-// ... keep all your existing styles ...
 const styles = StyleSheet.create({
   featuredSection: {
     marginBottom: 12,
+  },
+  // NEW: Inline header container
+  inlineHeaderContainer: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "flex-start",
+    marginBottom: 16,
+    paddingHorizontal: 5, // Small padding to align with content
   },
   wordOfTheDayCard: {
     borderRadius: 20,
@@ -262,5 +276,5 @@ const styles = StyleSheet.create({
   },
 });
 
-WordOfDayCard.displayName = "WordOfDayCard";
-export default WordOfDayCard;
+WordOfTheDayCard.displayName = "WordOfDayCard";
+export default WordOfTheDayCard;
