@@ -1,5 +1,5 @@
 import { RankingData } from "@/types/rankingTypes";
-
+import { registerRankingsCacheClear } from "./dataManager";
 // Simple in-memory cache for compatibility with existing code
 let rankingsPreloaded: boolean = false;
 
@@ -33,14 +33,25 @@ export const setRankingsCache = (
 };
 
 export const clearRankingsCache = () => {
-  // Import and use the hook's clear function
-  const { clearRankingsCache } = require("@/hooks/useRankings");
-  clearRankingsCache();
+  // Get the clear function from useRankings hook without importing
+  const clearFunction = getClearRankingsCacheFunction();
+  if (clearFunction) {
+    clearFunction();
+  }
   rankingsPreloaded = false;
 };
 
+// Store the clear function reference to avoid circular dependency
+let clearRankingsCacheFunction: (() => void) | null = null;
+
+export const setClearRankingsCacheFunction = (clearFunction: () => void) => {
+  clearRankingsCacheFunction = clearFunction;
+};
+
+const getClearRankingsCacheFunction = () => clearRankingsCacheFunction;
+
 // Register this module with the data manager
-import { registerRankingsCache } from "@/utils/dataManager";
-registerRankingsCache({
-  clearCache: clearRankingsCache,
-});
+// Import asynchronously to avoid circular dependency
+setTimeout(() => {
+  registerRankingsCacheClear(clearRankingsCache);
+}, 0);

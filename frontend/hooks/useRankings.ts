@@ -7,6 +7,8 @@ import {
   isRankingsDataPreloaded,
   getPreloadedRankings,
 } from "@/store/useSplashStore";
+// ADD: Import the function setter to avoid circular dependency
+import { setClearRankingsCacheFunction } from "@/utils/rankingsCache";
 
 const API_URL = process.env.EXPO_PUBLIC_BACKEND_URL || "http://localhost:5000";
 
@@ -167,3 +169,6 @@ export const useRankings = (
 export const clearRankingsCache = () => {
   rankingsCache.clear();
 };
+
+// Register the clear function to avoid circular dependency
+setClearRankingsCacheFunction(clearRankingsCache);

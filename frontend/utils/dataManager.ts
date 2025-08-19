@@ -27,6 +27,9 @@ let gameStoreRef: GameStoreActions | null = null;
 let coinsStoreRef: CoinsStoreActions | null = null;
 let registeredRankingsStore: RankingsStoreActions | null = null;
 
+// NEW: Add rankings cache clear function reference
+let clearRankingsCacheRef: (() => void) | null = null;
+
 // Functions to register store references
 export const registerSplashStore = (store: SplashStoreActions) => {
   splashStoreRef = store;
@@ -46,6 +49,11 @@ export const registerCoinsStore = (store: CoinsStoreActions) => {
 
 export const registerRankingsStore = (store: RankingsStoreActions) => {
   registeredRankingsStore = store;
+};
+
+// NEW: Function to register rankings cache clear function
+export const registerRankingsCacheClear = (clearFunction: () => void) => {
+  clearRankingsCacheRef = clearFunction;
 };
 
 // Data management functions
@@ -81,10 +89,15 @@ export const clearAllAccountData = async () => {
       console.warn("[DataManager] CoinsStore not registered");
     }
 
-    // 5. Clear rankings hook cache
-    const { clearRankingsCache } = await import("@/hooks/useRankings");
-    clearRankingsCache();
-    console.log("[DataManager] Rankings cache cleared");
+    // 5. Clear rankings hook cache using registered function
+    if (clearRankingsCacheRef) {
+      clearRankingsCacheRef();
+      console.log("[DataManager] Rankings cache cleared");
+    } else {
+      console.warn(
+        "[DataManager] Rankings cache clear function not registered"
+      );
+    }
 
     console.log("[DataManager] All account data cleared successfully");
   } catch (error) {
@@ -102,9 +115,11 @@ export const refreshAccountData = async () => {
     // Give a small delay to ensure cleanup is complete
     await new Promise((resolve) => setTimeout(resolve, 100));
 
-    // Trigger data precomputation for the new account
+    // Trigger data pre-computation for the new account
     if (splashStoreRef) {
-      console.log("[DataManager] Starting data precomputation for new account");
+      console.log(
+        "[DataManager] Starting data pre-computation for new account"
+      );
       await splashStoreRef.preloadGameData();
     } else {
       console.warn("[DataManager] SplashStore not available for preloading");
