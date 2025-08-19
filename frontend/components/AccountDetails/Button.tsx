@@ -17,7 +17,6 @@ interface ButtonProps {
   textStyle?: TextStyle;
   isLoading?: boolean;
   disabled?: boolean;
-  height?: number;
 }
 
 const Button = ({
@@ -26,7 +25,6 @@ const Button = ({
   color,
   textColor = "#FFFFFF",
   style,
-  height = 48,
   textStyle,
   isLoading = false,
   disabled = false,
@@ -38,7 +36,6 @@ const Button = ({
       style={[
         styles.button,
         { backgroundColor: color },
-        { height },
         disabled && styles.disabled,
         style,
       ]}
@@ -69,12 +66,13 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     justifyContent: "center",
     alignItems: "center",
-    paddingHorizontal: 16,
+    paddingHorizontal: 15,
+    paddingVertical: 10,
     flexDirection: "row",
   },
   text: {
-    fontSize: 14,
-    fontFamily: "Poppins-Regular",
+    fontSize: 13,
+    fontFamily: "Poppins-Medium",
   },
   disabled: {
     opacity: 0.7,

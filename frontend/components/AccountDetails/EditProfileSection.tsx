@@ -11,7 +11,7 @@ type SettingsSectionProps = {
   onProfileUpdate?: () => void;
 };
 
-export const SettingsSection = ({
+const EditProfileSection = ({
   theme,
   onProfileUpdate,
 }: SettingsSectionProps) => {
@@ -99,10 +99,10 @@ export const SettingsSection = ({
             { backgroundColor: theme.lightColor },
           ]}
         >
-          <Edit2 width={20} height={20} color={theme.secondaryColor} />
+          <Edit2 width={18} height={18} color={theme.secondaryColor} />
         </View>
         <Text style={styles.settingText}>Edit Profile</Text>
-        <ChevronRight width={20} height={20} color="#C0C0C8" />
+        <ChevronRight width={18} height={18} color="#C0C0C8" />
       </TouchableOpacity>
 
       {userData && (
@@ -117,3 +117,5 @@ export const SettingsSection = ({
     </View>
   );
 };
+
+export default EditProfileSection;

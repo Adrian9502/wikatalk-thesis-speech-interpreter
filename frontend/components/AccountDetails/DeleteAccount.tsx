@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from "react";
-import { View, Text, Modal, StyleSheet, TouchableOpacity } from "react-native";
+import { View, Text, Modal, StyleSheet } from "react-native";
 import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
 import { useAuth } from "@/context/AuthContext";
 import Button from "@/components/accountDetails/Button";
 import FormInput from "@/components/FormInput";
-import { AlertCircle, AlertTriangle, KeyRound, X } from "lucide-react-native";
+import { AlertCircle, AlertTriangle, KeyRound } from "lucide-react-native";
 import useThemeStore from "@/store/useThemeStore";
 import { BASE_COLORS, TITLE_COLORS } from "@/constant/colors";
 import ConfirmationModal from "@/components/ConfirmationModal";
@@ -204,7 +204,7 @@ const DeleteAccount = () => {
         return (
           <>
             <View style={styles.warningContainer}>
-              <AlertTriangle width={24} height={24} color="#FF9500" />
+              <AlertTriangle width={18} height={18} color="#FF9500" />
               <Text
                 style={[styles.warningText, { color: BASE_COLORS.darkText }]}
               >
@@ -225,7 +225,6 @@ const DeleteAccount = () => {
                     ? `Wait (${requestCooldown}s)`
                     : "Request Verification Code"
                 }
-                height={40}
                 onPress={handleRequestCode}
                 isLoading={isLoading}
                 disabled={requestCooldown > 0}
@@ -265,11 +264,10 @@ const DeleteAccount = () => {
             {/* Verify button */}
             <Button
               title="Verify"
-              height={40}
               onPress={handleVerificationSubmit(handleVerifyCode)}
               isLoading={isLoading}
               color={TITLE_COLORS.customRed}
-              style={{ marginBottom: 12 }}
+              style={{ marginBottom: 5 }}
             />
 
             <Button
@@ -287,8 +285,14 @@ const DeleteAccount = () => {
         return (
           <>
             <View style={styles.warningContainer}>
-              <AlertCircle width={24} height={24} color="#FF3B30" />
-              <Text style={[styles.dangerText, { color: "#FF3B30" }]}>
+              <AlertCircle
+                width={20}
+                height={20}
+                color={TITLE_COLORS.customRed}
+              />
+              <Text
+                style={[styles.dangerText, { color: TITLE_COLORS.customRed }]}
+              >
                 This action cannot be undone
               </Text>
             </View>
@@ -299,18 +303,15 @@ const DeleteAccount = () => {
             {/* Delete account button */}
             <Button
               title="Delete Account"
-              height={40}
               onPress={handleDeleteAccount}
               isLoading={isLoading}
-              color="#FF3B30"
+              color={TITLE_COLORS.customRed}
             />
             {/* cancel button */}
             <Button
               title="Cancel"
-              height={40}
-              textColor={BASE_COLORS.darkText}
+              textColor={BASE_COLORS.placeholderText}
               onPress={handleAttemptClose}
-              style={{ marginBottom: 12 }}
             />
           </>
         );
@@ -346,7 +347,11 @@ const DeleteAccount = () => {
             <View style={{ padding: 16 }}>
               {error ? (
                 <View style={styles.errorContainer}>
-                  <AlertCircle width={20} height={20} color={"#FF3B30"} />
+                  <AlertCircle
+                    width={20}
+                    height={20}
+                    color={TITLE_COLORS.customRed}
+                  />
                   <Text style={styles.errorText}>{error}</Text>
                 </View>
               ) : null}
@@ -354,10 +359,8 @@ const DeleteAccount = () => {
               {step === 1 && (
                 <Button
                   title="Cancel"
-                  height={40}
-                  textColor={activeTheme.secondaryColor}
+                  textColor={BASE_COLORS.placeholderText}
                   onPress={handleCloseModal}
-                  style={{ marginTop: 16 }}
                 />
               )}
             </View>
@@ -400,42 +403,45 @@ const styles = StyleSheet.create({
     shadowRadius: 3.84,
   },
   headerContainer: {
-    padding: 12,
     flexDirection: "row",
-    alignItems: "center",
-    backgroundColor: TITLE_COLORS.customRed,
     justifyContent: "center",
+    alignItems: "center",
+    padding: 15,
+    backgroundColor: TITLE_COLORS.customRed,
     position: "relative",
   },
   headerTitle: {
-    fontSize: 18,
+    color: BASE_COLORS.white,
     fontFamily: "Poppins-Medium",
-    color: "white",
+    fontSize: 14,
+    textAlign: "center",
   },
   description: {
-    fontSize: 14,
+    fontSize: 12,
     margin: 12,
     fontFamily: "Poppins-Regular",
     textAlign: "center",
   },
   warningContainer: {
     flexDirection: "row",
+    justifyContent: "center",
     alignItems: "center",
     backgroundColor: "rgba(255, 149, 0, 0.1)",
-    borderRadius: 16,
-    padding: 12,
+    borderRadius: 20,
+    paddingVertical: 10,
+    paddingHorizontal: 12,
     marginBottom: 16,
   },
   warningText: {
+    fontSize: 11,
     fontFamily: "Poppins-Regular",
     flex: 1,
     marginLeft: 12,
-    fontSize: 13,
   },
   dangerText: {
     flex: 1,
     marginLeft: 12,
-    fontSize: 15,
+    fontSize: 13,
     fontFamily: "Poppins-Regular",
   },
   buttonContainer: {
@@ -457,18 +463,21 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   errorText: {
-    color: "#FF3B30",
-    fontSize: 14,
+    color: TITLE_COLORS.customRed,
+    fontSize: 11,
   },
   countdown: {
     textAlign: "center",
     marginBottom: 16,
+    fontSize: 12,
+    fontFamily: "Poppins-Regular",
     color: "#555",
   },
   expired: {
     textAlign: "center",
     marginBottom: 16,
-    color: "#FF3B30",
+    color: TITLE_COLORS.customRed,
+    fontSize: 12,
   },
 });
 

@@ -281,22 +281,6 @@ const Pronounce = () => {
     }
   }, [clearCache, fetchPronunciations]);
 
-  // FIXED: Better scroll handling with debouncing
-  const handleScroll = useCallback((event: any) => {
-    const { contentOffset } = event.nativeEvent;
-    scrollPositionRef.current = contentOffset.y;
-  }, []);
-
-  const handleScrollBeginDrag = useCallback(() => {
-    isScrollingRef.current = true;
-  }, []);
-
-  const handleScrollEndDrag = useCallback(() => {
-    setTimeout(() => {
-      isScrollingRef.current = false;
-    }, 100);
-  }, []);
-
   const handleEndReached = useCallback(() => {
     if (hasMoreData && !isLoadingMore && !isScrollingRef.current) {
       loadMoreData();
@@ -391,11 +375,9 @@ const Pronounce = () => {
           <Text style={styles.headerTitle}>Pronunciation Guide</Text>
         </Animated.View>
 
-        {/* UPDATED: New stacked layout */}
         <Animated.View
           style={[styles.controlsContainer, { opacity: controlsFadeAnim }]}
         >
-          {/* Search Bar - Full Width */}
           <SearchBar
             searchInput={searchInput}
             setSearchInput={handleSearchChange}

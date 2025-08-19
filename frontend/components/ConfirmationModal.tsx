@@ -52,8 +52,8 @@ const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
         <View style={styles.modalContainer}>
           <View style={styles.modalIconContainer}>
             <AlertTriangle
-              width={32}
-              height={32}
+              width={22}
+              height={22}
               color={TITLE_COLORS.customRed}
             />
           </View>
@@ -92,10 +92,10 @@ const styles = StyleSheet.create({
     backgroundColor: "rgba(0, 0, 0, 0.5)",
   },
   modalContainer: {
-    width: "80%",
+    width: "75%",
     backgroundColor: BASE_COLORS.white,
     borderRadius: 20,
-    padding: 24,
+    padding: 20,
     alignItems: "center",
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 8 },
@@ -104,8 +104,8 @@ const styles = StyleSheet.create({
     elevation: 8,
   },
   modalIconContainer: {
-    width: 64,
-    height: 64,
+    width: 54,
+    height: 54,
     borderRadius: 32,
     backgroundColor: "rgba(206, 17, 38, 0.1)",
     justifyContent: "center",
@@ -113,13 +113,13 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   modalTitle: {
-    fontSize: 18,
+    fontSize: 14,
     fontFamily: "Poppins-SemiBold",
     color: TITLE_COLORS.customRed,
     marginBottom: 8,
   },
   modalText: {
-    fontSize: 14,
+    fontSize: 12,
     fontFamily: "Poppins-Regular",
     color: BASE_COLORS.darkText,
     marginBottom: 24,
@@ -148,12 +148,12 @@ const styles = StyleSheet.create({
   },
   cancelButtonText: {
     color: TITLE_COLORS.customRed,
-    fontFamily: "Poppins-Medium",
-    fontSize: 14,
+    fontFamily: "Poppins-Regular",
+    fontSize: 12,
   },
   deleteButtonText: {
     color: BASE_COLORS.white,
     fontFamily: "Poppins-Medium",
-    fontSize: 14,
+    fontSize: 12,
   },
 });

@@ -9,14 +9,18 @@ export const DangerSection = () => {
   const { activeTheme } = useThemeStore();
 
   return (
-    <View style={[styles.container]}>
+    <>
       <View
         style={[
           styles.warningContainer,
           { borderLeftColor: activeTheme.secondaryColor },
         ]}
       >
-        <AlertTriangle size={23} color="#FF9500" style={styles.icon} />
+        <AlertTriangle
+          size={18}
+          color={BASE_COLORS.danger}
+          style={styles.icon}
+        />
         <Text style={[styles.warningText, { color: BASE_COLORS.darkText }]}>
           The actions below are irreversible. Please proceed with caution.
         </Text>
@@ -25,23 +29,18 @@ export const DangerSection = () => {
       <View style={styles.buttonContainer}>
         <DeleteAccount />
       </View>
-    </View>
+    </>
   );
 };
 
 const styles = StyleSheet.create({
-  container: {
-    borderRadius: 20,
-    marginBottom: 20,
-  },
   warningContainer: {
     flexDirection: "row",
     backgroundColor: "#f2f0f0",
-    borderRadius: 16,
+    borderRadius: 20,
     padding: 12,
-    marginVertical: 16,
     alignItems: "flex-start",
-    borderLeftWidth: 4,
+    borderLeftWidth: 6,
   },
   icon: {
     margin: 8,
@@ -49,12 +48,11 @@ const styles = StyleSheet.create({
   warningText: {
     marginLeft: 10,
     flex: 1,
-    fontSize: 13,
+    fontSize: 12,
     fontFamily: "Poppins-Regular",
-    lineHeight: 20,
   },
   buttonContainer: {
-    marginTop: 8,
+    marginTop: 20,
   },
 });
 

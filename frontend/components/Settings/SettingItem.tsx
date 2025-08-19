@@ -26,24 +26,18 @@ interface SettingItemProps {
 const SettingItem: React.FC<SettingItemProps> = ({
   icon,
   label,
-  value,
   onPress,
-  toggleSwitch,
   customIconColor,
   customContainerStyle,
   customLabelStyle,
 }) => {
   const { activeTheme } = useThemeStore();
 
-  const isToggleItem = typeof value === "boolean";
-
   return (
     <TouchableOpacity
       style={[styles.container, customContainerStyle]}
       onPress={onPress}
-      disabled={isToggleItem}
     >
-      {/* Left Side: Icon and Label */}
       <View style={styles.leftContent}>
         <View
           style={[
@@ -53,32 +47,18 @@ const SettingItem: React.FC<SettingItemProps> = ({
         >
           <Feather
             name={icon}
-            size={18}
+            size={16}
             color={customIconColor || activeTheme.secondaryColor}
           />
         </View>
         <Text style={[styles.label, customLabelStyle]}>{label}</Text>
       </View>
 
-      {/* Right Side: Toggle or Arrow */}
-      {isToggleItem ? (
-        <Switch
-          value={value}
-          onValueChange={toggleSwitch}
-          trackColor={{
-            false: BASE_COLORS.borderColor,
-            true: activeTheme.secondaryColor,
-          }}
-          thumbColor={"#FFFFFF"}
-          ios_backgroundColor={BASE_COLORS.borderColor}
-        />
-      ) : (
-        <Feather
-          name="chevron-right"
-          size={20}
-          color={activeTheme.secondaryColor}
-        />
-      )}
+      <Feather
+        name="chevron-right"
+        size={16}
+        color={activeTheme.secondaryColor}
+      />
     </TouchableOpacity>
   );
 };
@@ -88,22 +68,23 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    padding: 16,
+    paddingVertical: 10,
+    paddingHorizontal: 15,
   },
   leftContent: {
     flexDirection: "row",
     alignItems: "center",
   },
   iconContainer: {
-    width: 36,
-    height: 36,
+    width: 30,
+    height: 30,
     borderRadius: 20,
     alignItems: "center",
     justifyContent: "center",
-    marginRight: 12,
+    marginRight: 15,
   },
   label: {
-    fontSize: 14,
+    fontSize: 13,
     color: BASE_COLORS.darkText,
     fontFamily: "Poppins-Regular",
   },

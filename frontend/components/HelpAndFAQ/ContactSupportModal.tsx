@@ -8,7 +8,7 @@ import {
   Linking,
   Platform,
 } from "react-native";
-import { X, Mail, Github } from "react-native-feather";
+import { Mail, Github } from "react-native-feather";
 import { BASE_COLORS } from "@/constant/colors";
 import useThemeStore from "@/store/useThemeStore";
 import { Feather } from "@expo/vector-icons";
@@ -58,7 +58,7 @@ const ContactSupportModal = ({
             onStartShouldSetResponder={() => true}
             onTouchEnd={(e) => e.stopPropagation()}
           >
-            <CloseButton size={17} onPress={onClose}></CloseButton>
+            <CloseButton size={14} onPress={onClose} />
             <View
               style={[
                 styles.modalHeader,
@@ -71,7 +71,7 @@ const ContactSupportModal = ({
 
             <View style={styles.modalBody}>
               <Text style={styles.contactText}>
-                Connect with us through any of these platforms:
+                Connect with us through any of these platforms
               </Text>
 
               <View style={styles.socialIconsContainer}>
@@ -80,7 +80,7 @@ const ContactSupportModal = ({
                   style={[styles.iconButton, { backgroundColor: "#DB4437" }]}
                   onPress={handleEmailPress}
                 >
-                  <Mail width={26} height={26} color={BASE_COLORS.white} />
+                  <Mail width={20} height={20} color={BASE_COLORS.white} />
                   <Text style={styles.iconText}>Email</Text>
                 </TouchableOpacity>
 
@@ -91,7 +91,7 @@ const ContactSupportModal = ({
                 >
                   <Feather
                     name="facebook"
-                    size={26}
+                    size={20}
                     color={BASE_COLORS.white}
                   />
                   <Text style={styles.iconText}>Facebook</Text>
@@ -102,7 +102,7 @@ const ContactSupportModal = ({
                   style={[styles.iconButton, { backgroundColor: "#333" }]}
                   onPress={handleGitHubPress}
                 >
-                  <Github width={26} height={26} color={BASE_COLORS.white} />
+                  <Github width={20} height={20} color={BASE_COLORS.white} />
                   <Text style={styles.iconText}>GitHub</Text>
                 </TouchableOpacity>
               </View>
@@ -136,42 +136,41 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "center",
     alignItems: "center",
-    paddingTop: 16,
-    paddingBottom: 16,
-    paddingHorizontal: 16,
+    padding: 15,
   },
 
   modalTitle: {
     color: BASE_COLORS.white,
     fontFamily: "Poppins-Medium",
-    fontSize: 16,
+    fontSize: 14,
     textAlign: "center",
   },
 
   modalBody: {
-    padding: 26,
+    padding: 10,
     alignItems: "center",
   },
   contactText: {
     fontFamily: "Poppins-Regular",
-    fontSize: 13,
+    fontSize: 12,
     color: BASE_COLORS.darkText,
     textAlign: "center",
     marginBottom: 26,
   },
   socialIconsContainer: {
     flexDirection: "row",
+    alignItems: "center",
     justifyContent: "space-around",
     width: "100%",
-    marginBottom: 26,
+    marginBottom: 10,
   },
   iconButton: {
     alignItems: "center",
     justifyContent: "center",
-    padding: 16,
+    padding: 6,
     borderRadius: 20,
-    width: 90,
-    height: 90,
+    width: 75,
+    height: 75,
     ...Platform.select({
       ios: {
         shadowColor: "#000",
@@ -185,10 +184,10 @@ const styles = StyleSheet.create({
     }),
   },
   iconText: {
-    color: "#fff",
-    fontFamily: "Poppins-Medium",
-    fontSize: 12,
-    marginTop: 8,
+    color: BASE_COLORS.white,
+    fontFamily: "Poppins-Regular",
+    fontSize: 11,
+    marginTop: 5,
   },
 });
 

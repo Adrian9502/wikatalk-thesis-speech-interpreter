@@ -1,6 +1,7 @@
 import React from "react";
 import { View, Text, TouchableOpacity, ActivityIndicator } from "react-native";
 import styles from "@/styles/editProfileStyles";
+import { BASE_COLORS } from "@/constant/colors";
 
 interface ModalFooterProps {
   onSave: () => void;
@@ -9,7 +10,7 @@ interface ModalFooterProps {
   theme: any;
 }
 
-export const ModalFooter = ({
+const EditProfileFooter = ({
   onSave,
   onClose,
   isLoading,
@@ -31,7 +32,7 @@ export const ModalFooter = ({
         {isLoading && (
           <ActivityIndicator
             size="small"
-            color="white"
+            color={BASE_COLORS.white}
             style={{ marginRight: 8 }}
           />
         )}
@@ -50,3 +51,5 @@ export const ModalFooter = ({
     </TouchableOpacity>
   </>
 );
+
+export default EditProfileFooter;

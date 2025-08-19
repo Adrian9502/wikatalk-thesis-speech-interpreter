@@ -4,7 +4,7 @@ import { useProfileForm } from "@/hooks/useProfileForm";
 import { ProfilePictureSection } from "@/components/accountDetails/ProfilePictureSection";
 import { BasicInfoForm } from "@/components/accountDetails/BasicInfoForm";
 import { PasswordSection } from "@/components/accountDetails/PasswordSection";
-import { ModalFooter } from "@/components/accountDetails/ModalFooter";
+import EditProfileFooter from "@/components/accountDetails/EditProfileFooter";
 import styles from "@/styles/editProfileStyles";
 import { UserDataTypes } from "@/types/types";
 
@@ -33,7 +33,6 @@ const EditProfileModal = ({
     control,
     handleSubmit,
     formState,
-    profileValues,
     imageState,
     passwordState,
     errorState,
@@ -65,7 +64,11 @@ const EditProfileModal = ({
             <Text style={styles.headerTitle}>Edit Profile</Text>
           </View>
 
-          <ScrollView style={styles.formContainer}>
+          <ScrollView
+            showsVerticalScrollIndicator={false}
+            showsHorizontalScrollIndicator={false}
+            style={styles.formContainer}
+          >
             {errorState.error ? (
               <Text style={styles.errorText}>{errorState.error}</Text>
             ) : null}
@@ -90,7 +93,7 @@ const EditProfileModal = ({
               isGoogleUser={isGoogleUser}
             />
 
-            <ModalFooter
+            <EditProfileFooter
               onSave={handleSubmit(onFormSubmit)}
               onClose={onClose}
               isLoading={isLoading}

@@ -8,7 +8,6 @@ export const pronunciationStyles = StyleSheet.create({
   },
   headerTitle: {
     fontSize: 15,
-    textAlign: "center",
     fontFamily: "Poppins-SemiBold",
     color: BASE_COLORS.white,
   },
@@ -50,7 +49,7 @@ export const pronunciationStyles = StyleSheet.create({
   },
   loadingText: {
     marginLeft: 8,
-    fontSize: 14,
+    fontSize: 12,
     fontFamily: "Poppins-Regular",
     color: BASE_COLORS.blue,
   },

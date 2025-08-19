@@ -3,17 +3,21 @@ import { Text, View, ScrollView } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { StatusBar } from "expo-status-bar";
 
+// styles and hooks
 import { useAuth } from "@/context/AuthContext";
 import useThemeStore from "@/store/useThemeStore";
 import { getGlobalStyles } from "@/styles/globalStyles";
-import DotsLoader from "@/components/DotLoader";
 import { useHardwareBack } from "@/hooks/useHardwareBack";
 
-import { ProfileCard } from "@/components/accountDetails/ProfileCard";
+// components
+import DotsLoader from "@/components/DotLoader";
+import ProfileCard from "@/components/settings/ProfileCard";
 import { InfoSection } from "@/components/accountDetails/InfoSection";
-import { SettingsSection } from "@/components/accountDetails/SettingsSection";
+import EditProfileSection from "@/components/accountDetails/EditProfileSection";
 import { DangerSection } from "@/components/accountDetails/DangerSection";
 import { Header } from "@/components/Header";
+
+// styles
 import styles from "@/styles/accountDetailsStyles";
 
 const AccountDetails = () => {
@@ -57,20 +61,23 @@ const AccountDetails = () => {
     >
       <StatusBar style="light" />
 
-      {/* Header - KEEP existing functionality */}
+      {/* Header */}
       <Header title="Account Details" />
 
       <ScrollView
         style={styles.scrollView}
         showsVerticalScrollIndicator={false}
       >
-        <ProfileCard userData={userData} theme={activeTheme} />
+        <ProfileCard
+          userData={userData}
+          themeColor={activeTheme.secondaryColor}
+        />
 
         <Text style={styles.sectionTitle}>Basic Information</Text>
         <InfoSection userData={userData} theme={activeTheme} />
 
         <Text style={styles.sectionTitle}>Account Settings</Text>
-        <SettingsSection
+        <EditProfileSection
           theme={activeTheme}
           onProfileUpdate={refreshUserData}
         />

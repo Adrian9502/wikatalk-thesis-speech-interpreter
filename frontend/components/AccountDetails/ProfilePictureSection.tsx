@@ -30,7 +30,7 @@ export const ProfilePictureSection = ({
         ]}
         onPress={handleSelectImage}
       >
-        <Camera width={16} height={16} color="white" />
+        <Camera width={14} height={14} color="white" />
       </TouchableOpacity>
     </View>
   </View>
