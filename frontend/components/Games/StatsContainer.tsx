@@ -3,9 +3,8 @@ import { View, StyleSheet, Text, Image } from "react-native";
 import * as Animatable from "react-native-animatable";
 import Timer from "@/components/games/Timer";
 import DifficultyBadge from "@/components/games/DifficultyBadge";
-import { Clock } from "react-native-feather";
-import { BASE_COLORS } from "@/constant/colors";
-import { formatTimerDisplay } from "@/utils/gameUtils";
+import { BASE_COLORS, ICON_COLORS } from "@/constant/colors";
+
 import { calculateRewardCoins } from "@/utils/rewardCalculationUtils";
 
 // Interface for reward info
@@ -122,10 +121,8 @@ const StatsContainer: React.FC<StatsContainerProps> = ({
           animation="fadeIn"
           duration={400}
           delay={animationDelay + 50}
-          style={styles.timerSection}
         >
           {variant === "playing" && isStarted && (
-            // FIXED: Improved layout with fixed widths
             <View style={styles.timeAndRewardContainer}>
               <View style={styles.timeContainer}>
                 <Timer
@@ -176,25 +173,22 @@ const styles = StyleSheet.create({
     marginBottom: 8,
     alignItems: "center",
   },
-  // FIXED: Improved container layout
   timeAndRewardContainer: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 8, // Reduced gap for better spacing
+    gap: 8,
   },
   completedStatsContainer: {
     justifyContent: "space-between",
   },
-  timerSection: {
-    // REMOVED: minWidth to let it size naturally
-  },
+
   staticTimerContainer: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
     gap: 6,
   },
-  // FIXED: Set fixed width for consistent timer container
+
   timeContainer: {
     flexDirection: "row",
     alignItems: "center",
@@ -213,18 +207,17 @@ const styles = StyleSheet.create({
     fontFamily: "Poppins-Medium",
     marginLeft: 6,
   },
-  // FIXED: Consistent reward display sizing
   rewardDisplay: {
     flexDirection: "row",
     alignItems: "center",
     backgroundColor: "rgba(255, 215, 0, 0.2)",
-    paddingHorizontal: 8,
-    paddingVertical: 4,
+    paddingHorizontal: 12,
+    paddingVertical: 6,
     borderRadius: 15,
     borderWidth: 1,
     borderColor: "rgba(255, 215, 0, 0.3)",
     gap: 4,
-    minWidth: 50, // FIXED: Set minimum width for consistency
+    minWidth: 50,
   },
   rewardCoin: {
     width: 16,
@@ -232,8 +225,8 @@ const styles = StyleSheet.create({
   },
   rewardText: {
     fontSize: 12,
-    fontFamily: "Poppins-SemiBold",
-    color: "#FFD700",
+    fontFamily: "Poppins-Medium",
+    color: ICON_COLORS.brightYellow,
   },
   badgesSection: {
     flexDirection: "row",

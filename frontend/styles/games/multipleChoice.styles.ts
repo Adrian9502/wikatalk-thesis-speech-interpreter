@@ -58,7 +58,7 @@ export default StyleSheet.create({
     borderColor: "rgba(255, 255, 255, 0.2)",
   },
   optionLetterText: {
-    fontSize: 16,
+    fontSize: 15,
     fontFamily: "Poppins-Medium",
     color: BASE_COLORS.white,
   },
@@ -67,7 +67,7 @@ export default StyleSheet.create({
     paddingRight: 16,
   },
   optionText: {
-    fontSize: 15,
+    fontSize: 14,
     fontFamily: "Poppins-Medium",
     color: BASE_COLORS.white,
     lineHeight: 22,

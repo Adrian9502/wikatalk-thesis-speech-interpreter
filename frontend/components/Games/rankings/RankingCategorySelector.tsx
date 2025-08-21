@@ -8,11 +8,8 @@ import {
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { RANKING_CATEGORIES } from "@/constant/rankingConstants";
-import {
-  GAME_RESULT_COLORS,
-  NAVIGATION_COLORS,
-} from "@/constant/gameConstants";
-import { rankingButtonColors } from "@/constant/colors";
+
+import { BASE_COLORS, rankingButtonColors } from "@/constant/colors";
 
 interface RankingCategorySelectorProps {
   selectedCategory: string;
@@ -80,13 +77,13 @@ const styles = StyleSheet.create({
   categoryButton: {
     paddingHorizontal: 14,
     paddingVertical: 12,
-    borderRadius: 16,
+    borderRadius: 20,
     alignItems: "center",
     justifyContent: "center",
     minWidth: 90,
     height: 60,
     borderWidth: 1,
-    borderColor: "rgba(255, 255, 255, 0.15)",
+    borderColor: "rgba(255, 255, 255, 0.20)",
   },
   categoryIcon: {
     marginBottom: 4,
@@ -101,7 +98,7 @@ const styles = StyleSheet.create({
     lineHeight: 12,
   },
   selectedCategoryTitle: {
-    color: "#fff",
+    color: BASE_COLORS.white,
     fontFamily: "Poppins-SemiBold",
   },
 });

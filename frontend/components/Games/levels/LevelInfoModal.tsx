@@ -169,7 +169,6 @@ const LevelInfoModal: React.FC<GameInfoModalProps> = React.memo(
       return null;
     }
 
-    // FIXED: Allow modal to show even if hasStarted is true (for smooth transitions)
     return (
       <Modal
         visible={visible}

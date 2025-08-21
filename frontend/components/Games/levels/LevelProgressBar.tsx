@@ -36,12 +36,7 @@ const LevelProgressBar: React.FC<LevelProgressBarProps> = ({ percentage }) => {
       <View style={styles.progressBarContainer}>
         <View style={styles.progressBar}>
           <View style={styles.progressBarBackground}>
-            <LinearGradient
-              colors={["#8BC34A", "#4CAF50"]}
-              start={{ x: 0, y: 0 }}
-              end={{ x: 1, y: 0 }}
-              style={[styles.progressFill, { width: `${percentage}%` }]}
-            />
+            <View style={[styles.progressFill, { width: `${percentage}%` }]} />
           </View>
         </View>
       </View>

@@ -1,5 +1,4 @@
 import { StyleSheet } from "react-native";
-import { BASE_COLORS } from "@/constant/colors";
 
 export const modalSharedStyles = StyleSheet.create({
   // Modal Containers
@@ -22,7 +21,7 @@ export const modalSharedStyles = StyleSheet.create({
     shadowRadius: 12,
   },
   modalContent: {
-    padding: 24,
+    padding: 20,
     position: "relative",
     overflow: "hidden",
     minHeight: 300,
@@ -55,7 +54,7 @@ export const modalSharedStyles = StyleSheet.create({
   },
   levelNumberContainer: {
     borderRadius: 20,
-    paddingVertical: 8,
+    paddingVertical: 7,
     paddingHorizontal: 18,
     flex: 0,
     backgroundColor: "rgba(255, 255, 255, 0.25)",
@@ -64,7 +63,8 @@ export const modalSharedStyles = StyleSheet.create({
     marginBottom: 8,
   },
   levelNumber: {
-    fontSize: 18,
+    fontSize: 15,
+
     textShadowColor: "rgba(0, 0, 0, 0.5)",
     textShadowOffset: { width: 0, height: 1 },
     textShadowRadius: 3,
@@ -72,7 +72,7 @@ export const modalSharedStyles = StyleSheet.create({
     color: "#fff",
   },
   levelTitle: {
-    fontSize: 23,
+    fontSize: 19,
     fontFamily: "Poppins-Bold",
     color: "#fff",
     textShadowColor: "rgba(0, 0, 0, 0.5)",
@@ -86,7 +86,9 @@ export const modalSharedStyles = StyleSheet.create({
   completedBadge: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "rgb(76, 175, 79)",
+    backgroundColor: "rgba(63, 212, 68, 0.75)",
+    borderColor: "rgba(62, 223, 67, 1)",
+    borderWidth: 1,
     paddingVertical: 5,
     paddingHorizontal: 10,
     borderRadius: 20,
@@ -109,12 +111,14 @@ export const modalSharedStyles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     backgroundColor: "rgba(255, 255, 255, 0.2)",
+    borderWidth: 1,
+    borderColor: "rgba(255, 255, 255, 0.4)",
     paddingHorizontal: 12,
     paddingVertical: 6,
     borderRadius: 20,
   },
   difficultyText: {
-    fontSize: 12,
+    fontSize: 11,
     fontFamily: "Poppins-SemiBold",
     color: "#fff",
   },
@@ -177,7 +181,7 @@ export const modalSharedStyles = StyleSheet.create({
     alignItems: "center",
   },
   startAndCloseText: {
-    fontSize: 15,
+    fontSize: 14,
     fontFamily: "Poppins-SemiBold",
     color: "#000",
   },

@@ -565,7 +565,7 @@ const LevelSelection = () => {
     // Fallback loading state
     return <AppLoading />;
   }, [
-    isProgressUpdating, // NEW: Add to dependencies
+    isProgressUpdating,
     dataReady,
     componentError,
     error,
@@ -633,7 +633,6 @@ const LevelSelection = () => {
           {/* Content Area */}
           <View style={styles.contentArea}>{renderContent}</View>
 
-          {/* FIXED: Only render modal when it should be visible */}
           {showGameModal &&
             selectedLevel &&
             selectedLevel.status !== "completed" && (
@@ -643,7 +642,7 @@ const LevelSelection = () => {
                 onStart={stableHandlers.handleStartGame}
                 levelData={{
                   ...selectedLevel.questionData,
-                  ...selectedLevel, // Include all level data
+                  ...selectedLevel,
                   levelString: selectedLevel.levelString,
                 }}
                 gameMode={gameMode}

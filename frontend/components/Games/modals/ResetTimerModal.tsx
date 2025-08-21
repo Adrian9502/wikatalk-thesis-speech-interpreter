@@ -191,7 +191,7 @@ const styles = StyleSheet.create({
     overflow: "hidden",
   },
   modalContent: {
-    padding: 24,
+    padding: 21,
     position: "relative",
   },
   modalHeader: {
@@ -202,7 +202,7 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   modalTitle: {
-    fontSize: 20,
+    fontSize: 18,
     fontFamily: "Poppins-SemiBold",
     color: BASE_COLORS.white,
   },
@@ -210,7 +210,7 @@ const styles = StyleSheet.create({
     marginBottom: 24,
   },
   modalText: {
-    fontSize: 13,
+    fontSize: 12,
     fontFamily: "Poppins-Medium",
     color: BASE_COLORS.white,
     lineHeight: 24,
@@ -229,7 +229,7 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   costLabel: {
-    fontSize: 14,
+    fontSize: 12,
     fontFamily: "Poppins-Medium",
     color: "rgba(255, 255, 255, 0.8)",
   },
@@ -239,13 +239,13 @@ const styles = StyleSheet.create({
     gap: 6,
   },
   costText: {
-    fontSize: 14,
+    fontSize: 13,
     fontFamily: "Poppins-SemiBold",
     color: BASE_COLORS.white,
   },
   coinImage: {
-    width: 16,
-    height: 16,
+    width: 15,
+    height: 15,
   },
   modalActions: {
     flexDirection: "row",
@@ -259,7 +259,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   cancelButtonText: {
-    fontSize: 14,
+    fontSize: 12,
     fontFamily: "Poppins-Medium",
     color: BASE_COLORS.white,
   },
@@ -274,7 +274,7 @@ const styles = StyleSheet.create({
     backgroundColor: "rgba(244, 67, 54, 0.5)",
   },
   confirmButtonText: {
-    fontSize: 14,
+    fontSize: 12,
     fontFamily: "Poppins-Medium",
     color: BASE_COLORS.white,
   },
@@ -283,7 +283,7 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   successTitle: {
-    fontSize: 20,
+    fontSize: 18,
     fontFamily: "Poppins-SemiBold",
     color: BASE_COLORS.white,
   },
@@ -291,7 +291,7 @@ const styles = StyleSheet.create({
     marginBottom: 24,
   },
   successText: {
-    fontSize: 14,
+    fontSize: 12,
     fontFamily: "Poppins-Medium",
     color: BASE_COLORS.white,
     textAlign: "center",
@@ -301,14 +301,14 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   successButton: {
-    backgroundColor: "#4CAF50",
+    backgroundColor: BASE_COLORS.success,
     paddingVertical: 8,
     borderRadius: 20,
     minWidth: 120,
     alignItems: "center",
   },
   successButtonText: {
-    fontSize: 14,
+    fontSize: 12,
     fontFamily: "Poppins-Medium",
     color: BASE_COLORS.white,
   },

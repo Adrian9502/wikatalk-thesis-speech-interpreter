@@ -1,7 +1,5 @@
-import { StyleSheet, Dimensions, Platform } from "react-native";
-import { BASE_COLORS } from "@/constant/colors";
-
-const { width } = Dimensions.get("window");
+import { BASE_COLORS, ICON_COLORS } from "@/constant/colors";
+import { StyleSheet, Platform } from "react-native";
 
 export const rewardStyles = StyleSheet.create({
   // Modal container styles
@@ -30,13 +28,6 @@ export const rewardStyles = StyleSheet.create({
   },
   gradientBackground: {
     padding: 20,
-  },
-  closeButton: {
-    position: "absolute",
-    right: 0,
-    padding: 8,
-    backgroundColor: "rgba(0,0,0,0.2)",
-    borderRadius: 20,
   },
 
   // Header styles
@@ -70,12 +61,12 @@ export const rewardStyles = StyleSheet.create({
     marginBottom: 12,
   },
   todayLabel: {
-    fontSize: 16,
+    fontSize: 13,
     fontFamily: "Poppins-Medium",
-    color: "#FFF",
+    color: BASE_COLORS.white,
   },
   availableBadge: {
-    backgroundColor: "#4CAF50",
+    backgroundColor: BASE_COLORS.success,
     paddingHorizontal: 8,
     paddingVertical: 4,
     borderRadius: 20,
@@ -88,8 +79,8 @@ export const rewardStyles = StyleSheet.create({
   },
   badgeText: {
     fontSize: 11,
-    fontFamily: "Poppins-Medium",
-    color: "#FFF",
+    fontFamily: "Poppins-Regular",
+    color: BASE_COLORS.white,
   },
   rewardContainer: {
     flexDirection: "row",
@@ -97,12 +88,12 @@ export const rewardStyles = StyleSheet.create({
     marginBottom: 8,
   },
   rewardAmount: {
-    fontSize: 22,
+    fontSize: 20,
     fontFamily: "Poppins-Bold",
-    color: "#FFF",
+    color: BASE_COLORS.white,
   },
   claimText: {
-    fontSize: 14,
+    fontSize: 11,
     fontFamily: "Poppins-Regular",
     color: "rgba(255,255,255,0.8)",
   },
@@ -110,12 +101,11 @@ export const rewardStyles = StyleSheet.create({
   // Month display styles
   monthDisplay: {
     alignItems: "center",
-    marginBottom: 16,
   },
   monthText: {
-    fontSize: 16,
+    fontSize: 15,
     fontFamily: "Poppins-SemiBold",
-    color: "#FFF",
+    color: BASE_COLORS.white,
   },
 
   // Calendar grid styles
@@ -197,26 +187,26 @@ export const rewardStyles = StyleSheet.create({
 
   // Buttons
   claimButton: {
-    backgroundColor: "#FFD700",
+    backgroundColor: ICON_COLORS.brightYellow,
     borderRadius: 20,
-    paddingVertical: 12,
+    paddingVertical: 8,
     alignItems: "center",
     marginBottom: 16,
   },
   claimButtonText: {
-    fontSize: 16,
+    fontSize: 13,
     fontFamily: "Poppins-SemiBold",
-    color: "#000",
+    color: "#333",
   },
   alreadyClaimedButton: {
     backgroundColor: "rgba(255,255,255,0.2)",
     borderRadius: 20,
-    paddingVertical: 12,
+    paddingVertical: 8,
     alignItems: "center",
     marginBottom: 16,
   },
   alreadyClaimedText: {
-    fontSize: 16,
+    fontSize: 13,
     fontFamily: "Poppins-SemiBold",
     color: "rgba(255,255,255,0.7)",
   },
@@ -241,7 +231,7 @@ export const rewardStyles = StyleSheet.create({
     color: "rgba(255,255,255,0.7)",
   },
   balanceValue: {
-    fontSize: 16,
+    fontSize: 15,
     fontFamily: "Poppins-SemiBold",
     color: "#FFF",
   },

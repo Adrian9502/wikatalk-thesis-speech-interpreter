@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState, useMemo } from "react";
+import React, { useEffect, useState, useMemo } from "react";
 import {
   View,
   Text,
@@ -12,7 +12,7 @@ import useProgressStore from "@/store/games/useProgressStore";
 import { getGameModeGradient } from "@/utils/gameUtils";
 
 interface GameCardProps {
-  game: GameOption;
+  game: any;
   onGamePress: () => void;
   onProgressPress: () => void;
 }
@@ -22,9 +22,8 @@ const GameCard: React.FC<GameCardProps> = ({
   onGamePress,
   onProgressPress,
 }) => {
-  const { getGameModeProgress, lastUpdated } = useProgressStore();
+  const { getGameModeProgress } = useProgressStore();
 
-  // NUCLEAR FIX: Freeze progress data after component mounts to prevent flicker
   const [frozenProgress] = useState(() => {
     // Capture progress data ONCE on mount and never change it
     const initialProgress = getGameModeProgress(game.id);
@@ -35,10 +34,6 @@ const GameCard: React.FC<GameCardProps> = ({
     return initialProgress;
   });
 
-  // NUCLEAR FIX: Disable ALL dynamic updates and re-renders
-  const [allowAnyUpdates] = useState(false); // Always false = no updates ever
-
-  // NUCLEAR FIX: Only do background preloading, NO state updates, NO logs
   useEffect(() => {
     // Only preload data silently, no state changes
     const timer = setTimeout(async () => {
@@ -53,7 +48,6 @@ const GameCard: React.FC<GameCardProps> = ({
     return () => clearTimeout(timer);
   }, [game.id]);
 
-  // NUCLEAR FIX: Memoize everything to prevent ANY re-renders
   const memoizedHandlers = useMemo(
     () => ({
       handleProgressPress: () => {
@@ -90,7 +84,6 @@ const GameCard: React.FC<GameCardProps> = ({
     );
   }, [game.id, game.gradientColors]);
 
-  // NUCLEAR FIX: Use frozen progress data - never changes
   return (
     <View style={styles.gameCard}>
       <LinearGradient
@@ -182,7 +175,7 @@ const styles = StyleSheet.create({
   gameIconBg: {
     width: 50,
     height: 50,
-    borderRadius: 20,
+    borderRadius: 50,
     backgroundColor: "rgba(255, 255, 255, 0.2)",
     justifyContent: "center",
     alignItems: "center",
@@ -193,13 +186,13 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   gameTitle: {
-    fontSize: 18,
+    fontSize: 17,
     fontFamily: "Poppins-Bold",
     color: "#fff",
     marginBottom: 4,
   },
   gameDescription: {
-    fontSize: 13,
+    fontSize: 12,
     fontFamily: "Poppins-Regular",
     color: "rgba(255, 255, 255, 0.8)",
     lineHeight: 16,
@@ -223,7 +216,7 @@ const styles = StyleSheet.create({
   },
   progressBtnText: {
     fontSize: 12,
-    fontFamily: "Poppins-SemiBold",
+    fontFamily: "Poppins-Medium",
     color: "#fff",
   },
   playBtn: {
@@ -231,12 +224,12 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
-    paddingVertical: 12,
+    paddingVertical: 10,
     borderRadius: 20,
     gap: 8,
   },
   playBtnText: {
-    fontSize: 14,
+    fontSize: 13,
     fontFamily: "Poppins-Bold",
     color: "#fff",
   },
@@ -251,7 +244,7 @@ const styles = StyleSheet.create({
   },
   difficultyText: {
     fontSize: 10,
-    fontFamily: "Poppins-Medium",
+    fontFamily: "Poppins-Regular",
     color: "#fff",
     textTransform: "uppercase",
     letterSpacing: 0.5,
@@ -269,7 +262,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   statValue: {
-    fontSize: 18,
+    fontSize: 14,
     fontFamily: "Poppins-Bold",
     color: "#FFF",
   },

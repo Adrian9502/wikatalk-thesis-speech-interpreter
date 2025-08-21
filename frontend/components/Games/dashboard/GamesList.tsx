@@ -1,11 +1,11 @@
 import React, { useCallback, useState, useMemo, useEffect } from "react";
-import { View, Text, StyleSheet, Animated } from "react-native";
-import { Target, Zap } from "react-native-feather";
+import { View, StyleSheet, Animated } from "react-native";
+import { Target } from "react-native-feather";
 import { SectionHeader } from "@/components/games/common/SectionHeader";
 import GameCard from "./GameCard";
 import gameOptions from "@/utils/games/gameOptions";
 import { GameOption } from "@/types/gameTypes";
-import { BASE_COLORS, iconColors } from "@/constant/colors";
+import { ICON_COLORS } from "@/constant/colors";
 import RankingButton from "../rankings/RankingButton";
 
 interface GamesListProps {
@@ -14,12 +14,11 @@ interface GamesListProps {
   onRankingsPress?: () => void;
 }
 
-// SIMPLE: Global flag to track if animations have played ONCE per app session
 let HAS_ANIMATED_ONCE = false;
 
 const GamesList = React.memo(
   ({ onGamePress, onProgressPress, onRankingsPress }: GamesListProps) => {
-    // Simple animation state - only animate if never animated before
+    // only animate if never animated before
     const [shouldAnimate] = useState(!HAS_ANIMATED_ONCE);
 
     // Simple animated values
@@ -30,7 +29,7 @@ const GamesList = React.memo(
       () => new Animated.Value(shouldAnimate ? 30 : 0)
     )[0];
 
-    // SIMPLE: Force consistent ordering
+    //  Force consistent ordering
     const sortedGameOptions = useMemo(() => {
       const gameOrder = ["multipleChoice", "identification", "fillBlanks"];
       return [...gameOptions].sort((a, b) => {
@@ -40,7 +39,7 @@ const GamesList = React.memo(
       });
     }, []);
 
-    // SIMPLE: One animation for the entire container
+    //  One animation for the entire container
     useEffect(() => {
       if (!shouldAnimate) return;
 
@@ -88,18 +87,14 @@ const GamesList = React.memo(
           },
         ]}
       >
-        <SectionHeader
-          icon={<Target width={20} height={20} color="#4CAF50" />}
-          title="Game Modes"
-          subtitle="Master different skills through interactive challenges"
-        />
-
         <View style={styles.headerRow}>
-          <View style={styles.titleSection}>
-            <Zap width={18} height={18} color={iconColors.brightYellow} />
-            <Text style={styles.sectionTitle}>Game Modes</Text>
-          </View>
-
+          <SectionHeader
+            icon={
+              <Target width={18} height={18} color={ICON_COLORS.brightYellow} />
+            }
+            title="Game Modes"
+            subtitle="Master skills with interactive challenges"
+          />
           {onRankingsPress && (
             <RankingButton onRankingsPress={onRankingsPress} />
           )}
@@ -127,17 +122,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    marginBottom: 15,
-  },
-  titleSection: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 8,
-  },
-  sectionTitle: {
-    fontSize: 18,
-    fontFamily: "Poppins-SemiBold",
-    color: BASE_COLORS.white,
+    marginTop: 10,
   },
 });
 

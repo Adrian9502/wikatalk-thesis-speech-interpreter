@@ -13,7 +13,7 @@ export default StyleSheet.create({
     marginBottom: 16,
   },
   instructionsTitle: {
-    fontSize: 15,
+    fontSize: 14,
     fontFamily: "Poppins-Medium",
     color: "rgba(255, 255, 255, 0.9)",
     marginBottom: 4,
@@ -47,8 +47,9 @@ export default StyleSheet.create({
     paddingVertical: 8,
     flexDirection: "row",
     alignItems: "center",
+    backgroundColor: "rgba(255, 255, 255, 0.1)",
     borderWidth: 1,
-    borderColor: "rgba(255, 255, 255, 0.1)",
+    borderColor: "rgba(255, 255, 255, 0.2)",
     paddingHorizontal: 12,
     minHeight: 50,
   },
@@ -90,10 +91,9 @@ export default StyleSheet.create({
     paddingRight: 8,
   },
   wordText: {
-    fontSize: 15,
+    fontSize: 14,
     fontFamily: "Poppins-Medium",
     color: BASE_COLORS.white,
-    lineHeight: 20,
   },
 
   resultIcon: {
@@ -121,7 +121,7 @@ export default StyleSheet.create({
     paddingVertical: 40,
   },
   noOptionsText: {
-    fontSize: 16,
+    fontSize: 14,
     fontFamily: "Poppins-Medium",
     color: "rgba(255, 255, 255, 0.6)",
     textAlign: "center",
@@ -129,14 +129,14 @@ export default StyleSheet.create({
 
   // Enhanced Translation Section
   translationSection: {
-    marginBottom: 20, // ADDED: Bottom margin for better spacing
+    marginBottom: 20,
   },
   translationButton: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
-    paddingHorizontal: 20,
-    paddingVertical: 12,
+    paddingHorizontal: 16,
+    paddingVertical: 10,
     borderRadius: 20,
     backgroundColor: "rgba(255, 255, 255, 0.1)",
     borderWidth: 1,
@@ -149,7 +149,7 @@ export default StyleSheet.create({
     borderColor: "rgba(255, 255, 255, 0.4)",
   },
   translationButtonText: {
-    fontSize: 14,
+    fontSize: 13,
     fontFamily: "Poppins-Medium",
     color: "rgba(255, 255, 255, 0.7)",
   },
@@ -163,25 +163,25 @@ export default StyleSheet.create({
   },
   translationCardGradient: {
     borderRadius: 20,
-    padding: 16,
-    borderWidth: 1,
-    borderColor: "rgba(16, 60, 182, 0.1)",
+    paddingVertical: 12,
   },
   translationCardHeader: {
     flexDirection: "row",
     alignItems: "center",
+    justifyContent: "center",
     marginBottom: 8,
     gap: 8,
   },
   translationCardTitle: {
-    fontSize: 14,
+    fontSize: 13,
     fontFamily: "Poppins-SemiBold",
     color: BASE_COLORS.white,
   },
   translationCardText: {
-    fontSize: 14,
+    fontSize: 12,
     fontFamily: "Poppins-Regular",
     color: "rgba(255, 255, 255, 0.9)",
+    textAlign: "center",
     lineHeight: 20,
   },
 

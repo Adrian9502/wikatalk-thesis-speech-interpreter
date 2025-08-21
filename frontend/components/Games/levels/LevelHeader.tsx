@@ -2,17 +2,16 @@ import React from "react";
 import { View, TouchableOpacity } from "react-native";
 import { ArrowLeft } from "react-native-feather";
 import * as Animatable from "react-native-animatable";
-import { router } from "expo-router"; // Add this import
+import { router } from "expo-router";
 import { BASE_COLORS } from "@/constant/colors";
 import { levelStyles as styles } from "@/styles/games/levels.styles";
 
 interface LevelHeaderProps {
   title: string;
-  onBack: () => void;
+  onBack?: () => void;
 }
 
-const LevelHeader: React.FC<LevelHeaderProps> = ({ title, onBack }) => {
-  // FIXED: Safe back navigation that clears the stack properly
+const LevelHeader: React.FC<LevelHeaderProps> = ({ title }) => {
   const handleBackPress = () => {
     try {
       console.log("[LevelHeader] Back button pressed");
@@ -33,16 +32,9 @@ const LevelHeader: React.FC<LevelHeaderProps> = ({ title, onBack }) => {
   };
 
   return (
-    <Animatable.View
-      animation="fadeInDown"
-      duration={600}
-      style={styles.headerContainer}
-    >
+    <Animatable.View animation="fadeInDown" duration={600}>
       <View style={styles.headerGradient}>
-        <TouchableOpacity
-          onPress={handleBackPress} // Use the fixed handler
-          style={styles.backButton}
-        >
+        <TouchableOpacity onPress={handleBackPress} style={styles.backButton}>
           <ArrowLeft width={17} height={17} color={BASE_COLORS.white} />
         </TouchableOpacity>
 

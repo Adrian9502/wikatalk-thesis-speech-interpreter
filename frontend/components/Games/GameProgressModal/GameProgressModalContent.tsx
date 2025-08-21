@@ -1,13 +1,6 @@
 import React, { useState, useEffect, useMemo, useCallback } from "react";
-import {
-  View,
-  Text,
-  TouchableOpacity,
-  StyleSheet,
-  ActivityIndicator,
-} from "react-native";
+import { View, Text, StyleSheet } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
-import { X } from "react-native-feather";
 import { EnhancedGameModeProgress } from "@/types/gameProgressTypes";
 import ProgressContent from "./ProgressContent";
 import useProgressStore from "@/store/games/useProgressStore";
@@ -15,6 +8,7 @@ import useProgressStore from "@/store/games/useProgressStore";
 import { getGameModeGradient } from "@/utils/gameUtils";
 import ModalLoading from "@/components/ModalLoading";
 import CloseButton from "../buttons/CloseButton";
+import { BASE_COLORS } from "@/constant/colors";
 
 interface GameProgressModalContentProps {
   gameMode: string;
@@ -192,13 +186,13 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "center",
     alignItems: "center",
-    marginBottom: 20,
+    marginBottom: 16,
     position: "relative",
   },
   title: {
-    fontSize: 20,
+    fontSize: 18,
     fontFamily: "Poppins-SemiBold",
-    color: "#FFF",
+    color: BASE_COLORS.white,
     textAlign: "center",
   },
 });

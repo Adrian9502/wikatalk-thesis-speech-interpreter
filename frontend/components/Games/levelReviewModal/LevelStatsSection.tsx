@@ -34,7 +34,6 @@ const LevelStatsSection: React.FC<LevelStatsSectionProps> = ({ details }) => {
         <View style={styles.statItem}>
           <View style={styles.statBox}>
             <Text style={styles.statLabel}>Time Spent</Text>
-            <Clock width={17} height={17} color="#fff" strokeWidth={2} />
             <Text style={styles.statValue}>
               {details ? formatTime(details.timeSpent || 0) : "--"}
             </Text>
@@ -45,7 +44,6 @@ const LevelStatsSection: React.FC<LevelStatsSectionProps> = ({ details }) => {
         <View style={styles.statItem}>
           <View style={styles.statBox}>
             <Text style={styles.statLabel}>Completed</Text>
-            <Calendar width={17} height={17} color="#fff" strokeWidth={2} />
             <Text style={styles.statValue} numberOfLines={2}>
               {completionDate || "--"}
             </Text>
@@ -59,8 +57,6 @@ const LevelStatsSection: React.FC<LevelStatsSectionProps> = ({ details }) => {
         <View style={styles.statItem}>
           <View style={styles.statBox}>
             <Text style={styles.statLabel}>Attempts</Text>
-
-            <Target width={17} height={17} color="#fff" strokeWidth={2} />
             <Text style={styles.statValue}>
               {details?.totalAttempts || "--"}
             </Text>
@@ -71,8 +67,6 @@ const LevelStatsSection: React.FC<LevelStatsSectionProps> = ({ details }) => {
         <View style={styles.statItem}>
           <View style={styles.statBox}>
             <Text style={styles.statLabel}>Success Rate</Text>
-
-            <Award width={17} height={17} color="#fff" strokeWidth={2} />
             <Text style={styles.statValue}>
               {details ? `${successRate}%` : "--"}
             </Text>
@@ -89,7 +83,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 4,
   },
   title: {
-    fontSize: 15,
+    fontSize: 14,
     fontFamily: "Poppins-Medium",
     color: "#fff",
     lineHeight: 22,
@@ -97,19 +91,17 @@ const styles = StyleSheet.create({
   },
   statsRow: {
     flexDirection: "row",
+    flexWrap: "wrap",
     justifyContent: "space-between",
     marginBottom: 16,
-    gap: 16,
   },
   statItem: {
-    flex: 1,
-    alignItems: "center",
+    flexBasis: "48%",
   },
   statLabel: {
-    fontSize: 13,
-    fontFamily: "Poppins-Medium",
-    color: "rgb(255, 255, 255)",
-    marginBottom: 6,
+    fontSize: 11,
+    fontFamily: "Poppins-Regular",
+    color: "rgba(255, 255, 255,0.9)",
     textAlign: "center",
     letterSpacing: 0.3,
   },
@@ -126,7 +118,7 @@ const styles = StyleSheet.create({
   },
   statValue: {
     fontSize: 13,
-    fontFamily: "Poppins-SemiBold",
+    fontFamily: "Poppins-Medium",
     color: "#fff",
     marginTop: 6,
     textAlign: "center",

@@ -12,11 +12,9 @@ import { NAVIGATION_COLORS } from "@/constant/gameConstants";
 import DifficultyBadge from "@/components/games/DifficultyBadge";
 import FocusAreaBadge from "@/components/games/FocusAreaBadge";
 
-// NEW: Import the ResetButton and ResetTimerModal components
 import ResetButton from "@/components/games/buttons/ResetButton";
 import ResetTimerModal from "@/components/games/modals/ResetTimerModal";
 
-// NEW: Import reset-related utilities
 import { calculateResetCost } from "@/utils/resetCostUtils";
 import { useUserProgress } from "@/hooks/useUserProgress";
 import useCoinsStore from "@/store/games/useCoinsStore";
@@ -69,11 +67,9 @@ const AnswerReview: React.FC<AnswerReviewProps> = ({
   levelTitle,
   levelString,
   actualTitle,
-  animation = "fadeIn", // CHANGED: Use simpler animation
-  duration = 600, // CHANGED: Reduced duration
-  delay = 100, // CHANGED: Reduced delay
-  questionLabel = "Question:",
-  answerLabel = "Your Answer:",
+  animation = "fadeIn",
+  duration = 600,
+  delay = 100,
   isBackgroundCompletion = false,
   isUserExit = false,
   rewardInfo = null,
@@ -84,11 +80,9 @@ const AnswerReview: React.FC<AnswerReviewProps> = ({
   const [showSuccessMessage, setShowSuccessMessage] = useState(false);
   const [resetMessage, setResetMessage] = useState("");
 
-  // NEW: Reset-related hooks (only if levelId exists)
   const { resetTimer } = useUserProgress(levelId || "");
   const { coins, fetchCoinsBalance } = useCoinsStore();
 
-  // NEW: Calculate reset cost
   const resetCost = useMemo(() => {
     if (levelId && timeElapsed && timeElapsed > 0) {
       return calculateResetCost(timeElapsed);
@@ -96,7 +90,6 @@ const AnswerReview: React.FC<AnswerReviewProps> = ({
     return 0;
   }, [levelId, timeElapsed]);
 
-  // NEW: Check if user can afford reset
   const canAfford = coins >= resetCost;
   const shouldDisableReset =
     !canAfford || isCorrect || !timeElapsed || timeElapsed === 0;
@@ -107,7 +100,6 @@ const AnswerReview: React.FC<AnswerReviewProps> = ({
     [gameMode]
   );
 
-  // ENHANCED: Handle different exit scenarios
   const getResultData = () => {
     if (isUserExit) {
       return {
@@ -149,7 +141,6 @@ const AnswerReview: React.FC<AnswerReviewProps> = ({
     return levelId ? `Level ${levelId}` : "Level";
   }, [actualTitle, levelTitle, levelString, levelId]);
 
-  // NEW: Reset button handlers
   const handleResetPress = useCallback(() => {
     if (levelId && timeElapsed && timeElapsed > 0 && !isCorrect) {
       setShowResetModal(true);
@@ -238,14 +229,14 @@ const AnswerReview: React.FC<AnswerReviewProps> = ({
 
   return (
     <>
-      {/* SIMPLIFIED: Main container with single fadeIn animation */}
+      {/* Main container */}
       <Animatable.View
         animation={animation}
         duration={duration}
         delay={delay}
         style={styles.container}
       >
-        {/* Hero Result Card - KEEP bounceIn animation */}
+        {/* Hero Result Card */}
         <Animatable.View
           animation="bounceIn"
           duration={1000}
@@ -266,9 +257,9 @@ const AnswerReview: React.FC<AnswerReviewProps> = ({
                   color={BASE_COLORS.white}
                 />
               ) : isCorrect ? (
-                <Check width={48} height={48} color={BASE_COLORS.white} />
+                <Check width={45} height={45} color={BASE_COLORS.white} />
               ) : (
-                <X width={48} height={48} color={BASE_COLORS.white} />
+                <X width={45} height={45} color={BASE_COLORS.white} />
               )}
             </View>
 
@@ -380,7 +371,7 @@ const AnswerReview: React.FC<AnswerReviewProps> = ({
           </Animatable.View>
         </View>
 
-        {/* Badges Row - SIMPLIFIED: Single fadeIn */}
+        {/* Badges Row  */}
         <Animatable.View
           animation="fadeIn"
           duration={400}
@@ -393,7 +384,7 @@ const AnswerReview: React.FC<AnswerReviewProps> = ({
           </View>
         </Animatable.View>
 
-        {/* Combined Q&A Card - SIMPLIFIED: Single fadeIn */}
+        {/* Q&A Card */}
         <Animatable.View
           animation="fadeIn"
           duration={500}
@@ -504,32 +495,32 @@ const styles = StyleSheet.create({
   heroCard: {
     width: screenWidth - 62,
     borderRadius: 20,
-    padding: 32,
+    padding: 28,
     alignItems: "center",
     position: "relative",
     overflow: "hidden",
     minHeight: 180,
   },
   heroIcon: {
-    width: 80,
-    height: 80,
+    width: 75,
+    height: 75,
     borderRadius: 40,
     backgroundColor: "rgba(255, 255, 255, 0.2)",
     justifyContent: "center",
     alignItems: "center",
     marginBottom: 16,
     borderWidth: 3,
-    borderColor: "rgba(255, 255, 255, 0.3)",
+    borderColor: "rgba(255, 255, 255, 0.4)",
   },
   heroTitle: {
-    fontSize: 28,
+    fontSize: 22,
     fontFamily: "Poppins-Bold",
     color: BASE_COLORS.white,
     marginBottom: 8,
     textAlign: "center",
   },
   heroMessage: {
-    fontSize: 16,
+    fontSize: 14,
     fontFamily: "Poppins-Medium",
     color: "rgba(255, 255, 255, 0.9)",
     textAlign: "center",
@@ -567,15 +558,15 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   resetSuccessIndicator: {
-    backgroundColor: "rgba(255,255,255 ,0.1)",
+    backgroundColor: "rgba(63, 212, 68, 0.75)",
     paddingHorizontal: 20,
     paddingVertical: 8,
     borderRadius: 20,
+    borderColor: "rgba(62, 223, 67, 1)",
     borderWidth: 1,
-    borderColor: "rgba(255, 255, 255, 0.3)",
   },
   resetSuccessText: {
-    fontSize: 13,
+    fontSize: 12,
     fontFamily: "Poppins-SemiBold",
     color: BASE_COLORS.white,
     textAlign: "center",
@@ -598,7 +589,7 @@ const styles = StyleSheet.create({
     padding: 16,
     alignItems: "center",
     borderWidth: 1,
-    borderColor: "rgba(255, 255, 255, 0.2)",
+    borderColor: "rgba(255, 255, 255, 0.3)",
     transform: [{ rotate: "-3deg" }],
   },
   timeCard: {
@@ -608,7 +599,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     borderWidth: 1,
     position: "relative",
-    borderColor: "rgba(255, 255, 255, 0.2)",
+    borderColor: "rgba(255, 255, 255, 0.3)",
     transform: [{ rotate: "3deg" }],
     minHeight: 135,
   },
@@ -628,7 +619,7 @@ const styles = StyleSheet.create({
     fontFamily: "Poppins-Bold",
     color: TITLE_COLORS.customYellow,
     textAlign: "center",
-    fontSize: 16,
+    fontSize: 15,
   },
   resetSection: {
     position: "absolute",
@@ -645,12 +636,12 @@ const styles = StyleSheet.create({
   curvedBadgeContainer: {
     flexDirection: "row",
     gap: 16,
-    backgroundColor: "rgba(255, 255, 255, 0.1)",
+    backgroundColor: "rgba(255, 255, 255, 0.15)",
     borderRadius: 20,
     paddingHorizontal: 20,
     paddingVertical: 12,
     borderWidth: 1,
-    borderColor: "rgba(255, 255, 255, 0.15)",
+    borderColor: "rgba(255, 255, 255, 0.4)",
   },
   rewardFloatingCard: {
     marginBottom: 24,
@@ -671,7 +662,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   rewardTitle: {
-    fontSize: 16,
+    fontSize: 15,
     fontFamily: "Poppins-SemiBold",
     color: BASE_COLORS.white,
     textAlign: "center",
@@ -692,11 +683,11 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   rewardCoinImage: {
-    width: 22,
-    height: 22,
+    width: 20,
+    height: 20,
   },
   rewardCoinsText: {
-    fontSize: 20,
+    fontSize: 18,
     fontFamily: "Poppins-Bold",
     color: BASE_COLORS.white,
     textShadowColor: "rgba(0, 0, 0, 0.3)",
@@ -716,11 +707,11 @@ const styles = StyleSheet.create({
     alignItems: "center",
     borderWidth: 1,
     marginBottom: 20,
-    borderColor: "rgba(255, 255, 255, 0.2)",
-    backgroundColor: "rgba(255, 255, 255, 0.1)",
+    borderColor: "rgba(255, 255, 255, 0.3)",
+    backgroundColor: "rgba(255, 255, 255, 0.15)",
   },
   sectionTitleText: {
-    fontSize: 15,
+    fontSize: 14,
     fontFamily: "Poppins-SemiBold",
     color: BASE_COLORS.white,
     textAlign: "center",
@@ -734,7 +725,7 @@ const styles = StyleSheet.create({
   },
   combinedCard: {
     borderRadius: 20,
-    padding: 24,
+    padding: 20,
     position: "relative",
     overflow: "hidden",
     shadowColor: "#000",
@@ -776,16 +767,16 @@ const styles = StyleSheet.create({
     backgroundColor: "rgba(255, 152, 0, 0.8)",
   },
   cardEmoji: {
-    fontSize: 16,
+    fontSize: 15,
     color: BASE_COLORS.white,
   },
   cardTitle: {
-    fontSize: 16,
+    fontSize: 14,
     fontFamily: "Poppins-SemiBold",
     color: BASE_COLORS.white,
   },
   cardContent: {
-    fontSize: 15,
+    fontSize: 13,
     fontFamily: "Poppins-Medium",
     color: "rgba(255, 255, 255, 0.9)",
     lineHeight: 22,

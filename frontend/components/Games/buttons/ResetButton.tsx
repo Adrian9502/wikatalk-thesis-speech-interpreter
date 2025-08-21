@@ -11,7 +11,7 @@ import {
   ImageStyle,
 } from "react-native";
 import { RefreshCw } from "react-native-feather";
-import { iconColors } from "@/constant/colors";
+import { ICON_COLORS } from "@/constant/colors";
 
 interface ResetButtonProps {
   // Core functionality
@@ -225,7 +225,7 @@ const styles = StyleSheet.create({
   baseCost: {
     fontSize: 12,
     fontFamily: "Poppins-SemiBold",
-    color: iconColors.brightYellow,
+    color: ICON_COLORS.brightYellow,
   } as TextStyle,
 
   mediumCost: {

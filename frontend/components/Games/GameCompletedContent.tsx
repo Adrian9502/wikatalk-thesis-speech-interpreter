@@ -2,7 +2,7 @@ import React, { useCallback } from "react";
 import { View, Text, ScrollView } from "react-native";
 import * as Animatable from "react-native-animatable";
 import { LinearGradient } from "expo-linear-gradient";
-import { BASE_COLORS, iconColors } from "@/constant/colors";
+import { BASE_COLORS, ICON_COLORS } from "@/constant/colors";
 import AnswerReview from "@/components/games/AnswerReview";
 import GameNavigation from "@/components/games/GameNavigation";
 import gameSharedStyles from "@/styles/gamesSharedStyles";

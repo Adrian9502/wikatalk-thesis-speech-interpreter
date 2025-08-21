@@ -6,6 +6,7 @@ import { LevelData } from "@/types/gameTypes";
 import { renderFocusIcon } from "@/utils/games/renderFocusIcon";
 import { getStarCount, formatDifficulty } from "@/utils/games/difficultyUtils";
 import { levelStyles as styles } from "@/styles/games/levels.styles";
+import { BASE_COLORS, ICON_COLORS } from "@/constant/colors";
 
 interface LevelCardProps {
   level: LevelData;
@@ -197,7 +198,12 @@ const LevelCard: React.FC<LevelCardProps> = React.memo(
             {/* Completed Badge */}
             {levelProps.isCompleted && (
               <View style={styles.completedPill}>
-                <Check width={14} height={14} color="#FFFFFF" strokeWidth={3} />
+                <Check
+                  width={14}
+                  height={14}
+                  color={BASE_COLORS.white}
+                  strokeWidth={3}
+                />
                 <Text style={styles.completedPillText}>Finished</Text>
               </View>
             )}
@@ -226,11 +232,13 @@ const LevelCard: React.FC<LevelCardProps> = React.memo(
                         width={14}
                         height={14}
                         fill={
-                          i < levelProps.starCount ? "#FFC107" : "transparent"
+                          i < levelProps.starCount
+                            ? ICON_COLORS.brightYellow
+                            : "transparent"
                         }
                         stroke={
                           i < levelProps.starCount
-                            ? "#FFC107"
+                            ? ICON_COLORS.brightYellow
                             : "rgba(255, 255, 255, 0.4)"
                         }
                         style={{ marginRight: 2 }}

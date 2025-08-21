@@ -38,7 +38,7 @@ const RewardDayItem: React.FC<RewardDayItemProps> = ({ item }) => {
         <View style={rewardStyles.upcomingIndicator}>
           <Image
             source={require("@/assets/images/coin.png")}
-            style={{ width: 24, height: 24 }}
+            style={{ width: 20, height: 20 }}
           />
         </View>
       )}

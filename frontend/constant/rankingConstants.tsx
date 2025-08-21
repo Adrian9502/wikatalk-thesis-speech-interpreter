@@ -2,7 +2,7 @@ import React from "react";
 import { Image } from "react-native";
 import { RankingCategory } from "@/types/rankingTypes";
 import { Ionicons } from "@expo/vector-icons";
-import { iconColors } from "@/constant/colors";
+import { ICON_COLORS } from "@/constant/colors";
 import { Zap } from "react-native-feather";
 
 export const RANKING_CATEGORIES: RankingCategory[] = [
@@ -10,7 +10,7 @@ export const RANKING_CATEGORIES: RankingCategory[] = [
     id: "quizChampions",
     title: "Quiz Champions",
     description: "Most quizzes completed",
-    icon: <Ionicons name="trophy" size={18} color={iconColors.brightYellow} />,
+    icon: <Ionicons name="trophy" size={18} color={ICON_COLORS.brightYellow} />,
   },
   {
     id: "coinMasters",
@@ -28,14 +28,14 @@ export const RANKING_CATEGORIES: RankingCategory[] = [
     id: "speedDemons",
     title: "Speed Demons",
     description: "Best average completion times",
-    icon: <Zap width={18} height={18} color={iconColors.brightYellow} />,
+    icon: <Zap width={18} height={18} color={ICON_COLORS.brightYellow} />,
   },
   {
     id: "consistencyKings",
     title: "Consistency Kings",
     description: "Highest completion rates",
     icon: (
-      <Ionicons name="stats-chart" size={18} color={iconColors.brightYellow} />
+      <Ionicons name="stats-chart" size={18} color={ICON_COLORS.brightYellow} />
     ),
   },
 ];
@@ -53,7 +53,7 @@ export const getRankingIcon = (type: string): React.ReactNode => {
   const category = RANKING_CATEGORIES.find((cat) => cat.id === type);
   return (
     category?.icon || (
-      <Ionicons name="trophy" size={18} color={iconColors.brightYellow} />
+      <Ionicons name="trophy" size={18} color={ICON_COLORS.brightYellow} />
     )
   );
 };

@@ -3,6 +3,7 @@ import { View, Text, StyleSheet } from "react-native";
 import * as Animatable from "react-native-animatable";
 import { Clock, CheckCircle, XCircle } from "react-native-feather";
 import { formatTime } from "@/utils/gameUtils";
+import { BASE_COLORS } from "@/constant/colors";
 
 interface RecentAttemptProps {
   attempt: {
@@ -41,19 +42,24 @@ const RecentAttempt = React.memo(({ attempt, index }: RecentAttemptProps) => {
         <View
           style={[
             styles.attemptResult,
-            { backgroundColor: attempt.isCorrect ? "#4CAF50" : "#F44336" },
+            {
+              backgroundColor: attempt.isCorrect
+                ? BASE_COLORS.success
+                : BASE_COLORS.danger,
+            },
           ]}
         >
           {attempt.isCorrect ? (
-            <CheckCircle width={12} height={12} color="#fff" />
+            <CheckCircle width={12} height={12} color={BASE_COLORS.white} />
           ) : (
-            <XCircle width={12} height={12} color="#fff" />
+            <XCircle width={12} height={12} color={BASE_COLORS.white} />
           )}
         </View>
       </View>
       <View style={styles.attemptDetails}>
         <Text style={styles.attemptTime}>
-          <Clock width={12} height={12} color="#fff" />{" "}
+          <Clock width={12} height={12} color={BASE_COLORS.white} />
+          {"  "}
           {formatTime(attempt.timeSpent || 0)}
         </Text>
         <Text style={styles.attemptDate}>
@@ -127,7 +133,7 @@ const styles = StyleSheet.create({
   attemptDate: {
     fontSize: 11,
     fontFamily: "Poppins-Regular",
-    color: "rgba(255, 255, 255, 0.5)",
+    color: "rgba(255, 255, 255, 0.6)",
   },
 });
 

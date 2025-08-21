@@ -5,7 +5,6 @@ import { BASE_COLORS } from "@/constant/colors";
 import { useNavigation } from "expo-router";
 import StatsContainer from "@/components/games/StatsContainer";
 
-// ADD: RewardInfo interface
 interface RewardInfo {
   coins: number;
   label: string;
@@ -20,7 +19,6 @@ type HeaderProps = {
   hideBack?: boolean;
   onBackPress?: () => void;
 
-  // NEW: Stats container props
   showStats?: boolean;
   difficulty?: string;
   focusArea?: string;
@@ -43,17 +41,11 @@ const GameHeader = ({
   // Stats props
   showStats = false,
   difficulty,
-  focusArea,
   showTimer,
   timerRunning,
   initialTime,
   isStarted,
   variant,
-  finalTime,
-  levelId,
-  onTimerReset,
-  isCorrectAnswer,
-  currentRewardInfo = null, // ADD: Current reward info
 }: HeaderProps & { levelId?: number | string; onTimerReset?: () => void }) => {
   const navigation = useNavigation();
 
@@ -140,7 +132,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
   },
   title: {
-    fontSize: 22,
+    fontSize: 17,
     fontFamily: "Poppins-SemiBold",
     color: BASE_COLORS.white,
     letterSpacing: 0.7,

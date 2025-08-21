@@ -3,7 +3,7 @@ import { View, Text, StyleSheet, Image } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { RankingUser } from "@/types/rankingTypes";
 import { formatTime } from "@/utils/gameUtils";
-import { iconColors, BASE_COLORS } from "@/constant/colors";
+import { ICON_COLORS, BASE_COLORS } from "@/constant/colors";
 
 interface RankingItemProps {
   user: RankingUser;
@@ -22,11 +22,11 @@ const RankingItem: React.FC<RankingItemProps> = ({
 
   const getRankDisplay = (rank: number): React.ReactNode => {
     if (rank === 1)
-      return <Ionicons name="trophy" size={20} color={iconColors.gold} />;
+      return <Ionicons name="trophy" size={20} color={ICON_COLORS.gold} />;
     if (rank === 2)
-      return <Ionicons name="trophy" size={20} color={iconColors.silver} />;
+      return <Ionicons name="trophy" size={20} color={ICON_COLORS.silver} />;
     if (rank === 3)
-      return <Ionicons name="trophy" size={20} color={iconColors.bronze} />;
+      return <Ionicons name="trophy" size={20} color={ICON_COLORS.bronze} />;
     return (
       <Text style={[styles.rankText, getRankStyle(rank)]}>{`${rank}`}.</Text>
     );
@@ -35,11 +35,11 @@ const RankingItem: React.FC<RankingItemProps> = ({
   const getRankStyle = (rank: number) => {
     switch (rank) {
       case 1:
-        return { color: iconColors.gold, fontSize: 24 as const };
+        return { color: ICON_COLORS.gold, fontSize: 24 as const };
       case 2:
-        return { color: iconColors.silver, fontSize: 24 as const };
+        return { color: ICON_COLORS.silver, fontSize: 24 as const };
       case 3:
-        return { color: iconColors.bronze, fontSize: 24 as const };
+        return { color: ICON_COLORS.bronze, fontSize: 24 as const };
       default:
         return { color: BASE_COLORS.white, fontSize: 14 as const };
     }
@@ -149,7 +149,7 @@ const styles = StyleSheet.create({
   },
   currentUserContainer: {
     backgroundColor: "rgba(0, 0, 0, 0.4)",
-    borderColor: iconColors.gold,
+    borderColor: ICON_COLORS.gold,
   },
   rankContainer: {
     minWidth: 40,
@@ -161,7 +161,7 @@ const styles = StyleSheet.create({
     textAlign: "center",
   },
   currentUserText: {
-    color: iconColors.gold,
+    color: ICON_COLORS.gold,
   },
   avatarContainer: {
     marginHorizontal: 12,
@@ -193,18 +193,18 @@ const styles = StyleSheet.create({
   },
   username: {
     fontSize: 13,
-    fontFamily: "Poppins-SemiBold",
+    fontFamily: "Poppins-Medium",
     color: BASE_COLORS.white,
     marginBottom: 3,
   },
   valueText: {
     fontSize: 12,
-    fontFamily: "Poppins-Medium",
+    fontFamily: "Poppins-Regular",
     color: "rgba(255, 255, 255, 0.85)",
     marginBottom: 2,
   },
   currentUserValue: {
-    color: iconColors.gold,
+    color: ICON_COLORS.gold,
     fontFamily: "Poppins-SemiBold",
     fontSize: 13,
   },

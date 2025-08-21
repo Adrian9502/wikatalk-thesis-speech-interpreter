@@ -13,9 +13,7 @@ import {
   TextInput,
   ScrollView,
   Animated,
-  Platform,
   Keyboard,
-  Dimensions,
 } from "react-native";
 import { Check, X, Eye, EyeOff } from "react-native-feather";
 import { LinearGradient } from "expo-linear-gradient";
@@ -63,7 +61,7 @@ const FillInTheBlankPlayingContent: React.FC<RenderPlayingContentProps> =
 
       useLayoutEffect(() => {
         navigation.setOptions({
-          // 👇 disables layout resizing when keyboard shows/hides
+          //  disables layout resizing when keyboard shows/hides
           windowSoftInputMode: "adjustNothing",
         });
       }, [navigation]);
@@ -72,14 +70,15 @@ const FillInTheBlankPlayingContent: React.FC<RenderPlayingContentProps> =
 
       // Simplified animation state
       const [isAnimating, setIsAnimating] = useState(true);
-      const [keyboardHeight, setKeyboardHeight] = useState(0);
-      const [isKeyboardVisible, setIsKeyboardVisible] = useState(false);
 
-      // NEW: Animation refs for hint and translation
+      // Animation refs for hint and translation
       const hintOpacity = useRef(new Animated.Value(0)).current;
       const translationOpacity = useRef(new Animated.Value(0)).current;
 
-      // NEW: Animation for smooth keyboard transitions
+      //Animation for feedback card bounce
+      const feedbackScale = useRef(new Animated.Value(0)).current;
+
+      // Animation for smooth keyboard transitions
       const keyboardAnim = useRef(new Animated.Value(0)).current;
       const containerTranslateY = useRef(new Animated.Value(0)).current;
 
@@ -98,16 +97,24 @@ const FillInTheBlankPlayingContent: React.FC<RenderPlayingContentProps> =
         return () => clearTimeout(timer);
       }, []);
 
-      // NEW: Keyboard event listeners
+      useEffect(() => {
+        if (showFeedback) {
+          feedbackScale.setValue(0);
+          Animated.spring(feedbackScale, {
+            toValue: 1,
+            tension: 80,
+            friction: 15,
+            useNativeDriver: true,
+          }).start();
+        } else {
+          feedbackScale.setValue(0);
+        }
+      }, [showFeedback, feedbackScale]);
+
       useEffect(() => {
         const keyboardDidShowListener = Keyboard.addListener(
           "keyboardDidShow",
           (e) => {
-            const { height } = e.endCoordinates;
-            setKeyboardHeight(height);
-            setIsKeyboardVisible(true);
-
-            // Smooth animation when keyboard appears
             Animated.parallel([
               Animated.timing(keyboardAnim, {
                 toValue: 1,
@@ -115,7 +122,7 @@ const FillInTheBlankPlayingContent: React.FC<RenderPlayingContentProps> =
                 useNativeDriver: false,
               }),
               Animated.timing(containerTranslateY, {
-                toValue: -20, // Slight upward movement
+                toValue: -20,
                 duration: 300,
                 useNativeDriver: true,
               }),
@@ -134,9 +141,6 @@ const FillInTheBlankPlayingContent: React.FC<RenderPlayingContentProps> =
         const keyboardDidHideListener = Keyboard.addListener(
           "keyboardDidHide",
           () => {
-            setKeyboardHeight(0);
-            setIsKeyboardVisible(false);
-
             // Smooth animation when keyboard disappears
             Animated.parallel([
               Animated.timing(keyboardAnim, {
@@ -320,8 +324,8 @@ const FillInTheBlankPlayingContent: React.FC<RenderPlayingContentProps> =
                     autoCapitalize="none"
                     selectionColor={BASE_COLORS.white}
                     multiline={false}
+                    numberOfLines={1}
                     editable={!isAnimating}
-                    returnKeyType="done"
                     onSubmitEditing={handleCheckAnswer}
                     onFocus={handleInputFocus}
                   />
@@ -330,11 +334,12 @@ const FillInTheBlankPlayingContent: React.FC<RenderPlayingContentProps> =
                     <TouchableOpacity
                       style={styles.clearButton}
                       onPress={handleClear}
-                      activeOpacity={0.7}
+                      activeOpacity={0.8}
+                      hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
                     >
                       <X
-                        width={14}
-                        height={14}
+                        width={12}
+                        height={12}
                         color="rgba(255, 255, 255, 0.7)"
                       />
                     </TouchableOpacity>
@@ -366,13 +371,61 @@ const FillInTheBlankPlayingContent: React.FC<RenderPlayingContentProps> =
                         styles.submitButtonText,
                         !canSubmit && styles.submitButtonTextDisabled,
                       ]}
+                      numberOfLines={1}
+                      adjustsFontSizeToFit={true}
+                      minimumFontScale={0.8}
                     >
-                      CHECK
+                      Submit
                     </Text>
                   </LinearGradient>
                 </TouchableOpacity>
               </View>
             </View>
+
+            {/* Feedback Card with Bounce Animation */}
+            {showFeedback && (
+              <Animated.View
+                style={[
+                  styles.feedbackContainer,
+                  {
+                    transform: [
+                      {
+                        scale: feedbackScale.interpolate({
+                          inputRange: [0, 1, 1.5],
+                          outputRange: [0, 1, 1.05],
+                          extrapolate: "clamp",
+                        }),
+                      },
+                    ],
+                  },
+                ]}
+              >
+                <LinearGradient
+                  colors={
+                    isCorrect ? ["#4CAF50", "#2E7D32"] : ["#F44336", "#C62828"]
+                  }
+                  style={styles.feedbackCard}
+                >
+                  <View style={styles.feedbackIcon}>
+                    {isCorrect ? (
+                      <Check width={24} height={24} color={BASE_COLORS.white} />
+                    ) : (
+                      <X width={24} height={24} color={BASE_COLORS.white} />
+                    )}
+                  </View>
+                  <View style={styles.feedbackContent}>
+                    <Text style={styles.feedbackTitle}>
+                      {isCorrect ? "Perfect!" : "Oops, try again!"}
+                    </Text>
+                    <Text style={styles.feedbackText}>
+                      {isCorrect
+                        ? "You got it! Well done."
+                        : `Try again! You have ${attemptsLeft} attempts left.`}
+                    </Text>
+                  </View>
+                </LinearGradient>
+              </Animated.View>
+            )}
 
             {/* Help Buttons */}
             <View style={styles.helpSection}>
@@ -484,36 +537,6 @@ const FillInTheBlankPlayingContent: React.FC<RenderPlayingContentProps> =
                   </Text>
                 </LinearGradient>
               </Animated.View>
-            )}
-
-            {/* Feedback Card */}
-            {showFeedback && (
-              <View style={styles.feedbackContainer}>
-                <LinearGradient
-                  colors={
-                    isCorrect ? ["#4CAF50", "#2E7D32"] : ["#F44336", "#C62828"]
-                  }
-                  style={styles.feedbackCard}
-                >
-                  <View style={styles.feedbackIcon}>
-                    {isCorrect ? (
-                      <Check width={24} height={24} color={BASE_COLORS.white} />
-                    ) : (
-                      <X width={24} height={24} color={BASE_COLORS.white} />
-                    )}
-                  </View>
-                  <View style={styles.feedbackContent}>
-                    <Text style={styles.feedbackTitle}>
-                      {isCorrect ? "Perfect!" : "Not quite right"}
-                    </Text>
-                    <Text style={styles.feedbackText}>
-                      {isCorrect
-                        ? "You got it! Well done."
-                        : `Try again! You have ${attemptsLeft} attempts left.`}
-                    </Text>
-                  </View>
-                </LinearGradient>
-              </View>
             )}
           </ScrollView>
         </Animated.View>

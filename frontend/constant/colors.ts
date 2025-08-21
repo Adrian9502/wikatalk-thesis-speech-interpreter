@@ -80,7 +80,7 @@ export const getPositionalColors = (
     success: BASE_COLORS.success,
   };
 };
-export const iconColors = {
+export const ICON_COLORS = {
   brightYellow: "#fbff26ff" as const,
   gold: "#FFD700" as const,
   silver: "#C0C0C0" as const,

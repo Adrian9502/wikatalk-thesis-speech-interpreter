@@ -1,6 +1,6 @@
 import React from "react";
 import { View, Text, StyleSheet } from "react-native";
-import { BASE_COLORS, iconColors } from "@/constant/colors";
+import { BASE_COLORS, ICON_COLORS } from "@/constant/colors";
 import MaterialCommunityIcons from "react-native-vector-icons/MaterialCommunityIcons";
 
 interface DifficultyBadgeProps {
@@ -26,7 +26,7 @@ const DifficultyBadge: React.FC<DifficultyBadgeProps> = ({
           key={i}
           name="star"
           size={16}
-          color={iconColors.brightYellow}
+          color={ICON_COLORS.brightYellow}
         />
       );
     }

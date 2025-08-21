@@ -36,7 +36,7 @@ export const gameSharedStyles = StyleSheet.create({
   },
 
   questionText: {
-    fontSize: 20,
+    fontSize: 18,
     fontFamily: "Poppins-SemiBold",
     color: BASE_COLORS.white,
     marginBottom: 10,
@@ -107,7 +107,7 @@ export const gameSharedStyles = StyleSheet.create({
 
   questionContainer: {
     borderRadius: 20,
-    padding: 40,
+    padding: 30,
     overflow: "hidden",
     justifyContent: "center",
     alignItems: "center",

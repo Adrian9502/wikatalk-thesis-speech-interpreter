@@ -68,7 +68,7 @@ const MultipleChoicePlayingContent: React.FC<MultipleChoicePlayingContentProps> 
 
     return (
       <View style={gamesSharedStyles.gameContainer}>
-        {/* Question Card - No animation, parent handles it */}
+        {/* Question Card  */}
         <View style={gamesSharedStyles.questionCardContainer}>
           <LinearGradient
             style={gamesSharedStyles.questionCard}
@@ -112,7 +112,6 @@ const MultipleChoicePlayingContent: React.FC<MultipleChoicePlayingContentProps> 
             </View>
           </View>
 
-          {/* FIXED: Use ScrollView instead of FlatList to avoid nesting */}
           <ScrollView
             showsVerticalScrollIndicator={false}
             contentContainerStyle={{ flexGrow: 1, paddingBottom: 20 }}

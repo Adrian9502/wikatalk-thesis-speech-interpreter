@@ -65,9 +65,9 @@ const Games = () => {
   const { showRankingsModal } = useRankingsModal();
 
   // Get progress from centralized store
-  const { fetchProgress, isLoading: progressLoading } = useProgressStore();
+  const { fetchProgress } = useProgressStore();
 
-  // ADD: Get the correct Word of Day functions from pronunciation store
+  // Get the correct Word of Day functions from pronunciation store
   const {
     wordOfTheDay,
     isWordOfDayPlaying,
@@ -89,7 +89,7 @@ const Games = () => {
     handleGamePress,
   } = useGameDashboard();
 
-  // ADD: Initialize Word of the Day when component mounts
+  // Initialize Word of the Day when component mounts
   useEffect(() => {
     if (hasInitialized && !wordOfTheDay) {
       console.log("[Games] Loading Word of the Day");
@@ -167,9 +167,8 @@ const Games = () => {
     };
 
     INITIALIZATION_PROMISE = initializeOnce();
-  }, []); // Run only once per app session
+  }, []);
 
-  // FIXED: Smart focus refresh - but don't re-initialize
   useFocusEffect(
     React.useCallback(() => {
       if (!hasInitialized || focusRefreshInProgress.current) {
@@ -218,7 +217,6 @@ const Games = () => {
     setHasInitialized(false);
   };
 
-  // FIXED: Optimized progress press handler
   const handleProgressPress = useCallback(
     (gameId: string, gameTitle: string) => {
       const now = Date.now();
@@ -234,7 +232,6 @@ const Games = () => {
     [showProgressModal]
   );
 
-  // SIMPLIFIED: Show loading only during initial load
   if (!hasInitialized && !hasError) {
     return <AppLoading />;
   }
@@ -263,20 +260,18 @@ const Games = () => {
       style={[styles.wrapper, { backgroundColor: activeTheme.backgroundColor }]}
     >
       <SafeAreaView style={[dynamicStyles.container, styles.container]}>
-        {/* Removed standalone DashboardHeader */}
-
         <ScrollView
           showsVerticalScrollIndicator={false}
           contentContainerStyle={styles.scrollContent}
         >
-          {/* Word of the Day card with integrated header */}
+          {/* Word of the Day card with coin display component */}
           <WordOfTheDayCard
             wordOfTheDay={wordOfTheDay}
             isPlaying={isWordOfDayPlaying}
             isLoading={isAudioLoading && isWordOfDayPlaying}
             onCardPress={() => setWordOfDayModalVisible(true)}
             onPlayPress={playWordOfDay}
-            onCoinsPress={openRewardsModal} // Pass the coins press handler
+            onCoinsPress={openRewardsModal}
           />
 
           {/* Game modes list */}

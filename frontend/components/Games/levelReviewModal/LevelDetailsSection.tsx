@@ -1,3 +1,5 @@
+import { BASE_COLORS } from "@/constant/colors";
+import { trimEnd } from "lodash";
 import React from "react";
 import { View, Text, StyleSheet } from "react-native";
 import { AlertCircle } from "react-native-feather";
@@ -77,36 +79,35 @@ const styles = StyleSheet.create({
     marginTop: 8,
   },
   errorHint: {
-    color: "rgba(255, 255, 255, 0.7)",
+    color: BASE_COLORS.white,
     fontFamily: "Poppins-Regular",
     textAlign: "center",
     fontSize: 13,
     marginTop: 4,
   },
   sectionContainer: {
-    marginBottom: 16,
+    marginBottom: 12,
   },
   sectionLabel: {
     fontSize: 14,
     fontFamily: "Poppins-Medium",
-    color: "#fff",
+    color: BASE_COLORS.white,
     marginBottom: 8,
   },
   questionContainer: {
     borderWidth: 1,
-    borderColor: "rgba(255, 255, 255, 0.20)",
-    backgroundColor: "rgba(255, 255, 255, 0.15)",
+    borderColor: "rgba(255, 255, 255, 0.4)",
+    backgroundColor: "rgba(255, 255, 255, 0.2)",
     borderRadius: 20,
     alignItems: "center",
     justifyContent: "center",
-    padding: 16,
+    padding: 8,
     minHeight: 50,
   },
   questionText: {
-    fontSize: 15,
+    fontSize: 13,
     fontFamily: "Poppins-Medium",
-    color: "#fff",
-    lineHeight: 22,
+    color: BASE_COLORS.white,
     textAlign: "center",
   },
   answerContainer: {
@@ -118,13 +119,12 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     minHeight: 50,
-    padding: 16,
+    padding: 8,
   },
   answerText: {
-    fontSize: 15,
+    fontSize: 13,
     fontFamily: "Poppins-Medium",
-    color: "#fff",
-    lineHeight: 22,
+    color: BASE_COLORS.white,
     textAlign: "center",
   },
 });

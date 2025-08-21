@@ -55,8 +55,8 @@ const styles = StyleSheet.create({
     borderColor: "rgba(255, 255, 255, 0.2)",
   },
   levelText: {
-    fontSize: 15,
-    fontFamily: "Poppins-Medium",
+    fontSize: 14,
+    fontFamily: "Poppins-SemiBold",
     color: BASE_COLORS.white,
     textAlign: "center",
     letterSpacing: 0.3,

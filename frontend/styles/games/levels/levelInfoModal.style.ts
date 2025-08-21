@@ -1,3 +1,4 @@
+import { BASE_COLORS } from "@/constant/colors";
 import { StyleSheet } from "react-native";
 
 export const styles = StyleSheet.create({
@@ -28,13 +29,13 @@ export const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
-    backgroundColor: "rgba(255, 255, 255, 0.18)",
+    backgroundColor: "rgba(255, 255, 255, 0.2)",
     paddingHorizontal: 8,
     paddingVertical: 6,
     borderRadius: 20,
     gap: 4,
     borderWidth: 1,
-    borderColor: "rgba(255, 255, 255, 0.1)",
+    borderColor: "rgba(255, 255, 255, 0.4)",
   },
   progressItemIcon: {
     width: 16,
@@ -45,7 +46,7 @@ export const styles = StyleSheet.create({
   progressItemText: {
     fontSize: 11,
     fontFamily: "Poppins-Medium",
-    color: "#fff",
+    color: BASE_COLORS.white,
     textAlign: "center",
   },
   coinImage: {
@@ -76,18 +77,19 @@ export const styles = StyleSheet.create({
     gap: 6,
   },
   resetConfirmationTitle: {
-    fontSize: 15,
+    fontSize: 14,
     fontFamily: "Poppins-SemiBold",
-    color: "#fff",
+    color: BASE_COLORS.white,
   },
   resetConfirmationText: {
-    fontSize: 13,
+    fontSize: 12,
     fontFamily: "Poppins-Medium",
-    color: "rgba(255, 255, 255, 0.8)",
+    color: BASE_COLORS.white,
     textAlign: "center",
   },
   resetConfirmationButtons: {
     flexDirection: "row",
+    marginTop: 8,
     gap: 8,
     justifyContent: "center",
   },
@@ -103,7 +105,7 @@ export const styles = StyleSheet.create({
   resetCancelButtonText: {
     fontSize: 11,
     fontFamily: "Poppins-Medium",
-    color: "#fff",
+    color: BASE_COLORS.white,
     textAlign: "center",
   },
   resetConfirmButton: {
@@ -122,7 +124,7 @@ export const styles = StyleSheet.create({
   resetConfirmButtonText: {
     fontSize: 12,
     fontFamily: "Poppins-SemiBold",
-    color: "#fff",
+    color: BASE_COLORS.white,
     textAlign: "center",
   },
   resetConfirmationTextContainer: {
@@ -174,16 +176,16 @@ export const styles = StyleSheet.create({
   resetMessageTitle: {
     fontSize: 11,
     fontFamily: "Poppins-Medium",
-    color: "#fff",
+    color: BASE_COLORS.white,
   },
   descriptionContainer: {
     width: "100%",
     marginBottom: 20,
   },
   levelDescription: {
-    fontSize: 16,
+    fontSize: 15,
     fontFamily: "Poppins-Medium",
-    color: "#fff",
+    color: BASE_COLORS.white,
     textAlign: "center",
     lineHeight: 24,
   },
@@ -196,37 +198,34 @@ export const styles = StyleSheet.create({
     paddingHorizontal: 4,
   },
   infoLabel: {
-    fontSize: 14,
+    fontSize: 13,
     fontFamily: "Poppins-Medium",
-    color: "rgba(255, 255, 255, 0.8)",
+    color: BASE_COLORS.white,
   },
   infoValue: {
     fontSize: 14,
     fontFamily: "Poppins-SemiBold",
-    color: "#fff",
+    color: BASE_COLORS.white,
   },
   rulesContainer: {
     backgroundColor: "rgba(255, 255, 255, 0.1)",
     borderRadius: 20,
-    padding: 18,
+    padding: 16,
     marginBottom: 22,
     borderWidth: 1,
     borderColor: "rgba(255, 255, 255, 0.2)",
   },
   rulesTitle: {
-    fontSize: 15,
+    fontSize: 14,
     fontFamily: "Poppins-SemiBold",
-    color: "#fff",
+    color: BASE_COLORS.white,
     marginBottom: 8,
   },
   rulesText: {
-    fontSize: 14,
+    fontSize: 12,
     fontFamily: "Poppins-Regular",
-    color: "#fff",
+    color: BASE_COLORS.white,
     lineHeight: 22,
-  },
-  buttonContainer: {
-    marginTop: 6,
   },
   disabledButton: {
     opacity: 0.7,
@@ -238,7 +237,7 @@ export const styles = StyleSheet.create({
     paddingHorizontal: 12,
   },
   noProgressText: {
-    fontSize: 13,
+    fontSize: 12,
     fontFamily: "Poppins-Medium",
     color: "rgba(255, 255, 255, 0.7)",
     textAlign: "center",
@@ -257,6 +256,6 @@ export const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     borderWidth: 1,
-    borderColor: "rgba(255, 255, 255, 0.2)",
+    borderColor: "rgba(255, 255, 255, 0.4)",
   },
 });

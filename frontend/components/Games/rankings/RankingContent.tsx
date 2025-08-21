@@ -13,7 +13,7 @@ import { useRankings } from "@/hooks/useRankings";
 import { RankingType, RankingUser } from "@/types/rankingTypes";
 import { getRankingCategory } from "@/constant/rankingConstants";
 import RankingItem from "./RankingItem";
-import { iconColors } from "@/constant/colors";
+import { BASE_COLORS, ICON_COLORS } from "@/constant/colors";
 
 interface RankingContentProps {
   selectedCategory: string;
@@ -49,12 +49,12 @@ const RankingContent: React.FC<RankingContentProps> = ({
     console.log(`[RankingContent] Refreshing ${selectedCategory} rankings`);
     refresh();
   };
-
+  const asd = true;
   // Render loading state
   if (isLoading) {
     return (
       <View style={styles.centerContainer}>
-        <ActivityIndicator size="small" color="#FFD700" />
+        <ActivityIndicator size="small" color={BASE_COLORS.white} />
         <Text style={styles.loadingText}>Loading rankings...</Text>
       </View>
     );
@@ -67,7 +67,7 @@ const RankingContent: React.FC<RankingContentProps> = ({
         <Text style={styles.errorText}>Failed to load rankings</Text>
         <Text style={styles.errorSubtext}>{error}</Text>
         <TouchableOpacity style={styles.retryButton} onPress={handleRefresh}>
-          <RefreshCw width={16} height={16} color="#fff" />
+          <RefreshCw width={16} height={16} color={BASE_COLORS.white} />
           <Text style={styles.retryButtonText}>Try Again</Text>
         </TouchableOpacity>
       </View>
@@ -111,12 +111,7 @@ const RankingContent: React.FC<RankingContentProps> = ({
         style={styles.rankingsList}
         showsVerticalScrollIndicator={false}
         refreshControl={
-          <RefreshControl
-            refreshing={isLoading}
-            onRefresh={handleRefresh}
-            tintColor="#FFD700"
-            colors={["#FFD700"]}
-          />
+          <RefreshControl refreshing={isLoading} onRefresh={handleRefresh} />
         }
       >
         <View style={styles.rankingsContainer}>
@@ -181,7 +176,7 @@ const styles = StyleSheet.create({
   categoryTitle: {
     fontSize: 14,
     fontFamily: "Poppins-SemiBold",
-    color: iconColors.brightYellow,
+    color: ICON_COLORS.brightYellow,
   },
   categoryDescription: {
     fontSize: 11,
@@ -230,14 +225,14 @@ const styles = StyleSheet.create({
     color: "#fff",
   },
   emptyText: {
-    fontSize: 16,
+    fontSize: 14,
     fontFamily: "Poppins-SemiBold",
     color: "#fff",
     textAlign: "center",
     marginBottom: 6,
   },
   emptySubtext: {
-    fontSize: 12,
+    fontSize: 11,
     fontFamily: "Poppins-Regular",
     color: "rgba(255, 255, 255, 0.7)",
     textAlign: "center",

@@ -1,16 +1,11 @@
 import React, { useCallback, useMemo } from "react";
-import {
-  View,
-  Text,
-  StyleSheet,
-  ActivityIndicator,
-  ScrollView,
-} from "react-native";
+import { View, Text, StyleSheet, ScrollView } from "react-native";
 import { EnhancedGameModeProgress } from "@/types/gameProgressTypes";
 import { Target } from "react-native-feather";
 import DifficultyCard from "./DifficultyCard";
 import StatGrid from "./StatGrid";
 import RecentAttempt from "./RecentAttempt";
+import { BASE_COLORS, ICON_COLORS } from "@/constant/colors";
 
 interface ProgressContentProps {
   progressData: EnhancedGameModeProgress | null;
@@ -30,11 +25,7 @@ interface OverallSummaryProps {
   total: number;
 }
 
-const ProgressContent: React.FC<ProgressContentProps> = ({
-  progressData,
-  isLoading,
-  gameMode,
-}) => {
+const ProgressContent: React.FC<ProgressContentProps> = ({ progressData }) => {
   // Memoized helper functions
   const getDifficultyColor = useCallback((diff: string): string => {
     switch (diff) {
@@ -85,9 +76,8 @@ const ProgressContent: React.FC<ProgressContentProps> = ({
     ];
 
     if (progressData.recentAttempts && progressData.recentAttempts.length > 0) {
-      // Fix the type error by explicitly typing the section
       sections.push({
-        title: "Game History",
+        title: "Recent Activity",
         data: progressData.recentAttempts.slice(0, 5) as any[],
         type: "attempts",
       });
@@ -137,7 +127,7 @@ const ProgressContent: React.FC<ProgressContentProps> = ({
   if (!progressData) {
     return (
       <View style={styles.errorContainer}>
-        <Target width={32} height={32} color="rgba(255,255,255,0.6)" />
+        <Target width={28} height={28} color="rgba(255,255,255,0.6)" />
         <Text style={styles.errorText}>No progress data available</Text>
         <Text style={styles.errorSubtext}>
           Start playing to see your statistics!
@@ -217,24 +207,13 @@ const styles = StyleSheet.create({
   scrollContent: {
     paddingBottom: 10,
   },
-  loadingContainer: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  loadingText: {
-    fontSize: 14,
-    fontFamily: "Poppins-Medium",
-    color: "rgba(255, 255, 255, 0.8)",
-    marginTop: 10,
-  },
   errorContainer: {
     flex: 1,
     alignItems: "center",
     justifyContent: "center",
   },
   errorText: {
-    fontSize: 16,
+    fontSize: 14,
     fontFamily: "Poppins-Medium",
     color: "#fff",
     textAlign: "center",
@@ -242,7 +221,7 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   errorSubtext: {
-    fontSize: 14,
+    fontSize: 12,
     fontFamily: "Poppins-Regular",
     color: "rgba(255, 255, 255, 0.6)",
     textAlign: "center",
@@ -251,20 +230,19 @@ const styles = StyleSheet.create({
     marginBottom: 15,
   },
   sectionTitle: {
-    fontSize: 16,
-    fontFamily: "Poppins-SemiBold",
+    fontSize: 13,
+    fontFamily: "Poppins-Medium",
     color: "#fff",
-    marginBottom: 12,
+    marginBottom: 10,
   },
   sectionContent: {
     gap: 8,
   },
   // Summary card styles
   summaryCard: {
-    backgroundColor: "rgba(255, 255, 255, 0.15)",
+    backgroundColor: "rgba(255, 255, 255, 0.12)",
     borderRadius: 20,
     padding: 16,
-    marginBottom: 10,
     borderWidth: 1,
     borderColor: "rgba(255, 255, 255, 0.2)",
   },
@@ -272,15 +250,15 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    marginBottom: 12,
+    marginBottom: 8,
   },
   summaryLabel: {
-    fontSize: 16,
+    fontSize: 12,
     fontFamily: "Poppins-Medium",
-    color: "#FFF",
+    color: BASE_COLORS.white,
   },
   completionBadge: {
-    backgroundColor: "#4CAF50",
+    backgroundColor: BASE_COLORS.success,
     paddingHorizontal: 8,
     paddingVertical: 4,
     borderRadius: 20,
@@ -288,35 +266,34 @@ const styles = StyleSheet.create({
   badgeText: {
     fontSize: 11,
     fontFamily: "Poppins-Medium",
-    color: "#FFF",
+    color: BASE_COLORS.white,
   },
   progressSummary: {
     flexDirection: "row",
     alignItems: "center",
-    marginBottom: 8,
   },
   progressNumbers: {
     flexDirection: "row",
     alignItems: "baseline",
   },
   completedText: {
-    fontSize: 32,
+    fontSize: 22,
     fontFamily: "Poppins-Bold",
-    color: "#FFD700",
+    color: ICON_COLORS.brightYellow,
   },
   totalText: {
-    fontSize: 18,
+    fontSize: 17,
     fontFamily: "Poppins-Medium",
-    color: "#FFF",
+    color: BASE_COLORS.white,
     marginLeft: 4,
   },
   encouragementText: {
-    fontSize: 13,
+    fontSize: 11,
     fontFamily: "Poppins-Regular",
     color: "rgba(255,255,255,0.8)",
   },
   attemptsTitle: {
-    color: "#fff",
+    color: BASE_COLORS.white,
   },
   attemptsContainer: {
     gap: 12,

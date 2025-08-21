@@ -100,7 +100,6 @@ const ProgressStats = React.memo(() => {
   return (
     <Animated.View
       style={[
-        styles.container,
         {
           opacity: fadeAnim,
           transform: [{ translateY: slideAnim }],
@@ -115,29 +114,13 @@ const ProgressStats = React.memo(() => {
 
       <View style={styles.statsGrid}>
         <View style={styles.quickStatCard}>
-          <LinearGradient
-            colors={GAME_GRADIENTS[GAME_MODES.FILL_BLANKS]}
-            style={styles.statCardGradient}
-          >
-            <View style={styles.statIconContainer}>
-              <Target width={24} height={24} color="#fff" />
-            </View>
-            <Text style={styles.statNumber}>{displayStats.completed}</Text>
-            <Text style={styles.statText}>Levels Completed</Text>
-          </LinearGradient>
+          <Text style={styles.statNumber}>{displayStats.completed}</Text>
+          <Text style={styles.statText}>Levels Completed</Text>
         </View>
 
         <View style={styles.quickStatCard}>
-          <LinearGradient
-            colors={GAME_GRADIENTS[GAME_MODES.MULTIPLE_CHOICE]}
-            style={styles.statCardGradient}
-          >
-            <View style={styles.statIconContainer}>
-              <Award width={24} height={24} color="#fff" />
-            </View>
-            <Text style={styles.statNumber}>{displayStats.total}</Text>
-            <Text style={styles.statText}>Total Quizzes</Text>
-          </LinearGradient>
+          <Text style={styles.statNumber}>{displayStats.total}</Text>
+          <Text style={styles.statText}>Total Quizzes</Text>
         </View>
       </View>
 
@@ -148,11 +131,7 @@ const ProgressStats = React.memo(() => {
   );
 });
 
-// Keep all existing styles the same
 const styles = StyleSheet.create({
-  container: {
-    // Add any container styles if needed
-  },
   statsGrid: {
     flexDirection: "row",
     gap: 20,
@@ -161,48 +140,36 @@ const styles = StyleSheet.create({
     flex: 1,
     borderRadius: 20,
     overflow: "hidden",
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.15,
-    shadowRadius: 8,
-    elevation: 6,
-  },
-  statCardGradient: {
-    padding: 16,
-    alignItems: "center",
-    minHeight: 120,
-    justifyContent: "center",
-  },
-  statIconContainer: {
-    width: 48,
-    height: 48,
-    borderRadius: 20,
-    backgroundColor: "rgba(255, 255, 255, 0.2)",
     justifyContent: "center",
     alignItems: "center",
-    marginBottom: 12,
+    padding: 10,
+    borderWidth: 1,
+    borderColor: "rgba(255,255,255,0.2)",
+    backgroundColor: "rgba(255,255,255,0.1)",
   },
+
   statNumber: {
-    fontSize: 22,
+    fontSize: 16,
     fontFamily: "Poppins-SemiBold",
     color: BASE_COLORS.white,
     marginBottom: 4,
   },
   statText: {
-    fontSize: 12,
+    fontSize: 11,
     fontFamily: "Poppins-Regular",
     color: BASE_COLORS.white,
     textAlign: "center",
   },
   progressSummaryContainer: {
     marginTop: 20,
-    paddingVertical: 12,
-    paddingHorizontal: 16,
+    padding: 10,
     borderRadius: 20,
-    backgroundColor: "rgba(255, 255, 255, 0.1)",
+    borderWidth: 1,
+    borderColor: "rgba(255,255,255,0.2)",
+    backgroundColor: "rgba(255,255,255,0.1)",
   },
   progressSummaryText: {
-    fontSize: 14,
+    fontSize: 12,
     fontFamily: "Poppins-Regular",
     color: BASE_COLORS.white,
     textAlign: "center",

@@ -5,12 +5,13 @@ import {
   Text,
   TouchableOpacity,
   ActivityIndicator,
+  StyleSheet,
 } from "react-native";
 import * as Animatable from "react-native-animatable";
 import { LinearGradient } from "expo-linear-gradient";
 import LottieView from "lottie-react-native";
-import styles from "@/styles/wordOfDayStyles";
 import CloseButton from "./buttons/CloseButton";
+import { BASE_COLORS, WORD_OF_DAY_GRADIENT } from "@/constant/colors";
 
 interface WordOfDayModalProps {
   visible: boolean;
@@ -73,13 +74,13 @@ const WordOfDayModal: React.FC<WordOfDayModalProps> = ({
           style={styles.modalContainer}
         >
           <LinearGradient
-            colors={["#667eea", "#764ba2"]}
+            colors={WORD_OF_DAY_GRADIENT}
             start={{ x: 0, y: 0 }}
             end={{ x: 1, y: 1 }}
             style={styles.gradientBackground}
           >
             {/* Close Button */}
-            <CloseButton size={17} onPress={onClose}></CloseButton>
+            <CloseButton size={17} onPress={onClose} />
 
             {/* Header Section */}
             <View style={styles.headerSection}>
@@ -189,5 +190,157 @@ const WordOfDayModal: React.FC<WordOfDayModalProps> = ({
     </Modal>
   );
 };
+const styles = StyleSheet.create({
+  overlay: {
+    flex: 1,
+    backgroundColor: "rgba(0,0,0,0.75)",
+    justifyContent: "center",
+    alignItems: "center",
+    padding: 20,
+  },
+  modalContainer: {
+    width: "92%",
+    maxWidth: 360,
+    borderRadius: 20,
+    overflow: "hidden",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 10 },
+    shadowOpacity: 0.4,
+    shadowRadius: 20,
+    elevation: 15,
+  },
+  gradientBackground: {
+    paddingVertical: 24,
+    paddingHorizontal: 20,
+    position: "relative",
+  },
+  headerSection: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    marginBottom: 20,
+  },
+  headerTitle: {
+    fontSize: 20,
+    fontFamily: "Poppins-SemiBold",
+    color: BASE_COLORS.white,
 
+    textAlign: "center",
+  },
+  wordCard: {
+    backgroundColor: "rgba(255, 255, 255, 0.12)",
+    borderRadius: 20,
+    padding: 20,
+    marginBottom: 20,
+    alignItems: "center",
+  },
+  languageBadge: {
+    backgroundColor: "rgba(255, 255, 255, 0.2)",
+    borderWidth: 1,
+    borderColor: "rgba(255,255,255,0.5)",
+    paddingHorizontal: 20,
+    paddingVertical: 6,
+    borderRadius: 20,
+    transform: [{ translateY: -30 }],
+  },
+  languageText: {
+    fontSize: 15,
+    fontFamily: "Poppins-SemiBold",
+    color: BASE_COLORS.white,
+    textShadowColor: "rgba(0, 0, 0, 0.5)",
+    textShadowOffset: { width: 0, height: 1 },
+    textShadowRadius: 3,
+  },
+  wordText: {
+    fontSize: 26,
+    fontFamily: "Poppins-Bold",
+    color: BASE_COLORS.white,
+    textAlign: "center",
+    letterSpacing: 0.5,
+    marginTop: -20,
+  },
+  translationContainer: {
+    width: "100%",
+    alignItems: "center",
+  },
+  dividerLine: {
+    width: "50%",
+    height: 1,
+    backgroundColor: "rgba(255, 255, 255, 0.2)",
+    marginBottom: 16,
+  },
+  translationText: {
+    fontSize: 20,
+    fontFamily: "Poppins-SemiBold",
+    color: "rgba(255, 255, 255, 0.9)",
+    textAlign: "center",
+  },
+  pronunciationContainer: {
+    backgroundColor: "rgba(255, 255, 255, 0.15)",
+    paddingHorizontal: 18,
+    paddingVertical: 7,
+    borderRadius: 20,
+    marginTop: 10,
+  },
+  pronunciationText: {
+    fontSize: 15,
+    fontFamily: "Poppins-SemiBold",
+    color: "rgba(255, 255, 255, 0.9)",
+    textAlign: "center",
+    letterSpacing: 0.5,
+  },
+  audioContainer: {
+    flexDirection: "column",
+    alignItems: "center",
+    backgroundColor: "rgba(255, 255, 255, 0.08)",
+    borderRadius: 20,
+    padding: 12,
+    marginBottom: 16,
+    borderWidth: 1,
+    borderColor: "rgba(255, 255, 255, 0.1)",
+  },
+  playButton: {
+    width: 70,
+    height: 70,
+    borderRadius: 40,
+    backgroundColor: "rgba(255, 255, 255, 0.2)",
+    justifyContent: "center",
+    alignItems: "center",
+    marginBottom: 16,
+  },
+  playButtonActive: {
+    backgroundColor: "rgba(255, 255, 255, 0.4)",
+  },
+  lottieContainer: {
+    width: 60,
+    height: 60,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  lottieAnimation: {
+    width: 60,
+    height: 60,
+  },
+  audioTextContainer: {
+    width: "100%",
+    alignItems: "center",
+  },
+  audioLabelText: {
+    fontSize: 11,
+    fontFamily: "Poppins-Medium",
+    color: "rgba(255, 255, 255, 0.6)",
+    textAlign: "center",
+  },
+  noteContainer: {
+    alignItems: "center",
+    paddingHorizontal: 10,
+    marginTop: 8,
+  },
+  noteText: {
+    fontSize: 11,
+    fontFamily: "Poppins-Regular",
+    color: "rgba(255, 255, 255, 0.7)",
+    textAlign: "center",
+  },
+});
 export default memo(WordOfDayModal);

@@ -36,10 +36,8 @@ const IdentificationPlayingContent: React.FC<IdentificationPlayingContentProps> 
       toggleTranslation,
       handleWordSelect,
     }) => {
-      // Simplified animation state
       const [isAnimating, setIsAnimating] = useState(true);
 
-      // NEW: Translation animation
       const translationOpacity = React.useRef(new Animated.Value(0)).current;
 
       // Memoized values
@@ -54,12 +52,11 @@ const IdentificationPlayingContent: React.FC<IdentificationPlayingContentProps> 
       useEffect(() => {
         const timer = setTimeout(() => {
           setIsAnimating(false);
-        }, 700); // Consistent timing
+        }, 700);
 
         return () => clearTimeout(timer);
       }, []);
 
-      // NEW: Animation effect for translation
       useEffect(() => {
         if (showTranslation) {
           // Animate in
@@ -130,7 +127,7 @@ const IdentificationPlayingContent: React.FC<IdentificationPlayingContentProps> 
             </Text>
           </View>
 
-          {/* FIXED: Words Grid - Now part of main ScrollView */}
+          {/* Words Grid  */}
           <View style={styles.wordsContainer}>
             {wordOptions.length > 0 ? (
               <View style={styles.wordsGrid}>

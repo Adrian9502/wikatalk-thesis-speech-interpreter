@@ -26,6 +26,7 @@ import BalanceCard from "./dailyRewardsModal/BalanceCard";
 import { getDayRewardAmount } from "@/hooks/useRewards";
 import ModalLoading from "@/components/ModalLoading";
 import CloseButton from "../buttons/CloseButton";
+import { BASE_COLORS } from "@/constant/colors";
 
 interface DailyRewardsModalProps {
   visible: boolean;
@@ -138,7 +139,7 @@ const DailyRewardsModal: React.FC<DailyRewardsModalProps> = ({
       <View style={styles.overlay}>
         <View style={styles.modalContainer}>
           <LinearGradient
-            colors={["#3B4DA3", "#251D79"]}
+            colors={["#314bcfff", "#4c41beff"]}
             start={{ x: 0, y: 0 }}
             end={{ x: 1, y: 1 }}
             style={styles.gradientBackground}
@@ -208,7 +209,7 @@ const DailyRewardsModal: React.FC<DailyRewardsModalProps> = ({
 const styles = StyleSheet.create({
   overlay: {
     flex: 1,
-    backgroundColor: "rgba(0, 0, 0, 0.6)",
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
     justifyContent: "center",
     alignItems: "center",
   },
@@ -240,17 +241,10 @@ const styles = StyleSheet.create({
     position: "relative",
   },
   title: {
-    fontSize: 20,
+    fontSize: 18,
     fontFamily: "Poppins-SemiBold",
-    color: "#FFF",
+    color: BASE_COLORS.white,
     textAlign: "center",
-  },
-  closeButton: {
-    position: "absolute",
-    right: 0,
-    padding: 8,
-    backgroundColor: "rgba(0,0,0,0.2)",
-    borderRadius: 20,
   },
   animationOverlay: {
     position: "absolute",

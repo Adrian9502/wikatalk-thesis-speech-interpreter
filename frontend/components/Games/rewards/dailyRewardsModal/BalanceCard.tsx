@@ -12,7 +12,7 @@ const BalanceCard: React.FC<BalanceCardProps> = ({ balance }) => {
       <View style={rewardStyles.balanceCard}>
         <Image
           source={require("@/assets/images/coin.png")}
-          style={{ width: 24, height: 24, marginRight: 8 }}
+          style={{ width: 20, height: 20, marginRight: 8 }}
         />
         <View>
           <Text style={rewardStyles.balanceLabel}>Your Balance</Text>

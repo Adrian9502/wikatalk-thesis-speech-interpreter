@@ -58,10 +58,11 @@ const styles = StyleSheet.create({
     marginRight: 8,
   },
   coinImage: {
-    width: 17,
-    height: 17,
+    width: 15,
+    height: 15,
   },
   coinsText: {
+    marginTop: 2,
     color: BASE_COLORS.white,
     fontFamily: "Poppins-Medium",
     fontSize: 13,

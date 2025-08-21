@@ -1,10 +1,11 @@
 import React from "react";
 import { View, Text, TouchableOpacity } from "react-native";
-import { X, Star, Info } from "react-native-feather";
-import { getStarCount, formatDifficulty } from "@/utils/games/difficultyUtils";
+import { Star, Info } from "react-native-feather";
+import { formatDifficulty } from "@/utils/games/difficultyUtils";
 import FocusAreaBadge from "@/components/games/FocusAreaBadge";
 import modalSharedStyles from "@/styles/games/modalSharedStyles";
 import CloseButton from "../../buttons/CloseButton";
+import { ICON_COLORS } from "@/constant/colors";
 
 interface LevelHeaderProps {
   levelData: any;
@@ -26,7 +27,7 @@ const LevelHeader: React.FC<LevelHeaderProps> = ({
 }) => {
   return (
     <>
-      <CloseButton size={17} onPress={onClose}></CloseButton>
+      <CloseButton size={17} onPress={onClose} />
       {/* Level header */}
       <View style={modalSharedStyles.levelHeader}>
         <View style={modalSharedStyles.levelNumberContainer}>
@@ -50,9 +51,13 @@ const LevelHeader: React.FC<LevelHeaderProps> = ({
                   key={index}
                   width={16}
                   height={16}
-                  fill={index < starCount ? "#FFC107" : "transparent"}
+                  fill={
+                    index < starCount ? ICON_COLORS.brightYellow : "transparent"
+                  }
                   stroke={
-                    index < starCount ? "#FFC107" : "rgba(255, 255, 255, 0.4)"
+                    index < starCount
+                      ? ICON_COLORS.brightYellow
+                      : "rgba(255, 255, 255, 0.4)"
                   }
                 />
               ))}

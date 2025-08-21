@@ -18,7 +18,7 @@ import {
   Grid,
   Zap,
 } from "react-native-feather";
-import { BASE_COLORS, iconColors } from "@/constant/colors";
+import { BASE_COLORS, ICON_COLORS } from "@/constant/colors";
 import {
   NAVIGATION_COLORS,
   GAME_MODES,
@@ -626,7 +626,7 @@ const GameNavigation: React.FC<GameNavigationProps> = ({
           style={styles.gameModesContainer}
         >
           <View style={styles.gameModesHeader}>
-            <Zap width={16} height={16} color={iconColors.brightYellow} />
+            <Zap width={16} height={16} color={ICON_COLORS.brightYellow} />
             <Text style={styles.gameModesTitle}>Try Other Modes</Text>
           </View>
 

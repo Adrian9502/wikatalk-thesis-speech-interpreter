@@ -27,7 +27,6 @@ const ActionButton: React.FC<ActionButtonProps> = ({
   const showLoadingIndicator =
     isLoading || isAnimating || progressIsLoading || hasStarted;
 
-  // FIXED: Better button text logic
   const getButtonText = () => {
     if (progressIsLoading) {
       return "Loading Progress...";
@@ -42,33 +41,31 @@ const ActionButton: React.FC<ActionButtonProps> = ({
   };
 
   return (
-    <View style={styles.buttonContainer}>
-      <TouchableOpacity
-        style={[modalSharedStyles.startAndCloseButton]}
-        onPress={onStart}
-        disabled={isDisabled}
-        activeOpacity={isDisabled ? 1 : 0.8}
-      >
-        {/* NEW: Show activity indicator when loading */}
-        {showLoadingIndicator ? (
-          <View
-            style={{
-              flexDirection: "row",
-              alignItems: "center",
-              justifyContent: "center",
-            }}
-          >
-            <Text style={modalSharedStyles.startAndCloseText}>
-              {getButtonText()}
-            </Text>
-          </View>
-        ) : (
+    <TouchableOpacity
+      style={[modalSharedStyles.startAndCloseButton]}
+      onPress={onStart}
+      disabled={isDisabled}
+      activeOpacity={isDisabled ? 1 : 0.8}
+    >
+      {/* NEW: Show activity indicator when loading */}
+      {showLoadingIndicator ? (
+        <View
+          style={{
+            flexDirection: "row",
+            alignItems: "center",
+            justifyContent: "center",
+          }}
+        >
           <Text style={modalSharedStyles.startAndCloseText}>
             {getButtonText()}
           </Text>
-        )}
-      </TouchableOpacity>
-    </View>
+        </View>
+      ) : (
+        <Text style={modalSharedStyles.startAndCloseText}>
+          {getButtonText()}
+        </Text>
+      )}
+    </TouchableOpacity>
   );
 };
 

@@ -6,7 +6,7 @@ import {
   GestureResponderEvent,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import { iconColors } from "@/constant/colors";
+import { BASE_COLORS, ICON_COLORS } from "@/constant/colors";
 
 type RankingButtonProps = {
   onRankingsPress?: (event: GestureResponderEvent) => void;
@@ -19,7 +19,7 @@ const RankingButton: React.FC<RankingButtonProps> = ({ onRankingsPress }) => {
       onPress={onRankingsPress}
       activeOpacity={0.8}
     >
-      <Ionicons name="trophy" size={18} color={iconColors.brightYellow} />
+      <Ionicons name="trophy" size={15} color={ICON_COLORS.brightYellow} />
       <Text style={styles.rankingsButtonText}>Rankings</Text>
     </TouchableOpacity>
   );
@@ -31,17 +31,17 @@ const styles = StyleSheet.create({
   rankingsButton: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "rgba(255,255,255,0.2)",
+    backgroundColor: "rgba(255,255,255,0.3)",
     borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.4)",
+    borderColor: "rgba(255,255,255,0.5)",
     borderRadius: 20,
-    paddingHorizontal: 18,
+    paddingHorizontal: 12,
     paddingVertical: 8,
-    gap: 8,
+    gap: 5,
   },
   rankingsButtonText: {
-    fontSize: 13,
+    fontSize: 12,
     fontFamily: "Poppins-Medium",
-    color: "#FFf",
+    color: BASE_COLORS.white,
   },
 });

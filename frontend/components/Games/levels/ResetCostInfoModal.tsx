@@ -3,7 +3,7 @@ import { Modal, View, Text, StyleSheet, ScrollView, Image } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { Clock } from "react-native-feather";
 import * as Animatable from "react-native-animatable";
-import { BASE_COLORS, iconColors } from "@/constant/colors";
+import { BASE_COLORS, ICON_COLORS } from "@/constant/colors";
 import { NAVIGATION_COLORS } from "@/constant/gameConstants";
 import costTiers from "@/utils/games/costTiers";
 import CloseButton from "../buttons/CloseButton";
@@ -46,14 +46,17 @@ const ResetCostInfoModal: React.FC<ResetCostInfoModalProps> = ({
             </Text>
 
             {/* Cost Tiers */}
-            <ScrollView style={styles.tiersContainer}>
+            <ScrollView
+              showsVerticalScrollIndicator={false}
+              style={styles.tiersContainer}
+            >
               {costTiers.map((tier, index) => (
                 <View key={index} style={styles.tierItem}>
                   <View style={styles.tierLeft}>
                     <Clock
-                      width={16}
-                      height={16}
-                      color={iconColors.brightYellow}
+                      width={15}
+                      height={15}
+                      color={ICON_COLORS.brightYellow}
                     />
                     <View style={styles.tierInfo}>
                       <Text style={styles.tierTime}>{tier.timeRange}</Text>
@@ -90,7 +93,6 @@ const styles = StyleSheet.create({
     backgroundColor: "rgba(0, 0, 0, 0.6)",
     justifyContent: "center",
     alignItems: "center",
-    padding: 20,
   },
   modalContainer: {
     width: "100%",
@@ -108,21 +110,22 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   coinImage: {
-    width: 16,
-    height: 16,
+    width: 15,
+    height: 15,
     alignSelf: "center",
   },
   title: {
-    fontSize: 20,
+    fontSize: 18,
     fontFamily: "Poppins-SemiBold",
-    color: "#FFF",
+    color: BASE_COLORS.white,
     textAlign: "center",
   },
   description: {
-    fontSize: 13,
+    fontSize: 12,
     fontFamily: "Poppins-Regular",
     color: "rgba(255, 255, 255, 0.9)",
     marginBottom: 20,
+    textAlign: "center",
     lineHeight: 20,
   },
   tiersContainer: {
@@ -136,7 +139,7 @@ const styles = StyleSheet.create({
     backgroundColor: "rgba(255, 255, 255, 0.1)",
     borderRadius: 20,
     padding: 12,
-    marginBottom: 8,
+    marginBottom: 12,
   },
   tierLeft: {
     flexDirection: "row",
@@ -167,8 +170,8 @@ const styles = StyleSheet.create({
   },
   costText: {
     fontSize: 13,
-    fontFamily: "Poppins-Bold",
-    color: "#FFC107",
+    fontFamily: "Poppins-SemiBold",
+    color: ICON_COLORS.brightYellow,
     marginLeft: 4,
   },
   footer: {

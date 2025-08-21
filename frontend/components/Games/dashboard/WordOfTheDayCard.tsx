@@ -7,9 +7,14 @@ import {
   Animated,
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
-import { Calendar, Volume2, Star } from "react-native-feather";
+import { Calendar, Volume2, Star, ArrowRight } from "react-native-feather";
 import { SectionHeader } from "@/components/games/common/SectionHeader";
-import CoinsDisplay from "@/components/games/rewards/CoinsDisplay"; // Import CoinsDisplay directly
+import CoinsDisplay from "@/components/games/rewards/CoinsDisplay";
+import {
+  BASE_COLORS,
+  ICON_COLORS,
+  WORD_OF_DAY_GRADIENT,
+} from "@/constant/colors";
 
 interface WordOfTheDayCardProps {
   wordOfTheDay: any;
@@ -17,10 +22,9 @@ interface WordOfTheDayCardProps {
   isLoading: boolean;
   onCardPress: () => void;
   onPlayPress: () => void;
-  onCoinsPress: () => void; // Add coins press handler
+  onCoinsPress: () => void;
 }
 
-// SIMPLE: Global flag - animate only once per app session
 let WORD_ANIMATION_PLAYED = false;
 
 const WordOfTheDayCard = React.memo(
@@ -30,11 +34,10 @@ const WordOfTheDayCard = React.memo(
     isLoading,
     onCardPress,
     onPlayPress,
-    onCoinsPress, // Add to props
+    onCoinsPress,
   }: WordOfTheDayCardProps) => {
     const [shouldAnimate] = useState(!WORD_ANIMATION_PLAYED);
 
-    // Simple animated values
     const fadeAnim = useState(
       () => new Animated.Value(shouldAnimate ? 0 : 1)
     )[0];
@@ -42,7 +45,13 @@ const WordOfTheDayCard = React.memo(
       () => new Animated.Value(shouldAnimate ? 20 : 0)
     )[0];
 
-    // SIMPLE: One animation for the card
+    const spinAnim = useState(() => new Animated.Value(0))[0];
+
+    // Add debug logging
+    useEffect(() => {
+      console.log("[WordOfDayCard] Props changed:", { isPlaying, isLoading });
+    }, [isPlaying, isLoading]);
+
     useEffect(() => {
       if (!shouldAnimate) return;
 
@@ -62,20 +71,56 @@ const WordOfTheDayCard = React.memo(
       });
     }, [shouldAnimate, fadeAnim, slideAnim]);
 
+    // Fixed spin animation effect - spin while playing (since isLoading is not being set)
+    useEffect(() => {
+      let spinAnimation: Animated.CompositeAnimation | null = null;
+
+      console.log("[WordOfDayCard] Spin effect triggered:", {
+        isLoading,
+        isPlaying,
+      });
+
+      // OPTION 1: Spin while playing (since isLoading is not working)
+      if (isPlaying) {
+        console.log("[WordOfDayCard] Starting spin animation");
+        spinAnimation = Animated.loop(
+          Animated.timing(spinAnim, {
+            toValue: 1,
+            duration: 1000,
+            useNativeDriver: true,
+          })
+        );
+        spinAnimation.start();
+      } else {
+        console.log("[WordOfDayCard] Stopping spin animation");
+        spinAnim.stopAnimation(() => {
+          spinAnim.setValue(0);
+        });
+      }
+
+      return () => {
+        if (spinAnimation) {
+          console.log("[WordOfDayCard] Cleanup: stopping spin animation");
+          spinAnimation.stop();
+        }
+      };
+    }, [isPlaying, spinAnim]); // Remove isLoading dependency since it's not working
+
+    // Spin while playing since isLoading is not being set by parent
+    const shouldSpin = isPlaying;
+
     return (
       <Animated.View
         style={[
-          styles.featuredSection,
           {
             opacity: fadeAnim,
             transform: [{ translateY: slideAnim }],
           },
         ]}
       >
-        {/* FIXED: Inline header with section header and coins display */}
         <View style={styles.inlineHeaderContainer}>
           <SectionHeader
-            icon={<Star width={20} height={20} color="#FFD700" />}
+            icon={<Star width={20} height={20} color={ICON_COLORS.gold} />}
             title="Word of the Day"
             subtitle="Expand your vocabulary daily"
           />
@@ -88,7 +133,7 @@ const WordOfTheDayCard = React.memo(
           onPress={onCardPress}
         >
           <LinearGradient
-            colors={["#667eea", "#764ba2"]}
+            colors={WORD_OF_DAY_GRADIENT}
             start={{ x: 0, y: 0 }}
             end={{ x: 1, y: 1 }}
             style={styles.wordCardGradient}
@@ -104,12 +149,12 @@ const WordOfTheDayCard = React.memo(
                 <Text style={styles.wordBadgeText}>TODAY'S WORD</Text>
               </View>
               <TouchableOpacity style={styles.playButton} onPress={onPlayPress}>
-                {isLoading && isPlaying ? (
+                {shouldSpin ? (
                   <Animated.View
                     style={{
                       transform: [
                         {
-                          rotate: fadeAnim.interpolate({
+                          rotate: spinAnim.interpolate({
                             inputRange: [0, 1],
                             outputRange: ["0deg", "360deg"],
                           }),
@@ -117,10 +162,18 @@ const WordOfTheDayCard = React.memo(
                       ],
                     }}
                   >
-                    <Volume2 width={16} height={16} color="#667eea" />
+                    <Volume2
+                      width={17}
+                      height={17}
+                      color={WORD_OF_DAY_GRADIENT[0]}
+                    />
                   </Animated.View>
                 ) : (
-                  <Volume2 width={16} height={16} color="#667eea" />
+                  <Volume2
+                    width={17}
+                    height={17}
+                    color={WORD_OF_DAY_GRADIENT[0]}
+                  />
                 )}
               </TouchableOpacity>
             </View>
@@ -139,7 +192,7 @@ const WordOfTheDayCard = React.memo(
             <View style={styles.wordCardFooter}>
               <Text style={styles.exploreText}>Tap to explore more</Text>
               <View style={styles.arrowContainer}>
-                <Text style={styles.arrow}>→</Text>
+                <ArrowRight width={16} height={16} color={BASE_COLORS.white} />
               </View>
             </View>
           </LinearGradient>
@@ -150,16 +203,11 @@ const WordOfTheDayCard = React.memo(
 );
 
 const styles = StyleSheet.create({
-  featuredSection: {
-    marginBottom: 12,
-  },
-  // NEW: Inline header container
   inlineHeaderContainer: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "flex-start",
-    marginBottom: 16,
-    paddingHorizontal: 5, // Small padding to align with content
+    paddingHorizontal: 5,
   },
   wordOfTheDayCard: {
     borderRadius: 20,
@@ -171,7 +219,8 @@ const styles = StyleSheet.create({
     elevation: 8,
   },
   wordCardGradient: {
-    padding: 20,
+    paddingVertical: 15,
+    paddingHorizontal: 20,
     borderRadius: 20,
     position: "relative",
     minHeight: 120,
@@ -181,14 +230,15 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    marginBottom: 16,
   },
   wordBadge: {
     flexDirection: "row",
     alignItems: "center",
     backgroundColor: "rgba(255, 255, 255, 0.2)",
-    paddingHorizontal: 10,
-    paddingVertical: 6,
+    borderColor: "rgba(255,255,255,0.3)",
+    borderWidth: 1,
+    paddingHorizontal: 12,
+    paddingVertical: 5,
     borderRadius: 20,
     gap: 6,
   },
@@ -202,7 +252,7 @@ const styles = StyleSheet.create({
   playButton: {
     width: 40,
     height: 40,
-    borderRadius: 20,
+    borderRadius: 30,
     backgroundColor: "rgba(255, 255, 255, 0.9)",
     justifyContent: "center",
     alignItems: "center",
@@ -212,40 +262,33 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   wordMainText: {
-    fontSize: 26,
+    fontSize: 22,
     fontFamily: "Poppins-Bold",
     color: "#fff",
     marginBottom: 8,
   },
   wordTranslation: {
     fontSize: 16,
-    fontFamily: "Poppins-Regular",
-    color: "rgba(255, 255, 255, 0.9)",
-    lineHeight: 22,
+    fontFamily: "Poppins-Medium",
+    color: BASE_COLORS.white,
   },
   wordCardFooter: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    marginTop: 16,
   },
   exploreText: {
-    fontSize: 14,
-    fontFamily: "Poppins-Medium",
-    color: "rgba(255, 255, 255, 0.8)",
+    fontSize: 11,
+    fontFamily: "Poppins-Regular",
+    color: "rgba(255, 255, 255, 0.6)",
   },
   arrowContainer: {
-    width: 28,
-    height: 28,
-    borderRadius: 14,
+    width: 32,
+    height: 32,
+    borderRadius: 34,
     backgroundColor: "rgba(255, 255, 255, 0.2)",
     justifyContent: "center",
     alignItems: "center",
-  },
-  arrow: {
-    fontSize: 16,
-    color: "#fff",
-    fontFamily: "Poppins-Medium",
   },
   wordDecoPattern1: {
     position: "absolute",
@@ -254,7 +297,7 @@ const styles = StyleSheet.create({
     width: 40,
     height: 40,
     borderRadius: 20,
-    backgroundColor: "rgba(255, 255, 255, 0.05)",
+    backgroundColor: "rgba(255, 255, 255, 0.1)",
   },
   wordDecoPattern2: {
     position: "absolute",
@@ -263,16 +306,16 @@ const styles = StyleSheet.create({
     width: 60,
     height: 60,
     borderRadius: 30,
-    backgroundColor: "rgba(255, 255, 255, 0.03)",
+    backgroundColor: "rgba(255, 255, 255, 0.1)",
   },
   wordDecoPattern3: {
     position: "absolute",
-    top: 20,
-    right: 40,
-    width: 20,
-    height: 20,
-    borderRadius: 10,
-    backgroundColor: "rgba(255, 255, 255, 0.08)",
+    top: 60,
+    right: 100,
+    width: 50,
+    height: 50,
+    borderRadius: 60,
+    backgroundColor: "rgba(255, 255, 255, 0.2)",
   },
 });
 

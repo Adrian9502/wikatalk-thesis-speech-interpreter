@@ -8,21 +8,19 @@ interface SectionHeaderProps {
   subtitle: string;
 }
 
-export const SectionHeader = React.memo(({
-  icon,
-  title,
-  subtitle
-}: SectionHeaderProps) => {
-  return (
-    <View style={styles.sectionHeader}>
-      <View style={styles.sectionTitleRow}>
-        {icon}
-        <Text style={styles.sectionMainTitle}>{title}</Text>
+export const SectionHeader = React.memo(
+  ({ icon, title, subtitle }: SectionHeaderProps) => {
+    return (
+      <View style={styles.sectionHeader}>
+        <View style={styles.sectionTitleRow}>
+          {icon}
+          <Text style={styles.sectionMainTitle}>{title}</Text>
+        </View>
+        <Text style={styles.sectionSubtitle}>{subtitle}</Text>
       </View>
-      <Text style={styles.sectionSubtitle}>{subtitle}</Text>
-    </View>
-  );
-});
+    );
+  }
+);
 
 const styles = StyleSheet.create({
   sectionHeader: {
@@ -34,13 +32,13 @@ const styles = StyleSheet.create({
     marginBottom: 4,
   },
   sectionMainTitle: {
-    fontSize: 22,
+    fontSize: 15,
     fontFamily: "Poppins-Bold",
     color: BASE_COLORS.white,
     marginLeft: 8,
   },
   sectionSubtitle: {
-    fontSize: 14,
+    fontSize: 12,
     fontFamily: "Poppins-Regular",
     color: BASE_COLORS.white,
     opacity: 0.7,
@@ -48,4 +46,4 @@ const styles = StyleSheet.create({
   },
 });
 
-SectionHeader.displayName = 'SectionHeader';
+SectionHeader.displayName = "SectionHeader";

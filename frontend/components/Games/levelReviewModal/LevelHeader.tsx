@@ -6,6 +6,7 @@ import { getStarCount, formatDifficulty } from "@/utils/games/difficultyUtils";
 import { renderFocusIcon } from "@/utils/games/renderFocusIcon";
 import modalSharedStyles from "@/styles/games/modalSharedStyles";
 import FocusAreaBadge from "@/components/games/FocusAreaBadge";
+import { BASE_COLORS } from "@/constant/colors";
 
 interface LevelHeaderProps {
   level: LevelData;
@@ -59,7 +60,7 @@ const LevelHeader: React.FC<LevelHeaderProps> = ({ level }) => {
       {/* Completed badge */}
       <View style={styles.completedBadgeContainer}>
         <View style={modalSharedStyles.completedBadge}>
-          <Check width={18} height={18} color="#fff" />
+          <Check width={16} height={16} color={BASE_COLORS.white} />
           <Text style={styles.completedText}>Level Finished</Text>
         </View>
       </View>
@@ -82,7 +83,7 @@ const styles = StyleSheet.create({
   completedText: {
     fontSize: 13,
     fontFamily: "Poppins-Medium",
-    color: "#fff",
+    color: BASE_COLORS.white,
     marginLeft: 4,
   },
 });

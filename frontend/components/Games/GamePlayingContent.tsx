@@ -21,7 +21,6 @@ const GamePlayingContent: React.FC<GamePlayingContentProps> = React.memo(
     const fadeAnim = useRef(new Animated.Value(0)).current;
     const translateY = useRef(new Animated.Value(30)).current;
 
-    // CRITICAL: Add refs to prevent multiple animations
     const animationStartedRef = useRef(false);
     const isMountedRef = useRef(true);
 
@@ -38,7 +37,6 @@ const GamePlayingContent: React.FC<GamePlayingContentProps> = React.memo(
       }
     }, [timerRunning, initialTime]);
 
-    // FIXED: Stable animation function with proper cleanup
     const startAnimation = useCallback(() => {
       if (animationStartedRef.current || !isMountedRef.current) {
         console.log(
@@ -73,7 +71,6 @@ const GamePlayingContent: React.FC<GamePlayingContentProps> = React.memo(
       });
     }, [fadeAnim, translateY]);
 
-    // FIXED: Only animate when game status changes to playing
     useEffect(() => {
       // Reset animation flag when component mounts or game restarts
       if (gameStatus === "idle" || gameStatus === "ready") {
@@ -100,7 +97,7 @@ const GamePlayingContent: React.FC<GamePlayingContentProps> = React.memo(
       }
     }, [gameStatus, startAnimation, fadeAnim, translateY]);
 
-    // FIXED: Cleanup on unmount
+    // Cleanup on unmount
     useEffect(() => {
       isMountedRef.current = true;
 

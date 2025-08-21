@@ -122,7 +122,6 @@ export const RankingsModalProvider: React.FC<{ children: React.ReactNode }> = ({
             useNativeDriver
             style={styles.container}
           >
-            {/* First phase: show loading spinner with gradient - NO SEPARATE ANIMATION */}
             {!contentReady && (
               <LinearGradient
                 colors={NAVIGATION_COLORS.indigo}
@@ -208,7 +207,7 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   title: {
-    fontSize: 20,
+    fontSize: 18,
     fontFamily: "Poppins-SemiBold",
     color: "#FFF",
     textAlign: "center",
