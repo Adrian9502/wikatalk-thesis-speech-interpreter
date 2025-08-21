@@ -55,7 +55,7 @@ const FormInput = <T extends FieldValues>({
             >
               {IconComponent && (
                 <IconComponent
-                  size={18}
+                  size={17}
                   color="#4A6FFF"
                   style={styles.inputIcon}
                 />
@@ -97,9 +97,9 @@ const FormInput = <T extends FieldValues>({
                   onPress={() => setIsPasswordVisible(!isPasswordVisible)}
                 >
                   {isPasswordVisible ? (
-                    <Eye size={18} color="#888" />
+                    <Eye size={17} color="#888" />
                   ) : (
-                    <EyeOff size={18} color="#888" />
+                    <EyeOff size={17} color="#888" />
                   )}
                 </TouchableOpacity>
               )}
@@ -125,10 +125,10 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     backgroundColor: "#f7f7f7",
-    borderRadius: 16,
+    borderRadius: 20,
     paddingHorizontal: 12,
-    borderWidth: 1,
-    borderColor: "#e0e0e0",
+    borderWidth: 0.5,
+    borderColor: "rgba(0,0,0,0.1)",
   },
   inputContainerError: {
     borderColor: "#EF4444",
@@ -154,8 +154,8 @@ const styles = StyleSheet.create({
   },
   errorText: {
     color: "#EF4444",
-    fontSize: 12,
-    fontFamily: "Roboto",
+    fontSize: 11,
+    fontFamily: "Poppins-Regular",
   },
 });
 

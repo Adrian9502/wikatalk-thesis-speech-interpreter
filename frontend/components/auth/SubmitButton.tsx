@@ -6,8 +6,9 @@ import {
   Pressable,
   StyleSheet,
   ActivityIndicator,
+  TouchableOpacity,
 } from "react-native";
-import { TITLE_COLORS } from "@/constant/colors";
+import { BASE_COLORS, TITLE_COLORS } from "@/constant/colors";
 
 interface SubmitButtonProps {
   activeTab: "signin" | "signup";
@@ -36,7 +37,8 @@ const SubmitButton: React.FC<SubmitButtonProps> = ({
       elevation: 2,
     }}
   >
-    <Pressable
+    <TouchableOpacity
+      activeOpacity={0.7}
       style={[styles.submitButton, { backgroundColor: TITLE_COLORS.customRed }]}
       disabled={isLoading}
       onPress={onPress}
@@ -53,7 +55,7 @@ const SubmitButton: React.FC<SubmitButtonProps> = ({
           {activeTab === "signin" ? "Sign In" : "Sign Up"}
         </Text>
       </View>
-    </Pressable>
+    </TouchableOpacity>
   </Animated.View>
 );
 
@@ -70,8 +72,8 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   submitButtonText: {
-    color: "white",
-    fontSize: 16,
+    color: BASE_COLORS.white,
+    fontSize: 14,
     fontFamily: "Poppins-Medium",
   },
 });

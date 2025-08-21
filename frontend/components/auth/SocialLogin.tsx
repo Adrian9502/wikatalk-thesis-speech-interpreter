@@ -146,7 +146,7 @@ const styles = StyleSheet.create({
   },
   dividerText: {
     paddingHorizontal: 8,
-    fontSize: 14,
+    fontSize: 13,
   },
   socialButtonsContainer: {
     flexDirection: "row",

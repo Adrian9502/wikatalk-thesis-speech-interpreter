@@ -1,11 +1,10 @@
 import React, { useState, useEffect } from "react";
 import {
-  Pressable,
+  TouchableOpacity,
   Text,
   View,
   TouchableWithoutFeedback,
   ActivityIndicator,
-  Platform,
   StyleSheet,
   Alert,
   Keyboard,
@@ -231,7 +230,7 @@ const ForgotPassword: React.FC = () => {
 
                     {/* Submit Button */}
                     <View style={styles.buttonContainer}>
-                      <Pressable
+                      <TouchableOpacity
                         style={[styles.submitButton]}
                         disabled={isLoading}
                         onPress={handleEmailSubmit(handleSendCode)}
@@ -248,7 +247,7 @@ const ForgotPassword: React.FC = () => {
                             Send Recovery Code
                           </Text>
                         </View>
-                      </Pressable>
+                      </TouchableOpacity>
                     </View>
                   </>
                 ) : (
@@ -272,7 +271,7 @@ const ForgotPassword: React.FC = () => {
 
                     {/* Verify Button */}
                     <View style={styles.buttonContainer}>
-                      <Pressable
+                      <TouchableOpacity
                         style={[styles.submitButton]}
                         disabled={isLoading}
                         onPress={handleVerificationSubmit(handleVerifyCode)}
@@ -283,11 +282,11 @@ const ForgotPassword: React.FC = () => {
                           )}
                           <Text style={styles.buttonText}>Verify Code</Text>
                         </View>
-                      </Pressable>
+                      </TouchableOpacity>
                     </View>
 
                     {/* Resend Code Button */}
-                    <Pressable
+                    <TouchableOpacity
                       style={[styles.resendButton]}
                       onPress={handleResendCode}
                       disabled={resendDisabled}
@@ -302,17 +301,17 @@ const ForgotPassword: React.FC = () => {
                           ? `Resend Code (${countdown}s)`
                           : "Resend Code"}
                       </Text>
-                    </Pressable>
+                    </TouchableOpacity>
                   </>
                 )}
-                <Pressable
+                <TouchableOpacity
                   onPress={() => {
                     clearFormMessage();
                     router.back();
                   }}
                 >
                   <Text style={styles.goBackText}>Go back</Text>
-                </Pressable>
+                </TouchableOpacity>
               </View>
             </View>
           </View>
@@ -337,7 +336,7 @@ export const styles = StyleSheet.create({
   formOuterContainer: {
     backgroundColor: BASE_COLORS.white,
     borderRadius: 20,
-    padding: 15,
+    padding: 20,
     width: "100%",
     alignItems: "center",
     shadowColor: "#000",
@@ -347,14 +346,14 @@ export const styles = StyleSheet.create({
     elevation: 5,
   },
   titleText: {
-    fontSize: 23,
+    fontSize: 18,
     fontFamily: "Poppins-SemiBold",
     color: BASE_COLORS.blue,
     marginBottom: 8,
   },
   descriptionText: {
     textAlign: "center",
-    fontSize: 13,
+    fontSize: 12,
     fontFamily: "Poppins-Regular",
     color: BASE_COLORS.darkText,
     marginBottom: 8,
@@ -382,8 +381,8 @@ export const styles = StyleSheet.create({
     justifyContent: "center",
   },
   buttonText: {
-    color: "white",
-    fontSize: 15,
+    color: BASE_COLORS.white,
+    fontSize: 13,
     fontFamily: "Poppins-Medium",
   },
   emailContainer: {
@@ -407,7 +406,7 @@ export const styles = StyleSheet.create({
   },
   resendButtonText: {
     color: "#0038A8",
-    fontSize: 12,
+    fontSize: 11,
     fontFamily: "Poppins-Regular",
   },
   resendDisabledText: {

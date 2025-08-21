@@ -4,7 +4,6 @@ import {
   Text,
   View,
   ActivityIndicator,
-  Platform,
   StyleSheet,
   TouchableWithoutFeedback,
   Keyboard,
@@ -235,7 +234,7 @@ const styles = StyleSheet.create({
     elevation: 3,
   },
   headerTitle: {
-    fontSize: 22,
+    fontSize: 18,
     fontFamily: "Poppins-SemiBold",
     color: TITLE_COLORS.customBlue,
     marginBottom: 8,
@@ -243,7 +242,8 @@ const styles = StyleSheet.create({
   headerSubtitle: {
     textAlign: "center",
     fontFamily: "Poppins-Regular",
-    fontSize: 14,
+    marginBottom: 8,
+    fontSize: 12,
     color: BASE_COLORS.placeholderText,
   },
   formInnerContainer: {
@@ -278,7 +278,7 @@ const styles = StyleSheet.create({
   },
   resetButton: {
     backgroundColor: TITLE_COLORS.customRed,
-    paddingVertical: 11,
+    paddingVertical: 10,
     alignItems: "center",
     justifyContent: "center",
     borderRadius: 20,
@@ -293,13 +293,13 @@ const styles = StyleSheet.create({
   },
   buttonText: {
     color: "white",
-    fontSize: 15,
+    fontSize: 13,
     fontFamily: "Poppins-Medium",
   },
   goBackText: {
-    fontSize: 12,
+    fontSize: 11,
     color: BASE_COLORS.placeholderText,
-    marginBottom: 8,
+    marginTop: 12,
     fontFamily: "Poppins-Regular",
     textAlign: "center",
   },

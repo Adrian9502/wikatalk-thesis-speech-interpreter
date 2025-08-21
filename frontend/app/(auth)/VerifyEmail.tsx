@@ -17,7 +17,6 @@ import FormInput from "@/components/FormInput";
 import { Mail, CheckCircle } from "lucide-react-native";
 import { useAuth } from "@/context/AuthContext";
 import FormMessage from "@/components/FormMessage";
-import { router } from "expo-router";
 import { useValidation } from "@/context/ValidationContext";
 import { BASE_COLORS, TITLE_COLORS } from "@/constant/colors";
 import Logo from "@/components/Logo";
@@ -263,14 +262,14 @@ const styles = StyleSheet.create({
     elevation: 5,
   },
   titleText: {
-    fontSize: 23,
+    fontSize: 18,
     fontFamily: "Poppins-SemiBold",
     color: BASE_COLORS.blue,
     marginBottom: 8,
   },
   descriptionText: {
     textAlign: "center",
-    fontSize: 13,
+    fontSize: 12,
     fontFamily: "Poppins-Regular",
     color: BASE_COLORS.darkText,
     marginBottom: 8,
@@ -284,10 +283,10 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     backgroundColor: "#F0F8FF",
-    borderRadius: 16,
+    borderRadius: 20,
     padding: 12,
     marginBottom: 16,
-    borderWidth: 1,
+    borderWidth: 0.5,
     borderColor: BASE_COLORS.blue,
   },
   emailText: {
@@ -297,22 +296,22 @@ const styles = StyleSheet.create({
   },
   noteContainer: {
     backgroundColor: "#F0F8FF",
-    borderRadius: 16,
-    padding: 12,
+    borderRadius: 20,
+    padding: 10,
     marginBottom: 16,
-    borderWidth: 1,
+    borderWidth: 0.5,
     borderColor: BASE_COLORS.blue,
   },
   noteText: {
     textAlign: "center",
-    fontSize: 13,
+    fontSize: 12,
     fontFamily: "Poppins-Regular",
     color: BASE_COLORS.darkText,
   },
   buttonContainer: {
     width: "100%",
     overflow: "hidden",
-    marginVertical: 8,
+    marginVertical: 12,
   },
   submitButton: {
     backgroundColor: TITLE_COLORS.customRed,
@@ -328,11 +327,11 @@ const styles = StyleSheet.create({
   },
   buttonText: {
     color: "white",
-    fontSize: 15,
+    fontSize: 13,
     fontFamily: "Poppins-Medium",
   },
   resendButton: {
-    marginTop: 4,
+    marginTop: 12,
     alignSelf: "center",
   },
   resendButtonDisabled: {
@@ -347,7 +346,7 @@ const styles = StyleSheet.create({
     color: "#777d87",
   },
   goBackText: {
-    fontSize: 12,
+    fontSize: 11,
     fontFamily: "Poppins-Regular",
     color: "#777d87",
     marginTop: 16,

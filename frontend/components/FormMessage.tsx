@@ -19,11 +19,11 @@ const FormMessage: React.FC<FormMessageProps> = ({
   const getBackgroundColor = () => {
     switch (type) {
       case "success":
-        return "rgba(22, 163, 74, 0.15)"; // Light green
+        return "rgba(22, 163, 74, 0.15)";
       case "error":
-        return "rgba(220, 38, 38, 0.15)"; // Light red
+        return "rgba(220, 38, 38, 0.15)";
       default:
-        return "rgba(59, 130, 246, 0.15)"; // Light blue
+        return "rgba(59, 130, 246, 0.15)";
     }
   };
 
@@ -64,7 +64,7 @@ const FormMessage: React.FC<FormMessageProps> = ({
       </View>
       {onDismiss && (
         <CloseButton
-          size={17}
+          size={12}
           onPress={onDismiss}
           color={getTextColor()}
           hasBackground={false}
@@ -78,7 +78,7 @@ const styles = StyleSheet.create({
   container: {
     borderRadius: 20,
     marginBottom: 16,
-    padding: 12,
+    padding: 13,
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
@@ -92,12 +92,9 @@ const styles = StyleSheet.create({
     marginRight: 8,
   },
   message: {
-    fontSize: 13,
+    fontSize: 12,
     fontFamily: "Poppins-Regular",
     flex: 1,
-  },
-  closeButton: {
-    padding: 1,
   },
 });
 

@@ -79,7 +79,8 @@ const styles = StyleSheet.create({
     padding: 4,
     fontFamily: "Poppins-Regular",
     marginBottom: 4,
-    fontSize: 13,
+    fontSize: 11,
+    textAlign: "center",
   },
   helpTextBold: {
     fontFamily: "Poppins-Regular",

@@ -32,12 +32,12 @@ const styles = StyleSheet.create({
     marginTop: 12,
   },
   switchText: {
-    fontSize: 12,
+    fontSize: 11,
     fontFamily: "Poppins-Regular",
   },
   switchButtonText: {
     fontFamily: "Poppins-Regular",
-    fontSize: 13,
+    fontSize: 12,
     marginLeft: 4,
   },
 });
