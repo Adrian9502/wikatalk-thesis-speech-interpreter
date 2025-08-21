@@ -19,10 +19,11 @@ interface HintState {
     gameMode: string,
     options: any[]
   ) => Promise<boolean>;
-  getHintCost: (hintsUsed: number) => number | null;
+  getHintCost: (hintsUsed: number, gameMode: string) => number | null;
   resetQuestionHints: () => void;
   setCurrentQuestion: (questionId: string) => void;
-  canUseHint: (hintsUsed: number) => boolean;
+  canUseHint: (hintsUsed: number, gameMode: string) => boolean;
+  getMaxHints: (gameMode: string) => number;
 
   // Utility
   resetStore: () => void;
@@ -32,9 +33,17 @@ const HINT_COSTS = {
   1: 5,
   2: 10,
   3: 15,
+  4: 20, // NEW: Fourth hint cost for identification
 };
 
-const MAX_HINTS = 3;
+// NEW: Game mode specific max hints
+const MAX_HINTS_PER_GAME_MODE = {
+  multipleChoice: 2,
+  identification: 4,
+  fillBlanks: 3,
+};
+
+const DEFAULT_MAX_HINTS = 3;
 
 const useHintStore = create<HintState>((set, get) => ({
   // Initial state
@@ -44,15 +53,31 @@ const useHintStore = create<HintState>((set, get) => ({
   currentQuestionHints: [],
   hintsUsedCount: 0,
 
-  // Get hint cost
-  getHintCost: (hintsUsed: number) => {
+  // NEW: Get max hints for game mode
+  getMaxHints: (gameMode: string) => {
+    return (
+      MAX_HINTS_PER_GAME_MODE[
+        gameMode as keyof typeof MAX_HINTS_PER_GAME_MODE
+      ] || DEFAULT_MAX_HINTS
+    );
+  },
+
+  // UPDATED: Get hint cost with game mode support
+  getHintCost: (hintsUsed: number, gameMode: string) => {
+    const maxHints = get().getMaxHints(gameMode);
     const nextHint = hintsUsed + 1;
+
+    if (nextHint > maxHints) {
+      return null; // No more hints available for this game mode
+    }
+
     return HINT_COSTS[nextHint as keyof typeof HINT_COSTS] || null;
   },
 
-  // Check if hint can be used
-  canUseHint: (hintsUsed: number) => {
-    return hintsUsed < MAX_HINTS;
+  // UPDATED: Check if hint can be used with game mode support
+  canUseHint: (hintsUsed: number, gameMode: string) => {
+    const maxHints = get().getMaxHints(gameMode);
+    return hintsUsed < maxHints;
   },
 
   // Set current question and load existing hints
@@ -88,7 +113,15 @@ const useHintStore = create<HintState>((set, get) => ({
         throw new Error("No authentication token");
       }
 
-      const { currentQuestionHints, hintsUsedCount } = get();
+      const { currentQuestionHints, hintsUsedCount, getMaxHints } = get();
+      const maxHints = getMaxHints(gameMode);
+
+      // Check if max hints reached for this game mode
+      if (hintsUsedCount >= maxHints) {
+        throw new Error(
+          `Maximum hints reached for ${gameMode} (${maxHints} max)`
+        );
+      }
 
       // API call to purchase hint
       const response = await fetch(`${API_URL}/api/hints/purchase`, {
@@ -110,19 +143,55 @@ const useHintStore = create<HintState>((set, get) => ({
         throw new Error(data.message || "Failed to purchase hint");
       }
 
-      // Select random incorrect option to disable
-      const incorrectOptions = options.filter((option) => !option.isCorrect);
-      const availableOptions = incorrectOptions.filter(
-        (option) => !currentQuestionHints.includes(option.id)
+      // FIXED: Better filtering to ensure only incorrect options are targeted
+      const incorrectOptions = options.filter((option) => {
+        // Explicitly check that isCorrect is false (not just falsy)
+        const isIncorrect =
+          option.isCorrect === false || option.isCorrect === undefined;
+        const notAlreadyHinted = !currentQuestionHints.includes(option.id);
+
+        console.log(
+          `[HintStore] Option ${option.id}: isCorrect=${option.isCorrect}, isIncorrect=${isIncorrect}, notHinted=${notAlreadyHinted}`
+        );
+
+        return isIncorrect && notAlreadyHinted;
+      });
+
+      // ADDITIONAL: Log all options for debugging
+      console.log(
+        `[HintStore] All options:`,
+        options.map((opt) => ({
+          id: opt.id,
+          text: opt.text?.substring(0, 20) + "...",
+          isCorrect: opt.isCorrect,
+        }))
       );
 
-      if (availableOptions.length === 0) {
-        throw new Error("No more options can be disabled");
+      console.log(
+        `[HintStore] Incorrect options available:`,
+        incorrectOptions.map((opt) => ({
+          id: opt.id,
+          text: opt.text?.substring(0, 20) + "...",
+          isCorrect: opt.isCorrect,
+        }))
+      );
+
+      if (incorrectOptions.length === 0) {
+        throw new Error("No more incorrect options can be disabled");
       }
 
       // Randomly select an incorrect option to disable
-      const randomIndex = Math.floor(Math.random() * availableOptions.length);
-      const optionToDisable = availableOptions[randomIndex];
+      const randomIndex = Math.floor(Math.random() * incorrectOptions.length);
+      const optionToDisable = incorrectOptions[randomIndex];
+
+      // ADDITIONAL: Verify the option we're disabling is incorrect
+      if (optionToDisable.isCorrect === true) {
+        console.error(
+          `[HintStore] ERROR: Attempting to disable correct answer! Option:`,
+          optionToDisable
+        );
+        throw new Error("System error: Cannot disable correct answer");
+      }
 
       // Update state
       const updatedHints = [...currentQuestionHints, optionToDisable.id];
@@ -138,7 +207,7 @@ const useHintStore = create<HintState>((set, get) => ({
       });
 
       console.log(
-        `[HintStore] Hint purchased for question ${questionId}. Disabled option: ${optionToDisable.id}`
+        `[HintStore] Hint purchased for ${gameMode} question ${questionId}. Disabled INCORRECT option: ${optionToDisable.id} (isCorrect: ${optionToDisable.isCorrect}). Hints used: ${updatedHints.length}/${maxHints}`
       );
       return true;
     } catch (error) {

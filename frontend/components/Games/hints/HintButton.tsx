@@ -31,15 +31,22 @@ const HintButton: React.FC<HintButtonProps> = ({
     purchaseHint,
     getHintCost,
     canUseHint,
+    getMaxHints, // NEW: Get max hints for game mode
     hintsUsedCount,
     isLoading,
     error,
   } = useHintStore();
 
-  // Memoized values
+  // NEW: Get max hints for this game mode
+  const maxHints = useMemo(
+    () => getMaxHints(gameMode),
+    [gameMode, getMaxHints]
+  );
+
+  // UPDATED: Pass game mode to getHintCost
   const hintCost = useMemo(
-    () => getHintCost(hintsUsedCount),
-    [hintsUsedCount, getHintCost]
+    () => getHintCost(hintsUsedCount, gameMode),
+    [hintsUsedCount, gameMode, getHintCost]
   );
 
   const canAfford = useMemo(
@@ -47,29 +54,36 @@ const HintButton: React.FC<HintButtonProps> = ({
     [coins, hintCost]
   );
 
+  // UPDATED: Pass game mode to canUseHint
   const canPurchase = useMemo(
-    () => !disabled && canUseHint(hintsUsedCount) && canAfford && !isLoading,
-    [disabled, canUseHint, hintsUsedCount, canAfford, isLoading]
+    () =>
+      !disabled &&
+      canUseHint(hintsUsedCount, gameMode) &&
+      canAfford &&
+      !isLoading,
+    [disabled, canUseHint, hintsUsedCount, gameMode, canAfford, isLoading]
   );
 
   // Determine button state for styling
   const buttonState = useMemo(() => {
     if (isLoading) return "loading";
-    if (!canUseHint(hintsUsedCount)) return "maxReached";
+    if (!canUseHint(hintsUsedCount, gameMode)) return "maxReached";
     if (!canAfford) return "insufficientFunds";
     if (disabled) return "disabled";
     return "available";
-  }, [isLoading, canUseHint, hintsUsedCount, canAfford, disabled]);
+  }, [isLoading, canUseHint, hintsUsedCount, gameMode, canAfford, disabled]);
 
   const handlePurchaseHint = async () => {
     if (!canPurchase) {
       console.log(
-        `[HintButton] Cannot purchase: disabled=${disabled}, canAfford=${canAfford}, hintsUsed=${hintsUsedCount}`
+        `[HintButton] Cannot purchase: disabled=${disabled}, canAfford=${canAfford}, hintsUsed=${hintsUsedCount}/${maxHints}, gameMode=${gameMode}`
       );
       return;
     }
 
-    console.log(`[HintButton] Purchasing hint for question ${questionId}`);
+    console.log(
+      `[HintButton] Purchasing hint for ${gameMode} question ${questionId}`
+    );
     const success = await purchaseHint(questionId, gameMode, options);
 
     if (!success && error) {
@@ -109,7 +123,7 @@ const HintButton: React.FC<HintButtonProps> = ({
         };
       case "maxReached":
         return {
-          text: "Max Hints Used",
+          text: `Max Hints Used (${maxHints})`, // NEW: Show game mode specific max
           costText: "",
           showCoin: false,
           suffix: "",
@@ -182,14 +196,14 @@ const HintButton: React.FC<HintButtonProps> = ({
         </LinearGradient>
       </TouchableOpacity>
 
-      {/* Hints Used Indicator */}
+      {/* UPDATED: Hints Used Indicator with dynamic max */}
       {hintsUsedCount > 0 && (
         <View style={styles.hintsUsedContainer}>
           <Text style={styles.hintsUsedText}>
-            Hints used: {hintsUsedCount}/3
+            Hints used: {hintsUsedCount}/{maxHints}
           </Text>
           <View style={styles.hintsProgress}>
-            {[1, 2, 3].map((i) => (
+            {Array.from({ length: maxHints }, (_, i) => i + 1).map((i) => (
               <View
                 key={i}
                 style={[

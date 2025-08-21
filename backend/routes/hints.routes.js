@@ -5,35 +5,63 @@ const User = require("../models/user.model");
 const {
   getNextHintCost,
   canPurchaseHint,
-  MAX_HINTS_PER_QUESTION
+  getMaxHintsForGameMode,
+  getHintPricing
 } = require("../utils/hintUtils");
 
 /**
- * GET /api/hints/cost/:hintNumber
- * Get cost for a specific hint number
+ * GET /api/hints/cost/:hintNumber/:gameMode
+ * Get cost for a specific hint number in specific game mode
  */
-router.get("/cost/:hintNumber", protect, async (req, res) => {
+router.get("/cost/:hintNumber/:gameMode", protect, async (req, res) => {
   try {
-    const { hintNumber } = req.params;
+    const { hintNumber, gameMode } = req.params;
     const hintNum = parseInt(hintNumber);
+    const maxHints = getMaxHintsForGameMode(gameMode);
 
-    if (hintNum < 1 || hintNum > MAX_HINTS_PER_QUESTION) {
+    if (hintNum < 1 || hintNum > maxHints) {
       return res.status(400).json({
         success: false,
-        message: `Invalid hint number. Must be between 1 and ${MAX_HINTS_PER_QUESTION}`
+        message: `Invalid hint number for ${gameMode}. Must be between 1 and ${maxHints}`
       });
     }
 
-    const cost = getNextHintCost(hintNum - 1);
+    const cost = getNextHintCost(hintNum - 1, gameMode);
 
     res.json({
       success: true,
       hintNumber: hintNum,
       cost,
-      maxHints: MAX_HINTS_PER_QUESTION
+      maxHints,
+      gameMode
     });
   } catch (error) {
     console.error("Error getting hint cost:", error);
+    res.status(500).json({
+      success: false,
+      message: "Server error"
+    });
+  }
+});
+
+/**
+ * GET /api/hints/pricing/:gameMode
+ * Get all hint pricing for a specific game mode
+ */
+router.get("/pricing/:gameMode", protect, async (req, res) => {
+  try {
+    const { gameMode } = req.params;
+    const pricing = getHintPricing(gameMode);
+    const maxHints = getMaxHintsForGameMode(gameMode);
+
+    res.json({
+      success: true,
+      gameMode,
+      maxHints,
+      pricing
+    });
+  } catch (error) {
+    console.error("Error getting hint pricing:", error);
     res.status(500).json({
       success: false,
       message: "Server error"
@@ -67,14 +95,17 @@ router.post("/purchase", protect, async (req, res) => {
       });
     }
 
-    // Check if hint can be purchased
-    const hintValidation = canPurchaseHint(user.coins, currentHintsUsed);
+    // Check if hint can be purchased for this game mode
+    const hintValidation = canPurchaseHint(user.coins, currentHintsUsed, gameMode);
     if (!hintValidation.canPurchase) {
       return res.status(400).json({
         success: false,
         message: hintValidation.reason,
         userCoins: user.coins,
-        hintsUsed: currentHintsUsed
+        hintsUsed: currentHintsUsed,
+        gameMode,
+        maxHints: getMaxHintsForGameMode(gameMode),
+        coinsNeeded: hintValidation.coinsNeeded || 0
       });
     }
 
@@ -99,7 +130,9 @@ router.post("/purchase", protect, async (req, res) => {
       hintCost,
       remainingCoins: updatedUser.coins,
       hintsUsed: currentHintsUsed + 1,
-      nextHintCost: getNextHintCost(currentHintsUsed + 1)
+      maxHints: getMaxHintsForGameMode(gameMode),
+      hintsRemaining: hintValidation.hintsRemaining,
+      nextHintCost: getNextHintCost(currentHintsUsed + 1, gameMode)
     });
 
   } catch (error) {
@@ -112,12 +145,13 @@ router.post("/purchase", protect, async (req, res) => {
 });
 
 /**
- * GET /api/hints/status
- * Get user's hint usage status
+ * GET /api/hints/status/:gameMode
+ * Get user's hint usage status for specific game mode
  */
-router.get("/status", protect, async (req, res) => {
+router.get("/status/:gameMode", protect, async (req, res) => {
   try {
     const userId = req.user._id;
+    const { gameMode } = req.params;
     const user = await User.findById(userId).select("coins hintUsage");
 
     if (!user) {
@@ -127,11 +161,14 @@ router.get("/status", protect, async (req, res) => {
       });
     }
 
+    const maxHints = getMaxHintsForGameMode(gameMode);
+
     res.json({
       success: true,
       coins: user.coins,
       hintUsage: user.hintUsage,
-      maxHintsPerQuestion: MAX_HINTS_PER_QUESTION
+      maxHints,
+      gameMode
     });
   } catch (error) {
     console.error("Error getting hint status:", error);
