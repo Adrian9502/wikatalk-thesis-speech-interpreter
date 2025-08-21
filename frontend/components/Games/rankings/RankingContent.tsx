@@ -49,13 +49,14 @@ const RankingContent: React.FC<RankingContentProps> = ({
     console.log(`[RankingContent] Refreshing ${selectedCategory} rankings`);
     refresh();
   };
-  const asd = true;
-  // Render loading state
-  if (isLoading) {
+
+  // FIXED: Don't show loading on initial render - let provider handle it
+  // Only show loading during refresh operations
+  if (isLoading && data) {
     return (
       <View style={styles.centerContainer}>
         <ActivityIndicator size="small" color={BASE_COLORS.white} />
-        <Text style={styles.loadingText}>Loading rankings...</Text>
+        <Text style={styles.loadingText}>Refreshing rankings...</Text>
       </View>
     );
   }
@@ -73,9 +74,7 @@ const RankingContent: React.FC<RankingContentProps> = ({
       </View>
     );
   }
-
-  // Render empty state
-  if (!data || !data.rankings || data.rankings.length === 0) {
+  if (data && (!data.rankings || data.rankings.length === 0)) {
     return (
       <View style={styles.centerContainer}>
         <Text style={styles.emptyText}>No rankings available</Text>
@@ -84,6 +83,16 @@ const RankingContent: React.FC<RankingContentProps> = ({
         </Text>
       </View>
     );
+  }
+
+  // If no data yet and not loading (initial state), return null to let provider handle loading
+  if (!data && !isLoading) {
+    return null;
+  }
+
+  // If we're still loading initial data, return null (provider shows loading)
+  if (!data) {
+    return null;
   }
 
   // Render main content

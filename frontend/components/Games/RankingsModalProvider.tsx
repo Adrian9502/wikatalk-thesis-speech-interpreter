@@ -39,7 +39,6 @@ export const RankingsModalProvider: React.FC<{ children: React.ReactNode }> = ({
 
   // New state to handle content rendering in phases
   const [contentReady, setContentReady] = useState(false);
-  const [renderStartTime, setRenderStartTime] = useState(0);
 
   // Animation refs
   const modalRef = useRef<Animatable.View>(null);
@@ -57,7 +56,6 @@ export const RankingsModalProvider: React.FC<{ children: React.ReactNode }> = ({
   const showRankingsModal = useCallback(() => {
     // Start tracking performance
     const startTime = Date.now();
-    setRenderStartTime(startTime);
     console.log(`[RankingsModalProvider] Opening rankings modal`);
 
     // Reset states before showing modal
