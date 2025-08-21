@@ -33,14 +33,15 @@ const HINT_COSTS = {
   1: 5,
   2: 10,
   3: 15,
-  4: 20, // NEW: Fourth hint cost for identification
+  4: 20, //  Fourth hint cost for identification
+  5: 25, // Fifth hint cost for fill in the blanks
 };
 
-// NEW: Game mode specific max hints
+//  Game mode specific max hints
 const MAX_HINTS_PER_GAME_MODE = {
   multipleChoice: 2,
   identification: 4,
-  fillBlanks: 3,
+  fillBlanks: 5,
 };
 
 const DEFAULT_MAX_HINTS = 3;
@@ -143,54 +144,56 @@ const useHintStore = create<HintState>((set, get) => ({
         throw new Error(data.message || "Failed to purchase hint");
       }
 
-      // FIXED: Better filtering to ensure only incorrect options are targeted
-      const incorrectOptions = options.filter((option) => {
-        // Explicitly check that isCorrect is false (not just falsy)
-        const isIncorrect =
-          option.isCorrect === false || option.isCorrect === undefined;
-        const notAlreadyHinted = !currentQuestionHints.includes(option.id);
+      let optionToDisable;
+
+      // NEW: Special handling for fillBlanks (letter hints)
+      if (gameMode === "fillBlanks") {
+        // For fillBlanks, we reveal letters instead of disabling options
+        const availableLetters = options.filter(
+          (option) => !currentQuestionHints.includes(option.id)
+        );
+
+        if (availableLetters.length === 0) {
+          throw new Error("No more letters can be revealed");
+        }
+
+        // Randomly select a letter to reveal
+        const randomIndex = Math.floor(Math.random() * availableLetters.length);
+        optionToDisable = availableLetters[randomIndex];
 
         console.log(
-          `[HintStore] Option ${option.id}: isCorrect=${option.isCorrect}, isIncorrect=${isIncorrect}, notHinted=${notAlreadyHinted}`
+          `[HintStore] Revealing letter at position: ${optionToDisable.id} (${optionToDisable.text})`
         );
+      } else {
+        // EXISTING: Logic for multipleChoice and identification
+        const incorrectOptions = options.filter((option) => {
+          const isIncorrect =
+            option.isCorrect === false || option.isCorrect === undefined;
+          const notAlreadyHinted = !currentQuestionHints.includes(option.id);
 
-        return isIncorrect && notAlreadyHinted;
-      });
+          console.log(
+            `[HintStore] Option ${option.id}: isCorrect=${option.isCorrect}, isIncorrect=${isIncorrect}, notHinted=${notAlreadyHinted}`
+          );
 
-      // ADDITIONAL: Log all options for debugging
-      console.log(
-        `[HintStore] All options:`,
-        options.map((opt) => ({
-          id: opt.id,
-          text: opt.text?.substring(0, 20) + "...",
-          isCorrect: opt.isCorrect,
-        }))
-      );
+          return isIncorrect && notAlreadyHinted;
+        });
 
-      console.log(
-        `[HintStore] Incorrect options available:`,
-        incorrectOptions.map((opt) => ({
-          id: opt.id,
-          text: opt.text?.substring(0, 20) + "...",
-          isCorrect: opt.isCorrect,
-        }))
-      );
+        if (incorrectOptions.length === 0) {
+          throw new Error("No more incorrect options can be disabled");
+        }
 
-      if (incorrectOptions.length === 0) {
-        throw new Error("No more incorrect options can be disabled");
-      }
+        // Randomly select an incorrect option to disable
+        const randomIndex = Math.floor(Math.random() * incorrectOptions.length);
+        optionToDisable = incorrectOptions[randomIndex];
 
-      // Randomly select an incorrect option to disable
-      const randomIndex = Math.floor(Math.random() * incorrectOptions.length);
-      const optionToDisable = incorrectOptions[randomIndex];
-
-      // ADDITIONAL: Verify the option we're disabling is incorrect
-      if (optionToDisable.isCorrect === true) {
-        console.error(
-          `[HintStore] ERROR: Attempting to disable correct answer! Option:`,
-          optionToDisable
-        );
-        throw new Error("System error: Cannot disable correct answer");
+        // Verify the option we're disabling is incorrect
+        if (optionToDisable.isCorrect === true) {
+          console.error(
+            `[HintStore] ERROR: Attempting to disable correct answer! Option:`,
+            optionToDisable
+          );
+          throw new Error("System error: Cannot disable correct answer");
+        }
       }
 
       // Update state
@@ -206,8 +209,10 @@ const useHintStore = create<HintState>((set, get) => ({
         questionHints: newQuestionHints,
       });
 
+      const action =
+        gameMode === "fillBlanks" ? "Revealed letter" : "Disabled option";
       console.log(
-        `[HintStore] Hint purchased for ${gameMode} question ${questionId}. Disabled INCORRECT option: ${optionToDisable.id} (isCorrect: ${optionToDisable.isCorrect}). Hints used: ${updatedHints.length}/${maxHints}`
+        `[HintStore] Hint purchased for ${gameMode} question ${questionId}. ${action}: ${optionToDisable.id}. Hints used: ${updatedHints.length}/${maxHints}`
       );
       return true;
     } catch (error) {

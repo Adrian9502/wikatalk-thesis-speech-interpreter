@@ -19,6 +19,7 @@ import { useTimerReset } from "@/hooks/games/useTimerReset";
 import useProgressStore from "@/store/games/useProgressStore";
 import { useAppStateProgress } from "@/hooks/games/useAppStateProgress";
 import useCoinsStore from "@/store/games/useCoinsStore";
+import useHintStore from "@/store/games/useHintStore";
 
 interface FillInTheBlankProps {
   levelId: number;
@@ -63,6 +64,9 @@ const FillInTheBlank: React.FC<FillInTheBlankProps> = React.memo(
 
     // NEW: Coins store for balance refresh
     const { fetchCoinsBalance } = useCoinsStore();
+
+    // NEW: Hint store for reset functionality
+    const { resetQuestionHints } = useHintStore();
 
     // Custom hooks for shared logic
     const {
@@ -319,6 +323,12 @@ const FillInTheBlank: React.FC<FillInTheBlankProps> = React.memo(
       }
     }, [showFeedback, setTimerRunning]);
 
+    // NEW: Enhanced restart with hint reset
+    const handleRestartWithHints = useCallback(async () => {
+      resetQuestionHints();
+      await handleRestartWithProgress();
+    }, [resetQuestionHints, handleRestartWithProgress]);
+
     return (
       <GameContainer
         title="Fill in the Blank"
@@ -372,7 +382,7 @@ const FillInTheBlank: React.FC<FillInTheBlankProps> = React.memo(
             levelId={levelId}
             gameMode="fillBlanks"
             gameTitle="Fill in the Blank"
-            onRestart={handleRestartWithProgress}
+            onRestart={handleRestartWithHints} // NEW: Use hint-aware restart
             focusArea={gameConfig.focusArea}
             levelString={gameConfig.currentExercise?.level}
             actualTitle={gameConfig.currentExercise?.title}

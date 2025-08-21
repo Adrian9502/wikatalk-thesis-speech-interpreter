@@ -1,31 +1,22 @@
 import { StyleSheet, Dimensions } from "react-native";
-import { BASE_COLORS } from "@/constant/colors";
+import { BASE_COLORS, ICON_COLORS } from "@/constant/colors";
 
 const { width: screenWidth } = Dimensions.get("window");
-const isSmallScreen = screenWidth < 375;
+const isSmallScreen = screenWidth < 380;
 
 export default StyleSheet.create({
-  // Scroll container for proper spacing
   scrollContainer: {
     paddingVertical: 10,
-    flexGrow: 1,
-    minHeight: "100%",
+    paddingBottom: 40,
   },
 
-  // Attempts Section
+  // Attempts
   attemptsContainer: {
-    alignItems: "center",
-    justifyContent: "center",
     flexDirection: "row",
-    alignSelf: "center",
-    marginBottom: 24,
-    paddingVertical: 10,
-    paddingHorizontal: 16,
-    backgroundColor: "rgba(255, 255, 255, 0.1)",
-    borderRadius: 20,
-    borderWidth: 1,
-    gap: 8,
-    borderColor: "rgba(255, 255, 255, 0.3)",
+    justifyContent: "center",
+    alignItems: "center",
+    marginBottom: 20,
+    gap: 12,
   },
   attemptsLabel: {
     fontSize: 13,
@@ -34,37 +25,85 @@ export default StyleSheet.create({
   },
   heartsContainer: {
     flexDirection: "row",
-    gap: 5,
+    gap: 4,
   },
   heartIcon: {
-    fontSize: 13,
+    fontSize: 16,
   },
   heartActive: {
-    color: BASE_COLORS.danger,
+    color: "#FF6B6B",
   },
   heartInactive: {
-    color: "rgba(255, 255, 255, 0.31)",
+    color: "rgba(255, 255, 255, 0.3)",
   },
 
-  // Input Section - UPDATED FOR CONSISTENT BUTTON SIZE
+  // Hint Section with Letter Display and Button
+  hintSection: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 20,
+    gap: 16,
+  },
+
+  //  Letter hint display (left side)
+  letterHintContainer: {
+    flex: 1,
+    padding: 12,
+    borderRadius: 20,
+    borderWidth: 1,
+    backgroundColor: "rgba(255, 255, 255, 0.15)",
+    borderColor: "rgba(255, 255, 255, 0.3)",
+  },
+  letterHintHeader: {
+    marginBottom: 8,
+  },
+  letterHintLabel: {
+    fontSize: 12,
+    fontFamily: "Poppins-SemiBold",
+    color: "rgba(255, 255, 255, 0.9)",
+  },
+  letterHintDisplay: {
+    backgroundColor: "rgba(255, 215, 0, 0.15)",
+    borderRadius: 20,
+    paddingHorizontal: 8,
+    paddingVertical: 8,
+    borderWidth: 1,
+    borderColor: "rgba(255, 215, 0, 0.3)",
+    minWidth: 120,
+    flex: 1,
+  },
+  letterHintText: {
+    fontSize: 15,
+    fontFamily: "Poppins-Bold",
+    color: ICON_COLORS.brightYellow,
+    textAlign: "center",
+    letterSpacing: 2,
+  },
+
+  // Hint button container (right side)
+  hintButtonContainer: {
+    alignItems: "flex-end",
+  },
+
+  // Input Section
   inputSection: {
     marginBottom: 20,
-    zIndex: 1,
   },
   inputHeader: {
-    marginVertical: 10,
-    alignItems: "flex-start",
+    alignItems: "center",
+    marginBottom: 12,
   },
   inputLabel: {
-    fontSize: 13,
+    fontSize: 14,
     fontFamily: "Poppins-Medium",
-    color: BASE_COLORS.white,
-    marginBottom: 4,
+    color: "rgba(255, 255, 255, 0.8)",
   },
   inputWrapper: {
     flexDirection: "row",
-    gap: 12,
     alignItems: "center",
+    gap: 12,
+    paddingHorizontal: 20,
   },
   inputContainer: {
     flex: 1,
@@ -98,33 +137,60 @@ export default StyleSheet.create({
     elevation: 2,
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.25,
-    shadowRadius: 3.84,
-    alignSelf: "center",
-    flexShrink: 0,
-    flexGrow: 0,
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
   },
   submitButtonDisabled: {
-    opacity: 0.8,
-    elevation: 0,
-    shadowOpacity: 0,
+    opacity: 0.5,
   },
   submitGradient: {
-    paddingHorizontal: isSmallScreen ? 16 : 20,
+    paddingHorizontal: isSmallScreen ? 20 : 24,
+    paddingVertical: isSmallScreen ? 10 : 12,
     alignItems: "center",
-    justifyContent: "center",
-    height: 40,
-    minWidth: isSmallScreen ? 80 : 90,
-    borderRadius: 20,
+    minWidth: isSmallScreen ? 80 : 100,
   },
   submitButtonText: {
     fontSize: isSmallScreen ? 12 : 14,
-    fontFamily: "Poppins-Medium",
+    fontFamily: "Poppins-SemiBold",
     color: BASE_COLORS.white,
-    letterSpacing: 0.5,
   },
   submitButtonTextDisabled: {
     color: "rgba(255, 255, 255, 0.6)",
+  },
+
+  // Feedback
+  feedbackContainer: {
+    marginBottom: 20,
+  },
+  feedbackCard: {
+    borderRadius: 20,
+    padding: 16,
+    flexDirection: "row",
+    alignItems: "center",
+    marginHorizontal: 20,
+    gap: 12,
+  },
+  feedbackIcon: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: "rgba(255, 255, 255, 0.2)",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  feedbackContent: {
+    flex: 1,
+  },
+  feedbackTitle: {
+    fontSize: 16,
+    fontFamily: "Poppins-SemiBold",
+    color: BASE_COLORS.white,
+    marginBottom: 2,
+  },
+  feedbackText: {
+    fontSize: 13,
+    fontFamily: "Poppins-Regular",
+    color: "rgba(255, 255, 255, 0.9)",
   },
 
   // Help Section
@@ -174,64 +240,40 @@ export default StyleSheet.create({
   },
   helpCardGradient: {
     borderRadius: 20,
-    paddingVertical: 10,
+    paddingVertical: 12,
     paddingHorizontal: 16,
+    marginHorizontal: 20,
   },
   helpCardHeader: {
     flexDirection: "row",
-    justifyContent: "center",
     alignItems: "center",
+    justifyContent: "center",
     marginBottom: 8,
     gap: 8,
   },
   helpCardTitle: {
     fontSize: 13,
-    textAlign: "center",
-    fontFamily: "Poppins-Medium",
+    fontFamily: "Poppins-SemiBold",
     color: BASE_COLORS.white,
   },
   helpCardText: {
-    textAlign: "center",
     fontSize: 12,
     fontFamily: "Poppins-Regular",
     color: "rgba(255, 255, 255, 0.9)",
-    lineHeight: 20,
+    textAlign: "center",
+    lineHeight: 18,
   },
 
-  // Feedback
-  feedbackContainer: {
-    marginBottom: 20,
-  },
-  feedbackCard: {
-    flexDirection: "row",
-    alignItems: "center",
-    borderRadius: 20,
-    paddingVertical: 12,
-    paddingHorizontal: 16,
-  },
-  feedbackIcon: {
-    width: 38,
-    height: 38,
-    borderRadius: 100,
-    backgroundColor: "rgba(255, 255, 255, 0.2)",
+  // Loading animation
+  loadingContainer: {
+    flex: 1,
     justifyContent: "center",
     alignItems: "center",
-    marginRight: 16,
   },
-  feedbackContent: {
-    flex: 1,
-  },
-  feedbackTitle: {
+  loadingText: {
     fontSize: 14,
-    fontFamily: "Poppins-SemiBold",
-    color: BASE_COLORS.white,
-    marginBottom: 4,
-  },
-  feedbackText: {
-    fontSize: 12,
-    fontFamily: "Poppins-Regular",
-    color: BASE_COLORS.white,
-    lineHeight: 20,
-    opacity: 0.9,
+    fontFamily: "Poppins-Medium",
+    color: "rgba(255, 255, 255, 0.7)",
+    marginTop: 12,
   },
 });

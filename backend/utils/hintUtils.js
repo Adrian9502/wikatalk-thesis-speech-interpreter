@@ -6,14 +6,15 @@ const HINT_COSTS = {
   1: 5,   // First hint: 5 coins
   2: 10,  // Second hint: 10 coins  
   3: 15,  // Third hint: 15 coins
-  4: 20   // Fourth hint: 20 coins (for identification)
+  4: 20,  // Fourth hint: 20 coins (for identification)
+  5: 25   // Fourth hint: 20 coins (for fillintheblank)
 };
 
 // NEW: Different max hints per game mode
 const MAX_HINTS_PER_GAME_MODE = {
   multipleChoice: 2,    // Max 2 hints for Multiple Choice
   identification: 4,    // Max 4 hints for Identification  
-  fillBlanks: 3        // Max 3 hints for Fill in the Blanks (default)
+  fillBlanks: 5        // Max 5 hints for Fill in the Blanks 
 };
 
 // Default fallback
@@ -30,8 +31,8 @@ function getMaxHintsForGameMode(gameMode) {
  * Calculate hint cost based on hint number
  */
 function getHintCost(hintNumber) {
-  if (hintNumber < 1 || hintNumber > 4) { // Updated max to 4
-    throw new Error(`Invalid hint number: ${hintNumber}. Must be between 1 and 4`);
+  if (hintNumber < 1 || hintNumber > 5) {
+    throw new Error(`Invalid hint number: ${hintNumber}. Must be between 1 and 5`);
   }
   return HINT_COSTS[hintNumber];
 }

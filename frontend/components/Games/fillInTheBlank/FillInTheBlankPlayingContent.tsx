@@ -22,6 +22,8 @@ import { getGameModeGradient } from "@/utils/gameUtils";
 import styles from "@/styles/games/fillInTheBlank.styles";
 import gamesSharedStyles from "@/styles/gamesSharedStyles";
 import LevelTitleHeader from "@/components/games/LevelTitleHeader";
+import HintButton from "@/components/games/hints/HintButton"; // NEW: Import HintButton
+import useHintStore from "@/store/games/useHintStore"; // NEW: Import hint store
 import Icon from "react-native-vector-icons/Feather";
 import { useNavigation } from "expo-router";
 
@@ -45,6 +47,8 @@ interface RenderPlayingContentProps {
 const FillInTheBlankPlayingContent: React.FC<RenderPlayingContentProps> =
   React.memo(
     ({
+      difficulty,
+      levelData,
       userAnswer,
       showHint,
       showTranslation,
@@ -61,10 +65,10 @@ const FillInTheBlankPlayingContent: React.FC<RenderPlayingContentProps> =
 
       useLayoutEffect(() => {
         navigation.setOptions({
-          //  disables layout resizing when keyboard shows/hides
           windowSoftInputMode: "adjustNothing",
         });
       }, [navigation]);
+
       const inputRef = useRef<TextInput>(null);
       const scrollViewRef = useRef<ScrollView>(null);
 
@@ -74,13 +78,29 @@ const FillInTheBlankPlayingContent: React.FC<RenderPlayingContentProps> =
       // Animation refs for hint and translation
       const hintOpacity = useRef(new Animated.Value(0)).current;
       const translationOpacity = useRef(new Animated.Value(0)).current;
-
-      //Animation for feedback card bounce
       const feedbackScale = useRef(new Animated.Value(0)).current;
-
-      // Animation for smooth keyboard transitions
       const keyboardAnim = useRef(new Animated.Value(0)).current;
       const containerTranslateY = useRef(new Animated.Value(0)).current;
+
+      // NEW: Hint store integration
+      const {
+        currentQuestionHints,
+        hintsUsedCount,
+        setCurrentQuestion,
+        resetQuestionHints,
+      } = useHintStore();
+
+      // NEW: Generate questionId for hint system
+      const questionId = useMemo(() => {
+        return `${currentExercise?.id || levelData?.id}_${difficulty}`;
+      }, [currentExercise?.id, levelData?.id, difficulty]);
+
+      // NEW: Set current question for hint system
+      useEffect(() => {
+        if (questionId) {
+          setCurrentQuestion(questionId);
+        }
+      }, [questionId, setCurrentQuestion]);
 
       // Memoized values
       const gameGradientColors = useMemo(
@@ -122,35 +142,26 @@ const FillInTheBlankPlayingContent: React.FC<RenderPlayingContentProps> =
                 useNativeDriver: false,
               }),
               Animated.timing(containerTranslateY, {
-                toValue: -20,
+                toValue: -e.endCoordinates.height / 4,
                 duration: 300,
                 useNativeDriver: true,
               }),
             ]).start();
-
-            // Auto-scroll to input section when keyboard appears
-            setTimeout(() => {
-              scrollViewRef.current?.scrollTo({
-                y: 200,
-                animated: true,
-              });
-            }, 350);
           }
         );
 
         const keyboardDidHideListener = Keyboard.addListener(
           "keyboardDidHide",
           () => {
-            // Smooth animation when keyboard disappears
             Animated.parallel([
               Animated.timing(keyboardAnim, {
                 toValue: 0,
-                duration: 150,
+                duration: 300,
                 useNativeDriver: false,
               }),
               Animated.timing(containerTranslateY, {
                 toValue: 0,
-                duration: 150,
+                duration: 300,
                 useNativeDriver: true,
               }),
             ]).start();
@@ -158,12 +169,11 @@ const FillInTheBlankPlayingContent: React.FC<RenderPlayingContentProps> =
         );
 
         return () => {
-          keyboardDidShowListener.remove();
-          keyboardDidHideListener.remove();
+          keyboardDidShowListener?.remove();
+          keyboardDidHideListener?.remove();
         };
       }, [keyboardAnim, containerTranslateY]);
 
-      // Animation effects for hint and translation
       useEffect(() => {
         if (showHint) {
           Animated.timing(hintOpacity, {
@@ -187,6 +197,29 @@ const FillInTheBlankPlayingContent: React.FC<RenderPlayingContentProps> =
           translationOpacity.setValue(0);
         }
       }, [showTranslation, translationOpacity]);
+
+      // NEW: Memoized letter hint display
+      const letterHintDisplay = useMemo(() => {
+        if (!currentExercise?.answer) {
+          return "_".repeat(8); // Default placeholder
+        }
+
+        const answer = currentExercise.answer;
+        let displayAnswer = "_".repeat(answer.length);
+
+        // Replace underscores with revealed letters from hints
+        currentQuestionHints.forEach((letterIndex) => {
+          const index = parseInt(letterIndex.replace("letter_", ""));
+          if (index >= 0 && index < answer.length) {
+            displayAnswer =
+              displayAnswer.substring(0, index) +
+              answer[index] +
+              displayAnswer.substring(index + 1);
+          }
+        });
+
+        return displayAnswer;
+      }, [currentExercise?.answer, currentQuestionHints]);
 
       // Memoized formatted sentence
       const formattedSentence = useMemo(() => {
@@ -247,7 +280,6 @@ const FillInTheBlankPlayingContent: React.FC<RenderPlayingContentProps> =
         toggleTranslation();
       }, [toggleTranslation, isAnimating]);
 
-      // NEW: Focus handler for input
       const handleInputFocus = useCallback(() => {
         setTimeout(() => {
           scrollViewRef.current?.scrollTo({
@@ -304,6 +336,43 @@ const FillInTheBlankPlayingContent: React.FC<RenderPlayingContentProps> =
             <View style={styles.attemptsContainer}>
               <Text style={styles.attemptsLabel}>Attempts left:</Text>
               <View style={styles.heartsContainer}>{attemptsDisplay}</View>
+            </View>
+
+            {/* Hint Section with Letter Display and Hint Button */}
+            <View style={styles.hintSection}>
+              {/* Left side: Letter hint display */}
+              <View style={styles.letterHintContainer}>
+                <View style={styles.letterHintHeader}>
+                  <Text style={styles.letterHintLabel}>Hint:</Text>
+                </View>
+                <View style={styles.letterHintDisplay}>
+                  <Text style={styles.letterHintText}>
+                    {hintsUsedCount > 0
+                      ? letterHintDisplay
+                      : "_".repeat(currentExercise?.answer?.length || 5)}
+                  </Text>
+                </View>
+              </View>
+
+              {/* Right side: Hint button */}
+              <View style={styles.hintButtonContainer}>
+                <HintButton
+                  questionId={questionId}
+                  gameMode="fillBlanks"
+                  options={
+                    currentExercise?.answer
+                      ? currentExercise.answer
+                          .split("")
+                          .map((letter: string, index: number) => ({
+                            id: `letter_${index}`,
+                            text: letter,
+                            isCorrect: true, // All letters are "correct" for fill in the blank
+                          }))
+                      : []
+                  }
+                  disabled={showFeedback || isAnimating}
+                />
+              </View>
             </View>
 
             {/* Input Section */}

@@ -40,7 +40,7 @@ const faqItems: FAQItem[] = [
     category: "features",
     question: "How many game types are there?",
     answer:
-      "WikaTalk offers 3 interactive game types to help you learn Filipino dialects:\n\n• Multiple Choice - Choose from 4 answer options (up to 2 hints available)\n• Identification - Select from 8 choices with translation hints available (up to 4 hints available)\n• Fill in the Blanks - Complete sentences with 2 attempts plus hint and translation buttons to make answering easier (up to 3 hints available)",
+      "WikaTalk offers 3 interactive game types to help you learn Filipino dialects:\n\n• Multiple Choice - Choose from 4 answer options (up to 2 hints available)\n• Identification - Select from 8 choices with translation hints available (up to 4 hints available)\n• Fill in the Blanks - Complete sentences with 2 attempts plus hint and translation buttons to make answering easier (up to 5 hints available)",
   },
   {
     id: 7,
