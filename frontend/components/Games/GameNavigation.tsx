@@ -784,7 +784,7 @@ const styles = StyleSheet.create({
   },
   gameModesGrid: {
     flexDirection: "row",
-    gap: 10,
+    gap: 16,
     justifyContent: "space-between",
   },
   gameModeCard: {
