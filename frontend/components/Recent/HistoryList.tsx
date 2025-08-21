@@ -25,8 +25,12 @@ const HistoryList: React.FC<HistoryListProps> = ({
 
   return (
     <>
-      {items.map((item) => (
-        <HistoryItem key={item.id} item={item} onDeletePress={onDeletePress} />
+      {items.map((item, index) => (
+        <HistoryItem
+          key={`${activeTab}-${item.id}-${item.date}-${index}`}
+          item={item}
+          onDeletePress={onDeletePress}
+        />
       ))}
     </>
   );

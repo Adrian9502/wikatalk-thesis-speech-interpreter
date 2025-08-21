@@ -61,16 +61,26 @@ export const RecentActivity: React.FC = () => {
       try {
         const response = await api.get(`/api/translations?type=${tabType}`);
 
-        // Format the data to match our HistoryItems structure
-        const formattedData = response.data.data.map(
-          (item: TranslationAPIItem) => ({
-            id: item._id,
-            date: format(new Date(item.date), "MMM. d, yyyy - h:mma"),
-            fromLanguage: item.fromLanguage,
-            toLanguage: item.toLanguage,
-            originalText: item.originalText,
-            translatedText: item.translatedText,
-          })
+        // FIXED: Access response.data.history instead of response.data.data
+        const formattedData = response.data.history.map(
+          (item: TranslationAPIItem) => {
+            // DEBUG: Log each item before formatting
+            console.log(`[RecentActivity] Processing item:`, {
+              id: item._id,
+              originalText: item.originalText,
+              translatedText: item.translatedText,
+              type: typeof item.originalText,
+            });
+
+            return {
+              id: item._id,
+              date: format(new Date(item.date), "MMM. d, yyyy - h:mma"),
+              fromLanguage: item.fromLanguage,
+              toLanguage: item.toLanguage,
+              originalText: item.originalText,
+              translatedText: item.translatedText,
+            };
+          }
         );
 
         // Update just this tab's data
@@ -79,6 +89,12 @@ export const RecentActivity: React.FC = () => {
           [tabType]: formattedData,
         }));
       } catch (err: any) {
+        // Enhanced error logging
+        console.error(
+          `[RecentActivity] API Error:`,
+          err.response?.data || err.message
+        );
+
         // If it's a 401, show empty state instead of error
         if (err.response?.status === 401) {
           setHistoryItems((prev) => ({
@@ -213,9 +229,7 @@ export const RecentActivity: React.FC = () => {
             <RefreshControl
               refreshing={refreshing}
               onRefresh={onRefresh}
-              colors={[BASE_COLORS.white]} // Color of the refresh spinner
-              tintColor={activeTheme.tabActiveColor} // For iOS
-              progressBackgroundColor={activeTheme.secondaryColor} // For Android
+              progressBackgroundColor={activeTheme.secondaryColor}
             />
           }
         >
