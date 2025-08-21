@@ -1,7 +1,7 @@
 import { StyleSheet } from "react-native";
 import { BASE_COLORS } from "@/constant/colors";
 
-export const gameSharedStyles = StyleSheet.create({
+const gameSharedStyles = StyleSheet.create({
   // Base container styles
   wrapper: {
     flex: 1,
@@ -39,6 +39,7 @@ export const gameSharedStyles = StyleSheet.create({
     fontSize: 18,
     fontFamily: "Poppins-SemiBold",
     color: BASE_COLORS.white,
+    textAlign: "center",
     marginBottom: 10,
     lineHeight: 26,
   },
@@ -61,6 +62,38 @@ export const gameSharedStyles = StyleSheet.create({
   incorrectOption: {
     backgroundColor: "rgba(239, 68, 68, 0.2)",
     borderColor: BASE_COLORS.danger,
+  },
+
+  // ADD: Missing option styles for MultipleChoice
+  optionsContainer: {
+    flex: 1,
+    paddingVertical: 10,
+  },
+  optionButton: {
+    marginBottom: 12,
+    borderRadius: 20,
+    overflow: "hidden",
+    borderWidth: 1,
+    borderColor: "rgba(255, 255, 255, 0.2)",
+  },
+  selectedOption: {
+    borderColor: "rgba(255, 255, 255, 0.8)",
+    shadowColor: "#fff",
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    shadowOffset: { width: 0, height: 2 },
+  },
+  optionGradient: {
+    padding: 16,
+    minHeight: 60,
+    justifyContent: "center",
+  },
+  optionText: {
+    fontSize: 16,
+    fontFamily: "Poppins-Medium",
+    color: BASE_COLORS.white,
+    textAlign: "center",
+    lineHeight: 22,
   },
 
   // Loader styles
@@ -111,6 +144,23 @@ export const gameSharedStyles = StyleSheet.create({
     overflow: "hidden",
     justifyContent: "center",
     alignItems: "center",
+  },
+
+  // hints styles
+  hintSection: {
+    alignItems: "center",
+    marginBottom: 16,
+    paddingHorizontal: 20,
+  },
+  disabledOption: {
+    opacity: 0.6,
+  },
+  disabledOptionLetterText: {
+    color: "rgba(255, 255, 255, 0.3)",
+  },
+  disabledOptionText: {
+    color: "rgba(255, 255, 255, 0.4)",
+    textDecorationLine: "line-through",
   },
 });
 

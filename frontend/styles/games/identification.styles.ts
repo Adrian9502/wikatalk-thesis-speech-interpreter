@@ -23,6 +23,7 @@ export default StyleSheet.create({
     fontFamily: "Poppins-Regular",
     color: "rgba(255, 255, 255, 0.7)",
     textAlign: "center",
+    marginBottom: 16,
   },
 
   // Enhanced Words Grid
@@ -130,6 +131,7 @@ export default StyleSheet.create({
   // Enhanced Translation Section
   translationSection: {
     marginBottom: 20,
+    alignItems: "center",
   },
   translationButton: {
     flexDirection: "row",
@@ -164,6 +166,7 @@ export default StyleSheet.create({
   translationCardGradient: {
     borderRadius: 20,
     paddingVertical: 12,
+    paddingHorizontal: 16,
   },
   translationCardHeader: {
     flexDirection: "row",
@@ -197,5 +200,32 @@ export default StyleSheet.create({
     borderWidth: 2,
     borderColor: "red",
     marginBottom: 10,
+  },
+
+  // NEW: Hint styles
+  hintSection: {
+    alignItems: "center",
+    marginBottom: 16,
+    paddingHorizontal: 20,
+  },
+  disabledWord: {
+    opacity: 0.5,
+  },
+  disabledWordText: {
+    color: "rgba(255, 255, 255, 0.4)",
+    textDecorationLine: "line-through",
+  },
+  disabledWordSubtext: {
+    color: "rgba(255, 255, 255, 0.3)",
+    textDecorationLine: "line-through",
+  },
+  strikeThrough: {
+    position: "absolute",
+    top: "50%",
+    left: 0,
+    right: 0,
+    height: 2,
+    backgroundColor: "rgba(255, 255, 255, 0.6)",
+    transform: [{ translateY: -1 }],
   },
 });

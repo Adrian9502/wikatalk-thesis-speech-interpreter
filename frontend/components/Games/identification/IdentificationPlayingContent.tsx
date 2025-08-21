@@ -14,6 +14,8 @@ import styles from "@/styles/games/identification.styles";
 import gamesSharedStyles from "@/styles/gamesSharedStyles";
 import { safeTextRender } from "@/utils/textUtils";
 import LevelTitleHeader from "@/components/games/LevelTitleHeader";
+import HintButton from "@/components/games/hints/HintButton"; // NEW: Import HintButton
+import useHintStore from "@/store/games/useHintStore"; // NEW: Import hint store
 
 interface IdentificationPlayingContentProps {
   difficulty: string;
@@ -24,6 +26,10 @@ interface IdentificationPlayingContentProps {
   showTranslation: boolean;
   toggleTranslation: () => void;
   handleWordSelect: (index: number) => void;
+  // NEW: Add hint-related props
+  currentQuestionHints?: string[];
+  hintsUsedCount?: number;
+  questionId?: string;
 }
 
 const IdentificationPlayingContent: React.FC<IdentificationPlayingContentProps> =
@@ -35,10 +41,27 @@ const IdentificationPlayingContent: React.FC<IdentificationPlayingContentProps> 
       showTranslation,
       toggleTranslation,
       handleWordSelect,
+      // NEW: Destructure hint props
+      currentQuestionHints = [],
+      hintsUsedCount = 0,
+      questionId = "",
     }) => {
       const [isAnimating, setIsAnimating] = useState(true);
 
       const translationOpacity = React.useRef(new Animated.Value(0)).current;
+
+      // NEW: Hint store integration
+      const {
+        currentQuestionHints: storeHints,
+        hintsUsedCount: storeHintsCount,
+        setCurrentQuestion,
+      } = useHintStore();
+
+      // Use store hints if props aren't provided (fallback)
+      const activeQuestionHints =
+        currentQuestionHints.length > 0 ? currentQuestionHints : storeHints;
+      const activeHintsCount =
+        hintsUsedCount > 0 ? hintsUsedCount : storeHintsCount;
 
       // Memoized values
       const gameGradientColors = useMemo(
@@ -47,6 +70,13 @@ const IdentificationPlayingContent: React.FC<IdentificationPlayingContentProps> 
       );
 
       const wordOptions = useMemo(() => words || [], [words]);
+
+      // NEW: Set current question for hint system
+      useEffect(() => {
+        if (questionId) {
+          setCurrentQuestion(questionId);
+        }
+      }, [questionId, setCurrentQuestion]);
 
       // Simplified animation timing
       useEffect(() => {
@@ -71,13 +101,17 @@ const IdentificationPlayingContent: React.FC<IdentificationPlayingContentProps> 
         }
       }, [showTranslation, translationOpacity]);
 
-      // Memoized handlers
+      // NEW: Enhanced word press handler with hint support
       const handleWordPress = useCallback(
         (index: number) => {
-          if (isAnimating || selectedWord !== null) return;
+          // Check if word is disabled by hint
+          const wordId = `word_${index}`;
+          const isDisabled = activeQuestionHints.includes(wordId);
+
+          if (isAnimating || selectedWord !== null || isDisabled) return;
           handleWordSelect(index);
         },
-        [isAnimating, selectedWord, handleWordSelect]
+        [isAnimating, selectedWord, handleWordSelect, activeQuestionHints]
       );
 
       const handleToggleTranslation = useCallback(() => {
@@ -119,6 +153,22 @@ const IdentificationPlayingContent: React.FC<IdentificationPlayingContentProps> 
             </LinearGradient>
           </View>
 
+          {/* NEW: Hint Section - Centered */}
+          {questionId && (
+            <View style={gamesSharedStyles.hintSection}>
+              <HintButton
+                questionId={questionId}
+                gameMode="identification"
+                options={wordOptions.map((word, index) => ({
+                  id: `word_${index}`,
+                  text: word.text || word.clean,
+                  isCorrect: word.isCorrect || false,
+                }))}
+                disabled={!!selectedWord || isAnimating}
+              />
+            </View>
+          )}
+
           {/* Instructions */}
           <View style={styles.instructionsContainer}>
             <Text style={styles.instructionsTitle}>Find the correct word:</Text>
@@ -126,13 +176,14 @@ const IdentificationPlayingContent: React.FC<IdentificationPlayingContentProps> 
               Tap on the word that best fits the sentence context
             </Text>
           </View>
-
-          {/* Words Grid  */}
+          {/* Words Grid with Hint Support */}
           <View style={styles.wordsContainer}>
             {wordOptions.length > 0 ? (
               <View style={styles.wordsGrid}>
                 {wordOptions.map((word, index) => {
                   const isSelected = selectedWord === index;
+                  const wordId = `word_${index}`;
+                  const isDisabled = activeQuestionHints.includes(wordId);
 
                   return (
                     <View
@@ -143,19 +194,37 @@ const IdentificationPlayingContent: React.FC<IdentificationPlayingContentProps> 
                         style={[
                           styles.wordCard,
                           isSelected && styles.selectedWordCard,
+                          isDisabled && gamesSharedStyles.disabledOption,
                         ]}
                         onPress={() => handleWordPress(index)}
-                        disabled={isAnimating || selectedWord !== null}
-                        activeOpacity={isAnimating ? 1 : 0.8}
+                        disabled={
+                          isAnimating || selectedWord !== null || isDisabled
+                        }
+                        activeOpacity={isDisabled ? 1 : 0.8}
                       >
                         {/* Word Number */}
                         <View style={styles.wordNumber}>
-                          <Text style={styles.wordNumberText}>{index + 1}</Text>
+                          <Text
+                            style={[
+                              styles.wordNumberText,
+                              isDisabled &&
+                                gamesSharedStyles.disabledOptionLetterText,
+                            ]}
+                          >
+                            {index + 1}
+                          </Text>
                         </View>
 
                         {/* Word Content */}
                         <View style={styles.wordContent}>
-                          <Text style={styles.wordText} numberOfLines={2}>
+                          <Text
+                            style={[
+                              styles.wordText,
+                              isDisabled &&
+                                gamesSharedStyles.disabledOptionText,
+                            ]}
+                            numberOfLines={2}
+                          >
                             {safeTextRender(word.text)}
                           </Text>
                         </View>
@@ -199,7 +268,7 @@ const IdentificationPlayingContent: React.FC<IdentificationPlayingContentProps> 
               </Text>
             </TouchableOpacity>
 
-            {/* NEW: Animated Translation Card */}
+            {/* Animated Translation Card */}
             {showTranslation && (
               <Animated.View
                 style={[

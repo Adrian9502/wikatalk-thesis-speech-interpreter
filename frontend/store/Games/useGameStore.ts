@@ -3,6 +3,7 @@ import axios from "axios";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { UserProgress } from "@/types/userProgress";
 import { getToken } from "@/lib/authTokenManager";
+import useHintStore from "./useHintStore";
 
 // Define the API URL using environment variable
 const API_URL = process.env.EXPO_PUBLIC_BACKEND_URL || "http://localhost:5000";
@@ -977,6 +978,12 @@ const useGameStore = create<QuizState>((set, get) => ({
 
   // Restart game
   handleRestart: () => {
+    console.log("[GameStore] Restarting game...");
+
+    // Reset hint store
+    const { resetQuestionHints } = useHintStore.getState();
+    resetQuestionHints();
+
     const { currentMode } = get().gameState;
 
     console.log("[GameStore] Restarting game, clearing ALL state completely");

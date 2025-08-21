@@ -19,6 +19,7 @@ import { useTimerReset } from "@/hooks/games/useTimerReset";
 import { useAppStateProgress } from "@/hooks/games/useAppStateProgress";
 import useProgressStore from "@/store/games/useProgressStore";
 import useCoinsStore from "@/store/games/useCoinsStore";
+import useHintStore from "@/store/games/useHintStore"; // NEW: Add hint store
 import { router } from "expo-router";
 import { BASE_COLORS } from "@/constant/colors";
 import gameSharedStyles from "@/styles/gamesSharedStyles";
@@ -60,8 +61,11 @@ const Identification: React.FC<IdentificationProps> = React.memo(
       setBackgroundCompletion,
     } = useGameStore();
 
-    // NEW: Coins store for balance refresh
+    // Coins store for balance refresh
     const { fetchCoinsBalance } = useCoinsStore();
+
+    // NEW: Hint store for reset functionality
+    const { resetQuestionHints } = useHintStore();
 
     // Custom hooks for shared logic
     const {
@@ -89,7 +93,7 @@ const Identification: React.FC<IdentificationProps> = React.memo(
 
     const handleTimerReset = useTimerReset(setTimeElapsed, "Identification");
 
-    // ADD: App state monitoring for auto-save
+    // App state monitoring for auto-save
     const { resetAutoSaveFlag, handleUserExit } = useAppStateProgress({
       levelData,
       levelId,
@@ -100,10 +104,10 @@ const Identification: React.FC<IdentificationProps> = React.memo(
     // Add finalTimeRef at the top of the component
     const finalTimeRef = useRef<number>(0);
 
-    // UPDATED: Reset finalTimeRef when game restarts
+    // Reset finalTimeRef when game restarts
     const hasResetForSessionRef = useRef(false);
 
-    // FIXED: Only reset flags once per game restart, not on every status change
+    // Reset flags once per game restart
     useEffect(() => {
       if (
         (gameStatus === "idle" || gameStatus === "playing") &&
@@ -117,13 +121,11 @@ const Identification: React.FC<IdentificationProps> = React.memo(
           `[Identification] Reset finalTimeRef and auto-save flag on game restart`
         );
 
-        // Reset background completion flag separately
         if (isBackgroundCompletion) {
           setBackgroundCompletion(false);
         }
       }
 
-      // Reset the session flag when game completes
       if (gameStatus === "completed") {
         hasResetForSessionRef.current = false;
       }
@@ -134,7 +136,7 @@ const Identification: React.FC<IdentificationProps> = React.memo(
       isBackgroundCompletion,
     ]);
 
-    // UPDATED: Handle word selection with reward notification
+    // Handle word selection with reward notification
     const handleWordSelectWithProgress = useCallback(
       async (wordIndex: number) => {
         try {
@@ -158,12 +160,11 @@ const Identification: React.FC<IdentificationProps> = React.memo(
             `[Identification] Updating progress - Time: ${exactFinalTime}, Correct: ${isCorrect}, Completed: ${isCorrect}`
           );
 
-          // UPDATED: Pass difficulty to updateProgress
           const updatedProgress = await updateProgress(
             exactFinalTime,
             isCorrect,
             isCorrect,
-            difficulty // NEW: Pass difficulty for reward calculation
+            difficulty
           );
 
           if (updatedProgress) {
@@ -174,16 +175,14 @@ const Identification: React.FC<IdentificationProps> = React.memo(
               updatedProgress.rewardInfo.coins > 0
             ) {
               setRewardInfo(updatedProgress.rewardInfo);
-              // Refresh coins balance to show updated amount
               setTimeout(() => {
                 fetchCoinsBalance(true);
               }, 500);
             }
 
-            // ADDED: Force refresh enhanced progress cache for ALL answers (correct AND incorrect)
             const progressStore = useProgressStore.getState();
-            progressStore.enhancedProgress["identification"] = null; // Clear cache
-            progressStore.lastUpdated = Date.now(); // Trigger UI updates
+            progressStore.enhancedProgress["identification"] = null;
+            progressStore.lastUpdated = Date.now();
 
             console.log(
               `[Identification] Enhanced progress cache cleared for immediate refresh`
@@ -201,10 +200,11 @@ const Identification: React.FC<IdentificationProps> = React.memo(
         setTimerRunning,
         handleWordSelect,
         updateProgress,
-        difficulty, // NEW: Add difficulty dependency
-        fetchCoinsBalance, // NEW: Add fetchCoinsBalance dependency
+        difficulty,
+        fetchCoinsBalance,
       ]
     );
+
     const handleUserExitWithSave = useCallback(async () => {
       console.log("[identification] User exit triggered");
 
@@ -219,7 +219,20 @@ const Identification: React.FC<IdentificationProps> = React.memo(
         console.error("[identification] Error during user exit:", error);
       }
     }, [handleUserExit]);
-    // UPDATED: Game configuration to handle background completion
+
+    // NEW: Enhanced restart with hint reset
+    const handleRestartWithHints = useCallback(async () => {
+      resetQuestionHints();
+      await handleRestartWithProgress();
+    }, [resetQuestionHints, handleRestartWithProgress]);
+
+    // NEW: Generate questionId for hint system
+    const questionId = useMemo(() => {
+      const currentSentence = sentences[currentSentenceIndex];
+      return `${currentSentence?.id || levelId}_${difficulty}`;
+    }, [sentences, currentSentenceIndex, levelId, difficulty]);
+
+    // Game configuration to handle background completion
     const gameConfig = useMemo(() => {
       const currentSentence = sentences[currentSentenceIndex];
 
@@ -229,11 +242,9 @@ const Identification: React.FC<IdentificationProps> = React.memo(
         sentences?.[0]?.focusArea ||
         "Vocabulary";
 
-      // FIXED: Get progress time like MultipleChoice does
       const progressTime =
         progress && !Array.isArray(progress) ? progress.totalTimeSpent || 0 : 0;
 
-      // NEW: Handle background completion case
       let selectedAnswerText = "";
       let isCorrect = false;
       let isUserExit = false;
@@ -257,23 +268,19 @@ const Identification: React.FC<IdentificationProps> = React.memo(
 
       if (gameStatus === "completed") {
         if (isBackgroundCompletion) {
-          // For user exits or background completion, use the current timeElapsed
           displayTime = timeElapsed;
           console.log(
             `User exit/background completion - using timeElapsed: ${timeElapsed}`
           );
         } else if (timeElapsed === 0) {
-          // NEW: If timeElapsed is 0, this indicates a timer reset
           displayTime = 0;
           console.log(`Timer reset detected - using 0: ${timeElapsed}`);
         } else if (finalTimeRef.current > 0) {
-          // For normal completion, use the captured final time
           displayTime = finalTimeRef.current;
           console.log(
             `Normal completion - using finalTimeRef: ${finalTimeRef.current}`
           );
         } else {
-          // Fallback to current elapsed time
           displayTime = timeElapsed;
           console.log(`Fallback - using timeElapsed: ${timeElapsed}`);
         }
@@ -367,6 +374,7 @@ const Identification: React.FC<IdentificationProps> = React.memo(
           onTimerReset={handleTimerReset}
           isCorrectAnswer={gameConfig.isCorrect}
           onUserExit={handleUserExitWithSave}
+          currentRewardInfo={rewardInfo}
         >
           {gameStatus === "playing" ? (
             <GamePlayingContent
@@ -387,6 +395,7 @@ const Identification: React.FC<IdentificationProps> = React.memo(
                 showTranslation={showTranslation}
                 toggleTranslation={toggleTranslation}
                 handleWordSelect={handleWordSelectWithProgress}
+                questionId={questionId}
               />
             </GamePlayingContent>
           ) : (
@@ -400,7 +409,7 @@ const Identification: React.FC<IdentificationProps> = React.memo(
               levelId={levelId}
               gameMode="identification"
               gameTitle="Word Identification"
-              onRestart={handleRestartWithProgress}
+              onRestart={handleRestartWithHints}
               focusArea={gameConfig.focusArea}
               levelString={sentences[currentSentenceIndex]?.level}
               actualTitle={sentences[currentSentenceIndex]?.title}

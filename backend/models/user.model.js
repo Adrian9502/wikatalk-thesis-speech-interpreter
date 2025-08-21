@@ -87,10 +87,16 @@ const userSchema = new mongoose.Schema(
       default: null,
     },
     // user coins
-    coins:{
-      type:Number,
-      default:0
-    }
+    coins: {
+      type: Number,
+      default: 0,
+    },
+    // Hint usage tracking
+    hintUsage: {
+      daily: { type: Number, default: 0 },
+      total: { type: Number, default: 0 },
+      lastReset: { type: Date, default: Date.now },
+    },
   },
   { timestamps: true }
 );
