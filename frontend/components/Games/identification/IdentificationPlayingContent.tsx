@@ -159,11 +159,20 @@ const IdentificationPlayingContent: React.FC<IdentificationPlayingContentProps> 
               <HintButton
                 questionId={questionId}
                 gameMode="identification"
-                options={wordOptions.map((word, index) => ({
-                  id: `word_${index}`,
-                  text: word.text || word.clean,
-                  isCorrect: word.isCorrect || false,
-                }))}
+                options={wordOptions.map((word, index) => {
+                  const correctAnswer =
+                    currentSentence?.answer || currentSentence?.targetWord;
+                  const isCorrectWord =
+                    word.clean?.toLowerCase() ===
+                      correctAnswer?.toLowerCase() ||
+                    word.text?.toLowerCase() === correctAnswer?.toLowerCase();
+
+                  return {
+                    id: `word_${index}`,
+                    text: word.text || word.clean,
+                    isCorrect: isCorrectWord === true,
+                  };
+                })}
                 disabled={!!selectedWord || isAnimating}
               />
             </View>

@@ -143,7 +143,11 @@ const MultipleChoicePlayingContent: React.FC<MultipleChoicePlayingContentProps> 
             <HintButton
               questionId={questionId}
               gameMode="multipleChoice"
-              options={options}
+              options={options.map((option) => ({
+                id: option.id,
+                text: option.text,
+                isCorrect: option.isCorrect === true, // FIXED: Explicit boolean conversion
+              }))}
               disabled={!!selectedOption || isAnimating}
             />
           </View>
