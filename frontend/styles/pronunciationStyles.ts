@@ -21,19 +21,10 @@ export const pronunciationStyles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "space-between",
     marginBottom: 8,
-    paddingHorizontal: 12,
-  },
-  listContainer: {
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: -4 },
-    shadowOpacity: 0.1,
-    shadowRadius: 8,
-    elevation: 8,
-    overflow: "hidden", // keeps rounded corners clean
-    height: "80%", // or any fixed percentage/px height
   },
   flatListContent: {
     paddingBottom: 20,
+    paddingTop: 8,
   },
   listHeaderTitle: {
     fontSize: 13,
@@ -70,27 +61,26 @@ export const pronunciationStyles = StyleSheet.create({
     shadowRadius: 4,
     elevation: 2,
     minWidth: 150,
-    maxWidth: 200,
-  },
-  dropdownList: {
-    borderRadius: 20,
-    backgroundColor: BASE_COLORS.white,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.1,
-    shadowRadius: 8,
-    elevation: 8,
-    fontFamily: "Poppins-Regular",
-    fontSize: 13,
+    borderWidth: 1,
+    borderColor: "rgba(255, 255, 255, 0.2)",
   },
   dropdownPlaceholder: {
-    fontSize: 13,
+    fontSize: 12,
     fontFamily: "Poppins-Regular",
     color: BASE_COLORS.placeholderText,
   },
   dropdownSelectedText: {
-    fontSize: 13,
+    fontSize: 12,
     fontFamily: "Poppins-Medium",
-    color: BASE_COLORS.darkText,
+    color: BASE_COLORS.blue,
+  },
+  dropdownList: {
+    borderRadius: 12,
+    fontSize: 12,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.15,
+    shadowRadius: 8,
+    elevation: 8,
   },
 });

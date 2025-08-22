@@ -5,7 +5,6 @@ import {
   FlatList,
   Keyboard,
   TouchableWithoutFeedback,
-  ActivityIndicator,
   Animated,
   RefreshControl,
 } from "react-native";
@@ -32,12 +31,11 @@ import { DIALECTS } from "@/constant/languages";
 import { Ionicons } from "@expo/vector-icons";
 
 const Pronounce = () => {
-  // stop speech if there's any
+  // Stop speech when tab focused
   useFocusEffect(
     React.useCallback(() => {
       console.log("[Pronounce] Tab focused, stopping all speech");
       globalSpeechManager.stopAllSpeech();
-
       return () => {
         console.log("[Pronounce] Tab losing focus");
         globalSpeechManager.stopAllSpeech();
@@ -47,320 +45,154 @@ const Pronounce = () => {
 
   const { activeTheme } = useThemeStore();
   const dynamicStyles = getGlobalStyles(activeTheme.backgroundColor);
-  const [selectedLanguage, setSelectedLanguage] = useState("Cebuano");
-  const [searchInput, setSearchInput] = useState("");
-  const [currentPage, setCurrentPage] = useState(1);
-  const [isLoadingMore, setIsLoadingMore] = useState(false);
-  const [hasMoreData, setHasMoreData] = useState(true);
-  const [allPronunciationData, setAllPronunciationData] = useState<
-    PronunciationItem[]
-  >([]);
 
-  // Animation refs
-  const headerFadeAnim = useRef(new Animated.Value(0)).current;
-  const controlsFadeAnim = useRef(new Animated.Value(0)).current;
-  const listHeaderFadeAnim = useRef(new Animated.Value(0)).current;
-  const animationStartedRef = useRef(false);
-  const componentMountedRef = useRef(false);
-  const dataLoadedRef = useRef(false);
-
-  // FlatList ref for scroll control
-  const flatListRef = useRef<FlatList>(null);
-
-  // NEW: Add refreshing state for pull-to-refresh
-  const [isRefreshing, setIsRefreshing] = useState(false);
-
-  // FIXED: Prevent multiple refresh calls
-  const refreshingRef = useRef(false);
-  const [isDropdownFocus, setIsDropdownFocus] = useState(false);
-
-  // Add scroll position tracking
-  const scrollPositionRef = useRef(0);
-  const isScrollingRef = useRef(false);
-
+  // FIXED: Remove the non-existent getAllPronunciationData
   const {
-    fetchPronunciations,
-    getFilteredPronunciations,
+    // Data
+    transformedData,
+    isLoading,
+    error,
+
+    // Audio
     playAudio,
     stopAudio,
-    isLoading,
-    setSearchTerm,
-    error,
     currentPlayingIndex,
     isAudioLoading,
-    isCacheValid,
+
+    // Actions
+    fetchPronunciations,
+    setSearchTerm,
     clearCache,
-    transformedData,
   } = usePronunciationStore();
 
-  // CRITICAL FIX: Initialize data with caching on mount
-  useEffect(() => {
-    componentMountedRef.current = true;
+  // LOCAL STATE - Simplified
+  const [selectedLanguage, setSelectedLanguage] = useState("Cebuano");
+  const [searchInput, setSearchInput] = useState("");
+  const [isRefreshing, setIsRefreshing] = useState(false);
+  const [isDropdownFocus, setIsDropdownFocus] = useState(false);
 
-    const initializeData = async () => {
-      // Check if we have valid cached data
-      if (isCacheValid()) {
-        console.log("[Pronounce] Using cached data, skipping fetch");
-        dataLoadedRef.current = true;
-        return;
+  // Animation - Single fade only
+  const fadeAnim = useRef(new Animated.Value(0)).current;
+  const [isInitialized, setIsInitialized] = useState(false);
+
+  // FlatList ref
+  const flatListRef = useRef<FlatList>(null);
+
+  // SIMPLIFIED: Get filtered data directly from store
+  const displayData = React.useMemo(() => {
+    if (!transformedData?.[selectedLanguage]) return [];
+
+    let data = transformedData[selectedLanguage];
+
+    if (searchInput.trim()) {
+      const searchLower = searchInput.toLowerCase();
+      data = data.filter(
+        (item) =>
+          item.english.toLowerCase().includes(searchLower) ||
+          item.translation.toLowerCase().includes(searchLower) ||
+          item.pronunciation.toLowerCase().includes(searchLower)
+      );
+    }
+
+    return data;
+  }, [transformedData, selectedLanguage, searchInput]);
+
+  // INITIALIZATION - Single effect
+  useEffect(() => {
+    let mounted = true;
+
+    const initialize = async () => {
+      try {
+        console.log("[Pronounce] Initializing data...");
+        await fetchPronunciations(false);
+
+        if (mounted) {
+          setIsInitialized(true);
+
+          // Start simple fade animation
+          Animated.timing(fadeAnim, {
+            toValue: 1,
+            duration: 800,
+            useNativeDriver: true,
+          }).start();
+
+          console.log("[Pronounce] Initialization complete");
+        }
+      } catch (error) {
+        console.error("[Pronounce] Initialization error:", error);
       }
-      // Fetch fresh data if no valid cache
-      await fetchPronunciations(false); // Don't force refresh, respect cache
-      dataLoadedRef.current = true;
     };
 
-    initializeData();
+    initialize();
 
     return () => {
-      componentMountedRef.current = false;
+      mounted = false;
       stopAudio();
     };
   }, []);
 
-  // CRITICAL FIX: Update data when store changes or search/language changes
-  useEffect(() => {
-    if (!isLoading && dataLoadedRef.current) {
-      console.log("[Pronounce] Updating pronunciation data", {
-        selectedLanguage,
-        searchInput: `"${searchInput}"`,
-        searchInputLength: searchInput.length,
-        transformedDataKeys: Object.keys(transformedData || {}),
-        transformedDataSize: transformedData?.[selectedLanguage]?.length || 0,
-      });
-
-      setCurrentPage(1);
-      setHasMoreData(true);
-      const ITEMS_PER_PAGE = 25;
-
-      // Always get fresh data when search changes
-      const newData = getFilteredPronunciations(
-        selectedLanguage,
-        1,
-        ITEMS_PER_PAGE
-      );
-
-      setAllPronunciationData(newData);
-
-      // Reset scroll position when data changes
-      scrollPositionRef.current = 0;
-      if (flatListRef.current) {
-        setTimeout(() => {
-          flatListRef.current?.scrollToOffset({ offset: 0, animated: false });
-        }, 100);
-      }
-    }
-  }, [
-    selectedLanguage,
-    searchInput,
-    isLoading,
-    transformedData,
-    getFilteredPronunciations,
-  ]);
-
-  // FIXED: Start animations when component is ready with data
-  useEffect(() => {
-    if (
-      componentMountedRef.current &&
-      !isLoading &&
-      !animationStartedRef.current &&
-      dataLoadedRef.current
-    ) {
-      animationStartedRef.current = true;
-      console.log("[Pronounce] Starting header animations");
-
-      Animated.sequence([
-        Animated.timing(headerFadeAnim, {
-          toValue: 1,
-          duration: 600,
-          useNativeDriver: true,
-        }),
-        Animated.timing(controlsFadeAnim, {
-          toValue: 1,
-          duration: 400,
-          useNativeDriver: true,
-        }),
-        Animated.timing(listHeaderFadeAnim, {
-          toValue: 1,
-          duration: 400,
-          useNativeDriver: true,
-        }),
-      ]).start();
-    }
-  }, [isLoading, headerFadeAnim, controlsFadeAnim, listHeaderFadeAnim]);
-
-  // FIXED: Language change handler - don't reset animations unless data changes
-  const handleLanguageChange = (language: string) => {
-    stopAudio();
-    setSelectedLanguage(language);
-    console.log(`[Pronounce] Language changed to: ${language}`);
-  };
-
-  const loadMoreData = useCallback(async () => {
-    if (isLoadingMore || !hasMoreData || isScrollingRef.current) return;
-
-    try {
-      setIsLoadingMore(true);
-      const nextPage = currentPage + 1;
-      const ITEMS_PER_PAGE = 25;
-
-      // OPTIMIZED: Get more data at once to reduce frequent calls
-      const newData = getFilteredPronunciations(
-        selectedLanguage,
-        nextPage,
-        ITEMS_PER_PAGE
-      );
-
-      if (newData.length === 0) {
-        setHasMoreData(false);
-      } else {
-        // PERFORMANCE: Use functional update to avoid stale closures
-        setAllPronunciationData((prevData) => {
-          // DEDUPLICATION: Ensure no duplicates are added
-          const existingKeys = new Set(
-            prevData.map((item) => `${item.english}-${item.translation}`)
-          );
-          const uniqueNewData = newData.filter(
-            (item) => !existingKeys.has(`${item.english}-${item.translation}`)
-          );
-
-          return [...prevData, ...uniqueNewData];
-        });
-        setCurrentPage(nextPage);
-      }
-    } catch (error) {
-      console.error("Error loading more data:", error);
-    } finally {
-      setIsLoadingMore(false);
-    }
-  }, [
-    currentPage,
-    selectedLanguage,
-    isLoadingMore,
-    hasMoreData,
-    getFilteredPronunciations,
-  ]);
-
+  // SEARCH HANDLER - Immediate update
   const handleSearchChange = useCallback(
     (text: string) => {
-      console.log(`[Pronounce] Search input changed: "${text}"`);
+      console.log(`[Pronounce] Search: "${text}"`);
       setSearchInput(text);
-      // INSTANT: Update store immediately
       setSearchTerm(text);
     },
     [setSearchTerm]
   );
 
-  // FIXED: Prevent multiple refresh calls
+  // LANGUAGE HANDLER - Simple
+  const handleLanguageChange = useCallback(
+    (language: string) => {
+      console.log(`[Pronounce] Language changed: ${language}`);
+      stopAudio();
+      setSelectedLanguage(language);
+    },
+    [stopAudio]
+  );
+
+  // REFRESH HANDLER - Clean
   const handleRefresh = useCallback(async () => {
-    if (refreshingRef.current) {
-      console.log("[Pronounce] Refresh already in progress, skipping");
-      return;
-    }
+    if (isRefreshing) return;
 
-    refreshingRef.current = true;
     setIsRefreshing(true);
-
     try {
-      console.log("[Pronounce] Refreshing pronunciation data");
-
-      // Clear cache and fetch fresh data
+      console.log("[Pronounce] Refreshing data...");
       clearCache();
-      await fetchPronunciations(true); // Force refresh
-
-      // Reset pagination
-      setCurrentPage(1);
-      setHasMoreData(true);
-      scrollPositionRef.current = 0;
-
-      console.log("[Pronounce] Refresh completed");
+      await fetchPronunciations(true);
     } catch (error) {
-      console.error("Error refreshing data:", error);
+      console.error("[Pronounce] Refresh error:", error);
     } finally {
       setIsRefreshing(false);
-      refreshingRef.current = false;
     }
-  }, [clearCache, fetchPronunciations]);
+  }, [isRefreshing, clearCache, fetchPronunciations]);
 
-  const handleEndReached = useCallback(() => {
-    if (hasMoreData && !isLoadingMore && !isScrollingRef.current) {
-      loadMoreData();
-    }
-  }, [hasMoreData, isLoadingMore, loadMoreData]);
-
-  const renderFooter = () => {
-    if (!isLoadingMore) return null;
-
-    return (
-      <View style={styles.loadingFooter}>
-        <ActivityIndicator size="small" color={BASE_COLORS.blue} />
-        <Text style={styles.loadingText}>Loading more phrases...</Text>
-      </View>
-    );
-  };
-
-  // SIMPLIFIED: Direct renderItem without heavy animations
+  // RENDER FUNCTIONS - Optimized
   const renderItem = useCallback(
-    ({ item, index }: { item: PronunciationItem; index: number }) => {
-      return (
-        <PronunciationCard
-          item={item}
-          index={index}
-          currentPlayingIndex={currentPlayingIndex}
-          isAudioLoading={isAudioLoading}
-          onPlayPress={playAudio}
-        />
-      );
-    },
+    ({ item, index }: { item: PronunciationItem; index: number }) => (
+      <PronunciationCard
+        item={item}
+        index={index}
+        currentPlayingIndex={currentPlayingIndex}
+        isAudioLoading={isAudioLoading}
+        onPlayPress={playAudio}
+      />
+    ),
     [currentPlayingIndex, isAudioLoading, playAudio]
   );
 
   const keyExtractor = useCallback(
     (item: PronunciationItem, index: number) =>
-      `pronunciation-${index}-${item.english}-${item.translation}`,
-    []
+      `${selectedLanguage}-${index}-${item.english}`,
+    [selectedLanguage]
   );
 
-  // FIXED: Optimized FlatList with better scroll behavior
-  const renderList = () => (
-    <FlatList
-      data={allPronunciationData}
-      renderItem={renderItem}
-      keyExtractor={keyExtractor}
-      ListEmptyComponent={() => <EmptyState />}
-      contentContainerStyle={styles.flatListContent}
-      initialNumToRender={5}
-      maxToRenderPerBatch={3}
-      windowSize={3}
-      updateCellsBatchingPeriod={100}
-      removeClippedSubviews={true}
-      showsVerticalScrollIndicator={false}
-      getItemLayout={(data, index) => ({
-        length: 120,
-        offset: 120 * index,
-        index,
-      })}
-      onEndReached={handleEndReached}
-      onEndReachedThreshold={0.5}
-      ListFooterComponent={renderFooter}
-      maintainVisibleContentPosition={{
-        minIndexForVisible: 0,
-      }}
-      refreshControl={
-        <RefreshControl
-          refreshing={isRefreshing}
-          onRefresh={handleRefresh}
-          tintColor={BASE_COLORS.white}
-          titleColor={BASE_COLORS.white}
-          title="Pull to refresh"
-        />
-      }
-    />
-  );
+  // LOADING STATES
+  if (!isInitialized && isLoading) {
+    return <AppLoading />;
+  }
 
-  // FIXED: Show loading only on initial load
-  if (isLoading && !dataLoadedRef.current) return <AppLoading />;
-
-  if (error && !dataLoadedRef.current) {
+  if (error && !isInitialized) {
     return (
       <SafeAreaView style={[dynamicStyles.container, styles.centerContainer]}>
         <ErrorState onRetry={() => fetchPronunciations(true)} />
@@ -369,35 +201,28 @@ const Pronounce = () => {
   }
 
   return (
-    <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
-      <SafeAreaView style={dynamicStyles.container}>
-        <Animated.View style={[styles.header, { opacity: headerFadeAnim }]}>
+    <SafeAreaView style={dynamicStyles.container}>
+      <Animated.View style={[{ flex: 1, opacity: fadeAnim }]}>
+        {/* Header */}
+        <View style={styles.header}>
           <Text style={styles.headerTitle}>Pronunciation Guide</Text>
-        </Animated.View>
+        </View>
 
-        <Animated.View
-          style={[styles.controlsContainer, { opacity: controlsFadeAnim }]}
-        >
+        {/* Search */}
+        <View style={styles.controlsContainer}>
           <SearchBar
             searchInput={searchInput}
             setSearchInput={handleSearchChange}
             setSearchTerm={setSearchTerm}
           />
-        </Animated.View>
+        </View>
 
-        {/* Combined header and dropdown container */}
-        <Animated.View
-          style={[
-            styles.headerDropdownContainer,
-            { opacity: listHeaderFadeAnim },
-          ]}
-        >
-          {/* List Header Title - Left Side */}
+        {/* Language Header & Dropdown */}
+        <View style={styles.headerDropdownContainer}>
           <Text style={styles.listHeaderTitle}>
             {selectedLanguage} Vocabulary
           </Text>
 
-          {/* Language Dropdown - Right Side */}
           <Dropdown
             style={[
               styles.dropdown,
@@ -427,11 +252,39 @@ const Pronounce = () => {
             activeColor={BASE_COLORS.lightBlue}
             containerStyle={styles.dropdownList}
           />
-        </Animated.View>
-
-        <View style={styles.listContainer}>{renderList()}</View>
-      </SafeAreaView>
-    </TouchableWithoutFeedback>
+        </View>
+        <FlatList
+          ref={flatListRef}
+          data={displayData}
+          renderItem={renderItem}
+          keyExtractor={keyExtractor}
+          ListEmptyComponent={EmptyState}
+          contentContainerStyle={styles.flatListContent}
+          style={[{ flex: 1 }]}
+          keyboardShouldPersistTaps="handled"
+          keyboardDismissMode="on-drag"
+          removeClippedSubviews={false}
+          maxToRenderPerBatch={8}
+          windowSize={8}
+          initialNumToRender={8}
+          updateCellsBatchingPeriod={100}
+          showsVerticalScrollIndicator={true}
+          bounces={true}
+          scrollEventThrottle={16}
+          nestedScrollEnabled={false}
+          refreshControl={
+            <RefreshControl
+              refreshing={isRefreshing}
+              onRefresh={handleRefresh}
+              colors={[BASE_COLORS.blue]}
+              tintColor={BASE_COLORS.white}
+              titleColor={BASE_COLORS.white}
+              title="Pull to refresh"
+            />
+          }
+        />
+      </Animated.View>
+    </SafeAreaView>
   );
 };
 
