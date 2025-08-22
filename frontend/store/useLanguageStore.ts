@@ -67,6 +67,12 @@ type LanguageStore = {
     prevLang: string,
     newLang: string
   ) => Promise<void>;
+  // NEW: Add the enhanced language change handler
+  handleLanguageChange: (
+    newLang: string,
+    position: "top" | "bottom",
+    prevLang: string
+  ) => Promise<void>;
   debouncedTranslate: (text: string, position: "top" | "bottom") => void;
   speakText: (
     text: string,
@@ -160,6 +166,35 @@ const useLanguageStore = create<LanguageStore>((set, get) => {
         bottomTextfield: bottom,
         translationError: false,
       });
+
+      // NEW: Auto-speak the translated text based on active user
+      if (
+        get().autoSpeechEnabled &&
+        upper &&
+        bottom &&
+        upper !== INITIAL_TEXT &&
+        bottom !== INITIAL_TEXT
+      ) {
+        const { activeUser } = get();
+
+        // If activeUser is 1 (bottom section was used), speak the top section (upper)
+        // If activeUser is 2 (top section was used), speak the bottom section (bottom)
+        if (activeUser === 1) {
+          console.log(
+            "[useLanguageStore] Auto-speaking translated text (top section)"
+          );
+          setTimeout(() => {
+            get().speakText(upper, "top", true);
+          }, 500);
+        } else if (activeUser === 2) {
+          console.log(
+            "[useLanguageStore] Auto-speaking translated text (bottom section)"
+          );
+          setTimeout(() => {
+            get().speakText(bottom, "bottom", true);
+          }, 500);
+        }
+      }
     },
 
     setActiveUser: (userId) => set({ activeUser: userId }),
@@ -386,8 +421,28 @@ const useLanguageStore = create<LanguageStore>((set, get) => {
         // Update the appropriate text field
         if (position === "top") {
           set({ upperTextfield: translatedText });
+
+          // NEW: Auto-speak translated text if enabled
+          if (get().autoSpeechEnabled) {
+            console.log(
+              "[useLanguageStore] Auto-speaking translated text after language change (top)"
+            );
+            setTimeout(() => {
+              get().speakText(translatedText, "top", true);
+            }, 500);
+          }
         } else {
           set({ bottomTextfield: translatedText });
+
+          // NEW: Auto-speak translated text if enabled
+          if (get().autoSpeechEnabled) {
+            console.log(
+              "[useLanguageStore] Auto-speaking translated text after language change (bottom)"
+            );
+            setTimeout(() => {
+              get().speakText(translatedText, "bottom", true);
+            }, 500);
+          }
         }
 
         // Save this translation to history
@@ -428,6 +483,73 @@ const useLanguageStore = create<LanguageStore>((set, get) => {
       return Object.values(USER_FRIENDLY_MESSAGES).some(
         (message) => text.includes(message) || message.includes(text)
       );
+    },
+
+    // NEW: Enhanced function to handle language changes with bidirectional translation
+    handleLanguageChange: async (
+      newLang: string,
+      position: "top" | "bottom",
+      prevLang: string
+    ) => {
+      const { upperTextfield, bottomTextfield } = get();
+
+      // Update the language first
+      if (position === "top") {
+        set({ language2: newLang });
+      } else {
+        set({ language1: newLang });
+      }
+
+      // Get current text fields
+      const topText = upperTextfield;
+      const bottomText = bottomTextfield;
+
+      // Only proceed if the section being changed has actual content
+      const textToTranslate = position === "top" ? topText : bottomText;
+
+      if (textToTranslate && textToTranslate !== INITIAL_TEXT) {
+        set({ isTranslating: true, translationError: false });
+
+        try {
+          // Translate only the text from the section where language was changed
+          const translatedText = await translateText(
+            textToTranslate,
+            prevLang,
+            newLang
+          );
+
+          // Update only the section where the language was changed
+          if (position === "top") {
+            set({ upperTextfield: translatedText });
+          } else {
+            set({ bottomTextfield: translatedText });
+          }
+
+          // Auto-speak only the section that was changed
+          if (get().autoSpeechEnabled) {
+            setTimeout(() => {
+              console.log(
+                `[useLanguageStore] Auto-speaking after ${position} language change`
+              );
+              get().speakText(translatedText, position, true);
+            }, 500);
+          }
+
+          // Save to history
+          await saveTranslationHistory({
+            type: "Speech",
+            fromLanguage: prevLang,
+            toLanguage: newLang,
+            originalText: textToTranslate,
+            translatedText: translatedText,
+          });
+        } catch (error) {
+          console.error("Language change translation error:", error);
+          get().showTranslationError();
+        } finally {
+          set({ isTranslating: false });
+        }
+      }
     },
   };
 });

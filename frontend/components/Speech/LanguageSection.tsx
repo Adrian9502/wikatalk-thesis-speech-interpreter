@@ -36,10 +36,12 @@ const LanguageSection: React.FC<LanguageSectionProps> = ({
     bottomTextfield,
     setLanguage1,
     setLanguage2,
+    openTopDropdown,
+    openBottomDropdown,
     toggleTopDropdown,
     toggleBottomDropdown,
     showLanguageDetails,
-    translateOnLanguageChange,
+    handleLanguageChange, // NEW: Use the enhanced function
   } = useLanguageStore();
 
   // Determine which language and text to use based on position
@@ -49,19 +51,9 @@ const LanguageSection: React.FC<LanguageSectionProps> = ({
   // Set language based on position
   const setLanguage = (lang: string) => {
     const prevLang = position === "top" ? language2 : language1;
-    const text = textField;
 
-    // First update the language in the store
-    if (position === "top") {
-      setLanguage2(lang);
-    } else {
-      setLanguage1(lang);
-    }
-
-    // If there's actual text (not initial placeholder), trigger translation with the new language
-    if (text && text !== INITIAL_TEXT) {
-      translateOnLanguageChange(text, position, prevLang, lang);
-    }
+    // Use the enhanced language change handler
+    handleLanguageChange(lang, position, prevLang);
   };
 
   // Open dropdown and close the other
