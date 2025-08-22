@@ -5,11 +5,13 @@ import {
   TouchableOpacity,
   StyleSheet,
   Platform,
+  ActivityIndicator,
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { TrendingUp, Play } from "react-native-feather";
 import useProgressStore from "@/store/games/useProgressStore";
 import { getGameModeGradient } from "@/utils/gameUtils";
+import { BASE_COLORS } from "@/constant/colors";
 
 interface GameCardProps {
   game: any;
@@ -22,23 +24,65 @@ const GameCard: React.FC<GameCardProps> = ({
   onGamePress,
   onProgressPress,
 }) => {
-  const { getGameModeProgress } = useProgressStore();
+  const { getGameModeProgress, lastUpdated } = useProgressStore();
 
-  const [frozenProgress] = useState(() => {
-    // Capture progress data ONCE on mount and never change it
+  // NEW: Track animation state and progress loading
+  const [animationPlayed, setAnimationPlayed] = useState(false);
+  const [isLoadingProgress, setIsLoadingProgress] = useState(false);
+  const [currentProgress, setCurrentProgress] = useState(() => {
+    // Initial progress data for animation
     const initialProgress = getGameModeProgress(game.id);
-    console.log(
-      `[GameCard] FREEZING progress for ${game.id}:`,
-      initialProgress
-    );
+    console.log(`[GameCard] Initial progress for ${game.id}:`, initialProgress);
     return initialProgress;
   });
 
+  // NEW: Handle progress updates after animation
   useEffect(() => {
-    // Only preload data silently, no state changes
+    // Only update progress if animation has been played
+    if (animationPlayed) {
+      console.log(
+        `[GameCard] Animation completed, checking for progress updates for ${game.id}`
+      );
+
+      setIsLoadingProgress(true);
+
+      // Small delay to show loading state
+      setTimeout(() => {
+        const freshProgress = getGameModeProgress(game.id);
+        console.log(`[GameCard] Fresh progress for ${game.id}:`, freshProgress);
+
+        // Only update if there's actually a change
+        if (
+          freshProgress.completed !== currentProgress.completed ||
+          freshProgress.total !== currentProgress.total
+        ) {
+          console.log(`[GameCard] Updating progress for ${game.id}:`, {
+            from: currentProgress,
+            to: freshProgress,
+          });
+          setCurrentProgress(freshProgress);
+        }
+
+        setIsLoadingProgress(false);
+      }, 300); // Brief loading state
+    }
+  }, [lastUpdated, animationPlayed, game.id]);
+
+  // NEW: Mark animation as played after mount (simulate your existing animation logic)
+  useEffect(() => {
+    // Simulate the animation duration you have elsewhere in your app
+    const animationTimer = setTimeout(() => {
+      console.log(`[GameCard] Animation completed for ${game.id}`);
+      setAnimationPlayed(true);
+    }, 1200); // Adjust this to match your actual animation duration
+
+    return () => clearTimeout(animationTimer);
+  }, [game.id]);
+
+  useEffect(() => {
+    // Silent preload - keep existing functionality
     const timer = setTimeout(async () => {
       try {
-        // Silent preload - no logs, no state updates
         await useProgressStore.getState().getEnhancedGameProgress(game.id);
       } catch (error) {
         // Silent failure
@@ -72,10 +116,10 @@ const GameCard: React.FC<GameCardProps> = ({
   );
 
   const completionPercentage = useMemo(() => {
-    return frozenProgress.total > 0
-      ? Math.round((frozenProgress.completed / frozenProgress.total) * 100)
+    return currentProgress.total > 0
+      ? Math.round((currentProgress.completed / currentProgress.total) * 100)
       : 0;
-  }, [frozenProgress.completed, frozenProgress.total]);
+  }, [currentProgress.completed, currentProgress.total]);
 
   const gradientColors = useMemo(() => {
     return getGameModeGradient(
@@ -110,15 +154,23 @@ const GameCard: React.FC<GameCardProps> = ({
           </View>
         </View>
 
-        {/* FROZEN PROGRESS DATA - NEVER UPDATES */}
+        {/* DYNAMIC PROGRESS DATA - UPDATES AFTER ANIMATION */}
         <View style={styles.gameStatsRow}>
           <View style={styles.statItem}>
-            <Text style={styles.statValue}>{frozenProgress.completed}</Text>
+            {isLoadingProgress ? (
+              <ActivityIndicator size="small" color="#fff" />
+            ) : (
+              <Text style={styles.statValue}>{currentProgress.completed}</Text>
+            )}
             <Text style={styles.statLabel}>Completed</Text>
           </View>
           <View style={styles.statDivider} />
           <View style={styles.statItem}>
-            <Text style={styles.statValue}>{completionPercentage}%</Text>
+            {isLoadingProgress ? (
+              <ActivityIndicator size="small" color="#fff" />
+            ) : (
+              <Text style={styles.statValue}>{completionPercentage}%</Text>
+            )}
             <Text style={styles.statLabel}>Progress</Text>
           </View>
         </View>
