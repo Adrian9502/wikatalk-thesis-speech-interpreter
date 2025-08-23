@@ -22,7 +22,7 @@ const EmptyHistory: React.FC<EmptyStateProps> = ({ tabType }) => {
       >
         <Feather
           name={getTabIcon(tabType)}
-          size={32}
+          size={24}
           color={TITLE_COLORS.customWhite}
         />
       </View>
@@ -42,8 +42,8 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   emptyIconContainer: {
-    width: 80,
-    height: 80,
+    width: 60,
+    height: 60,
     backgroundColor: "red",
     borderRadius: 40,
     justifyContent: "center",
@@ -51,12 +51,12 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   emptyTitle: {
-    fontSize: 18,
+    fontSize: 14,
     fontFamily: "Poppins-SemiBold",
     marginBottom: 8,
   },
   emptyText: {
-    fontSize: 15,
+    fontSize: 11,
     color: BASE_COLORS.darkText,
     fontFamily: "Poppins-Regular",
     textAlign: "center",

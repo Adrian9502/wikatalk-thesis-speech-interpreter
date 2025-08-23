@@ -67,6 +67,12 @@ const RootLayout = () => {
   useEffect(() => {
     const googleWebClientId = process.env.EXPO_PUBLIC_GOOGLE_CLIENT_ID_WEB;
     const googleIosClientId = process.env.EXPO_PUBLIC_GOOGLE_CLIENT_ID_IOS;
+
+    console.log("=== GOOGLE SIGNIN CONFIGURATION ===");
+    console.log("Web Client ID:", googleWebClientId);
+    console.log("iOS Client ID:", googleIosClientId);
+    console.log("=== END CONFIGURATION ===");
+
     GoogleSignin.configure({
       webClientId: googleWebClientId,
       offlineAccess: true,

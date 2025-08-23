@@ -8,14 +8,14 @@ import { useNavigation } from "expo-router";
 type HeaderProps = {
   title: string;
   disableBack?: boolean;
-  hideBack?: boolean; // Add this new prop
+  hideBack?: boolean;
   onBackPress?: () => void;
 };
 
 export const Header = ({
   title,
   disableBack = false,
-  hideBack = false, // Default to showing the back button
+  hideBack = false,
   onBackPress,
 }: HeaderProps) => {
   const navigation = useNavigation();
@@ -34,10 +34,7 @@ export const Header = ({
     <View style={[styles.headerContainer]}>
       {!hideBack ? (
         <TouchableOpacity
-          style={[
-            styles.backButton,
-            disableBack && { opacity: 0.4 }, // Visual indicator that back is disabled
-          ]}
+          style={[styles.backButton, disableBack && { opacity: 0.4 }]}
           onPress={handleBackPress}
           disabled={disableBack}
         >

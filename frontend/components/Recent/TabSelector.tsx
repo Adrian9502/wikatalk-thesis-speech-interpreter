@@ -125,7 +125,7 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.06,
     shadowRadius: 8,
     elevation: 2,
-    position: "relative", // For absolute positioned indicator
+    position: "relative",
   },
   tabButton: {
     flex: 1,
@@ -134,23 +134,23 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     flexDirection: "row",
     gap: 8,
-    zIndex: 1, // Place above indicator
+    zIndex: 1,
   },
   indicator: {
     position: "absolute",
     height: "100%",
     backgroundColor: BASE_COLORS.blue,
     borderRadius: 20,
-    zIndex: 0, // Place below tabs
+    zIndex: 0,
   },
   tabText: {
-    fontSize: 13,
+    fontSize: 12,
     fontFamily: "Poppins-Regular",
     color: BASE_COLORS.blue,
   },
   activeTabText: {
     color: BASE_COLORS.white,
-    fontSize: 14,
+    fontSize: 12,
     fontFamily: "Poppins-Medium",
   },
 });

@@ -23,7 +23,7 @@ export default StyleSheet.create({
   },
   placeholderView: { width: 40 },
   headerTitle: {
-    fontSize: 20,
+    fontSize: 18,
     fontFamily: "Poppins-Medium",
     color: BASE_COLORS.white,
   },

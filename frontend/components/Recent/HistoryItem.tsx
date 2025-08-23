@@ -80,8 +80,8 @@ const HistoryItem: React.FC<HistoryItemProps> = ({ item, onDeletePress }) => {
       <View style={styles.headerContainer}>
         <View style={styles.dateContainer}>
           <Calendar
-            width={15}
-            height={15}
+            width={14}
+            height={14}
             color={BASE_COLORS.white}
             style={styles.dateIcon}
           />
@@ -128,7 +128,7 @@ const HistoryItem: React.FC<HistoryItemProps> = ({ item, onDeletePress }) => {
           <Animated.View
             style={[
               styles.translationContainer,
-              expanded ? styles.expandedContainer : styles.collapsedContainer,
+              styles.collapsedContainer,
               { opacity: fadeAnim },
             ]}
           >
@@ -215,7 +215,7 @@ const styles = StyleSheet.create({
   dateText: {
     fontFamily: "Poppins-Regular",
     color: BASE_COLORS.white,
-    fontSize: 12,
+    fontSize: 11,
   },
   deleteIcon: {
     padding: 5,
@@ -239,7 +239,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    paddingVertical: 7,
+    paddingVertical: 6,
     paddingHorizontal: 8,
   },
   languageBlock: {
@@ -247,7 +247,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   languageText: {
-    fontSize: 16,
+    fontSize: 14,
     fontFamily: "Poppins-Medium",
     color: TITLE_COLORS.customWhite,
   },
@@ -273,9 +273,7 @@ const styles = StyleSheet.create({
   collapsedContainer: {
     maxHeight: 120,
   },
-  expandedContainer: {
-    // No max height constraint
-  },
+
   expandGradient: {
     height: 50,
     position: "absolute",
@@ -294,7 +292,7 @@ const styles = StyleSheet.create({
   expandCollapseText: {
     fontFamily: "Poppins-Regular",
     color: BASE_COLORS.blue,
-    fontSize: 13,
+    fontSize: 12,
     marginRight: 5,
   },
 });

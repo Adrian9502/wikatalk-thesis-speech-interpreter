@@ -33,11 +33,33 @@ const SocialLogin = () => {
   const handleGoogleSignIn = async () => {
     try {
       setIsSubmitting(true);
-      console.log("Starting Google Sign In");
+
+      // DEBUG: Log all environment variables
+      console.log("=== GOOGLE SIGNIN ENVIRONMENT DEBUG ===");
       console.log(
-        "WebClientId:",
-        process.env.EXPO_PUBLIC_GOOGLE_CLIENT_ID_WEB?.substring(0, 10) + "..."
+        "Web Client ID:",
+        process.env.EXPO_PUBLIC_GOOGLE_CLIENT_ID_WEB
       );
+      console.log(
+        "Android Client ID:",
+        process.env.EXPO_PUBLIC_GOOGLE_CLIENT_ID_ANDROID
+      );
+      console.log(
+        "iOS Client ID:",
+        process.env.EXPO_PUBLIC_GOOGLE_CLIENT_ID_IOS
+      );
+      console.log(
+        "All env vars:",
+        Object.keys(process.env).filter((key) => key.includes("GOOGLE"))
+      );
+      console.log("=== END DEBUG ===");
+
+      // Check Google Play Services
+      const hasPlayServices = await GoogleSignin.hasPlayServices({
+        showPlayServicesUpdateDialog: true,
+      });
+      console.log("Google Play Services available:", hasPlayServices);
+
       const userInfo: SignInResponse = await GoogleSignin.signIn();
       console.log("Google Sign-In Success!", userInfo);
       const idToken = userInfo?.data?.idToken ?? "";

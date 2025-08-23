@@ -60,8 +60,6 @@ export const RecentActivity: React.FC = () => {
 
       try {
         const response = await api.get(`/api/translations?type=${tabType}`);
-
-        // FIXED: Access response.data.history instead of response.data.data
         const formattedData = response.data.history.map(
           (item: TranslationAPIItem) => {
             // DEBUG: Log each item before formatting
@@ -142,11 +140,9 @@ export const RecentActivity: React.FC = () => {
   const handleDeleteConfirm = async (): Promise<void> => {
     if (itemToDelete) {
       try {
-        // Use the createAuthenticatedApi instead of direct axios call
         const api = createAuthenticatedApi();
         await api.delete(`/api/translations/${itemToDelete}`);
 
-        // Update local state after successful delete
         const updatedHistoryItems = { ...historyItems };
         updatedHistoryItems[activeTab] = historyItems[activeTab].filter(
           (item) => item.id !== itemToDelete
@@ -177,7 +173,7 @@ export const RecentActivity: React.FC = () => {
   useHardwareBack({
     enabled: true,
     fallbackRoute: "/(tabs)/Settings",
-    useExistingHeaderLogic: true, // Use same logic as Header component
+    useExistingHeaderLogic: true,
   });
 
   // Update the header to remove custom back handling since hardware back now handles it
@@ -191,7 +187,6 @@ export const RecentActivity: React.FC = () => {
     >
       <StatusBar style="light" />
 
-      {/* Header - KEEP existing functionality, don't remove onBackPress */}
       <Header title="Recent Activity" />
 
       {/* Tabs */}
@@ -289,6 +284,7 @@ const styles = StyleSheet.create({
   },
   errorText: {
     fontFamily: "Poppins-Regular",
+    fontSize: 12,
     marginBottom: 12,
   },
   retryButton: {
@@ -297,7 +293,8 @@ const styles = StyleSheet.create({
     borderRadius: 20,
   },
   retryButtonText: {
-    color: "#fff",
+    fontSize: 12,
+    color: BASE_COLORS.white,
     fontFamily: "Poppins-Regular",
   },
 });

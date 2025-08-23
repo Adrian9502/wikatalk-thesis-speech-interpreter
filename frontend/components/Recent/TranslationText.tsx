@@ -52,14 +52,14 @@ const styles = StyleSheet.create({
   },
   originalText: {
     color: BASE_COLORS.blue,
-    fontSize: 17,
-    fontFamily: "Poppins-Regular",
+    fontSize: 12,
+    fontFamily: "Poppins-Medium",
     lineHeight: 22,
   },
   translatedText: {
     color: BASE_COLORS.orange,
-    fontSize: 17,
-    fontFamily: "Poppins-Regular",
+    fontSize: 12,
+    fontFamily: "Poppins-Medium",
     lineHeight: 22,
   },
 });
