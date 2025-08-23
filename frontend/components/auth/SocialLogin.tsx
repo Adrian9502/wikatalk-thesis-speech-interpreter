@@ -69,11 +69,15 @@ const SocialLogin = () => {
         throw new Error("Failed to get user data from Google Sign-In");
       }
 
-      await loginWithGoogle(idToken, {
+      // NEW: Pass the login result to show appropriate feedback
+      const result = await loginWithGoogle(idToken, {
         name: userData.name ?? userData.email,
         email: userData.email,
         photo: userData.photo,
       });
+
+      // The success message is now handled in the store
+      console.log("Google login completed:", result);
     } catch (error: any) {
       console.error("Full Google sign-in error:", error);
       if (error.code) {

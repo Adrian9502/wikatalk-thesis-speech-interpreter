@@ -22,7 +22,7 @@ const generateToken = (id) => {
     console.error("JWT_SECRET is not defined in environment variables");
     throw new Error("Server configuration error");
   }
-  
+
   try {
     const token = jwt.sign({ id }, process.env.JWT_SECRET, {
       expiresIn: "30d",
@@ -138,6 +138,13 @@ exports.loginUser = async (req, res) => {
       });
     }
 
+    // NEW: Update authProvider if this was a Google-only account being accessed manually
+    if (user.authProvider === "google") {
+      console.log(`Linking existing Google account to manual login: ${user.email}`);
+      await User.findByIdAndUpdate(user._id, { authProvider: "both" });
+      user.authProvider = "both"; // Update local object
+    }
+
     res.json({
       success: true,
       data: {
@@ -145,9 +152,12 @@ exports.loginUser = async (req, res) => {
         fullName: user.fullName,
         username: user.username,
         email: user.email,
+        profilePicture: user.profilePicture,
+        coins: user.coins,
         theme: user.theme,
         createdAt: user.createdAt,
         isVerified: user.isVerified,
+        authProvider: user.authProvider,
         token: generateToken(user._id),
       },
     });
@@ -166,20 +176,20 @@ exports.loginWithGoogle = async (req, res) => {
   try {
     const { email, name, photo } = req.body;
 
-    // Check if user exists
+    // Check if user exists by email
     let user = await User.findOne({ email });
     let isNewUser = false;
+    let wasLinked = false;
 
     if (!user) {
-      // This is a new user - set flag for welcome email
+      // This is a completely new user
       isNewUser = true;
 
-      // Create new user if doesn't exist
       user = await User.create({
         fullName: name,
         username: email.split("@")[0], // Generate username from email
         email,
-        password: crypto.randomBytes(16).toString("hex"),
+        password: crypto.randomBytes(16).toString("hex"), // Random password for Google users
         profilePicture: photo || "",
         isVerified: true, // Google users are pre-verified
         authProvider: "google",
@@ -191,36 +201,63 @@ exports.loginWithGoogle = async (req, res) => {
         console.log(`Welcome email sent to new Google user: ${email}`);
       } catch (emailError) {
         console.error("Welcome email failed to send:", emailError);
-        // Continue even if welcome email fails (non-critical)
       }
     } else {
-      // Update existing user to mark as Google user if they're signing in with Google
-      if (!user.authProvider || user.authProvider !== "google") {
-        user.authProvider = "google";
-        await user.save();
+      // User exists - handle account linking
+      let needsUpdate = false;
+      const updates = {};
+
+      // Check if this is account linking (manual -> google)
+      if (user.authProvider !== "google") {
+        console.log(`Linking existing manual account to Google: ${email}`);
+        updates.authProvider = "both"; // Set to 'both' to indicate linked account
+        wasLinked = true;
+        needsUpdate = true;
+      } else if (user.authProvider === "google") {
+        // Already a Google account, no linking needed
+        console.log(`Existing Google user signing in: ${email}`);
+      } else if (user.authProvider === "both") {
+        // Already linked account
+        console.log(`Linked account user signing in via Google: ${email}`);
       }
 
-      // Update user profile picture if it exists
-      if (photo && !user.profilePicture) {
-        user.profilePicture = photo;
-        await user.save();
+      // Update profile picture ONLY if user doesn't have one and Google provides one
+      if (photo && (!user.profilePicture || user.profilePicture === "")) {
+        console.log(`Updating empty profile picture with Google photo`);
+        updates.profilePicture = photo;
+        needsUpdate = true;
+      } else if (user.profilePicture) {
+        console.log(`Keeping existing profile picture: ${user.profilePicture}`);
+      }
+
+      // Apply updates if needed
+      if (needsUpdate) {
+        await User.findByIdAndUpdate(user._id, updates);
+        user = await User.findById(user._id); // Refresh user data
       }
     }
 
     res.json({
       success: true,
+      message: wasLinked
+        ? "Account successfully linked with Google!"
+        : isNewUser
+          ? "Google account created successfully!"
+          : "Google sign-in successful!",
       data: {
         _id: user._id,
         fullName: user.fullName,
         username: user.username,
         email: user.email,
         profilePicture: user.profilePicture || photo,
+        coins: user.coins,
         theme: user.theme,
         createdAt: user.createdAt,
         isVerified: true,
         authProvider: user.authProvider,
         token: generateToken(user._id),
-        isNewUser, // Optionally include this flag in response
+        isNewUser,
+        wasLinked, // Include this flag in response
       },
     });
   } catch (error) {
@@ -349,34 +386,34 @@ exports.resendVerificationCode = async (req, res) => {
 
     // First try to find an existing registered user
     const existingUser = await User.findOne({ email });
-    
+
     if (existingUser) {
       // Handle existing user as before...
       const verificationCode = generateVerificationCode();
       existingUser.verificationCode = verificationCode;
       existingUser.verificationCodeExpires = new Date(Date.now() + 30 * 60000); // 30 minutes
       await existingUser.save();
-      
+
       await sendVerificationEmail({ email, fullName, verificationCode });
-      
+
       return res.json({
         success: true,
         message: "Verification code sent successfully"
       });
     }
-    
+
     // No existing user, check if we have a tempToken (registration flow)
     if (tempToken) {
       try {
         // Try to verify the token
         const decoded = jwt.verify(tempToken, process.env.JWT_SECRET);
-        
+
         // Create a new verification code
         const verificationCode = generateVerificationCode();
-        
+
         // Remove existing exp and iat claims to avoid conflicts
         const { exp, iat, ...tokenDataWithoutExpiry } = decoded;
-        
+
         // Create new token with updated verification code and fresh expiration
         const newTempToken = jwt.sign(
           {
@@ -387,10 +424,10 @@ exports.resendVerificationCode = async (req, res) => {
           process.env.JWT_SECRET,
           { expiresIn: "30m" }
         );
-        
+
         // Send verification email with new code
         await sendVerificationEmail({ email, fullName, verificationCode });
-        
+
         return res.json({
           success: true,
           message: "Verification code sent successfully",
@@ -398,11 +435,11 @@ exports.resendVerificationCode = async (req, res) => {
         });
       } catch (error) {
         console.error("Token verification failed:", error);
-        
+
         // If token is expired, create a new registration token for the user
         if (error.name === 'TokenExpiredError' && email && fullName) {
           const verificationCode = generateVerificationCode();
-          
+
           // Create a fresh token with minimal data
           const newTempToken = jwt.sign(
             {
@@ -414,17 +451,17 @@ exports.resendVerificationCode = async (req, res) => {
             process.env.JWT_SECRET,
             { expiresIn: "30m" }
           );
-          
+
           // Send verification email with new code
           await sendVerificationEmail({ email, fullName, verificationCode });
-          
+
           return res.json({
             success: true,
             message: "Your session expired, but we've sent a new verification code",
             data: { tempToken: newTempToken }
           });
         }
-        
+
         // If not an expiration issue or missing data, return error
         return res.status(400).json({
           success: false,

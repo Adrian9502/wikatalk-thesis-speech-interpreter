@@ -3,19 +3,7 @@ import { View, StyleSheet, Text, Image } from "react-native";
 import * as Animatable from "react-native-animatable";
 import Timer from "@/components/games/Timer";
 import DifficultyBadge from "@/components/games/DifficultyBadge";
-import UserBalance from "@/components/games/UserBalance"; // NEW: Import UserBalance
-import { BASE_COLORS, ICON_COLORS } from "@/constant/colors";
-
-import { calculateRewardCoins } from "@/utils/rewardCalculationUtils";
-
-// Interface for reward info
-interface RewardInfo {
-  coins: number;
-  label: string;
-  difficulty: string;
-  timeSpent: number;
-  tier?: any;
-}
+import UserBalance from "@/components/games/UserBalance";
 
 interface StatsContainerProps {
   difficulty: string;

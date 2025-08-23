@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { View, Text, StyleSheet, Image, ActivityIndicator } from "react-native";
 import { BASE_COLORS, ICON_COLORS } from "@/constant/colors";
 import useCoinsStore from "@/store/games/useCoinsStore";
@@ -10,7 +10,12 @@ interface UserBalanceProps {
 }
 
 const UserBalance: React.FC<UserBalanceProps> = ({}) => {
-  const { coins, isLoading } = useCoinsStore();
+  const { coins, isLoading, fetchCoinsBalance } = useCoinsStore();
+
+  useEffect(() => {
+    fetchCoinsBalance(false); // Don't force refresh on mount
+  }, []);
+
   return (
     <View style={styles.balanceContainer}>
       {/* Coin Icon */}

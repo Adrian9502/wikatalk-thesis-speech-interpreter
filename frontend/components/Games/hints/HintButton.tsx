@@ -26,12 +26,12 @@ const HintButton: React.FC<HintButtonProps> = ({
   options,
   disabled = false,
 }) => {
-  const { coins } = useCoinsStore();
+  const { coins, fetchCoinsBalance } = useCoinsStore(); // ADD: fetchCoinsBalance
   const {
     purchaseHint,
     getHintCost,
     canUseHint,
-    getMaxHints, // NEW: Get max hints for game mode
+    getMaxHints,
     hintsUsedCount,
     isLoading,
     error,
@@ -86,7 +86,11 @@ const HintButton: React.FC<HintButtonProps> = ({
     );
     const success = await purchaseHint(questionId, gameMode, options);
 
-    if (!success && error) {
+    // NEW: Refresh coins immediately after successful purchase
+    if (success) {
+      console.log("[HintButton] Hint purchased successfully, refreshing coins");
+      await fetchCoinsBalance(true); // Force refresh
+    } else if (error) {
       console.error(`[HintButton] Failed to purchase hint: ${error}`);
     }
   };

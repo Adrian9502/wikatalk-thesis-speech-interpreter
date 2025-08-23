@@ -1,5 +1,6 @@
 import { create } from "zustand";
 import { getToken } from "@/lib/authTokenManager";
+import useCoinsStore from "./useCoinsStore";
 
 const API_URL = process.env.EXPO_PUBLIC_BACKEND_URL || "http://localhost:5000";
 
@@ -144,11 +145,10 @@ const useHintStore = create<HintState>((set, get) => ({
         throw new Error(data.message || "Failed to purchase hint");
       }
 
+      // ... existing hint logic for different game modes ...
       let optionToDisable;
 
-      // NEW: Special handling for fillBlanks (letter hints)
       if (gameMode === "fillBlanks") {
-        // For fillBlanks, we reveal letters instead of disabling options
         const availableLetters = options.filter(
           (option) => !currentQuestionHints.includes(option.id)
         );
@@ -157,24 +157,13 @@ const useHintStore = create<HintState>((set, get) => ({
           throw new Error("No more letters can be revealed");
         }
 
-        // Randomly select a letter to reveal
         const randomIndex = Math.floor(Math.random() * availableLetters.length);
         optionToDisable = availableLetters[randomIndex];
-
-        console.log(
-          `[HintStore] Revealing letter at position: ${optionToDisable.id} (${optionToDisable.text})`
-        );
       } else {
-        // EXISTING: Logic for multipleChoice and identification
         const incorrectOptions = options.filter((option) => {
           const isIncorrect =
             option.isCorrect === false || option.isCorrect === undefined;
           const notAlreadyHinted = !currentQuestionHints.includes(option.id);
-
-          console.log(
-            `[HintStore] Option ${option.id}: isCorrect=${option.isCorrect}, isIncorrect=${isIncorrect}, notHinted=${notAlreadyHinted}`
-          );
-
           return isIncorrect && notAlreadyHinted;
         });
 
@@ -182,21 +171,15 @@ const useHintStore = create<HintState>((set, get) => ({
           throw new Error("No more incorrect options can be disabled");
         }
 
-        // Randomly select an incorrect option to disable
         const randomIndex = Math.floor(Math.random() * incorrectOptions.length);
         optionToDisable = incorrectOptions[randomIndex];
 
-        // Verify the option we're disabling is incorrect
         if (optionToDisable.isCorrect === true) {
-          console.error(
-            `[HintStore] ERROR: Attempting to disable correct answer! Option:`,
-            optionToDisable
-          );
           throw new Error("System error: Cannot disable correct answer");
         }
       }
 
-      // Update state
+      // Update hint state
       const updatedHints = [...currentQuestionHints, optionToDisable.id];
       const { questionHints } = get();
       const newQuestionHints = new Map(questionHints);
@@ -209,11 +192,18 @@ const useHintStore = create<HintState>((set, get) => ({
         questionHints: newQuestionHints,
       });
 
+      // NEW: Update coins store with remaining coins from backend response
+      if (data.remainingCoins !== undefined) {
+        console.log(`[HintStore] Updating coins to ${data.remainingCoins}`);
+        useCoinsStore.setState({ coins: data.remainingCoins });
+      }
+
       const action =
         gameMode === "fillBlanks" ? "Revealed letter" : "Disabled option";
       console.log(
         `[HintStore] Hint purchased for ${gameMode} question ${questionId}. ${action}: ${optionToDisable.id}. Hints used: ${updatedHints.length}/${maxHints}`
       );
+
       return true;
     } catch (error) {
       console.error("Error purchasing hint:", error);

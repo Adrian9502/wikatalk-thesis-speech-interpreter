@@ -93,66 +93,64 @@ const useCoinsStore = create<CoinsState>((set, get) => ({
   },
 
   // Fetch user's coin balance
-  fetchCoinsBalance: async (forceRefresh = false) => {
-    const currentTime = Date.now();
-    const { lastCoinsChecked } = get();
+  fetchCoinsBalance: async (forceRefresh: boolean = false) => {
+    const { isLoading, lastCoinsChecked } = get();
+    const now = Date.now();
 
-    // Use cached data if not forcing refresh
-    if (
-      !forceRefresh &&
-      lastCoinsChecked > 0 &&
-      currentTime - lastCoinsChecked < REWARDS_CACHE_EXPIRY
-    ) {
-      console.log("[CoinsStore] Using cached coins balance");
-      return true;
+    // Skip if already loading or recently fetched (unless forced)
+    if (isLoading || (!forceRefresh && now - lastCoinsChecked < 30000)) {
+      console.log("Skipping coins fetch - already loading or recently fetched");
+      return;
     }
 
+    set({ isLoading: true, error: null });
+
     try {
-      // Only set loading if not preloading in background
-      if (forceRefresh) {
-        set({ isLoading: true, error: null });
-      }
-
-      // Get token from authTokenManager instead of AsyncStorage directly
-      const token = getToken();
-
+      const token = await getToken();
       if (!token) {
-        console.log("No token available for fetchCoinsBalance");
+        console.log("No token found, cannot fetch coins");
         set({ isLoading: false, error: "Authentication required" });
-        return;
+        return false;
       }
 
-      // Ensure isDailyRewardAvailable is reset when fetching balance
-      set({ isDailyRewardAvailable: false });
+      console.log("Fetching coins balance from server...");
+      const response = await axios.get(`${API_URL}/api/rewards/coins`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+        timeout: 10000,
+      });
 
-      try {
-        const response = await axios.get(`${API_URL}/api/rewards/coins`, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
+      if (response.data && typeof response.data.coins === "number") {
+        const coins = response.data.coins;
+        await AsyncStorage.setItem("user_coins", coins.toString());
+
+        console.log("✅ Coins fetched successfully:", response.data.coins);
+
+        set({
+          coins: response.data.coins,
+          isLoading: false,
+          error: null,
+          lastCoinsChecked: now,
         });
 
-        if (response.data.success) {
-          const coins = response.data.coins;
-          await AsyncStorage.setItem("user_coins", coins.toString());
-          set({
-            coins,
-            isLoading: false,
-            lastCoinsChecked: Date.now(), // Update timestamp
-          });
-          return true;
-        }
-      } catch (error: any) {
-        console.error(
-          "API Error fetching coins:",
-          error.response?.status,
-          error.response?.data
-        );
-        set({ isLoading: false, error: "Failed to fetch coins balance" });
+        return true;
+      } else {
+        console.error("Invalid coins response:", response.data);
+        set({ isLoading: false, error: "Invalid response from server" });
+        return false;
       }
-    } catch (error) {
-      console.error("Error in fetchCoinsBalance:", error);
-      set({ isLoading: false, error: "Failed to fetch coins balance" });
+    } catch (error: any) {
+      console.error("Error fetching coins:", error);
+
+      // Don't reset coins to 0 on error - keep existing value
+      set({
+        isLoading: false,
+        error: error.message || "Failed to fetch coins",
+        // Keep existing coins value on error
+      });
+
+      return false;
     }
   },
 

@@ -35,8 +35,8 @@ const userSchema = new mongoose.Schema(
     },
     authProvider: {
       type: String,
-      enum: ["local", "google"],
-      default: "local",
+      enum: ["manual", "google", "both"], // Add "both" option
+      default: "manual",
     },
 
     createdAt: {

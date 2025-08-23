@@ -9,13 +9,13 @@ import useThemeStore from "./useThemeStore";
 import { getToken, setToken } from "@/lib/authTokenManager";
 import { useTranslateStore } from "./useTranslateStore";
 import { GoogleSignin } from "@react-native-google-signin/google-signin";
-import useCoinsStore from "./games/useCoinsStore";
+import useCoinsStore from "@/store/games/useCoinsStore";
 import { authService, testAPIConnection } from "@/services/api";
 import { clearAllAccountData, refreshAccountData } from "@/utils/dataManager";
-import { setLogoutCallback } from "@/services/api/baseApi"; // Add this import
+import { setLogoutCallback } from "@/services/api/baseApi";
 
 // Types
-interface UserData {
+export interface UserData {
   id?: string;
   fullName: string;
   username?: string;
@@ -26,6 +26,10 @@ interface UserData {
   updatedAt?: string;
   tempToken?: string;
   authProvider?: string;
+  coins?: number;
+  theme?: string;
+  // NEW: Track current session login method
+  currentLoginMethod?: "manual" | "google";
 }
 
 interface AuthResponse {
@@ -441,22 +445,47 @@ export const useAuthStore = create<AuthState>()(
           // Handle successful login
           await Promise.all([
             AsyncStorage.setItem("userToken", token),
-            AsyncStorage.setItem("userData", JSON.stringify(user)),
+            AsyncStorage.setItem(
+              "userData",
+              JSON.stringify({
+                ...user,
+                currentLoginMethod: "manual", // NEW: Track login method
+              })
+            ),
           ]);
-          get().setFormMessage("Login successful!", "success");
+
+          // NEW: Show different messages based on auth provider
+          const loginMessage =
+            user.authProvider === "both"
+              ? "Welcome back! Your account works with both manual and Google login."
+              : "Login successful!";
+
+          get().setFormMessage(loginMessage, "success");
 
           setupAxiosDefaults(token);
-          setToken(token); // Update the token manager
-          set({ userToken: token, userData: user });
+          setToken(token);
+          set({
+            userToken: token,
+            userData: {
+              ...user,
+              currentLoginMethod: "manual", // NEW: Track in state
+            },
+          });
 
           await refreshAccountData();
 
-          setTimeout(() => {
+          // NEW: Force refresh coins after login
+          setTimeout(async () => {
+            console.log("[Auth] Fetching coins after login...");
+            const coinsStore = useCoinsStore.getState();
+            await coinsStore.fetchCoinsBalance(true); // Force refresh
             get().getUserProfile();
           }, 500);
+
           // After successful login, sync the theme
           const themeStore = useThemeStore.getState();
           await themeStore.syncThemeWithServer();
+
           InteractionManager.runAfterInteractions(() => {
             router.replace("/(tabs)/Speech");
           });
@@ -479,7 +508,6 @@ export const useAuthStore = create<AuthState>()(
         const { name, email, photo } = user;
 
         try {
-          // Call backend API to authenticate with Google
           const response = await authService.loginWithGoogle(idToken, {
             name,
             email,
@@ -487,7 +515,6 @@ export const useAuthStore = create<AuthState>()(
           });
 
           if (response.success) {
-            // Use the backend token
             const token = response.data?.token;
 
             if (!token) {
@@ -504,7 +531,6 @@ export const useAuthStore = create<AuthState>()(
               isVerified: true,
             };
 
-            // Store user data and token
             await Promise.all([
               AsyncStorage.setItem("userToken", token),
               AsyncStorage.setItem(
@@ -515,11 +541,12 @@ export const useAuthStore = create<AuthState>()(
                   email: userData.email || email,
                   profilePicture: userData.profilePicture || photo || "",
                   isVerified: true,
+                  authProvider: (userData as any)?.authProvider || "google",
+                  currentLoginMethod: "google",
                 })
               ),
             ]);
 
-            // Set token in axios and token manager
             setupAxiosDefaults(token);
             setToken(token);
             set({
@@ -530,43 +557,62 @@ export const useAuthStore = create<AuthState>()(
                 email: userData.email || email,
                 profilePicture: userData.profilePicture || photo || "",
                 isVerified: true,
-                authProvider: "google",
+                authProvider: (userData as any)?.authProvider || "google",
+                currentLoginMethod: "google", // NEW: Track in state
               },
               isAppReady: true,
             });
+
             await refreshAccountData();
+
+            // NEW: Force refresh coins after Google login
+            setTimeout(async () => {
+              console.log("[Auth] Fetching coins after Google login...");
+              const coinsStore = useCoinsStore.getState();
+              await coinsStore.fetchCoinsBalance(true); // Force refresh
+            }, 500);
 
             const themeStore = useThemeStore.getState();
             await themeStore.syncThemeWithServer();
 
-            showToast({
-              type: "success",
-              title: "Signed in with Google Successful!",
-              description: `Welcome, ${name}!`,
-            });
+            // Show success messages
+            if (response.data?.wasLinked) {
+              showToast({
+                type: "success",
+                title: "Account Linked Successfully!",
+                description: `Your existing account has been linked with Google. All your progress is preserved!`,
+              });
+            } else if (response.data?.isNewUser) {
+              showToast({
+                type: "success",
+                title: "Welcome to WikaTalk!",
+                description: `Account created with Google. Start your language learning journey!`,
+              });
+            } else {
+              showToast({
+                type: "success",
+                title: "Signed in with Google!",
+                description: `Welcome back, ${userData.fullName || name}!`,
+              });
+            }
 
             setTimeout(() => {
               router.replace("/(tabs)/Speech");
             }, 300);
             return { success: true };
           }
-          throw new Error(response.message || "Google login failed");
-        } catch (error: any) {
-          console.log("Google login error:", error);
 
-          // DON'T FALL BACK TO STORING GOOGLE TOKEN
-          // Just show the error and let user try again
-          const message =
-            error.response?.data?.message ||
-            error.message ||
-            "Google login failed";
+          throw new Error(response.message || "Google sign-in failed");
+        } catch (error: any) {
+          const message = error.message || "Google sign-in failed";
           set({ error: message });
-          get().setFormMessage(message, "error");
+
+          console.error("Google login error:", error);
 
           showToast({
             type: "error",
             title: "Google Sign-In Failed",
-            description: "Please check your internet connection and try again.",
+            description: message,
           });
 
           return { success: false, message };

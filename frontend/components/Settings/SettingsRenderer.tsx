@@ -5,7 +5,6 @@ import SettingItem from "@/components/settings/SettingItem";
 import ThemeSelector from "@/components/settings/ThemeSelector";
 import { BASE_COLORS, TITLE_COLORS } from "@/constant/colors";
 import { FeatherIconName } from "@/types/types";
-import ProfilePictureModal from "../accountDetails/ProfilePictureModal";
 
 // Types
 type SettingItemWithToggle = {
@@ -105,7 +104,7 @@ const styles = StyleSheet.create({
     marginVertical: 20,
   },
   sectionTitle: {
-    fontSize: 14,
+    fontSize: 13,
     fontFamily: "Poppins-Medium",
     color: BASE_COLORS.white,
     marginBottom: 5,

@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from "react";
-import { FlatList, Animated, View } from "react-native";
+import { FlatList, Animated, View, Text, StyleSheet } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { StatusBar } from "expo-status-bar";
 import { useAuth } from "@/context/AuthContext";
@@ -18,6 +18,9 @@ import { router } from "expo-router";
 import ContactSupportModal from "@/components/helpAndFAQ/ContactSupportModal";
 import { clearAllAccountData } from "@/utils/accountUtils";
 import ProfileCard from "@/components/settings/ProfileCard";
+import { BASE_COLORS } from "@/constant/colors";
+import { UserData } from "@/store/useAuthStore";
+import AccountLinkingInfo from "@/components/settings/AccountLinkingInfo";
 
 // Types
 type SettingItemWithToggle = {
@@ -44,7 +47,14 @@ type SettingSection = {
 };
 
 type ListItem = {
-  type: "header" | "profile" | "appearance" | "section" | "item" | "logout";
+  type:
+    | "header"
+    | "profile"
+    | "account-linking"
+    | "appearance"
+    | "section"
+    | "item"
+    | "logout";
   data: any;
   key: string;
   sectionIndex?: number;
@@ -148,6 +158,15 @@ const Settings = () => {
       key: "profile",
     });
 
+    // Account linking info section
+    if (userData) {
+      items.push({
+        type: "account-linking",
+        data: userData,
+        key: "account-linking",
+      });
+    }
+
     // Add appearance section
     items.push({
       type: "appearance",
@@ -162,7 +181,7 @@ const Settings = () => {
         type: "section",
         data: section.title,
         key: `section-${sectionIndex}`,
-        sectionIndex, // NEW: Add for animation timing
+        sectionIndex,
       });
 
       // Add section items
@@ -176,8 +195,8 @@ const Settings = () => {
             sectionIndex,
           },
           key: `item-${sectionIndex}-${itemIndex}`,
-          sectionIndex, // NEW: Add for animation timing
-          itemIndex, // NEW: Add for animation timing
+          sectionIndex,
+          itemIndex,
         });
       });
     });
@@ -192,7 +211,6 @@ const Settings = () => {
     return items;
   };
 
-  // SIMPLIFIED: Direct rendering without individual animations
   const renderItem = ({ item, index }: { item: ListItem; index: number }) => {
     switch (item.type) {
       case "header":
@@ -205,6 +223,9 @@ const Settings = () => {
             themeColor={activeTheme.secondaryColor}
           />
         );
+
+      case "account-linking":
+        return <AccountLinkingInfo userData={item.data} />;
 
       case "appearance":
         return <AppearanceSection />;
