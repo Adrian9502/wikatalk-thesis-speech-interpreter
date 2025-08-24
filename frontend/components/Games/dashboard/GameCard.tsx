@@ -1,11 +1,10 @@
-import React, { useEffect, useState, useMemo } from "react";
+import React, { useEffect, useMemo } from "react";
 import {
   View,
   Text,
   TouchableOpacity,
   StyleSheet,
   Platform,
-  ActivityIndicator,
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { TrendingUp, Play } from "react-native-feather";
@@ -26,58 +25,12 @@ const GameCard: React.FC<GameCardProps> = ({
 }) => {
   const { getGameModeProgress, lastUpdated } = useProgressStore();
 
-  // NEW: Track animation state and progress loading
-  const [animationPlayed, setAnimationPlayed] = useState(false);
-  const [isLoadingProgress, setIsLoadingProgress] = useState(false);
-  const [currentProgress, setCurrentProgress] = useState(() => {
-    // Initial progress data for animation
-    const initialProgress = getGameModeProgress(game.id);
-    console.log(`[GameCard] Initial progress for ${game.id}:`, initialProgress);
-    return initialProgress;
-  });
-
-  // NEW: Handle progress updates after animation
-  useEffect(() => {
-    // Only update progress if animation has been played
-    if (animationPlayed) {
-      console.log(
-        `[GameCard] Animation completed, checking for progress updates for ${game.id}`
-      );
-
-      setIsLoadingProgress(true);
-
-      // Small delay to show loading state
-      setTimeout(() => {
-        const freshProgress = getGameModeProgress(game.id);
-        console.log(`[GameCard] Fresh progress for ${game.id}:`, freshProgress);
-
-        // Only update if there's actually a change
-        if (
-          freshProgress.completed !== currentProgress.completed ||
-          freshProgress.total !== currentProgress.total
-        ) {
-          console.log(`[GameCard] Updating progress for ${game.id}:`, {
-            from: currentProgress,
-            to: freshProgress,
-          });
-          setCurrentProgress(freshProgress);
-        }
-
-        setIsLoadingProgress(false);
-      }, 300); // Brief loading state
-    }
-  }, [lastUpdated, animationPlayed, game.id]);
-
-  // NEW: Mark animation as played after mount (simulate your existing animation logic)
-  useEffect(() => {
-    // Simulate the animation duration you have elsewhere in your app
-    const animationTimer = setTimeout(() => {
-      console.log(`[GameCard] Animation completed for ${game.id}`);
-      setAnimationPlayed(true);
-    }, 1200); // Adjust this to match your actual animation duration
-
-    return () => clearTimeout(animationTimer);
-  }, [game.id]);
+  // SIMPLIFIED: Just get current progress - no loading states needed
+  const currentProgress = useMemo(() => {
+    const progress = getGameModeProgress(game.id);
+    console.log(`[GameCard] Fresh progress for ${game.id}:`, progress);
+    return progress;
+  }, [lastUpdated, game.id, getGameModeProgress]);
 
   useEffect(() => {
     // Silent preload - keep existing functionality
@@ -154,23 +107,15 @@ const GameCard: React.FC<GameCardProps> = ({
           </View>
         </View>
 
-        {/* DYNAMIC PROGRESS DATA - UPDATES AFTER ANIMATION */}
+        {/* SIMPLIFIED: Direct progress display - no loading states */}
         <View style={styles.gameStatsRow}>
           <View style={styles.statItem}>
-            {isLoadingProgress ? (
-              <ActivityIndicator size="small" color="#fff" />
-            ) : (
-              <Text style={styles.statValue}>{currentProgress.completed}</Text>
-            )}
+            <Text style={styles.statValue}>{currentProgress.completed}</Text>
             <Text style={styles.statLabel}>Completed</Text>
           </View>
           <View style={styles.statDivider} />
           <View style={styles.statItem}>
-            {isLoadingProgress ? (
-              <ActivityIndicator size="small" color="#fff" />
-            ) : (
-              <Text style={styles.statValue}>{completionPercentage}%</Text>
-            )}
+            <Text style={styles.statValue}>{completionPercentage}%</Text>
             <Text style={styles.statLabel}>Progress</Text>
           </View>
         </View>
