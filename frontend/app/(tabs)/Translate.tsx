@@ -1,10 +1,10 @@
-import React, { useEffect, useRef } from "react";
+import React, { useEffect } from "react";
 import {
   KeyboardAvoidingView,
   Platform,
   TouchableWithoutFeedback,
   Keyboard,
-  Animated,
+  View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import TranslateSection from "@/components/translate/TranslateSection";
@@ -45,10 +45,6 @@ const Translate = () => {
     clearSourceText,
   } = useTranslateStore();
 
-  // NEW: Simple animation refs - only fade animation
-  const fadeAnim = useRef(new Animated.Value(0)).current;
-  const animationStartedRef = useRef(false);
-
   // Clear source text when the component mounts
   useEffect(() => {
     clearSourceText(); // You were missing the parentheses here
@@ -72,20 +68,6 @@ const Translate = () => {
     };
   }, [sourceText, sourceLanguage, targetLanguage, updateState]);
 
-  // NEW: Simple fade-in animation on component mount
-  useEffect(() => {
-    if (!animationStartedRef.current) {
-      animationStartedRef.current = true;
-
-      // Simple fade-in animation
-      Animated.timing(fadeAnim, {
-        toValue: 1,
-        duration: 1200,
-        useNativeDriver: true,
-      }).start();
-    }
-  }, [fadeAnim]);
-
   // Handle dismissing the keyboard
   const dismissKeyboard = () => {
     Keyboard.dismiss();
@@ -99,17 +81,9 @@ const Translate = () => {
         keyboardVerticalOffset={Platform.OS === "ios" ? 0 : -100}
       >
         <SafeAreaView style={dynamicStyles.container}>
-          {/* NEW: Simple fade animation wrapper - no other changes */}
-          <Animated.View
-            style={[
-              { flex: 1 },
-              {
-                opacity: fadeAnim, // Only add fade animation
-              },
-            ]}
-          >
+          <View style={{ flex: 1 }}>
             <TranslateSection />
-          </Animated.View>
+          </View>
         </SafeAreaView>
       </KeyboardAvoidingView>
     </TouchableWithoutFeedback>

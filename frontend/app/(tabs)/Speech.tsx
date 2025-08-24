@@ -4,12 +4,11 @@ import {
   KeyboardAvoidingView,
   Platform,
   Keyboard,
-  Animated,
   TouchableWithoutFeedback,
   AppState,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import React, { useEffect, useState, useRef, useCallback } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import { StatusBar } from "expo-status-bar";
 import { LANGUAGE_INFO } from "@/constant/languages";
 import SwapButton from "@/components/speech/SwapButton";
@@ -77,12 +76,6 @@ const Speech = () => {
   const [recordingUser, setRecordingUser] = useState<number | null>(null);
   // Track which section is being edited (top=false, bottom=true)
   const [isBottomActive, setIsBottomActive] = useState(false);
-  // Track content position
-  const contentPosition = useRef(new Animated.Value(0)).current;
-
-  // NEW: Simple animation refs - only fade animation
-  const fadeAnim = useRef(new Animated.Value(0)).current;
-  const animationStartedRef = useRef(false);
 
   // Handle text field updates based on user
   const handleTextfield = (translatedText: string, transcribedText: string) => {
@@ -210,53 +203,6 @@ const Speech = () => {
     swapLanguages();
   }, [swapLanguages]);
 
-  // NEW: Simple fade-in animation on component mount
-  useEffect(() => {
-    if (!animationStartedRef.current) {
-      animationStartedRef.current = true;
-
-      // Simple fade-in animation
-      Animated.timing(fadeAnim, {
-        toValue: 1,
-        duration: 1200,
-        useNativeDriver: true,
-      }).start();
-    }
-  }, [fadeAnim]);
-
-  useEffect(() => {
-    const keyboardDidShowListener = Keyboard.addListener(
-      "keyboardDidShow",
-      () => {
-        // If bottom section is active, animate content up
-        if (isBottomActive) {
-          Animated.timing(contentPosition, {
-            toValue: -200, // Move content up by 200 units when keyboard shows
-            duration: 300,
-            useNativeDriver: true,
-          }).start();
-        }
-      }
-    );
-
-    const keyboardDidHideListener = Keyboard.addListener(
-      "keyboardDidHide",
-      () => {
-        // Animate content back to original position
-        Animated.timing(contentPosition, {
-          toValue: 0,
-          duration: 300,
-          useNativeDriver: true,
-        }).start();
-      }
-    );
-
-    return () => {
-      keyboardDidShowListener.remove();
-      keyboardDidHideListener.remove();
-    };
-  }, [isBottomActive]);
-
   useEffect(() => {
     clearText("top");
     clearText("bottom");
@@ -310,15 +256,7 @@ const Speech = () => {
           keyboardVerticalOffset={keyboardOffset}
           enabled={true}
         >
-          <Animated.View
-            style={[
-              styles.contentContainer,
-              {
-                opacity: fadeAnim,
-                transform: [{ translateY: contentPosition }],
-              },
-            ]}
-          >
+          <View style={styles.contentContainer}>
             {/* Top section */}
             <LanguageSection
               position="top"
@@ -346,7 +284,7 @@ const Speech = () => {
               onTextAreaFocus={handleTextAreaFocus}
               recordingDuration={recordingDuration}
             />
-          </Animated.View>
+          </View>
         </KeyboardAvoidingView>
       </TouchableWithoutFeedback>
 
@@ -371,7 +309,7 @@ const Speech = () => {
 
 export default Speech;
 
-// Styles - COMPLETELY UNCHANGED
+// Styles - Updated to remove animation-related styles
 const styles = StyleSheet.create({
   keyboardAvoidingView: {
     flex: 1,

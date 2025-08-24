@@ -15,16 +15,16 @@ export const pronunciationStyles = StyleSheet.create({
     marginBottom: 16,
     gap: 12,
   },
-  //  Combined header and dropdown container
   headerDropdownContainer: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
     marginBottom: 8,
   },
-  flatListContent: {
+  flashListContent: {
     paddingBottom: 20,
     paddingTop: 8,
+    backgroundColor: "transparent",
   },
   listHeaderTitle: {
     fontSize: 13,

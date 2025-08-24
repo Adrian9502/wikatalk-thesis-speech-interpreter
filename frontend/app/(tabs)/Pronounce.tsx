@@ -1,14 +1,13 @@
-import React, { useState, useEffect, useCallback, useRef } from "react";
-import {
-  View,
-  Text,
-  FlatList,
-  Keyboard,
-  TouchableWithoutFeedback,
-  Animated,
-  RefreshControl,
-} from "react-native";
+import React, {
+  useState,
+  useEffect,
+  useCallback,
+  useRef,
+  useMemo,
+} from "react";
+import { View, Text, RefreshControl } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { FlashList } from "@shopify/flash-list";
 import useThemeStore from "@/store/useThemeStore";
 import { getGlobalStyles } from "@/styles/globalStyles";
 import { usePronunciationStore } from "@/store/usePronunciationStore";
@@ -46,7 +45,6 @@ const Pronounce = () => {
   const { activeTheme } = useThemeStore();
   const dynamicStyles = getGlobalStyles(activeTheme.backgroundColor);
 
-  // FIXED: Remove the non-existent getAllPronunciationData
   const {
     // Data
     transformedData,
@@ -70,17 +68,19 @@ const Pronounce = () => {
   const [searchInput, setSearchInput] = useState("");
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [isDropdownFocus, setIsDropdownFocus] = useState(false);
-
-  // Animation - Single fade only
-  const fadeAnim = useRef(new Animated.Value(0)).current;
   const [isInitialized, setIsInitialized] = useState(false);
 
-  // FlatList ref
-  const flatListRef = useRef<FlatList>(null);
+  // FlashList ref (changed from FlatList)
+  const flashListRef = useRef<FlashList<PronunciationItem>>(null);
 
-  // SIMPLIFIED: Get filtered data directly from store
-  const displayData = React.useMemo(() => {
-    if (!transformedData?.[selectedLanguage]) return [];
+  // OPTIMIZED: Memoized filtered data with performance tracking
+  const displayData = useMemo(() => {
+    const startTime = Date.now();
+
+    if (!transformedData?.[selectedLanguage]) {
+      console.log(`[Pronounce] No data for ${selectedLanguage}`);
+      return [];
+    }
 
     let data = transformedData[selectedLanguage];
 
@@ -93,6 +93,11 @@ const Pronounce = () => {
           item.pronunciation.toLowerCase().includes(searchLower)
       );
     }
+
+    const duration = Date.now() - startTime;
+    console.log(
+      `[Pronounce] Data filtered in ${duration}ms: ${data.length} items`
+    );
 
     return data;
   }, [transformedData, selectedLanguage, searchInput]);
@@ -108,14 +113,6 @@ const Pronounce = () => {
 
         if (mounted) {
           setIsInitialized(true);
-
-          // Start simple fade animation
-          Animated.timing(fadeAnim, {
-            toValue: 1,
-            duration: 800,
-            useNativeDriver: true,
-          }).start();
-
           console.log("[Pronounce] Initialization complete");
         }
       } catch (error) {
@@ -129,7 +126,7 @@ const Pronounce = () => {
       mounted = false;
       stopAudio();
     };
-  }, []);
+  }, [fetchPronunciations, stopAudio]);
 
   // SEARCH HANDLER - Immediate update
   const handleSearchChange = useCallback(
@@ -151,7 +148,7 @@ const Pronounce = () => {
     [stopAudio]
   );
 
-  // REFRESH HANDLER - Clean
+  // REFRESH HANDLER - Enhanced for FlashList
   const handleRefresh = useCallback(async () => {
     if (isRefreshing) return;
 
@@ -167,7 +164,7 @@ const Pronounce = () => {
     }
   }, [isRefreshing, clearCache, fetchPronunciations]);
 
-  // RENDER FUNCTIONS - Optimized
+  // RENDER FUNCTIONS - Optimized for FlashList
   const renderItem = useCallback(
     ({ item, index }: { item: PronunciationItem; index: number }) => (
       <PronunciationCard
@@ -181,11 +178,25 @@ const Pronounce = () => {
     [currentPlayingIndex, isAudioLoading, playAudio]
   );
 
+  // OPTIMIZED: Enhanced key extractor for FlashList
   const keyExtractor = useCallback(
-    (item: PronunciationItem, index: number) =>
-      `${selectedLanguage}-${index}-${item.english}`,
+    (item: PronunciationItem, index: number) => {
+      // Use a more stable key that includes content hash for better performance
+      const contentHash = `${item.english}-${item.translation}-${selectedLanguage}`;
+      return `${contentHash}-${index}`;
+    },
     [selectedLanguage]
   );
+
+  // OPTIMIZED: Memoized empty component
+  const ListEmptyComponent = useMemo(() => EmptyState, []);
+
+  // PERFORMANCE: Calculate estimated item size based on content
+  const estimatedItemSize = useMemo(() => {
+    // Base card height + margins + padding
+    // Adjust based on your PronunciationCard actual height
+    return 140; // Adjust this value based on your card's actual height
+  }, []);
 
   // LOADING STATES
   if (!isInitialized && isLoading) {
@@ -202,7 +213,7 @@ const Pronounce = () => {
 
   return (
     <SafeAreaView style={dynamicStyles.container}>
-      <Animated.View style={[{ flex: 1, opacity: fadeAnim }]}>
+      <View style={{ flex: 1 }}>
         {/* Header */}
         <View style={styles.header}>
           <Text style={styles.headerTitle}>Pronunciation Guide</Text>
@@ -253,37 +264,54 @@ const Pronounce = () => {
             containerStyle={styles.dropdownList}
           />
         </View>
-        <FlatList
-          ref={flatListRef}
+        {/* 
+
+<FlashList
+              data={currentData}
+              renderItem={renderItem}
+              keyExtractor={keyExtractor}
+              ListEmptyComponent={ListEmptyComponent}
+              estimatedItemSize={180}
+              contentContainerStyle={styles.flashListContent}
+              refreshControl={
+                <RefreshControl
+                  refreshing={refreshing}
+                  onRefresh={handleRefresh}
+                  tintColor={activeTheme.secondaryColor}
+                  colors={[activeTheme.secondaryColor]}
+                />
+              }
+              showsVerticalScrollIndicator={false}
+            />
+*/}
+        {/* FLASHLIST - Optimized Implementation */}
+        <FlashList
+          ref={flashListRef}
           data={displayData}
           renderItem={renderItem}
           keyExtractor={keyExtractor}
-          ListEmptyComponent={EmptyState}
-          contentContainerStyle={styles.flatListContent}
-          style={[{ flex: 1 }]}
-          keyboardShouldPersistTaps="handled"
-          keyboardDismissMode="on-drag"
-          removeClippedSubviews={false} // cspell:disable-line
-          maxToRenderPerBatch={8}
-          windowSize={8}
-          initialNumToRender={8}
-          updateCellsBatchingPeriod={100}
+          ListEmptyComponent={ListEmptyComponent}
+          estimatedItemSize={estimatedItemSize}
+          contentContainerStyle={styles.flashListContent}
+          removeClippedSubviews={true}
           showsVerticalScrollIndicator={true}
           bounces={true}
           scrollEventThrottle={16}
-          nestedScrollEnabled={false}
+          keyboardShouldPersistTaps="handled"
+          keyboardDismissMode="on-drag"
+          drawDistance={200}
           refreshControl={
             <RefreshControl
               refreshing={isRefreshing}
               onRefresh={handleRefresh}
               colors={[BASE_COLORS.blue]}
-              tintColor={BASE_COLORS.white}
-              titleColor={BASE_COLORS.white}
+              tintColor={activeTheme.secondaryColor}
+              titleColor={activeTheme.tabActiveColor}
               title="Pull to refresh"
             />
           }
         />
-      </Animated.View>
+      </View>
     </SafeAreaView>
   );
 };

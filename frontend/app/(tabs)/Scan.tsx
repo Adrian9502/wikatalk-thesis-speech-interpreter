@@ -8,7 +8,6 @@ import {
   Platform,
   TouchableWithoutFeedback,
   Keyboard,
-  Animated,
 } from "react-native";
 import { StatusBar } from "expo-status-bar";
 import { CameraView, useCameraPermissions } from "expo-camera";
@@ -92,28 +91,10 @@ const Scan: React.FC = () => {
 
   const { isProcessing, ocrProgress, recognizeText } = useImageProcessing();
 
-  // NEW: Simple animation refs - only fade animation
-  const fadeAnim = useRef(new Animated.Value(0)).current;
-  const animationStartedRef = useRef(false);
-
   useEffect(() => {
     clearText();
     return () => stopSpeech();
   }, []);
-
-  // NEW: Simple fade-in animation on component mount
-  useEffect(() => {
-    if (!animationStartedRef.current) {
-      animationStartedRef.current = true;
-
-      // Simple fade-in animation
-      Animated.timing(fadeAnim, {
-        toValue: 1,
-        duration: 1200,
-        useNativeDriver: true,
-      }).start();
-    }
-  }, [fadeAnim]);
 
   // Function to capture image and process it
   const takePicture = async (): Promise<void> => {
@@ -219,15 +200,7 @@ const Scan: React.FC = () => {
             keyboardVerticalOffset={Platform.OS === "ios" ? 0 : 20}
             enabled={true}
           >
-            {/* NEW: Simple fade animation wrapper - no other changes */}
-            <Animated.View
-              style={[
-                styles.cameraContainer,
-                {
-                  opacity: fadeAnim, // Only add fade animation
-                },
-              ]}
-            >
+            <View style={styles.cameraContainer}>
               <View style={styles.cameraViewContainer}>
                 <CameraView
                   style={{ flex: 1 }}
@@ -301,7 +274,7 @@ const Scan: React.FC = () => {
                   color={BASE_COLORS.orange}
                 />
               </View>
-            </Animated.View>
+            </View>
           </KeyboardAvoidingView>
         </View>
       </TouchableWithoutFeedback>

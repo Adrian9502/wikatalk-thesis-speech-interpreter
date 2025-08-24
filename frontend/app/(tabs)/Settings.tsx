@@ -1,5 +1,5 @@
-import React, { useState, useRef, useEffect } from "react";
-import { FlatList, Animated, View, Text, StyleSheet } from "react-native";
+import React, { useState } from "react";
+import { FlatList, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { StatusBar } from "expo-status-bar";
 import { useAuth } from "@/context/AuthContext";
@@ -18,8 +18,6 @@ import { router } from "expo-router";
 import ContactSupportModal from "@/components/helpAndFAQ/ContactSupportModal";
 import { clearAllAccountData } from "@/utils/accountUtils";
 import ProfileCard from "@/components/settings/ProfileCard";
-import { BASE_COLORS } from "@/constant/colors";
-import { UserData } from "@/store/useAuthStore";
 import AccountLinkingInfo from "@/components/settings/AccountLinkingInfo";
 
 // Types
@@ -69,18 +67,6 @@ const Settings = () => {
   // Modal state
   const [logoutModalVisible, setLogoutModalVisible] = useState(false);
   const [contactModalVisible, setContactModalVisible] = useState(false);
-
-  // SIMPLIFIED: Single fade animation for entire list
-  const fadeAnim = useRef(new Animated.Value(0)).current;
-
-  useEffect(() => {
-    // Simple fade-in animation
-    Animated.timing(fadeAnim, {
-      toValue: 1,
-      duration: 800,
-      useNativeDriver: true,
-    }).start();
-  }, [fadeAnim]);
 
   const handleLogout = async () => {
     try {
@@ -280,7 +266,7 @@ const Settings = () => {
         onClose={() => setContactModalVisible(false)}
       />
 
-      <Animated.View style={{ flex: 1, opacity: fadeAnim }}>
+      <View style={{ flex: 1 }}>
         <FlatList
           data={createListItems()}
           renderItem={renderItem}
@@ -291,7 +277,7 @@ const Settings = () => {
           maxToRenderPerBatch={5}
           windowSize={10}
         />
-      </Animated.View>
+      </View>
     </SafeAreaView>
   );
 };

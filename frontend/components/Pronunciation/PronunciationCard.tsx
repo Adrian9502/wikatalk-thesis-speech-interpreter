@@ -166,7 +166,6 @@ export default PronunciationCard;
 const styles = StyleSheet.create({
   cardContainer: {
     marginVertical: 8,
-    marginHorizontal: 16,
     borderRadius: 16,
     backgroundColor: BASE_COLORS.white,
     shadowColor: "#000",
