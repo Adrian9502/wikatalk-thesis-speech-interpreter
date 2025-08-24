@@ -1,14 +1,22 @@
-import React, { useState, useCallback, useEffect } from "react";
-import { View, ScrollView, RefreshControl, StyleSheet } from "react-native";
+import React, {
+  useState,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+} from "react";
+import { View, StyleSheet, InteractionManager } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { StatusBar } from "expo-status-bar";
 import { TouchableOpacity, Text } from "react-native";
+import { FlashList } from "@shopify/flash-list";
 import useThemeStore from "@/store/useThemeStore";
 import { getGlobalStyles } from "@/styles/globalStyles";
 import ConfirmationModal from "@/components/ConfirmationModal";
 import TabSelector from "@/components/recent/TabSelector";
-import HistoryList from "@/components/recent/HistoryList";
-import { TabType, HistoryItems } from "@/types/types";
+import HistoryItem from "@/components/recent/HistoryItem";
+import EmptyHistory from "@/components/recent/EmptyHistory";
+import { TabType } from "@/types/types";
 import { format } from "date-fns";
 import DotsLoader from "@/components/DotLoader";
 import { BASE_COLORS } from "@/constant/colors";
@@ -16,6 +24,7 @@ import createAuthenticatedApi from "@/lib/api";
 import showNotification from "@/lib/showNotification";
 import { Header } from "@/components/Header";
 import { useHardwareBack } from "@/hooks/useHardwareBack";
+import { RefreshControl } from "react-native-gesture-handler";
 
 interface TranslationAPIItem {
   _id: string;
@@ -27,20 +36,36 @@ interface TranslationAPIItem {
   translatedText: string;
 }
 
-export const TranslationHistory: React.FC = () => {
+interface OptimizedHistoryItem {
+  id: string;
+  date: string;
+  fromLanguage: string;
+  toLanguage: string;
+  originalText: string;
+  translatedText: string;
+  key: string; // Add unique key for optimization
+}
+
+// Define the optimized history items structure
+interface OptimizedHistoryItems {
+  Speech: OptimizedHistoryItem[];
+  Translate: OptimizedHistoryItem[];
+  Scan: OptimizedHistoryItem[];
+}
+
+// Memoized cache for formatted data
+const formatCache = new Map<string, OptimizedHistoryItem>();
+
+const TranslationHistory: React.FC = () => {
   // Theme store
   const { activeTheme } = useThemeStore();
   const dynamicStyles = getGlobalStyles(activeTheme.backgroundColor);
 
-  // State to track active tab
+  // State - Updated to use OptimizedHistoryItems
   const [activeTab, setActiveTab] = useState<TabType>("Speech");
-
-  // State for delete confirmation
   const [deleteConfirmVisible, setDeleteConfirmVisible] = useState(false);
   const [itemToDelete, setItemToDelete] = useState<string | null>(null);
-
-  // State for history items with loading and error states
-  const [historyItems, setHistoryItems] = useState<HistoryItems>({
+  const [historyItems, setHistoryItems] = useState<OptimizedHistoryItems>({
     Speech: [],
     Translate: [],
     Scan: [],
@@ -49,120 +74,193 @@ export const TranslationHistory: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [refreshing, setRefreshing] = useState(false);
 
-  // Function to fetch history from the API
-  const fetchHistory = async (tabType: TabType) => {
-    try {
-      setLoading(true);
-      setError(null);
+  // Refs for performance
+  const abortControllerRef = useRef<AbortController | null>(null);
+  const fetchTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
-      const api = createAuthenticatedApi();
+  // Memoized formatted data with caching
+  const formatTranslationData = useCallback(
+    (items: TranslationAPIItem[]): OptimizedHistoryItem[] => {
+      return items
+        .map((item: TranslationAPIItem) => {
+          const cacheKey = `${item._id}-${item.date}`;
 
+          // Check cache first
+          if (formatCache.has(cacheKey)) {
+            return formatCache.get(cacheKey)!;
+          }
+
+          const itemId = item._id || (item as any).id;
+          if (!itemId) {
+            console.error(`[TranslationHistory] Item missing ID:`, item);
+            return null;
+          }
+
+          const formatted: OptimizedHistoryItem = {
+            id: itemId.toString(),
+            date: format(new Date(item.date), "MMM. d, yyyy - h:mma"),
+            fromLanguage: item.fromLanguage,
+            toLanguage: item.toLanguage,
+            originalText: item.originalText,
+            translatedText: item.translatedText,
+            key: `${activeTab}-${itemId}-${item.date}`, // Stable key
+          };
+
+          // Cache the formatted item
+          formatCache.set(cacheKey, formatted);
+          return formatted;
+        })
+        .filter(Boolean) as OptimizedHistoryItem[];
+    },
+    [activeTab]
+  );
+
+  // Optimized fetch function with abort controller
+  const fetchHistory = useCallback(
+    async (tabType: TabType) => {
       try {
-        const response = await api.get(`/api/translations?type=${tabType}`);
-        const formattedData = response.data.history
-          .map((item: TranslationAPIItem) => {
-            const itemId = item._id || (item as any).id;
+        setLoading(true);
+        setError(null);
 
-            if (!itemId) {
-              console.error(`[RecentActivity] Item missing ID:`, item);
-              return null;
-            }
+        // Cancel previous request
+        if (abortControllerRef.current) {
+          abortControllerRef.current.abort();
+        }
 
-            return {
-              id: itemId.toString(),
-              date: format(new Date(item.date), "MMM. d, yyyy - h:mma"),
-              fromLanguage: item.fromLanguage,
-              toLanguage: item.toLanguage,
-              originalText: item.originalText,
-              translatedText: item.translatedText,
-            };
-          })
-          .filter(Boolean); // Remove null items
+        // Create new abort controller
+        abortControllerRef.current = new AbortController();
 
-        // Update just this tab's data
-        setHistoryItems((prev) => ({
-          ...prev,
-          [tabType]: formattedData,
-        }));
+        const api = createAuthenticatedApi();
+
+        const response = await api.get(`/api/translations?type=${tabType}`, {
+          signal: abortControllerRef.current.signal,
+          timeout: 10000, // 10 second timeout
+        });
+
+        const formattedData = formatTranslationData(response.data.history);
+
+        // Update state only if not aborted
+        if (!abortControllerRef.current?.signal.aborted) {
+          setHistoryItems((prev) => ({
+            ...prev,
+            [tabType]: formattedData,
+          }));
+        }
       } catch (err: any) {
-        // Enhanced error logging
+        if (err.name === "AbortError") {
+          console.log(`[TranslationHistory] Request aborted for ${tabType}`);
+          return;
+        }
+
         console.error(
-          `[RecentActivity] API Error:`,
+          `[TranslationHistory] API Error:`,
           err.response?.data || err.message
         );
 
-        // If it's a 401, show empty state instead of error
         if (err.response?.status === 401) {
           setHistoryItems((prev) => ({
             ...prev,
             [tabType]: [],
           }));
         } else {
-          // For other errors, show the error message
           setError("Failed to load history. Please try again.");
         }
       } finally {
         setLoading(false);
       }
-    } catch (err) {
-      console.error("Error creating API instance:", err);
-      setError("Failed to connect to server. Please try again.");
-      setLoading(false);
-    }
-  };
+    },
+    [formatTranslationData]
+  );
 
-  // Fetch history when tab changes
+  // Debounced tab change
+  const handleTabChange = useCallback(
+    (tab: TabType) => {
+      if (tab === activeTab) return;
+
+      setActiveTab(tab);
+
+      // Clear timeout if exists
+      if (fetchTimeoutRef.current) {
+        clearTimeout(fetchTimeoutRef.current);
+      }
+
+      // Debounce the fetch
+      fetchTimeoutRef.current = setTimeout(() => {
+        InteractionManager.runAfterInteractions(() => {
+          fetchHistory(tab);
+        });
+      }, 150);
+    },
+    [activeTab, fetchHistory]
+  );
+
+  // Initial fetch
   useEffect(() => {
-    fetchHistory(activeTab);
-  }, [activeTab]);
-
-  // Refresh function to reload data
-  const onRefresh = useCallback(() => {
-    setRefreshing(true);
-    fetchHistory(activeTab)
-      .then(() => {
-        setRefreshing(false);
-      })
-      .catch(() => {
-        setRefreshing(false);
+    const initialFetch = () => {
+      InteractionManager.runAfterInteractions(() => {
+        fetchHistory(activeTab);
       });
-  }, [activeTab]);
+    };
 
-  // Handle delete confirmation
-  const handleDeletePress = (id: string): void => {
+    initialFetch();
+
+    return () => {
+      if (abortControllerRef.current) {
+        abortControllerRef.current.abort();
+      }
+      if (fetchTimeoutRef.current) {
+        clearTimeout(fetchTimeoutRef.current);
+      }
+    };
+  }, []); // Only run once
+
+  // Optimized refresh
+  const handleRefresh = useCallback(async () => {
+    if (refreshing) return;
+
+    setRefreshing(true);
+    try {
+      // Clear cache for current tab
+      const currentItems = historyItems[activeTab];
+      currentItems.forEach((item) => {
+        formatCache.delete(`${item.id}-${item.date}`);
+      });
+
+      await fetchHistory(activeTab);
+    } catch (error) {
+      console.error("[TranslationHistory] Refresh error:", error);
+    } finally {
+      setRefreshing(false);
+    }
+  }, [refreshing, activeTab, fetchHistory, historyItems]);
+
+  // Optimized delete handlers
+  const handleDeletePress = useCallback((id: string) => {
     setItemToDelete(id);
     setDeleteConfirmVisible(true);
-  };
+  }, []);
 
-  // Handle delete confirmation with API call
-  const handleDeleteConfirm = async (): Promise<void> => {
+  const handleDeleteConfirm = useCallback(async () => {
     if (!itemToDelete) {
-      console.error("[RecentActivity] No item selected for deletion");
-      console.error(
-        "[RecentActivity] Current state - itemToDelete:",
-        itemToDelete
-      );
-      console.error(
-        "[RecentActivity] Current state - deleteConfirmVisible:",
-        deleteConfirmVisible
-      );
       setDeleteConfirmVisible(false);
       return;
     }
 
     try {
       const api = createAuthenticatedApi();
-      const response = await api.delete(`/api/translations/${itemToDelete}`);
+      await api.delete(`/api/translations/${itemToDelete}`);
 
-      // Update local state immediately
-      const updatedHistoryItems = { ...historyItems };
-      const originalCount = updatedHistoryItems[activeTab].length;
-      updatedHistoryItems[activeTab] = historyItems[activeTab].filter(
-        (item) => item.id !== itemToDelete
-      );
-      const newCount = updatedHistoryItems[activeTab].length;
+      // Optimized state update
+      setHistoryItems((prev) => {
+        const updated = { ...prev };
+        updated[activeTab] = prev[activeTab].filter(
+          (item) => item.id !== itemToDelete
+        );
+        return updated;
+      });
 
-      setHistoryItems(updatedHistoryItems);
+      // Clear from cache
+      formatCache.delete(itemToDelete);
 
       showNotification({
         type: "success",
@@ -170,10 +268,7 @@ export const TranslationHistory: React.FC = () => {
         description: "Translation deleted successfully.",
       });
     } catch (err: any) {
-      console.error("[RecentActivity] Delete error:", err);
-      console.error("[RecentActivity] Error response:", err.response?.data);
-      console.error("[RecentActivity] Error status:", err.response?.status);
-
+      console.error("[TranslationHistory] Delete error:", err);
       showNotification({
         type: "error",
         title: "Delete Failed",
@@ -181,29 +276,46 @@ export const TranslationHistory: React.FC = () => {
           err.response?.data?.message ||
           "Failed to delete item. Please try again.",
       });
-
-      setError("Failed to delete item. Please try again.");
     } finally {
-      console.log("[RecentActivity] Closing delete modal");
       setDeleteConfirmVisible(false);
       setItemToDelete(null);
     }
-  };
+  }, [itemToDelete, activeTab]);
 
-  // Handle delete cancellation
-  const handleDeleteCancel = (): void => {
+  const handleDeleteCancel = useCallback(() => {
     setDeleteConfirmVisible(false);
     setItemToDelete(null);
-  };
+  }, []);
 
-  // Hardware back button handling
+  // Hardware back button
   useHardwareBack({
     enabled: true,
     fallbackRoute: "/(tabs)/Settings",
     useExistingHeaderLogic: true,
   });
 
-  // Update the header to remove custom back handling since hardware back now handles it
+  // Memoized render item
+  const renderItem = useCallback(
+    ({ item }: { item: OptimizedHistoryItem }) => (
+      <HistoryItem item={item} onDeletePress={handleDeletePress} />
+    ),
+    [handleDeletePress]
+  );
+
+  // Memoized key extractor
+  const keyExtractor = useCallback(
+    (item: OptimizedHistoryItem) => item.key,
+    []
+  );
+
+  // Memoized empty component
+  const ListEmptyComponent = useMemo(
+    () => <EmptyHistory tabType={activeTab} />,
+    [activeTab]
+  );
+
+  // Current data - Now properly typed
+  const currentData: OptimizedHistoryItem[] = historyItems[activeTab];
   return (
     <SafeAreaView
       style={[
@@ -216,11 +328,9 @@ export const TranslationHistory: React.FC = () => {
 
       <Header title="Translation History" />
 
-      {/* Tabs */}
-      <TabSelector activeTab={activeTab} onTabChange={setActiveTab} />
+      <TabSelector activeTab={activeTab} onTabChange={handleTabChange} />
 
-      {/* Loading State */}
-      {loading ? (
+      {loading && currentData.length === 0 ? (
         <View style={styles.loadingContainer}>
           <DotsLoader />
         </View>
@@ -229,7 +339,7 @@ export const TranslationHistory: React.FC = () => {
           <Text
             style={[styles.errorText, { color: activeTheme.tabActiveColor }]}
           >
-            {error}
+            {error}123123123
           </Text>
           <TouchableOpacity
             style={[styles.retryButton, { backgroundColor: BASE_COLORS.blue }]}
@@ -239,31 +349,24 @@ export const TranslationHistory: React.FC = () => {
           </TouchableOpacity>
         </View>
       ) : (
-        /* History Items */
-        <ScrollView
-          style={styles.scrollView}
-          contentContainerStyle={[
-            styles.scrollContent,
-            historyItems[activeTab].length === 0 && styles.emptyScrollContent,
-          ]}
-          showsVerticalScrollIndicator={false}
+        <FlashList
+          data={currentData}
+          renderItem={renderItem}
+          keyExtractor={keyExtractor}
+          ListEmptyComponent={ListEmptyComponent}
+          estimatedItemSize={180}
           refreshControl={
             <RefreshControl
               refreshing={refreshing}
-              onRefresh={onRefresh}
-              progressBackgroundColor={activeTheme.secondaryColor}
+              onRefresh={handleRefresh}
+              tintColor={activeTheme.secondaryColor}
+              colors={[activeTheme.secondaryColor]}
             />
           }
-        >
-          <HistoryList
-            items={historyItems[activeTab]}
-            activeTab={activeTab}
-            onDeletePress={handleDeletePress}
-          />
-        </ScrollView>
+          showsVerticalScrollIndicator={false}
+        />
       )}
 
-      {/* Delete Confirmation Modal */}
       <ConfirmationModal
         visible={deleteConfirmVisible}
         title="Delete Translation"
@@ -280,34 +383,15 @@ const styles = StyleSheet.create({
   safeAreaView: {
     flex: 1,
   },
-  scrollView: {
-    flex: 1,
-  },
-  scrollContent: {
-    flexGrow: 1,
-    paddingBottom: 24,
-  },
-  emptyScrollContent: {
-    justifyContent: "center",
-    alignItems: "center",
-  },
   loadingContainer: {
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
-    height: "100%",
-    width: "100%",
-  },
-  loadingText: {
-    marginTop: 12,
-    fontFamily: "Poppins-Regular",
   },
   errorContainer: {
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
-    height: "100%",
-    width: "100%",
   },
   errorText: {
     fontFamily: "Poppins-Regular",

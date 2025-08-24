@@ -1,12 +1,22 @@
-import React, { useRef, useEffect, useState } from "react";
+import React, {
+  useRef,
+  useEffect,
+  useState,
+  useCallback,
+  useMemo,
+} from "react";
 import {
   View,
   Text,
-  TouchableOpacity,
   StyleSheet,
   Animated,
   LayoutChangeEvent,
 } from "react-native";
+import {
+  TapGestureHandler,
+  State,
+  TapGestureHandlerGestureEvent,
+} from "react-native-gesture-handler";
 import { Feather } from "@expo/vector-icons";
 import { BASE_COLORS } from "@/constant/colors";
 import { TabType } from "@/types/types";
@@ -17,98 +27,121 @@ interface TabSelectorProps {
   onTabChange: (tab: TabType) => void;
 }
 
-const TabSelector: React.FC<TabSelectorProps> = ({
-  activeTab,
-  onTabChange,
-}) => {
-  const tabs: TabType[] = ["Speech", "Translate", "Scan"];
+const TabSelector: React.FC<TabSelectorProps> = React.memo(
+  ({ activeTab, onTabChange }) => {
+    const tabs: TabType[] = ["Speech", "Translate", "Scan"];
 
-  // Store tab widths and positions
-  const [tabMeasurements, setTabMeasurements] = useState<
-    Array<{ x: number; width: number }>
-  >([]);
+    // Animation and state
+    const indicatorPosition = useRef(new Animated.Value(0)).current;
+    const [tabMeasurements, setTabMeasurements] = useState<
+      Array<{ x: number; width: number }>
+    >([]);
+    const [indicatorWidth, setIndicatorWidth] = useState(0);
 
-  // For native animation of position only
-  const indicatorPosition = useRef(new Animated.Value(0)).current;
+    // Gesture refs
+    const tabRefs = useRef<Array<TapGestureHandler | null>>([]);
 
-  // Non-animated currentWidth state for the indicator
-  const [indicatorWidth, setIndicatorWidth] = useState(0);
+    // Tab layout handler
+    const handleTabLayout = useCallback(
+      (index: number, event: LayoutChangeEvent) => {
+        const { x, width } = event.nativeEvent.layout;
 
-  // Handle container layout to get overall width
-  const handleContainerLayout = (event: LayoutChangeEvent) => {
-    const { width } = event.nativeEvent.layout;
-  };
+        setTabMeasurements((prev) => {
+          const newMeasurements = [...prev];
+          newMeasurements[index] = { x, width };
+          return newMeasurements;
+        });
+      },
+      []
+    );
 
-  // Handle tab layout to record position and width
-  const handleTabLayout = (index: number, event: LayoutChangeEvent) => {
-    const { x, width } = event.nativeEvent.layout;
+    // Optimized indicator animation - FIXED: Use only tension/friction, not speed
+    const animateIndicator = useCallback(
+      (activeIndex: number) => {
+        if (activeIndex >= 0 && tabMeasurements[activeIndex]) {
+          const { x, width } = tabMeasurements[activeIndex];
 
-    setTabMeasurements((prev) => {
-      const newMeasurements = [...prev];
-      newMeasurements[index] = { x, width };
-      return newMeasurements;
-    });
-  };
+          // Animate position with spring - removed conflicting speed parameter
+          Animated.spring(indicatorPosition, {
+            toValue: x,
+            useNativeDriver: true,
+            friction: 8,
+            tension: 120,
+            // Removed speed: 14 to fix the invariant violation
+          }).start();
 
-  // Update indicator position and width when activeTab changes
-  useEffect(() => {
-    const activeIndex = tabs.indexOf(activeTab);
-    if (activeIndex >= 0 && tabMeasurements[activeIndex]) {
-      const { x, width } = tabMeasurements[activeIndex];
+          setIndicatorWidth(width);
+        }
+      },
+      [indicatorPosition, tabMeasurements]
+    );
 
-      // Animate position with native driver
-      Animated.spring(indicatorPosition, {
-        toValue: x,
-        useNativeDriver: true,
-        friction: 8,
-        tension: 50,
-      }).start();
+    // Update indicator when active tab changes
+    useEffect(() => {
+      const activeIndex = tabs.indexOf(activeTab);
+      animateIndicator(activeIndex);
+    }, [activeTab, animateIndicator, tabs]);
 
-      // Set width directly (no animation)
-      setIndicatorWidth(width);
-    }
-  }, [activeTab, tabMeasurements, tabs, indicatorPosition]);
+    // Gesture handlers for each tab
+    const createTabHandler = useCallback(
+      (tab: TabType, index: number) =>
+        (event: TapGestureHandlerGestureEvent) => {
+          if (event.nativeEvent.state === State.END && tab !== activeTab) {
+            onTabChange(tab);
+          }
+        },
+      [activeTab, onTabChange]
+    );
 
-  return (
-    <View style={styles.tabOuterContainer}>
-      <View style={styles.tabContainer} onLayout={handleContainerLayout}>
-        {tabs.map((tab, index) => (
-          <TouchableOpacity
+    // Memoized tab components
+    const tabComponents = useMemo(() => {
+      return tabs.map((tab, index) => {
+        const isActive = activeTab === tab;
+
+        return (
+          <TapGestureHandler
             key={tab}
-            style={styles.tabButton}
-            onPress={() => onTabChange(tab)}
-            onLayout={(e) => handleTabLayout(index, e)}
+            ref={(ref) => (tabRefs.current[index] = ref)}
+            onHandlerStateChange={createTabHandler(tab, index)}
           >
-            <Feather
-              name={getTabIcon(tab)}
-              size={18}
-              color={activeTab === tab ? BASE_COLORS.white : BASE_COLORS.blue}
-            />
-            <Text
-              style={[
-                styles.tabText,
-                activeTab === tab && styles.activeTabText,
-              ]}
+            <Animated.View
+              style={styles.tabButton}
+              onLayout={(e) => handleTabLayout(index, e)}
             >
-              {tab}
-            </Text>
-          </TouchableOpacity>
-        ))}
+              <Feather
+                name={getTabIcon(tab)}
+                size={18}
+                color={isActive ? BASE_COLORS.white : BASE_COLORS.blue}
+              />
+              <Text style={[styles.tabText, isActive && styles.activeTabText]}>
+                {tab}
+              </Text>
+            </Animated.View>
+          </TapGestureHandler>
+        );
+      });
+    }, [tabs, activeTab, createTabHandler, handleTabLayout]);
 
-        {/* Animated Indicator - we set width directly and only animate translateX */}
-        <Animated.View
-          style={[
-            styles.indicator,
-            {
-              width: indicatorWidth, // Set width directly (not animated)
-              transform: [{ translateX: indicatorPosition }], // Only animate position
-            },
-          ]}
-        />
+    return (
+      <View style={styles.tabOuterContainer}>
+        <View style={styles.tabContainer}>
+          {tabComponents}
+
+          {/* Animated Indicator */}
+          <Animated.View
+            style={[
+              styles.indicator,
+              {
+                width: indicatorWidth,
+                transform: [{ translateX: indicatorPosition }],
+              },
+            ]}
+          />
+        </View>
       </View>
-    </View>
-  );
-};
+    );
+  }
+);
 
 const styles = StyleSheet.create({
   tabOuterContainer: {

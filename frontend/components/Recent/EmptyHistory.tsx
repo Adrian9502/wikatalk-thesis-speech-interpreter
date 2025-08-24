@@ -39,12 +39,13 @@ const EmptyHistory: React.FC<EmptyStateProps> = ({ tabType }) => {
 const styles = StyleSheet.create({
   emptyContainer: {
     justifyContent: "center",
+    height: "100%",
+    paddingTop: 80,
     alignItems: "center",
   },
   emptyIconContainer: {
     width: 60,
     height: 60,
-    backgroundColor: "red",
     borderRadius: 40,
     justifyContent: "center",
     alignItems: "center",

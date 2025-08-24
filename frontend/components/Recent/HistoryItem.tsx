@@ -1,10 +1,8 @@
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useRef, useCallback, useMemo } from "react";
 import {
   View,
   Text,
-  TouchableOpacity,
   StyleSheet,
-  Pressable,
   LayoutAnimation,
   Platform,
   UIManager,
@@ -13,6 +11,13 @@ import {
 import { LinearGradient } from "expo-linear-gradient";
 import { Feather, Ionicons } from "@expo/vector-icons";
 import { Calendar } from "react-native-feather";
+import {
+  TapGestureHandler,
+  State,
+  PanGestureHandler,
+  TapGestureHandlerGestureEvent,
+  PanGestureHandlerGestureEvent,
+} from "react-native-gesture-handler";
 import { BASE_COLORS, TITLE_COLORS } from "@/constant/colors";
 import { HistoryItemType } from "@/types/types";
 import TranslationText from "./TranslationText";
@@ -30,167 +35,254 @@ interface HistoryItemProps {
   onDeletePress: (id: string) => void;
 }
 
-const HistoryItem: React.FC<HistoryItemProps> = ({ item, onDeletePress }) => {
-  const [expanded, setExpanded] = useState(false);
-  const [needsExpandButton, setNeedsExpandButton] = useState(false);
-  const contentRef = useRef<View>(null);
-  const fadeAnim = useRef(new Animated.Value(1)).current;
+const HistoryItem: React.FC<HistoryItemProps> = React.memo(
+  ({ item, onDeletePress }) => {
+    const [expanded, setExpanded] = useState(false);
+    const [needsExpandButton, setNeedsExpandButton] = useState(false);
 
-  // Check if content exceeds collapsed height
-  useEffect(() => {
-    // Reset measurement when item changes
-    setNeedsExpandButton(false);
+    // Animation refs
+    const fadeAnim = useRef(new Animated.Value(1)).current;
+    const scaleAnim = useRef(new Animated.Value(1)).current;
+    const deleteScaleAnim = useRef(new Animated.Value(1)).current;
 
-    // Use a small delay to ensure content is properly laid out
-    const timer = setTimeout(() => {
-      if (contentRef.current) {
-        contentRef.current.measure((x, y, width, height, pageX, pageY) => {
-          // Only show the expand button if content height exceeds our threshold
-          setNeedsExpandButton(height > 120);
-        });
-      }
-    }, 100);
+    // Gesture refs
+    const contentTapRef = useRef<TapGestureHandler>(null);
+    const deleteTapRef = useRef<TapGestureHandler>(null);
+    const expandTapRef = useRef<TapGestureHandler>(null);
 
-    return () => clearTimeout(timer);
-  }, [item]);
+    // Memoized content measurement
+    const onContentLayout = useCallback((event: any) => {
+      const { height } = event.nativeEvent.layout;
+      setNeedsExpandButton(height > 120);
+    }, []);
 
-  const toggleExpansion = () => {
-    // Start fade out animation
-    Animated.timing(fadeAnim, {
-      toValue: 0,
-      duration: 150,
-      useNativeDriver: true,
-    }).start(() => {
-      // After fade out, change the expanded state
-      LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
-      setExpanded(!expanded);
-
-      // Then fade back in
-      Animated.timing(fadeAnim, {
-        toValue: 1,
+    // Optimized expansion toggle
+    const toggleExpansion = useCallback(() => {
+      const animationConfig = {
         duration: 300,
-        useNativeDriver: true,
-      }).start();
-    });
-  };
+        create: {
+          type: LayoutAnimation.Types.easeInEaseOut,
+          property: LayoutAnimation.Properties.opacity,
+        },
+        update: {
+          type: LayoutAnimation.Types.easeInEaseOut,
+        },
+      };
 
-  return (
-    <View style={styles.historyContainer}>
-      {/* Date and Delete button */}
-      <View style={styles.headerContainer}>
-        <View style={styles.dateContainer}>
-          <Calendar
-            width={14}
-            height={14}
-            color={BASE_COLORS.white}
-            style={styles.dateIcon}
-          />
-          <Text style={styles.dateText}>{item.date}</Text>
-        </View>
-        <TouchableOpacity
-          style={styles.deleteIcon}
-          onPress={() => {
-            console.log("[HistoryItem] Delete pressed for item ID:", item.id);
+      LayoutAnimation.configureNext(animationConfig);
+
+      Animated.sequence([
+        Animated.timing(fadeAnim, {
+          toValue: 0.7,
+          duration: 150,
+          useNativeDriver: true,
+        }),
+        Animated.timing(fadeAnim, {
+          toValue: 1,
+          duration: 150,
+          useNativeDriver: true,
+        }),
+      ]).start();
+
+      setExpanded(!expanded);
+    }, [expanded, fadeAnim]);
+
+    // Gesture handlers
+    const onContentTap = useCallback(
+      (event: TapGestureHandlerGestureEvent) => {
+        if (event.nativeEvent.state === State.END && needsExpandButton) {
+          // Scale animation for feedback
+          Animated.sequence([
+            Animated.timing(scaleAnim, {
+              toValue: 0.98,
+              duration: 100,
+              useNativeDriver: true,
+            }),
+            Animated.timing(scaleAnim, {
+              toValue: 1,
+              duration: 100,
+              useNativeDriver: true,
+            }),
+          ]).start();
+
+          toggleExpansion();
+        }
+      },
+      [needsExpandButton, toggleExpansion, scaleAnim]
+    );
+
+    const onDeleteTap = useCallback(
+      (event: TapGestureHandlerGestureEvent) => {
+        if (event.nativeEvent.state === State.END) {
+          // Scale animation for delete button
+          Animated.sequence([
+            Animated.timing(deleteScaleAnim, {
+              toValue: 0.9,
+              duration: 100,
+              useNativeDriver: true,
+            }),
+            Animated.timing(deleteScaleAnim, {
+              toValue: 1,
+              duration: 100,
+              useNativeDriver: true,
+            }),
+          ]).start(() => {
             onDeletePress(item.id);
-          }}
-        >
-          <Ionicons name="trash-outline" size={15} color={BASE_COLORS.white} />
-        </TouchableOpacity>
-      </View>
+          });
+        }
+      },
+      [onDeletePress, item.id, deleteScaleAnim]
+    );
 
-      <View style={styles.contentContainer}>
-        {/* Language Header */}
-        <View style={styles.languageHeaderContainer}>
-          <LinearGradient
-            start={{ x: 0, y: 0 }}
-            end={{ x: 1, y: 1 }}
-            colors={[BASE_COLORS.blue, BASE_COLORS.orange]}
-            style={styles.languageHeaderContent}
+    const onExpandTap = useCallback(
+      (event: TapGestureHandlerGestureEvent) => {
+        if (event.nativeEvent.state === State.END) {
+          toggleExpansion();
+        }
+      },
+      [toggleExpansion]
+    );
+
+    // Memoized styles for performance
+    const containerStyle = useMemo(
+      () => [
+        styles.translationContainer,
+        expanded ? undefined : styles.collapsedContainer,
+        { opacity: fadeAnim, transform: [{ scale: scaleAnim }] },
+      ],
+      [expanded, fadeAnim, scaleAnim]
+    );
+
+    const deleteButtonStyle = useMemo(
+      () => [styles.deleteIcon, { transform: [{ scale: deleteScaleAnim }] }],
+      [deleteScaleAnim]
+    );
+
+    return (
+      <View style={styles.historyContainer}>
+        {/* Header */}
+        <View style={styles.headerContainer}>
+          <View style={styles.dateContainer}>
+            <Calendar
+              width={14}
+              height={14}
+              color={BASE_COLORS.white}
+              style={styles.dateIcon}
+            />
+            <Text style={styles.dateText}>{item.date}</Text>
+          </View>
+
+          <TapGestureHandler
+            ref={deleteTapRef}
+            onHandlerStateChange={onDeleteTap}
           >
-            <View style={styles.languageBlock}>
-              <Text style={styles.languageText}>{item.fromLanguage}</Text>
-            </View>
-
-            <LinearGradient
-              colors={[BASE_COLORS.blue, BASE_COLORS.orange]}
-              start={{ x: 0, y: 0 }}
-              end={{ x: 1, y: 1 }}
-              style={styles.exchangeIconContainer}
-            >
-              <Feather name="repeat" size={16} color={BASE_COLORS.white} />
-            </LinearGradient>
-
-            <View style={styles.languageBlock}>
-              <Text style={styles.languageText}>{item.toLanguage}</Text>
-            </View>
-          </LinearGradient>
-        </View>
-
-        {/* Translation Content with Fade Animation */}
-        <Pressable onPress={needsExpandButton ? toggleExpansion : undefined}>
-          <Animated.View
-            style={[
-              styles.translationContainer,
-              styles.collapsedContainer,
-              { opacity: fadeAnim },
-            ]}
-          >
-            <View ref={contentRef} style={styles.translationInnerContainer}>
-              <TranslationText
-                label="Original"
-                text={item.originalText}
-                isOriginal
-              />
-              <TranslationText
-                label="Translation"
-                text={item.translatedText}
-                isOriginal={false}
-              />
-            </View>
-
-            {/* Gradient fade when collapsed */}
-            {!expanded && needsExpandButton && (
-              <LinearGradient
-                colors={[
-                  "rgba(255,255,255,0)",
-                  "rgba(255,255,255,0.9)",
-                  "rgba(255,255,255,1)",
-                ]}
-                style={styles.expandGradient}
-              />
-            )}
-          </Animated.View>
-        </Pressable>
-
-        {/* Expand/Collapse Button with Animation - ONLY SHOW WHEN NEEDED */}
-        {needsExpandButton && (
-          <TouchableOpacity
-            style={styles.expandCollapseButton}
-            onPress={toggleExpansion}
-            activeOpacity={0.7}
-          >
-            <Animated.View
-              style={{
-                opacity: fadeAnim,
-                flexDirection: "row",
-                alignItems: "center",
-              }}
-            >
-              <Text style={styles.expandCollapseText}>
-                {expanded ? "Show Less" : "Show More"}
-              </Text>
+            <Animated.View style={deleteButtonStyle}>
               <Ionicons
-                name={expanded ? "chevron-up" : "chevron-down"}
-                size={18}
-                color={BASE_COLORS.blue}
+                name="trash-outline"
+                size={15}
+                color={BASE_COLORS.white}
               />
             </Animated.View>
-          </TouchableOpacity>
-        )}
+          </TapGestureHandler>
+        </View>
+
+        <View style={styles.contentContainer}>
+          {/* Language Header */}
+          <View style={styles.languageHeaderContainer}>
+            <LinearGradient
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 1 }}
+              colors={[BASE_COLORS.blue, BASE_COLORS.orange]}
+              style={styles.languageHeaderContent}
+            >
+              <View style={styles.languageBlock}>
+                <Text style={styles.languageText}>{item.fromLanguage}</Text>
+              </View>
+
+              <LinearGradient
+                colors={[BASE_COLORS.blue, BASE_COLORS.orange]}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 1 }}
+                style={styles.exchangeIconContainer}
+              >
+                <Feather name="repeat" size={16} color={BASE_COLORS.white} />
+              </LinearGradient>
+
+              <View style={styles.languageBlock}>
+                <Text style={styles.languageText}>{item.toLanguage}</Text>
+              </View>
+            </LinearGradient>
+          </View>
+
+          {/* Translation Content with Gesture */}
+          <TapGestureHandler
+            ref={contentTapRef}
+            onHandlerStateChange={onContentTap}
+          >
+            <Animated.View style={containerStyle}>
+              <View
+                style={styles.translationInnerContainer}
+                onLayout={onContentLayout}
+              >
+                <TranslationText
+                  label="Original"
+                  text={item.originalText}
+                  isOriginal
+                />
+                <TranslationText
+                  label="Translation"
+                  text={item.translatedText}
+                  isOriginal={false}
+                />
+              </View>
+
+              {/* Gradient fade when collapsed */}
+              {!expanded && needsExpandButton && (
+                <LinearGradient
+                  colors={[
+                    "rgba(255,255,255,0)",
+                    "rgba(255,255,255,0.9)",
+                    "rgba(255,255,255,1)",
+                  ]}
+                  style={styles.expandGradient}
+                  pointerEvents="none"
+                />
+              )}
+            </Animated.View>
+          </TapGestureHandler>
+
+          {/* Expand/Collapse Button */}
+          {needsExpandButton && (
+            <TapGestureHandler
+              ref={expandTapRef}
+              onHandlerStateChange={onExpandTap}
+            >
+              <Animated.View style={styles.expandCollapseButton}>
+                <Text style={styles.expandCollapseText}>
+                  {expanded ? "Show Less" : "Show More"}
+                </Text>
+                <Ionicons
+                  name={expanded ? "chevron-up" : "chevron-down"}
+                  size={18}
+                  color={BASE_COLORS.blue}
+                />
+              </Animated.View>
+            </TapGestureHandler>
+          )}
+        </View>
       </View>
-    </View>
-  );
-};
+    );
+  },
+  (prevProps, nextProps) => {
+    // Optimized comparison for React.memo
+    return (
+      prevProps.item.id === nextProps.item.id &&
+      prevProps.item.date === nextProps.item.date &&
+      prevProps.item.originalText === nextProps.item.originalText &&
+      prevProps.item.translatedText === nextProps.item.translatedText
+    );
+  }
+);
 
 const styles = StyleSheet.create({
   historyContainer: {
@@ -276,7 +368,6 @@ const styles = StyleSheet.create({
   collapsedContainer: {
     maxHeight: 120,
   },
-
   expandGradient: {
     height: 50,
     position: "absolute",
