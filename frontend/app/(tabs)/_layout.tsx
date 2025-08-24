@@ -1,9 +1,11 @@
-import { View, Animated } from "react-native";
-import React, { useRef, useEffect } from "react";
-import { Tabs } from "expo-router";
+import { View, Animated, InteractionManager } from "react-native";
+import React, { useRef, useEffect, useCallback, useState } from "react";
+import { Tabs, useSegments } from "expo-router";
 import { Mic, Camera, Settings, Globe, Volume2 } from "react-native-feather";
 import useThemeStore from "@/store/useThemeStore";
 import { Ionicons } from "@expo/vector-icons";
+import { tabPreloader } from "@/utils/tabPreloader";
+import { useFocusEffect } from "@react-navigation/native";
 
 interface TabIconProps {
   Icon: React.ComponentType<any>;
@@ -11,6 +13,7 @@ interface TabIconProps {
   name: string;
   focused: boolean;
 }
+
 interface IconProps {
   color: string;
   width?: number;
@@ -19,182 +22,312 @@ interface IconProps {
   stroke?: string;
 }
 
-const TabIcon: React.FC<TabIconProps> = ({ Icon, color, name, focused }) => {
-  // Animation values
-  const scale = useRef(new Animated.Value(1)).current;
-  const opacity = useRef(new Animated.Value(focused ? 1 : 0.6)).current;
+const TabIcon: React.FC<TabIconProps> = React.memo(
+  ({ Icon, color, name, focused }) => {
+    // Optimized animation with native driver and reduced re-renders
+    const opacity = useRef(new Animated.Value(focused ? 1 : 0.6)).current;
+    const scale = useRef(new Animated.Value(focused ? 1.05 : 1)).current;
 
-  // Update opacity when focused state changes
-  useEffect(() => {
-    Animated.timing(opacity, {
-      toValue: focused ? 1 : 0.6,
-      duration: 200,
-      useNativeDriver: true,
-    }).start();
-  }, [focused]);
+    useEffect(() => {
+      // Batch animations together for better performance
+      Animated.parallel([
+        Animated.timing(opacity, {
+          toValue: focused ? 1 : 0.6,
+          duration: 150, // Reduced for snappier feel
+          useNativeDriver: true,
+        }),
+        Animated.timing(scale, {
+          toValue: focused ? 1.05 : 1,
+          duration: 150,
+          useNativeDriver: true,
+        }),
+      ]).start();
+    }, [focused, opacity, scale]);
 
-  return (
-    <View
-      style={{
-        alignItems: "center",
-        justifyContent: "center",
-        width: 70,
-      }}
-    >
-      <Animated.View
+    return (
+      <View
         style={{
           alignItems: "center",
-          transform: [{ scale }],
-          opacity,
+          justifyContent: "center",
+          width: 70,
         }}
       >
-        <Icon
-          stroke={color}
-          width={focused ? 19 : 18}
-          height={focused ? 19 : 18}
-          strokeWidth={focused ? 1 : 1.5}
-          color={color}
-        />
-
-        <Animated.Text
+        <Animated.View
           style={{
-            fontSize: 11,
-            textAlign: "center",
-            color: color,
-            fontFamily: focused ? "Poppins-Medium" : "Poppins-Regular",
-            marginTop: 5,
+            alignItems: "center",
+            transform: [{ scale }],
             opacity,
           }}
-          numberOfLines={1}
         >
-          {name}
-        </Animated.Text>
-      </Animated.View>
-    </View>
-  );
-};
+          <Icon
+            stroke={color}
+            width={focused ? 18 : 17}
+            height={focused ? 18 : 17}
+            strokeWidth={focused ? 1.5 : 1}
+            color={color}
+          />
 
-const GameIcon: React.FC<IconProps> = ({ color, width }) => (
-  <Ionicons name="game-controller-outline" size={width} color={color} />
+          <Animated.Text
+            style={{
+              fontSize: 11,
+              textAlign: "center",
+              color: color,
+              fontFamily: focused ? "Poppins-Medium" : "Poppins-Regular",
+              marginTop: 5,
+              opacity,
+            }}
+            numberOfLines={1}
+          >
+            {name}
+          </Animated.Text>
+        </Animated.View>
+      </View>
+    );
+  }
 );
 
+const GameIcon: React.FC<IconProps> = React.memo(({ color, width }) => (
+  <Ionicons name="game-controller-outline" size={width} color={color} />
+));
+
 export default function TabsLayout() {
-  // Get the active theme from the store
   const { activeTheme } = useThemeStore();
-  const activeColor = activeTheme.tabActiveColor;
-  const inactiveColor = activeTheme.tabInactiveColor;
+  const segments = useSegments();
+  const [currentTab, setCurrentTab] = useState<string>("Speech");
+  const [isTransitioning, setIsTransitioning] = useState(false);
+
+  // Stable color references to prevent re-renders
+  const tabColors = useRef({
+    active: activeTheme.tabActiveColor,
+    inactive: activeTheme.tabInactiveColor,
+    background: activeTheme.tabBarColor,
+  });
+
+  // Update colors when theme changes
+  useEffect(() => {
+    tabColors.current = {
+      active: activeTheme.tabActiveColor,
+      inactive: activeTheme.tabInactiveColor,
+      background: activeTheme.tabBarColor,
+    };
+  }, [activeTheme]);
+
+  // Helper function to get the main tab from segments
+  const getMainTabFromSegments = useCallback((segments: string[]): string => {
+    // Main tabs that correspond to actual tab bar items
+    const mainTabs = [
+      "Speech",
+      "Translate",
+      "Scan",
+      "Games",
+      "Pronounce",
+      "Settings",
+    ];
+
+    // Find the first segment that matches a main tab
+    for (const segment of segments) {
+      if (mainTabs.includes(segment)) {
+        return segment;
+      }
+    }
+
+    // If we're in a sub-screen, try to determine the parent tab
+    // For example: (games)/LevelSelection should map to Games tab
+    if (segments.includes("(games)")) {
+      return "Games";
+    }
+    if (segments.includes("(settings)")) {
+      return "Settings";
+    }
+
+    // Default fallback
+    return segments[segments.length - 1] || "Speech";
+  }, []);
+
+  // Track current tab from segments with better logic
+  useEffect(() => {
+    const mainTab = getMainTabFromSegments(segments);
+
+    if (mainTab && mainTab !== currentTab) {
+      const prevTab = currentTab;
+      setCurrentTab(mainTab);
+
+      // Only handle tab transitions for actual main tab changes
+      const mainTabs = [
+        "Speech",
+        "Translate",
+        "Scan",
+        "Games",
+        "Pronounce",
+        "Settings",
+      ];
+      if (mainTabs.includes(mainTab) && mainTabs.includes(prevTab)) {
+        handleTabTransition(prevTab, mainTab);
+      }
+    }
+  }, [segments, currentTab, getMainTabFromSegments]);
+
+  // Optimized tab transition handler
+  const handleTabTransition = useCallback(
+    async (fromTab: string, toTab: string) => {
+      if (isTransitioning) return;
+
+      console.log(`[TabsLayout] Tab transition: ${fromTab} → ${toTab}`);
+      setIsTransitioning(true);
+
+      try {
+        // Run after interactions for smooth animation
+        InteractionManager.runAfterInteractions(async () => {
+          try {
+            // Parallel operations for better performance
+            await Promise.allSettled([
+              // Cleanup previous tab (non-blocking)
+              Promise.resolve().then(() => {
+                if (fromTab && fromTab !== toTab) {
+                  tabPreloader.cleanupTab(fromTab);
+                }
+              }),
+
+              // Preload current tab (priority)
+              tabPreloader.preloadTab(toTab),
+
+              // Preload next likely tab (non-blocking)
+              Promise.resolve().then(() => {
+                setTimeout(() => {
+                  tabPreloader.preloadNextTab(toTab);
+                }, 500); // Delay to not interfere with current tab loading
+              }),
+            ]);
+
+            console.log(`[TabsLayout] ✅ Tab transition completed: ${toTab}`);
+          } catch (error) {
+            console.warn(`[TabsLayout] Tab transition error:`, error);
+          } finally {
+            setIsTransitioning(false);
+          }
+        });
+      } catch (error) {
+        console.error(`[TabsLayout] Tab transition failed:`, error);
+        setIsTransitioning(false);
+      }
+    },
+    [isTransitioning]
+  );
+
+  // Focus effect for additional optimizations
+  useFocusEffect(
+    useCallback(() => {
+      // Ensure current tab is preloaded when focus returns
+      if (currentTab) {
+        tabPreloader.preloadTab(currentTab);
+      }
+
+      return () => {
+        // Minimal cleanup on unfocus
+      };
+    }, [currentTab])
+  );
+
+  // Memoized tab screen configurations
+  const tabScreens = React.useMemo(
+    () => [
+      {
+        name: "Speech",
+        title: "Speech",
+        icon: Mic,
+        iconName: "Speech",
+      },
+      {
+        name: "Translate",
+        title: "Translate",
+        icon: Globe,
+        iconName: "Translate",
+      },
+      {
+        name: "Scan",
+        title: "Scan",
+        icon: Camera,
+        iconName: "Scan",
+      },
+      {
+        name: "Games",
+        title: "Games",
+        icon: GameIcon,
+        iconName: "Games",
+      },
+      {
+        name: "Pronounce",
+        title: "Pronounce",
+        icon: Volume2,
+        iconName: "Pronounce",
+      },
+      {
+        name: "Settings",
+        title: "Settings",
+        icon: Settings,
+        iconName: "Settings",
+      },
+    ],
+    []
+  );
+
+  // Memoized tab bar background
+  const TabBarBackground = React.useMemo(
+    () => () =>
+      (
+        <View
+          style={{
+            position: "absolute",
+            left: 0,
+            right: 0,
+            top: 0,
+            bottom: 0,
+            backgroundColor: tabColors.current.background,
+          }}
+        />
+      ),
+    []
+  );
 
   return (
     <Tabs
       screenOptions={{
         tabBarShowLabel: false,
-        tabBarActiveTintColor: activeColor,
-        tabBarInactiveTintColor: inactiveColor,
+        tabBarActiveTintColor: tabColors.current.active,
+        tabBarInactiveTintColor: tabColors.current.inactive,
         tabBarStyle: {
-          backgroundColor: activeTheme.tabBarColor,
+          backgroundColor: tabColors.current.background,
           height: 60,
           paddingTop: 10,
           borderTopWidth: 0,
         },
-        tabBarBackground: () => (
-          <View
-            style={{
-              position: "absolute",
-              left: 0,
-              right: 0,
-              top: 0,
-              bottom: 0,
-              backgroundColor: activeTheme.tabBarColor,
-            }}
-          />
-        ),
+        tabBarBackground: TabBarBackground,
+        // Add lazy loading for better performance
+        lazy: true,
+        // Optimize header settings
+        headerShown: false,
       }}
     >
-      <Tabs.Screen
-        name="Speech"
-        options={{
-          title: "Speech",
-          headerShown: false,
-          tabBarIcon: ({ color, focused }) => (
-            <TabIcon Icon={Mic} color={color} name="Speech" focused={focused} />
-          ),
-        }}
-      />
-      <Tabs.Screen
-        name="Translate"
-        options={{
-          title: "Translate",
-          headerShown: false,
-          tabBarIcon: ({ color, focused }) => (
-            <TabIcon
-              Icon={Globe}
-              color={color}
-              name="Translate"
-              focused={focused}
-            />
-          ),
-        }}
-      />
-      <Tabs.Screen
-        name="Scan"
-        options={{
-          title: "Scan",
-          headerShown: false,
-          tabBarIcon: ({ color, focused }) => (
-            <TabIcon
-              Icon={Camera}
-              color={color}
-              name="Scan"
-              focused={focused}
-            />
-          ),
-        }}
-      />
-      <Tabs.Screen
-        name="Games"
-        options={{
-          title: "Games",
-          headerShown: false,
-          tabBarIcon: ({ color, focused }) => (
-            <TabIcon
-              Icon={GameIcon}
-              color={color}
-              name="Games"
-              focused={focused}
-            />
-          ),
-        }}
-      />
-      <Tabs.Screen
-        name="Pronounce"
-        options={{
-          title: "Pronounce",
-          headerShown: false,
-          tabBarIcon: ({ color, focused }) => (
-            <TabIcon
-              Icon={Volume2}
-              color={color}
-              name="Pronounce"
-              focused={focused}
-            />
-          ),
-        }}
-      />
-      <Tabs.Screen
-        name="Settings"
-        options={{
-          title: "Settings",
-          headerShown: false,
-          tabBarIcon: ({ color, focused }) => (
-            <TabIcon
-              Icon={Settings}
-              color={color}
-              name="Settings"
-              focused={focused}
-            />
-          ),
-        }}
-      />
+      {tabScreens.map(({ name, title, icon: Icon, iconName }) => (
+        <Tabs.Screen
+          key={name}
+          name={name}
+          options={{
+            title,
+            headerShown: false,
+            tabBarIcon: ({ color, focused }) => (
+              <TabIcon
+                Icon={Icon}
+                color={color}
+                name={iconName}
+                focused={focused}
+              />
+            ),
+            // Optimize each tab screen
+            lazy: name !== "Speech", // Don't lazy load default tab
+          }}
+        />
+      ))}
     </Tabs>
   );
 }

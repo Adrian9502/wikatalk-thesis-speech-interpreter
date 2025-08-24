@@ -1384,9 +1384,9 @@ export const useAuthStore = create<AuthState>()(
     {
       name: "auth-storage",
       storage: createJSONStorage(() => AsyncStorage),
-      // FIXED: Add comment to ignore spell check for "partialize"
       partialize: (state) => ({
         // cspell:disable-line
+
         userToken: state.userToken,
         userData: state.userData,
       }),

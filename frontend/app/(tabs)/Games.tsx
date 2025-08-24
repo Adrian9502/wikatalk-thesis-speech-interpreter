@@ -24,7 +24,7 @@ import { useComponentLoadTime } from "@/utils/performanceMonitor";
 import AppLoading from "@/components/AppLoading";
 import useProgressStore from "@/store/games/useProgressStore";
 import useGameStore from "@/store/games/useGameStore";
-import { isAllDataReady } from "@/store/useSplashStore";
+import { isAllDataReady, useSplashStore } from "@/store/useSplashStore";
 
 // GLOBAL state to persist across component remounts
 let GAMES_INITIALIZED = false;
@@ -169,42 +169,50 @@ const Games = () => {
     INITIALIZATION_PROMISE = initializeOnce();
   }, []);
 
+  // Enhanced focus effect to ensure fresh data display
   useFocusEffect(
     React.useCallback(() => {
-      if (!hasInitialized || focusRefreshInProgress.current) {
-        console.log(
-          "[Games] Skipping focus refresh - not ready or in progress"
-        );
-        return;
+      console.log("[Games] Tab focused, stopping all speech");
+      globalSpeechManager.stopAllSpeech();
+
+      // ENHANCED: Ensure GameCards show most updated progress
+      if (hasInitialized && !focusRefreshInProgress.current) {
+        const progressStore = useProgressStore.getState();
+        const lastFetched = progressStore.lastFetched || 0;
+        const now = Date.now();
+        const timeSinceLastFetch = now - lastFetched;
+
+        // If more than 1 minute since last fetch, refresh progress
+        const shouldRefresh = timeSinceLastFetch > 1 * 60 * 1000; // Reduced from 2 minutes
+
+        if (shouldRefresh) {
+          console.log(
+            `[Games] Screen focused, refreshing progress data (${timeSinceLastFetch}ms since last fetch)`
+          );
+          focusRefreshInProgress.current = true;
+
+          fetchProgress(true).finally(() => {
+            setTimeout(() => {
+              focusRefreshInProgress.current = false;
+
+              // Trigger GameCard updates by refreshing precomputed data
+              const splashStore = useSplashStore.getState();
+              Promise.allSettled([
+                splashStore.precomputeSpecificGameMode("multipleChoice"),
+                splashStore.precomputeSpecificGameMode("identification"),
+                splashStore.precomputeSpecificGameMode("fillBlanks"),
+              ]).then(() => {
+                console.log("[Games] GameCard data refreshed");
+              });
+            }, 1000);
+          });
+        }
       }
 
-      // Check if we need to refresh progress data
-      const progressStore = useProgressStore.getState();
-      const lastFetched = progressStore.lastFetched || 0;
-      const now = Date.now();
-      const timeSinceLastFetch = now - lastFetched;
-
-      // Only refresh if more than 2 minutes since last fetch
-      const shouldRefresh = timeSinceLastFetch > 2 * 60 * 1000;
-
-      if (shouldRefresh) {
-        console.log(
-          `[Games] Screen focused, refreshing progress data (${timeSinceLastFetch}ms since last fetch)`
-        );
-        focusRefreshInProgress.current = true;
-
-        fetchProgress(true).finally(() => {
-          setTimeout(() => {
-            focusRefreshInProgress.current = false;
-          }, 1000);
-        });
-      } else {
-        console.log(
-          `[Games] Screen focused, data is fresh (${timeSinceLastFetch}ms old)`
-        );
-      }
-
-      return () => {}; // Cleanup function
+      return () => {
+        console.log("[Games] Tab losing focus");
+        globalSpeechManager.stopAllSpeech();
+      };
     }, [fetchProgress, hasInitialized])
   );
 

@@ -263,7 +263,7 @@ const Pronounce = () => {
           style={[{ flex: 1 }]}
           keyboardShouldPersistTaps="handled"
           keyboardDismissMode="on-drag"
-          removeClippedSubviews={false}
+          removeClippedSubviews={false} // cspell:disable-line
           maxToRenderPerBatch={8}
           windowSize={8}
           initialNumToRender={8}

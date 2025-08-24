@@ -71,8 +71,7 @@ interface SplashState {
     };
   };
 
-  // ADD: Missing ongoingPrecomputations property
-  ongoingPrecomputations?: Map<string, boolean>;
+  ongoingPrecomputations?: Map<string, boolean>; // cspell:disable-line
 
   markLoadingComplete: () => void;
   markSplashShown: () => void;
@@ -234,7 +233,8 @@ const extractQuestionAndAnswerFromData = (
   return { question, answer };
 };
 
-export const useSplashStore = create<SplashState>((set, get) => ({
+// Add this method to your existing useSplashStore
+export const useSplashStore = create<SplashState>()((set, get) => ({
   isLoadingComplete: false,
   splashShown: false,
   gameDataPreloaded: false,
@@ -785,70 +785,50 @@ export const useSplashStore = create<SplashState>((set, get) => ({
     try {
       console.log("[SplashStore] Starting comprehensive game data preloading");
 
-      const token = await AsyncStorage.getItem("userToken");
-      if (!token) {
-        console.log("[SplashStore] No auth token found, skipping preloading");
-        return false;
-      }
-
-      // Phase 1: Load core data first
-      console.log("[SplashStore] Phase 1: Loading core game data");
-      const corePromises = [];
+      // Phase 1: Critical data (blocking)
+      console.log("[SplashStore] Phase 1: Loading critical data");
+      const criticalPromises = [];
       const gameStore = useGameStore.getState();
       const progressStore = useProgressStore.getState();
-      const coinsStore = useCoinsStore.getState();
 
-      corePromises.push(gameStore.ensureQuestionsLoaded());
-      corePromises.push(progressStore.fetchProgress(true));
-      corePromises.push(coinsStore.prefetchRewardsData());
+      criticalPromises.push(gameStore.ensureQuestionsLoaded());
+      criticalPromises.push(progressStore.fetchProgress(true));
 
-      await Promise.all(corePromises);
-      console.log("[SplashStore] Phase 1 complete: Core data loaded");
+      await Promise.all(criticalPromises);
 
-      // Phase 2: Precompute individual progress cache
-      console.log(
-        "[SplashStore] Phase 2: Precomputing individual progress cache"
-      );
-      const individualProgressSuccess =
-        await get().precomputeIndividualProgress();
+      // Phase 2: Enhanced data (blocking)
+      console.log("[SplashStore] Phase 2: Computing enhanced data");
+      const enhancedPromises = [];
 
-      // Phase 3: Precompute ALL progress data
-      console.log("[SplashStore] Phase 3: Precomputing all progress data");
-      const progressPrecomputeSuccess = await get().precomputeAllProgressData();
+      enhancedPromises.push(get().precomputeIndividualProgress());
+      enhancedPromises.push(get().precomputeAllLevels());
+      enhancedPromises.push(get().precomputeAllLevelDetails());
 
-      // Phase 4: Precompute ALL levels with filters
-      console.log(
-        "[SplashStore] Phase 4: Precomputing all levels with filters"
-      );
-      const levelsPrecomputeSuccess = await get().precomputeAllLevels();
+      await Promise.allSettled(enhancedPromises);
 
-      // Phase 5: Precompute level details for completed levels
-      console.log("[SplashStore] Phase 5: Precomputing level details");
-      const levelDetailsPrecomputeSuccess =
-        await get().precomputeAllLevelDetails();
-
-      // Phase 6: Preload all rankings data
-      console.log("[SplashStore] Phase 6: Preloading all rankings");
-      const rankingsPreloadSuccess = await get().preloadAllRankings();
-
-      // Phase 7: Load other data in background (don't wait)
-      console.log("[SplashStore] Phase 7: Loading background data");
+      // Phase 3: Background data (non-blocking)
+      console.log("[SplashStore] Phase 3: Loading background data");
       const backgroundPromises = [];
       const pronunciationStore = usePronunciationStore.getState();
+      const coinsStore = useCoinsStore.getState();
 
-      backgroundPromises.push(pronunciationStore.fetchPronunciations());
+      backgroundPromises.push(pronunciationStore.fetchPronunciations(false));
       backgroundPromises.push(coinsStore.fetchCoinsBalance());
       backgroundPromises.push(coinsStore.checkDailyReward());
+      backgroundPromises.push(get().preloadAllRankings());
 
-      // Don't wait for background data
-      Promise.allSettled(backgroundPromises).then(() => {
-        console.log("[SplashStore] Phase 7 complete: Background data loaded");
+      // Don't wait for background data - let tab preloader handle it
+      Promise.allSettled(backgroundPromises).then((results) => {
+        const successCount = results.filter(
+          (r) => r.status === "fulfilled"
+        ).length;
+        console.log(
+          `[SplashStore] Background data loaded: ${successCount}/${results.length} successful`
+        );
       });
 
       set({ gameDataPreloaded: true });
-      console.log(
-        "[SplashStore] ✅ Comprehensive game data preloading complete"
-      );
+      console.log("[SplashStore] ✅ Essential game data preloading complete");
       return true;
     } catch (error) {
       console.error("[SplashStore] Error in comprehensive preloading:", error);
@@ -856,103 +836,69 @@ export const useSplashStore = create<SplashState>((set, get) => ({
     }
   },
 
-  // Add this method to the SplashStore
+  // New method to check if tab-specific data is ready
+  isTabDataReady: (tabName: string) => {
+    const state = get();
+
+    switch (tabName) {
+      case "Games":
+        return state.gameDataPreloaded && state.levelsPrecomputed;
+      case "Pronounce":
+        const pronunciationStore = usePronunciationStore.getState();
+        return (
+          pronunciationStore.transformedData &&
+          Object.keys(pronunciationStore.transformedData).length > 0
+        );
+      case "Speech":
+        return true; // Speech tab doesn't require heavy data
+      case "Translate":
+        return true; // Translate is mostly on-demand
+      case "Scan":
+        return true; // Scan initializes on demand
+      case "Settings":
+        return true; // Settings is mostly static
+      default:
+        return false;
+    }
+  },
+
+  // Add the missing precomputeSpecificGameMode method
   precomputeSpecificGameMode: async (
     gameMode: string,
     levels?: LevelData[],
     progressData?: any[]
-  ) => {
-    const state = get();
-
-    // CRITICAL FIX: Better debouncing to prevent duplicate processing
-    const debounceKey = `precompute_${gameMode}`;
-
-    // Check if we already have recent data for this game mode
-    const existingData = state.precomputedLevels[gameMode];
-    const dataAge = existingData?.lastUpdated
-      ? Date.now() - existingData.lastUpdated
-      : Infinity;
-
-    // Skip if we have very recent data (less than 2 seconds old)
-    if (existingData && dataAge < 2000) {
-      console.log(
-        `[SplashStore] Skipping precomputation for ${gameMode} - data is very recent (${dataAge}ms old)`
-      );
-      return;
-    }
-
-    // Use a Map to track ongoing precomputations
-    if (!state.ongoingPrecomputations) {
-      state.ongoingPrecomputations = new Map();
-    }
-
-    if (state.ongoingPrecomputations.has(debounceKey)) {
-      console.log(
-        `[SplashStore] Precomputation already in progress for ${gameMode}, skipping`
-      );
-      return;
-    }
-
-    // Mark as in progress
-    state.ongoingPrecomputations.set(debounceKey, true);
-
+  ): Promise<void> => {
     try {
-      console.log(
-        `[SplashStore] Starting specific precomputation for ${gameMode}`
-      );
+      console.log(`[SplashStore] Precomputing specific game mode: ${gameMode}`);
 
-      let currentLevels = levels;
-      let currentProgressData = progressData;
+      const gameStore = useGameStore.getState();
+      const progressStore = useProgressStore.getState();
 
-      // Only fetch data if not provided
-      if (!currentLevels || !currentProgressData) {
-        const gameStore = useGameStore.getState();
-        const progressStore = useProgressStore.getState();
+      // Use provided data or fetch from stores
+      const levelsToUse =
+        levels ||
+        (await convertQuizToLevels(
+          gameMode,
+          gameStore.questions as QuizQuestions,
+          progressData || progressStore.progress || []
+        ));
 
-        if (!currentLevels) {
-          // Convert questions to levels
-          const { questions } = gameStore;
-          const globalProgress = progressStore.progress || [];
-
-          if (questions && questions[gameMode]) {
-            currentLevels = await convertQuizToLevels(
-              gameMode,
-              questions,
-              Array.isArray(globalProgress) ? globalProgress : []
-            );
-          }
-        }
-
-        if (!currentProgressData) {
-          currentProgressData = Array.isArray(progressStore.progress)
-            ? progressStore.progress
-            : [];
-        }
-      }
-
-      if (!currentLevels) {
-        console.warn(`[SplashStore] No levels available for ${gameMode}`);
-        return;
-      }
-
-      // Calculate completion percentage
-      const completedCount = currentLevels.filter(
+      const completedCount = levelsToUse.filter(
         (level) => level.status === "completed"
       ).length;
       const completionPercentage =
-        currentLevels.length > 0
-          ? Math.round((completedCount / currentLevels.length) * 100)
+        levelsToUse.length > 0
+          ? Math.round((completedCount / levelsToUse.length) * 100)
           : 0;
 
-      // Precompute filters
-      const filteredLevels = precomputeFilters(currentLevels);
+      const filteredLevels = precomputeFilters(levelsToUse);
 
-      // Update store with debounced data
+      // Update the specific game mode
       set((state) => ({
         precomputedLevels: {
           ...state.precomputedLevels,
           [gameMode]: {
-            levels: currentLevels,
+            levels: levelsToUse,
             completionPercentage,
             lastUpdated: Date.now(),
             filteredLevels,
@@ -961,18 +907,18 @@ export const useSplashStore = create<SplashState>((set, get) => ({
       }));
 
       console.log(
-        `[SplashStore] ✅ ${gameMode} precomputed: ${currentLevels.length} levels (0ms)`
+        `[SplashStore] ✅ Specific game mode ${gameMode} precomputed`
       );
     } catch (error) {
       console.error(
-        `[SplashStore] Error in specific precomputation for ${gameMode}:`,
+        `[SplashStore] Error precomputing specific game mode ${gameMode}:`,
         error
       );
-    } finally {
-      // Remove from in progress
-      state.ongoingPrecomputations.delete(debounceKey);
+      throw error;
     }
   },
+
+  // ...rest of existing methods...
 }));
 
 // Helper functions
