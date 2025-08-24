@@ -14,9 +14,7 @@ import { Calendar } from "react-native-feather";
 import {
   TapGestureHandler,
   State,
-  PanGestureHandler,
   TapGestureHandlerGestureEvent,
-  PanGestureHandlerGestureEvent,
 } from "react-native-gesture-handler";
 import { BASE_COLORS, TITLE_COLORS } from "@/constant/colors";
 import { HistoryItemType } from "@/types/types";
@@ -322,10 +320,10 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     overflow: "hidden",
     shadowColor: "#000",
-    shadowOffset: { width: 0, height: 4 },
+    shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.08,
-    shadowRadius: 8,
-    elevation: 3,
+    shadowRadius: 20,
+    elevation: 2,
   },
   languageHeaderContainer: {
     overflow: "hidden",

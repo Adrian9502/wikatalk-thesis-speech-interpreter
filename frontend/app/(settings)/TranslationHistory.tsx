@@ -5,11 +5,16 @@ import React, {
   useMemo,
   useRef,
 } from "react";
-import { View, StyleSheet, InteractionManager } from "react-native";
+import { View, StyleSheet, InteractionManager, Dimensions } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { StatusBar } from "expo-status-bar";
 import { TouchableOpacity, Text } from "react-native";
 import { FlashList } from "@shopify/flash-list";
+import {
+  PanGestureHandler,
+  State,
+  PanGestureHandlerGestureEvent,
+} from "react-native-gesture-handler";
 import useThemeStore from "@/store/useThemeStore";
 import { getGlobalStyles } from "@/styles/globalStyles";
 import ConfirmationModal from "@/components/ConfirmationModal";
@@ -25,6 +30,9 @@ import showNotification from "@/lib/showNotification";
 import { Header } from "@/components/Header";
 import { useHardwareBack } from "@/hooks/useHardwareBack";
 import { RefreshControl } from "react-native-gesture-handler";
+
+// Get screen width for swipe calculations
+const { width: SCREEN_WIDTH } = Dimensions.get("window");
 
 interface TranslationAPIItem {
   _id: string;
@@ -43,10 +51,9 @@ interface OptimizedHistoryItem {
   toLanguage: string;
   originalText: string;
   translatedText: string;
-  key: string; // Add unique key for optimization
+  key: string;
 }
 
-// Define the optimized history items structure
 interface OptimizedHistoryItems {
   Speech: OptimizedHistoryItem[];
   Translate: OptimizedHistoryItem[];
@@ -61,7 +68,10 @@ const TranslationHistory: React.FC = () => {
   const { activeTheme } = useThemeStore();
   const dynamicStyles = getGlobalStyles(activeTheme.backgroundColor);
 
-  // State - Updated to use OptimizedHistoryItems
+  // Tab management
+  const tabs: TabType[] = ["Speech", "Translate", "Scan"];
+
+  // State
   const [activeTab, setActiveTab] = useState<TabType>("Speech");
   const [deleteConfirmVisible, setDeleteConfirmVisible] = useState(false);
   const [itemToDelete, setItemToDelete] = useState<string | null>(null);
@@ -77,6 +87,10 @@ const TranslationHistory: React.FC = () => {
   // Refs for performance
   const abortControllerRef = useRef<AbortController | null>(null);
   const fetchTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const swipeGestureRef = useRef<PanGestureHandler>(null);
+
+  // Swipe state
+  const [isSwipeEnabled, setIsSwipeEnabled] = useState(true);
 
   // Memoized formatted data with caching
   const formatTranslationData = useCallback(
@@ -147,9 +161,16 @@ const TranslationHistory: React.FC = () => {
           }));
         }
       } catch (err: any) {
-        if (err.name === "AbortError") {
-          console.log(`[TranslationHistory] Request aborted for ${tabType}`);
-          return;
+        // FIXED: Better handling of abort errors
+        if (
+          err.name === "AbortError" ||
+          err.message === "canceled" ||
+          err.code === "ERR_CANCELED"
+        ) {
+          console.log(
+            `[TranslationHistory] Request aborted for ${tabType} (expected behavior)`
+          );
+          return; // Don't show error for intentionally canceled requests
         }
 
         console.error(
@@ -157,41 +178,97 @@ const TranslationHistory: React.FC = () => {
           err.response?.data || err.message
         );
 
-        if (err.response?.status === 401) {
-          setHistoryItems((prev) => ({
-            ...prev,
-            [tabType]: [],
-          }));
-        } else {
-          setError("Failed to load history. Please try again.");
+        // Only set error state if the request wasn't aborted
+        if (!abortControllerRef.current?.signal.aborted) {
+          if (err.response?.status === 401) {
+            setHistoryItems((prev) => ({
+              ...prev,
+              [tabType]: [],
+            }));
+          } else {
+            setError("Failed to load history. Please try again.");
+          }
         }
       } finally {
-        setLoading(false);
+        // Only update loading state if the request wasn't aborted
+        if (!abortControllerRef.current?.signal.aborted) {
+          setLoading(false);
+        }
       }
     },
     [formatTranslationData]
   );
 
-  // Debounced tab change
+  // IMPROVED: Better debounced tab change with request queuing
   const handleTabChange = useCallback(
-    (tab: TabType) => {
+    (tab: TabType, source: "tap" | "swipe" = "tap") => {
       if (tab === activeTab) return;
+
+      console.log(
+        `[TranslationHistory] Tab change via ${source}: ${activeTab} -> ${tab}`
+      );
 
       setActiveTab(tab);
 
-      // Clear timeout if exists
+      // Clear any existing timeout
       if (fetchTimeoutRef.current) {
         clearTimeout(fetchTimeoutRef.current);
       }
 
-      // Debounce the fetch
+      // IMPROVED: Longer debounce for swipe to handle rapid swipes
+      const debounceTime = source === "swipe" ? 300 : 150;
+
+      // Debounce the fetch with longer delay for swipes
       fetchTimeoutRef.current = setTimeout(() => {
         InteractionManager.runAfterInteractions(() => {
           fetchHistory(tab);
         });
-      }, 150);
+      }, debounceTime);
     },
     [activeTab, fetchHistory]
+  );
+
+  const onSwipeGesture = useCallback(
+    (event: PanGestureHandlerGestureEvent) => {
+      if (!isSwipeEnabled) return;
+
+      const { translationX, velocityX, state } = event.nativeEvent;
+
+      if (state === State.END) {
+        const currentIndex = tabs.indexOf(activeTab);
+        // IMPROVED: Increase thresholds to prevent accidental rapid swipes
+        const swipeThreshold = SCREEN_WIDTH * 0.25; // Increased from 0.2 to 0.25
+        const velocityThreshold = 800; // Increased from 500 to 800
+
+        // Determine swipe direction and strength
+        const isStrongSwipe = Math.abs(velocityX) > velocityThreshold;
+        const isLongSwipe = Math.abs(translationX) > swipeThreshold;
+
+        if (isStrongSwipe || isLongSwipe) {
+          let newIndex = currentIndex;
+
+          // Swipe right -> Previous tab (left in array)
+          if (translationX > 0 && currentIndex > 0) {
+            newIndex = currentIndex - 1;
+          }
+          // Swipe left -> Next tab (right in array)
+          else if (translationX < 0 && currentIndex < tabs.length - 1) {
+            newIndex = currentIndex + 1;
+          }
+
+          if (newIndex !== currentIndex) {
+            const newTab = tabs[newIndex];
+            console.log(
+              `[TranslationHistory] Swipe detected: ${
+                translationX > 0 ? "right" : "left"
+              }, changing to ${newTab}`
+            );
+            handleTabChange(newTab, "swipe");
+          }
+        }
+      }
+    },
+    [activeTab, tabs, isSwipeEnabled, handleTabChange]
   );
 
   // Initial fetch
@@ -294,6 +371,11 @@ const TranslationHistory: React.FC = () => {
     useExistingHeaderLogic: true,
   });
 
+  // Disable swipe when modal is open
+  useEffect(() => {
+    setIsSwipeEnabled(!deleteConfirmVisible);
+  }, [deleteConfirmVisible]);
+
   // Memoized render item
   const renderItem = useCallback(
     ({ item }: { item: OptimizedHistoryItem }) => (
@@ -328,44 +410,67 @@ const TranslationHistory: React.FC = () => {
 
       <Header title="Translation History" />
 
-      <TabSelector activeTab={activeTab} onTabChange={handleTabChange} />
+      {/* TabSelector - now responds to swipe changes */}
+      <TabSelector
+        activeTab={activeTab}
+        onTabChange={(tab) => handleTabChange(tab, "tap")}
+      />
 
-      {loading && currentData.length === 0 ? (
-        <View style={styles.loadingContainer}>
-          <DotsLoader />
-        </View>
-      ) : error ? (
-        <View style={styles.errorContainer}>
-          <Text
-            style={[styles.errorText, { color: activeTheme.tabActiveColor }]}
-          >
-            {error}123123123
-          </Text>
-          <TouchableOpacity
-            style={[styles.retryButton, { backgroundColor: BASE_COLORS.blue }]}
-            onPress={() => fetchHistory(activeTab)}
-          >
-            <Text style={styles.retryButtonText}>Retry</Text>
-          </TouchableOpacity>
-        </View>
-      ) : (
-        <FlashList
-          data={currentData}
-          renderItem={renderItem}
-          keyExtractor={keyExtractor}
-          ListEmptyComponent={ListEmptyComponent}
-          estimatedItemSize={180}
-          refreshControl={
-            <RefreshControl
-              refreshing={refreshing}
-              onRefresh={handleRefresh}
-              tintColor={activeTheme.secondaryColor}
-              colors={[activeTheme.secondaryColor]}
+      {/* NEW: Swipe-enabled content area */}
+      <PanGestureHandler
+        ref={swipeGestureRef}
+        onGestureEvent={onSwipeGesture}
+        onHandlerStateChange={onSwipeGesture}
+        enabled={isSwipeEnabled}
+        activeOffsetX={[-20, 20]} // Only activate when swiping horizontally
+        failOffsetY={[-50, 50]} // Allow vertical scrolling in FlashList
+      >
+        <View style={styles.swipeContainer}>
+          {loading && currentData.length === 0 ? (
+            <View style={styles.loadingContainer}>
+              <DotsLoader />
+            </View>
+          ) : error ? (
+            <View style={styles.errorContainer}>
+              <Text
+                style={[
+                  styles.errorText,
+                  { color: activeTheme.tabActiveColor },
+                ]}
+              >
+                {error}
+              </Text>
+              <TouchableOpacity
+                style={[
+                  styles.retryButton,
+                  { backgroundColor: BASE_COLORS.blue },
+                ]}
+                onPress={() => fetchHistory(activeTab)}
+              >
+                <Text style={styles.retryButtonText}>Retry</Text>
+              </TouchableOpacity>
+            </View>
+          ) : (
+            <FlashList
+              data={currentData}
+              renderItem={renderItem}
+              keyExtractor={keyExtractor}
+              ListEmptyComponent={ListEmptyComponent}
+              estimatedItemSize={180}
+              contentContainerStyle={styles.flashListContent}
+              refreshControl={
+                <RefreshControl
+                  refreshing={refreshing}
+                  onRefresh={handleRefresh}
+                  tintColor={activeTheme.secondaryColor}
+                  colors={[activeTheme.secondaryColor]}
+                />
+              }
+              showsVerticalScrollIndicator={false}
             />
-          }
-          showsVerticalScrollIndicator={false}
-        />
-      )}
+          )}
+        </View>
+      </PanGestureHandler>
 
       <ConfirmationModal
         visible={deleteConfirmVisible}
@@ -382,6 +487,14 @@ const TranslationHistory: React.FC = () => {
 const styles = StyleSheet.create({
   safeAreaView: {
     flex: 1,
+  },
+  swipeContainer: {
+    flex: 1,
+  },
+  flashListContent: {
+    paddingBottom: 24,
+    paddingTop: 8,
+    backgroundColor: "transparent",
   },
   loadingContainer: {
     flex: 1,
