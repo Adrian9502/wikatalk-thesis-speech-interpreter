@@ -2,7 +2,6 @@ import React, { useState, useCallback, useEffect } from "react";
 import { View, ScrollView, RefreshControl, StyleSheet } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { StatusBar } from "expo-status-bar";
-import { Platform } from "react-native";
 import { TouchableOpacity, Text } from "react-native";
 import useThemeStore from "@/store/useThemeStore";
 import { getGlobalStyles } from "@/styles/globalStyles";
@@ -28,7 +27,7 @@ interface TranslationAPIItem {
   translatedText: string;
 }
 
-export const RecentActivity: React.FC = () => {
+export const TranslationHistory: React.FC = () => {
   // Theme store
   const { activeTheme } = useThemeStore();
   const dynamicStyles = getGlobalStyles(activeTheme.backgroundColor);
@@ -60,26 +59,25 @@ export const RecentActivity: React.FC = () => {
 
       try {
         const response = await api.get(`/api/translations?type=${tabType}`);
-        const formattedData = response.data.history.map(
-          (item: TranslationAPIItem) => {
-            // DEBUG: Log each item before formatting
-            console.log(`[RecentActivity] Processing item:`, {
-              id: item._id,
-              originalText: item.originalText,
-              translatedText: item.translatedText,
-              type: typeof item.originalText,
-            });
+        const formattedData = response.data.history
+          .map((item: TranslationAPIItem) => {
+            const itemId = item._id || (item as any).id;
+
+            if (!itemId) {
+              console.error(`[RecentActivity] Item missing ID:`, item);
+              return null;
+            }
 
             return {
-              id: item._id,
+              id: itemId.toString(),
               date: format(new Date(item.date), "MMM. d, yyyy - h:mma"),
               fromLanguage: item.fromLanguage,
               toLanguage: item.toLanguage,
               originalText: item.originalText,
               translatedText: item.translatedText,
             };
-          }
-        );
+          })
+          .filter(Boolean); // Remove null items
 
         // Update just this tab's data
         setHistoryItems((prev) => ({
@@ -138,28 +136,57 @@ export const RecentActivity: React.FC = () => {
 
   // Handle delete confirmation with API call
   const handleDeleteConfirm = async (): Promise<void> => {
-    if (itemToDelete) {
-      try {
-        const api = createAuthenticatedApi();
-        await api.delete(`/api/translations/${itemToDelete}`);
+    if (!itemToDelete) {
+      console.error("[RecentActivity] No item selected for deletion");
+      console.error(
+        "[RecentActivity] Current state - itemToDelete:",
+        itemToDelete
+      );
+      console.error(
+        "[RecentActivity] Current state - deleteConfirmVisible:",
+        deleteConfirmVisible
+      );
+      setDeleteConfirmVisible(false);
+      return;
+    }
 
-        const updatedHistoryItems = { ...historyItems };
-        updatedHistoryItems[activeTab] = historyItems[activeTab].filter(
-          (item) => item.id !== itemToDelete
-        );
-        setHistoryItems(updatedHistoryItems);
-        showNotification({
-          type: "success",
-          title: "Translation Deleted",
-          description: "Translation deleted successfully.",
-        });
-      } catch (err) {
-        console.error("Error deleting history item:", err);
-        setError("Failed to delete item. Please try again.");
-      } finally {
-        setDeleteConfirmVisible(false);
-        setItemToDelete(null);
-      }
+    try {
+      const api = createAuthenticatedApi();
+      const response = await api.delete(`/api/translations/${itemToDelete}`);
+
+      // Update local state immediately
+      const updatedHistoryItems = { ...historyItems };
+      const originalCount = updatedHistoryItems[activeTab].length;
+      updatedHistoryItems[activeTab] = historyItems[activeTab].filter(
+        (item) => item.id !== itemToDelete
+      );
+      const newCount = updatedHistoryItems[activeTab].length;
+
+      setHistoryItems(updatedHistoryItems);
+
+      showNotification({
+        type: "success",
+        title: "Translation Deleted",
+        description: "Translation deleted successfully.",
+      });
+    } catch (err: any) {
+      console.error("[RecentActivity] Delete error:", err);
+      console.error("[RecentActivity] Error response:", err.response?.data);
+      console.error("[RecentActivity] Error status:", err.response?.status);
+
+      showNotification({
+        type: "error",
+        title: "Delete Failed",
+        description:
+          err.response?.data?.message ||
+          "Failed to delete item. Please try again.",
+      });
+
+      setError("Failed to delete item. Please try again.");
+    } finally {
+      console.log("[RecentActivity] Closing delete modal");
+      setDeleteConfirmVisible(false);
+      setItemToDelete(null);
     }
   };
 
@@ -187,7 +214,7 @@ export const RecentActivity: React.FC = () => {
     >
       <StatusBar style="light" />
 
-      <Header title="Recent Activity" />
+      <Header title="Translation History" />
 
       {/* Tabs */}
       <TabSelector activeTab={activeTab} onTabChange={setActiveTab} />
@@ -299,4 +326,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default RecentActivity;
+export default TranslationHistory;

@@ -89,7 +89,10 @@ const HistoryItem: React.FC<HistoryItemProps> = ({ item, onDeletePress }) => {
         </View>
         <TouchableOpacity
           style={styles.deleteIcon}
-          onPress={() => onDeletePress(item.id)}
+          onPress={() => {
+            console.log("[HistoryItem] Delete pressed for item ID:", item.id);
+            onDeletePress(item.id);
+          }}
         >
           <Ionicons name="trash-outline" size={15} color={BASE_COLORS.white} />
         </TouchableOpacity>
@@ -239,7 +242,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    paddingVertical: 6,
+    paddingVertical: 2,
     paddingHorizontal: 8,
   },
   languageBlock: {
@@ -247,7 +250,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   languageText: {
-    fontSize: 14,
+    fontSize: 13,
     fontFamily: "Poppins-Medium",
     color: TITLE_COLORS.customWhite,
   },

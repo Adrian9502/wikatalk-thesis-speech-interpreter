@@ -77,7 +77,7 @@ const ProgressContent: React.FC<ProgressContentProps> = ({ progressData }) => {
 
     if (progressData.recentAttempts && progressData.recentAttempts.length > 0) {
       sections.push({
-        title: "Recent Activity",
+        title: "Translation History",
         data: progressData.recentAttempts.slice(0, 5) as any[],
         type: "attempts",
       });

@@ -101,8 +101,8 @@ const Settings = () => {
       items: [
         {
           icon: "clock",
-          label: "Recent Activity",
-          onPress: () => router.push("/(settings)/RecentActivity"),
+          label: "Translation History",
+          onPress: () => router.push("/(settings)/TranslationHistory"),
         },
       ],
     },

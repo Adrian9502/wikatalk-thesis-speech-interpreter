@@ -1,6 +1,6 @@
-import { StyleSheet, Text, View, ScrollView } from "react-native";
+import { StyleSheet, Text, View } from "react-native";
 import React from "react";
-import { BASE_COLORS, TITLE_COLORS } from "@/constant/colors";
+import { BASE_COLORS } from "@/constant/colors";
 
 interface TranslationTextProps {
   label: string;
@@ -34,7 +34,7 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     borderWidth: 1,
     borderColor: BASE_COLORS.borderColor,
-    padding: 8,
+    padding: 12,
   },
   textLabelContainer: {
     flexDirection: "row",
