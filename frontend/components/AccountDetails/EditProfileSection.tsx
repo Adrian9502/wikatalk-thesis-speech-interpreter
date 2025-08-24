@@ -4,7 +4,7 @@ import { Edit2, ChevronRight } from "react-native-feather";
 import styles from "@/styles/accountDetailsStyles";
 import EditProfileModal from "./EditProfileModal";
 import { useAuth } from "@/context/AuthContext";
-import { showToast } from "@/lib/showToast";
+import showNotification from "@/lib/showNotification";
 import { useAuthStore } from "@/store/useAuthStore";
 type SettingsSectionProps = {
   theme: any;
@@ -58,7 +58,7 @@ const EditProfileSection = ({
       }
 
       // Show success message only on success
-      showToast({
+      showNotification({
         type: "success",
         title: "Profile Updated",
         description: "Your profile has been updated successfully",
@@ -76,11 +76,11 @@ const EditProfileSection = ({
 
       // For password errors, show the error in the modal and don't close it
       if (updatedData.currentPassword && error.message.includes("password")) {
-        // Return the error to EditProfileModal instead of showing toast
+        // Return the error to EditProfileModal instead of showing notification
         throw error;
       } else {
-        // For other errors, show toast and close modal
-        showToast({
+        // For other errors, show notification and close modal
+        showNotification({
           type: "error",
           title: "Update Failed",
           description: error.message || "Failed to update profile",

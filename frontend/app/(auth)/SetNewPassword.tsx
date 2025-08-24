@@ -19,7 +19,7 @@ import { useAuth } from "@/context/AuthContext";
 import FormMessage from "@/components/FormMessage";
 import { router } from "expo-router";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { showToast } from "@/lib/showToast";
+import showNotification from "@/lib/showNotification";
 import useThemeStore from "@/store/useThemeStore";
 import { getGlobalStyles } from "@/styles/globalStyles";
 import { BASE_COLORS, TITLE_COLORS } from "@/constant/colors";
@@ -81,7 +81,7 @@ const SetNewPassword: React.FC = () => {
 
   const handleResetPassword = async (data: ResetPasswordFormData) => {
     if (!resetToken) {
-      showToast({
+      showNotification({
         type: "error",
         title: "Session Expired",
         description: "Reset session expired. Please try again.",
@@ -95,7 +95,7 @@ const SetNewPassword: React.FC = () => {
 
       if (result.success) {
         // Navigation is now handled within the resetPassword function
-        // No need for additional Alert here as we're already showing a toast
+        // No need for additional Alert here as we're already showing a notification
       }
     } catch (error) {
       // This catch block will rarely be hit as errors are handled in resetPassword

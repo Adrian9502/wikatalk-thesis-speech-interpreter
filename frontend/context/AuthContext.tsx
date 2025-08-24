@@ -1,6 +1,6 @@
 import React, { useEffect, ReactNode } from "react";
 import { useAuthStore, initializeAuth } from "@/store/useAuthStore";
-import { showToast } from "@/lib/showToast";
+import showNotification from "@/lib/showNotification";
 
 interface AuthProviderProps {
   children: ReactNode;
@@ -69,7 +69,7 @@ export const useAuth = () => {
     formMessage,
     isLoggedIn,
     isVerified,
-    showToast,
+    showNotification,
     setFormMessage,
     clearFormMessage,
     register,

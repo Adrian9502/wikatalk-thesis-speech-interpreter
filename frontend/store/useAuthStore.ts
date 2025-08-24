@@ -4,7 +4,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import axios from "axios";
 import { AppState, AppStateStatus, InteractionManager } from "react-native";
 import { router } from "expo-router";
-import { showToast } from "@/lib/showToast";
+import showNotification from "@/lib/showNotification";
 import useThemeStore from "./useThemeStore";
 import { getToken, setToken } from "@/lib/authTokenManager";
 import { useTranslateStore } from "./useTranslateStore";
@@ -370,7 +370,7 @@ export const useAuthStore = create<AuthState>()(
             );
             set({ userData: tempUserData });
 
-            showToast({
+            showNotification({
               type: "success",
               title: "Verify your email",
               description:
@@ -577,19 +577,19 @@ export const useAuthStore = create<AuthState>()(
 
             // Show success messages
             if (response.data?.wasLinked) {
-              showToast({
+              showNotification({
                 type: "success",
                 title: "Account Linked Successfully!",
                 description: `Your existing account has been linked with Google. All your progress is preserved!`,
               });
             } else if (response.data?.isNewUser) {
-              showToast({
+              showNotification({
                 type: "success",
                 title: "Welcome to WikaTalk!",
                 description: `Account created with Google. Start your language learning journey!`,
               });
             } else {
-              showToast({
+              showNotification({
                 type: "success",
                 title: "Signed in with Google!",
                 description: `Welcome back, ${userData.fullName || name}!`,
@@ -609,7 +609,7 @@ export const useAuthStore = create<AuthState>()(
 
           console.error("Google login error:", error);
 
-          showToast({
+          showNotification({
             type: "error",
             title: "Google Sign-In Failed",
             description: message,
@@ -667,14 +667,14 @@ export const useAuthStore = create<AuthState>()(
 
           // FIXED: Only show success toast for manual logout
           if (showSuccessMessage) {
-            showToast({
+            showNotification({
               type: "success",
-              title: "Logged out",
-              description: "Logged out successfully!",
+              title: "Logged Out",
+              description: "You have been successfully logged out.",
             });
           } else {
             // Show different message for automatic logout
-            showToast({
+            showNotification({
               type: "info", // Changed from success to info
               title: "Session Expired",
               description:
@@ -701,7 +701,7 @@ export const useAuthStore = create<AuthState>()(
 
           // FIXED: Only show error toast for manual logout
           if (showSuccessMessage) {
-            showToast({
+            showNotification({
               type: "error",
               title: "Error logging out",
               description: "Error during logout",
@@ -767,7 +767,7 @@ export const useAuthStore = create<AuthState>()(
           const tempToken = userData?.tempToken;
 
           if (!tempToken) {
-            showToast({
+            showNotification({
               type: "error",
               title: "Invalid Session",
               description: "Invalid session. Please register again.",
@@ -832,7 +832,7 @@ export const useAuthStore = create<AuthState>()(
               AsyncStorage.removeItem("tempToken"),
             ]);
 
-            showToast({
+            showNotification({
               type: "success",
               title: "Verification Success!",
               description: response.message || "Email verified successfully!",
@@ -872,7 +872,7 @@ export const useAuthStore = create<AuthState>()(
             "Email information is missing. Please register again.",
             "error"
           );
-          showToast({
+          showNotification({
             type: "error",
             title: "Error",
             description: "Email information is missing. Please register again.",
@@ -915,7 +915,7 @@ export const useAuthStore = create<AuthState>()(
               "success"
             );
 
-            showToast({
+            showNotification({
               type: "success",
               title: "Verification Email Sent!",
               description: response.data.message,
@@ -928,7 +928,7 @@ export const useAuthStore = create<AuthState>()(
               "error"
             );
 
-            showToast({
+            showNotification({
               type: "error",
               title: "Verification Send Error",
               description: response.data.message,
@@ -951,14 +951,14 @@ export const useAuthStore = create<AuthState>()(
           ) {
             // Clear tempToken and redirect to registration
             router.replace("/");
-            showToast({
+            showNotification({
               type: "error",
               title: "Session Expired",
               description:
                 "Your verification session has expired. Please register again.",
             });
           } else {
-            showToast({
+            showNotification({
               type: "error",
               title: "Error",
               description:
@@ -1022,7 +1022,7 @@ export const useAuthStore = create<AuthState>()(
               AsyncStorage.setItem("resetToken", resetToken),
               AsyncStorage.setItem("isResetPasswordFlow", "true"),
             ]);
-            showToast({
+            showNotification({
               type: "success",
               title: "Verification Successful",
               description: response.message,
@@ -1060,11 +1060,9 @@ export const useAuthStore = create<AuthState>()(
 
           const { success, message } = response;
 
-          showToast({
+          showNotification({
             type: success ? "success" : "error",
-            title: success
-              ? "Password reset successfully!"
-              : "Password reset failed!",
+            title: success ? "Password Changed" : "Password reset failed!",
             description: message,
           });
 
@@ -1095,7 +1093,7 @@ export const useAuthStore = create<AuthState>()(
           );
 
           if (response.success) {
-            showToast({
+            showNotification({
               type: "success",
               title: "Password Updated",
               description: "Your password has been changed successfully",
@@ -1167,7 +1165,7 @@ export const useAuthStore = create<AuthState>()(
           console.error("❌ Error clearing AsyncStorage:", error);
 
           if (navigateAfterClear) {
-            showToast({
+            showNotification({
               type: "error",
               title: "Error",
               description: "Error returning to home screen",
@@ -1329,7 +1327,7 @@ export const useAuthStore = create<AuthState>()(
             // Clear local storage and state
             await get().clearStorage();
 
-            showToast({
+            showNotification({
               type: "success",
               title: "Account Deleted",
               description: "Your account has been permanently deleted",
@@ -1346,7 +1344,7 @@ export const useAuthStore = create<AuthState>()(
           throw new Error(response.message || "Failed to delete account");
         } catch (error: any) {
           const message = error.message || "Failed to delete account";
-          showToast({
+          showNotification({
             type: "error",
             title: "Deletion Failed",
             description: message,

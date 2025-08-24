@@ -7,7 +7,9 @@ import { SplashScreen } from "expo-router";
 import { ValidationProvider } from "@/context/ValidationContext";
 import { PaperProvider } from "react-native-paper";
 import { AuthProvider } from "@/context/AuthContext";
-import Toast from "react-native-toast-message";
+import { NotifierWrapper } from "react-native-notifier";
+import { GestureHandlerRootView } from "react-native-gesture-handler";
+
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import ThemeProvider from "@/components/ThemeProvider";
 import SplashAnimation from "@/components/SplashAnimation";
@@ -23,7 +25,6 @@ import {
   registerProgressStore,
   registerGameStore,
   registerCoinsStore,
-  registerRankingsStore,
   setCurrentUserId,
 } from "@/utils/dataManager";
 import useProgressStore from "@/store/games/useProgressStore";
@@ -222,37 +223,40 @@ const RootLayout = () => {
   }
 
   return (
-    <AuthProvider>
-      <ThemeProvider onThemeReady={handleThemeReady}>
-        <ProgressModalProvider>
-          <RankingsModalProvider>
-            <PaperProvider>
-              <ValidationProvider>
-                <SafeAreaProvider>
-                  <View style={{ flex: 1 }}>
-                    <Stack screenOptions={{ headerShown: false }}>
-                      <Stack.Screen
-                        name="index"
-                        options={{ headerShown: false }}
-                      />
-                      <Stack.Screen
-                        name="(auth)"
-                        options={{ headerShown: false }}
-                      />
-                      <Stack.Screen
-                        name="(tabs)"
-                        options={{ headerShown: false }}
-                      />
-                    </Stack>
-                    <Toast />
-                  </View>
-                </SafeAreaProvider>
-              </ValidationProvider>
-            </PaperProvider>
-          </RankingsModalProvider>
-        </ProgressModalProvider>
-      </ThemeProvider>
-    </AuthProvider>
+    <GestureHandlerRootView style={{ flex: 1 }}>
+      <SafeAreaProvider>
+        <AuthProvider>
+          <ThemeProvider onThemeReady={handleThemeReady}>
+            <ProgressModalProvider>
+              <RankingsModalProvider>
+                <PaperProvider>
+                  <ValidationProvider>
+                    <NotifierWrapper>
+                      <View style={{ flex: 1 }}>
+                        <Stack screenOptions={{ headerShown: false }}>
+                          <Stack.Screen
+                            name="index"
+                            options={{ headerShown: false }}
+                          />
+                          <Stack.Screen
+                            name="(auth)"
+                            options={{ headerShown: false }}
+                          />
+                          <Stack.Screen
+                            name="(tabs)"
+                            options={{ headerShown: false }}
+                          />
+                        </Stack>
+                      </View>
+                    </NotifierWrapper>
+                  </ValidationProvider>
+                </PaperProvider>
+              </RankingsModalProvider>
+            </ProgressModalProvider>
+          </ThemeProvider>
+        </AuthProvider>
+      </SafeAreaProvider>
+    </GestureHandlerRootView>
   );
 };
 

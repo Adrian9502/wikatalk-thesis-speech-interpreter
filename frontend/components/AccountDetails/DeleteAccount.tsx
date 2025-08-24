@@ -7,7 +7,6 @@ import { useAuth } from "@/context/AuthContext";
 import Button from "@/components/accountDetails/Button";
 import FormInput from "@/components/FormInput";
 import { AlertCircle, AlertTriangle, KeyRound } from "lucide-react-native";
-import useThemeStore from "@/store/useThemeStore";
 import { BASE_COLORS, TITLE_COLORS } from "@/constant/colors";
 import ConfirmationModal from "@/components/ConfirmationModal";
 import CloseButton from "../games/buttons/CloseButton";
@@ -21,7 +20,6 @@ const verificationCodeSchema = yup.object({
 });
 
 const DeleteAccount = () => {
-  const { activeTheme } = useThemeStore();
   const { requestAccountDeletion, verifyDeletionCode, deleteAccount } =
     useAuth();
   const [isModalVisible, setIsModalVisible] = useState(false);
@@ -286,8 +284,8 @@ const DeleteAccount = () => {
           <>
             <View style={styles.warningContainer}>
               <AlertCircle
-                width={20}
-                height={20}
+                width={16}
+                height={16}
                 color={TITLE_COLORS.customRed}
               />
               <Text
@@ -348,8 +346,8 @@ const DeleteAccount = () => {
               {error ? (
                 <View style={styles.errorContainer}>
                   <AlertCircle
-                    width={20}
-                    height={20}
+                    width={16}
+                    height={16}
                     color={TITLE_COLORS.customRed}
                   />
                   <Text style={styles.errorText}>{error}</Text>
@@ -464,7 +462,9 @@ const styles = StyleSheet.create({
   },
   errorText: {
     color: TITLE_COLORS.customRed,
-    fontSize: 11,
+    fontSize: 12,
+    marginLeft: 4,
+    fontFamily: "Poppins-Medium",
   },
   countdown: {
     textAlign: "center",

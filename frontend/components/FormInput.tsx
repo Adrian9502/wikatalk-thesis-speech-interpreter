@@ -55,7 +55,7 @@ const FormInput = <T extends FieldValues>({
             >
               {IconComponent && (
                 <IconComponent
-                  size={17}
+                  size={16}
                   color="#4A6FFF"
                   style={styles.inputIcon}
                 />
@@ -97,9 +97,9 @@ const FormInput = <T extends FieldValues>({
                   onPress={() => setIsPasswordVisible(!isPasswordVisible)}
                 >
                   {isPasswordVisible ? (
-                    <Eye size={17} color="#888" />
+                    <Eye size={16} color="#888" />
                   ) : (
-                    <EyeOff size={17} color="#888" />
+                    <EyeOff size={16} color="#888" />
                   )}
                 </TouchableOpacity>
               )}
@@ -140,7 +140,7 @@ const styles = StyleSheet.create({
     fontFamily: "Poppins-Regular",
     flex: 1,
     paddingVertical: 10,
-    fontSize: 14,
+    fontSize: 12,
     color: "#333",
   },
   actionIcon: {

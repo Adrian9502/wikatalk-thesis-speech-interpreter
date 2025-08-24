@@ -14,7 +14,7 @@ import { format } from "date-fns";
 import DotsLoader from "@/components/DotLoader";
 import { BASE_COLORS } from "@/constant/colors";
 import createAuthenticatedApi from "@/lib/api";
-import { showToast } from "@/lib/showToast";
+import showNotification from "@/lib/showNotification";
 import { Header } from "@/components/Header";
 import { useHardwareBack } from "@/hooks/useHardwareBack";
 
@@ -148,7 +148,7 @@ export const RecentActivity: React.FC = () => {
           (item) => item.id !== itemToDelete
         );
         setHistoryItems(updatedHistoryItems);
-        showToast({
+        showNotification({
           type: "success",
           title: "Translation Deleted",
           description: "Translation deleted successfully.",
