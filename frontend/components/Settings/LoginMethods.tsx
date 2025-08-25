@@ -4,13 +4,11 @@ import Ionicons from "react-native-vector-icons/Ionicons";
 import { BASE_COLORS } from "@/constant/colors";
 import { UserData } from "@/store/useAuthStore";
 
-interface AccountLinkingInfoProps {
+interface LoginMethodsProps {
   userData: UserData;
 }
 
-const AccountLinkingInfo: React.FC<AccountLinkingInfoProps> = ({
-  userData,
-}) => {
+const LoginMethods: React.FC<LoginMethodsProps> = ({ userData }) => {
   const getAvailableMethods = (authProvider: string) => {
     switch (authProvider) {
       case "manual":
@@ -166,4 +164,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default AccountLinkingInfo;
+export default LoginMethods;

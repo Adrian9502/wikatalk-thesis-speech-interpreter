@@ -18,7 +18,7 @@ import { router } from "expo-router";
 import ContactSupportModal from "@/components/helpAndFAQ/ContactSupportModal";
 import { clearAllAccountData } from "@/utils/accountUtils";
 import ProfileCard from "@/components/settings/ProfileCard";
-import AccountLinkingInfo from "@/components/settings/AccountLinkingInfo";
+import LoginMethods from "@/components/settings/LoginMethods";
 
 // Types
 type SettingItemWithToggle = {
@@ -48,7 +48,7 @@ type ListItem = {
   type:
     | "header"
     | "profile"
-    | "account-linking"
+    | "login-methods"
     | "appearance"
     | "section"
     | "item"
@@ -147,9 +147,9 @@ const Settings = () => {
     // Account linking info section
     if (userData) {
       items.push({
-        type: "account-linking",
+        type: "login-methods",
         data: userData,
-        key: "account-linking",
+        key: "login-methods",
       });
     }
 
@@ -210,8 +210,8 @@ const Settings = () => {
           />
         );
 
-      case "account-linking":
-        return <AccountLinkingInfo userData={item.data} />;
+      case "login-methods":
+        return <LoginMethods userData={item.data} />;
 
       case "appearance":
         return <AppearanceSection />;

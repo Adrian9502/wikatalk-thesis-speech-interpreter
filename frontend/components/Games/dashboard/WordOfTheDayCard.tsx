@@ -5,6 +5,7 @@ import {
   TouchableOpacity,
   StyleSheet,
   Animated,
+  ActivityIndicator,
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { Calendar, Volume2, Star, ArrowRight } from "react-native-feather";
@@ -47,11 +48,6 @@ const WordOfTheDayCard = React.memo(
 
     const spinAnim = useState(() => new Animated.Value(0))[0];
 
-    // Add debug logging
-    useEffect(() => {
-      console.log("[WordOfDayCard] Props changed:", { isPlaying, isLoading });
-    }, [isPlaying, isLoading]);
-
     useEffect(() => {
       if (!shouldAnimate) return;
 
@@ -71,18 +67,10 @@ const WordOfTheDayCard = React.memo(
       });
     }, [shouldAnimate, fadeAnim, slideAnim]);
 
-    // Fixed spin animation effect - spin while playing (since isLoading is not being set)
     useEffect(() => {
       let spinAnimation: Animated.CompositeAnimation | null = null;
 
-      console.log("[WordOfDayCard] Spin effect triggered:", {
-        isLoading,
-        isPlaying,
-      });
-
-      // OPTION 1: Spin while playing (since isLoading is not working)
       if (isPlaying) {
-        console.log("[WordOfDayCard] Starting spin animation");
         spinAnimation = Animated.loop(
           Animated.timing(spinAnim, {
             toValue: 1,
@@ -104,9 +92,8 @@ const WordOfTheDayCard = React.memo(
           spinAnimation.stop();
         }
       };
-    }, [isPlaying, spinAnim]); // Remove isLoading dependency since it's not working
+    }, [isPlaying, spinAnim]);
 
-    // Spin while playing since isLoading is not being set by parent
     const shouldSpin = isPlaying;
 
     return (
@@ -180,12 +167,18 @@ const WordOfTheDayCard = React.memo(
 
             <View style={styles.wordContent}>
               <Text style={styles.wordMainText}>
-                {wordOfTheDay ? wordOfTheDay.english : "Loading..."}
+                {wordOfTheDay ? (
+                  wordOfTheDay.english
+                ) : (
+                  <ActivityIndicator color={BASE_COLORS.white} size="small" />
+                )}
               </Text>
               <Text style={styles.wordTranslation}>
-                {wordOfTheDay && wordOfTheDay.translation
-                  ? wordOfTheDay.translation
-                  : "Discovering meaning..."}
+                {wordOfTheDay && wordOfTheDay.translation ? (
+                  wordOfTheDay.translation
+                ) : (
+                  <ActivityIndicator color={BASE_COLORS.white} size="small" />
+                )}
               </Text>
             </View>
 
