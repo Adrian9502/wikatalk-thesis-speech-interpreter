@@ -10,7 +10,6 @@ export const useLevelData = (gameMode: string) => {
   const [showLevels, setShowLevels] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [completionPercentage, setCompletionPercentage] = useState(0);
 
   // CRITICAL: Add debouncing refs to prevent multiple operations
   const debounceTimeoutRef = useRef<NodeJS.Timeout | null>(null);
@@ -55,7 +54,6 @@ export const useLevelData = (gameMode: string) => {
         );
 
         setLevels(precomputedData.levels);
-        setCompletionPercentage(precomputedData.completionPercentage);
         setShowLevels(true);
         setIsLoading(false);
         lastDataTimestamp.current = Date.now();
@@ -104,22 +102,13 @@ export const useLevelData = (gameMode: string) => {
         progressArray
       );
 
-      const completedCount = currentLevels.filter(
-        (level) => level.status === "completed"
-      ).length;
-      const percentage =
-        currentLevels.length > 0
-          ? Math.round((completedCount / currentLevels.length) * 100)
-          : 0;
-
       // Update state
       setLevels(currentLevels);
-      setCompletionPercentage(percentage);
       setShowLevels(true);
       lastDataTimestamp.current = Date.now();
 
       console.log(
-        `[useLevelData] ${safeGameMode}: ${currentLevels.length} levels loaded (${percentage}% complete)`
+        `[useLevelData] ${safeGameMode}: ${currentLevels.length} levels loaded`
       );
 
       // BACKGROUND: Update splash store cache (non-blocking)
@@ -262,7 +251,6 @@ export const useLevelData = (gameMode: string) => {
     showLevels,
     isLoading,
     error,
-    completionPercentage,
     handleRetry,
     getFilteredLevels,
   };

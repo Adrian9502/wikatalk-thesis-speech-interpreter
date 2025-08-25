@@ -10,7 +10,7 @@ import { LinearGradient } from "expo-linear-gradient";
 import { TrendingUp, Play } from "react-native-feather";
 import useProgressStore from "@/store/games/useProgressStore";
 import { getGameModeGradient } from "@/utils/gameUtils";
-import { BASE_COLORS } from "@/constant/colors";
+import { useGameStats, useFormattedStats } from "@/utils/gameStatsUtils";
 
 interface GameCardProps {
   game: any;
@@ -23,14 +23,11 @@ const GameCard: React.FC<GameCardProps> = ({
   onGamePress,
   onProgressPress,
 }) => {
-  const { getGameModeProgress, lastUpdated } = useProgressStore();
+  const { lastUpdated } = useProgressStore();
 
-  // SIMPLIFIED: Just get current progress - no loading states needed
-  const currentProgress = useMemo(() => {
-    const progress = getGameModeProgress(game.id);
-    console.log(`[GameCard] Fresh progress for ${game.id}:`, progress);
-    return progress;
-  }, [lastUpdated, game.id, getGameModeProgress]);
+  // NEW: Use centralized stats instead of manual computation
+  const gameStats = useGameStats(game.id);
+  const formattedStats = useFormattedStats(game.id);
 
   useEffect(() => {
     // Silent preload - keep existing functionality
@@ -68,12 +65,6 @@ const GameCard: React.FC<GameCardProps> = ({
     [game.color]
   );
 
-  const completionPercentage = useMemo(() => {
-    return currentProgress.total > 0
-      ? Math.round((currentProgress.completed / currentProgress.total) * 100)
-      : 0;
-  }, [currentProgress.completed, currentProgress.total]);
-
   const gradientColors = useMemo(() => {
     return getGameModeGradient(
       game.id,
@@ -107,15 +98,15 @@ const GameCard: React.FC<GameCardProps> = ({
           </View>
         </View>
 
-        {/* SIMPLIFIED: Direct progress display - no loading states */}
+        {/* UPDATED: Use centralized stats */}
         <View style={styles.gameStatsRow}>
           <View style={styles.statItem}>
-            <Text style={styles.statValue}>{currentProgress.completed}</Text>
+            <Text style={styles.statValue}>{formattedStats.completed}</Text>
             <Text style={styles.statLabel}>Completed</Text>
           </View>
           <View style={styles.statDivider} />
           <View style={styles.statItem}>
-            <Text style={styles.statValue}>{completionPercentage}%</Text>
+            <Text style={styles.statValue}>{formattedStats.percentage}</Text>
             <Text style={styles.statLabel}>Progress</Text>
           </View>
         </View>

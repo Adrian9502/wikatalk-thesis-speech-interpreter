@@ -34,6 +34,8 @@ import { usePronunciationStore } from "@/store/usePronunciationStore";
 import AppName from "../AppName";
 import RankingCategorySelector from "@/components/games/rankings/RankingCategorySelector";
 import RankingContent from "@/components/games/rankings/RankingContent";
+// NEW: Import stats utilities
+import { useFormattedStats } from "@/utils/gameStatsUtils";
 
 const { width: screenWidth } = Dimensions.get("window");
 
@@ -50,10 +52,11 @@ const HomePage: React.FC<HomePageProps> = ({
 }) => {
   const { activeTheme } = useThemeStore();
   const { userData } = useAuth();
-  const { getGameModeProgress, totalCompletedCount, totalQuizCount } =
-    useProgressStore();
   const { coins } = useCoinsStore();
   const { wordOfTheDay, getWordOfTheDay } = usePronunciationStore();
+
+  // NEW: Use centralized stats instead of manual computation
+  const overallStats = useFormattedStats();
 
   const [dontShowAgain, setDontShowAgain] = useState(false);
 
@@ -70,9 +73,6 @@ const HomePage: React.FC<HomePageProps> = ({
   // Animation values
   const fadeAnim = useState(() => new Animated.Value(0))[0];
   const slideAnim = useState(() => new Animated.Value(50))[0];
-
-  const speechProgress = getGameModeProgress("multipleChoice");
-  const gamesProgress = getGameModeProgress("identification");
 
   // Initialize Word of the Day when component mounts
   useEffect(() => {
@@ -150,19 +150,14 @@ const HomePage: React.FC<HomePageProps> = ({
     { count: "150+", label: "Game Levels" },
   ];
 
-  const overallProgressPercentage =
-    totalQuizCount > 0
-      ? Math.round((totalCompletedCount / totalQuizCount) * 100)
-      : 0;
-
   const quickStats = [
     {
       icon: (
         <TrendingUp width={14} height={14} color={activeTheme.secondaryColor} />
       ),
       label: "Overall Progress",
-      value: `${overallProgressPercentage}%`,
-      subValue: `${totalCompletedCount}/${totalQuizCount}`,
+      value: overallStats.percentage,
+      subValue: overallStats.progressText,
     },
     {
       icon: (

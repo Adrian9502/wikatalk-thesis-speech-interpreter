@@ -6,6 +6,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import useThemeStore from "@/store/useThemeStore";
 import LevelInfoModal from "@/components/games/levels/LevelInfoModal";
 import LevelReviewModal from "@/components/games/levels/LevelReviewModal";
+// Utils & types
 import { LevelData } from "@/types/gameTypes";
 import LevelHeader from "@/components/games/levels/LevelHeader";
 import LevelProgressBar from "@/components/games/levels/LevelProgressBar";
@@ -23,6 +24,7 @@ import FilterBar from "@/components/games/levels/FilterBar";
 import AppLoading from "@/components/AppLoading";
 import DotsLoader from "@/components/DotLoader";
 import useProgressStore from "@/store/games/useProgressStore";
+import { useCompletionPercentage } from "@/utils/gameStatsUtils";
 
 type FilterType = "all" | "completed" | "current" | "easy" | "medium" | "hard";
 
@@ -43,13 +45,16 @@ const LevelSelection = () => {
 
   const { shouldPlayAnimation } = useAnimationTracker();
 
-  // Use the enhanced hook that includes precomputed filters
+  // NEW: Use centralized completion percentage instead of useLevelData's completionPercentage
+  const completionPercentage = useCompletionPercentage(gameMode);
+
+  // Use the enhanced hook that includes precomputed filters (but exclude completionPercentage)
   const {
     levels,
     showLevels,
     isLoading,
     error,
-    completionPercentage,
+    // completionPercentage, // REMOVED: We get this from gameStatsUtils now
     handleRetry,
     getFilteredLevels,
   } = useLevelData(gameMode);
@@ -377,7 +382,7 @@ const LevelSelection = () => {
             typeof selectedLevel.difficultyCategory === "string"
               ? selectedLevel.difficultyCategory
               : "easy",
-          skipModal: "true", // Only skip modal when starting from level selection
+          skipModal: "true",
         },
       });
     };
@@ -532,6 +537,9 @@ const LevelSelection = () => {
     if (showLevels && levels.length > 0) {
       return (
         <>
+          {/* NEW: Use centralized completion percentage */}
+          {/* <LevelProgressBar percentage={completionPercentage} /> */}
+
           <FilterBar
             activeFilter={activeFilter}
             setActiveFilter={stableHandlers.handleFilterChange}
@@ -577,6 +585,7 @@ const LevelSelection = () => {
     isFilterLoading,
     shouldAnimateCards,
     animationKey,
+    completionPercentage,
     stableHandlers.handleLevelSelectWithCompletion,
     stableHandlers.handleErrorReset,
     stableHandlers.handleFilterChange,

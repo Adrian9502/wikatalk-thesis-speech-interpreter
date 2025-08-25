@@ -1,3 +1,4 @@
+import { BASE_COLORS, TITLE_COLORS } from "@/constant/colors";
 import React from "react";
 import { View, Text, StyleSheet } from "react-native";
 
@@ -29,14 +30,14 @@ const styles = StyleSheet.create({
   statValue: {
     fontSize: 14,
     fontFamily: "Poppins-Bold",
-    color: "#fff",
+    color: TITLE_COLORS.customYellow,
     marginTop: 6,
     marginBottom: 2,
   },
   statLabel: {
     fontSize: 11,
     fontFamily: "Poppins-Medium",
-    color: "rgba(255, 255, 255, 0.7)",
+    color: BASE_COLORS.white,
     textAlign: "center",
   },
 });

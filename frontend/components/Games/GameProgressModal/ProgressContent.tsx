@@ -6,6 +6,8 @@ import DifficultyCard from "./DifficultyCard";
 import StatGrid from "./StatGrid";
 import RecentAttempt from "./RecentAttempt";
 import { BASE_COLORS, ICON_COLORS } from "@/constant/colors";
+// NEW: Import centralized stats utilities
+import { useGameModeSummaryStats } from "@/utils/gameStatsUtils";
 
 interface ProgressContentProps {
   progressData: EnhancedGameModeProgress | null;
@@ -23,9 +25,20 @@ interface OverallSummaryProps {
   completionRate: number;
   completed: number;
   total: number;
+  // NEW: Additional props for enhanced summary
+  successRate: number;
+  totalTimeSpent: string;
+  totalAttempts: number;
+  averageScore: number;
 }
 
-const ProgressContent: React.FC<ProgressContentProps> = ({ progressData }) => {
+const ProgressContent: React.FC<ProgressContentProps> = ({
+  progressData,
+  gameMode,
+}) => {
+  // NEW: Use centralized summary stats
+  const summaryStats = useGameModeSummaryStats(gameMode, progressData);
+
   // Memoized helper functions
   const getDifficultyColor = useCallback((diff: string): string => {
     switch (diff) {
@@ -96,6 +109,11 @@ const ProgressContent: React.FC<ProgressContentProps> = ({ progressData }) => {
               completionRate={Math.round(item.overallCompletionRate)}
               completed={item.completedLevels}
               total={item.totalLevels}
+              // NEW: Pass enhanced stats from centralized source
+              successRate={summaryStats.successRate}
+              totalTimeSpent={summaryStats.formattedTotalTime}
+              totalAttempts={summaryStats.totalAttempts}
+              averageScore={summaryStats.averageScore}
             />
           );
 
@@ -109,7 +127,7 @@ const ProgressContent: React.FC<ProgressContentProps> = ({ progressData }) => {
           );
 
         case "stats":
-          return <StatGrid progressData={item} />;
+          return <StatGrid gameMode={gameMode} progressData={item} />;
 
         case "attempts":
           return (
@@ -120,7 +138,7 @@ const ProgressContent: React.FC<ProgressContentProps> = ({ progressData }) => {
           return null;
       }
     },
-    [getDifficultyColor, getDifficultyStars]
+    [getDifficultyColor, getDifficultyStars, summaryStats, gameMode]
   );
 
   // Error/empty state
@@ -172,7 +190,6 @@ const ProgressContent: React.FC<ProgressContentProps> = ({ progressData }) => {
   );
 };
 
-// Simple component for the summary section
 const OverallSummary = React.memo<OverallSummaryProps>(
   ({ completionRate, completed, total }) => {
     return (
@@ -271,6 +288,7 @@ const styles = StyleSheet.create({
   progressSummary: {
     flexDirection: "row",
     alignItems: "center",
+    marginBottom: 16,
   },
   progressNumbers: {
     flexDirection: "row",
