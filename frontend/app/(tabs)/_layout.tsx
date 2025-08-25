@@ -1,5 +1,11 @@
 import { View, Animated, InteractionManager } from "react-native";
-import React, { useRef, useEffect, useCallback, useState } from "react";
+import React, {
+  useRef,
+  useEffect,
+  useCallback,
+  useState,
+  useMemo,
+} from "react";
 import { Tabs, useSegments } from "expo-router";
 import { Mic, Camera, Settings, Globe, Volume2 } from "react-native-feather";
 import useThemeStore from "@/store/useThemeStore";
@@ -96,21 +102,32 @@ export default function TabsLayout() {
   const [currentTab, setCurrentTab] = useState<string>("Speech");
   const [isTransitioning, setIsTransitioning] = useState(false);
 
-  // Stable color references to prevent re-renders
-  const tabColors = useRef({
-    active: activeTheme.tabActiveColor,
-    inactive: activeTheme.tabInactiveColor,
-    background: activeTheme.tabBarColor,
-  });
+  // FIXED: Use state instead of ref so theme changes trigger re-renders
+  const [tabColors] = useState(() => ({
+    get active() {
+      return activeTheme.tabActiveColor;
+    },
+    get inactive() {
+      return activeTheme.tabInactiveColor;
+    },
+    get background() {
+      return activeTheme.tabBarColor;
+    },
+  }));
 
-  // Update colors when theme changes
-  useEffect(() => {
-    tabColors.current = {
+  // FIXED: Create reactive colors that update with theme
+  const currentTabColors = useMemo(
+    () => ({
       active: activeTheme.tabActiveColor,
       inactive: activeTheme.tabInactiveColor,
       background: activeTheme.tabBarColor,
-    };
-  }, [activeTheme]);
+    }),
+    [
+      activeTheme.tabActiveColor,
+      activeTheme.tabInactiveColor,
+      activeTheme.tabBarColor,
+    ]
+  );
 
   // Helper function to get the main tab from segments
   const getMainTabFromSegments = useCallback((segments: string[]): string => {
@@ -271,7 +288,7 @@ export default function TabsLayout() {
     []
   );
 
-  // Memoized tab bar background
+  // FIXED: TabBarBackground now properly responds to theme changes
   const TabBarBackground = React.useMemo(
     () => () =>
       (
@@ -282,32 +299,36 @@ export default function TabsLayout() {
             right: 0,
             top: 0,
             bottom: 0,
-            backgroundColor: tabColors.current.background,
+            backgroundColor: currentTabColors.background,
           }}
         />
       ),
-    []
+    [currentTabColors.background] // FIXED: Add dependency on background color
+  );
+
+  // FIXED: Memoize screen options to respond to theme changes
+  const screenOptions = useMemo(
+    () => ({
+      tabBarShowLabel: false,
+      tabBarActiveTintColor: currentTabColors.active,
+      tabBarInactiveTintColor: currentTabColors.inactive,
+      tabBarStyle: {
+        backgroundColor: currentTabColors.background,
+        height: 60,
+        paddingTop: 10,
+        borderTopWidth: 0,
+      },
+      tabBarBackground: TabBarBackground,
+      // Add lazy loading for better performance
+      lazy: true,
+      // Optimize header settings
+      headerShown: false,
+    }),
+    [currentTabColors, TabBarBackground] // FIXED: Add dependencies
   );
 
   return (
-    <Tabs
-      screenOptions={{
-        tabBarShowLabel: false,
-        tabBarActiveTintColor: tabColors.current.active,
-        tabBarInactiveTintColor: tabColors.current.inactive,
-        tabBarStyle: {
-          backgroundColor: tabColors.current.background,
-          height: 60,
-          paddingTop: 10,
-          borderTopWidth: 0,
-        },
-        tabBarBackground: TabBarBackground,
-        // Add lazy loading for better performance
-        lazy: true,
-        // Optimize header settings
-        headerShown: false,
-      }}
-    >
+    <Tabs screenOptions={screenOptions}>
       {tabScreens.map(({ name, title, icon: Icon, iconName }) => (
         <Tabs.Screen
           key={name}

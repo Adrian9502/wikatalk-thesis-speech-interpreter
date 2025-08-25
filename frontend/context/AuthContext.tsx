@@ -87,5 +87,7 @@ export const useAuth = () => {
     requestAccountDeletion,
     verifyDeletionCode,
     deleteAccount,
+    hasToken: !!userToken,
+    manuallyCheckedToken: isAppReady,
   };
 };

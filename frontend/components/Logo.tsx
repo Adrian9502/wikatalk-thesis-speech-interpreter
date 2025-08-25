@@ -2,12 +2,24 @@ import { View, Image, Text, StyleSheet } from "react-native";
 import React from "react";
 import { BASE_COLORS, TITLE_COLORS } from "@/constant/colors";
 
-const Logo: React.FC = () => {
+interface LogoProps {
+  logoSize?: number;
+  wikaTextSize?: number;
+  talkTextSize?: number;
+  taglineTextSize?: number;
+}
+
+const Logo: React.FC<LogoProps> = ({
+  logoSize = 100,
+  wikaTextSize = 30,
+  talkTextSize = 30,
+  taglineTextSize = 14,
+}) => {
   return (
     <View style={styles.container}>
       <Image
         source={require("@/assets/images/icon.png")}
-        style={styles.logo}
+        style={[styles.logo, { width: logoSize, height: logoSize }]}
         resizeMode="contain"
       />
       <View
@@ -19,16 +31,24 @@ const Logo: React.FC = () => {
         }}
       >
         <Text
-          style={[styles.wikaText, { color: "#FFEC18" }]}
+          style={[
+            styles.wikaText,
+            { color: "#FFEC18", fontSize: wikaTextSize },
+          ]}
           allowFontScaling={false}
         >
           Wika
         </Text>
-        <Text style={styles.talkText} allowFontScaling={false}>
+        <Text
+          style={[styles.talkText, { fontSize: talkTextSize }]}
+          allowFontScaling={false}
+        >
           Talk
         </Text>
       </View>
-      <Text style={styles.tagline}>Speak Freely, Understand Instantly.</Text>
+      <Text style={[styles.tagline, { fontSize: taglineTextSize }]}>
+        Speak Freely, Understand Instantly.
+      </Text>
     </View>
   );
 };
@@ -41,25 +61,24 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   logo: {
-    width: 100,
-    height: 100,
+    // width and height will be overridden by props
   },
   wikaText: {
     fontFamily: "Poppins-Bold",
-    fontSize: 30,
+    // fontSize will be overridden by props
     color: TITLE_COLORS.customYellow,
     flexShrink: 1,
   },
   talkText: {
     fontFamily: "Poppins-Bold",
-    fontSize: 30,
+    // fontSize will be overridden by props
     color: BASE_COLORS.white,
     flexShrink: 1,
   },
   tagline: {
     fontFamily: "Poppins-Medium",
-    fontSize: 14,
-    marginTop: -12,
+    // fontSize will be overridden by props
+    marginTop: -10,
     color: TITLE_COLORS.customWhite,
     textShadowOffset: { width: 1, height: 1 },
     textShadowRadius: 3,

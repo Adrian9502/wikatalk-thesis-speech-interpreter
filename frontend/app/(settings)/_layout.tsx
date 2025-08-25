@@ -7,6 +7,7 @@ export default function SettingsLayout() {
       <Stack.Screen name="HelpAndFAQ" />
       <Stack.Screen name="About" />
       <Stack.Screen name="TranslationHistory" />
+      <Stack.Screen name="HomePage" />
     </Stack>
   );
 }

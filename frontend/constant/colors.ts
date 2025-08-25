@@ -80,6 +80,35 @@ export const getPositionalColors = (
     success: BASE_COLORS.success,
   };
 };
+
+// Homepage gradient colors
+export const HOMEPAGE_COLORS = {
+  speech: ["#ac8d04ff", "#c25202ff"] as const,
+  translate: ["#02359cff", "#0a7d94ff"] as const,
+  scan: ["#a70215ff", "#910585ff"] as const,
+  games: ["#5e049eff", "#aa0451ff"] as const,
+  pronounce: ["#019c3aff", "#ac8d04ff"] as const,
+};
+
+export const APP_COLORS = {
+  // Main brand colors
+  yellow: "#FCD116",
+  blue: "#0038a8",
+  red: "#ce1126",
+
+  // Gradient palettes
+  sunrise: ["#ac8d04ff", "#c25202ff"] as const, // warm yellow-orange
+  ocean: ["#02359cff", "#0a7d94ff"] as const, // cool blue
+  crimson: ["#a70215ff", "#910585ff"] as const, // deep red to purple
+  violet: ["#5e049eff", "#aa0451ff"] as const, // dark violet to pink
+  forest: ["#019c3aff", "#ac8d04ff"] as const, // green to yellow
+
+  // Gradients for main brand colors (yellow, blue, red)
+  sunbeam: ["#FCD116", "#FFD84D"] as const, // yellow gradient
+  deepBlue: ["#0038a8", "#3366CC"] as const, // blue gradient
+  ruby: ["#ce1126", "#E03A3E"] as const, // red gradient
+};
+
 export const ICON_COLORS = {
   brightYellow: "#fbff26ff" as const,
   gold: "#FFD700" as const,

@@ -21,6 +21,10 @@ interface SettingItemProps {
   customIconColor?: string;
   customContainerStyle?: object;
   customLabelStyle?: object;
+  showSwitch?: boolean;
+  switchValue?: boolean;
+  onSwitchChange?: (value: boolean) => void;
+  description?: string;
 }
 
 const SettingItem: React.FC<SettingItemProps> = ({
@@ -30,13 +34,27 @@ const SettingItem: React.FC<SettingItemProps> = ({
   customIconColor,
   customContainerStyle,
   customLabelStyle,
+  showSwitch = false,
+  switchValue = false,
+  onSwitchChange,
+  description,
 }) => {
   const { activeTheme } = useThemeStore();
+
+  const handlePress = (event: GestureResponderEvent) => {
+    // If it's a switch item, toggle the switch instead of calling onPress
+    if (showSwitch && onSwitchChange) {
+      onSwitchChange(!switchValue);
+    } else if (onPress) {
+      onPress(event);
+    }
+  };
 
   return (
     <TouchableOpacity
       style={[styles.container, customContainerStyle]}
-      onPress={onPress}
+      onPress={handlePress}
+      activeOpacity={showSwitch ? 1 : 0.7} // Disable touch feedback for switch items
     >
       <View style={styles.leftContent}>
         <View
@@ -51,14 +69,30 @@ const SettingItem: React.FC<SettingItemProps> = ({
             color={customIconColor || activeTheme.secondaryColor}
           />
         </View>
-        <Text style={[styles.label, customLabelStyle]}>{label}</Text>
+        <View style={styles.textContainer}>
+          <Text style={[styles.label, customLabelStyle]}>{label}</Text>
+          {description && <Text style={styles.description}>{description}</Text>}
+        </View>
       </View>
 
-      <Feather
-        name="chevron-right"
-        size={16}
-        color={activeTheme.secondaryColor}
-      />
+      {/* Show either switch or chevron based on showSwitch prop */}
+      {showSwitch ? (
+        <Switch
+          value={switchValue}
+          onValueChange={onSwitchChange}
+          trackColor={{
+            false: "#767577",
+            true: activeTheme.secondaryColor + "80",
+          }}
+          thumbColor={switchValue ? activeTheme.secondaryColor : "#f4f3f4"}
+        />
+      ) : (
+        <Feather
+          name="chevron-right"
+          size={16}
+          color={activeTheme.secondaryColor}
+        />
+      )}
     </TouchableOpacity>
   );
 };
@@ -68,12 +102,13 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    paddingVertical: 10,
+    paddingVertical: 12,
     paddingHorizontal: 15,
   },
   leftContent: {
     flexDirection: "row",
     alignItems: "center",
+    flex: 1,
   },
   iconContainer: {
     width: 30,
@@ -83,10 +118,20 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     marginRight: 15,
   },
+  textContainer: {
+    flex: 1,
+  },
   label: {
     fontSize: 13,
     color: BASE_COLORS.darkText,
     fontFamily: "Poppins-Regular",
+  },
+  description: {
+    fontSize: 11,
+    color: BASE_COLORS.placeholderText,
+    fontFamily: "Poppins-Regular",
+    marginTop: 2,
+    lineHeight: 14,
   },
 });
 

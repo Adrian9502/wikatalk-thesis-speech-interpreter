@@ -32,6 +32,10 @@ import useGameStore from "@/store/games/useGameStore";
 import useCoinsStore from "@/store/games/useCoinsStore";
 import { useAuthStore } from "@/store/useAuthStore";
 
+// NEW: Import HomePage related components
+import useHomePageStore from "@/store/useHomePageStore";
+import HomePage from "@/components/home/HomePage";
+
 // Prevent the splash screen from auto-hiding
 SplashScreen.preventAutoHideAsync();
 
@@ -51,12 +55,19 @@ const RootLayout = () => {
 
   const { splashShown, markSplashShown, markLoadingComplete } =
     useSplashStore();
+
+  // NEW: Add HomePage state
+  const { shouldShowHomePage, setShowHomePage } = useHomePageStore();
+
   const [themeReady, setThemeReady] = useState<boolean>(false);
   const [manuallyCheckedToken, setManuallyCheckedToken] =
     useState<boolean>(false);
   const [hasToken, setHasToken] = useState<boolean>(false);
   const [initialRouteReady, setInitialRouteReady] = useState<boolean>(false);
   const [showSplashAnimation, setShowSplashAnimation] = useState<boolean>(true);
+
+  // NEW: Add HomePage display state
+  const [showHomePage, setShowHomePageState] = useState<boolean>(false);
 
   // Stable callback for theme ready
   const handleThemeReady = useCallback(() => {
@@ -134,7 +145,7 @@ const RootLayout = () => {
     return () => clearTimeout(forceTimeout);
   }, [markLoadingComplete, markSplashShown]);
 
-  // When all resources are loaded, decide what to do
+  // UPDATED: Enhanced navigation logic with HomePage support
   useEffect(() => {
     if (
       fontsLoaded &&
@@ -147,18 +158,32 @@ const RootLayout = () => {
       // Mark check as complete to avoid multiple runs
       setInitialRouteReady(true);
 
+      // NEW: Immediate HomePage check before any navigation
+      if (hasToken && shouldShowHomePage()) {
+        console.log("HomePage should show - setting state immediately");
+        setShowHomePageState(true);
+
+        // Hide splash animation after HomePage state is set
+        setTimeout(() => {
+          console.log("HomePage ready, hiding splash screen");
+          setShowSplashAnimation(false);
+          markSplashShown();
+          markLoadingComplete();
+        }, 100);
+
+        return;
+      }
+
       const initialNavigate = async () => {
         try {
           if (hasToken) {
-            console.log("Token exists, navigating to Speech");
+            console.log("Skipping HomePage, navigating to Speech");
             await router.replace("/(tabs)/Speech");
           } else {
             console.log("No token, showing login screen");
             await router.replace("/");
           }
 
-          // Add delay AFTER navigation completes to ensure screen is fully ready
-          // Keep splash animation visible longer
           setTimeout(() => {
             console.log("Navigation complete, now hiding splash screen");
             setShowSplashAnimation(false);
@@ -188,6 +213,7 @@ const RootLayout = () => {
     hasToken,
     initialRouteReady,
     router,
+    shouldShowHomePage,
     markLoadingComplete,
     markSplashShown,
   ]);
@@ -217,11 +243,51 @@ const RootLayout = () => {
     return unsubscribe;
   }, []);
 
+  const handleNavigateToTab = useCallback(
+    (tabName: string) => {
+      console.log("HomePage: Navigating to tab:", tabName);
+      setShowHomePageState(false);
+
+      // Add a small delay to ensure navigation is ready
+      setTimeout(() => {
+        // Navigate to the appropriate tab
+        switch (tabName) {
+          case "Speech":
+            router.replace("/(tabs)/Speech");
+            break;
+          case "Translate":
+            router.replace("/(tabs)/Translate");
+            break;
+          case "Scan":
+            router.replace("/(tabs)/Scan");
+            break;
+          case "Games":
+            router.replace("/(tabs)/Games");
+            break;
+          case "Pronounce":
+            router.replace("/(tabs)/Pronounce");
+            break;
+          case "Settings":
+            router.replace("/(tabs)/Settings");
+            break;
+          default:
+            router.replace("/(tabs)/Speech");
+        }
+      }, 100); // Small delay to ensure router is ready
+    },
+    [router]
+  );
+
   // Only show splash animation in RootLayout, not in child components
   if (showSplashAnimation && !splashShown) {
     return <SplashAnimation />;
   }
 
+  if (showHomePage && hasToken) {
+    return <HomePage onNavigateToTab={handleNavigateToTab} context="startup" />;
+  }
+
+  // Only render the main app stack if we're not showing HomePage
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
       <SafeAreaProvider>

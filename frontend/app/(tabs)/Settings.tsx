@@ -19,6 +19,7 @@ import ContactSupportModal from "@/components/helpAndFAQ/ContactSupportModal";
 import { clearAllAccountData } from "@/utils/accountUtils";
 import ProfileCard from "@/components/settings/ProfileCard";
 import LoginMethods from "@/components/settings/LoginMethods";
+import HomePageToggle from "@/components/settings/HomePageToggle";
 
 // Types
 type SettingItemWithToggle = {
@@ -50,6 +51,7 @@ type ListItem = {
     | "profile"
     | "login-methods"
     | "appearance"
+    | "homepage-toggle"
     | "section"
     | "item"
     | "logout";
@@ -160,6 +162,13 @@ const Settings = () => {
       key: "appearance-title",
     });
 
+    // Add HomePage toggle
+    items.push({
+      type: "homepage-toggle",
+      data: null,
+      key: "homepage-toggle",
+    });
+
     // Add settings sections
     sections.forEach((section, sectionIndex) => {
       // Add section title
@@ -215,6 +224,9 @@ const Settings = () => {
 
       case "appearance":
         return <AppearanceSection />;
+
+      case "homepage-toggle":
+        return <HomePageToggle />;
 
       case "section":
         return <SectionTitle title={item.data} />;
