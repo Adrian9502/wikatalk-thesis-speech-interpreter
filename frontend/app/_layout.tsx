@@ -34,6 +34,7 @@ import { useAuthStore } from "@/store/useAuthStore";
 
 import useHomePageStore from "@/store/useHomePageStore";
 import HomePage from "@/components/home/HomePage";
+import AppLoading from "@/components/AppLoading"; // NEW: Import AppLoading
 
 // Prevent the splash screen from auto-hiding
 SplashScreen.preventAutoHideAsync();
@@ -66,6 +67,10 @@ const RootLayout = () => {
 
   const [showHomePage, setShowHomePageState] = useState<boolean>(false);
   const [shouldRenderTabs, setShouldRenderTabs] = useState<boolean>(false);
+
+  // NEW: Add state to track HomePage readiness
+  const [homePageReady, setHomePageReady] = useState<boolean>(false);
+  const [showAppLoading, setShowAppLoading] = useState<boolean>(false);
 
   // Stable callback for theme ready
   const handleThemeReady = useCallback(() => {
@@ -143,7 +148,13 @@ const RootLayout = () => {
     return () => clearTimeout(forceTimeout);
   }, [markLoadingComplete, markSplashShown]);
 
-  // FIXED: Enhanced navigation logic with HomePage support - prevent tab flash
+  // NEW: HomePage readiness callback
+  const handleHomePageReady = useCallback(() => {
+    console.log("[Layout] HomePage reports it's ready");
+    setHomePageReady(true);
+  }, []);
+
+  // UPDATED: Enhanced navigation logic with HomePage support - prevent tab flash
   useEffect(() => {
     if (
       fontsLoaded &&
@@ -164,13 +175,27 @@ const RootLayout = () => {
         setShowHomePageState(true);
         setShouldRenderTabs(false); // CRITICAL: Don't render tabs
 
-        // Hide splash animation after HomePage state is set
+        // NEW: Show AppLoading while HomePage prepares
+        setShowAppLoading(true);
+        setShowSplashAnimation(false);
+        markSplashShown();
+
+        // UPDATED: Wait a bit longer for HomePage data to be ready
         setTimeout(() => {
-          console.log("HomePage ready, hiding splash screen");
-          setShowSplashAnimation(false);
-          markSplashShown();
-          markLoadingComplete();
-        }, 100);
+          console.log("HomePage data should be ready, checking readiness...");
+
+          // Give HomePage some time to initialize its data
+          const checkHomePageReadiness = () => {
+            // You can add more sophisticated checks here
+            // For now, we'll just wait a bit more to ensure data is loaded
+            console.log("HomePage ready, hiding app loading");
+            setShowAppLoading(false);
+            markLoadingComplete();
+          };
+
+          // Small additional delay to ensure HomePage data is fully loaded
+          setTimeout(checkHomePageReadiness, 500);
+        }, 200);
 
         return; // Exit early, don't setup tab navigation
       }
@@ -251,6 +276,7 @@ const RootLayout = () => {
     (tabName: string) => {
       console.log("HomePage: Navigating to tab:", tabName);
       setShowHomePageState(false);
+      setHomePageReady(false); // NEW: Reset HomePage ready state
       setShouldRenderTabs(true); // NEW: Enable tab rendering when navigating from HomePage
 
       // Add a small delay to ensure navigation is ready
@@ -288,9 +314,20 @@ const RootLayout = () => {
     return <SplashAnimation />;
   }
 
+  // NEW: Show AppLoading while HomePage is preparing
+  if (showAppLoading && showHomePage && hasToken) {
+    return <AppLoading />;
+  }
+
   // FIXED: Show HomePage without any tab background
-  if (showHomePage && hasToken) {
-    return <HomePage onNavigateToTab={handleNavigateToTab} context="startup" />;
+  if (showHomePage && hasToken && !showAppLoading) {
+    return (
+      <HomePage
+        onNavigateToTab={handleNavigateToTab}
+        context="startup"
+        onReady={handleHomePageReady}
+      />
+    );
   }
 
   // FIXED: Only render the main app stack if we should render tabs

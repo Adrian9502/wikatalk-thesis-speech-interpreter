@@ -40,6 +40,7 @@ import RankingContent from "@/components/games/rankings/RankingContent";
 
 import { useFormattedStats } from "@/utils/gameStatsUtils";
 import { DIALECTS } from "@/constant/languages";
+import AppLoading from "../AppLoading";
 
 const { width: screenWidth } = Dimensions.get("window");
 
@@ -47,12 +48,14 @@ interface HomePageProps {
   onNavigateToTab: (tabName: string) => void;
   context?: "startup" | "settings";
   onBack?: () => void;
+  onReady?: () => void;
 }
 
 const HomePage: React.FC<HomePageProps> = ({
   onNavigateToTab,
   context = "startup",
   onBack,
+  onReady,
 }) => {
   const { activeTheme } = useThemeStore();
   const { userData } = useAuth();
@@ -69,6 +72,9 @@ const HomePage: React.FC<HomePageProps> = ({
   const [selectedRankingCategory, setSelectedRankingCategory] =
     useState("quizChampions");
 
+  //Add state to track data readiness
+  const [dataLoaded, setDataLoaded] = useState(false);
+
   // get user first name
   const firstName = (userData?.fullName || userData?.username || "").split(
     " "
@@ -78,36 +84,72 @@ const HomePage: React.FC<HomePageProps> = ({
   const fadeAnim = useState(() => new Animated.Value(0))[0];
   const slideAnim = useState(() => new Animated.Value(50))[0];
 
-  // Initialize Word of the Day when component mounts
+  // Initialize data and track readiness
   useEffect(() => {
-    if (!wordOfTheDay) {
-      console.log("[HomePage] Loading Word of the Day");
-      getWordOfTheDay();
+    const initializeData = async () => {
+      try {
+        console.log("[HomePage] Starting data initialization");
+
+        // Load Word of the Day if not already loaded
+        if (!wordOfTheDay) {
+          console.log("[HomePage] Loading Word of the Day");
+          await getWordOfTheDay();
+        }
+
+        // Wait for essential stats to be ready
+        // The hooks should provide the data, so we just need to wait a tick
+        await new Promise((resolve) => setTimeout(resolve, 100));
+
+        console.log("[HomePage] Data initialization complete");
+        setDataLoaded(true);
+
+        // Notify parent that we're ready
+        if (onReady) {
+          console.log("[HomePage] Notifying parent that we're ready");
+          onReady();
+        }
+      } catch (error) {
+        console.error("[HomePage] Data initialization error:", error);
+        // Still mark as ready to prevent infinite loading
+        setDataLoaded(true);
+        if (onReady) {
+          onReady();
+        }
+      }
+    };
+
+    initializeData();
+  }, [wordOfTheDay, getWordOfTheDay, onReady]);
+
+  useEffect(() => {
+    // Only start animation when data is loaded
+    if (dataLoaded) {
+      console.log("[HomePage] Starting entrance animation");
+
+      // Entrance animation
+      Animated.parallel([
+        Animated.timing(fadeAnim, {
+          toValue: 1,
+          duration: 800,
+          useNativeDriver: true,
+        }),
+        Animated.timing(slideAnim, {
+          toValue: 0,
+          duration: 800,
+          useNativeDriver: true,
+        }),
+      ]).start(() => {
+        console.log("[HomePage] Animation completed");
+      });
+
+      // Auto-rotate featured content
+      const interval = setInterval(() => {
+        setActiveFeatureIndex((prev) => (prev + 1) % features.length);
+      }, 5000);
+
+      return () => clearInterval(interval);
     }
-  }, [wordOfTheDay, getWordOfTheDay]);
-
-  useEffect(() => {
-    // Entrance animation
-    Animated.parallel([
-      Animated.timing(fadeAnim, {
-        toValue: 1,
-        duration: 800,
-        useNativeDriver: true,
-      }),
-      Animated.timing(slideAnim, {
-        toValue: 0,
-        duration: 800,
-        useNativeDriver: true,
-      }),
-    ]).start();
-
-    // Auto-rotate featured content
-    const interval = setInterval(() => {
-      setActiveFeatureIndex((prev) => (prev + 1) % features.length);
-    }, 5000);
-
-    return () => clearInterval(interval);
-  }, []);
+  }, [dataLoaded]);
 
   const features = [
     {
@@ -220,6 +262,11 @@ const HomePage: React.FC<HomePageProps> = ({
     setSelectedRankingCategory(categoryId);
   };
 
+  //  Don't render content until data is loaded
+  if (!dataLoaded) {
+    return <AppLoading />;
+  }
+
   return (
     <View style={{ flex: 1, backgroundColor: activeTheme.backgroundColor }}>
       <StatusBar
@@ -299,7 +346,7 @@ const HomePage: React.FC<HomePageProps> = ({
             {/* Featured Content Carousel */}
             <View style={styles.featuredSection}>
               <View style={styles.featuredHeader}>
-                <Text style={[styles.sectionTitle]}>Featured Today</Text>
+                <Text style={styles.sectionTitle}>Featured Today</Text>
                 <View style={styles.carouselDots}>
                   {features.map((_, index) => (
                     <View
@@ -352,7 +399,7 @@ const HomePage: React.FC<HomePageProps> = ({
 
             {/* Dialect Stats Section */}
             <View style={styles.statsSection}>
-              <Text style={[styles.sectionTitle]}>Platform Overview</Text>
+              <Text style={styles.sectionTitle}>App Statistics</Text>
               <View style={styles.statsContainer}>
                 {dialectStats.map((stat, index) => (
                   <View key={index} style={styles.statItem}>
@@ -372,7 +419,7 @@ const HomePage: React.FC<HomePageProps> = ({
 
             {/* All Features Section */}
             <View style={styles.allFeaturesSection}>
-              <Text style={[styles.sectionTitle]}>All Features</Text>
+              <Text style={styles.sectionTitle}>Explore All Features</Text>
               {features.map((feature, index) => (
                 <TouchableOpacity
                   key={index}
