@@ -6,7 +6,7 @@ import React, {
   useState,
   useMemo,
 } from "react";
-import { Tabs, useSegments } from "expo-router";
+import { Tabs, useLocalSearchParams, useSegments } from "expo-router";
 import { Mic, Camera, Settings, Globe, Volume2 } from "react-native-feather";
 import useThemeStore from "@/store/useThemeStore";
 import { Ionicons } from "@expo/vector-icons";
@@ -102,10 +102,28 @@ export default function TabsLayout() {
   const { activeTheme } = useThemeStore();
   const segments = useSegments();
   const insets = useSafeAreaInsets();
+  const params = useLocalSearchParams();
+
+  // NEW: Get the initial tab from params if available
+  const initialTabParam = params.initialTab as string | undefined;
 
   // State hooks - always called in same order
-  const [currentTab, setCurrentTab] = useState<string>("Speech");
+  const [currentTab, setCurrentTab] = useState<string>(
+    initialTabParam || "Speech"
+  );
   const [isTransitioning, setIsTransitioning] = useState(false);
+  const [initialTabProcessed, setInitialTabProcessed] = useState(false);
+
+  // NEW: Process the initial tab parameter only once
+  useEffect(() => {
+    if (initialTabParam && !initialTabProcessed) {
+      console.log(
+        `[TabsLayout] Using initial tab from params: ${initialTabParam}`
+      );
+      setCurrentTab(initialTabParam);
+      setInitialTabProcessed(true);
+    }
+  }, [initialTabParam, initialTabProcessed]);
 
   const currentTabColors = useMemo(
     () => ({
@@ -201,6 +219,14 @@ export default function TabsLayout() {
 
   // Track current tab from segments with better logic
   useEffect(() => {
+    // Skip initial transition when coming from homepage
+    if (initialTabParam && !initialTabProcessed) {
+      console.log(
+        `[TabsLayout] Skipping initial transition for: ${initialTabParam}`
+      );
+      return;
+    }
+
     const mainTab = getMainTabFromSegments(segments);
 
     if (mainTab && mainTab !== currentTab) {
@@ -220,7 +246,14 @@ export default function TabsLayout() {
         handleTabTransition(prevTab, mainTab);
       }
     }
-  }, [segments, currentTab, getMainTabFromSegments, handleTabTransition]);
+  }, [
+    segments,
+    currentTab,
+    initialTabProcessed,
+    initialTabParam,
+    getMainTabFromSegments,
+    handleTabTransition,
+  ]);
 
   // Focus effect for additional optimizations
   useFocusEffect(
@@ -326,7 +359,10 @@ export default function TabsLayout() {
         backgroundColor={activeTheme.backgroundColor}
         translucent={false}
       />
-      <Tabs screenOptions={screenOptions}>
+      <Tabs
+        screenOptions={screenOptions}
+        initialRouteName={initialTabParam || "Speech"}
+      >
         {tabScreens.map(({ name, title, icon: Icon, iconName }) => (
           <Tabs.Screen
             key={name}
@@ -342,8 +378,7 @@ export default function TabsLayout() {
                   focused={focused}
                 />
               ),
-              // Optimize each tab screen
-              lazy: name !== "Speech", // Don't lazy load default tab
+              lazy: true,
             }}
           />
         ))}
