@@ -58,15 +58,14 @@ const Speech = () => {
     toggleLanguageInfo,
     clearText,
     clearTranslationError,
-    stopSpeech, // NEW: Add stopSpeech from store
+    stopSpeech,
   } = useLanguageStore();
 
   // Custom hooks
   const { recording, startRecording, stopRecording, recordingDuration } =
     useRecording();
 
-  const { loading, wasCancelled, translateAudio, speakText } =
-    useRecordingTranslation();
+  const { loading, wasCancelled, translateAudio } = useRecordingTranslation();
 
   // NEW: State for tracking current translation controller
   const [currentTranslationController, setCurrentTranslationController] =
