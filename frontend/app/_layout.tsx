@@ -32,7 +32,6 @@ import useGameStore from "@/store/games/useGameStore";
 import useCoinsStore from "@/store/games/useCoinsStore";
 import { useAuthStore } from "@/store/useAuthStore";
 
-// NEW: Import HomePage related components
 import useHomePageStore from "@/store/useHomePageStore";
 import HomePage from "@/components/home/HomePage";
 
@@ -56,7 +55,6 @@ const RootLayout = () => {
   const { splashShown, markSplashShown, markLoadingComplete } =
     useSplashStore();
 
-  // NEW: Add HomePage state
   const { shouldShowHomePage, setShowHomePage } = useHomePageStore();
 
   const [themeReady, setThemeReady] = useState<boolean>(false);
@@ -66,8 +64,8 @@ const RootLayout = () => {
   const [initialRouteReady, setInitialRouteReady] = useState<boolean>(false);
   const [showSplashAnimation, setShowSplashAnimation] = useState<boolean>(true);
 
-  // NEW: Add HomePage display state
   const [showHomePage, setShowHomePageState] = useState<boolean>(false);
+  const [shouldRenderTabs, setShouldRenderTabs] = useState<boolean>(false);
 
   // Stable callback for theme ready
   const handleThemeReady = useCallback(() => {
@@ -145,7 +143,7 @@ const RootLayout = () => {
     return () => clearTimeout(forceTimeout);
   }, [markLoadingComplete, markSplashShown]);
 
-  // UPDATED: Enhanced navigation logic with HomePage support
+  // FIXED: Enhanced navigation logic with HomePage support - prevent tab flash
   useEffect(() => {
     if (
       fontsLoaded &&
@@ -158,10 +156,13 @@ const RootLayout = () => {
       // Mark check as complete to avoid multiple runs
       setInitialRouteReady(true);
 
-      // NEW: Immediate HomePage check before any navigation
+      // FIXED: Check HomePage first and prevent tab rendering if HomePage should show
       if (hasToken && shouldShowHomePage()) {
-        console.log("HomePage should show - setting state immediately");
+        console.log(
+          "HomePage should show - setting state immediately, preventing tab flash"
+        );
         setShowHomePageState(true);
+        setShouldRenderTabs(false); // CRITICAL: Don't render tabs
 
         // Hide splash animation after HomePage state is set
         setTimeout(() => {
@@ -171,8 +172,11 @@ const RootLayout = () => {
           markLoadingComplete();
         }, 100);
 
-        return;
+        return; // Exit early, don't setup tab navigation
       }
+
+      // Only render tabs if HomePage is not showing
+      setShouldRenderTabs(true);
 
       const initialNavigate = async () => {
         try {
@@ -247,6 +251,7 @@ const RootLayout = () => {
     (tabName: string) => {
       console.log("HomePage: Navigating to tab:", tabName);
       setShowHomePageState(false);
+      setShouldRenderTabs(true); // NEW: Enable tab rendering when navigating from HomePage
 
       // Add a small delay to ensure navigation is ready
       setTimeout(() => {
@@ -283,11 +288,12 @@ const RootLayout = () => {
     return <SplashAnimation />;
   }
 
+  // FIXED: Show HomePage without any tab background
   if (showHomePage && hasToken) {
     return <HomePage onNavigateToTab={handleNavigateToTab} context="startup" />;
   }
 
-  // Only render the main app stack if we're not showing HomePage
+  // FIXED: Only render the main app stack if we should render tabs
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
       <SafeAreaProvider>
@@ -299,20 +305,22 @@ const RootLayout = () => {
                   <ValidationProvider>
                     <NotifierWrapper>
                       <View style={{ flex: 1 }}>
-                        <Stack screenOptions={{ headerShown: false }}>
-                          <Stack.Screen
-                            name="index"
-                            options={{ headerShown: false }}
-                          />
-                          <Stack.Screen
-                            name="(auth)"
-                            options={{ headerShown: false }}
-                          />
-                          <Stack.Screen
-                            name="(tabs)"
-                            options={{ headerShown: false }}
-                          />
-                        </Stack>
+                        {shouldRenderTabs && (
+                          <Stack screenOptions={{ headerShown: false }}>
+                            <Stack.Screen
+                              name="index"
+                              options={{ headerShown: false }}
+                            />
+                            <Stack.Screen
+                              name="(auth)"
+                              options={{ headerShown: false }}
+                            />
+                            <Stack.Screen
+                              name="(tabs)"
+                              options={{ headerShown: false }}
+                            />
+                          </Stack>
+                        )}
                       </View>
                     </NotifierWrapper>
                   </ValidationProvider>

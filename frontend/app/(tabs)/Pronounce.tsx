@@ -6,7 +6,10 @@ import React, {
   useMemo,
 } from "react";
 import { View, Text, RefreshControl } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
+import {
+  SafeAreaView,
+  useSafeAreaInsets,
+} from "react-native-safe-area-context";
 import { FlashList } from "@shopify/flash-list";
 import useThemeStore from "@/store/useThemeStore";
 import { getGlobalStyles } from "@/styles/globalStyles";
@@ -210,9 +213,13 @@ const Pronounce = () => {
       </SafeAreaView>
     );
   }
+  const insets = useSafeAreaInsets();
 
   return (
-    <SafeAreaView style={dynamicStyles.container}>
+    <SafeAreaView
+      edges={["left", "right"]}
+      style={[dynamicStyles.container, { paddingTop: insets.top }]}
+    >
       <View style={{ flex: 1 }}>
         {/* Header */}
         <View style={styles.header}>
@@ -264,27 +271,6 @@ const Pronounce = () => {
             containerStyle={styles.dropdownList}
           />
         </View>
-        {/* 
-
-<FlashList
-              data={currentData}
-              renderItem={renderItem}
-              keyExtractor={keyExtractor}
-              ListEmptyComponent={ListEmptyComponent}
-              estimatedItemSize={180}
-              contentContainerStyle={styles.flashListContent}
-              refreshControl={
-                <RefreshControl
-                  refreshing={refreshing}
-                  onRefresh={handleRefresh}
-                  tintColor={activeTheme.secondaryColor}
-                  colors={[activeTheme.secondaryColor]}
-                />
-              }
-              showsVerticalScrollIndicator={false}
-            />
-*/}
-        {/* FLASHLIST - Optimized Implementation */}
         <FlashList
           ref={flashListRef}
           data={displayData}

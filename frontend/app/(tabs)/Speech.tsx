@@ -245,10 +245,9 @@ const Speech = () => {
 
   return (
     <SafeAreaView
-      edges={["top", "left", "right"]}
-      style={[dynamicStyles.container]}
+      edges={["left", "right"]}
+      style={[dynamicStyles.container, { paddingTop: insets.top }]}
     >
-      <StatusBar style="light" />
       <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
         <KeyboardAvoidingView
           behavior={Platform.OS === "ios" ? "padding" : "height"}

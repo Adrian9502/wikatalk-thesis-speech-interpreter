@@ -1,6 +1,9 @@
 import React, { useState } from "react";
 import { FlatList, View } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
+import {
+  SafeAreaView,
+  useSafeAreaInsets,
+} from "react-native-safe-area-context";
 import { StatusBar } from "expo-status-bar";
 import { useAuth } from "@/context/AuthContext";
 import useThemeStore from "@/store/useThemeStore";
@@ -251,11 +254,15 @@ const Settings = () => {
     }
   };
 
+  const insets = useSafeAreaInsets();
+
   return (
     <SafeAreaView
+      edges={["left", "right"]}
       style={[
         globalStyles.container,
         { backgroundColor: activeTheme.backgroundColor },
+        { paddingTop: insets.top },
       ]}
     >
       <StatusBar style="light" />

@@ -9,10 +9,12 @@ import {
   TouchableWithoutFeedback,
   Keyboard,
 } from "react-native";
-import { StatusBar } from "expo-status-bar";
 import { CameraView, useCameraPermissions } from "expo-camera";
 import * as ImagePicker from "expo-image-picker";
-import { SafeAreaView } from "react-native-safe-area-context";
+import {
+  SafeAreaView,
+  useSafeAreaInsets,
+} from "react-native-safe-area-context";
 import { BASE_COLORS } from "@/constant/colors";
 import { useScanTranslateStore } from "@/store/useScanTranslateStore";
 import { useImageProcessing } from "@/hooks/useImageProcessing";
@@ -49,27 +51,18 @@ interface ScanTranslateState {
 }
 
 const Scan: React.FC = () => {
-  // stop ongoing speech
-  useFocusEffect(
-    React.useCallback(() => {
-      console.log("[Scan] Tab focused, stopping all speech");
-      globalSpeechManager.stopAllSpeech();
+  // FIXED: All hooks must be called at the top level, in the same order every time
 
-      return () => {
-        console.log("[Scan] Tab losing focus");
-        globalSpeechManager.stopAllSpeech();
-      };
-    }, [])
-  );
-  // Theme store
+  // Theme and utility hooks first
   const { activeTheme } = useThemeStore();
-
-  // Get the dynamic styles based on the current theme
   const dynamicStyles = getGlobalStyles(activeTheme.backgroundColor);
+  const insets = useSafeAreaInsets();
 
+  // Camera and permissions hooks
   const [permission, requestPermission] = useCameraPermissions();
   const cameraRef = useRef<any>(null);
 
+  // Store hooks
   const {
     targetLanguage,
     sourceText,
@@ -89,12 +82,27 @@ const Scan: React.FC = () => {
     copiedTarget,
   } = useScanTranslateStore() as ScanTranslateState;
 
+  // Processing hooks
   const { isProcessing, ocrProgress, recognizeText } = useImageProcessing();
 
+  // Focus effect for speech management
+  useFocusEffect(
+    React.useCallback(() => {
+      console.log("[Scan] Tab focused, stopping all speech");
+      globalSpeechManager.stopAllSpeech();
+
+      return () => {
+        console.log("[Scan] Tab losing focus");
+        globalSpeechManager.stopAllSpeech();
+      };
+    }, [])
+  );
+
+  // Effects - always in same order
   useEffect(() => {
     clearText();
     return () => stopSpeech();
-  }, []);
+  }, [clearText, stopSpeech]);
 
   // Function to capture image and process it
   const takePicture = async (): Promise<void> => {
@@ -157,11 +165,18 @@ const Scan: React.FC = () => {
     }
   };
 
+  // FIXED: Early returns after all hooks are called
   // Render permission request screen
   if (!permission) {
     return (
-      <SafeAreaView style={[dynamicStyles.container, styles.centeredContainer]}>
-        <StatusBar style="light" />
+      <SafeAreaView
+        edges={["left", "right"]}
+        style={[
+          dynamicStyles.container,
+          styles.centeredContainer,
+          { paddingTop: insets.top },
+        ]}
+      >
         <DotsLoader />
       </SafeAreaView>
     );
@@ -170,8 +185,14 @@ const Scan: React.FC = () => {
   // Render camera permission request
   if (!permission.granted) {
     return (
-      <SafeAreaView style={[dynamicStyles.container, styles.centeredContainer]}>
-        <StatusBar style="light" />
+      <SafeAreaView
+        edges={["left", "right"]}
+        style={[
+          dynamicStyles.container,
+          styles.centeredContainer,
+          { paddingTop: insets.top },
+        ]}
+      >
         <Text style={styles.permissionText}>
           We need your permission to show the camera
         </Text>
@@ -188,12 +209,12 @@ const Scan: React.FC = () => {
 
   return (
     <SafeAreaView
-      style={dynamicStyles.container}
       onStartShouldSetResponder={() => true}
+      edges={["left", "right"]}
+      style={[dynamicStyles.container, { paddingTop: insets.top }]}
     >
       <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
         <View style={{ flex: 1 }}>
-          <StatusBar style="light" />
           <KeyboardAvoidingView
             behavior={Platform.OS === "ios" ? "padding" : "height"}
             style={styles.keyboardView}

@@ -12,6 +12,8 @@ import useThemeStore from "@/store/useThemeStore";
 import { Ionicons } from "@expo/vector-icons";
 import { tabPreloader } from "@/utils/tabPreloader";
 import { useFocusEffect } from "@react-navigation/native";
+import { StatusBar } from "expo-status-bar";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 interface TabIconProps {
   Icon: React.ComponentType<any>;
@@ -99,23 +101,12 @@ const GameIcon: React.FC<IconProps> = React.memo(({ color, width }) => (
 export default function TabsLayout() {
   const { activeTheme } = useThemeStore();
   const segments = useSegments();
+  const insets = useSafeAreaInsets();
+
+  // State hooks - always called in same order
   const [currentTab, setCurrentTab] = useState<string>("Speech");
   const [isTransitioning, setIsTransitioning] = useState(false);
 
-  // FIXED: Use state instead of ref so theme changes trigger re-renders
-  const [tabColors] = useState(() => ({
-    get active() {
-      return activeTheme.tabActiveColor;
-    },
-    get inactive() {
-      return activeTheme.tabInactiveColor;
-    },
-    get background() {
-      return activeTheme.tabBarColor;
-    },
-  }));
-
-  // FIXED: Create reactive colors that update with theme
   const currentTabColors = useMemo(
     () => ({
       active: activeTheme.tabActiveColor,
@@ -160,29 +151,6 @@ export default function TabsLayout() {
     // Default fallback
     return segments[segments.length - 1] || "Speech";
   }, []);
-
-  // Track current tab from segments with better logic
-  useEffect(() => {
-    const mainTab = getMainTabFromSegments(segments);
-
-    if (mainTab && mainTab !== currentTab) {
-      const prevTab = currentTab;
-      setCurrentTab(mainTab);
-
-      // Only handle tab transitions for actual main tab changes
-      const mainTabs = [
-        "Speech",
-        "Translate",
-        "Scan",
-        "Games",
-        "Pronounce",
-        "Settings",
-      ];
-      if (mainTabs.includes(mainTab) && mainTabs.includes(prevTab)) {
-        handleTabTransition(prevTab, mainTab);
-      }
-    }
-  }, [segments, currentTab, getMainTabFromSegments]);
 
   // Optimized tab transition handler
   const handleTabTransition = useCallback(
@@ -230,6 +198,29 @@ export default function TabsLayout() {
     },
     [isTransitioning]
   );
+
+  // Track current tab from segments with better logic
+  useEffect(() => {
+    const mainTab = getMainTabFromSegments(segments);
+
+    if (mainTab && mainTab !== currentTab) {
+      const prevTab = currentTab;
+      setCurrentTab(mainTab);
+
+      // Only handle tab transitions for actual main tab changes
+      const mainTabs = [
+        "Speech",
+        "Translate",
+        "Scan",
+        "Games",
+        "Pronounce",
+        "Settings",
+      ];
+      if (mainTabs.includes(mainTab) && mainTabs.includes(prevTab)) {
+        handleTabTransition(prevTab, mainTab);
+      }
+    }
+  }, [segments, currentTab, getMainTabFromSegments, handleTabTransition]);
 
   // Focus effect for additional optimizations
   useFocusEffect(
@@ -303,7 +294,7 @@ export default function TabsLayout() {
           }}
         />
       ),
-    [currentTabColors.background] // FIXED: Add dependency on background color
+    [currentTabColors.background]
   );
 
   // FIXED: Memoize screen options to respond to theme changes
@@ -317,6 +308,7 @@ export default function TabsLayout() {
         height: 60,
         paddingTop: 10,
         borderTopWidth: 0,
+        paddingBottom: Math.max(insets.bottom, 8),
       },
       tabBarBackground: TabBarBackground,
       // Add lazy loading for better performance
@@ -324,31 +316,38 @@ export default function TabsLayout() {
       // Optimize header settings
       headerShown: false,
     }),
-    [currentTabColors, TabBarBackground] // FIXED: Add dependencies
+    [currentTabColors, TabBarBackground, insets.bottom]
   );
 
   return (
-    <Tabs screenOptions={screenOptions}>
-      {tabScreens.map(({ name, title, icon: Icon, iconName }) => (
-        <Tabs.Screen
-          key={name}
-          name={name}
-          options={{
-            title,
-            headerShown: false,
-            tabBarIcon: ({ color, focused }) => (
-              <TabIcon
-                Icon={Icon}
-                color={color}
-                name={iconName}
-                focused={focused}
-              />
-            ),
-            // Optimize each tab screen
-            lazy: name !== "Speech", // Don't lazy load default tab
-          }}
-        />
-      ))}
-    </Tabs>
+    <View style={{ flex: 1 }}>
+      <StatusBar
+        style="light"
+        backgroundColor={activeTheme.backgroundColor}
+        translucent={false}
+      />
+      <Tabs screenOptions={screenOptions}>
+        {tabScreens.map(({ name, title, icon: Icon, iconName }) => (
+          <Tabs.Screen
+            key={name}
+            name={name}
+            options={{
+              title,
+              headerShown: false,
+              tabBarIcon: ({ color, focused }) => (
+                <TabIcon
+                  Icon={Icon}
+                  color={color}
+                  name={iconName}
+                  focused={focused}
+                />
+              ),
+              // Optimize each tab screen
+              lazy: name !== "Speech", // Don't lazy load default tab
+            }}
+          />
+        ))}
+      </Tabs>
+    </View>
   );
 }

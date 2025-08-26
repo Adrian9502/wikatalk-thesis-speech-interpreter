@@ -59,8 +59,6 @@ const HomePagePreview: React.FC = () => {
         { backgroundColor: activeTheme.backgroundColor },
       ]}
     >
-      <StatusBar style="light" />
-
       {/* HomePage Component with settings context */}
       <View style={styles.homePageContainer}>
         <HomePage

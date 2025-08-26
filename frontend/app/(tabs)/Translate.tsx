@@ -6,7 +6,10 @@ import {
   Keyboard,
   View,
 } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
+import {
+  SafeAreaView,
+  useSafeAreaInsets,
+} from "react-native-safe-area-context";
 import TranslateSection from "@/components/translate/TranslateSection";
 import {
   useTranslateStore,
@@ -67,7 +70,7 @@ const Translate = () => {
       debouncedTranslate.cancel();
     };
   }, [sourceText, sourceLanguage, targetLanguage, updateState]);
-
+  const insets = useSafeAreaInsets();
   // Handle dismissing the keyboard
   const dismissKeyboard = () => {
     Keyboard.dismiss();
@@ -80,7 +83,10 @@ const Translate = () => {
         style={{ flex: 1 }}
         keyboardVerticalOffset={Platform.OS === "ios" ? 0 : -100}
       >
-        <SafeAreaView style={dynamicStyles.container}>
+        <SafeAreaView
+          edges={["left", "right"]}
+          style={[dynamicStyles.container, { paddingTop: insets.top }]}
+        >
           <View style={{ flex: 1 }}>
             <TranslateSection />
           </View>

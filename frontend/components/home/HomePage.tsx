@@ -9,7 +9,10 @@ import {
   Image,
   Dimensions,
 } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
+import {
+  SafeAreaView,
+  useSafeAreaInsets,
+} from "react-native-safe-area-context";
 import { LinearGradient } from "expo-linear-gradient";
 import { StatusBar } from "expo-status-bar";
 import {
@@ -55,6 +58,7 @@ const HomePage: React.FC<HomePageProps> = ({
   const { userData } = useAuth();
   const { coins } = useCoinsStore();
   const { wordOfTheDay, getWordOfTheDay } = usePronunciationStore();
+  const insets = useSafeAreaInsets();
 
   const overallStats = useFormattedStats();
   const totalPronunciationsCount = useTotalPronunciationsCount();
@@ -217,261 +221,271 @@ const HomePage: React.FC<HomePageProps> = ({
   };
 
   return (
-    <SafeAreaView
-      style={[
-        styles.container,
-        { backgroundColor: activeTheme.backgroundColor },
-      ]}
-    >
-      <StatusBar style="light" />
+    <View style={{ flex: 1, backgroundColor: activeTheme.backgroundColor }}>
+      <StatusBar
+        style="light"
+        backgroundColor={activeTheme.backgroundColor}
+        translucent={false}
+      />
 
-      <Animated.View
+      <SafeAreaView
+        edges={["left", "right", "bottom"]}
         style={[
-          styles.content,
+          styles.container,
           {
-            opacity: fadeAnim,
-            transform: [{ translateY: slideAnim }],
+            backgroundColor: activeTheme.backgroundColor,
+            paddingTop: insets.top,
           },
         ]}
       >
-        <ScrollView
-          bounces={false}
-          overScrollMode="never"
-          showsVerticalScrollIndicator={false}
-          contentContainerStyle={styles.scrollContent}
+        <Animated.View
+          style={[
+            styles.content,
+            {
+              opacity: fadeAnim,
+              transform: [{ translateY: slideAnim }],
+            },
+          ]}
         >
-          {/* Header Section */}
-          <View style={styles.header}>
-            <AppName />
+          <ScrollView
+            bounces={false}
+            overScrollMode="never"
+            showsVerticalScrollIndicator={false}
+            contentContainerStyle={styles.scrollContent}
+          >
+            {/* Header Section */}
+            <View style={styles.header}>
+              <AppName />
 
-            {userData && (
-              <Text
-                style={[
-                  styles.welcomeText,
-                  { color: activeTheme.tabActiveColor },
-                ]}
-              >
-                Welcome back, {firstName}!
-              </Text>
-            )}
-            {/* Only show back button in settings context */}
-            {context === "settings" && (
+              {userData && (
+                <Text
+                  style={[
+                    styles.welcomeText,
+                    { color: activeTheme.tabActiveColor },
+                  ]}
+                >
+                  Welcome back, {firstName}!
+                </Text>
+              )}
+              {/* Only show back button in settings context */}
+              {context === "settings" && (
+                <TouchableOpacity
+                  style={styles.backButton}
+                  onPress={handleBackPress}
+                  activeOpacity={0.7}
+                  hitSlop={{ top: 20, left: 20, right: 20, bottom: 20 }}
+                >
+                  <ArrowLeft
+                    width={16}
+                    height={16}
+                    color={activeTheme.tabActiveColor}
+                  />
+                </TouchableOpacity>
+              )}
+
               <TouchableOpacity
-                style={styles.backButton}
-                onPress={handleBackPress}
+                style={styles.settingsButton}
+                onPress={handleSettingsPress}
                 activeOpacity={0.7}
-                hitSlop={{ top: 20, left: 20, right: 20, bottom: 20 }}
               >
-                <ArrowLeft
+                <Settings
                   width={16}
                   height={16}
                   color={activeTheme.tabActiveColor}
                 />
               </TouchableOpacity>
-            )}
+            </View>
 
-            <TouchableOpacity
-              style={styles.settingsButton}
-              onPress={handleSettingsPress}
-              activeOpacity={0.7}
-            >
-              <Settings
-                width={16}
-                height={16}
-                color={activeTheme.tabActiveColor}
-              />
-            </TouchableOpacity>
-          </View>
+            {/* Featured Content Carousel */}
+            <View style={styles.featuredSection}>
+              <View style={styles.featuredHeader}>
+                <Text style={[styles.sectionTitle]}>Featured Today</Text>
+                <View style={styles.carouselDots}>
+                  {features.map((_, index) => (
+                    <View
+                      key={index}
+                      style={[
+                        styles.dot,
+                        {
+                          backgroundColor:
+                            index === activeFeatureIndex
+                              ? activeTheme.secondaryColor
+                              : "rgba(255, 255, 255, 0.3)",
+                        },
+                      ]}
+                    />
+                  ))}
+                </View>
+              </View>
 
-          {/* Featured Content Carousel */}
-          <View style={styles.featuredSection}>
-            <View style={styles.featuredHeader}>
-              <Text style={[styles.sectionTitle]}>Featured Today</Text>
-              <View style={styles.carouselDots}>
-                {features.map((_, index) => (
-                  <View
-                    key={index}
-                    style={[
-                      styles.dot,
-                      {
-                        backgroundColor:
-                          index === activeFeatureIndex
-                            ? activeTheme.secondaryColor
-                            : "rgba(255, 255, 255, 0.3)",
-                      },
-                    ]}
-                  />
+              <TouchableOpacity
+                style={styles.featuredCard}
+                onPress={() =>
+                  handleFeaturePress(features[activeFeatureIndex].tabName)
+                }
+                activeOpacity={0.8}
+              >
+                <LinearGradient
+                  colors={features[activeFeatureIndex].gradient}
+                  style={styles.featuredGradient}
+                  start={{ x: 0, y: 0 }}
+                  end={{ x: 1, y: 1 }}
+                >
+                  <View style={styles.featuredContent}>
+                    <View style={styles.featuredIconContainer}>
+                      {features[activeFeatureIndex].icon}
+                    </View>
+                    <View style={styles.featuredText}>
+                      <Text style={styles.featuredTitle}>
+                        {features[activeFeatureIndex].title}
+                      </Text>
+                      <Text style={styles.featuredDescription}>
+                        {features[activeFeatureIndex].description}
+                      </Text>
+                    </View>
+                  </View>
+                  <View style={styles.featuredDecor1} />
+                  <View style={styles.featuredDecor2} />
+                </LinearGradient>
+              </TouchableOpacity>
+            </View>
+
+            {/* Dialect Stats Section */}
+            <View style={styles.statsSection}>
+              <Text style={[styles.sectionTitle]}>Platform Overview</Text>
+              <View style={styles.statsContainer}>
+                {dialectStats.map((stat, index) => (
+                  <View key={index} style={styles.statItem}>
+                    <Text
+                      style={[
+                        styles.statNumber,
+                        { color: activeTheme.tabActiveColor },
+                      ]}
+                    >
+                      {stat.count}
+                    </Text>
+                    <Text style={styles.statLabel}>{stat.label}</Text>
+                  </View>
                 ))}
               </View>
             </View>
 
-            <TouchableOpacity
-              style={styles.featuredCard}
-              onPress={() =>
-                handleFeaturePress(features[activeFeatureIndex].tabName)
-              }
-              activeOpacity={0.8}
-            >
-              <LinearGradient
-                colors={features[activeFeatureIndex].gradient}
-                style={styles.featuredGradient}
-                start={{ x: 0, y: 0 }}
-                end={{ x: 1, y: 1 }}
-              >
-                <View style={styles.featuredContent}>
-                  <View style={styles.featuredIconContainer}>
-                    {features[activeFeatureIndex].icon}
-                  </View>
-                  <View style={styles.featuredText}>
-                    <Text style={styles.featuredTitle}>
-                      {features[activeFeatureIndex].title}
-                    </Text>
-                    <Text style={styles.featuredDescription}>
-                      {features[activeFeatureIndex].description}
-                    </Text>
-                  </View>
-                </View>
-                <View style={styles.featuredDecor1} />
-                <View style={styles.featuredDecor2} />
-              </LinearGradient>
-            </TouchableOpacity>
-          </View>
-
-          {/* Dialect Stats Section */}
-          <View style={styles.statsSection}>
-            <Text style={[styles.sectionTitle]}>Platform Overview</Text>
-            <View style={styles.statsContainer}>
-              {dialectStats.map((stat, index) => (
-                <View key={index} style={styles.statItem}>
-                  <Text
-                    style={[
-                      styles.statNumber,
-                      { color: activeTheme.tabActiveColor },
-                    ]}
-                  >
-                    {stat.count}
-                  </Text>
-                  <Text style={styles.statLabel}>{stat.label}</Text>
-                </View>
-              ))}
-            </View>
-          </View>
-
-          {/* All Features Section */}
-          <View style={styles.allFeaturesSection}>
-            <Text style={[styles.sectionTitle]}>All Features</Text>
-            {features.map((feature, index) => (
-              <TouchableOpacity
-                key={index}
-                style={styles.featureCard}
-                onPress={() => handleFeaturePress(feature.tabName)}
-                activeOpacity={0.8}
-              >
-                <LinearGradient
-                  colors={feature.gradient}
-                  style={styles.featureGradient}
-                  start={{ x: 0, y: 0 }}
-                  end={{ x: 1, y: 1 }}
+            {/* All Features Section */}
+            <View style={styles.allFeaturesSection}>
+              <Text style={[styles.sectionTitle]}>All Features</Text>
+              {features.map((feature, index) => (
+                <TouchableOpacity
+                  key={index}
+                  style={styles.featureCard}
+                  onPress={() => handleFeaturePress(feature.tabName)}
+                  activeOpacity={0.8}
                 >
-                  <View style={styles.featureIconContainer}>
-                    {feature.icon}
-                  </View>
-
-                  <View style={styles.featureContent}>
-                    <Text style={styles.featureTitle}>{feature.title}</Text>
-                    <Text style={styles.featureDescription}>
-                      {feature.description}
-                    </Text>
-                  </View>
-
-                  <View style={styles.featureDecor1} />
-                  <View style={styles.featureDecor2} />
-                </LinearGradient>
-              </TouchableOpacity>
-            ))}
-          </View>
-
-          {/* Quick Stats Cards */}
-          <View style={styles.quickStatsSection}>
-            <Text style={[styles.sectionTitle]}>Your Game Progress</Text>
-            <View style={styles.quickStatsGrid}>
-              {quickStats.map((stat, index) => (
-                <View key={index} style={styles.quickStatCard}>
-                  <View style={styles.quickStatHeader}>
-                    {stat.icon}
-                    <Text style={styles.quickStatLabel}>{stat.label}</Text>
-                  </View>
-                  <Text
-                    style={[
-                      styles.quickStatValue,
-                      { color: activeTheme.tabActiveColor },
-                    ]}
+                  <LinearGradient
+                    colors={feature.gradient}
+                    style={styles.featureGradient}
+                    start={{ x: 0, y: 0 }}
+                    end={{ x: 1, y: 1 }}
                   >
-                    {stat.value}
-                  </Text>
-                  {stat.subValue && (
-                    <Text style={styles.quickStatSubValue}>
-                      {stat.subValue}
-                    </Text>
-                  )}
-                </View>
+                    <View style={styles.featureIconContainer}>
+                      {feature.icon}
+                    </View>
+
+                    <View style={styles.featureContent}>
+                      <Text style={styles.featureTitle}>{feature.title}</Text>
+                      <Text style={styles.featureDescription}>
+                        {feature.description}
+                      </Text>
+                    </View>
+
+                    <View style={styles.featureDecor1} />
+                    <View style={styles.featureDecor2} />
+                  </LinearGradient>
+                </TouchableOpacity>
               ))}
             </View>
-          </View>
 
-          {/* Rankings Section */}
-          <View style={styles.rankingsHeader}>
-            <Text style={[styles.sectionTitle]}>Games Rankings</Text>
-          </View>
-          <View style={styles.rankingsSection}>
-            {/* Rankings Category Selector - Same as in RankingsModal */}
-            <RankingCategorySelector
-              selectedCategory={selectedRankingCategory}
-              onCategorySelect={handleRankingCategorySelect}
-            />
-
-            {/* Rankings Content - Same as in RankingsModal but without modal wrapper */}
-            <View style={styles.rankingsContentContainer}>
-              <RankingContent
-                selectedCategory={selectedRankingCategory}
-                visible={true}
-              />
+            {/* Quick Stats Cards */}
+            <View style={styles.quickStatsSection}>
+              <Text style={[styles.sectionTitle]}>Your Game Progress</Text>
+              <View style={styles.quickStatsGrid}>
+                {quickStats.map((stat, index) => (
+                  <View key={index} style={styles.quickStatCard}>
+                    <View style={styles.quickStatHeader}>
+                      {stat.icon}
+                      <Text style={styles.quickStatLabel}>{stat.label}</Text>
+                    </View>
+                    <Text
+                      style={[
+                        styles.quickStatValue,
+                        { color: activeTheme.tabActiveColor },
+                      ]}
+                    >
+                      {stat.value}
+                    </Text>
+                    {stat.subValue && (
+                      <Text style={styles.quickStatSubValue}>
+                        {stat.subValue}
+                      </Text>
+                    )}
+                  </View>
+                ))}
+              </View>
             </View>
-          </View>
 
-          {/* Skip Option - only for startup context */}
-          {context === "startup" && (
-            <TouchableOpacity
-              style={styles.checkboxContainer}
-              onPress={() => setDontShowAgain(!dontShowAgain)}
-              activeOpacity={0.7}
-            >
-              {dontShowAgain ? (
-                <CheckSquare
-                  width={16}
-                  height={16}
-                  color={activeTheme.secondaryColor}
+            {/* Rankings Section */}
+            <View style={styles.rankingsHeader}>
+              <Text style={[styles.sectionTitle]}>Games Rankings</Text>
+            </View>
+            <View style={styles.rankingsSection}>
+              {/* Rankings Category Selector - Same as in RankingsModal */}
+              <RankingCategorySelector
+                selectedCategory={selectedRankingCategory}
+                onCategorySelect={handleRankingCategorySelect}
+              />
+
+              {/* Rankings Content - Same as in RankingsModal but without modal wrapper */}
+              <View style={styles.rankingsContentContainer}>
+                <RankingContent
+                  selectedCategory={selectedRankingCategory}
+                  visible={true}
                 />
-              ) : (
-                <Square
-                  width={16}
-                  height={16}
-                  color={activeTheme.tabActiveColor}
-                />
-              )}
-              <Text
-                style={[
-                  styles.checkboxText,
-                  { color: activeTheme.tabActiveColor },
-                ]}
+              </View>
+            </View>
+
+            {/* Skip Option - only for startup context */}
+            {context === "startup" && (
+              <TouchableOpacity
+                style={styles.checkboxContainer}
+                onPress={() => setDontShowAgain(!dontShowAgain)}
+                activeOpacity={0.7}
               >
-                Skip this screen next time
-              </Text>
-            </TouchableOpacity>
-          )}
-        </ScrollView>
-      </Animated.View>
-    </SafeAreaView>
+                {dontShowAgain ? (
+                  <CheckSquare
+                    width={16}
+                    height={16}
+                    color={activeTheme.secondaryColor}
+                  />
+                ) : (
+                  <Square
+                    width={16}
+                    height={16}
+                    color={activeTheme.tabActiveColor}
+                  />
+                )}
+                <Text
+                  style={[
+                    styles.checkboxText,
+                    { color: activeTheme.tabActiveColor },
+                  ]}
+                >
+                  Don't show this page again on startup
+                </Text>
+              </TouchableOpacity>
+            )}
+          </ScrollView>
+        </Animated.View>
+      </SafeAreaView>
+    </View>
   );
 };
 

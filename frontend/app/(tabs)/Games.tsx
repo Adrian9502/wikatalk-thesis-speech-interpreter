@@ -1,6 +1,9 @@
 import React, { useEffect, useState, useCallback, useRef } from "react";
 import { StyleSheet, View, ScrollView } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
+import {
+  SafeAreaView,
+  useSafeAreaInsets,
+} from "react-native-safe-area-context";
 import { useFocusEffect } from "@react-navigation/native";
 
 import useThemeStore from "@/store/useThemeStore";
@@ -31,7 +34,43 @@ let GAMES_INITIALIZED = false;
 let INITIALIZATION_PROMISE: Promise<void> | null = null;
 
 const Games = () => {
-  // stop speech
+  // FIXED: All hooks must be called at the top level, in the same order every time
+
+  // Theme and utility hooks first
+  const { activeTheme } = useThemeStore();
+  const dynamicStyles = getGlobalStyles(activeTheme.backgroundColor);
+  const insets = useSafeAreaInsets();
+  const finishLoadTracking = useComponentLoadTime("Games");
+
+  // Modal hooks
+  const { showProgressModal } = useProgressModal();
+  const { showRankingsModal } = useRankingsModal();
+
+  // Store hooks
+  const { fetchProgress } = useProgressStore();
+  const { wordOfTheDay, isWordOfDayPlaying, getWordOfTheDay, playWordOfDay } =
+    usePronunciationStore();
+
+  // Custom hook for dashboard logic
+  const {
+    wordOfDayModalVisible,
+    isAudioLoading,
+    setWordOfDayModalVisible,
+    isDailyRewardsModalVisible,
+    hideDailyRewardsModal,
+    openRewardsModal,
+    handleGamePress,
+  } = useGameDashboard();
+
+  // State hooks - always in same order
+  const [hasInitialized, setHasInitialized] = useState(GAMES_INITIALIZED);
+  const [hasError, setHasError] = useState(false);
+
+  // Ref hooks - always in same order
+  const lastClickRef = useRef<number>(0);
+  const focusRefreshInProgress = useRef(false);
+
+  // Focus effect for speech management
   useFocusEffect(
     React.useCallback(() => {
       console.log("[Games] Tab focused, stopping all speech");
@@ -43,51 +82,6 @@ const Games = () => {
       };
     }, [])
   );
-  // Performance monitoring for development
-  const finishLoadTracking = useComponentLoadTime("Games");
-
-  // Get the progress modal functions
-  const { showProgressModal } = useProgressModal();
-
-  // Theme store
-  const { activeTheme } = useThemeStore();
-  const dynamicStyles = getGlobalStyles(activeTheme.backgroundColor);
-
-  // FIXED: Use global state + local state
-  const [hasInitialized, setHasInitialized] = useState(GAMES_INITIALIZED);
-  const [hasError, setHasError] = useState(false);
-
-  // FIXED: Persistent refs that don't reset
-  const lastClickRef = useRef<number>(0);
-  const focusRefreshInProgress = useRef(false);
-
-  // Get the rankings modal functions
-  const { showRankingsModal } = useRankingsModal();
-
-  // Get progress from centralized store
-  const { fetchProgress } = useProgressStore();
-
-  // Get the correct Word of Day functions from pronunciation store
-  const {
-    wordOfTheDay,
-    isWordOfDayPlaying,
-    getWordOfTheDay,
-    playWordOfDay, // This is the correct function name
-  } = usePronunciationStore();
-
-  // Custom hook for dashboard logic (excluding Word of Day which we handle here)
-  const {
-    // Remove wordOfTheDay from here since we're getting it from pronunciation store
-    wordOfDayModalVisible,
-    // Remove isWordOfDayPlaying from here
-    isAudioLoading,
-    setWordOfDayModalVisible,
-    // Remove playWordOfDayAudio since we'll use playWordOfDay
-    isDailyRewardsModalVisible,
-    hideDailyRewardsModal,
-    openRewardsModal,
-    handleGamePress,
-  } = useGameDashboard();
 
   // Initialize Word of the Day when component mounts
   useEffect(() => {
@@ -167,7 +161,7 @@ const Games = () => {
     };
 
     INITIALIZATION_PROMISE = initializeOnce();
-  }, []);
+  }, [fetchProgress, finishLoadTracking]);
 
   // Enhanced focus effect to ensure fresh data display
   useFocusEffect(
@@ -217,13 +211,13 @@ const Games = () => {
   );
 
   // Handle retry
-  const handleRetry = () => {
+  const handleRetry = useCallback(() => {
     setHasError(false);
     // Reset global state on manual retry
     GAMES_INITIALIZED = false;
     INITIALIZATION_PROMISE = null;
     setHasInitialized(false);
-  };
+  }, []);
 
   const handleProgressPress = useCallback(
     (gameId: string, gameTitle: string) => {
@@ -240,6 +234,7 @@ const Games = () => {
     [showProgressModal]
   );
 
+  // FIXED: Early returns after all hooks are called
   if (!hasInitialized && !hasError) {
     return <AppLoading />;
   }
@@ -253,7 +248,10 @@ const Games = () => {
           { backgroundColor: activeTheme.backgroundColor },
         ]}
       >
-        <SafeAreaView style={[dynamicStyles.container, styles.container]}>
+        <SafeAreaView
+          edges={["left", "right"]}
+          style={[dynamicStyles.container, { paddingTop: insets.top }]}
+        >
           <ErrorDisplay
             message="Unable to load game data. Please check your connection and try again."
             onRetry={handleRetry}
@@ -267,7 +265,10 @@ const Games = () => {
     <View
       style={[styles.wrapper, { backgroundColor: activeTheme.backgroundColor }]}
     >
-      <SafeAreaView style={[dynamicStyles.container, styles.container]}>
+      <SafeAreaView
+        edges={["left", "right"]}
+        style={[dynamicStyles.container, { paddingTop: insets.top }]}
+      >
         <ScrollView
           showsVerticalScrollIndicator={false}
           contentContainerStyle={styles.scrollContent}
@@ -319,10 +320,6 @@ const styles = StyleSheet.create({
   wrapper: {
     flex: 1,
     position: "relative",
-  },
-  container: {
-    flex: 1,
-    paddingHorizontal: 20,
   },
   scrollContent: {
     paddingBottom: 15,
