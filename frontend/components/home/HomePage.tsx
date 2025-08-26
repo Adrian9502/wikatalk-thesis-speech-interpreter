@@ -212,7 +212,6 @@ const HomePage: React.FC<HomePageProps> = ({
     }
   };
 
-  // NEW: Handle ranking category selection
   const handleRankingCategorySelect = (categoryId: string) => {
     setSelectedRankingCategory(categoryId);
   };
@@ -236,6 +235,8 @@ const HomePage: React.FC<HomePageProps> = ({
         ]}
       >
         <ScrollView
+          bounces={false}
+          overScrollMode="never"
           showsVerticalScrollIndicator={false}
           contentContainerStyle={styles.scrollContent}
         >
@@ -244,16 +245,14 @@ const HomePage: React.FC<HomePageProps> = ({
             <AppName />
 
             {userData && (
-              <View style={styles.welcomeContainer}>
-                <Text
-                  style={[
-                    styles.welcomeText,
-                    { color: activeTheme.tabActiveColor },
-                  ]}
-                >
-                  Welcome back, {firstName}!
-                </Text>
-              </View>
+              <Text
+                style={[
+                  styles.welcomeText,
+                  { color: activeTheme.tabActiveColor },
+                ]}
+              >
+                Welcome back, {firstName}!
+              </Text>
             )}
             {/* Only show back button in settings context */}
             {context === "settings" && (
@@ -284,52 +283,10 @@ const HomePage: React.FC<HomePageProps> = ({
             </TouchableOpacity>
           </View>
 
-          {/* Quick Stats Cards */}
-          <View style={styles.quickStatsSection}>
-            <Text
-              style={[
-                styles.sectionTitle,
-                { color: activeTheme.tabActiveColor },
-              ]}
-            >
-              Your Game Progress
-            </Text>
-            <View style={styles.quickStatsGrid}>
-              {quickStats.map((stat, index) => (
-                <View key={index} style={styles.quickStatCard}>
-                  <View style={styles.quickStatHeader}>
-                    {stat.icon}
-                    <Text style={styles.quickStatLabel}>{stat.label}</Text>
-                  </View>
-                  <Text
-                    style={[
-                      styles.quickStatValue,
-                      { color: activeTheme.tabActiveColor },
-                    ]}
-                  >
-                    {stat.value}
-                  </Text>
-                  {stat.subValue && (
-                    <Text style={styles.quickStatSubValue}>
-                      {stat.subValue}
-                    </Text>
-                  )}
-                </View>
-              ))}
-            </View>
-          </View>
-
           {/* Featured Content Carousel */}
           <View style={styles.featuredSection}>
             <View style={styles.featuredHeader}>
-              <Text
-                style={[
-                  styles.sectionTitle,
-                  { color: activeTheme.tabActiveColor },
-                ]}
-              >
-                Featured Today
-              </Text>
+              <Text style={[styles.sectionTitle]}>Featured Today</Text>
               <View style={styles.carouselDots}>
                 {features.map((_, index) => (
                   <View
@@ -382,14 +339,7 @@ const HomePage: React.FC<HomePageProps> = ({
 
           {/* Dialect Stats Section */}
           <View style={styles.statsSection}>
-            <Text
-              style={[
-                styles.sectionTitle,
-                { color: activeTheme.tabActiveColor },
-              ]}
-            >
-              Platform Overview
-            </Text>
+            <Text style={[styles.sectionTitle]}>Platform Overview</Text>
             <View style={styles.statsContainer}>
               {dialectStats.map((stat, index) => (
                 <View key={index} style={styles.statItem}>
@@ -409,14 +359,7 @@ const HomePage: React.FC<HomePageProps> = ({
 
           {/* All Features Section */}
           <View style={styles.allFeaturesSection}>
-            <Text
-              style={[
-                styles.sectionTitle,
-                { color: activeTheme.tabActiveColor },
-              ]}
-            >
-              All Features
-            </Text>
+            <Text style={[styles.sectionTitle]}>All Features</Text>
             {features.map((feature, index) => (
               <TouchableOpacity
                 key={index}
@@ -448,16 +391,37 @@ const HomePage: React.FC<HomePageProps> = ({
             ))}
           </View>
 
+          {/* Quick Stats Cards */}
+          <View style={styles.quickStatsSection}>
+            <Text style={[styles.sectionTitle]}>Your Game Progress</Text>
+            <View style={styles.quickStatsGrid}>
+              {quickStats.map((stat, index) => (
+                <View key={index} style={styles.quickStatCard}>
+                  <View style={styles.quickStatHeader}>
+                    {stat.icon}
+                    <Text style={styles.quickStatLabel}>{stat.label}</Text>
+                  </View>
+                  <Text
+                    style={[
+                      styles.quickStatValue,
+                      { color: activeTheme.tabActiveColor },
+                    ]}
+                  >
+                    {stat.value}
+                  </Text>
+                  {stat.subValue && (
+                    <Text style={styles.quickStatSubValue}>
+                      {stat.subValue}
+                    </Text>
+                  )}
+                </View>
+              ))}
+            </View>
+          </View>
+
           {/* Rankings Section */}
           <View style={styles.rankingsHeader}>
-            <Text
-              style={[
-                styles.sectionTitle,
-                { color: activeTheme.tabActiveColor },
-              ]}
-            >
-              Games Rankings
-            </Text>
+            <Text style={[styles.sectionTitle]}>Games Rankings</Text>
           </View>
           <View style={styles.rankingsSection}>
             {/* Rankings Category Selector - Same as in RankingsModal */}
@@ -520,7 +484,6 @@ const styles = StyleSheet.create({
   },
   scrollContent: {
     paddingHorizontal: 20,
-    paddingBottom: 40,
   },
   header: {
     alignItems: "flex-start",
@@ -545,23 +508,16 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     backgroundColor: "rgba(255, 255, 255, 0.2)",
   },
-  welcomeContainer: {
-    backgroundColor: "rgba(255, 255, 255, 0.1)",
-    borderColor: "rgba(255, 255, 255, 0.11)",
-    borderWidth: 1,
-    paddingHorizontal: 16,
-    paddingVertical: 6,
-    borderRadius: 20,
-  },
   welcomeText: {
     fontSize: 12,
     fontFamily: "Poppins-Medium",
-    textAlign: "center",
+    textAlign: "left",
   },
   sectionTitle: {
     fontSize: 14,
     fontFamily: "Poppins-SemiBold",
     marginBottom: 16,
+    color: BASE_COLORS.white,
   },
   // Quick Stats Section
   rewardCoinImage: {
@@ -789,7 +745,6 @@ const styles = StyleSheet.create({
     borderColor: "rgba(255, 255, 255, 0.15)",
     borderWidth: 1,
     padding: 16,
-    marginBottom: 12,
     borderRadius: 20,
   },
   rankingsHeader: {

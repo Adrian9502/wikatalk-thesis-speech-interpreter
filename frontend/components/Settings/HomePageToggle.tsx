@@ -16,18 +16,16 @@ const HomePageToggle: React.FC = () => {
   };
 
   return (
-    <View style={styles.container}>
+    <>
       <SectionTitle title="Startup" />
       <View style={styles.card}>
         {/* Homepage Toggle Switch using SettingItem */}
         <SettingItem
           icon="home"
-          label="Show welcome screen on startup"
-          description="Display welcome page on app startup"
+          label="Show Homepage on startup"
           showSwitch={true}
           switchValue={showHomePage}
           onSwitchChange={setShowHomePage}
-          customContainerStyle={styles.switchItemContainer}
         />
 
         {/* Divider */}
@@ -35,22 +33,17 @@ const HomePageToggle: React.FC = () => {
 
         {/* Navigate to HomePage Button using SettingItem */}
         <SettingItem
-          icon="home"
+          icon="arrow-right"
           label="View Home Page"
-          description="Preview the welcome screen"
           onPress={handleNavigateToHomePage}
-          customContainerStyle={styles.navigationItemContainer}
           customIconColor={activeTheme.secondaryColor}
         />
       </View>
-    </View>
+    </>
   );
 };
 
 const styles = StyleSheet.create({
-  container: {
-    marginTop: 16,
-  },
   sectionTitle: {
     fontSize: 13,
     fontFamily: "Poppins-Medium",
@@ -67,17 +60,10 @@ const styles = StyleSheet.create({
     elevation: 3,
     marginBottom: 16,
   },
-  switchItemContainer: {
-    paddingVertical: 16,
-  },
   divider: {
     height: 1,
     backgroundColor: "#f0f0f0",
     marginHorizontal: 16,
-  },
-  navigationItemContainer: {
-    paddingVertical: 16,
-    backgroundColor: "rgba(59, 111, 229, 0.02)",
   },
 });
 
