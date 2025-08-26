@@ -14,6 +14,7 @@ import { RankingType, RankingUser } from "@/types/rankingTypes";
 import { getRankingCategory } from "@/constant/rankingConstants";
 import RankingItem from "./RankingItem";
 import { BASE_COLORS, ICON_COLORS } from "@/constant/colors";
+import { useAuth } from "@/context/AuthContext"; // Add this import
 
 interface RankingContentProps {
   selectedCategory: string;
@@ -24,6 +25,11 @@ const RankingContent: React.FC<RankingContentProps> = ({
   selectedCategory,
   visible,
 }) => {
+  // Get current user data for proper identification
+  const { userData } = useAuth();
+  const currentUserId = userData?.id || userData?._id;
+  const currentUsername = userData?.username;
+
   // Only fetch when component is visible
   const { data, isLoading, error, refresh } = useRankings(
     selectedCategory,
@@ -43,6 +49,21 @@ const RankingContent: React.FC<RankingContentProps> = ({
   const selectedCategoryData = useMemo(() => {
     return getRankingCategory(selectedCategory);
   }, [selectedCategory]);
+
+  // FIXED: Helper function to identify current user
+  const isCurrentUserItem = (user: RankingUser): boolean => {
+    // Primary check: user ID
+    if (currentUserId && user.userId) {
+      return user.userId.toString() === currentUserId.toString();
+    }
+
+    // Fallback: username (exact match)
+    if (currentUsername && user.username) {
+      return user.username.toLowerCase() === currentUsername.toLowerCase();
+    }
+
+    return false;
+  };
 
   // Refresh handler
   const handleRefresh = () => {
@@ -74,6 +95,7 @@ const RankingContent: React.FC<RankingContentProps> = ({
       </View>
     );
   }
+
   if (data && (!data.rankings || data.rankings.length === 0)) {
     return (
       <View style={styles.centerContainer}>
@@ -132,7 +154,7 @@ const RankingContent: React.FC<RankingContentProps> = ({
                 user={user}
                 rank={index + 1}
                 type={categoryConfig.rankingType}
-                isCurrentUser={data.userRank?.rank === index + 1}
+                isCurrentUser={isCurrentUserItem(user)}
               />
             ))}
         </View>
