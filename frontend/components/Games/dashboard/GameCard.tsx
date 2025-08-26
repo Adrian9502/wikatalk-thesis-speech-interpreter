@@ -9,8 +9,8 @@ import {
 import { LinearGradient } from "expo-linear-gradient";
 import { TrendingUp, Play } from "react-native-feather";
 import useProgressStore from "@/store/games/useProgressStore";
-import { getGameModeGradient } from "@/utils/gameUtils";
-import { useGameStats, useFormattedStats } from "@/utils/gameStatsUtils";
+import { getGameModeGradient, getPlayButtonColor } from "@/utils/gameUtils";
+import { useFormattedStats } from "@/utils/gameStatsUtils";
 
 interface GameCardProps {
   game: any;
@@ -23,10 +23,6 @@ const GameCard: React.FC<GameCardProps> = ({
   onGamePress,
   onProgressPress,
 }) => {
-  const { lastUpdated } = useProgressStore();
-
-  // NEW: Use centralized stats instead of manual computation
-  const gameStats = useGameStats(game.id);
   const formattedStats = useFormattedStats(game.id);
 
   useEffect(() => {
@@ -60,11 +56,13 @@ const GameCard: React.FC<GameCardProps> = ({
 
   const staticStyles = useMemo(
     () => ({
-      playBtn: [styles.playBtn, { backgroundColor: game.color }],
+      playBtn: [
+        styles.playBtn,
+        { backgroundColor: getPlayButtonColor(game.id) },
+      ],
     }),
-    [game.color]
+    [game.id]
   );
-
   const gradientColors = useMemo(() => {
     return getGameModeGradient(
       game.id,
@@ -80,14 +78,18 @@ const GameCard: React.FC<GameCardProps> = ({
         end={{ x: 1, y: 1 }}
         style={styles.gameCardGradient}
       >
+        {/* difficulty badges */}
         <View style={styles.difficultyBadge}>
           <Text style={styles.difficultyText}>{game.difficulty}</Text>
         </View>
 
+        {/* header */}
         <View style={styles.gameHeader}>
+          {/* icon */}
           <View style={styles.gameIconContainer}>
             <View style={styles.gameIconBg}>{game.icon}</View>
           </View>
+          {/* game title and description */}
           <View style={styles.gameInfo}>
             <Text style={styles.gameTitle} numberOfLines={1}>
               {game.title}
@@ -98,7 +100,7 @@ const GameCard: React.FC<GameCardProps> = ({
           </View>
         </View>
 
-        {/* UPDATED: Use centralized stats */}
+        {/* centralized stats */}
         <View style={styles.gameStatsRow}>
           <View style={styles.statItem}>
             <Text style={styles.statValue}>{formattedStats.completed}</Text>
@@ -111,13 +113,14 @@ const GameCard: React.FC<GameCardProps> = ({
           </View>
         </View>
 
+        {/* view progress and play button */}
         <View style={styles.gameActionsRow}>
           <TouchableOpacity
             style={styles.progressBtn}
             onPress={memoizedHandlers.handleProgressPress}
             activeOpacity={0.7}
           >
-            <TrendingUp width={14} height={14} color="#fff" />
+            <TrendingUp width={13} height={13} color="#fff" />
             <Text style={styles.progressBtnText}>View Progress</Text>
           </TouchableOpacity>
 
@@ -130,6 +133,7 @@ const GameCard: React.FC<GameCardProps> = ({
           </TouchableOpacity>
         </View>
 
+        {/* circle decoration */}
         <View style={styles.gameDecoShape1} />
         <View style={styles.gameDecoShape2} />
       </LinearGradient>
@@ -180,15 +184,14 @@ const styles = StyleSheet.create({
     marginBottom: 4,
   },
   gameDescription: {
-    fontSize: 12,
+    fontSize: 11.5,
     fontFamily: "Poppins-Regular",
     color: "rgba(255, 255, 255, 0.8)",
-    lineHeight: 16,
   },
   gameActionsRow: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 12,
+    gap: 16,
   },
   progressBtn: {
     paddingHorizontal: 16,
@@ -198,7 +201,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     gap: 6,
     borderRadius: 20,
-    backgroundColor: "rgba(255, 255, 255, 0.2)",
+    backgroundColor: "rgba(255, 255, 255, 0.1)",
     borderWidth: 1,
     borderColor: "rgba(255, 255, 255, 0.3)",
   },
@@ -211,13 +214,15 @@ const styles = StyleSheet.create({
     flex: 1,
     flexDirection: "row",
     alignItems: "center",
+    borderWidth: 1,
+    borderColor: "rgba(255, 255, 255, 0.3)",
     justifyContent: "center",
     paddingVertical: 10,
     borderRadius: 20,
     gap: 8,
   },
   playBtnText: {
-    fontSize: 13,
+    fontSize: 12,
     fontFamily: "Poppins-Bold",
     color: "#fff",
   },
@@ -225,7 +230,9 @@ const styles = StyleSheet.create({
     position: "absolute",
     top: 15,
     right: 15,
-    backgroundColor: "rgba(255, 255, 255, 0.2)",
+    backgroundColor: "rgba(255, 255, 255, 0.08)",
+    borderColor: "rgba(255, 255, 255, 0.2)",
+    borderWidth: 1,
     paddingHorizontal: 8,
     paddingVertical: 4,
     borderRadius: 20,
@@ -241,7 +248,9 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     marginBottom: 16,
-    backgroundColor: "rgba(255, 255, 255, 0.1)",
+    backgroundColor: "rgba(255, 255, 255, 0.08)",
+    borderColor: "rgba(255, 255, 255, 0.2)",
+    borderWidth: 1,
     borderRadius: 20,
     padding: 12,
   },
@@ -263,7 +272,7 @@ const styles = StyleSheet.create({
   statDivider: {
     width: 1,
     height: 30,
-    backgroundColor: "rgba(255, 255, 255, 0.2)",
+    backgroundColor: "rgba(255, 255, 255, 0.4)",
     marginHorizontal: 16,
   },
   gameDecoShape1: {

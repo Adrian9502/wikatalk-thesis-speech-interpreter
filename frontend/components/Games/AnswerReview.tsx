@@ -2,13 +2,13 @@ import React, { useMemo, useState, useCallback } from "react";
 import { View, Text, StyleSheet, Dimensions, Image } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import * as Animatable from "react-native-animatable";
-import { Check, X, Award } from "react-native-feather";
+import { Check, X } from "react-native-feather";
 import MaterialCommunityIcons from "react-native-vector-icons/MaterialCommunityIcons";
-import { BASE_COLORS, difficultyColors, TITLE_COLORS } from "@/constant/colors";
-import { GAME_RESULT_COLORS } from "@/constant/gameConstants";
+import { BASE_COLORS, TITLE_COLORS } from "@/constant/colors";
+import { GAME_RESULT_COLORS } from "@/constant/colors";
 import { formatTimerDisplay, getGameModeGradient } from "@/utils/gameUtils";
 import { safeTextRender } from "@/utils/textUtils";
-import { NAVIGATION_COLORS } from "@/constant/gameConstants";
+import { NAVIGATION_COLORS } from "@/constant/colors";
 import DifficultyBadge from "@/components/games/DifficultyBadge";
 import FocusAreaBadge from "@/components/games/FocusAreaBadge";
 
@@ -291,7 +291,7 @@ const AnswerReview: React.FC<AnswerReviewProps> = ({
             style={styles.rewardFloatingCard}
           >
             <LinearGradient
-              colors={NAVIGATION_COLORS.green}
+              colors={GAME_RESULT_COLORS.correctAnswer}
               style={styles.rewardGradient}
               start={{ x: 0, y: 0 }}
               end={{ x: 1, y: 1 }}

@@ -3,7 +3,7 @@ import { View, StyleSheet, Animated } from "react-native";
 import { Target } from "react-native-feather";
 import { SectionHeader } from "@/components/games/common/SectionHeader";
 import GameCard from "./GameCard";
-import gameOptions from "@/utils/games/gameOptions";
+import gameOptions from "@/utils/gameUtils";
 import { GameOption } from "@/types/gameTypes";
 import { ICON_COLORS } from "@/constant/colors";
 import RankingButton from "../rankings/RankingButton";
@@ -61,7 +61,6 @@ const GamesList = React.memo(
       });
     }, [shouldAnimate, fadeAnim, slideAnim]);
 
-    // Simple render function - no complex animations
     const renderGameCard = useCallback(
       (item: GameOption, index: number) => {
         return (

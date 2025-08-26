@@ -1,7 +1,7 @@
 import React, { useCallback } from "react";
 import { Modal, View, Animated } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
-import { difficultyColors } from "@/constant/colors";
+import { DIFFICULTY_COLORS } from "@/constant/colors";
 import { getStarCount } from "@/utils/games/difficultyUtils";
 import modalSharedStyles from "@/styles/games/modalSharedStyles";
 import ResetCostInfoModal from "@/components/games/levels/ResetCostInfoModal";
@@ -13,7 +13,7 @@ import LevelContent from "./modal/LevelContent";
 import ActionButton from "./modal/ActionButton";
 import { styles } from "@/styles/games/levels/levelInfoModal.style";
 
-type DifficultyLevel = keyof typeof difficultyColors;
+type DifficultyLevel = keyof typeof DIFFICULTY_COLORS;
 
 interface GameInfoModalProps {
   visible: boolean;
@@ -153,13 +153,13 @@ const LevelInfoModal: React.FC<GameInfoModalProps> = React.memo(
     const starCount = getStarCount(difficulty);
 
     const getGradientColors = (): readonly [string, string] => {
-      if (difficulty && difficulty in difficultyColors) {
-        return difficultyColors[difficulty as DifficultyLevel];
+      if (difficulty && difficulty in DIFFICULTY_COLORS) {
+        return DIFFICULTY_COLORS[difficulty as DifficultyLevel];
       }
       const capitalized =
         difficulty.charAt(0).toUpperCase() + difficulty.slice(1).toLowerCase();
-      if (capitalized in difficultyColors) {
-        return difficultyColors[capitalized as DifficultyLevel];
+      if (capitalized in DIFFICULTY_COLORS) {
+        return DIFFICULTY_COLORS[capitalized as DifficultyLevel];
       }
       return ["#2563EB", "#1E40AF"] as const;
     };

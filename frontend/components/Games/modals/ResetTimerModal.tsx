@@ -8,10 +8,9 @@ import {
   Image,
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
-import { X } from "react-native-feather";
 import * as Animatable from "react-native-animatable";
 import { BASE_COLORS } from "@/constant/colors";
-import { NAVIGATION_COLORS } from "@/constant/gameConstants";
+import { NAVIGATION_COLORS } from "@/constant/colors";
 import { StyleSheet } from "react-native";
 import CloseButton from "../buttons/CloseButton";
 

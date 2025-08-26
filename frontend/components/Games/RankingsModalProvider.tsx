@@ -12,7 +12,7 @@ import { LinearGradient } from "expo-linear-gradient";
 import RankingCategorySelector from "@/components/games/rankings/RankingCategorySelector";
 import RankingContent from "@/components/games/rankings/RankingContent";
 import CloseButton from "@/components/games/buttons/CloseButton";
-import { NAVIGATION_COLORS } from "@/constant/gameConstants";
+import { NAVIGATION_COLORS, RANKING_COLORS } from "@/constant/colors";
 import { InteractionManager } from "react-native";
 import ModalLoading from "../ModalLoading";
 
@@ -122,7 +122,7 @@ export const RankingsModalProvider: React.FC<{ children: React.ReactNode }> = ({
           >
             {!contentReady && (
               <LinearGradient
-                colors={NAVIGATION_COLORS.indigo}
+                colors={RANKING_COLORS}
                 style={styles.loadingContainer}
                 start={{ x: 0, y: 0 }}
                 end={{ x: 1, y: 1 }}
@@ -138,7 +138,7 @@ export const RankingsModalProvider: React.FC<{ children: React.ReactNode }> = ({
             {contentReady && (
               <View style={styles.contentContainer}>
                 <LinearGradient
-                  colors={NAVIGATION_COLORS.indigo}
+                  colors={RANKING_COLORS}
                   start={{ x: 0, y: 0 }}
                   end={{ x: 1, y: 1 }}
                   style={styles.gradientBackground}

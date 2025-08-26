@@ -199,10 +199,10 @@ const LevelCard: React.FC<LevelCardProps> = React.memo(
             {levelProps.isCompleted && (
               <View style={styles.completedPill}>
                 <Check
-                  width={14}
-                  height={14}
+                  width={13}
+                  height={13}
                   color={BASE_COLORS.white}
-                  strokeWidth={3}
+                  strokeWidth={2}
                 />
                 <Text style={styles.completedPillText}>Finished</Text>
               </View>

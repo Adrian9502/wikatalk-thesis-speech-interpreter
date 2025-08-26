@@ -1,3 +1,12 @@
+import { Zap, BookOpen, Search, Edit2 } from "react-native-feather";
+
+type IconProps = {
+  width?: number;
+  height?: number;
+  color?: string;
+  strokeWidth?: number;
+};
+
 export const TITLE_COLORS: Record<string, string> = {
   customNavyBlue: "#E4D00A",
   customYellow: "#FCD116",
@@ -90,48 +99,54 @@ export const HOMEPAGE_COLORS = {
   pronounce: ["#019c3aff", "#ac8d04ff"] as const,
 };
 
-export const APP_COLORS = {
-  // Main brand colors
-  yellow: "#FCD116",
-  blue: "#0038a8",
-  red: "#ce1126",
-
-  // Gradient palettes
-  sunrise: ["#ac8d04ff", "#c25202ff"] as const, // warm yellow-orange
-  ocean: ["#02359cff", "#0a7d94ff"] as const, // cool blue
-  crimson: ["#a70215ff", "#910585ff"] as const, // deep red to purple
-  violet: ["#5e049eff", "#aa0451ff"] as const, // dark violet to pink
-  forest: ["#019c3aff", "#ac8d04ff"] as const, // green to yellow
-
-  // Gradients for main brand colors (yellow, blue, red)
-  sunbeam: ["#FCD116", "#FFD84D"] as const, // yellow gradient
-  deepBlue: ["#0038a8", "#3366CC"] as const, // blue gradient
-  ruby: ["#ce1126", "#E03A3E"] as const, // red gradient
-};
-
+// Colors for icon
 export const ICON_COLORS = {
   brightYellow: "#fbff26ff" as const,
   gold: "#FFD700" as const,
   silver: "#C0C0C0" as const,
   bronze: "#CD7F32" as const,
+  white: "#fff" as const,
 };
 
-export const difficultyColors = {
-  Easy: ["#22C216", "#007F3B"] as const,
-  Medium: ["#FF8E2B", "#B52A00"] as const,
-  Hard: ["#FF2919", "#B80D5F"] as const,
+// LevelCard colors
+export const DIFFICULTY_COLORS = {
+  Easy: ["#019c3aff", "#007F3B"] as const,
+  Medium: ["#b36b00ff", "#d45e09ff"] as const,
+  Hard: ["#c20d00ff", "#9e0135ff"] as const,
 };
+export const RANKING_SELECTOR_COLORS = ["#c9a60cff", "#b36b00ff"] as const;
 
-export const rankingButtonColors = {
-  yellow: ["#e4ac05ff", "#b36b00ff"] as const,
-};
-
-// Game mode navigation
-export const gameModeNavigationColors = {
-  identification: ["#2563EB", "#1E40AF"] as const,
-  fillBlanks: ["#F97316", "#C2410C"] as const,
-  multipleChoice: ["#22C55E", "#15803D"] as const,
+// game card game mode gradients
+export const GAME_MODE_GRADIENTS = {
+  multipleChoice: ["#d45c06ff", "#c9a60cff"] as const,
+  identification: ["#02359cff", "#0a7d94ff"] as const,
+  fillBlanks: ["#ce1126", "#E94444"] as const,
 };
 
 // Word of the Day card gradient
-export const WORD_OF_DAY_GRADIENT = ["#667eea", "#764ba2"] as const;
+export const WORD_OF_DAY_GRADIENT = ["#3168dfff", "#0a7d94ff"] as const;
+
+// Navigation colors on GameNavigation
+export const NAVIGATION_COLORS = {
+  green: ["#028633ff", "#03b845ff"] as const,
+  yellow: ["#a17d04ff", "#fd9635ff"] as const,
+  blue: ["#02359cff", "#0a7d94ff"] as const,
+  red: ["#a70215ff", "#910585ff"] as const,
+  disabled: ["rgba(255, 255, 255, 0.15)", "rgba(255, 255, 255, 0.08)"] as const,
+};
+
+// Game icon colors
+export const GAME_ICONS_COLORS = {
+  multipleChoice: (props: IconProps) => <Zap {...props} color="#FFF" />,
+  identification: (props: IconProps) => <Search {...props} color="#FFF" />,
+  fillBlanks: (props: IconProps) => <Edit2 {...props} color="#FFF" />,
+};
+
+// Hero gradient colors on answer review
+export const GAME_RESULT_COLORS = {
+  userExit: ["#FF9800", "#EF6C00"] as const,
+  correctAnswer: ["#22C216", "#007F3B"] as const,
+  incorrectAnswer: ["#FF2919", "#B80D5F"] as const,
+};
+
+export const RANKING_COLORS = ["#053691ff", "#0a7d94ff"] as const;

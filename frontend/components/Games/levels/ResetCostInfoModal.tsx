@@ -4,7 +4,7 @@ import { LinearGradient } from "expo-linear-gradient";
 import { Clock } from "react-native-feather";
 import * as Animatable from "react-native-animatable";
 import { BASE_COLORS, ICON_COLORS } from "@/constant/colors";
-import { NAVIGATION_COLORS } from "@/constant/gameConstants";
+import { NAVIGATION_COLORS } from "@/constant/colors";
 import costTiers from "@/utils/games/costTiers";
 import CloseButton from "../buttons/CloseButton";
 interface ResetCostInfoModalProps {

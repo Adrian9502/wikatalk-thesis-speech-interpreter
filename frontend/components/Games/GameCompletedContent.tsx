@@ -1,15 +1,9 @@
-import React, { useCallback } from "react";
-import { View, Text, ScrollView } from "react-native";
-import * as Animatable from "react-native-animatable";
-import { LinearGradient } from "expo-linear-gradient";
-import { BASE_COLORS, ICON_COLORS } from "@/constant/colors";
+import React from "react";
+import { ScrollView } from "react-native";
 import AnswerReview from "@/components/games/AnswerReview";
 import GameNavigation from "@/components/games/GameNavigation";
 import gameSharedStyles from "@/styles/gamesSharedStyles";
 import { GameMode } from "@/types/gameTypes";
-import { MaterialCommunityIcons } from "@expo/vector-icons";
-import { NAVIGATION_COLORS } from "@/constant/gameConstants";
-import { renderFocusIcon } from "@/utils/games/renderFocusIcon";
 
 interface RewardInfo {
   coins: number;

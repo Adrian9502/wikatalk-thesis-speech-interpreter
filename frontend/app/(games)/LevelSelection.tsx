@@ -12,7 +12,7 @@ import LevelHeader from "@/components/games/levels/LevelHeader";
 import LevelProgressBar from "@/components/games/levels/LevelProgressBar";
 import { levelStyles as styles } from "@/styles/games/levels.styles";
 import { useLevelData } from "@/hooks/useLevelData";
-import { difficultyColors } from "@/constant/colors";
+import { DIFFICULTY_COLORS } from "@/constant/colors";
 import { useSplashStore } from "@/store/useSplashStore";
 import { useAnimationTracker } from "@/hooks/useAnimationTracker";
 
@@ -496,10 +496,9 @@ const LevelSelection = () => {
     };
   }, [selectedLevel, gameMode, gameTitle, activeFilter, shouldPlayAnimation]);
 
-  const stableDifficultyColors = useMemo(() => difficultyColors, []);
+  const stableDifficultyColors = useMemo(() => DIFFICULTY_COLORS, []);
 
   const renderContent = useMemo(() => {
-    // NEW: Show loading for progress updates
     if (isProgressUpdating) {
       return (
         <View style={styles.loadingContainer}>
@@ -510,7 +509,11 @@ const LevelSelection = () => {
 
     // Wait for data to be ready
     if (!dataReady) {
-      return <AppLoading />;
+      return (
+        <View style={styles.loadingContainer}>
+          <AppLoading />
+        </View>
+      );
     }
 
     // First check for component error
@@ -530,14 +533,17 @@ const LevelSelection = () => {
 
     // Check for loading states
     if (isLoading || (levels.length > 0 && !showLevels)) {
-      return <AppLoading />;
+      return (
+        <View style={styles.loadingContainer}>
+          <AppLoading />
+        </View>
+      );
     }
 
     // Render content when loaded
     if (showLevels && levels.length > 0) {
       return (
         <>
-          {/* NEW: Use centralized completion percentage */}
           {/* <LevelProgressBar percentage={completionPercentage} /> */}
 
           <FilterBar
@@ -571,7 +577,11 @@ const LevelSelection = () => {
     }
 
     // Fallback loading state
-    return <AppLoading />;
+    return (
+      <View style={styles.loadingContainer}>
+        <AppLoading />
+      </View>
+    );
   }, [
     isProgressUpdating,
     dataReady,

@@ -9,7 +9,7 @@ import {
 import { LinearGradient } from "expo-linear-gradient";
 import { RANKING_CATEGORIES } from "@/constant/rankingConstants";
 
-import { BASE_COLORS, rankingButtonColors } from "@/constant/colors";
+import { BASE_COLORS, RANKING_SELECTOR_COLORS } from "@/constant/colors";
 
 interface RankingCategorySelectorProps {
   selectedCategory: string;
@@ -40,7 +40,7 @@ const RankingCategorySelector: React.FC<RankingCategorySelectorProps> = ({
             <LinearGradient
               colors={
                 isSelected
-                  ? rankingButtonColors.yellow
+                  ? RANKING_SELECTOR_COLORS
                   : ["rgba(255,255,255,0.08)", "rgba(255,255,255,0.02)"]
               }
               style={[styles.categoryButton, isSelected && { borderWidth: 0 }]}

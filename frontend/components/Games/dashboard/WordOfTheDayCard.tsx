@@ -32,7 +32,6 @@ const WordOfTheDayCard = React.memo(
   ({
     wordOfTheDay,
     isPlaying,
-    isLoading,
     onCardPress,
     onPlayPress,
     onCoinsPress,
@@ -105,6 +104,7 @@ const WordOfTheDayCard = React.memo(
           },
         ]}
       >
+        {/* header */}
         <View style={styles.inlineHeaderContainer}>
           <SectionHeader
             icon={<Star width={20} height={20} color={ICON_COLORS.gold} />}
@@ -113,6 +113,7 @@ const WordOfTheDayCard = React.memo(
           />
           <CoinsDisplay onPress={onCoinsPress} />
         </View>
+        {/* main content */}
 
         <TouchableOpacity
           style={styles.wordOfTheDayCard}

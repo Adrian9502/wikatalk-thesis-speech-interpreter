@@ -35,6 +35,7 @@ import { useAuthStore } from "@/store/useAuthStore";
 import useHomePageStore from "@/store/useHomePageStore";
 import HomePage from "@/components/home/HomePage";
 import AppLoading from "@/components/AppLoading"; // NEW: Import AppLoading
+import GameNavigation from "@/components/games/GameNavigation";
 
 // Prevent the splash screen from auto-hiding
 SplashScreen.preventAutoHideAsync();
@@ -330,7 +331,6 @@ const RootLayout = () => {
     );
   }
 
-  // FIXED: Only render the main app stack if we should render tabs
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
       <SafeAreaProvider>

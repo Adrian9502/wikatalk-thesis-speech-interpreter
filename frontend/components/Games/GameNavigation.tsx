@@ -18,12 +18,14 @@ import {
   Grid,
   Zap,
 } from "react-native-feather";
-import { BASE_COLORS, ICON_COLORS } from "@/constant/colors";
 import {
-  NAVIGATION_COLORS,
-  GAME_MODES,
-  GAME_ICONS,
-} from "@/constant/gameConstants";
+  BASE_COLORS,
+  GAME_MODE_GRADIENTS,
+  ICON_COLORS,
+} from "@/constant/colors";
+import { GAME_MODES } from "@/constant/gameConstants";
+import { GAME_ICONS_COLORS } from "@/constant/colors";
+import { NAVIGATION_COLORS } from "@/constant/colors";
 import { useLevelData } from "@/hooks/useLevelData";
 import useGameStore from "@/store/games/useGameStore";
 import useProgressStore from "@/store/games/useProgressStore";
@@ -418,19 +420,19 @@ const GameNavigation: React.FC<GameNavigationProps> = ({
         mode: GAME_MODES.MULTIPLE_CHOICE,
         title: "Multiple Choice",
         subtitle: "Pick the right answer",
-        colors: ["#4361EE", "#3A0CA3"],
+        colors: GAME_MODE_GRADIENTS.multipleChoice,
       },
       {
         mode: GAME_MODES.IDENTIFICATION,
         title: "Word Identification",
         subtitle: "Find the correct word",
-        colors: ["#e01f78", "#6a03ad"],
+        colors: GAME_MODE_GRADIENTS.identification,
       },
       {
         mode: GAME_MODES.FILL_BLANKS,
         title: "Fill in the Blank",
         subtitle: "Complete the sentence",
-        colors: ["#22C216", "#007F3B"],
+        colors: GAME_MODE_GRADIENTS.fillBlanks,
       },
     ];
     return allModes.filter((mode) => mode.mode !== currentMode);
@@ -465,6 +467,8 @@ const GameNavigation: React.FC<GameNavigationProps> = ({
                     ? NAVIGATION_COLORS.disabled
                     : NAVIGATION_COLORS.green
                 }
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 1 }}
                 style={styles.primaryActionGradient}
               >
                 <View style={styles.primaryActionIcon}>
@@ -529,6 +533,8 @@ const GameNavigation: React.FC<GameNavigationProps> = ({
                     ? NAVIGATION_COLORS.disabled
                     : NAVIGATION_COLORS.yellow
                 }
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 1 }}
                 style={styles.primaryActionGradient}
               >
                 <View style={styles.primaryActionIcon}>
@@ -589,8 +595,10 @@ const GameNavigation: React.FC<GameNavigationProps> = ({
               activeOpacity={0.8}
             >
               <LinearGradient
-                colors={NAVIGATION_COLORS.purple}
+                colors={NAVIGATION_COLORS.red}
                 style={styles.quickNavGradient}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 1 }}
               >
                 <Grid width={18} height={18} color={BASE_COLORS.white} />
                 <Text style={styles.quickNavText}>Level Selection</Text>
@@ -604,8 +612,10 @@ const GameNavigation: React.FC<GameNavigationProps> = ({
               activeOpacity={0.8}
             >
               <LinearGradient
-                colors={NAVIGATION_COLORS.indigo}
+                colors={NAVIGATION_COLORS.blue}
                 style={styles.quickNavGradient}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 1 }}
               >
                 <Ionicons
                   name="game-controller-outline"
@@ -619,12 +629,7 @@ const GameNavigation: React.FC<GameNavigationProps> = ({
         </Animatable.View>
 
         {/* Game Modes Section */}
-        <Animatable.View
-          animation="fadeInUp"
-          duration={600}
-          delay={400}
-          style={styles.gameModesContainer}
-        >
+        <Animatable.View animation="fadeInUp" duration={600} delay={400}>
           <View style={styles.gameModesHeader}>
             <Zap width={16} height={16} color={ICON_COLORS.brightYellow} />
             <Text style={styles.gameModesTitle}>Try Other Modes</Text>
@@ -633,7 +638,8 @@ const GameNavigation: React.FC<GameNavigationProps> = ({
           <View style={styles.gameModesGrid}>
             {availableGameModes.map((mode, index) => {
               // Get the icon component from GAME_ICONS
-              const IconComponent = GAME_ICONS[mode.mode];
+              const IconComponent =
+                GAME_ICONS_COLORS[mode.mode as keyof typeof GAME_ICONS_COLORS];
 
               return (
                 <TouchableOpacity
@@ -648,6 +654,8 @@ const GameNavigation: React.FC<GameNavigationProps> = ({
                   <LinearGradient
                     colors={[mode.colors[0], mode.colors[1]]}
                     style={styles.gameModeGradient}
+                    start={{ x: 0, y: 0 }}
+                    end={{ x: 1, y: 1 }}
                   >
                     <View
                       style={[
@@ -767,14 +775,12 @@ const styles = StyleSheet.create({
   },
 
   // Game Modes
-  gameModesContainer: {
-    marginBottom: 20,
-  },
+
   gameModesHeader: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
-    marginBottom: 14,
+    marginBottom: 12,
     gap: 6,
   },
   gameModesTitle: {
@@ -792,7 +798,7 @@ const styles = StyleSheet.create({
     overflow: "hidden",
   },
   gameModeGradient: {
-    paddingVertical: 14,
+    paddingVertical: 8,
     paddingHorizontal: 16,
     alignItems: "center",
     borderRadius: 20,
