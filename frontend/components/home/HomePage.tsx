@@ -28,14 +28,15 @@ import {
 import useThemeStore from "@/store/useThemeStore";
 import { BASE_COLORS, HOMEPAGE_COLORS, ICON_COLORS } from "@/constant/colors";
 import { useAuth } from "@/context/AuthContext";
-import useProgressStore from "@/store/games/useProgressStore";
+import { useTotalPronunciationsCount } from "@/hooks/useTotalPronunciationsCount";
 import useCoinsStore from "@/store/games/useCoinsStore";
 import { usePronunciationStore } from "@/store/usePronunciationStore";
 import AppName from "../AppName";
 import RankingCategorySelector from "@/components/games/rankings/RankingCategorySelector";
 import RankingContent from "@/components/games/rankings/RankingContent";
-// NEW: Import stats utilities
+
 import { useFormattedStats } from "@/utils/gameStatsUtils";
+import { DIALECTS } from "@/constant/languages";
 
 const { width: screenWidth } = Dimensions.get("window");
 
@@ -55,9 +56,8 @@ const HomePage: React.FC<HomePageProps> = ({
   const { coins } = useCoinsStore();
   const { wordOfTheDay, getWordOfTheDay } = usePronunciationStore();
 
-  // NEW: Use centralized stats instead of manual computation
   const overallStats = useFormattedStats();
-
+  const totalPronunciationsCount = useTotalPronunciationsCount();
   const [dontShowAgain, setDontShowAgain] = useState(false);
 
   const [activeFeatureIndex, setActiveFeatureIndex] = useState(0);
@@ -143,11 +143,10 @@ const HomePage: React.FC<HomePageProps> = ({
     },
   ];
 
-  // ! Make this dynamic
   const dialectStats = [
-    { count: "10", label: "Filipino Dialects" },
-    { count: "34K+", label: "Pronunciations" },
-    { count: "150+", label: "Game Levels" },
+    { count: DIALECTS.length, label: "Filipino Dialects" },
+    { count: totalPronunciationsCount, label: "Pronunciations" },
+    { count: overallStats.total, label: "Game Levels" },
   ];
 
   const quickStats = [

@@ -1,20 +1,8 @@
 import { create } from "zustand";
-import axios from "axios";
 import * as Speech from "expo-speech";
-import { DIALECTS } from "@/constant/languages";
 import { debounce } from "lodash";
 import { pronunciationService } from "@/services/api";
 
-// Types remain the same
-interface TranslationEntry {
-  english: string;
-  translation: string;
-  pronunciation: string;
-}
-
-interface Translations {
-  [key: string]: TranslationEntry[];
-}
 
 interface PronunciationDataItem {
   english: string;
