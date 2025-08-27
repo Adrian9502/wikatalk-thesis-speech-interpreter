@@ -16,7 +16,7 @@ const HomePagePreview: React.FC = () => {
   // Hardware back button handling
   useHardwareBack({
     enabled: true,
-    fallbackRoute: "/(tabs)/Settings",
+    fallbackRoute: "/(settings)/Settings",
     useExistingHeaderLogic: true,
   });
 
@@ -41,7 +41,7 @@ const HomePagePreview: React.FC = () => {
         router.replace("/(tabs)/Pronounce");
         break;
       case "Settings":
-        router.replace("/(tabs)/Settings");
+        router.replace("/(settings)/Settings");
         break;
       default:
         router.replace("/(tabs)/Speech");

@@ -4,7 +4,7 @@ import { router } from "expo-router";
 
 // Define allowed fallback routes for better type safety
 type AllowedFallbackRoutes =
-  | "/(tabs)/Settings"
+  | "/(settings)/Settings"
   | "/(tabs)/Speech"
   | "/(tabs)/Translate"
   | "/(tabs)/Scan"
@@ -21,7 +21,7 @@ interface UseHardwareBackOptions {
 export const useHardwareBack = ({
   enabled = true,
   onBackPress,
-  fallbackRoute = "/(tabs)/Settings",
+  fallbackRoute = "/(settings)/Settings",
   useExistingHeaderLogic = false,
 }: UseHardwareBackOptions = {}) => {
   useEffect(() => {
@@ -60,7 +60,7 @@ export const useHardwareBack = ({
         } catch (error) {
           console.error("[useHardwareBack] Navigation error:", error);
           // Fallback to settings screen on error
-          router.replace("/(tabs)/Settings");
+          router.replace("/(settings)/Settings");
           return true;
         }
       }

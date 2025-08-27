@@ -367,7 +367,7 @@ const TranslationHistory: React.FC = () => {
   // Hardware back button
   useHardwareBack({
     enabled: true,
-    fallbackRoute: "/(tabs)/Settings",
+    fallbackRoute: "/(settings)/Settings",
     useExistingHeaderLogic: true,
   });
 

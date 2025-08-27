@@ -20,16 +20,13 @@ import {
   Camera,
   Mic,
   Volume2,
-  CheckSquare,
-  Square,
   Settings,
-  ArrowLeft,
   Target,
   TrendingUp,
   BookOpen,
 } from "react-native-feather";
 import useThemeStore from "@/store/useThemeStore";
-import { BASE_COLORS, HOMEPAGE_COLORS, ICON_COLORS } from "@/constant/colors";
+import { BASE_COLORS, HOMEPAGE_COLORS } from "@/constant/colors";
 import { useAuth } from "@/context/AuthContext";
 import { useTotalPronunciationsCount } from "@/hooks/useTotalPronunciationsCount";
 import useCoinsStore from "@/store/games/useCoinsStore";
@@ -37,7 +34,6 @@ import { usePronunciationStore } from "@/store/usePronunciationStore";
 import AppName from "../AppName";
 import RankingCategorySelector from "@/components/games/rankings/RankingCategorySelector";
 import RankingContent from "@/components/games/rankings/RankingContent";
-
 import { useFormattedStats } from "@/utils/gameStatsUtils";
 import { DIALECTS } from "@/constant/languages";
 import AppLoading from "../AppLoading";
@@ -65,10 +61,8 @@ const HomePage: React.FC<HomePageProps> = ({
 
   const overallStats = useFormattedStats();
   const totalPronunciationsCount = useTotalPronunciationsCount();
-  const [dontShowAgain, setDontShowAgain] = useState(false);
 
   const [activeFeatureIndex, setActiveFeatureIndex] = useState(0);
-
   const [selectedRankingCategory, setSelectedRankingCategory] =
     useState("quizChampions");
 
@@ -226,18 +220,10 @@ const HomePage: React.FC<HomePageProps> = ({
   ];
 
   const handleFeaturePress = (tabName: string) => {
-    if (dontShowAgain) {
-      const useHomePageStore = require("@/store/useHomePageStore").default;
-      useHomePageStore.getState().setShowHomePage(false);
-    }
     onNavigateToTab(tabName);
   };
 
   const handleSettingsPress = () => {
-    if (dontShowAgain) {
-      const useHomePageStore = require("@/store/useHomePageStore").default;
-      useHomePageStore.getState().setShowHomePage(false);
-    }
     onNavigateToTab("Settings");
   };
 
@@ -250,10 +236,7 @@ const HomePage: React.FC<HomePageProps> = ({
     if (context === "settings") {
       onNavigateToTab("Settings");
     } else {
-      if (dontShowAgain) {
-        const useHomePageStore = require("@/store/useHomePageStore").default;
-        useHomePageStore.getState().setShowHomePage(false);
-      }
+      // Default behavior for startup context
       onNavigateToTab("Speech");
     }
   };
@@ -304,32 +287,21 @@ const HomePage: React.FC<HomePageProps> = ({
             <View style={styles.header}>
               <AppName />
 
+              {/* Welcome Message */}
               {userData && (
-                <Text
-                  style={[
-                    styles.welcomeText,
-                    { color: activeTheme.tabActiveColor },
-                  ]}
-                >
-                  Welcome back, {firstName}!
-                </Text>
-              )}
-              {/* Only show back button in settings context */}
-              {context === "settings" && (
-                <TouchableOpacity
-                  style={styles.backButton}
-                  onPress={handleBackPress}
-                  activeOpacity={0.7}
-                  hitSlop={{ top: 20, left: 20, right: 20, bottom: 20 }}
-                >
-                  <ArrowLeft
-                    width={16}
-                    height={16}
-                    color={activeTheme.tabActiveColor}
-                  />
-                </TouchableOpacity>
+                <View style={styles.welcomeContainer}>
+                  <Text
+                    style={[
+                      styles.welcomeText,
+                      { color: activeTheme.tabActiveColor },
+                    ]}
+                  >
+                    Welcome back, {firstName}! 👋
+                  </Text>
+                </View>
               )}
 
+              {/* Settings Button */}
               <TouchableOpacity
                 style={styles.settingsButton}
                 onPress={handleSettingsPress}
@@ -346,7 +318,7 @@ const HomePage: React.FC<HomePageProps> = ({
             {/* Featured Content Carousel */}
             <View style={styles.featuredSection}>
               <View style={styles.featuredHeader}>
-                <Text style={styles.sectionTitle}>Featured Today</Text>
+                <Text style={styles.sectionTitle}>Featured</Text>
                 <View style={styles.carouselDots}>
                   {features.map((_, index) => (
                     <View
@@ -356,7 +328,7 @@ const HomePage: React.FC<HomePageProps> = ({
                         {
                           backgroundColor:
                             index === activeFeatureIndex
-                              ? activeTheme.secondaryColor
+                              ? BASE_COLORS.white
                               : "rgba(255, 255, 255, 0.3)",
                         },
                       ]}
@@ -436,14 +408,12 @@ const HomePage: React.FC<HomePageProps> = ({
                     <View style={styles.featureIconContainer}>
                       {feature.icon}
                     </View>
-
                     <View style={styles.featureContent}>
                       <Text style={styles.featureTitle}>{feature.title}</Text>
                       <Text style={styles.featureDescription}>
                         {feature.description}
                       </Text>
                     </View>
-
                     <View style={styles.featureDecor1} />
                     <View style={styles.featureDecor2} />
                   </LinearGradient>
@@ -456,10 +426,23 @@ const HomePage: React.FC<HomePageProps> = ({
               <Text style={[styles.sectionTitle]}>Your Game Progress</Text>
               <View style={styles.quickStatsGrid}>
                 {quickStats.map((stat, index) => (
-                  <View key={index} style={styles.quickStatCard}>
+                  <View
+                    key={index}
+                    style={[
+                      styles.quickStatCard,
+                      { backgroundColor: "rgba(255, 255, 255, 0.08)" },
+                    ]}
+                  >
                     <View style={styles.quickStatHeader}>
                       {stat.icon}
-                      <Text style={styles.quickStatLabel}>{stat.label}</Text>
+                      <Text
+                        style={[
+                          styles.quickStatLabel,
+                          { color: "rgba(255, 255, 255, 0.7)" },
+                        ]}
+                      >
+                        {stat.label}
+                      </Text>
                     </View>
                     <Text
                       style={[
@@ -484,13 +467,11 @@ const HomePage: React.FC<HomePageProps> = ({
               <Text style={[styles.sectionTitle]}>Games Rankings</Text>
             </View>
             <View style={styles.rankingsSection}>
-              {/* Rankings Category Selector - Same as in RankingsModal */}
               <RankingCategorySelector
                 selectedCategory={selectedRankingCategory}
                 onCategorySelect={handleRankingCategorySelect}
               />
 
-              {/* Rankings Content - Same as in RankingsModal but without modal wrapper */}
               <View style={styles.rankingsContentContainer}>
                 <RankingContent
                   selectedCategory={selectedRankingCategory}
@@ -498,37 +479,6 @@ const HomePage: React.FC<HomePageProps> = ({
                 />
               </View>
             </View>
-
-            {/* Skip Option - only for startup context */}
-            {context === "startup" && (
-              <TouchableOpacity
-                style={styles.checkboxContainer}
-                onPress={() => setDontShowAgain(!dontShowAgain)}
-                activeOpacity={0.7}
-              >
-                {dontShowAgain ? (
-                  <CheckSquare
-                    width={16}
-                    height={16}
-                    color={activeTheme.secondaryColor}
-                  />
-                ) : (
-                  <Square
-                    width={16}
-                    height={16}
-                    color={activeTheme.tabActiveColor}
-                  />
-                )}
-                <Text
-                  style={[
-                    styles.checkboxText,
-                    { color: activeTheme.tabActiveColor },
-                  ]}
-                >
-                  Don't show this page again on startup
-                </Text>
-              </TouchableOpacity>
-            )}
           </ScrollView>
         </Animated.View>
       </SafeAreaView>
@@ -545,20 +495,15 @@ const styles = StyleSheet.create({
   },
   scrollContent: {
     paddingHorizontal: 20,
+    paddingBottom: 16,
   },
   header: {
     alignItems: "flex-start",
     justifyContent: "flex-start",
     marginBottom: 20,
   },
-  backButton: {
-    position: "absolute",
-    top: 0,
-    right: 50,
-    zIndex: 10,
-    padding: 10,
-    borderRadius: 20,
-    backgroundColor: "rgba(255, 255, 255, 0.1)",
+  welcomeContainer: {
+    marginTop: 8,
   },
   settingsButton: {
     position: "absolute",
@@ -586,7 +531,6 @@ const styles = StyleSheet.create({
     height: 14,
     resizeMode: "contain",
   },
-
   quickStatsSection: {
     marginBottom: 16,
   },
@@ -686,7 +630,6 @@ const styles = StyleSheet.create({
     color: "rgba(255, 255, 255, 0.8)",
     marginBottom: 4,
   },
-
   featuredDecor1: {
     position: "absolute",
     top: -20,
@@ -817,18 +760,6 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     minHeight: 400,
     maxHeight: 500,
-  },
-  // Checkbox Section
-  checkboxContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    paddingVertical: 16,
-    gap: 8,
-  },
-  checkboxText: {
-    fontSize: 11,
-    fontFamily: "Poppins-Regular",
   },
 });
 

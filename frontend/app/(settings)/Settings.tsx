@@ -22,7 +22,7 @@ import ContactSupportModal from "@/components/helpAndFAQ/ContactSupportModal";
 import { clearAllAccountData } from "@/utils/accountUtils";
 import ProfileCard from "@/components/settings/ProfileCard";
 import LoginMethods from "@/components/settings/LoginMethods";
-import HomePageToggle from "@/components/settings/HomePageToggle";
+import { Header as BackHeader } from "@/components/Header"; // Import the Header component
 
 // Types
 type SettingItemWithToggle = {
@@ -73,13 +73,17 @@ const Settings = () => {
   const [logoutModalVisible, setLogoutModalVisible] = useState(false);
   const [contactModalVisible, setContactModalVisible] = useState(false);
 
+  // NEW: Back navigation handler
+  const handleBackPress = () => {
+    console.log("[Settings] Back pressed, navigating to Home tab");
+    router.push("/(tabs)/Home");
+  };
+
   const handleLogout = async () => {
     try {
       console.log("[Settings] Logging out user");
       await clearAllAccountData();
-
-      // FIXED: Use the logout function correctly with optional parameter
-      await logout(true); // Pass true for manual logout (shows success message)
+      await logout(true);
     } catch (error) {
       console.error("Logout error:", error);
     }
@@ -135,12 +139,8 @@ const Settings = () => {
   const createListItems = (): ListItem[] => {
     const items: ListItem[] = [];
 
-    // Add header
-    items.push({
-      type: "header",
-      data: "Settings",
-      key: "header",
-    });
+    // REMOVE the old header and add back header instead
+    // Don't add the old header item anymore
 
     // Add profile section
     items.push({
@@ -165,12 +165,12 @@ const Settings = () => {
       key: "appearance-title",
     });
 
-    // Add HomePage toggle
-    items.push({
-      type: "homepage-toggle",
-      data: null,
-      key: "homepage-toggle",
-    });
+    // Remove HomePage toggle since it's no longer needed
+    // items.push({
+    //   type: "homepage-toggle",
+    //   data: null,
+    //   key: "homepage-toggle",
+    // });
 
     // Add settings sections
     sections.forEach((section, sectionIndex) => {
@@ -211,6 +211,7 @@ const Settings = () => {
 
   const renderItem = ({ item, index }: { item: ListItem; index: number }) => {
     switch (item.type) {
+      // REMOVE the header case since we're using BackHeader now
       case "header":
         return <Header />;
 
@@ -227,9 +228,6 @@ const Settings = () => {
 
       case "appearance":
         return <AppearanceSection />;
-
-      case "homepage-toggle":
-        return <HomePageToggle />;
 
       case "section":
         return <SectionTitle title={item.data} />;
@@ -258,7 +256,7 @@ const Settings = () => {
 
   return (
     <SafeAreaView
-      edges={["left", "right"]}
+      edges={["left", "right", "bottom"]} // FIXED: Add bottom edge
       style={[
         globalStyles.container,
         { backgroundColor: activeTheme.backgroundColor },
@@ -266,6 +264,9 @@ const Settings = () => {
       ]}
     >
       <StatusBar style="light" />
+
+      {/* NEW: Add Back Header */}
+      <BackHeader title="Settings" onBackPress={handleBackPress} />
 
       {/* Confirmation Modal */}
       <ConfirmationModal
@@ -291,10 +292,11 @@ const Settings = () => {
           renderItem={renderItem}
           keyExtractor={(item) => item.key}
           showsVerticalScrollIndicator={false}
-          removeClippedSubviews={false} // cspell:disable-line
+          removeClippedSubviews={false}
           initialNumToRender={10}
           maxToRenderPerBatch={5}
           windowSize={10}
+          contentContainerStyle={{ paddingBottom: 20 }} // FIXED: Add bottom padding
         />
       </View>
     </SafeAreaView>

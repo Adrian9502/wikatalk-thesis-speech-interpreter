@@ -7,14 +7,14 @@ import React, {
   useMemo,
 } from "react";
 import { Tabs, useLocalSearchParams, useSegments } from "expo-router";
-import { Mic, Camera, Settings, Globe, Volume2 } from "react-native-feather";
+import { Mic, Camera, Globe, Volume2, Home } from "react-native-feather";
 import useThemeStore from "@/store/useThemeStore";
 import { Ionicons } from "@expo/vector-icons";
 import { tabPreloader } from "@/utils/tabPreloader";
 import { useFocusEffect } from "@react-navigation/native";
 import { StatusBar } from "expo-status-bar";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-
+import { MaterialIcons } from "@expo/vector-icons";
 interface TabIconProps {
   Icon: React.ComponentType<any>;
   color: string;
@@ -104,24 +104,35 @@ export default function TabsLayout() {
   const insets = useSafeAreaInsets();
   const params = useLocalSearchParams();
 
-  // NEW: Get the initial tab from params if available
-  const initialTabParam = params.initialTab as string | undefined;
+  // CRITICAL FIX: Get initial tab from params with proper fallback
+  const initialTabParam = (params.initialTab as string) || "Home";
 
-  // State hooks - always called in same order
-  const [currentTab, setCurrentTab] = useState<string>(
-    initialTabParam || "Speech"
-  );
+  // FIXED: Start with Home always, don't change based on segments initially
+  const [currentTab, setCurrentTab] = useState<string>("Home");
   const [isTransitioning, setIsTransitioning] = useState(false);
   const [initialTabProcessed, setInitialTabProcessed] = useState(false);
 
-  // NEW: Process the initial tab parameter only once
+  // CRITICAL FIX: Process initial tab immediately and prevent transitions
   useEffect(() => {
-    if (initialTabParam && !initialTabProcessed) {
-      console.log(
-        `[TabsLayout] Using initial tab from params: ${initialTabParam}`
-      );
+    console.log(`[TabsLayout] Initial tab parameter: ${initialTabParam}`);
+
+    if (initialTabParam && initialTabParam !== "Home" && !initialTabProcessed) {
+      console.log(`[TabsLayout] Setting initial tab to: ${initialTabParam}`);
       setCurrentTab(initialTabParam);
       setInitialTabProcessed(true);
+
+      // Preload the initial tab
+      setTimeout(() => {
+        tabPreloader.preloadTab(initialTabParam);
+      }, 100);
+    } else if (initialTabParam === "Home") {
+      setCurrentTab("Home");
+      setInitialTabProcessed(true);
+
+      // Preload Home tab
+      setTimeout(() => {
+        tabPreloader.preloadTab("Home");
+      }, 100);
     }
   }, [initialTabParam, initialTabProcessed]);
 
@@ -140,14 +151,14 @@ export default function TabsLayout() {
 
   // Helper function to get the main tab from segments
   const getMainTabFromSegments = useCallback((segments: string[]): string => {
-    // Main tabs that correspond to actual tab bar items
+    // FIXED: Only include the 5 main tabs (removed Settings)
     const mainTabs = [
+      "Home",
       "Speech",
       "Translate",
       "Scan",
       "Games",
       "Pronounce",
-      "Settings",
     ];
 
     // Find the first segment that matches a main tab
@@ -163,11 +174,11 @@ export default function TabsLayout() {
       return "Games";
     }
     if (segments.includes("(settings)")) {
-      return "Settings";
+      return "Home"; // CHANGED: Settings screens now map to Home tab
     }
 
     // Default fallback
-    return segments[segments.length - 1] || "Speech";
+    return segments[segments.length - 1] || "Home"; // Changed default to Home
   }, []);
 
   // Optimized tab transition handler
@@ -229,28 +240,42 @@ export default function TabsLayout() {
 
     const mainTab = getMainTabFromSegments(segments);
 
+    // CRITICAL FIX: Prevent initial transitions during startup
+    if (!initialTabProcessed) {
+      console.log(
+        `[TabsLayout] Skipping segment processing - initial tab not processed yet`
+      );
+      return;
+    }
+
+    // FIXED: Only process if it's a real navigation change, not startup
     if (mainTab && mainTab !== currentTab) {
       const prevTab = currentTab;
-      setCurrentTab(mainTab);
 
-      // Only handle tab transitions for actual main tab changes
-      const mainTabs = [
-        "Speech",
-        "Translate",
-        "Scan",
-        "Games",
-        "Pronounce",
-        "Settings",
-      ];
-      if (mainTabs.includes(mainTab) && mainTabs.includes(prevTab)) {
-        handleTabTransition(prevTab, mainTab);
+      // FIXED: Verify this is a genuine tab change, not initial load
+      if (prevTab !== "Home" || (prevTab === "Home" && mainTab !== "Home")) {
+        console.log(
+          `[TabsLayout] Real tab change detected: ${prevTab} → ${mainTab}`
+        );
+        setCurrentTab(mainTab);
+
+        const mainTabs = [
+          "Home",
+          "Speech",
+          "Translate",
+          "Scan",
+          "Games",
+          "Pronounce",
+        ];
+        if (mainTabs.includes(mainTab) && mainTabs.includes(prevTab)) {
+          handleTabTransition(prevTab, mainTab);
+        }
       }
     }
   }, [
     segments,
     currentTab,
-    initialTabProcessed,
-    initialTabParam,
+    initialTabProcessed, // CRITICAL: Only run after initial tab is processed
     getMainTabFromSegments,
     handleTabTransition,
   ]);
@@ -269,9 +294,21 @@ export default function TabsLayout() {
     }, [currentTab])
   );
 
-  // Memoized tab screen configurations
+  // FIXED: Memoized tab screen configurations - ONLY 5 tabs (removed Settings completely)
   const tabScreens = React.useMemo(
     () => [
+      {
+        name: "Home",
+        title: "Home",
+        icon: (props) => (
+          <MaterialIcons
+            name="home"
+            size={props.width || 18}
+            color={props.color}
+          />
+        ),
+        iconName: "Home",
+      },
       {
         name: "Speech",
         title: "Speech",
@@ -301,12 +338,6 @@ export default function TabsLayout() {
         title: "Pronounce",
         icon: Volume2,
         iconName: "Pronounce",
-      },
-      {
-        name: "Settings",
-        title: "Settings",
-        icon: Settings,
-        iconName: "Settings",
       },
     ],
     []
@@ -361,8 +392,10 @@ export default function TabsLayout() {
       />
       <Tabs
         screenOptions={screenOptions}
-        initialRouteName={initialTabParam || "Speech"}
+        // CRITICAL FIX: Always use Home as initial route
+        initialRouteName="Home"
       >
+        {/* FIXED: Map through only the 5 tabs (Settings completely removed) */}
         {tabScreens.map(({ name, title, icon: Icon, iconName }) => (
           <Tabs.Screen
             key={name}

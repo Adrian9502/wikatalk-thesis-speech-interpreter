@@ -35,7 +35,8 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
           } else if (!authRequired && token) {
             console.log("Already authenticated, redirecting to app");
             await InteractionManager.runAfterInteractions(() => {
-              router.replace("/(tabs)/Speech");
+              // FIXED: Navigate directly to Home tab route
+              router.replace("/(tabs)/Home");
             });
           }
 

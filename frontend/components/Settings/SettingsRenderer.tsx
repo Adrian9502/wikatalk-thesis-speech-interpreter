@@ -5,39 +5,70 @@ import SettingItem from "@/components/settings/SettingItem";
 import ThemeSelector from "@/components/settings/ThemeSelector";
 import { BASE_COLORS, TITLE_COLORS } from "@/constant/colors";
 import { FeatherIconName } from "@/types/types";
+import { SettingsSection, SettingsItemType } from "@/types/settingsTypes";
+import useThemeStore from "@/store/useThemeStore";
 
-// Types
-type SettingItemWithToggle = {
-  icon: FeatherIconName;
-  label: string;
-  value: boolean;
-  toggleSwitch: () => void;
-  onPress?: undefined;
+// Section title component
+export const SectionTitle: React.FC<{ title: string }> = ({ title }) => {
+  const { activeTheme } = useThemeStore();
+
+  return (
+    <Text
+      style={[styles.sectionTitle, { color: activeTheme.tabInactiveColor }]}
+    >
+      {title}
+    </Text>
+  );
 };
 
-type SettingItemWithPress = {
-  icon: FeatherIconName;
-  label: string;
-  onPress: () => void;
-  value?: undefined;
-  toggleSwitch?: undefined;
+// Card wrapper component
+export const SettingsCard: React.FC<{ children: React.ReactNode }> = ({
+  children,
+}) => <View style={styles.card}>{children}</View>;
+
+// Divider component
+export const SettingsDivider: React.FC = () => <View style={styles.divider} />;
+
+interface SettingsRendererProps {
+  sections: SettingsSection[];
+  onItemPress: (item: SettingsItemType) => void;
+}
+
+const SettingsRenderer: React.FC<SettingsRendererProps> = ({
+  sections,
+  onItemPress,
+}) => {
+  const renderSection = (section: SettingsSection) => (
+    <View key={section.title}>
+      <SectionTitle title={section.title} />
+      <SettingsCard>
+        {section.items.map((item: SettingsItemType, index: number) => (
+          <View key={item.id || index}>
+            <SettingItem
+              icon={item.icon}
+              label={item.label}
+              onPress={() => onItemPress(item)}
+              showSwitch={item.showSwitch}
+              switchValue={item.switchValue}
+              onSwitchChange={item.onSwitchChange}
+              customIconColor={item.customIconColor}
+            />
+            {index < section.items.length - 1 && <SettingsDivider />}
+          </View>
+        ))}
+      </SettingsCard>
+    </View>
+  );
+
+  return <View>{sections.map(renderSection)}</View>;
 };
-
-type SettingItemType = SettingItemWithToggle | SettingItemWithPress;
-
-// Convert render functions to proper React components
-export const Header = () => <Text style={styles.headerText}>Settings</Text>;
 
 export const AppearanceSection = () => (
   <View style={styles.appearanceContainer}>
-    <Text style={styles.sectionTitle}>Appearance</Text>
+    <Text style={[styles.sectionTitle, { color: "rgba(255, 255, 255, 0.7)" }]}>
+      Choose Theme
+    </Text>
     <ThemeSelector />
-  </View>
-);
-
-export const SectionTitle = ({ title }: { title: string }) => (
-  <View>
-    <Text style={styles.sectionTitle}>{title}</Text>
   </View>
 );
 
@@ -46,7 +77,7 @@ export const SettingItemComponent = ({
   isLast,
   isFirstItem,
 }: {
-  item: SettingItemType;
+  item: any;
   isLast: boolean;
   isFirstItem: boolean;
 }) => (
@@ -106,7 +137,6 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 13,
     fontFamily: "Poppins-Medium",
-    color: BASE_COLORS.white,
     marginBottom: 5,
   },
   settingItemCard: {
@@ -132,6 +162,22 @@ const styles = StyleSheet.create({
     fontSize: 13,
     fontFamily: "Poppins-Medium",
   },
+  card: {
+    backgroundColor: BASE_COLORS.white,
+    borderRadius: 20,
+    overflow: "hidden",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+    marginBottom: 16,
+  },
+  divider: {
+    height: 1,
+    backgroundColor: "#f0f0f0",
+    marginHorizontal: 16,
+  },
 });
 
-export default styles;
+export default SettingsRenderer;

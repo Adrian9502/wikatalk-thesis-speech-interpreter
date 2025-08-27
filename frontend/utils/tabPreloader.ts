@@ -1,10 +1,12 @@
+import { InteractionManager } from "react-native";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import * as Speech from "expo-speech";
 import { useSplashStore } from "@/store/useSplashStore";
 import { usePronunciationStore } from "@/store/usePronunciationStore";
 import useGameStore from "@/store/games/useGameStore";
 import useProgressStore from "@/store/games/useProgressStore";
 import useCoinsStore from "@/store/games/useCoinsStore";
 import { globalSpeechManager } from "@/utils/globalSpeechManager";
-import * as Speech from "expo-speech";
 
 interface TabPreloadConfig {
   [key: string]: {
@@ -12,20 +14,16 @@ interface TabPreloadConfig {
     dependencies: string[];
     preloadFn: () => Promise<boolean>;
     cleanup?: () => void;
-    warmUp?: () => Promise<void>; // Fixed typo: was warmpUp
+    warmUp?: () => Promise<void>; // Fixed typo: was warmUp
   };
 }
 
 class TabPreloader {
   private preloadedTabs = new Set<string>();
-  private preloadPromises = new Map<string, Promise<boolean>>();
-  private cleanupTasks = new Map<string, (() => void)[]>();
+  private isPreloading = new Map<string, boolean>();
+  private cleanupTasks = new Map<string, (() => void)[]>(); // Added missing property
 
   // Move cleanup functions to the beginning, before config
-  private cleanupSpeech = (): void => {
-    globalSpeechManager.stopAllSpeech();
-  };
-
   private cleanupGames = (): void => {
     // Clear heavy game data that's not immediately needed
     const gameStore = useGameStore.getState();
@@ -38,13 +36,18 @@ class TabPreloader {
     pronunciationStore.stopAudio();
   };
 
-  private config: TabPreloadConfig = {
+  // UPDATED: Tab configurations (replaced Settings with Home)
+  private tabConfigs: TabPreloadConfig = {
+    Home: {
+      priority: "high",
+      dependencies: ["core"],
+      preloadFn: this.preloadHome.bind(this),
+    },
     Speech: {
       priority: "high",
       dependencies: ["core"],
       preloadFn: this.preloadSpeech.bind(this),
-      warmUp: this.warmupSpeech.bind(this), // Fixed typo
-      cleanup: this.cleanupSpeech,
+      warmUp: this.warmupSpeech.bind(this),
     },
     Games: {
       priority: "high",
@@ -62,20 +65,45 @@ class TabPreloader {
       priority: "medium",
       dependencies: [],
       preloadFn: this.preloadTranslate.bind(this),
-      warmUp: this.warmupTranslate.bind(this), // Fixed typo
+      warmUp: this.warmupTranslate.bind(this),
     },
     Scan: {
       priority: "low",
       dependencies: [],
       preloadFn: this.preloadScan.bind(this),
-      warmUp: this.warmupScan.bind(this), // Fixed typo
-    },
-    Settings: {
-      priority: "low",
-      dependencies: [],
-      preloadFn: this.preloadSettings.bind(this),
+      warmUp: this.warmupScan.bind(this),
     },
   };
+
+  // NEW: Preload Home tab (HomePage) - FIXED version
+  private async preloadHome(): Promise<boolean> {
+    try {
+      console.log("[TabPreloader] Preloading Home tab");
+
+      // FIXED: Don't use InteractionManager - it can cause delays
+      try {
+        // Preload HomePage-specific data immediately
+        const splashStore = useSplashStore.getState();
+
+        // Check if we already have preloaded game data
+        if (splashStore.gameDataPreloaded) {
+          console.log("[TabPreloader] Home tab using existing game data");
+        }
+
+        // Small delay for UI smoothness
+        await new Promise((resolve) => setTimeout(resolve, 50));
+
+        console.log("[TabPreloader] ✅ Home tab preloaded successfully");
+        return true;
+      } catch (error) {
+        console.warn("[TabPreloader] ❌ Home tab preload failed:", error);
+        return false; // CHANGED: Return false instead of throwing
+      }
+    } catch (error) {
+      console.warn("[TabPreloader] Home preload error:", error);
+      return false; // CHANGED: Return false for any error
+    }
+  }
 
   // High priority - preload Speech tab (default)
   private async preloadSpeech(): Promise<boolean> {
@@ -249,18 +277,6 @@ class TabPreloader {
     }
   }
 
-  // Low priority - preload Settings tab
-  private async preloadSettings(): Promise<boolean> {
-    try {
-      console.log("[TabPreloader] Preloading Settings tab");
-      // Settings is mostly static, minimal preloading needed
-      return true;
-    } catch (error) {
-      console.error("[TabPreloader] Settings preload failed:", error);
-      return false;
-    }
-  }
-
   // Main preload method
   async preloadTab(tabName: string): Promise<boolean> {
     if (this.preloadedTabs.has(tabName)) {
@@ -268,12 +284,12 @@ class TabPreloader {
       return true;
     }
 
-    if (this.preloadPromises.has(tabName)) {
+    if (this.isPreloading.get(tabName)) {
       console.log(`[TabPreloader] ${tabName} preload in progress, waiting...`);
-      return await this.preloadPromises.get(tabName)!;
+      return false;
     }
 
-    const config = this.config[tabName];
+    const config = this.tabConfigs[tabName as keyof typeof this.tabConfigs];
     if (!config) {
       console.warn(`[TabPreloader] No config found for tab: ${tabName}`);
       return false;
@@ -283,11 +299,9 @@ class TabPreloader {
       `[TabPreloader] Starting preload for ${tabName} (${config.priority} priority)`
     );
 
-    const preloadPromise = this.executePreload(tabName, config);
-    this.preloadPromises.set(tabName, preloadPromise);
-
-    const success = await preloadPromise;
-    this.preloadPromises.delete(tabName);
+    this.isPreloading.set(tabName, true);
+    const success = await config.preloadFn();
+    this.isPreloading.delete(tabName);
 
     if (success) {
       this.preloadedTabs.add(tabName);
@@ -299,51 +313,35 @@ class TabPreloader {
     return success;
   }
 
-  private async executePreload(
-    tabName: string,
-    config: TabPreloadConfig[string]
-  ): Promise<boolean> {
-    try {
-      // Warmup if available
-      if (config.warmUp) {
-        // Fixed typo
-        await config.warmUp(); // Fixed typo
-      }
+  // Preload next likely tab
+  preloadNextTab(currentTab: string): void {
+    // UPDATED: Tab sequences (replaced Settings with Home)
+    const tabSequences = {
+      Home: ["Speech", "Games"],
+      Speech: ["Translate", "Home"],
+      Translate: ["Scan", "Speech"],
+      Scan: ["Games", "Translate"],
+      Games: ["Pronounce", "Home"],
+      Pronounce: ["Home", "Games"],
+    };
 
-      // Execute preload
-      return await config.preloadFn();
-    } catch (error) {
-      console.error(
-        `[TabPreloader] ${tabName} preload execution failed:`,
-        error
-      );
-      return false;
+    const nextTabs = tabSequences[currentTab as keyof typeof tabSequences];
+    if (nextTabs) {
+      // Preload the first predicted tab
+      setTimeout(() => this.preloadTab(nextTabs[0]), 1000);
     }
   }
 
   // Cleanup previous tab
   cleanupTab(tabName: string): void {
-    // Add validation to only cleanup actual tabs
-    const validTabs = [
-      "Speech",
-      "Translate",
-      "Scan",
-      "Games",
-      "Pronounce",
-      "Settings",
-    ];
-
-    if (!validTabs.includes(tabName)) {
-      console.log(
-        `[TabPreloader] Skipping cleanup for non-tab screen: ${tabName}`
-      );
-      return;
-    }
-
-    const config = this.config[tabName];
+    const config = this.tabConfigs[tabName as keyof typeof this.tabConfigs];
     if (config?.cleanup) {
-      console.log(`[TabPreloader] Cleaning up ${tabName}`);
-      config.cleanup();
+      try {
+        config.cleanup();
+        console.log(`[TabPreloader] 🧹 Cleaned up ${tabName} tab`);
+      } catch (error) {
+        console.warn(`[TabPreloader] Cleanup error for ${tabName}:`, error);
+      }
     }
 
     // Execute any registered cleanup tasks
@@ -360,50 +358,9 @@ class TabPreloader {
         }
       });
     }
-  }
 
-  // Preload next likely tab
-  async preloadNextTab(currentTab: string): Promise<void> {
-    const tabOrder = [
-      "Speech",
-      "Translate",
-      "Scan",
-      "Games",
-      "Pronounce",
-      "Settings",
-    ];
-    const currentIndex = tabOrder.indexOf(currentTab);
-
-    // Only proceed if currentTab is actually a main tab
-    if (currentIndex >= 0) {
-      // Preload next tab
-      const nextIndex = (currentIndex + 1) % tabOrder.length;
-      const nextTab = tabOrder[nextIndex];
-
-      // Don't wait for completion
-      this.preloadTab(nextTab).catch((error) => {
-        console.warn(
-          `[TabPreloader] Next tab preload failed for ${nextTab}:`,
-          error
-        );
-      });
-
-      // Also preload previous tab for backward navigation
-      const prevIndex =
-        currentIndex === 0 ? tabOrder.length - 1 : currentIndex - 1;
-      const prevTab = tabOrder[prevIndex];
-
-      this.preloadTab(prevTab).catch((error) => {
-        console.warn(
-          `[TabPreloader] Previous tab preload failed for ${prevTab}:`,
-          error
-        );
-      });
-    } else {
-      console.log(
-        `[TabPreloader] ${currentTab} is not a main tab, skipping preload`
-      );
-    }
+    // Remove from preloaded set
+    this.preloadedTabs.delete(tabName);
   }
 
   // Register cleanup task
@@ -417,7 +374,7 @@ class TabPreloader {
   // Get preload status
   getPreloadStatus(): { [key: string]: boolean } {
     const status: { [key: string]: boolean } = {};
-    Object.keys(this.config).forEach((tab) => {
+    Object.keys(this.tabConfigs).forEach((tab) => {
       status[tab] = this.preloadedTabs.has(tab);
     });
     return status;
@@ -426,7 +383,7 @@ class TabPreloader {
   // Reset preloader
   reset(): void {
     this.preloadedTabs.clear();
-    this.preloadPromises.clear();
+    this.isPreloading.clear();
     this.cleanupTasks.clear();
   }
 }

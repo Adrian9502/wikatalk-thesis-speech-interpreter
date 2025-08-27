@@ -1,7 +1,7 @@
-import React, { useEffect, useState, useCallback, useRef } from "react";
-import { View, StyleSheet } from "react-native";
+import React, { useEffect, useState, useCallback } from "react";
+import { View } from "react-native";
 import { useFonts } from "expo-font";
-import { Stack, useRouter, Slot } from "expo-router";
+import { Stack, useRouter } from "expo-router";
 import "react-native-url-polyfill/auto";
 import { SplashScreen } from "expo-router";
 import { ValidationProvider } from "@/context/ValidationContext";
@@ -32,11 +32,6 @@ import useGameStore from "@/store/games/useGameStore";
 import useCoinsStore from "@/store/games/useCoinsStore";
 import { useAuthStore } from "@/store/useAuthStore";
 
-import useHomePageStore from "@/store/useHomePageStore";
-import HomePage from "@/components/home/HomePage";
-import AppLoading from "@/components/AppLoading"; // NEW: Import AppLoading
-import GameNavigation from "@/components/games/GameNavigation";
-
 // Prevent the splash screen from auto-hiding
 SplashScreen.preventAutoHideAsync();
 
@@ -57,37 +52,13 @@ const RootLayout = () => {
   const { splashShown, markSplashShown, markLoadingComplete } =
     useSplashStore();
 
-  const { shouldShowHomePage, setShowHomePage } = useHomePageStore();
-
+  // SIMPLIFIED: Remove all HomePage-related state
   const [themeReady, setThemeReady] = useState<boolean>(false);
   const [manuallyCheckedToken, setManuallyCheckedToken] =
     useState<boolean>(false);
   const [hasToken, setHasToken] = useState<boolean>(false);
   const [initialRouteReady, setInitialRouteReady] = useState<boolean>(false);
   const [showSplashAnimation, setShowSplashAnimation] = useState<boolean>(true);
-
-  const [showHomePage, setShowHomePageState] = useState<boolean>(false);
-  const [shouldRenderTabs, setShouldRenderTabs] = useState<boolean>(false);
-
-  // NEW: Add state to track HomePage readiness
-  const [homePageReady, setHomePageReady] = useState<boolean>(false);
-  const [showAppLoading, setShowAppLoading] = useState<boolean>(false);
-
-  // Add a new state for navigation loading
-  const [isNavigatingFromHomePage, setIsNavigatingFromHomePage] =
-    useState<boolean>(false);
-
-  // First, add a new state for delayed navigation
-  const [pendingNavigation, setPendingNavigation] = useState<string | null>(
-    null
-  );
-
-  // NEW: Define a state to track which tab we want to show
-  const [activeTab, setActiveTab] = useState<string>("Speech");
-  // NEW: Define a state to track which UI to show (HomePage or Tabs)
-  const [activeUI, setActiveUI] = useState<"splash" | "homepage" | "tabs">(
-    "splash"
-  );
 
   // Stable callback for theme ready
   const handleThemeReady = useCallback(() => {
@@ -165,13 +136,7 @@ const RootLayout = () => {
     return () => clearTimeout(forceTimeout);
   }, [markLoadingComplete, markSplashShown]);
 
-  // NEW: HomePage readiness callback
-  const handleHomePageReady = useCallback(() => {
-    console.log("[Layout] HomePage reports it's ready");
-    setHomePageReady(true);
-  }, []);
-
-  // UPDATED: Enhanced navigation logic with HomePage support - prevent tab flash
+  // FIXED: Enhanced navigation logic to prevent Speech screen flash
   useEffect(() => {
     if (
       fontsLoaded &&
@@ -184,74 +149,24 @@ const RootLayout = () => {
       // Mark check as complete to avoid multiple runs
       setInitialRouteReady(true);
 
-      // FIXED: Check HomePage first and prevent tab rendering if HomePage should show
-      if (hasToken && shouldShowHomePage()) {
-        console.log(
-          "HomePage should show - setting state immediately, preventing tab flash"
-        );
-        setShowHomePageState(true);
-        setShouldRenderTabs(false); // CRITICAL: Don't render tabs
-
-        // NEW: CRITICAL FIX - Set activeUI to homepage
-        setActiveUI("homepage");
-
-        // NEW: Show AppLoading while HomePage prepares
-        setShowAppLoading(true);
-        setShowSplashAnimation(false);
-        markSplashShown();
-
-        // UPDATED: Wait a bit longer for HomePage data to be ready
-        setTimeout(() => {
-          console.log("HomePage data should be ready, checking readiness...");
-
-          // Give HomePage some time to initialize its data
-          const checkHomePageReadiness = () => {
-            // You can add more sophisticated checks here
-            // For now, we'll just wait a bit more to ensure data is loaded
-            console.log("HomePage ready, hiding app loading");
-            setShowAppLoading(false);
-            markLoadingComplete();
-          };
-
-          // Small additional delay to ensure HomePage data is fully loaded
-          setTimeout(checkHomePageReadiness, 500);
-        }, 200);
-
-        return; // Exit early, don't setup tab navigation
-      }
-
-      // Only render tabs if HomePage is not showing
-      setShouldRenderTabs(true);
-
       const initialNavigate = async () => {
         try {
-          // FIXED: Properly handle HomePage display on startup
           if (hasToken) {
-            if (shouldShowHomePage()) {
-              console.log("Showing HomePage on startup as configured");
-              setShowHomePageState(true);
-              setShowAppLoading(false);
-              markSplashShown();
-              markLoadingComplete();
-              return; // Exit early - don't navigate to Speech
-            } else {
-              console.log("Skipping HomePage, navigating to Speech");
-              await router.replace("/(tabs)/Speech");
-            }
+            // FIXED: Navigate directly to the specific Home tab route
+            console.log("Token found, navigating directly to Home tab");
+            await router.replace("/(tabs)/Home");
           } else {
             console.log("No token, showing login screen");
             await router.replace("/");
           }
 
-          setTimeout(() => {
-            console.log("Navigation complete, now hiding splash screen");
-            setShowSplashAnimation(false);
-            markSplashShown();
-            markLoadingComplete();
-          }, 100);
+          // Hide splash after navigation
+          console.log("Navigation complete, hiding splash screen");
+          setShowSplashAnimation(false);
+          markSplashShown();
+          markLoadingComplete();
         } catch (error) {
           console.error("Navigation error:", error);
-          // If navigation fails, still hide the splash after a delay
           setTimeout(() => {
             setShowSplashAnimation(false);
             markSplashShown();
@@ -260,10 +175,8 @@ const RootLayout = () => {
         }
       };
 
-      // Use InteractionManager to ensure UI is ready
-      InteractionManager.runAfterInteractions(() => {
-        initialNavigate();
-      });
+      // CRITICAL: Remove the timeout delay - navigate immediately
+      initialNavigate();
     }
   }, [
     fontsLoaded,
@@ -272,7 +185,6 @@ const RootLayout = () => {
     hasToken,
     initialRouteReady,
     router,
-    shouldShowHomePage,
     markLoadingComplete,
     markSplashShown,
   ]);
@@ -302,47 +214,12 @@ const RootLayout = () => {
     return unsubscribe;
   }, []);
 
-  // NEW: Define refs at the top level of the component
-  const targetTabNameRef = useRef<string>("");
-
-  // COMPLETELY REWRITTEN: Handle navigate to tab from HomePage
-  const handleNavigateToTab = useCallback((tabName: string) => {
-    console.log("HomePage: Navigating to tab:", tabName);
-
-    // 1. First, set which tab should be active
-    setActiveTab(tabName);
-
-    // 2. Show loading screen during transition
-    setIsNavigatingFromHomePage(true);
-
-    // 3. Schedule the UI change after a small delay
-    setTimeout(() => {
-      // This switches from HomePage to Tabs without navigation
-      setActiveUI("tabs");
-
-      // Hide loading after tabs are visible
-      setTimeout(() => {
-        setIsNavigatingFromHomePage(false);
-      }, 300);
-    }, 100);
-  }, []);
-
   // Only show splash animation at first
   if (showSplashAnimation && !splashShown) {
     return <SplashAnimation />;
   }
 
-  // Show AppLoading while HomePage is preparing
-  if (showAppLoading && hasToken) {
-    return <AppLoading />;
-  }
-
-  // SOLUTION: Show AppLoading during navigation from HomePage
-  if (isNavigatingFromHomePage) {
-    return <AppLoading />;
-  }
-
-  // COMPLETELY NEW APPROACH: Conditionally render the appropriate UI
+  // FIXED: Show Stack navigator with correct initial route
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
       <SafeAreaProvider>
@@ -353,43 +230,27 @@ const RootLayout = () => {
                 <PaperProvider>
                   <ValidationProvider>
                     <NotifierWrapper>
-                      <View style={{ flex: 1 }}>
-                        {/* Decide which UI to show */}
-                        {activeUI === "homepage" &&
-                        shouldShowHomePage() &&
-                        hasToken ? (
-                          // Show HomePage
-                          <HomePage
-                            onNavigateToTab={handleNavigateToTab}
-                            context="startup"
-                            onReady={handleHomePageReady}
-                          />
-                        ) : (
-                          // Show Tab Navigator - CRITICAL: With the correct initial tab!
-                          <Stack
-                            screenOptions={{ headerShown: false }}
-                            initialRouteName="(tabs)" // FIXED: Use just the screen name, not the full path
-                          >
-                            <Stack.Screen
-                              name="index"
-                              options={{ headerShown: false }}
-                            />
-                            <Stack.Screen
-                              name="(auth)"
-                              options={{ headerShown: false }}
-                            />
-                            <Stack.Screen
-                              name="(tabs)"
-                              options={{
-                                headerShown: false,
-                                // FIXED: Remove initialParams property
-                              }}
-                              // FIXED: Use initialParams as a separate prop instead
-                              initialParams={{ initialTab: activeTab }}
-                            />
-                          </Stack>
-                        )}
-                      </View>
+                      <Stack
+                        screenOptions={{ headerShown: false }}
+                        // FIXED: Don't set initial route, let navigation logic handle it
+                      >
+                        <Stack.Screen
+                          name="index"
+                          options={{ headerShown: false }}
+                        />
+                        <Stack.Screen
+                          name="(auth)"
+                          options={{ headerShown: false }}
+                        />
+                        <Stack.Screen
+                          name="(tabs)"
+                          options={{ headerShown: false }}
+                        />
+                        <Stack.Screen
+                          name="(settings)"
+                          options={{ headerShown: false }}
+                        />
+                      </Stack>
                     </NotifierWrapper>
                   </ValidationProvider>
                 </PaperProvider>

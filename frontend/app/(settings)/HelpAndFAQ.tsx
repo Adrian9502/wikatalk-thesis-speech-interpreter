@@ -62,7 +62,7 @@ const HelpFAQ = () => {
   // Hardware back button handling - ADD this while keeping Header functionality
   useHardwareBack({
     enabled: true,
-    fallbackRoute: "/(tabs)/Settings",
+    fallbackRoute: "/(settings)/Settings",
     useExistingHeaderLogic: true, // Use same logic as Header component
   });
 
