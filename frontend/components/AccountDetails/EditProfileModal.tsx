@@ -22,88 +22,84 @@ interface EditProfileModalProps {
   theme: any;
 }
 
-const EditProfileModal = ({
-  visible,
-  onClose,
-  onSave,
-  userData,
-  theme,
-}: EditProfileModalProps) => {
-  const {
-    control,
-    handleSubmit,
-    formState,
-    imageState,
-    passwordState,
-    errorState,
-    isLoading,
-    handleSelectImage,
-    onFormSubmit,
-    togglePasswordChange,
-    passwordValidation,
-  } = useProfileForm({ userData, visible, onSave });
+const EditProfileModal = React.memo(
+  ({ visible, onClose, onSave, userData, theme }: EditProfileModalProps) => {
+    const {
+      control,
+      handleSubmit,
+      formState,
+      imageState,
+      passwordState,
+      errorState,
+      isLoading,
+      handleSelectImage,
+      onFormSubmit,
+      togglePasswordChange,
+      passwordValidation,
+    } = useProfileForm({ userData, visible, onSave });
 
-  const isGoogleUser = userData?.authProvider === "google";
+    const isGoogleUser = userData?.authProvider === "google";
 
-  return (
-    <Modal
-      visible={visible}
-      transparent
-      animationType="fade"
-      onRequestClose={onClose}
-      statusBarTranslucent={true}
-    >
-      <View style={styles.modalOverlay}>
-        <View style={styles.modalContainer}>
-          <View
-            style={[
-              styles.headerContainer,
-              { backgroundColor: theme.secondaryColor },
-            ]}
-          >
-            <Text style={styles.headerTitle}>Edit Profile</Text>
+    return (
+      <Modal
+        visible={visible}
+        transparent
+        animationType="fade"
+        onRequestClose={onClose}
+        statusBarTranslucent={true}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContainer}>
+            <View
+              style={[
+                styles.headerContainer,
+                { backgroundColor: theme.secondaryColor },
+              ]}
+            >
+              <Text style={styles.headerTitle}>Edit Profile</Text>
+            </View>
+
+            <ScrollView
+              showsVerticalScrollIndicator={false}
+              showsHorizontalScrollIndicator={false}
+              style={styles.formContainer}
+            >
+              <ProfilePictureSection
+                profilePicture={imageState.profilePicture}
+                handleSelectImage={handleSelectImage}
+                theme={theme}
+              />
+              {errorState.error ? (
+                <Text style={styles.errorText}>{errorState.error}</Text>
+              ) : null}
+
+              <Text style={styles.sectionTitle}>Basic Information</Text>
+              <BasicInfoForm control={control} errors={formState.errors} />
+
+              <PasswordSection
+                control={control}
+                errors={formState.errors}
+                changePassword={passwordState.changePassword}
+                passwordError={passwordState.passwordError}
+                togglePasswordChange={togglePasswordChange}
+                passwordValidation={passwordValidation}
+                theme={theme}
+                isGoogleUser={isGoogleUser}
+              />
+
+              <EditProfileFooter
+                onSave={handleSubmit(onFormSubmit)}
+                onClose={onClose}
+                isLoading={isLoading}
+                theme={theme}
+              />
+            </ScrollView>
           </View>
-
-          <ScrollView
-            showsVerticalScrollIndicator={false}
-            showsHorizontalScrollIndicator={false}
-            style={styles.formContainer}
-          >
-            {errorState.error ? (
-              <Text style={styles.errorText}>{errorState.error}</Text>
-            ) : null}
-
-            <ProfilePictureSection
-              profilePicture={imageState.profilePicture}
-              handleSelectImage={handleSelectImage}
-              theme={theme}
-            />
-
-            <Text style={styles.sectionTitle}>Basic Information</Text>
-            <BasicInfoForm control={control} errors={formState.errors} />
-
-            <PasswordSection
-              control={control}
-              errors={formState.errors}
-              changePassword={passwordState.changePassword}
-              passwordError={passwordState.passwordError}
-              togglePasswordChange={togglePasswordChange}
-              passwordValidation={passwordValidation}
-              theme={theme}
-              isGoogleUser={isGoogleUser}
-            />
-
-            <EditProfileFooter
-              onSave={handleSubmit(onFormSubmit)}
-              onClose={onClose}
-              isLoading={isLoading}
-              theme={theme}
-            />
-          </ScrollView>
         </View>
-      </View>
-    </Modal>
-  );
-};
+      </Modal>
+    );
+  }
+);
 
+EditProfileModal.displayName = "EditProfileModal";
 export default EditProfileModal;

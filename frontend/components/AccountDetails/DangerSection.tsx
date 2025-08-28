@@ -5,25 +5,35 @@ import useThemeStore from "@/store/useThemeStore";
 import DeleteAccount from "./DeleteAccount";
 import { BASE_COLORS } from "@/constant/colors";
 
-export const DangerSection = () => {
+// Memoize the warning icon
+const WarningIcon = React.memo(() => (
+  <AlertTriangle size={18} color={BASE_COLORS.danger} style={styles.icon} />
+));
+
+// Memoize the warning text component
+const WarningText = React.memo(({ textColor }: { textColor: string }) => (
+  <Text style={[styles.warningText, { color: textColor }]}>
+    The actions below are irreversible. Please proceed with caution.
+  </Text>
+));
+
+export const DangerSection = React.memo(() => {
   const { activeTheme } = useThemeStore();
+
+  // Memoize style objects
+  const warningContainerStyle = React.useMemo(
+    () => [
+      styles.warningContainer,
+      { borderLeftColor: activeTheme.secondaryColor },
+    ],
+    [activeTheme.secondaryColor]
+  );
 
   return (
     <>
-      <View
-        style={[
-          styles.warningContainer,
-          { borderLeftColor: activeTheme.secondaryColor },
-        ]}
-      >
-        <AlertTriangle
-          size={18}
-          color={BASE_COLORS.danger}
-          style={styles.icon}
-        />
-        <Text style={[styles.warningText, { color: BASE_COLORS.darkText }]}>
-          The actions below are irreversible. Please proceed with caution.
-        </Text>
+      <View style={warningContainerStyle}>
+        <WarningIcon />
+        <WarningText textColor={BASE_COLORS.darkText} />
       </View>
 
       <View style={styles.buttonContainer}>
@@ -31,7 +41,7 @@ export const DangerSection = () => {
       </View>
     </>
   );
-};
+});
 
 const styles = StyleSheet.create({
   warningContainer: {
@@ -56,4 +66,5 @@ const styles = StyleSheet.create({
   },
 });
 
+DangerSection.displayName = "DangerSection";
 export default DangerSection;

@@ -81,7 +81,6 @@ export default StyleSheet.create({
     color: BASE_COLORS.orange,
     fontFamily: "Poppins-Regular",
     fontSize: 12,
-    marginBottom: 8,
     textAlign: "center",
   },
   inputLabel: {

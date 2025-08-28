@@ -9,6 +9,7 @@ import {
 import { LucideIcon, Eye, EyeOff, X } from "lucide-react-native";
 import { useState } from "react";
 import { Control, Controller, FieldValues, Path } from "react-hook-form";
+import React from "react";
 
 // Generic FormInput component that works with any form type
 interface FormInputProps<T extends FieldValues> {
@@ -159,4 +160,7 @@ const styles = StyleSheet.create({
   },
 });
 
-export default FormInput;
+// Memoize the component to prevent unnecessary re-renders
+export default React.memo(FormInput) as <T extends FieldValues>(
+  props: FormInputProps<T>
+) => React.ReactElement;
