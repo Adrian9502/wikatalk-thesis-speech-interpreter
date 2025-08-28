@@ -13,7 +13,7 @@ import { useRankings } from "@/hooks/useRankings";
 import { RankingType, RankingUser } from "@/types/rankingTypes";
 import { getRankingCategory } from "@/constant/rankingConstants";
 import RankingItem from "@/components/games/rankings/RankingItem";
-import { BASE_COLORS, ICON_COLORS } from "@/constant/colors";
+import { BASE_COLORS } from "@/constant/colors";
 import { useAuth } from "@/context/AuthContext";
 import { useRankingsModal } from "@/components/games/RankingsModalProvider";
 
@@ -84,7 +84,7 @@ const HomePageRankingContent: React.FC<HomePageRankingContentProps> = ({
       </View>
     );
   }
-
+  const qe = true;
   // Render error state
   if (error) {
     return (
@@ -92,7 +92,7 @@ const HomePageRankingContent: React.FC<HomePageRankingContentProps> = ({
         <Text style={styles.errorText}>Failed to load rankings</Text>
         <Text style={styles.errorSubtext}>{error}</Text>
         <TouchableOpacity style={styles.retryButton} onPress={handleRefresh}>
-          <RefreshCw width={16} height={16} color={BASE_COLORS.white} />
+          <RefreshCw width={14} height={14} color={BASE_COLORS.white} />
           <Text style={styles.retryButtonText}>Try Again</Text>
         </TouchableOpacity>
       </View>
@@ -114,7 +114,7 @@ const HomePageRankingContent: React.FC<HomePageRankingContentProps> = ({
   if (!data && !isLoading) {
     return (
       <View style={styles.centerContainer}>
-        <ActivityIndicator size="large" color={BASE_COLORS.white} />
+        <ActivityIndicator size="small" color={BASE_COLORS.white} />
         <Text style={styles.loadingText}>Loading rankings...</Text>
       </View>
     );
@@ -124,16 +124,16 @@ const HomePageRankingContent: React.FC<HomePageRankingContentProps> = ({
   if (!data) {
     return (
       <View style={styles.centerContainer}>
-        <ActivityIndicator size="large" color={BASE_COLORS.white} />
+        <ActivityIndicator size="small" color={BASE_COLORS.white} />
         <Text style={styles.loadingText}>Loading rankings...</Text>
       </View>
     );
   }
 
-  // Render main content - FIXED: Simplified for homepage
+  // Render main content
   return (
     <View style={styles.contentContainer}>
-      {/* Category Info Header - Smaller for homepage */}
+      {/* Category Info Header  */}
       {selectedCategoryData && (
         <View style={styles.categoryInfoHeader}>
           <View style={styles.categoryTitleRow}>
@@ -147,7 +147,7 @@ const HomePageRankingContent: React.FC<HomePageRankingContentProps> = ({
         </View>
       )}
 
-      {/* Rankings List - FIXED: Independent ScrollView */}
+      {/* Rankings List  */}
       <ScrollView
         style={styles.rankingsList}
         showsVerticalScrollIndicator={true}
@@ -174,7 +174,7 @@ const HomePageRankingContent: React.FC<HomePageRankingContentProps> = ({
             ))}
         </View>
 
-        {/* User's rank (if not in top 10) - Simplified for homepage */}
+        {/* User's rank (if not in top 10) */}
         {data.userRank && data.userRank.rank > 10 && (
           <View style={styles.userRankSection}>
             <View style={styles.userRankDivider}>
@@ -256,7 +256,7 @@ const styles = StyleSheet.create({
     marginBottom: 6,
   },
   errorSubtext: {
-    fontSize: 12,
+    fontSize: 11,
     fontFamily: "Poppins-Regular",
     color: "rgba(255, 255, 255, 0.7)",
     textAlign: "center",
@@ -272,12 +272,12 @@ const styles = StyleSheet.create({
     gap: 6,
   },
   retryButtonText: {
-    fontSize: 12,
+    fontSize: 11,
     fontFamily: "Poppins-Medium",
     color: "#fff",
   },
   emptyText: {
-    fontSize: 14,
+    fontSize: 12,
     fontFamily: "Poppins-SemiBold",
     color: "#fff",
     textAlign: "center",
