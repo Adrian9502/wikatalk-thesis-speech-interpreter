@@ -92,7 +92,7 @@ const Index = () => {
         } else if (token) {
           console.log("Token exists in storage, skipping theme reset");
           // Redirect if on login screen but has token
-          router.replace("/(tabs)/Speech");
+          router.replace("/(tabs)/Home");
         }
       });
     }

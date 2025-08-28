@@ -91,13 +91,13 @@ const styles = StyleSheet.create({
   },
   tabButton: {
     flex: 1,
-    paddingVertical: 12,
+    paddingVertical: 10,
     alignItems: "center",
     zIndex: 10,
   },
   tabButtonText: {
     fontFamily: "Poppins-Medium",
-    fontSize: 14,
+    fontSize: 12,
   },
   activeTabText: {
     fontFamily: "Poppins-Medium",

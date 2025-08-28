@@ -155,7 +155,7 @@ const styles = StyleSheet.create({
   },
   errorText: {
     color: "#EF4444",
-    fontSize: 11,
+    fontSize: 10,
     fontFamily: "Poppins-Regular",
   },
 });

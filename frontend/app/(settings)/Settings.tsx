@@ -22,6 +22,7 @@ import ContactSupportModal from "@/components/helpAndFAQ/ContactSupportModal";
 import { clearAllAccountData } from "@/utils/accountUtils";
 import ProfileCard from "@/components/settings/ProfileCard";
 import { Header as BackHeader } from "@/components/Header";
+import TermsOfUseModal from "@/components/legal/TermsOfUseModal";
 
 // Types
 type SettingItemWithToggle = {
@@ -71,6 +72,7 @@ const Settings = () => {
   // Modal state
   const [logoutModalVisible, setLogoutModalVisible] = useState(false);
   const [contactModalVisible, setContactModalVisible] = useState(false);
+  const [termsModalVisible, setTermsModalVisible] = useState(false);
 
   // NEW: Back navigation handler
   const handleBackPress = () => {
@@ -111,6 +113,17 @@ const Settings = () => {
         },
       ],
     },
+    // Legal Section - NEW
+    {
+      title: "Legal",
+      items: [
+        {
+          icon: "file-text",
+          label: "Terms of Use",
+          onPress: () => setTermsModalVisible(true),
+        },
+      ],
+    },
     // Support section
     {
       title: "Support",
@@ -137,9 +150,6 @@ const Settings = () => {
   // Create a flattened list of items for FlatList
   const createListItems = (): ListItem[] => {
     const items: ListItem[] = [];
-
-    // REMOVE the old header and add back header instead
-    // Don't add the old header item anymore
 
     // Add profile section
     items.push({
@@ -244,7 +254,7 @@ const Settings = () => {
 
   return (
     <SafeAreaView
-      edges={["left", "right", "bottom"]} // FIXED: Add bottom edge
+      edges={["left", "right", "bottom"]}
       style={[
         globalStyles.container,
         { backgroundColor: activeTheme.backgroundColor },
@@ -253,7 +263,7 @@ const Settings = () => {
     >
       <StatusBar style="light" />
 
-      {/* NEW: Add Back Header */}
+      {/* Back Header */}
       <BackHeader title="Settings" onBackPress={handleBackPress} />
 
       {/* Confirmation Modal */}
@@ -274,6 +284,12 @@ const Settings = () => {
         onClose={() => setContactModalVisible(false)}
       />
 
+      {/* Terms of Use Modal */}
+      <TermsOfUseModal
+        visible={termsModalVisible}
+        onClose={() => setTermsModalVisible(false)}
+      />
+
       <View style={{ flex: 1 }}>
         <FlatList
           data={createListItems()}
@@ -284,7 +300,7 @@ const Settings = () => {
           initialNumToRender={10}
           maxToRenderPerBatch={5}
           windowSize={10}
-          contentContainerStyle={{ paddingBottom: 20 }} // FIXED: Add bottom padding
+          contentContainerStyle={{ paddingBottom: 20 }}
         />
       </View>
     </SafeAreaView>

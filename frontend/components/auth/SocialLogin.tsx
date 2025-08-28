@@ -1,17 +1,24 @@
 import React, { useState, useEffect } from "react";
-import { View, Text, StyleSheet, Platform, Alert } from "react-native";
+import {
+  View,
+  Text,
+  StyleSheet,
+  Platform,
+  Alert,
+  TouchableOpacity,
+} from "react-native";
 import { BASE_COLORS } from "@/constant/colors";
 import {
-  GoogleSigninButton,
   statusCodes,
   GoogleSignin,
   SignInResponse,
 } from "@react-native-google-signin/google-signin";
 import { useAuthStore } from "@/store/useAuthStore";
 import CustomGoogleButton from "@/components/auth/GoogleLoginButton";
-
+import TermsOfUseModal from "@/components/legal/TermsOfUseModal";
 const SocialLogin = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showTermsModal, setShowTermsModal] = useState(false);
   const { loginWithGoogle } = useAuthStore();
 
   useEffect(() => {
@@ -20,7 +27,6 @@ const SocialLogin = () => {
         const isConfigured = await GoogleSignin.hasPlayServices({
           showPlayServicesUpdateDialog: true,
         });
-
         console.log("Google Play Services available:", isConfigured);
       } catch (error) {
         console.error("Google Play Services check failed:", error);
@@ -33,26 +39,6 @@ const SocialLogin = () => {
   const handleGoogleSignIn = async () => {
     try {
       setIsSubmitting(true);
-
-      // DEBUG: Log all environment variables
-      console.log("=== GOOGLE SIGNIN ENVIRONMENT DEBUG ===");
-      console.log(
-        "Web Client ID:",
-        process.env.EXPO_PUBLIC_GOOGLE_CLIENT_ID_WEB
-      );
-      console.log(
-        "Android Client ID:",
-        process.env.EXPO_PUBLIC_GOOGLE_CLIENT_ID_ANDROID
-      );
-      console.log(
-        "iOS Client ID:",
-        process.env.EXPO_PUBLIC_GOOGLE_CLIENT_ID_IOS
-      );
-      console.log(
-        "All env vars:",
-        Object.keys(process.env).filter((key) => key.includes("GOOGLE"))
-      );
-      console.log("=== END DEBUG ===");
 
       // Check Google Play Services
       const hasPlayServices = await GoogleSignin.hasPlayServices({
@@ -69,7 +55,6 @@ const SocialLogin = () => {
         throw new Error("Failed to get user data from Google Sign-In");
       }
 
-      // NEW: Pass the login result to show appropriate feedback
       const result = await loginWithGoogle(idToken, {
         name: userData.name ?? userData.email,
         email: userData.email,
@@ -156,6 +141,22 @@ const SocialLogin = () => {
           isSubmitting={isSubmitting}
         />
       </View>
+      {/*Terms text below Google login button */}
+      <Text style={styles.termsText}>
+        By logging in with Google, you agree to our{" "}
+        <TouchableOpacity
+          onPress={() => setShowTermsModal(true)}
+          style={styles.termsLinkContainer}
+        >
+          <Text style={styles.termsLink}>Terms of Use</Text>
+        </TouchableOpacity>
+      </Text>
+
+      {/* Terms Modal */}
+      <TermsOfUseModal
+        visible={showTermsModal}
+        onClose={() => setShowTermsModal(false)}
+      />
     </>
   );
 };
@@ -164,7 +165,7 @@ const styles = StyleSheet.create({
   dividerContainer: {
     flexDirection: "row",
     alignItems: "center",
-    marginVertical: 12,
+    marginVertical: 6,
   },
   dividerLine: {
     flex: 1,
@@ -172,19 +173,38 @@ const styles = StyleSheet.create({
   },
   dividerText: {
     paddingHorizontal: 8,
-    fontSize: 13,
+    fontSize: 11,
   },
   socialButtonsContainer: {
     flexDirection: "row",
     justifyContent: "center",
     alignItems: "center",
-    marginBottom: 12,
-    minHeight: 48,
     paddingVertical: 8,
   },
   googleButton: {
     width: "100%",
     height: Platform.OS === "ios" ? 48 : 48,
+  },
+  // Terms text styles (similar to SignUpForm)
+  termsText: {
+    fontSize: 11,
+    fontFamily: "Poppins-Regular",
+    color: BASE_COLORS.placeholderText,
+    textAlign: "center",
+    marginTop: 8,
+    marginBottom: 12,
+    lineHeight: 16,
+  },
+  termsLinkContainer: {
+    marginTop: 2,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  termsLink: {
+    fontSize: 11,
+    fontFamily: "Poppins-Medium",
+    color: BASE_COLORS.blue,
+    textDecorationLine: "underline",
   },
 });
 

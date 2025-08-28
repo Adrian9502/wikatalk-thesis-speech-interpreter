@@ -488,7 +488,7 @@ export const useAuthStore = create<AuthState>()(
           await themeStore.syncThemeWithServer();
 
           InteractionManager.runAfterInteractions(() => {
-            router.replace("/(tabs)/Speech");
+            router.replace("/(tabs)/Home");
           });
 
           return { success: true };
@@ -598,7 +598,7 @@ export const useAuthStore = create<AuthState>()(
             }
 
             setTimeout(() => {
-              router.replace("/(tabs)/Speech");
+              router.replace("/(tabs)/Home");
             }, 300);
             return { success: true };
           }
@@ -841,7 +841,7 @@ export const useAuthStore = create<AuthState>()(
 
             // Handle navigation here instead of in component
             InteractionManager.runAfterInteractions(() => {
-              router.replace("/(tabs)/Speech");
+              router.replace("/(tabs)/Home");
             });
 
             return { success: true };

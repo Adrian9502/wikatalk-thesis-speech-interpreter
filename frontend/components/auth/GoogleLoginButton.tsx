@@ -63,7 +63,7 @@ const CustomGoogleButton: React.FC<CustomGoogleButtonProps> = ({
 const styles = StyleSheet.create({
   googleButton: {
     width: "100%",
-    height: 45,
+    paddingVertical: 8,
     backgroundColor: "#FFFFFF",
     borderRadius: 20,
     flexDirection: "row",
@@ -78,7 +78,7 @@ const styles = StyleSheet.create({
   },
   buttonText: {
     color: "#757575",
-    fontSize: 14,
+    fontSize: 12,
     fontFamily: "Poppins-Regular",
   },
 });

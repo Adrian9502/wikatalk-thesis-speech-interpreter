@@ -1,15 +1,20 @@
-import React from "react";
-import { Text, StyleSheet } from "react-native";
+import React, { useState } from "react";
+import { Text, StyleSheet, TouchableOpacity } from "react-native";
+import { Control } from "react-hook-form";
+
 import { User, Lock, Mail } from "lucide-react-native";
 import { BASE_COLORS } from "@/constant/colors";
-import FormInput from "@/components/FormInput";
+import TermsOfUseModal from "@/components/legal/TermsOfUseModal";
 
+import FormInput from "@/components/FormInput";
 interface SignUpFormProps {
   control: any;
-  errors: Record<string, any>;
+  errors: any;
 }
 
 const SignUpForm: React.FC<SignUpFormProps> = ({ control, errors }) => {
+  const [showTermsModal, setShowTermsModal] = useState(false);
+
   return (
     <>
       {/* full name */}
@@ -40,7 +45,7 @@ const SignUpForm: React.FC<SignUpFormProps> = ({ control, errors }) => {
         to receive a 6-digit code. Check spam/junk if not received.
       </Text>
 
-      {/* email address */}
+      {/* Email address */}
       <FormInput
         control={control}
         name="email"
@@ -51,7 +56,7 @@ const SignUpForm: React.FC<SignUpFormProps> = ({ control, errors }) => {
         autoCapitalize="none"
       />
 
-      {/* password */}
+      {/* Password */}
       <FormInput
         control={control}
         name="password"
@@ -61,7 +66,7 @@ const SignUpForm: React.FC<SignUpFormProps> = ({ control, errors }) => {
         error={errors.password?.message}
       />
 
-      {/* confirm password */}
+      {/* Confirm password */}
       <FormInput
         control={control}
         name="confirmPassword"
@@ -70,20 +75,57 @@ const SignUpForm: React.FC<SignUpFormProps> = ({ control, errors }) => {
         IconComponent={Lock}
         error={errors.confirmPassword?.message}
       />
+
+      {/* Terms of Use Agreement */}
+      <Text style={styles.termsText}>
+        By registering, you accept our{" "}
+        <TouchableOpacity
+          onPress={() => setShowTermsModal(true)}
+          style={styles.termsLinkContainer}
+        >
+          <Text style={styles.termsLink}>Terms of Use</Text>
+        </TouchableOpacity>
+      </Text>
+
+      {/* Terms Modal */}
+      <TermsOfUseModal
+        visible={showTermsModal}
+        onClose={() => setShowTermsModal(false)}
+      />
     </>
   );
 };
 
 const styles = StyleSheet.create({
   helpText: {
-    padding: 4,
+    padding: 2,
     fontFamily: "Poppins-Regular",
     marginBottom: 4,
     fontSize: 11,
     textAlign: "center",
+    color: BASE_COLORS.placeholderText,
   },
   helpTextBold: {
+    fontFamily: "Poppins-Medium",
+  },
+  termsText: {
+    fontSize: 11,
     fontFamily: "Poppins-Regular",
+    color: BASE_COLORS.placeholderText,
+    textAlign: "center",
+    marginBottom: 8,
+    lineHeight: 16,
+  },
+  termsLinkContainer: {
+    marginTop: 2,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  termsLink: {
+    fontSize: 11,
+    fontFamily: "Poppins-Medium",
+    color: BASE_COLORS.blue,
+    textDecorationLine: "underline",
   },
 });
 
