@@ -73,6 +73,7 @@ export const BASE_COLORS: Record<string, string> = {
   borderColor: "#E8E8ED",
   success: "#10B981",
   danger: "#F44336",
+  yellow: "#FFD700",
 };
 
 export const getPositionalColors = (

@@ -37,22 +37,16 @@ import RankingContent from "@/components/games/rankings/RankingContent";
 import { useFormattedStats } from "@/utils/gameStatsUtils";
 import { DIALECTS } from "@/constant/languages";
 import AppLoading from "../AppLoading";
+import HomePageRankingContent from "@/components/home/HomePageRankingContent";
 
 const { width: screenWidth } = Dimensions.get("window");
 
 interface HomePageProps {
   onNavigateToTab: (tabName: string) => void;
-  context?: "startup" | "settings";
-  onBack?: () => void;
   onReady?: () => void;
 }
 
-const HomePage: React.FC<HomePageProps> = ({
-  onNavigateToTab,
-  context = "startup",
-  onBack,
-  onReady,
-}) => {
+const HomePage: React.FC<HomePageProps> = ({ onNavigateToTab, onReady }) => {
   const { activeTheme } = useThemeStore();
   const { userData } = useAuth();
   const { coins } = useCoinsStore();
@@ -87,7 +81,7 @@ const HomePage: React.FC<HomePageProps> = ({
         // Load Word of the Day if not already loaded
         if (!wordOfTheDay) {
           console.log("[HomePage] Loading Word of the Day");
-          await getWordOfTheDay();
+          getWordOfTheDay();
         }
 
         // Wait for essential stats to be ready
@@ -227,20 +221,6 @@ const HomePage: React.FC<HomePageProps> = ({
     onNavigateToTab("Settings");
   };
 
-  const handleBackPress = () => {
-    if (onBack) {
-      onBack();
-      return;
-    }
-
-    if (context === "settings") {
-      onNavigateToTab("Settings");
-    } else {
-      // Default behavior for startup context
-      onNavigateToTab("Speech");
-    }
-  };
-
   const handleRankingCategorySelect = (categoryId: string) => {
     setSelectedRankingCategory(categoryId);
   };
@@ -290,12 +270,7 @@ const HomePage: React.FC<HomePageProps> = ({
               {/* Welcome Message */}
               {userData && (
                 <View style={styles.welcomeContainer}>
-                  <Text
-                    style={[
-                      styles.welcomeText,
-                      { color: activeTheme.tabActiveColor },
-                    ]}
-                  >
+                  <Text style={styles.welcomeText}>
                     Welcome back, {firstName}! 👋
                   </Text>
                 </View>
@@ -313,6 +288,47 @@ const HomePage: React.FC<HomePageProps> = ({
                   color={activeTheme.tabActiveColor}
                 />
               </TouchableOpacity>
+            </View>
+
+            {/* Quick Stats Cards */}
+            <View style={styles.quickStatsSection}>
+              <Text style={[styles.sectionTitle]}>Your Game Progress</Text>
+              <View style={styles.quickStatsGrid}>
+                {quickStats.map((stat, index) => (
+                  <View
+                    key={index}
+                    style={[
+                      styles.quickStatCard,
+                      { backgroundColor: "rgba(255, 255, 255, 0.08)" },
+                    ]}
+                  >
+                    <View style={styles.quickStatHeader}>
+                      {stat.icon}
+                      <Text
+                        style={[
+                          styles.quickStatLabel,
+                          { color: "rgba(255, 255, 255, 0.7)" },
+                        ]}
+                      >
+                        {stat.label}
+                      </Text>
+                    </View>
+                    <Text
+                      style={[
+                        styles.quickStatValue,
+                        { color: activeTheme.tabActiveColor },
+                      ]}
+                    >
+                      {stat.value}
+                    </Text>
+                    {stat.subValue && (
+                      <Text style={styles.quickStatSubValue}>
+                        {stat.subValue}
+                      </Text>
+                    )}
+                  </View>
+                ))}
+              </View>
             </View>
 
             {/* Featured Content Carousel */}
@@ -421,47 +437,6 @@ const HomePage: React.FC<HomePageProps> = ({
               ))}
             </View>
 
-            {/* Quick Stats Cards */}
-            <View style={styles.quickStatsSection}>
-              <Text style={[styles.sectionTitle]}>Your Game Progress</Text>
-              <View style={styles.quickStatsGrid}>
-                {quickStats.map((stat, index) => (
-                  <View
-                    key={index}
-                    style={[
-                      styles.quickStatCard,
-                      { backgroundColor: "rgba(255, 255, 255, 0.08)" },
-                    ]}
-                  >
-                    <View style={styles.quickStatHeader}>
-                      {stat.icon}
-                      <Text
-                        style={[
-                          styles.quickStatLabel,
-                          { color: "rgba(255, 255, 255, 0.7)" },
-                        ]}
-                      >
-                        {stat.label}
-                      </Text>
-                    </View>
-                    <Text
-                      style={[
-                        styles.quickStatValue,
-                        { color: activeTheme.tabActiveColor },
-                      ]}
-                    >
-                      {stat.value}
-                    </Text>
-                    {stat.subValue && (
-                      <Text style={styles.quickStatSubValue}>
-                        {stat.subValue}
-                      </Text>
-                    )}
-                  </View>
-                ))}
-              </View>
-            </View>
-
             {/* Rankings Section */}
             <View style={styles.rankingsHeader}>
               <Text style={[styles.sectionTitle]}>Games Rankings</Text>
@@ -473,7 +448,7 @@ const HomePage: React.FC<HomePageProps> = ({
               />
 
               <View style={styles.rankingsContentContainer}>
-                <RankingContent
+                <HomePageRankingContent
                   selectedCategory={selectedRankingCategory}
                   visible={true}
                 />
@@ -517,6 +492,7 @@ const styles = StyleSheet.create({
   welcomeText: {
     fontSize: 12,
     fontFamily: "Poppins-Medium",
+    color: BASE_COLORS.white,
     textAlign: "left",
   },
   sectionTitle: {
@@ -758,8 +734,8 @@ const styles = StyleSheet.create({
   rankingsContentContainer: {
     backgroundColor: "rgba(0, 0, 0, 0.05)",
     borderRadius: 20,
-    minHeight: 400,
-    maxHeight: 500,
+    height: 400,
+    overflow: "hidden",
   },
 });
 

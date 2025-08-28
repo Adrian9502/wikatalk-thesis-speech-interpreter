@@ -192,21 +192,21 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   username: {
-    fontSize: 13,
-    fontFamily: "Poppins-Medium",
+    fontSize: 11,
+    fontFamily: "Poppins-Regular",
     color: BASE_COLORS.white,
     marginBottom: 3,
   },
   valueText: {
-    fontSize: 12,
+    fontSize: 11.5,
     fontFamily: "Poppins-Regular",
     color: "rgba(255, 255, 255, 0.85)",
     marginBottom: 2,
   },
   currentUserValue: {
-    color: ICON_COLORS.gold,
+    color: BASE_COLORS.yellow,
     fontFamily: "Poppins-SemiBold",
-    fontSize: 13,
+    fontSize: 11.5,
   },
   subText: {
     fontSize: 11,

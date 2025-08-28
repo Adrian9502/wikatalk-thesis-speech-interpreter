@@ -28,6 +28,7 @@ export interface UserData {
   authProvider?: string;
   coins?: number;
   theme?: string;
+  _id?: any;
   // NEW: Track current session login method
   currentLoginMethod?: "manual" | "google";
 }
