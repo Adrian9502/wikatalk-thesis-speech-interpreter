@@ -14,7 +14,6 @@ import { tabPreloader } from "@/utils/tabPreloader";
 import { useFocusEffect } from "@react-navigation/native";
 import { StatusBar } from "expo-status-bar";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { MaterialIcons } from "@expo/vector-icons";
 interface TabIconProps {
   Icon: React.ComponentType<any>;
   color: string;
@@ -300,13 +299,7 @@ export default function TabsLayout() {
       {
         name: "Home",
         title: "Home",
-        icon: (props) => (
-          <MaterialIcons
-            name="home"
-            size={props.width || 18}
-            color={props.color}
-          />
-        ),
+        icon: Home,
         iconName: "Home",
       },
       {

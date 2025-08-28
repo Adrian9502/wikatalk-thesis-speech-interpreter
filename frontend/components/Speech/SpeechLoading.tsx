@@ -7,9 +7,10 @@ import {
   TouchableOpacity,
   Text,
 } from "react-native";
-import { X } from "react-native-feather";
 import DotsLoader from "@/components/DotLoader";
 import useThemeStore from "@/store/useThemeStore";
+import { Modal } from "react-native";
+import { BASE_COLORS } from "@/constant/colors";
 
 interface SpeechLoadingProps {
   onCancel?: () => void;
@@ -20,102 +21,93 @@ const SpeechLoading: React.FC<SpeechLoadingProps> = ({ onCancel }) => {
 
   // Animation references
   const pulseAnim = useRef(new Animated.Value(1)).current;
-  const rotateAnim = useRef(new Animated.Value(0)).current;
-  const scaleAnim = useRef(new Animated.Value(0.8)).current;
+  const scaleAnim = useRef(new Animated.Value(0.9)).current;
   const fadeInAnim = useRef(new Animated.Value(0)).current;
 
-  // Get screen dimensions to ensure full coverage
+  // Get screen dimensions
   const { height, width } = Dimensions.get("window");
 
   useEffect(() => {
     // Entrance animation
-    Animated.sequence([
+    Animated.parallel([
       Animated.timing(fadeInAnim, {
         toValue: 1,
-        duration: 300,
+        duration: 200,
         useNativeDriver: true,
       }),
       Animated.spring(scaleAnim, {
         toValue: 1,
-        tension: 100,
+        tension: 150,
         friction: 8,
         useNativeDriver: true,
       }),
     ]).start();
 
-    // Continuous pulse animation
+    // Subtle pulse animation
     const pulseAnimation = Animated.loop(
       Animated.sequence([
         Animated.timing(pulseAnim, {
           toValue: 1.05,
-          duration: 2000,
+          duration: 800,
           useNativeDriver: true,
         }),
         Animated.timing(pulseAnim, {
           toValue: 1,
-          duration: 2000,
+          duration: 800,
           useNativeDriver: true,
         }),
       ])
     );
 
-    // Continuous rotation animation for accent elements
-    const rotateAnimation = Animated.loop(
-      Animated.timing(rotateAnim, {
-        toValue: 1,
-        duration: 10000,
-        useNativeDriver: true,
-      })
-    );
-
     pulseAnimation.start();
-    rotateAnimation.start();
 
     return () => {
       pulseAnimation.stop();
-      rotateAnimation.stop();
     };
   }, []);
 
-  const spin = rotateAnim.interpolate({
-    inputRange: [0, 1],
-    outputRange: ["0deg", "360deg"],
-  });
-
   return (
-    <Animated.View
-      style={[styles.overlay, { width, height, opacity: fadeInAnim }]}
-      pointerEvents="auto"
+    <Modal
+      visible={true}
+      transparent
+      animationType="none"
+      statusBarTranslucent={true}
+      hardwareAccelerated={true}
     >
       <Animated.View
-        style={[
-          styles.container,
-          {
-            backgroundColor: activeTheme.backgroundColor,
-            transform: [{ scale: scaleAnim }],
-          },
-        ]}
+        style={[styles.overlay, { width, height, opacity: fadeInAnim }]}
+        pointerEvents="auto"
       >
-        {/* Main content area with improved spacing */}
-        <Animated.Text style={[styles.loadingText]}>
-          Translating your speech...
-        </Animated.Text>
+        <Animated.View
+          style={[
+            styles.container,
+            {
+              backgroundColor: activeTheme.backgroundColor,
+              transform: [{ scale: scaleAnim }, { scale: pulseAnim }],
+            },
+          ]}
+        >
+          {/* Compact main content */}
+          <Text style={styles.loadingText}>Translating your speech...</Text>
 
-        {/* Dots loader with improved positioning */}
-        <View style={styles.loaderContainer}>
-          <DotsLoader />
-        </View>
-        {onCancel && (
-          <TouchableOpacity
-            style={styles.cancelButton}
-            onPress={onCancel}
-            activeOpacity={0.8}
-          >
-            <Text style={styles.cancelButtonText}>Cancel</Text>
-          </TouchableOpacity>
-        )}
+          {/* DotsLoader */}
+          <View style={styles.loaderContainer}>
+            <DotsLoader />
+          </View>
+
+          {/* Compact cancel button */}
+          {onCancel && (
+            <TouchableOpacity
+              style={styles.cancelButton}
+              onPress={onCancel}
+              activeOpacity={0.8}
+            >
+              <Text style={styles.cancelButtonText}>Cancel</Text>
+            </TouchableOpacity>
+          )}
+        </Animated.View>
       </Animated.View>
-    </Animated.View>
+    </Modal>
   );
 };
 
@@ -123,54 +115,44 @@ export default SpeechLoading;
 
 const styles = StyleSheet.create({
   overlay: {
-    position: "absolute",
-    top: 0,
-    bottom: 0,
-    left: 0,
-    right: 0,
-    zIndex: 9999,
+    flex: 1,
     alignItems: "center",
     justifyContent: "center",
     backgroundColor: "rgba(0, 0, 0, 0.7)",
   },
   container: {
-    maxWidth: 400,
     alignItems: "center",
     justifyContent: "center",
-    zIndex: 10000,
     borderRadius: 20,
-    borderWidth: 1,
-    padding: 32,
-    maxHeight: 250,
-    borderColor: "rgba(255, 255, 255, 0.15)",
+    paddingHorizontal: 24,
+    paddingVertical: 20,
+    minWidth: 200,
+    maxWidth: 280,
   },
-  // Text styles
   loadingText: {
-    fontFamily: "Poppins-Medium",
-    color: "#ffffff",
+    fontFamily: "Poppins-Regular",
+    color: BASE_COLORS.white,
     textAlign: "center",
-    fontSize: 14,
-    marginBottom: 20,
-    letterSpacing: 0.5,
+    fontSize: 12,
+    marginBottom: 16,
+    letterSpacing: 0.3,
   },
-  // Loader container
   loaderContainer: {
-    marginBottom: 20,
+    marginBottom: 16,
   },
-  // Enhanced cancel button
   cancelButton: {
     justifyContent: "center",
     alignItems: "center",
-    paddingVertical: 7,
-    backgroundColor: "rgba(255, 255, 255, 0.1)",
+    paddingVertical: 5,
+    paddingHorizontal: 16,
+    backgroundColor: "rgba(255, 255, 255, 0.08)",
     borderRadius: 20,
-    paddingHorizontal: 24,
     borderWidth: 1,
     borderColor: "rgba(255, 255, 255, 0.2)",
   },
   cancelButtonText: {
-    fontSize: 12,
-    fontFamily: "Poppins-Regular",
+    fontSize: 10,
+    fontFamily: "Poppins-Medium",
     color: "white",
   },
 });

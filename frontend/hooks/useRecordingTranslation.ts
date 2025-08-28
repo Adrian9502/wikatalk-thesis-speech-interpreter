@@ -181,7 +181,12 @@ export const useRecordingTranslation = () => {
   const speakText = useCallback(
     (text: string, language: string = "fil-PH"): void => {
       try {
-        Speech.speak(text, { language, rate: 0.75 });
+        Speech.speak(text, {
+          language,
+          rate: 0.75,
+          pitch: 1,
+          voice: "fil-ph-x-fie-local",
+        });
       } catch (error) {
         console.error("Error speaking text:", error);
       }
