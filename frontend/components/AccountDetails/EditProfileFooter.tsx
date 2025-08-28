@@ -8,6 +8,7 @@ interface ModalFooterProps {
   onClose: () => void;
   isLoading: boolean;
   theme: any;
+  hasImageChanged?: boolean; // NEW: Add prop to indicate if image was changed
 }
 
 // Memoize the loading indicator
@@ -19,20 +20,34 @@ const LoadingIndicator = React.memo(() => (
   />
 ));
 
-// Memoize the button content components
+// NEW: Enhanced save button content with better messaging
 const SaveButtonContent = React.memo(
-  ({ isLoading }: { isLoading: boolean }) => (
-    <View
-      style={{
-        flexDirection: "row",
-        alignItems: "center",
-        justifyContent: "center",
-      }}
-    >
-      {isLoading && <LoadingIndicator />}
-      <Text style={styles.saveButtonText}>Save Changes</Text>
-    </View>
-  )
+  ({
+    isLoading,
+    hasImageChanged,
+  }: {
+    isLoading: boolean;
+    hasImageChanged?: boolean;
+  }) => {
+    // Show different text based on whether image is being uploaded
+    const buttonText = React.useMemo(() => {
+      if (!isLoading) return "Save Changes";
+      return hasImageChanged ? "Uploading..." : "Saving...";
+    }, [isLoading, hasImageChanged]);
+
+    return (
+      <View
+        style={{
+          flexDirection: "row",
+          alignItems: "center",
+          justifyContent: "center",
+        }}
+      >
+        {isLoading && <LoadingIndicator />}
+        <Text style={styles.saveButtonText}>{buttonText}</Text>
+      </View>
+    );
+  }
 );
 
 const CancelButtonText = React.memo(({ color }: { color: string }) => (
@@ -40,7 +55,13 @@ const CancelButtonText = React.memo(({ color }: { color: string }) => (
 ));
 
 const EditProfileFooter = React.memo(
-  ({ onSave, onClose, isLoading, theme }: ModalFooterProps) => {
+  ({
+    onSave,
+    onClose,
+    isLoading,
+    theme,
+    hasImageChanged = false, // NEW: Default value
+  }: ModalFooterProps) => {
     // Memoize style objects
     const saveButtonStyle = React.useMemo(
       () => [styles.saveButton, { backgroundColor: theme.secondaryColor }],
@@ -55,7 +76,10 @@ const EditProfileFooter = React.memo(
           disabled={isLoading}
           activeOpacity={0.8}
         >
-          <SaveButtonContent isLoading={isLoading} />
+          <SaveButtonContent
+            isLoading={isLoading}
+            hasImageChanged={hasImageChanged}
+          />
         </TouchableOpacity>
 
         <TouchableOpacity

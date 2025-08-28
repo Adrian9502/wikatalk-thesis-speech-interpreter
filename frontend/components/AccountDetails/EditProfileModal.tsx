@@ -7,6 +7,7 @@ import { PasswordSection } from "@/components/accountDetails/PasswordSection";
 import EditProfileFooter from "@/components/accountDetails/EditProfileFooter";
 import styles from "@/styles/editProfileStyles";
 import { UserDataTypes } from "@/types/types";
+import ImageUploadProgress from "./ImageUploadProgress";
 
 interface EditProfileModalProps {
   visible: boolean;
@@ -67,6 +68,10 @@ const EditProfileModal = React.memo(
               <ProfilePictureSection
                 profilePicture={imageState.profilePicture}
                 handleSelectImage={handleSelectImage}
+                theme={theme}
+              />
+              <ImageUploadProgress
+                visible={isLoading && imageState.imageChanged}
                 theme={theme}
               />
               {errorState.error ? (
