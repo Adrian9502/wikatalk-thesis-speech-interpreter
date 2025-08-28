@@ -31,7 +31,7 @@ const HomeTab: React.FC = () => {
     }
   };
 
-  return <HomePage onNavigateToTab={handleNavigateToTab} context="startup" />;
+  return <HomePage onNavigateToTab={handleNavigateToTab} />;
 };
 
 export default HomeTab;

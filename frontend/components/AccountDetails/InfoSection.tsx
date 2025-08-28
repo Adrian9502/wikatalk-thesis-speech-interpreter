@@ -38,7 +38,7 @@ export const InfoSection = React.memo(
             <UserIcon width={16} height={16} color={theme.secondaryColor} />
           }
           label="Name"
-          value={userData.fullName}
+          value={userData.fullName || "Not provided"}
           theme={theme}
         />
         <InfoItem
@@ -46,7 +46,7 @@ export const InfoSection = React.memo(
             <UserIcon width={16} height={16} color={theme.secondaryColor} />
           }
           label="Username"
-          value={userData.username}
+          value={userData.username || "Not provided"}
           theme={theme}
         />
         <InfoItem
@@ -54,7 +54,7 @@ export const InfoSection = React.memo(
             <MailIcon width={16} height={16} color={theme.secondaryColor} />
           }
           label="Email"
-          value={userData.email}
+          value={userData.email || "Not provided"}
           theme={theme}
           showDivider
         />
