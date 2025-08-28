@@ -11,18 +11,17 @@ import { FeatherIconName } from "@/types/types";
 import ConfirmationModal from "@/components/ConfirmationModal";
 import { globalStyles } from "@/styles/globalStyles";
 import {
-  Header,
   AppearanceSection,
   SectionTitle,
   SettingItemComponent,
   LogoutButton,
+  LoginMethods,
 } from "@/components/settings/SettingsRenderer";
 import { router } from "expo-router";
 import ContactSupportModal from "@/components/helpAndFAQ/ContactSupportModal";
 import { clearAllAccountData } from "@/utils/accountUtils";
 import ProfileCard from "@/components/settings/ProfileCard";
-import LoginMethods from "@/components/settings/LoginMethods";
-import { Header as BackHeader } from "@/components/Header"; // Import the Header component
+import { Header as BackHeader } from "@/components/Header";
 
 // Types
 type SettingItemWithToggle = {
@@ -165,13 +164,6 @@ const Settings = () => {
       key: "appearance-title",
     });
 
-    // Remove HomePage toggle since it's no longer needed
-    // items.push({
-    //   type: "homepage-toggle",
-    //   data: null,
-    //   key: "homepage-toggle",
-    // });
-
     // Add settings sections
     sections.forEach((section, sectionIndex) => {
       // Add section title
@@ -211,10 +203,6 @@ const Settings = () => {
 
   const renderItem = ({ item, index }: { item: ListItem; index: number }) => {
     switch (item.type) {
-      // REMOVE the header case since we're using BackHeader now
-      case "header":
-        return <Header />;
-
       case "profile":
         return (
           <ProfileCard

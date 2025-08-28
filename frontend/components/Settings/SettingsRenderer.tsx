@@ -1,24 +1,25 @@
-import React, { useState } from "react";
-import { View, Text, Image, TouchableOpacity, StyleSheet } from "react-native";
+import React from "react";
+import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
 import { Feather } from "@expo/vector-icons";
 import SettingItem from "@/components/settings/SettingItem";
 import ThemeSelector from "@/components/settings/ThemeSelector";
 import { BASE_COLORS, TITLE_COLORS } from "@/constant/colors";
-import { FeatherIconName } from "@/types/types";
+import Ionicons from "react-native-vector-icons/Ionicons";
+import { UserData } from "@/store/useAuthStore";
 import { SettingsSection, SettingsItemType } from "@/types/settingsTypes";
-import useThemeStore from "@/store/useThemeStore";
+
+interface SettingsRendererProps {
+  sections: SettingsSection[];
+  onItemPress: (item: SettingsItemType) => void;
+}
+
+interface LoginMethodsProps {
+  userData: UserData;
+}
 
 // Section title component
 export const SectionTitle: React.FC<{ title: string }> = ({ title }) => {
-  const { activeTheme } = useThemeStore();
-
-  return (
-    <Text
-      style={[styles.sectionTitle, { color: activeTheme.tabInactiveColor }]}
-    >
-      {title}
-    </Text>
-  );
+  return <Text style={styles.sectionTitle}>{title}</Text>;
 };
 
 // Card wrapper component
@@ -29,10 +30,89 @@ export const SettingsCard: React.FC<{ children: React.ReactNode }> = ({
 // Divider component
 export const SettingsDivider: React.FC = () => <View style={styles.divider} />;
 
-interface SettingsRendererProps {
-  sections: SettingsSection[];
-  onItemPress: (item: SettingsItemType) => void;
-}
+// login methods component
+export const LoginMethods: React.FC<LoginMethodsProps> = ({ userData }) => {
+  const getAvailableMethods = (authProvider: string) => {
+    switch (authProvider) {
+      case "manual":
+        return ["Username/Email & Password"];
+      case "google":
+        return ["Google Account"];
+      case "both":
+        return ["Username/Email & Password", "Google Account"];
+      default:
+        return ["Username/Email & Password"];
+    }
+  };
+
+  // Get the actual login method used in current session
+  const getCurrentSessionLoginMethod = () => {
+    const loginMethod = userData.currentLoginMethod || "manual";
+
+    if (loginMethod === "google") {
+      return { method: "Google", icon: "logo-google" };
+    } else {
+      return { method: "Username/Email & Password", icon: "mail" };
+    }
+  };
+
+  const currentLogin = getCurrentSessionLoginMethod();
+
+  return (
+    <View style={styles.container}>
+      <Text style={styles.sectionTitle}>Login Methods</Text>
+      <View style={styles.card}>
+        <View style={styles.accountLinkingContainer}>
+          {/* Available Login Methods Section */}
+          <View style={styles.methodsSection}>
+            <Text style={styles.sectionSubtitle}>Available Login Methods</Text>
+            {getAvailableMethods(userData.authProvider || "manual").map(
+              (method, index) => (
+                <View key={index} style={styles.methodItem}>
+                  <Ionicons
+                    name={method === "Google Account" ? "logo-google" : "mail"}
+                    size={16}
+                    color={
+                      method === "Google Account" ? "#DB4437" : BASE_COLORS.blue
+                    }
+                  />
+                  <Text style={styles.methodText}>
+                    {method === "Google Account"
+                      ? "Google Account"
+                      : "Username/Email & Password"}
+                  </Text>
+                </View>
+              )
+            )}
+          </View>
+
+          {/* Current Session Login Method */}
+          <View style={styles.currentLoginSection}>
+            <Text style={styles.sectionSubtitle}>
+              You're now logged in using
+            </Text>
+            <View style={styles.currentMethodContainer}>
+              <View style={styles.currentMethodItem}>
+                <Ionicons
+                  name={currentLogin.icon}
+                  size={16}
+                  color={
+                    currentLogin.method === "Google"
+                      ? "#DB4437"
+                      : BASE_COLORS.blue
+                  }
+                />
+                <Text style={styles.currentMethodText}>
+                  {currentLogin.method}
+                </Text>
+              </View>
+            </View>
+          </View>
+        </View>
+      </View>
+    </View>
+  );
+};
 
 const SettingsRenderer: React.FC<SettingsRendererProps> = ({
   sections,
@@ -63,14 +143,14 @@ const SettingsRenderer: React.FC<SettingsRendererProps> = ({
   return <View>{sections.map(renderSection)}</View>;
 };
 
-export const AppearanceSection = () => (
-  <View style={styles.appearanceContainer}>
-    <Text style={[styles.sectionTitle, { color: "rgba(255, 255, 255, 0.7)" }]}>
-      Choose Theme
-    </Text>
-    <ThemeSelector />
-  </View>
-);
+export const AppearanceSection = () => {
+  return (
+    <View style={styles.appearanceContainer}>
+      <Text style={styles.sectionTitle}>Choose Theme</Text>
+      <ThemeSelector />
+    </View>
+  );
+};
 
 export const SettingItemComponent = ({
   item,
@@ -135,7 +215,8 @@ const styles = StyleSheet.create({
     marginVertical: 20,
   },
   sectionTitle: {
-    fontSize: 13,
+    fontSize: 12,
+    color: BASE_COLORS.white,
     fontFamily: "Poppins-Medium",
     marginBottom: 5,
   },
@@ -177,6 +258,60 @@ const styles = StyleSheet.create({
     height: 1,
     backgroundColor: "#f0f0f0",
     marginHorizontal: 16,
+  },
+  // login component styles
+  container: {
+    marginTop: 16,
+  },
+  accountLinkingContainer: {
+    padding: 16,
+  },
+  methodsSection: {
+    marginBottom: 20,
+  },
+  currentLoginSection: {
+    marginBottom: 8,
+  },
+  sectionSubtitle: {
+    fontSize: 11,
+    fontFamily: "Poppins-Medium",
+    color: "#666",
+    marginBottom: 12,
+  },
+  methodItem: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+    backgroundColor: "rgba(59, 111, 229, 0.05)",
+    borderRadius: 8,
+    marginBottom: 8,
+    borderLeftWidth: 3,
+    borderLeftColor: BASE_COLORS.blue,
+  },
+  methodText: {
+    fontSize: 12,
+    fontFamily: "Poppins-Regular",
+    color: BASE_COLORS.darkText,
+    marginLeft: 12,
+  },
+  currentMethodContainer: {
+    backgroundColor: "rgba(34, 197, 94, 0.1)",
+    borderRadius: 8,
+    borderLeftWidth: 3,
+    borderLeftColor: BASE_COLORS.success,
+  },
+  currentMethodItem: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingVertical: 12,
+    paddingHorizontal: 12,
+  },
+  currentMethodText: {
+    fontSize: 12,
+    fontFamily: "Poppins-Regular",
+    color: BASE_COLORS.darkText,
+    marginLeft: 12,
   },
 });
 
