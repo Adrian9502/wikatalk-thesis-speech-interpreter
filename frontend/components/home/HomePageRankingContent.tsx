@@ -79,7 +79,7 @@ const HomePageRankingContent: React.FC<HomePageRankingContentProps> = ({
   if (isLoading && !data) {
     return (
       <View style={styles.centerContainer}>
-        <ActivityIndicator size="large" color={BASE_COLORS.white} />
+        <ActivityIndicator size="small" color={BASE_COLORS.white} />
         <Text style={styles.loadingText}>Loading rankings...</Text>
       </View>
     );
