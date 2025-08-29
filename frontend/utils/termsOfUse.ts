@@ -24,22 +24,22 @@ WikaTalk is a mobile-based Filipino dialect interpreter application with gamifie
 **4. PERMITTED USES**
 
 You may use the App for:
-- Personal, non-commercial language learning and translation
-- Educational purposes related to Filipino dialects
-- Participating in gamified learning activities
-- Accessing pronunciation guides and language resources
+• Personal, non-commercial language learning and translation
+• Educational purposes related to Filipino dialects
+• Participating in gamified learning activities
+• Accessing pronunciation guides and language resources
 
 **5. PROHIBITED USES**
 
 You agree NOT to:
-- Use the App for any illegal or unauthorized purpose
-- Attempt to reverse engineer, decompile, or hack the App
-- Upload or transmit malicious code, viruses, or harmful content
-- Violate any applicable local, state, national, or international laws
-- Infringe upon intellectual property rights of others
-- Use the App to harass, abuse, or harm others
-- Create fake accounts or impersonate others
-- Attempt to gain unauthorized access to our systems
+• Use the App for any illegal or unauthorized purpose
+• Attempt to reverse engineer, decompile, or hack the App
+• Upload or transmit malicious code, viruses, or harmful content
+• Violate any applicable local, state, national, or international laws
+• Infringe upon intellectual property rights of others
+• Use the App to harass, abuse, or harm others
+• Create fake accounts or impersonate others
+• Attempt to gain unauthorized access to our systems
 
 **6. CONTENT AND INTELLECTUAL PROPERTY**
 
@@ -76,10 +76,10 @@ You agree NOT to:
 **10. THIRD-PARTY SERVICES**
 
 The App integrates with:
-- Google Sign-In services
-- Cloud storage services
-- Analytics services
-- Translation APIs
+• Google Sign-In services
+• Cloud storage services
+• Analytics services
+• Translation APIs
 
 Your use of these services is subject to their respective terms of service.
 
