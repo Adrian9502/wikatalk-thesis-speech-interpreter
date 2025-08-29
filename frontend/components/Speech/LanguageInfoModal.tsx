@@ -2,19 +2,18 @@ import React from "react";
 import {
   View,
   Text,
-  TouchableOpacity,
   StyleSheet,
   Dimensions,
   Modal,
   FlatList,
 } from "react-native";
-import { X } from "react-native-feather";
 import getLanguageBackground from "@/utils/getLanguageBackground";
 import { LANGUAGE_INFO } from "@/constant/languages";
 import useThemeStore from "@/store/useThemeStore";
 import SectionRenderer from "@/components/speech/languageInfoModal/SectionRenderer";
 import { createSections } from "@/utils/speech/languageInfoSection";
 import CloseButton from "../games/buttons/CloseButton";
+import { BASE_COLORS } from "@/constant/colors";
 
 interface LanguageInfoModalProps {
   visible: boolean;
@@ -76,7 +75,7 @@ const LanguageInfoModal: React.FC<LanguageInfoModalProps> = ({
             },
           ]}
         >
-          <CloseButton size={17} onPress={onClose}></CloseButton>
+          <CloseButton size={14} onPress={onClose} />
           {/* Fixed Header */}
           <View
             style={[
@@ -91,13 +90,12 @@ const LanguageInfoModal: React.FC<LanguageInfoModalProps> = ({
           {/* Content using FlatList with the extracted renderer */}
           <FlatList
             data={sections}
+            overScrollMode="never"
             keyExtractor={(item) => item.id}
             renderItem={({ item }) => (
               <SectionRenderer item={item} colors={colors} />
             )}
-            showsVerticalScrollIndicator={true}
             contentContainerStyle={styles.listContent}
-            ListFooterComponent={<View style={{ height: 20 }} />}
           />
         </View>
       </View>
@@ -110,7 +108,7 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
-    backgroundColor: "rgba(0, 0, 0, 0.5)",
+    backgroundColor: "rgba(0, 0, 0, 0.7)",
   },
   modalContainer: {
     borderRadius: 20,
@@ -123,14 +121,15 @@ const styles = StyleSheet.create({
     elevation: 24,
   },
   header: {
-    height: 56,
     flexDirection: "row",
     justifyContent: "center",
     alignItems: "center",
+    padding: 15,
   },
   titleText: {
-    fontSize: 18,
-    fontFamily: "Poppins-SemiBold",
+    color: BASE_COLORS.white,
+    fontFamily: "Poppins-Medium",
+    fontSize: 14,
     textAlign: "center",
   },
   listContent: {

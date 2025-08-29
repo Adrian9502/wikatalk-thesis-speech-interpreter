@@ -17,8 +17,8 @@ const PhrasesSection: React.FC<PhrasesSectionProps> = ({ data, colors }) => {
     <View style={styles.sectionContainer}>
       <View style={styles.sectionHeader}>
         <MessageCircle
-          width={18}
-          height={18}
+          width={17}
+          height={17}
           strokeWidth={2}
           stroke={colors.primary}
         />
@@ -61,7 +61,7 @@ const styles = StyleSheet.create({
   },
   sectionTitle: {
     fontFamily: "Poppins-Medium",
-    fontSize: 15,
+    fontSize: 13,
     marginLeft: 8,
   },
   phrasesColumn: {
@@ -80,11 +80,11 @@ const styles = StyleSheet.create({
   },
   phraseLabel: {
     marginBottom: 8,
-    fontSize: 14,
-    fontFamily: "Poppins-Regular",
+    fontSize: 13,
+    fontFamily: "Poppins-Medium",
   },
   phraseText: {
-    fontSize: 16,
+    fontSize: 12,
     fontFamily: "Poppins-Regular",
   },
 });

@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { View, StyleSheet, Animated, Keyboard } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { BASE_COLORS, getPositionalColors } from "@/constant/colors";
-import useLanguageStore, { INITIAL_TEXT } from "@/store/useLanguageStore";
+import useLanguageStore from "@/store/useLanguageStore";
 import LanguageSectionHeader from "./LanguageSectionHeader";
 import TextAreaSection from "./TextAreaSection";
 import LanguageBottomSection from "./LanguageBottomSection";
@@ -13,7 +13,7 @@ interface LanguageSectionProps {
   recording?: boolean;
   userId: number;
   onTextAreaFocus?: (position: "top" | "bottom") => void;
-  recordingDuration?: number; // NEW: Add duration prop
+  recordingDuration?: number;
 }
 
 const LanguageSection: React.FC<LanguageSectionProps> = ({
@@ -34,14 +34,10 @@ const LanguageSection: React.FC<LanguageSectionProps> = ({
     language2,
     upperTextfield,
     bottomTextfield,
-    setLanguage1,
-    setLanguage2,
-    openTopDropdown,
-    openBottomDropdown,
     toggleTopDropdown,
     toggleBottomDropdown,
     showLanguageDetails,
-    handleLanguageChange, // NEW: Use the enhanced function
+    handleLanguageChange,
   } = useLanguageStore();
 
   // Determine which language and text to use based on position
@@ -150,7 +146,7 @@ const LanguageSection: React.FC<LanguageSectionProps> = ({
         onTextAreaFocus={onTextAreaFocus}
       />
 
-      {/* Bottom Section - UPDATED: Pass recording duration */}
+      {/* Bottom Section  */}
       {(!keyboardVisible || position === "top") && (
         <LanguageBottomSection
           language={language}
@@ -160,7 +156,7 @@ const LanguageSection: React.FC<LanguageSectionProps> = ({
           colors={COLORS}
           showLanguageDetails={showLanguageDetails}
           micAnimation={micAnimation}
-          recordingDuration={recordingDuration} // NEW: Pass duration
+          recordingDuration={recordingDuration}
         />
       )}
     </View>

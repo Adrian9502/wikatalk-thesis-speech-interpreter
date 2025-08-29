@@ -201,17 +201,17 @@ const styles = StyleSheet.create({
     position: "absolute",
     bottom: 10,
     left: 10,
-    backgroundColor: "rgba(0,0,0,0.4)",
-    paddingHorizontal: 12,
-    paddingVertical: 6,
+    backgroundColor: "rgba(0,0,0,0.5)",
+    paddingHorizontal: 8,
+    paddingVertical: 4,
     borderRadius: 20,
   },
   languageName: {
     color: BASE_COLORS.white,
-    fontSize: 14,
-    fontFamily: "Poppins-Regular",
+    fontSize: 11,
+    fontFamily: "Poppins-Medium",
   },
-  // Add styles for recording info
+  // recording info
   recordingInfo: {
     position: "absolute",
     top: -35,

@@ -16,7 +16,7 @@ const CulturalSection: React.FC<CulturalSectionProps> = ({ data, colors }) => {
   return (
     <View style={styles.sectionContainer}>
       <View style={styles.sectionHeader}>
-        <Info width={18} height={18} strokeWidth={2} stroke={colors.primary} />
+        <Info width={17} height={17} strokeWidth={2} stroke={colors.primary} />
         <Text style={[styles.sectionTitle, { color: colors.text }]}>
           Cultural Notes
         </Text>
@@ -26,7 +26,13 @@ const CulturalSection: React.FC<CulturalSectionProps> = ({ data, colors }) => {
           <Text style={[styles.culturalLabel, { color: colors.primary }]}>
             Symbol
           </Text>
-          <Text style={{ color: colors.text, fontFamily: "Poppins-Regular" }}>
+          <Text
+            style={{
+              color: colors.text,
+              fontFamily: "Poppins-Regular",
+              fontSize: 12,
+            }}
+          >
             {data.symbol}
           </Text>
         </View>
@@ -38,6 +44,7 @@ const CulturalSection: React.FC<CulturalSectionProps> = ({ data, colors }) => {
             style={{
               color: colors.text,
               lineHeight: 20,
+              fontSize: 12,
               fontFamily: "Poppins-Regular",
             }}
           >
@@ -62,7 +69,7 @@ const styles = StyleSheet.create({
   },
   sectionTitle: {
     fontFamily: "Poppins-Medium",
-    fontSize: 15,
+    fontSize: 13,
     marginLeft: 8,
   },
   culturalBox: {
@@ -78,8 +85,8 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   culturalLabel: {
-    fontFamily: "Poppins-Regular",
-    fontSize: 14,
+    fontFamily: "Poppins-Medium",
+    fontSize: 13,
     marginBottom: 8,
   },
 });

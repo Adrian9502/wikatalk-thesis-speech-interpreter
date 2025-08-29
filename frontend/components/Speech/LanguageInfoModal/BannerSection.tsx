@@ -2,6 +2,7 @@ import React from "react";
 import { View, Image, Text, StyleSheet } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { BannerSection as BannerSectionType } from "@/types/languageInfo";
+import { BASE_COLORS } from "@/constant/colors";
 
 interface BannerSectionProps {
   data: BannerSectionType["data"];
@@ -52,12 +53,12 @@ const styles = StyleSheet.create({
     backgroundColor: "rgba(255, 111, 74, 0.9)",
     paddingHorizontal: 12,
     paddingVertical: 4,
-    borderRadius: 10,
+    borderRadius: 20,
   },
   regionText: {
-    color: "#FFFFFF",
+    color: BASE_COLORS.white,
     fontFamily: "Poppins-Medium",
-    fontSize: 14,
+    fontSize: 12,
   },
 });
 

@@ -84,7 +84,7 @@ const Speech = () => {
     }
   };
 
-  // ENHANCED: Handle microphone press with speech management
+  //  Handle microphone press with speech management
   const handleMicPress = async (userNum: number) => {
     // NEW: Stop any ongoing speech when starting a new recording
     await stopSpeech();
@@ -175,7 +175,7 @@ const Speech = () => {
     }
   };
 
-  // NEW: Handle cancel translation
+  // Handle cancel translation
   const handleCancelTranslation = useCallback(() => {
     console.log("[Speech] User requested to cancel translation");
 
@@ -196,7 +196,7 @@ const Speech = () => {
     setIsBottomActive(position === "bottom");
   };
 
-  // NEW: Optimized swap handler with callback to prevent re-renders
+  // swap handler with callback to prevent re-renders
   const handleSwapLanguages = useCallback(() => {
     swapLanguages();
   }, [swapLanguages]);
@@ -204,10 +204,10 @@ const Speech = () => {
   useEffect(() => {
     clearText("top");
     clearText("bottom");
-    clearTranslationError(); // Clear any errors on component mount
+    clearTranslationError();
   }, []);
 
-  // NEW: Stop speech when component unmounts or user navigates away
+  // Stop speech when component unmounts or user navigates away
   useEffect(() => {
     return () => {
       console.log("[Speech] Component unmounting, stopping speech");
@@ -215,7 +215,7 @@ const Speech = () => {
     };
   }, [stopSpeech]);
 
-  // NEW: Stop speech when app goes to background
+  // Stop speech when app goes to background
   useEffect(() => {
     const handleAppStateChange = (nextAppState: string) => {
       if (nextAppState === "background" || nextAppState === "inactive") {

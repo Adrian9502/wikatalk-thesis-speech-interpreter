@@ -43,6 +43,7 @@ const CitiesSection: React.FC<CitiesSectionProps> = ({ data, colors }) => {
               style={{
                 color: colors.text,
                 fontFamily: "Poppins-Regular",
+                fontSize: 12,
               }}
             >
               {city}
@@ -67,7 +68,7 @@ const styles = StyleSheet.create({
   },
   sectionTitle: {
     fontFamily: "Poppins-Medium",
-    fontSize: 15,
+    fontSize: 13,
     marginLeft: 8,
   },
   tagsContainer: {
