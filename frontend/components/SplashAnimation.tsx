@@ -1,13 +1,29 @@
-import React, { useRef, useEffect, useState } from "react";
-import { View, StyleSheet, Text } from "react-native";
+import React, { useRef, useEffect } from "react";
+import { View, StyleSheet } from "react-native";
 import LottieView from "lottie-react-native";
 import * as SplashScreen from "expo-splash-screen";
 import AppLoading from "@/components/AppLoading";
 import { useSplashStore } from "@/store/useSplashStore";
 
+// sound
+import { preloadSounds } from "@/utils/playSound";
+
 const SplashAnimation: React.FC = () => {
   const animationRef = useRef<LottieView>(null);
   const gameDataPreloaded = useSplashStore((state) => state.gameDataPreloaded);
+
+  // preload game sound
+  useEffect(() => {
+    const initializeSounds = async () => {
+      try {
+        await preloadSounds();
+      } catch (error) {
+        console.warn("[App] Sound preloading failed:", error);
+      }
+    };
+
+    initializeSounds();
+  }, []);
 
   useEffect(() => {
     // Hide the native splash screen

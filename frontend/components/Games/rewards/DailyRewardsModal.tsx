@@ -5,17 +5,8 @@ import React, {
   useEffect,
   useMemo,
 } from "react";
-import {
-  Modal,
-  View,
-  Text,
-  StyleSheet,
-  TouchableOpacity,
-  Platform,
-  ActivityIndicator,
-} from "react-native";
+import { Modal, View, Text, StyleSheet, Platform } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
-import { X } from "react-native-feather";
 import { InteractionManager } from "react-native";
 import LottieView from "lottie-react-native";
 import useCoinsStore from "@/store/games/useCoinsStore";
@@ -27,6 +18,8 @@ import { getDayRewardAmount } from "@/hooks/useRewards";
 import ModalLoading from "@/components/ModalLoading";
 import CloseButton from "../buttons/CloseButton";
 import { BASE_COLORS } from "@/constant/colors";
+// sound
+import { playSound } from "@/utils/playSound";
 
 interface DailyRewardsModalProps {
   visible: boolean;
@@ -104,7 +97,8 @@ const DailyRewardsModal: React.FC<DailyRewardsModalProps> = ({
     // Update UI immediately
     setClaimedToday(true);
     setClaimAnimation(true);
-
+    // play sound
+    playSound("coinClaim");
     // Make the API call in the background
     const rewardAmount = await claimDailyReward();
 

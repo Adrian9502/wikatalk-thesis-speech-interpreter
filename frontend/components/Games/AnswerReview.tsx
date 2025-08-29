@@ -1,4 +1,4 @@
-import React, { useMemo, useState, useCallback } from "react";
+import React, { useMemo, useState, useCallback, useEffect } from "react";
 import { View, Text, StyleSheet, Dimensions, Image } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import * as Animatable from "react-native-animatable";
@@ -8,7 +8,6 @@ import { BASE_COLORS, TITLE_COLORS } from "@/constant/colors";
 import { GAME_RESULT_COLORS } from "@/constant/colors";
 import { formatTimerDisplay, getGameModeGradient } from "@/utils/gameUtils";
 import { safeTextRender } from "@/utils/textUtils";
-import { NAVIGATION_COLORS } from "@/constant/colors";
 import DifficultyBadge from "@/components/games/DifficultyBadge";
 import FocusAreaBadge from "@/components/games/FocusAreaBadge";
 
@@ -21,6 +20,9 @@ import useCoinsStore from "@/store/games/useCoinsStore";
 import useGameStore from "@/store/games/useGameStore";
 import useProgressStore from "@/store/games/useProgressStore";
 import { useSplashStore } from "@/store/useSplashStore";
+
+// sound
+import { playSound } from "@/utils/playSound";
 
 const { width: screenWidth } = Dimensions.get("window");
 
@@ -226,6 +228,33 @@ const AnswerReview: React.FC<AnswerReviewProps> = ({
       setShowResetModal(false);
     }
   }, [isResetting, showSuccessMessage]);
+
+  // Sound effect for answer result
+  useEffect(() => {
+    // Only play sound for actual game completion, not user exits or background completion
+    if (!isBackgroundCompletion && !isUserExit) {
+      // Delay sound to match hero card animation
+      const soundDelay = setTimeout(() => {
+        if (isCorrect) {
+          console.log("[AnswerReview] Playing correct answer sound");
+          playSound("correct");
+
+          // Play level complete sound after correct sound (if this completes the level)
+          if (rewardInfo && rewardInfo.coins > 0) {
+            setTimeout(() => {
+              console.log("[AnswerReview] Playing level complete sound");
+              playSound("levelComplete");
+            }, 1500); // Play after correct sound finishes
+          }
+        } else {
+          console.log("[AnswerReview] Playing wrong answer sound");
+          playSound("wrong");
+        }
+      }, delay + 400); // Match hero card animation timing
+
+      return () => clearTimeout(soundDelay);
+    }
+  }, [isCorrect, isBackgroundCompletion, isUserExit, delay, rewardInfo]);
 
   return (
     <>

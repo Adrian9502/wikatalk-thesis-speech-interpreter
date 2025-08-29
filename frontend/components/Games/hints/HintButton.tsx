@@ -1,17 +1,13 @@
 import React, { useMemo } from "react";
-import {
-  TouchableOpacity,
-  Text,
-  StyleSheet,
-  Image,
-  View,
-  ActivityIndicator,
-} from "react-native";
-import { HelpCircle, AlertCircle } from "react-native-feather";
+import { TouchableOpacity, Text, StyleSheet, Image, View } from "react-native";
+
 import { LinearGradient } from "expo-linear-gradient";
 import { BASE_COLORS } from "@/constant/colors";
 import useHintStore from "@/store/games/useHintStore";
 import useCoinsStore from "@/store/games/useCoinsStore";
+
+// sound
+import { playSound } from "@/utils/playSound";
 
 interface HintButtonProps {
   questionId: string;
@@ -86,10 +82,11 @@ const HintButton: React.FC<HintButtonProps> = ({
     );
     const success = await purchaseHint(questionId, gameMode, options);
 
-    // NEW: Refresh coins immediately after successful purchase
+    // Refresh coins immediately after successful purchase
     if (success) {
       console.log("[HintButton] Hint purchased successfully, refreshing coins");
-      await fetchCoinsBalance(true); // Force refresh
+      playSound("coinSpend");
+      await fetchCoinsBalance(true);
     } else if (error) {
       console.error(`[HintButton] Failed to purchase hint: ${error}`);
     }
