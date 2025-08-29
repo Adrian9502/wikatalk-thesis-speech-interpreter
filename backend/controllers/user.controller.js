@@ -72,7 +72,7 @@ exports.registerUser = async (req, res) => {
       email,
       password,
       verificationCode,
-      verificationCodeExpires: new Date(Date.now() + 30 * 60000), // 30 minutes
+      verificationCodeExpires: new Date(Date.now() + 15 * 60000), // 15 minutes
     };
 
     try {
