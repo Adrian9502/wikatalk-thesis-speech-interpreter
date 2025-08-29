@@ -32,6 +32,8 @@ import { isAllDataReady, useSplashStore } from "@/store/useSplashStore";
 // GLOBAL state to persist across component remounts
 let GAMES_INITIALIZED = false;
 let INITIALIZATION_PROMISE: Promise<void> | null = null;
+// NEW: Add a completion flag to prevent premature cleanup
+let INITIALIZATION_COMPLETED = false;
 
 const Games = () => {
   // FIXED: All hooks must be called at the top level, in the same order every time
@@ -97,10 +99,10 @@ const Games = () => {
     showRankingsModal();
   }, [showRankingsModal]);
 
-  // FIXED: Global initialization that persists across remounts
+  // FIXED: Enhanced global initialization with better state management
   useEffect(() => {
-    // If already globally initialized, just sync local state
-    if (GAMES_INITIALIZED) {
+    // If already globally initialized and completed, just sync local state
+    if (GAMES_INITIALIZED && INITIALIZATION_COMPLETED) {
       console.log("[Games] Already globally initialized, syncing local state");
       setHasInitialized(true);
       if (finishLoadTracking) finishLoadTracking();
@@ -113,11 +115,14 @@ const Games = () => {
       INITIALIZATION_PROMISE.then(() => {
         setHasInitialized(true);
         if (finishLoadTracking) finishLoadTracking();
+      }).catch((error) => {
+        console.error("[Games] Initialization promise failed:", error);
+        setHasError(true);
       });
       return;
     }
 
-    // Start initialization
+    // Start initialization only once
     const initializeOnce = async () => {
       console.log("[Games] Starting one-time global initialization...");
 
@@ -148,58 +153,74 @@ const Games = () => {
           }
         }
 
-        // Mark as globally initialized
+        // Mark as globally initialized and completed
         GAMES_INITIALIZED = true;
+        INITIALIZATION_COMPLETED = true;
         setHasInitialized(true);
         if (finishLoadTracking) finishLoadTracking();
+
+        console.log("[Games] ✅ Global initialization completed successfully");
       } catch (error) {
         console.error("[Games] Initialization error:", error);
         setHasError(true);
+        // Reset flags on error to allow retry
+        GAMES_INITIALIZED = false;
+        INITIALIZATION_COMPLETED = false;
       } finally {
-        INITIALIZATION_PROMISE = null;
+        // FIXED: Only clear promise after a delay to ensure all components have mounted
+        setTimeout(() => {
+          INITIALIZATION_PROMISE = null;
+        }, 1000); // Give components time to mount and sync
       }
     };
 
     INITIALIZATION_PROMISE = initializeOnce();
   }, [fetchProgress, finishLoadTracking]);
 
-  // Enhanced focus effect to ensure fresh data display
+  // FIXED: Optimized focus effect to reduce background refresh frequency
   useFocusEffect(
     React.useCallback(() => {
       console.log("[Games] Tab focused, stopping all speech");
       globalSpeechManager.stopAllSpeech();
 
-      // ENHANCED: Ensure GameCards show most updated progress
+      // ENHANCED: Less aggressive refresh logic
       if (hasInitialized && !focusRefreshInProgress.current) {
         const progressStore = useProgressStore.getState();
         const lastFetched = progressStore.lastFetched || 0;
         const now = Date.now();
         const timeSinceLastFetch = now - lastFetched;
 
-        // If more than 1 minute since last fetch, refresh progress
-        const shouldRefresh = timeSinceLastFetch > 1 * 60 * 1000; // Reduced from 2 minutes
+        // FIXED: Increase refresh interval to reduce unnecessary updates
+        const shouldRefresh = timeSinceLastFetch > 5 * 60 * 1000; // Increased to 5 minutes
 
         if (shouldRefresh) {
           console.log(
-            `[Games] Screen focused, refreshing progress data (${timeSinceLastFetch}ms since last fetch)`
+            `[Games] Screen focused, refreshing progress data (${Math.round(
+              timeSinceLastFetch / 1000
+            )}s since last fetch)`
           );
           focusRefreshInProgress.current = true;
 
-          fetchProgress(true).finally(() => {
-            setTimeout(() => {
-              focusRefreshInProgress.current = false;
+          // FIXED: Debounce the refresh to prevent rapid successive calls
+          setTimeout(() => {
+            fetchProgress(true).finally(() => {
+              setTimeout(() => {
+                focusRefreshInProgress.current = false;
 
-              // Trigger GameCard updates by refreshing precomputed data
-              const splashStore = useSplashStore.getState();
-              Promise.allSettled([
-                splashStore.precomputeSpecificGameMode("multipleChoice"),
-                splashStore.precomputeSpecificGameMode("identification"),
-                splashStore.precomputeSpecificGameMode("fillBlanks"),
-              ]).then(() => {
-                console.log("[Games] GameCard data refreshed");
-              });
-            }, 1000);
-          });
+                // FIXED: Only refresh precomputed data if initialization is complete
+                if (INITIALIZATION_COMPLETED) {
+                  const splashStore = useSplashStore.getState();
+                  Promise.allSettled([
+                    splashStore.precomputeSpecificGameMode("multipleChoice"),
+                    splashStore.precomputeSpecificGameMode("identification"),
+                    splashStore.precomputeSpecificGameMode("fillBlanks"),
+                  ]).then(() => {
+                    console.log("[Games] GameCard data refreshed");
+                  });
+                }
+              }, 1500); // Increased delay to allow state to settle
+            });
+          }, 300); // Add small delay before starting refresh
         }
       }
 
@@ -210,11 +231,12 @@ const Games = () => {
     }, [fetchProgress, hasInitialized])
   );
 
-  // Handle retry
+  // Handle retry - FIXED: Reset all flags
   const handleRetry = useCallback(() => {
     setHasError(false);
-    // Reset global state on manual retry
+    // Reset all global state on manual retry
     GAMES_INITIALIZED = false;
+    INITIALIZATION_COMPLETED = false;
     INITIALIZATION_PROMISE = null;
     setHasInitialized(false);
   }, []);

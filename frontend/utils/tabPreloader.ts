@@ -147,8 +147,7 @@ class TabPreloader {
       if (splashStore.gameDataPreloaded) {
         console.log("[TabPreloader] Games data already preloaded from splash");
 
-        // IMPORTANT: Always refresh progress data when returning to Games
-        // This ensures users see the most updated progress
+        // IMPORTANT: Less aggressive refresh logic
         const progressStore = useProgressStore.getState();
         const gameStore = useGameStore.getState();
 
@@ -156,34 +155,46 @@ class TabPreloader {
         const lastUpdate = progressStore.lastUpdated || 0;
         const timeSinceUpdate = Date.now() - lastUpdate;
 
-        // If more than 30 seconds since last update, refresh in background
-        if (timeSinceUpdate > 30000) {
+        // FIXED: Increase refresh threshold to reduce background activity
+        if (timeSinceUpdate > 2 * 60 * 1000) {
+          // Increased from 30s to 2 minutes
           console.log(
-            "[TabPreloader] Refreshing progress data in background for Games"
+            "[TabPreloader] Scheduling background progress refresh for Games"
           );
 
-          // Non-blocking refresh to keep current flow
-          Promise.resolve().then(async () => {
-            try {
-              await progressStore.fetchProgress(true);
+          // FIXED: Debounce background refresh to prevent rapid successive calls
+          setTimeout(() => {
+            Promise.resolve().then(async () => {
+              try {
+                await progressStore.fetchProgress(true);
 
-              // Trigger recomputation of specific game modes to update cards
-              const gameModes = [
-                "multipleChoice",
-                "identification",
-                "fillBlanks",
-              ];
-              for (const mode of gameModes) {
-                await splashStore.precomputeSpecificGameMode(mode);
+                // FIXED: Add delay before recomputation to allow state to settle
+                setTimeout(async () => {
+                  const gameModes = [
+                    "multipleChoice",
+                    "identification",
+                    "fillBlanks",
+                  ];
+
+                  // FIXED: Process game modes sequentially to reduce CPU load
+                  for (const mode of gameModes) {
+                    await splashStore.precomputeSpecificGameMode(mode);
+                    // Small delay between each mode to prevent blocking
+                    await new Promise((resolve) => setTimeout(resolve, 100));
+                  }
+
+                  console.log(
+                    "[TabPreloader] Background progress refresh completed"
+                  );
+                }, 500);
+              } catch (error) {
+                console.warn(
+                  "[TabPreloader] Background refresh failed:",
+                  error
+                );
               }
-
-              console.log(
-                "[TabPreloader] Background progress refresh completed"
-              );
-            } catch (error) {
-              console.warn("[TabPreloader] Background refresh failed:", error);
-            }
-          });
+            });
+          }, 1000); // Delay background refresh by 1 second
         }
 
         return true;

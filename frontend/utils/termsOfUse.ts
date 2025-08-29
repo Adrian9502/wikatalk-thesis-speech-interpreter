@@ -5,7 +5,7 @@ export const TERMS_OF_USE_CONTENT = `
 
 **1. ACCEPTANCE OF TERMS**
 
-By downloading, installing, accessing, or using the WikaTalk mobile application ("App"), you agree to be bound by these Terms of Use ("Terms"). If you do not agree to these Terms, do not use the App.
+By downloading, installing, accessing, or using the WikaTalk mobile application ("Application"), you agree to be bound by these Terms of Use ("Terms"). If you do not agree to these Terms, do not use the App.
 
 **2. ABOUT WIKATALK**
 

@@ -38,7 +38,7 @@ export const Header = ({
           onPress={handleBackPress}
           disabled={disableBack}
         >
-          <ArrowLeft width={24} height={24} color={BASE_COLORS.white} />
+          <ArrowLeft width={18} height={18} color={BASE_COLORS.white} />
         </TouchableOpacity>
       ) : (
         <View style={styles.placeholderView} /> // Placeholder to maintain layout
