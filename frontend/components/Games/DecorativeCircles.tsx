@@ -49,8 +49,8 @@ const DecorativeCircles: React.FC<DecorativeCirclesProps> = ({
 const styles = StyleSheet.create({
   decorativeCircle1: {
     position: "absolute",
-    top: -100,
-    right: -80,
+    top: 10,
+    right: -70,
     width: 200,
     height: 200,
     borderRadius: 100,
