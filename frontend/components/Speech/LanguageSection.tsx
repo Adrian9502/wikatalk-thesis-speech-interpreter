@@ -122,42 +122,51 @@ const LanguageSection: React.FC<LanguageSectionProps> = ({
     }
   }, [recording]);
 
-  // Calculate responsive dimensions
+  // FIXED: Calculate responsive dimensions with better height allocation
   const getResponsiveStyles = () => {
     const { height, width } = screenData;
     const isSmallScreen = height < 700; // Nexus 4 height is 640
+    const isVerySmallScreen = height < 650; // Extra small screens like Nexus 4
     const isKeyboardShowing = keyboardVisible;
 
-    // Base calculations for responsive design
-    const baseHeight = isSmallScreen ? height * 0.42 : height * 0.45; // Reduced height for small screens
-    const keyboardAdjustment = isKeyboardShowing ? height * 0.25 : 0;
-
+    // FIXED: Better height calculations for small screens
     let sectionHeight, minHeight, padding;
 
     if (isKeyboardShowing) {
       if (position === "bottom") {
-        // Bottom section expands when keyboard is visible
-        sectionHeight = height - keyboardAdjustment;
-        minHeight = height * 0.4;
-        padding = isSmallScreen ? 12 : 16;
+        // Bottom section when keyboard is visible - give more space
+        sectionHeight = isVerySmallScreen ? height * 0.55 : height * 0.5;
+        minHeight = height * 0.45;
+        padding = 12;
       } else {
-        // Top section shrinks when keyboard is visible
-        sectionHeight = height * 0.3;
-        minHeight = height * 0.25;
-        padding = isSmallScreen ? 8 : 12;
+        // Top section when keyboard is visible - shrink more
+        sectionHeight = isVerySmallScreen ? height * 0.25 : height * 0.28;
+        minHeight = height * 0.22;
+        padding = 8;
       }
     } else {
-      // Normal state - equal distribution
-      sectionHeight = baseHeight;
-      minHeight = isSmallScreen ? height * 0.35 : height * 0.4;
-      padding = isSmallScreen ? 14 : 20;
+      // FIXED: Normal state - better distribution for small screens
+      if (isVerySmallScreen) {
+        // Nexus 4 and similar small screens
+        sectionHeight = height * 0.46; // Increased from 0.42
+        minHeight = height * 0.42;
+        padding = 12; // Reduced padding to save space
+      } else if (isSmallScreen) {
+        sectionHeight = height * 0.45;
+        minHeight = height * 0.4;
+        padding = 14;
+      } else {
+        sectionHeight = height * 0.45;
+        minHeight = height * 0.4;
+        padding = 20;
+      }
     }
 
     return {
       height: sectionHeight,
       minHeight,
       padding,
-      borderRadius: isSmallScreen ? 16 : 20,
+      borderRadius: isVerySmallScreen ? 14 : isSmallScreen ? 16 : 20, // Smaller radius for very small screens
     };
   };
 
@@ -182,7 +191,7 @@ const LanguageSection: React.FC<LanguageSectionProps> = ({
         style={styles.gradient}
       />
 
-      {/* Header Section */}
+      {/* Header  */}
       <LanguageSectionHeader
         position={position}
         language={language}
@@ -193,12 +202,14 @@ const LanguageSection: React.FC<LanguageSectionProps> = ({
       />
 
       {/* Text Area */}
-      <TextAreaSection
-        textField={textField}
-        colors={COLORS}
-        position={position}
-        onTextAreaFocus={onTextAreaFocus}
-      />
+      <View style={styles.textAreaContainer}>
+        <TextAreaSection
+          textField={textField}
+          colors={COLORS}
+          position={position}
+          onTextAreaFocus={onTextAreaFocus}
+        />
+      </View>
 
       {/* Bottom Section  */}
       {(!keyboardVisible || position === "top") && (
@@ -236,6 +247,10 @@ const styles = StyleSheet.create({
     right: 0,
     top: 0,
     bottom: 0,
+  },
+  textAreaContainer: {
+    flex: 1,
+    marginVertical: 4,
   },
 });
 

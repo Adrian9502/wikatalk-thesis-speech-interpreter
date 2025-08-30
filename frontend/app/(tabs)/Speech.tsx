@@ -24,6 +24,7 @@ import { saveTranslationHistory } from "@/utils/saveTranslationHistory";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { globalSpeechManager } from "@/utils/globalSpeechManager";
 import { useFocusEffect } from "@react-navigation/native";
+import { Dimensions } from "react-native";
 
 const Speech = () => {
   // stop ongoing speech
@@ -311,7 +312,6 @@ const Speech = () => {
 
 export default Speech;
 
-// Styles - Updated to remove animation-related styles
 const styles = StyleSheet.create({
   keyboardAvoidingView: {
     flex: 1,
@@ -325,7 +325,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     transform: "rotate(90deg)",
-    marginVertical: 8,
+    marginVertical: Dimensions.get("window").height < 650 ? 4 : 8,
     zIndex: 10,
   },
   swapButtonBorder: {

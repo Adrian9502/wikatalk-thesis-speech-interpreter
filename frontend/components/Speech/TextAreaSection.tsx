@@ -5,6 +5,7 @@ import {
   TextInput,
   ActivityIndicator,
   Text,
+  Dimensions,
 } from "react-native";
 import { BASE_COLORS } from "@/constant/colors";
 import useLanguageStore from "@/store/useLanguageStore";
@@ -39,6 +40,23 @@ const TextAreaSection: React.FC<TextAreaSectionProps> = ({
 
   // NEW: Determine if this section is currently speaking
   const isSpeaking = position === "top" ? isTopSpeaking : isBottomSpeaking;
+
+  // FIXED: Get responsive dimensions for text area
+  const getResponsiveStyles = () => {
+    const { height, width } = Dimensions.get("window");
+    const isVerySmallScreen = height < 650; // Nexus 4 and similar
+    const isSmallScreen = height < 700;
+
+    return {
+      minHeight: isVerySmallScreen ? 80 : isSmallScreen ? 100 : 120, // Reduced min height for very small screens
+      padding: isVerySmallScreen ? 12 : 16, // Reduced padding
+      borderRadius: isVerySmallScreen ? 14 : 20,
+      fontSize: isVerySmallScreen ? 13 : 14, // Slightly smaller font for very small screens
+      lineHeight: isVerySmallScreen ? 18 : 20,
+    };
+  };
+
+  const responsiveStyles = getResponsiveStyles();
 
   const handleTextChange = (text: string) => {
     // Don't allow editing if there's an error or if it's a user-friendly message
@@ -164,8 +182,29 @@ const TextAreaSection: React.FC<TextAreaSectionProps> = ({
     <View style={styles.textAreaWrapper}>
       {displayState.showAsText ? (
         // Show error message in a non-editable text area
-        <View style={[styles.textArea, { borderColor: COLORS.border }]}>
-          <Text style={[styles.textField, { color: displayState.textColor }]}>
+        <View
+          style={[
+            styles.textArea,
+            {
+              borderColor: COLORS.border,
+              minHeight: responsiveStyles.minHeight,
+              padding: responsiveStyles.padding,
+              borderRadius: responsiveStyles.borderRadius,
+            },
+          ]}
+        >
+          <Text
+            style={[
+              styles.textField,
+              {
+                color: displayState.textColor,
+                fontSize: responsiveStyles.fontSize,
+                lineHeight: responsiveStyles.lineHeight,
+                minHeight:
+                  responsiveStyles.minHeight - responsiveStyles.padding * 2, // Subtract padding
+              },
+            ]}
+          >
             {displayState.displayText}
           </Text>
         </View>
@@ -181,6 +220,11 @@ const TextAreaSection: React.FC<TextAreaSectionProps> = ({
             {
               borderColor: COLORS.border,
               color: displayState.textColor,
+              minHeight: responsiveStyles.minHeight,
+              padding: responsiveStyles.padding,
+              borderRadius: responsiveStyles.borderRadius,
+              fontSize: responsiveStyles.fontSize,
+              lineHeight: responsiveStyles.lineHeight,
             },
           ]}
           placeholder={displayState.placeholderText} // FIXED: Use proper placeholder
@@ -196,7 +240,15 @@ const TextAreaSection: React.FC<TextAreaSectionProps> = ({
 
       {/* Show loading indicator when translating */}
       {isTranslating && (
-        <View style={styles.loadingContainer}>
+        <View
+          style={[
+            styles.loadingContainer,
+            {
+              top: responsiveStyles.padding / 2,
+              right: responsiveStyles.padding / 2,
+            },
+          ]}
+        >
           <ActivityIndicator size="small" color={COLORS.primary} />
         </View>
       )}
@@ -207,29 +259,19 @@ const TextAreaSection: React.FC<TextAreaSectionProps> = ({
 const styles = StyleSheet.create({
   textAreaWrapper: {
     flex: 1,
-    marginVertical: 8,
     position: "relative",
-    minHeight: 100,
   },
   textArea: {
     backgroundColor: BASE_COLORS.white,
-    borderRadius: 20,
     borderWidth: 1,
-    padding: 16,
-    minHeight: 120,
     flex: 1,
   },
   textField: {
     fontFamily: "Poppins-Regular",
-    fontSize: 14,
-    lineHeight: 20,
     textAlignVertical: "top",
-    minHeight: 80,
   },
   loadingContainer: {
     position: "absolute",
-    top: 12,
-    right: 12,
     backgroundColor: "rgba(255,255,255,0.7)",
     borderRadius: 20,
     padding: 4,
