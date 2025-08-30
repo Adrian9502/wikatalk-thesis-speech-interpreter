@@ -128,6 +128,7 @@ const VerifyEmail: React.FC = () => {
             flexGrow: 1,
             justifyContent: "center",
             alignItems: "center",
+            paddingBottom: 30,
           }}
           keyboardShouldPersistTaps="handled"
           showsVerticalScrollIndicator={false}

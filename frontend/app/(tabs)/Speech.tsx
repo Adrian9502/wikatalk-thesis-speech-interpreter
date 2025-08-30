@@ -6,6 +6,7 @@ import {
   Keyboard,
   TouchableWithoutFeedback,
   AppState,
+  ScrollView,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import React, { useEffect, useState, useCallback } from "react";
@@ -253,7 +254,11 @@ const Speech = () => {
           keyboardVerticalOffset={keyboardOffset}
           enabled={true}
         >
-          <View style={styles.contentContainer}>
+          <ScrollView
+            showsVerticalScrollIndicator={false}
+            bounces={false}
+            style={styles.contentContainer}
+          >
             {/* Top section */}
             <LanguageSection
               position="top"
@@ -281,7 +286,7 @@ const Speech = () => {
               onTextAreaFocus={handleTextAreaFocus}
               recordingDuration={recordingDuration}
             />
-          </View>
+          </ScrollView>
         </KeyboardAvoidingView>
       </TouchableWithoutFeedback>
 

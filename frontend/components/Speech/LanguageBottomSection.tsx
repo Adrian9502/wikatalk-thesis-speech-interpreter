@@ -9,6 +9,7 @@ import {
   Easing,
   ImageSourcePropType,
   Animated,
+  Dimensions,
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
@@ -41,6 +42,23 @@ const LanguageBottomSection: React.FC<LanguageBottomSectionProps> = ({
 
   // Animation for pulse shadow
   const pulseAnim = useRef(new Animated.Value(0)).current;
+
+  // Get responsive styles
+  const getResponsiveStyles = () => {
+    const { height, width } = Dimensions.get("window");
+    const isSmallScreen = height < 700;
+
+    return {
+      bottomSectionHeight: isSmallScreen ? 70 : 90,
+      micButtonSize: isSmallScreen ? 50 : 60,
+      micButtonRadius: isSmallScreen ? 25 : 30,
+      micIconSize: isSmallScreen ? 24 : 28,
+      marginRight: isSmallScreen ? 12 : 16,
+      borderRadius: isSmallScreen ? 16 : 20,
+      fontSize: isSmallScreen ? 10 : 11,
+      durationFontSize: isSmallScreen ? 9 : 10,
+    };
+  };
 
   // Microphone icon scaling animation
   useEffect(() => {
@@ -80,13 +98,25 @@ const LanguageBottomSection: React.FC<LanguageBottomSectionProps> = ({
       pulseAnim.setValue(0);
     }
   }, [recording, pulseAnim]);
+
+  const responsiveStyles = getResponsiveStyles();
+
   return (
-    <View style={styles.bottomSection}>
+    <View
+      style={[
+        styles.bottomSection,
+        { height: responsiveStyles.bottomSectionHeight },
+      ]}
+    >
       <TouchableOpacity
         style={[
           styles.micButton,
           {
             backgroundColor: recording ? "#F82C2C" : COLORS.primary,
+            width: responsiveStyles.micButtonSize,
+            height: responsiveStyles.micButtonSize,
+            borderRadius: responsiveStyles.micButtonRadius,
+            marginRight: responsiveStyles.marginRight,
           },
         ]}
         onPress={() => handlePress(userId)}
@@ -94,8 +124,18 @@ const LanguageBottomSection: React.FC<LanguageBottomSectionProps> = ({
       >
         {/* Recording Duration Display */}
         {recording && (
-          <View style={styles.recordingInfo}>
-            <Text style={styles.durationText}>
+          <View
+            style={[
+              styles.recordingInfo,
+              { top: -Math.floor(responsiveStyles.micButtonSize * 0.58) },
+            ]}
+          >
+            <Text
+              style={[
+                styles.durationText,
+                { fontSize: responsiveStyles.durationFontSize },
+              ]}
+            >
               {recordingDuration.toFixed(1)}s
             </Text>
           </View>
@@ -106,7 +146,7 @@ const LanguageBottomSection: React.FC<LanguageBottomSectionProps> = ({
               position: "absolute",
               width: "100%",
               height: "100%",
-              borderRadius: 50,
+              borderRadius: responsiveStyles.micButtonRadius,
               backgroundColor: "rgba(248, 44, 44, 0.2)",
               transform: [
                 {
@@ -126,7 +166,7 @@ const LanguageBottomSection: React.FC<LanguageBottomSectionProps> = ({
         <Animated.View style={{ transform: [{ scale: micAnimation }] }}>
           <MaterialCommunityIcons
             name={recording ? "microphone" : "microphone-off"}
-            size={28}
+            size={responsiveStyles.micIconSize}
             color={BASE_COLORS.white}
           />
         </Animated.View>
@@ -134,7 +174,13 @@ const LanguageBottomSection: React.FC<LanguageBottomSectionProps> = ({
 
       <Pressable
         onPress={() => showLanguageDetails(language)}
-        style={styles.imageContainer}
+        style={[
+          styles.imageContainer,
+          {
+            height: responsiveStyles.bottomSectionHeight,
+            borderRadius: responsiveStyles.borderRadius,
+          },
+        ]}
       >
         <Image
           source={
@@ -151,8 +197,20 @@ const LanguageBottomSection: React.FC<LanguageBottomSectionProps> = ({
           start={{ x: 0, y: 0 }}
           end={{ x: 1, y: 1 }}
         />
-        <View style={styles.languageLabel}>
-          <Text style={styles.languageName}>{language}</Text>
+        <View
+          style={[
+            styles.languageLabel,
+            { borderRadius: responsiveStyles.borderRadius * 0.6 },
+          ]}
+        >
+          <Text
+            style={[
+              styles.languageName,
+              { fontSize: responsiveStyles.fontSize },
+            ]}
+          >
+            {language}
+          </Text>
         </View>
       </Pressable>
     </View>
@@ -164,15 +222,10 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     marginTop: 8,
-    height: 90,
   },
   micButton: {
-    width: 60,
-    height: 60,
-    borderRadius: 30,
     justifyContent: "center",
     alignItems: "center",
-    marginRight: 16,
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.2,
@@ -181,8 +234,6 @@ const styles = StyleSheet.create({
   },
   imageContainer: {
     flex: 1,
-    height: 90,
-    borderRadius: 20,
     overflow: "hidden",
     position: "relative",
   },
@@ -204,17 +255,14 @@ const styles = StyleSheet.create({
     backgroundColor: "rgba(0,0,0,0.5)",
     paddingHorizontal: 8,
     paddingVertical: 4,
-    borderRadius: 20,
   },
   languageName: {
     color: BASE_COLORS.white,
-    fontSize: 11,
     fontFamily: "Poppins-Medium",
   },
   // recording info
   recordingInfo: {
     position: "absolute",
-    top: -35,
     alignSelf: "center",
     alignItems: "center",
     backgroundColor: "rgba(0, 0, 0, 0.7)",
@@ -224,7 +272,6 @@ const styles = StyleSheet.create({
   },
   durationText: {
     color: BASE_COLORS.white,
-    fontSize: 10,
     fontFamily: "Poppins-SemiBold",
   },
   minimumText: {

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { View, StyleSheet, Animated, Keyboard } from "react-native";
+import { View, StyleSheet, Animated, Keyboard, Dimensions } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { BASE_COLORS, getPositionalColors } from "@/constant/colors";
 import useLanguageStore from "@/store/useLanguageStore";
@@ -27,6 +27,7 @@ const LanguageSection: React.FC<LanguageSectionProps> = ({
   // Animation for microphone button
   const [micAnimation] = useState(new Animated.Value(1));
   const [keyboardVisible, setKeyboardVisible] = useState(false);
+  const [screenData, setScreenData] = useState(Dimensions.get("window"));
 
   // Get state from Zustand store
   const {
@@ -63,6 +64,16 @@ const LanguageSection: React.FC<LanguageSectionProps> = ({
 
   // Get colors based on position using the utility function
   const COLORS = getPositionalColors(position);
+
+  // Track screen dimensions changes
+  useEffect(() => {
+    const onChange = (result: any) => {
+      setScreenData(result.window);
+    };
+
+    const subscription = Dimensions.addEventListener("change", onChange);
+    return () => subscription?.remove();
+  }, []);
 
   // Track keyboard visibility
   useEffect(() => {
@@ -111,14 +122,57 @@ const LanguageSection: React.FC<LanguageSectionProps> = ({
     }
   }, [recording]);
 
+  // Calculate responsive dimensions
+  const getResponsiveStyles = () => {
+    const { height, width } = screenData;
+    const isSmallScreen = height < 700; // Nexus 4 height is 640
+    const isKeyboardShowing = keyboardVisible;
+
+    // Base calculations for responsive design
+    const baseHeight = isSmallScreen ? height * 0.42 : height * 0.45; // Reduced height for small screens
+    const keyboardAdjustment = isKeyboardShowing ? height * 0.25 : 0;
+
+    let sectionHeight, minHeight, padding;
+
+    if (isKeyboardShowing) {
+      if (position === "bottom") {
+        // Bottom section expands when keyboard is visible
+        sectionHeight = height - keyboardAdjustment;
+        minHeight = height * 0.4;
+        padding = isSmallScreen ? 12 : 16;
+      } else {
+        // Top section shrinks when keyboard is visible
+        sectionHeight = height * 0.3;
+        minHeight = height * 0.25;
+        padding = isSmallScreen ? 8 : 12;
+      }
+    } else {
+      // Normal state - equal distribution
+      sectionHeight = baseHeight;
+      minHeight = isSmallScreen ? height * 0.35 : height * 0.4;
+      padding = isSmallScreen ? 14 : 20;
+    }
+
+    return {
+      height: sectionHeight,
+      minHeight,
+      padding,
+      borderRadius: isSmallScreen ? 16 : 20,
+    };
+  };
+
+  const responsiveStyles = getResponsiveStyles();
+
   return (
     <View
       style={[
         styles.translateContainer,
-        keyboardVisible &&
-          position === "bottom" &&
-          styles.keyboardVisibleBottom,
-        keyboardVisible && position === "top" && styles.keyboardVisibleTop,
+        {
+          height: responsiveStyles.height,
+          minHeight: responsiveStyles.minHeight,
+          padding: responsiveStyles.padding,
+          borderRadius: responsiveStyles.borderRadius,
+        },
       ]}
     >
       <LinearGradient
@@ -166,7 +220,6 @@ const LanguageSection: React.FC<LanguageSectionProps> = ({
 const styles = StyleSheet.create({
   translateContainer: {
     width: "100%",
-    height: "48%",
     borderRadius: 20,
     overflow: "hidden",
     backgroundColor: BASE_COLORS.white,
@@ -176,7 +229,6 @@ const styles = StyleSheet.create({
     shadowRadius: 15,
     elevation: 8,
     position: "relative",
-    padding: 20,
   },
   gradient: {
     position: "absolute",
@@ -184,12 +236,6 @@ const styles = StyleSheet.create({
     right: 0,
     top: 0,
     bottom: 0,
-  },
-  keyboardVisibleBottom: {
-    height: "100%", // Expand the bottom section when keyboard is visible
-  },
-  keyboardVisibleTop: {
-    height: "70%", // Shrink the top section when keyboard is visible
   },
 });
 
