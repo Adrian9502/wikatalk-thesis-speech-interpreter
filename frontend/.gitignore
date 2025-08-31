@@ -33,8 +33,7 @@ yarn-error.log
 .env
 
 # eas
-# eas.json
-eas.local.json
+eas.json
 
 # Expo
 .expo/
