@@ -307,7 +307,7 @@
       "mode": "multipleChoice",
       "title": "Maguindanao: Community Action",
       "description": "Identify the right interpretation",
-      "question": "What does \"Nagdatu ako sa panampalay\" mean?",
+      "question": "What does \"Napan ako sa panampalay.\" mean?",
       "options": [
         { "id": "a", "text": "I harvested fish", "isCorrect": false },
         { "id": "b", "text": "I went to the rice field", "isCorrect": true },
@@ -860,9 +860,9 @@
         {
           "id": "a",
           "text": "No one is watching our movie",
-          "isCorrect": false
+          "isCorrect": true
         },
-        { "id": "b", "text": "Our movie is boring", "isCorrect": true },
+        { "id": "b", "text": "Our movie is boring", "isCorrect": false },
         { "id": "c", "text": "Everyone watched our movie", "isCorrect": false },
         { "id": "d", "text": "The movie is very exciting", "isCorrect": false }
       ],
@@ -1042,10 +1042,10 @@
       "title": "Cebuano: Weather Identification",
       "description": "Choose the correct word related to weather.",
       "question": "Nag-ulan og kusog nga ___.",
-      "answer": "tubig",
+      "answer": "ulan",
       "options": [
         { "id": "a", "text": "kahoy" },
-        { "id": "b", "text": "tubig" },
+        { "id": "b", "text": "ulan" },
         { "id": "c", "text": "hangin" },
         { "id": "d", "text": "adlaw" },
         { "id": "e", "text": "daplin" },
@@ -1151,7 +1151,7 @@
       "mode": "identification",
       "title": "Bicol: School Vocabulary",
       "description": "Choose the appropriate word used in school.",
-      "question": "Ang ___ amo ang ginahalinan sang mga libro.",
+      "question": "Ang _______ iyo an lugar kun sain nakukuha an mga libro.",
       "answer": "librarya",
       "options": [
         { "id": "a", "text": "kwarto" },
@@ -1195,10 +1195,10 @@
       "mode": "identification",
       "title": "Maguindanao: House Location",
       "description": "Choose the correct word that refers to a location in the house.",
-      "question": "So sala et ___ ed bale.",
-      "answer": "abong",
+      "question": "So sala et ___.",
+      "answer": "bale",
       "options": [
-        { "id": "a", "text": "abong" },
+        { "id": "a", "text": "bale" },
         { "id": "b", "text": "tanap" },
         { "id": "c", "text": "lababo" },
         { "id": "d", "text": "danum" },
@@ -1405,7 +1405,7 @@
         { "id": "g", "text": "lapis" },
         { "id": "h", "text": "silya" }
       ],
-      "translation": "He/She is already afraid of the war.",
+      "translation": "Use the hammer for fixing.",
       "focusArea": "vocabulary"
     },
     {
@@ -1427,7 +1427,7 @@
         { "id": "g", "text": "bangko" },
         { "id": "h", "text": "papel" }
       ],
-      "translation": "They rode a vehicle.",
+      "translation": "They rode a jeep.",
       "focusArea": "vocabulary"
     },
     {
@@ -1537,7 +1537,7 @@
         { "id": "g", "text": "istorya" },
         { "id": "h", "text": "luto" }
       ],
-      "translation": "He wrote the assignment.",
+      "translation": "He is writing the assignment.",
       "focusArea": "vocabulary"
     },
     {
@@ -1559,7 +1559,7 @@
         { "id": "g", "text": "lampara" },
         { "id": "h", "text": "bintana" }
       ],
-      "translation": "We were under a tree in the mountain.",
+      "translation": "We were at the tree in the mountain.",
       "focusArea": "vocabulary"
     },
     {
@@ -1638,7 +1638,7 @@
       "question": "Matulog ko kada ___.",
       "answer": "gabii",
       "options": [
-        { "id": "a", "text": "buntag" },
+        { "id": "a", "text": "aga" },
         { "id": "b", "text": "udto" },
         { "id": "c", "text": "hapon" },
         { "id": "d", "text": "gabii" },
@@ -1658,10 +1658,10 @@
       "title": "Bicol: Emotion or Feeling",
       "description": "Choose the correct emotion word.",
       "question": "Siya masyado nang ___.",
-      "answer": "malipay",
+      "answer": "masaya",
       "options": [
         { "id": "a", "text": "masubo" },
-        { "id": "b", "text": "malipay" },
+        { "id": "b", "text": "masaya" },
         { "id": "c", "text": "mangirit" },
         { "id": "d", "text": "magtangis" },
         { "id": "e", "text": "magtakbo" },
@@ -1722,11 +1722,11 @@
       "difficulty": "hard",
       "mode": "identification",
       "title": "Ilocano: Descriptive Adjective",
-      "description": "Choose the best word to describe someone proud.",
+      "description": "Choose the best word to describe someone proud or boastful.",
       "question": "Daydiay nga lalaki ket ___.",
-      "answer": "agtaray",
+      "answer": "mangiparangarang",
       "options": [
-        { "id": "a", "text": "agtaray" },
+        { "id": "a", "text": "mangiparangarang" },
         { "id": "b", "text": "agpanunot" },
         { "id": "c", "text": "agtuytoy" },
         { "id": "d", "text": "agayat" },
@@ -1746,9 +1746,9 @@
       "title": "Bicol: Metaphorical Action",
       "description": "Choose the metaphorical phrase that makes the sentence meaningful.",
       "question": "Nag-___ siya kasabay kang marhay na tadhana.",
-      "answer": "sakay sa hangin",
+      "answer": "sumabay sa hangin",
       "options": [
-        { "id": "a", "text": "sakay sa hangin" },
+        { "id": "a", "text": "sumabay sa hangin" },
         { "id": "b", "text": "tungtong sa ulap" },
         { "id": "c", "text": "labay sa tubig" },
         { "id": "d", "text": "lusong sa baha" },
@@ -1757,7 +1757,7 @@
         { "id": "g", "text": "luto sa init" },
         { "id": "h", "text": "lutang sa bangis" }
       ],
-      "translation": "He rode with good fortune.",
+      "translation": "He went along with good fortune.",
       "focusArea": "vocabulary"
     },
     {
@@ -1823,7 +1823,7 @@
         { "id": "g", "text": "luklukan" },
         { "id": "h", "text": "alang-alang" }
       ],
-      "translation": "He has a deeper meaning.",
+      "translation": "It has deeper meaning.",
       "focusArea": "vocabulary"
     },
     {
@@ -1911,7 +1911,7 @@
         { "id": "g", "text": "kawayan" },
         { "id": "h", "text": "palu-palo" }
       ],
-      "translation": "The blacksmith used the hammer.",
+      "translation": "The blacksmith used the mallet.",
       "focusArea": "vocabulary"
     },
     {
@@ -1955,7 +1955,7 @@
         { "id": "g", "text": "panagdait" },
         { "id": "h", "text": "panagserbi" }
       ],
-      "translation": "My heart is full of weeping.",
+      "translation": "There is weeping in my heart.",
       "focusArea": "vocabulary"
     },
     {
@@ -2010,9 +2010,9 @@
       "title": "Maguindanao: Ethical Word",
       "description": "Identify the term that suggests moral value.",
       "question": "Importante ang ___.",
-      "answer": "kanduli",
+      "answer": "pagpasalamat",
       "options": [
-        { "id": "a", "text": "kanduli" },
+        { "id": "a", "text": "pagpasalamat" },
         { "id": "b", "text": "pagari" },
         { "id": "c", "text": "kulintang" },
         { "id": "d", "text": "panulakan" },
@@ -2076,9 +2076,9 @@
       "title": "Bisaya: Rare Descriptive Word",
       "description": "Choose the descriptive word that shows admiration.",
       "question": "Siya kay ___ nga tawo.",
-      "answer": "mapangahason",
+      "answer": "maisugon",
       "options": [
-        { "id": "a", "text": "mapangahason" },
+        { "id": "a", "text": "maisugon" },
         { "id": "b", "text": "matahum" },
         { "id": "c", "text": "maanyag" },
         { "id": "d", "text": "buotan" },
@@ -2095,8 +2095,8 @@
       "level": "Level 50",
       "difficulty": "hard",
       "mode": "identification",
-      "title": "Hiligaynon: Deep Cultural Term",
-      "description": "Identify the term associated with cultural ritual.",
+      "title": "Hiligaynon: Courtship Tradition",
+      "description": "Identify the term associated with the practice of courtship.",
       "question": "Ginsunod nila ang ___.",
       "answer": "pamuluyag",
       "options": [
@@ -2112,7 +2112,6 @@
       "translation": "They followed the courtship tradition.",
       "focusArea": "vocabulary"
     },
-
     {
       "questionId": 101,
       "level": "Level 1",
@@ -2121,7 +2120,7 @@
       "title": "Cebuano: Morning Habit",
       "description": "Choose the correct word to complete the morning activity.",
       "question": "Kada buntag, mag___ ko og ngipon.",
-      "answer": "toothbrush",
+      "answer": "sipilyo",
       "translation": "Every morning, I brush my teeth.",
       "hint": "Used to clean your teeth.",
       "focusArea": "vocabulary"
@@ -2161,7 +2160,7 @@
       "description": "Complete the sentence with a school item.",
       "question": "Dinake yang ___ keng bag.",
       "answer": "lapis",
-      "translation": "He took a pencil from the bag.",
+      "translation": "He/She took a pencil from the bag.",
       "hint": "Used for writing.",
       "focusArea": "vocabulary"
     },
@@ -2173,7 +2172,7 @@
       "title": "Bicol: House Chore",
       "description": "Choose the correct word for the chore being done.",
       "question": "Nag___ si mama kan kwarto.",
-      "answer": "linis",
+      "answer": "linig",
       "translation": "Mama cleaned the room.",
       "hint": "To make things tidy.",
       "focusArea": "vocabulary"
@@ -2211,7 +2210,7 @@
       "mode": "fillBlanks",
       "title": "Maguindanao: Directional Phrase",
       "description": "Choose the word that fits the direction shown.",
-      "question": "Nasa ___ aken libru.",
+      "question": "Sa ______ iyan aken libru.",
       "answer": "lamesa",
       "translation": "My book is on the table.",
       "hint": "A piece of furniture.",
@@ -2248,14 +2247,15 @@
       "level": "Level 11",
       "difficulty": "medium",
       "mode": "fillBlanks",
-      "title": "Cebuano: Afternoon Snack",
-      "description": "Choose the correct word for the food eaten in the afternoon.",
+      "title": "Cebuano: Dinner Food",
+      "description": "Choose the correct word for the food eaten at dinner.",
       "question": "Nipalit siya og ___ para sa panihapon.",
       "answer": "pan",
       "translation": "He bought bread for dinner.",
       "hint": "A baked food.",
       "focusArea": "vocabulary"
     },
+
     {
       "questionId": 112,
       "level": "Level 12",
@@ -2290,7 +2290,7 @@
       "title": "Kapampangan: Weekend Activity",
       "description": "Complete the activity done during weekends.",
       "question": "Mag___ la reng anak keng sabado.",
-      "answer": "laru",
+      "answer": "laku",
       "translation": "The kids will play on Saturday.",
       "hint": "Done for fun.",
       "focusArea": "vocabulary"
@@ -2341,7 +2341,7 @@
       "mode": "fillBlanks",
       "title": "Maguindanao: Directional Instruction",
       "description": "Select the word describing position.",
-      "question": "Ang lapis ada sa ___.",
+      "question": "Su lapis aden sa ___.",
       "answer": "ibabaw",
       "translation": "The pencil is on top.",
       "hint": "Opposite of \"under.\"",
@@ -2407,9 +2407,10 @@
       "title": "Waray: Weather Description",
       "description": "Choose the word for the weather condition.",
       "question": "Maupay an panahon, ___ yana.",
-      "answer": "maaraw",
+      "answer": "masirak",
       "translation": "The weather is good, it’s sunny today.",
-      "hint": "Opposite of rainy."
+      "hint": "Opposite of rainy.",
+      "focusArea": "vocabulary"
     },
     {
       "questionId": 124,
@@ -2470,8 +2471,8 @@
       "mode": "fillBlanks",
       "title": "Maguindanao: Afternoon Schedule",
       "description": "Fill in the activity done in the afternoon.",
-      "question": "Mag-___ kami mamayang hapon.",
-      "answer": "aral",
+      "question": "Mag-___ kami sa hapon.",
+      "answer": "eskwela",
       "translation": "We will study this afternoon.",
       "hint": "Done to learn.",
       "focusArea": "vocabulary"
@@ -2559,12 +2560,12 @@
       "level": "Level 35",
       "difficulty": "hard",
       "mode": "fillBlanks",
-      "title": "Kapampangan: Important Document",
-      "description": "Identify the document being requested.",
-      "question": "Paki-abot neng ___ keng HR.",
-      "answer": "resumé",
-      "translation": "Please submit the resumé to HR.",
-      "hint": "Needed for a job.",
+      "title": "Kapampangan: Travel Requirement",
+      "description": "Identify the important paper needed for travel.",
+      "question": "E ka makalako nung ala kang ___.",
+      "answer": "pasaporte",
+      "translation": "You cannot travel if you don’t have a passport.",
+      "hint": "Needed for international travel.",
       "focusArea": "vocabulary"
     },
     {
@@ -2601,7 +2602,7 @@
       "title": "Pangasinan: Medical Need",
       "description": "Choose the word that refers to a healing substance.",
       "question": "Ininom na so ___ para ed sakit na.",
-      "answer": "gamut",
+      "answer": "gamot",
       "translation": "He took medicine for his illness.",
       "hint": "Used for treatment.",
       "focusArea": "vocabulary"
@@ -2665,7 +2666,7 @@
       "mode": "fillBlanks",
       "title": "Bicol: Community Announcement",
       "description": "Fill in what’s being made public.",
-      "question": "Mayong ___ sa plaza buwas.",
+      "question": "Magkakaigwa nin ___ sa plaza buwas.",
       "answer": "miting",
       "translation": "There will be a meeting at the plaza tomorrow.",
       "hint": "A gathering.",
@@ -2704,7 +2705,7 @@
       "mode": "fillBlanks",
       "title": "Maguindanao: Emergency Room Visit",
       "description": "Identify the place where the person was brought.",
-      "question": "Dinala siya sa ___.",
+      "question": "Inged siya i ___.",
       "answer": "ospital",
       "translation": "He was brought to the hospital.",
       "hint": "Place for treatment.",
@@ -2718,7 +2719,7 @@
       "title": "Hiligaynon: Festival Preparation",
       "description": "Choose the item hung for decoration.",
       "question": "Ginbutang ang mga ___ sa plaza.",
-      "answer": "dekorasyon",
+      "answer": "banderitas",
       "translation": "They put up decorations in the plaza.",
       "hint": "Makes a place festive.",
       "focusArea": "vocabulary"
@@ -2741,12 +2742,12 @@
       "level": "Level 49",
       "difficulty": "hard",
       "mode": "fillBlanks",
-      "title": "Bisaya: Item Lost While Traveling",
-      "description": "Fill in the object that got lost.",
-      "question": "Nawala ang akong ___.",
-      "answer": "cellphone",
-      "translation": "I lost my cellphone.",
-      "hint": "Used to call or text.",
+      "title": "Bisaya: Important Document",
+      "description": "Identify the thing forgotten at home.",
+      "question": "Nakalimot ko sa akong ___.",
+      "answer": "lisensya",
+      "translation": "I forgot my license.",
+      "hint": "Used for driving.",
       "focusArea": "vocabulary"
     },
     {
