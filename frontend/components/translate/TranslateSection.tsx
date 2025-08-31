@@ -1,5 +1,11 @@
 import React, { useState } from "react";
-import { View, TouchableOpacity, StyleSheet, Animated } from "react-native";
+import {
+  View,
+  TouchableOpacity,
+  StyleSheet,
+  Animated,
+  Dimensions,
+} from "react-native";
 import { Dropdown } from "react-native-element-dropdown";
 import { LinearGradient } from "expo-linear-gradient";
 import { Ionicons } from "@expo/vector-icons";
@@ -11,6 +17,11 @@ import { useTranslateStore } from "@/store/useTranslateStore";
 import SourceTextArea from "@/components/translate/SourceTextArea";
 import TargetTextArea from "@/components/translate/TargetTextArea";
 import { Repeat } from "react-native-feather";
+
+const { width: screenWidth, height: screenHeight } = Dimensions.get("window");
+
+// Check if it's a small screen (like Nexus 4)
+const isSmallScreen = screenWidth <= 384 && screenHeight <= 1280;
 
 const TranslateSection = () => {
   const { sourceLanguage, targetLanguage, updateState, handleSwapLanguages } =
@@ -41,14 +52,16 @@ const TranslateSection = () => {
     handleSwapLanguages();
   };
 
+  const responsiveStyles = getResponsiveStyles();
+
   return (
-    <View style={{ paddingBottom: 16, flex: 1 }}>
+    <View style={{ flex: 1 }}>
       {/* Language Selection Area */}
-      <View style={styles.languageSelectionContainer}>
-        <View style={styles.dropdownContainer}>
+      <View style={responsiveStyles.languageSelectionContainer}>
+        <View style={responsiveStyles.dropdownContainer}>
           <Dropdown
             style={[
-              styles.dropdown,
+              responsiveStyles.dropdown,
               {
                 borderColor: BASE_COLORS.borderColor,
                 backgroundColor: BASE_COLORS.lightBlue,
@@ -56,15 +69,15 @@ const TranslateSection = () => {
               isSourceFocus && { borderColor: BASE_COLORS.blue },
             ]}
             placeholderStyle={[
-              styles.dropdownText,
+              responsiveStyles.dropdownText,
               { color: BASE_COLORS.placeholderText },
             ]}
             selectedTextStyle={[
-              styles.dropdownText,
+              responsiveStyles.dropdownText,
               { color: BASE_COLORS.blue, borderRadius: 8 },
             ]}
             data={DIALECTS}
-            maxHeight={250}
+            maxHeight={isSmallScreen ? 200 : 250}
             labelField="label"
             valueField="value"
             placeholder="From"
@@ -82,36 +95,36 @@ const TranslateSection = () => {
             renderRightIcon={() => (
               <Ionicons
                 name={isSourceFocus ? "chevron-up" : "chevron-down"}
-                size={18}
+                size={isSmallScreen ? 16 : 18}
                 color={BASE_COLORS.blue}
               />
             )}
             activeColor={BASE_COLORS.lightBlue}
-            containerStyle={styles.dropdownList}
+            containerStyle={responsiveStyles.dropdownList}
           />
         </View>
 
         {/* Language swap button */}
         <Animated.View
           style={[
-            styles.swapButtonContainer,
+            responsiveStyles.swapButtonContainer,
             { transform: [{ scale: swapButtonAnimation }] },
           ]}
         >
           <TouchableOpacity
             onPress={handleSwap}
-            style={styles.swapButton}
+            style={responsiveStyles.swapButton}
             activeOpacity={0.7}
           >
             <LinearGradient
               colors={[BASE_COLORS.blue, BASE_COLORS.orange]}
               start={{ x: 0, y: 0 }}
               end={{ x: 1, y: 1 }}
-              style={styles.swapGradient}
+              style={responsiveStyles.swapGradient}
             >
               <Repeat
-                width={20}
-                height={20}
+                width={isSmallScreen ? 18 : 20}
+                height={isSmallScreen ? 18 : 20}
                 strokeWidth={2}
                 color={BASE_COLORS.white}
               />
@@ -119,10 +132,10 @@ const TranslateSection = () => {
           </TouchableOpacity>
         </Animated.View>
 
-        <View style={styles.dropdownContainer}>
+        <View style={responsiveStyles.dropdownContainer}>
           <Dropdown
             style={[
-              styles.dropdown,
+              responsiveStyles.dropdown,
               {
                 borderColor: BASE_COLORS.borderColor,
                 backgroundColor: BASE_COLORS.lightPink,
@@ -130,15 +143,15 @@ const TranslateSection = () => {
               isTargetFocus && { borderColor: BASE_COLORS.orange },
             ]}
             placeholderStyle={[
-              styles.dropdownText,
+              responsiveStyles.dropdownText,
               { color: BASE_COLORS.placeholderText },
             ]}
             selectedTextStyle={[
-              styles.dropdownText,
+              responsiveStyles.dropdownText,
               { color: BASE_COLORS.orange, borderRadius: 8 },
             ]}
             data={DIALECTS}
-            maxHeight={250}
+            maxHeight={isSmallScreen ? 200 : 250}
             labelField="label"
             valueField="value"
             placeholder="To"
@@ -156,18 +169,18 @@ const TranslateSection = () => {
             renderRightIcon={() => (
               <Ionicons
                 name={isTargetFocus ? "chevron-up" : "chevron-down"}
-                size={18}
+                size={isSmallScreen ? 16 : 18}
                 color={BASE_COLORS.orange}
               />
             )}
             activeColor={BASE_COLORS.lightPink}
-            containerStyle={styles.dropdownList}
+            containerStyle={responsiveStyles.dropdownList}
           />
         </View>
       </View>
 
       {/* Quick Phrases */}
-      <View style={styles.quickPhrasesContainer}>
+      <View style={responsiveStyles.quickPhrasesContainer}>
         <QuickPhrases
           sourceLanguage={sourceLanguage as LanguageOption}
           onSelectPhrase={(text) => updateState({ sourceText: text })}
@@ -175,7 +188,7 @@ const TranslateSection = () => {
       </View>
 
       {/* Translation Area Container */}
-      <View style={styles.translationContainer}>
+      <View style={responsiveStyles.translationContainer}>
         {/* Source Text Area */}
         <SourceTextArea />
 
@@ -186,69 +199,72 @@ const TranslateSection = () => {
   );
 };
 
-const styles = StyleSheet.create({
-  languageSelectionContainer: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    marginBottom: 16,
-    zIndex: 1000,
-  },
-  dropdownContainer: {
-    width: "42%",
-    zIndex: 2000,
-  },
-  dropdown: {
-    borderRadius: 20,
-    borderWidth: 1,
-    height: 46,
-    paddingHorizontal: 12,
-  },
-  dropdownList: {
-    borderRadius: 20,
-    borderWidth: 1,
-    backgroundColor: BASE_COLORS.white,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.1,
-    shadowRadius: 8,
-    elevation: 6,
-    borderColor: BASE_COLORS.borderColor,
-  },
-  dropdownText: {
-    fontSize: 14,
-    fontFamily: "Poppins-Regular",
-  },
-  swapButtonContainer: {
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  swapButton: {
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.2,
-    shadowRadius: 6,
-    elevation: 4,
-  },
-  swapGradient: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  quickPhrasesContainer: {
-    marginBottom: 16,
-    borderRadius: 20,
-    padding: 10,
-    overflow: "hidden",
-    backgroundColor: "#e7edfd",
-  },
-  translationContainer: {
-    flex: 1,
-    flexDirection: "column",
-    justifyContent: "space-between",
-  },
-});
+const getResponsiveStyles = () => {
+  return StyleSheet.create({
+    languageSelectionContainer: {
+      flexDirection: "row",
+      justifyContent: "space-between",
+      alignItems: "center",
+      marginBottom: isSmallScreen ? 12 : 16,
+      zIndex: 1000,
+      paddingHorizontal: isSmallScreen ? 2 : 0,
+    },
+    dropdownContainer: {
+      width: isSmallScreen ? "41%" : "42%",
+      zIndex: 2000,
+    },
+    dropdown: {
+      borderRadius: isSmallScreen ? 18 : 20,
+      borderWidth: 1,
+      height: isSmallScreen ? 42 : 46,
+      paddingHorizontal: isSmallScreen ? 10 : 12,
+    },
+    dropdownList: {
+      borderRadius: isSmallScreen ? 18 : 20,
+      borderWidth: 1,
+      backgroundColor: BASE_COLORS.white,
+      shadowColor: "#000",
+      shadowOffset: { width: 0, height: 6 },
+      shadowOpacity: 0.1,
+      shadowRadius: 8,
+      elevation: 6,
+      borderColor: BASE_COLORS.borderColor,
+    },
+    dropdownText: {
+      fontSize: isSmallScreen ? 13 : 14,
+      fontFamily: "Poppins-Regular",
+    },
+    swapButtonContainer: {
+      alignItems: "center",
+      justifyContent: "center",
+    },
+    swapButton: {
+      shadowColor: "#000",
+      shadowOffset: { width: 0, height: 4 },
+      shadowOpacity: 0.2,
+      shadowRadius: 6,
+      elevation: 4,
+    },
+    swapGradient: {
+      width: isSmallScreen ? 36 : 40,
+      height: isSmallScreen ? 36 : 40,
+      borderRadius: isSmallScreen ? 18 : 20,
+      justifyContent: "center",
+      alignItems: "center",
+    },
+    quickPhrasesContainer: {
+      marginBottom: isSmallScreen ? 12 : 16,
+      borderRadius: isSmallScreen ? 18 : 20,
+      padding: isSmallScreen ? 8 : 10,
+      overflow: "hidden",
+      backgroundColor: "#e7edfd",
+    },
+    translationContainer: {
+      flex: 1,
+      flexDirection: "column",
+      justifyContent: "space-between",
+    },
+  });
+};
 
 export default TranslateSection;

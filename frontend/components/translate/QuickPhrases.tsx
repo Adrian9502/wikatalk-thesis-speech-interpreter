@@ -5,10 +5,16 @@ import {
   TouchableOpacity,
   ScrollView,
   StyleSheet,
+  Dimensions,
 } from "react-native";
 import QUICK_PHRASES from "@/constant/quickPhrases";
 import { LanguageOption } from "@/types/types";
 import { BASE_COLORS } from "@/constant/colors";
+
+const { width: screenWidth, height: screenHeight } = Dimensions.get("window");
+
+// Check if it's a small screen (like Nexus 4)
+const isSmallScreen = screenWidth <= 384 && screenHeight <= 1280;
 
 const QuickPhrases = ({
   onSelectPhrase,
@@ -44,33 +50,35 @@ const QuickPhrases = ({
     return null;
   }
 
+  const responsiveStyles = getResponsiveStyles();
+
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Quick Phrases:</Text>
+    <View style={responsiveStyles.container}>
+      <Text style={responsiveStyles.title}>Quick Phrases:</Text>
 
       {/* Category Tabs */}
       <ScrollView
         horizontal
         showsHorizontalScrollIndicator={false}
-        style={styles.categoryScrollView}
+        style={responsiveStyles.categoryScrollView}
       >
         {categories.map((category) => (
           <TouchableOpacity
             key={category}
             onPress={() => setActiveCategory(category)}
             style={[
-              styles.categoryTab,
+              responsiveStyles.categoryTab,
               activeCategory === category
-                ? styles.activeTab
-                : styles.inactiveTab,
+                ? responsiveStyles.activeTab
+                : responsiveStyles.inactiveTab,
             ]}
           >
             <Text
               style={[
-                styles.categoryText,
+                responsiveStyles.categoryText,
                 activeCategory === category
-                  ? styles.activeTabText
-                  : styles.inactiveTabText,
+                  ? responsiveStyles.activeTabText
+                  : responsiveStyles.inactiveTabText,
               ]}
             >
               {category}
@@ -83,15 +91,15 @@ const QuickPhrases = ({
       <ScrollView
         horizontal
         showsHorizontalScrollIndicator={false}
-        style={styles.phrasesScrollView}
+        style={responsiveStyles.phrasesScrollView}
       >
         {currentPhrases.map((phrase, index) => (
           <TouchableOpacity
             key={index}
             onPress={() => onSelectPhrase(phrase.text)}
-            style={styles.phraseButton}
+            style={responsiveStyles.phraseButton}
           >
-            <Text style={styles.phraseText}>{phrase.label}</Text>
+            <Text style={responsiveStyles.phraseText}>{phrase.label}</Text>
           </TouchableOpacity>
         ))}
       </ScrollView>
@@ -99,62 +107,64 @@ const QuickPhrases = ({
   );
 };
 
-const styles = StyleSheet.create({
-  container: {
-    width: "100%",
-  },
-  title: {
-    color: BASE_COLORS.blue,
-    fontFamily: "Poppins-Medium",
-    marginBottom: 8,
-    fontSize: 14,
-  },
-  categoryScrollView: {
-    marginBottom: 8,
-  },
-  categoryTab: {
-    paddingHorizontal: 12,
-    paddingVertical: 3,
-    alignItems: "center",
-    justifyContent: "center",
-    marginHorizontal: 8,
-    borderRadius: 20,
-  },
-  activeTab: {
-    backgroundColor: BASE_COLORS.blue,
-  },
-  inactiveTab: {
-    borderWidth: 2,
-    borderColor: BASE_COLORS.lightBlue,
-  },
-  categoryText: {
-    fontFamily: "Poppins-Regular",
-    fontSize: 13,
-  },
-  activeTabText: {
-    color: BASE_COLORS.white,
-  },
-  inactiveTabText: {
-    color: BASE_COLORS.blue,
-  },
-  phrasesScrollView: {
-    paddingBottom: 4,
-  },
-  phraseButton: {
-    borderWidth: 1,
-    borderColor: BASE_COLORS.blue,
-    paddingHorizontal: 10,
-    paddingVertical: 5,
-    borderRadius: 20,
-    marginRight: 6,
-    flexDirection: "row",
-    alignItems: "center",
-  },
-  phraseText: {
-    color: BASE_COLORS.blue,
-    fontSize: 12,
-    fontFamily: "Poppins-Regular",
-  },
-});
+const getResponsiveStyles = () => {
+  return StyleSheet.create({
+    container: {
+      width: "100%",
+    },
+    title: {
+      color: BASE_COLORS.blue,
+      fontFamily: "Poppins-Medium",
+      marginBottom: isSmallScreen ? 6 : 8,
+      fontSize: isSmallScreen ? 13 : 14,
+    },
+    categoryScrollView: {
+      marginBottom: isSmallScreen ? 6 : 8,
+    },
+    categoryTab: {
+      paddingHorizontal: isSmallScreen ? 10 : 12,
+      paddingVertical: isSmallScreen ? 2 : 3,
+      alignItems: "center",
+      justifyContent: "center",
+      marginHorizontal: isSmallScreen ? 6 : 8,
+      borderRadius: isSmallScreen ? 16 : 20,
+    },
+    activeTab: {
+      backgroundColor: BASE_COLORS.blue,
+    },
+    inactiveTab: {
+      borderWidth: 2,
+      borderColor: BASE_COLORS.lightBlue,
+    },
+    categoryText: {
+      fontFamily: "Poppins-Regular",
+      fontSize: isSmallScreen ? 12 : 13,
+    },
+    activeTabText: {
+      color: BASE_COLORS.white,
+    },
+    inactiveTabText: {
+      color: BASE_COLORS.blue,
+    },
+    phrasesScrollView: {
+      paddingBottom: 4,
+    },
+    phraseButton: {
+      borderWidth: 1,
+      borderColor: BASE_COLORS.blue,
+      paddingHorizontal: isSmallScreen ? 8 : 10,
+      paddingVertical: isSmallScreen ? 4 : 5,
+      borderRadius: isSmallScreen ? 16 : 20,
+      marginRight: isSmallScreen ? 4 : 6,
+      flexDirection: "row",
+      alignItems: "center",
+    },
+    phraseText: {
+      color: BASE_COLORS.blue,
+      fontSize: isSmallScreen ? 11 : 12,
+      fontFamily: "Poppins-Regular",
+    },
+  });
+};
 
 export default QuickPhrases;

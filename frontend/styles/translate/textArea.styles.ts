@@ -1,11 +1,16 @@
-import { StyleSheet } from "react-native";
+import { StyleSheet, Dimensions } from "react-native";
 import { BASE_COLORS } from "@/constant/colors";
+
+const { width: screenWidth, height: screenHeight } = Dimensions.get("window");
+
+// Check if it's a small screen (like Nexus 4)
+const isSmallScreen = screenWidth <= 384 && screenHeight <= 1280;
 
 export const textAreaStyles = StyleSheet.create({
   // Container styles
   textSectionContainer: {
-    height: "49%",
-    borderRadius: 20,
+    height: isSmallScreen ? "47%" : "49%",
+    borderRadius: isSmallScreen ? 18 : 20,
     overflow: "hidden",
     backgroundColor: BASE_COLORS.white,
     shadowColor: "#000",
@@ -14,8 +19,8 @@ export const textAreaStyles = StyleSheet.create({
     shadowRadius: 15,
     elevation: 8,
     position: "relative",
-    padding: 20,
-    marginBottom: 10,
+    padding: isSmallScreen ? 16 : 20,
+    marginBottom: isSmallScreen ? 8 : 10,
   },
 
   gradientBackground: {
@@ -32,10 +37,11 @@ export const textAreaStyles = StyleSheet.create({
     justifyContent: "space-between",
     alignItems: "center",
     zIndex: 100,
+    marginBottom: isSmallScreen ? 4 : 0,
   },
 
   sectionTitle: {
-    fontSize: 15,
+    fontSize: isSmallScreen ? 14 : 15,
     fontFamily: "Poppins-Medium",
   },
 
@@ -45,33 +51,33 @@ export const textAreaStyles = StyleSheet.create({
   },
 
   controlButton: {
-    width: 40,
-    height: 40,
+    width: isSmallScreen ? 36 : 40,
+    height: isSmallScreen ? 36 : 40,
     justifyContent: "center",
     alignItems: "center",
-    borderRadius: 20,
-    marginLeft: 8,
+    borderRadius: isSmallScreen ? 18 : 20,
+    marginLeft: isSmallScreen ? 6 : 8,
   },
 
   // Text area styles
   textAreaWrapper: {
     flex: 1,
-    marginVertical: 8,
+    marginVertical: isSmallScreen ? 6 : 8,
   },
 
   textArea: {
     backgroundColor: BASE_COLORS.white,
-    borderRadius: 20,
+    borderRadius: isSmallScreen ? 16 : 20,
     borderWidth: 1,
-    padding: 16,
+    padding: isSmallScreen ? 12 : 16,
     flex: 1,
   },
 
   textField: {
     fontFamily: "Poppins-Regular",
     textAlignVertical: "top",
-    fontSize: 14,
-    lineHeight: 20,
+    fontSize: isSmallScreen ? 12 : 13,
+    lineHeight: isSmallScreen ? 18 : 20,
     color: BASE_COLORS.darkText,
   },
 
@@ -81,7 +87,7 @@ export const textAreaStyles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     backgroundColor: BASE_COLORS.white,
-    borderRadius: 20,
+    borderRadius: isSmallScreen ? 16 : 20,
     borderWidth: 1,
     borderColor: BASE_COLORS.borderColor,
   },
@@ -91,14 +97,14 @@ export const textAreaStyles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     backgroundColor: BASE_COLORS.white,
-    borderRadius: 20,
+    borderRadius: isSmallScreen ? 16 : 20,
     borderWidth: 1,
     borderColor: BASE_COLORS.borderColor,
-    padding: 16,
+    padding: isSmallScreen ? 12 : 16,
   },
 
   errorText: {
-    fontSize: 14,
+    fontSize: isSmallScreen ? 13 : 14,
     textAlign: "center",
     fontFamily: "Poppins-Regular",
   },

@@ -5,6 +5,8 @@ import {
   TouchableWithoutFeedback,
   Keyboard,
   View,
+  ScrollView,
+  Dimensions,
 } from "react-native";
 import {
   SafeAreaView,
@@ -20,6 +22,11 @@ import { getGlobalStyles } from "@/styles/globalStyles";
 import { globalSpeechManager } from "@/utils/globalSpeechManager";
 import { useFocusEffect } from "@react-navigation/native";
 
+const { width: screenWidth, height: screenHeight } = Dimensions.get("window");
+
+// Check if it's a small screen (like Nexus 4)
+const isSmallScreen = screenWidth <= 384 && screenHeight <= 1280;
+
 const Translate = () => {
   // stop ongoing speech
   useFocusEffect(
@@ -33,6 +40,7 @@ const Translate = () => {
       };
     }, [])
   );
+
   // Theme store
   const { activeTheme } = useThemeStore();
 
@@ -50,7 +58,7 @@ const Translate = () => {
 
   // Clear source text when the component mounts
   useEffect(() => {
-    clearSourceText(); // You were missing the parentheses here
+    clearSourceText();
   }, []);
 
   // Stop speech when changing languages
@@ -70,7 +78,9 @@ const Translate = () => {
       debouncedTranslate.cancel();
     };
   }, [sourceText, sourceLanguage, targetLanguage, updateState]);
+
   const insets = useSafeAreaInsets();
+
   // Handle dismissing the keyboard
   const dismissKeyboard = () => {
     Keyboard.dismiss();
@@ -81,13 +91,26 @@ const Translate = () => {
       <KeyboardAvoidingView
         behavior={Platform.OS === "ios" ? "padding" : "height"}
         style={{ flex: 1 }}
-        keyboardVerticalOffset={Platform.OS === "ios" ? 0 : -100}
+        keyboardVerticalOffset={
+          Platform.OS === "ios" ? 0 : isSmallScreen ? -60 : -100
+        }
       >
         <SafeAreaView
           edges={["left", "right"]}
-          style={[dynamicStyles.container, { paddingTop: insets.top }]}
+          style={[
+            dynamicStyles.container,
+            {
+              paddingTop: insets.top,
+              paddingHorizontal: isSmallScreen ? 12 : 16,
+            },
+          ]}
         >
-          <View style={{ flex: 1 }}>
+          <View
+            style={{
+              flex: 1,
+              paddingBottom: isSmallScreen ? 8 : 16,
+            }}
+          >
             <TranslateSection />
           </View>
         </SafeAreaView>
