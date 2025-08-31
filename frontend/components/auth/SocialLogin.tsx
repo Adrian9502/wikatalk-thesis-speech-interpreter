@@ -142,15 +142,17 @@ const SocialLogin = () => {
         />
       </View>
       {/*Terms text below Google login button */}
-      <Text style={styles.termsText}>
-        By logging in with Google, you agree to our{" "}
+      <View style={styles.termsTextContainer}>
+        <Text style={styles.termsText}>
+          By logging in with Google, you agree to our{"  "}
+        </Text>
         <TouchableOpacity
           onPress={() => setShowTermsModal(true)}
           style={styles.termsLinkContainer}
         >
           <Text style={styles.termsLink}>Terms of Use</Text>
         </TouchableOpacity>
-      </Text>
+      </View>
 
       {/* Terms Modal */}
       <TermsOfUseModal
@@ -186,17 +188,20 @@ const styles = StyleSheet.create({
     height: Platform.OS === "ios" ? 48 : 48,
   },
   // Terms text styles (similar to SignUpForm)
+  termsTextContainer: {
+    justifyContent: "center",
+    alignItems: "center",
+    marginTop: 8,
+    marginBottom: 8,
+  },
   termsText: {
     fontSize: 11,
     fontFamily: "Poppins-Regular",
     color: BASE_COLORS.placeholderText,
     textAlign: "center",
-    marginTop: 8,
-    marginBottom: 12,
     lineHeight: 16,
   },
   termsLinkContainer: {
-    marginTop: 2,
     justifyContent: "center",
     alignItems: "center",
   },

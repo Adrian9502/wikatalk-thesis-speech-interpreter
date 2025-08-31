@@ -230,10 +230,7 @@ const RootLayout = () => {
                 <PaperProvider>
                   <ValidationProvider>
                     <NotifierWrapper>
-                      <Stack
-                        screenOptions={{ headerShown: false }}
-                        // FIXED: Don't set initial route, let navigation logic handle it
-                      >
+                      <Stack screenOptions={{ headerShown: false }}>
                         <Stack.Screen
                           name="index"
                           options={{ headerShown: false }}

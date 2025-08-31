@@ -1,9 +1,7 @@
 "use client";
-import React, { useEffect, useState, useRef } from "react";
+import React, { useEffect, useState } from "react";
 import {
   View,
-  Animated,
-  LayoutAnimation,
   Platform,
   UIManager,
   Keyboard,
@@ -72,8 +70,6 @@ const Index = () => {
     isAppReady,
   } = useAuth();
   const [activeTab, setActiveTab] = useState<"signin" | "signup">("signin");
-  const [buttonScale] = useState(new Animated.Value(1));
-  const tabIndicatorPosition = useRef(new Animated.Value(0)).current;
   const { signIn, signUp } = useAuthForms(signInSchema, signUpSchema);
 
   // reset to default theme if user is not logged in
@@ -105,44 +101,24 @@ const Index = () => {
   }, [isAppReady, isLoggedIn]);
 
   const switchTab = (tab: TabType) => {
-    // Only animate if the tab is actually changing
     if (activeTab !== tab) {
-      // Dismiss keyboard when switching tabs
+      // Dismiss keyboard first
       Keyboard.dismiss();
 
+      // Clear form messages
       clearFormMessage();
 
-      // Reset the form that's being switched away from
-      if (activeTab === "signin" && tab === "signup") {
-        signIn.reset();
-      } else if (activeTab === "signup" && tab === "signin") {
-        signUp.reset();
-      }
-
-      // Use setTimeout to ensure layout completes before animation
+      // Reset forms - but delay slightly to avoid conflicts during animation
       setTimeout(() => {
-        LayoutAnimation.configureNext({
-          duration: 300,
-          create: {
-            type: LayoutAnimation.Types.easeInEaseOut,
-            property: LayoutAnimation.Properties.opacity,
-          },
-          update: {
-            type: LayoutAnimation.Types.easeInEaseOut,
-          },
-          delete: {
-            type: LayoutAnimation.Types.easeInEaseOut,
-            property: LayoutAnimation.Properties.opacity,
-          },
-        });
+        if (activeTab === "signin" && tab === "signup") {
+          signIn.reset();
+        } else if (activeTab === "signup" && tab === "signin") {
+          signUp.reset();
+        }
+      }, 100);
 
-        setActiveTab(tab);
-        Animated.timing(tabIndicatorPosition, {
-          toValue: tab === "signin" ? 0 : 1,
-          duration: 300,
-          useNativeDriver: false,
-        }).start();
-      }, 50);
+      // Update tab immediately for UI responsiveness
+      setActiveTab(tab);
     }
   };
 
@@ -186,7 +162,7 @@ const Index = () => {
             {/* Logo */}
             <Logo />
 
-            {/* Form container */}
+            {/* Form container with animation */}
             <View style={styles.keyboardAvoidingView}>
               <View
                 style={[
@@ -195,13 +171,8 @@ const Index = () => {
                 ]}
               >
                 {/* Tab navigation */}
-                <AuthTabs
-                  activeTab={activeTab}
-                  switchTab={switchTab}
-                  tabIndicatorPosition={tabIndicatorPosition}
-                />
+                <AuthTabs activeTab={activeTab} switchTab={switchTab} />
 
-                {/* Form container */}
                 <View style={styles.formInnerContainer}>
                   {formMessage && (
                     <FormMessage
@@ -234,7 +205,6 @@ const Index = () => {
                   <SubmitButton
                     activeTab={activeTab}
                     isLoading={isLoading}
-                    buttonScale={buttonScale}
                     onPress={handleSubmit}
                   />
 

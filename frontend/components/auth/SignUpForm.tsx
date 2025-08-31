@@ -7,6 +7,7 @@ import { BASE_COLORS } from "@/constant/colors";
 import TermsOfUseModal from "@/components/legal/TermsOfUseModal";
 
 import FormInput from "@/components/FormInput";
+import { View } from "react-native";
 interface SignUpFormProps {
   control: any;
   errors: any;
@@ -77,15 +78,15 @@ const SignUpForm: React.FC<SignUpFormProps> = ({ control, errors }) => {
       />
 
       {/* Terms of Use Agreement */}
-      <Text style={styles.termsText}>
-        By registering, you accept our{" "}
+      <View style={styles.termsTextContainer}>
+        <Text style={styles.termsText}>By registering, you accept our </Text>
         <TouchableOpacity
           onPress={() => setShowTermsModal(true)}
           style={styles.termsLinkContainer}
         >
           <Text style={styles.termsLink}>Terms of Use</Text>
         </TouchableOpacity>
-      </Text>
+      </View>
 
       {/* Terms Modal */}
       <TermsOfUseModal
@@ -108,18 +109,26 @@ const styles = StyleSheet.create({
   helpTextBold: {
     fontFamily: "Poppins-Medium",
   },
+  // term of use styles
+  termsTextContainer: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    justifyContent: "center",
+    alignItems: "center",
+    marginTop: 8,
+    marginBottom: 8,
+  },
   termsText: {
     fontSize: 11,
     fontFamily: "Poppins-Regular",
     color: BASE_COLORS.placeholderText,
     textAlign: "center",
-    marginBottom: 8,
     lineHeight: 16,
   },
   termsLinkContainer: {
-    marginTop: 2,
     justifyContent: "center",
     alignItems: "center",
+    flexShrink: 1,
   },
   termsLink: {
     fontSize: 11,

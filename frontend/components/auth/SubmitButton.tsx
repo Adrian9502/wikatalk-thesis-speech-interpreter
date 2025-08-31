@@ -13,19 +13,16 @@ import { BASE_COLORS, TITLE_COLORS } from "@/constant/colors";
 interface SubmitButtonProps {
   activeTab: "signin" | "signup";
   isLoading: boolean;
-  buttonScale: Animated.Value;
   onPress: () => void;
 }
 
 const SubmitButton: React.FC<SubmitButtonProps> = ({
   activeTab,
   isLoading,
-  buttonScale,
   onPress,
 }) => (
   <Animated.View
     style={{
-      transform: [{ scale: buttonScale }],
       width: "100%",
       borderRadius: 20,
       overflow: "hidden",
@@ -61,7 +58,7 @@ const SubmitButton: React.FC<SubmitButtonProps> = ({
 
 const styles = StyleSheet.create({
   submitButton: {
-    paddingVertical: 8,
+    paddingVertical: 10,
     alignItems: "center",
     justifyContent: "center",
     borderRadius: 20,
@@ -73,7 +70,7 @@ const styles = StyleSheet.create({
   },
   submitButtonText: {
     color: BASE_COLORS.white,
-    fontSize: 12,
+    fontSize: 13,
     fontFamily: "Poppins-Medium",
   },
 });
