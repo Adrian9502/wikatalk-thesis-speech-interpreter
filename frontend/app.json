@@ -4,7 +4,7 @@
     "slug": "WikaTalk",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/images/android-icon.png",
+    "icon": "./assets/icon.png",
     "scheme": "myapp",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": false,
