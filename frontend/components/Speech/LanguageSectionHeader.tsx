@@ -5,6 +5,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { DIALECTS } from "@/constant/languages";
 import { BASE_COLORS } from "@/constant/colors";
 import useLanguageStore from "@/store/useLanguageStore";
+import ConfidenceModal from "@/components/ConfidenceModal";
 
 interface LanguageSectionHeaderProps {
   position: "top" | "bottom";
@@ -25,10 +26,10 @@ const LanguageSectionHeader: React.FC<LanguageSectionHeaderProps> = ({
 }) => {
   const [isFocus, setIsFocus] = useState(false);
   const [copySuccess, setCopySuccess] = useState(false);
+  const [confidenceModalVisible, setConfidenceModalVisible] = useState(false);
   const {
     clearText,
     copyToClipboard,
-    showLanguageDetails,
     speakText,
     stopSpeech,
     isTopSpeaking,
@@ -41,7 +42,6 @@ const LanguageSectionHeader: React.FC<LanguageSectionHeaderProps> = ({
   // Determine if this section is currently speaking
   const isSpeaking = position === "top" ? isTopSpeaking : isBottomSpeaking;
 
-  // NEW: Stop speech when app goes to background or becomes inactive
   useEffect(() => {
     const handleAppStateChange = (nextAppState: string) => {
       if (nextAppState === "background" || nextAppState === "inactive") {
@@ -114,6 +114,14 @@ const LanguageSectionHeader: React.FC<LanguageSectionHeaderProps> = ({
     clearText(position);
   };
 
+  // handler for show confidence modal
+  const handleShowConfidence = () => {
+    console.log(
+      `[LanguageSectionHeader] Opening confidence modal for ${language}`
+    );
+    setConfidenceModalVisible(true);
+  };
+
   return (
     <View style={styles.header}>
       <View style={styles.dropdownContainer}>
@@ -178,7 +186,7 @@ const LanguageSectionHeader: React.FC<LanguageSectionHeaderProps> = ({
 
         <TouchableOpacity
           style={styles.controlButton}
-          onPress={() => showLanguageDetails(language)}
+          onPress={handleShowConfidence}
         >
           <Ionicons
             name="information-circle-outline"
@@ -208,6 +216,12 @@ const LanguageSectionHeader: React.FC<LanguageSectionHeaderProps> = ({
           <Ionicons name="trash-outline" size={20} color={COLORS.primary} />
         </TouchableOpacity>
       </View>
+
+      <ConfidenceModal
+        visible={confidenceModalVisible}
+        language={language}
+        onClose={() => setConfidenceModalVisible(false)}
+      />
     </View>
   );
 };
