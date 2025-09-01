@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { View, TextInput, TouchableOpacity, Text } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
@@ -6,8 +6,13 @@ import { BASE_COLORS } from "@/constant/colors";
 import { useTranslateStore } from "@/store/useTranslateStore";
 import { useAuthStore } from "@/store/useAuthStore";
 import { textAreaStyles } from "@/styles/translate/textArea.styles";
+import ConfidenceModal from "@/components/ConfidenceModal";
 
 const SourceTextArea = () => {
+  const [confidenceModalVisible, setConfidenceModalVisible] = useState(false);
+  const handleShowConfidence = () => {
+    setConfidenceModalVisible(true);
+  };
   const {
     sourceLanguage,
     sourceText,
@@ -62,6 +67,17 @@ const SourceTextArea = () => {
 
           <TouchableOpacity
             style={textAreaStyles.controlButton}
+            onPress={handleShowConfidence}
+          >
+            <Ionicons
+              name="information-circle-outline"
+              size={20}
+              color={BASE_COLORS.blue}
+            />
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={textAreaStyles.controlButton}
             onPress={() => copyToClipboard(sourceText, "copiedSource")}
             disabled={!sourceText}
           >
@@ -99,6 +115,12 @@ const SourceTextArea = () => {
           scrollEnabled={true}
         />
       </View>
+
+      <ConfidenceModal
+        visible={confidenceModalVisible}
+        language={sourceLanguage}
+        onClose={() => setConfidenceModalVisible(false)}
+      />
     </View>
   );
 };

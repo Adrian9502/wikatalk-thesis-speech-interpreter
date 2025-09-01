@@ -207,7 +207,6 @@ const LanguageSectionHeader: React.FC<LanguageSectionHeaderProps> = ({
           />
         </TouchableOpacity>
 
-        {/* UPDATED: Clear button that stops speech */}
         <TouchableOpacity
           style={styles.controlButton}
           onPress={handleClearText}

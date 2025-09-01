@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import {
   View,
   TextInput,
@@ -12,6 +12,7 @@ import { BASE_COLORS } from "@/constant/colors";
 import { useTranslateStore } from "@/store/useTranslateStore";
 import DotsLoader from "@/components/DotLoader";
 import { textAreaStyles } from "@/styles/translate/textArea.styles";
+import ConfidenceModal from "@/components/ConfidenceModal";
 
 const TargetTextArea = () => {
   const {
@@ -24,7 +25,10 @@ const TargetTextArea = () => {
     handleTranslatedSpeech,
     copyToClipboard,
   } = useTranslateStore();
-
+  const [confidenceModalVisible, setConfidenceModalVisible] = useState(false);
+  const handleShowConfidence = () => {
+    setConfidenceModalVisible(true);
+  };
   // Handler to prevent editing for non-editable fields
   const handleChangeText = (newText: string) => {
     // For non-editable, do nothing - text won't change
@@ -67,6 +71,17 @@ const TargetTextArea = () => {
               color={
                 isTargetSpeaking ? BASE_COLORS.success : BASE_COLORS.orange
               }
+            />
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={textAreaStyles.controlButton}
+            onPress={handleShowConfidence}
+          >
+            <Ionicons
+              name="information-circle-outline"
+              size={20}
+              color={BASE_COLORS.orange}
             />
           </TouchableOpacity>
 
@@ -131,6 +146,11 @@ const TargetTextArea = () => {
           />
         )}
       </View>
+      <ConfidenceModal
+        visible={confidenceModalVisible}
+        language={targetLanguage}
+        onClose={() => setConfidenceModalVisible(false)}
+      />
     </View>
   );
 };

@@ -1,16 +1,16 @@
-import React, { useRef } from "react";
+import React, { useRef, useState } from "react";
 import {
   View,
   Text,
   TouchableOpacity,
   StyleSheet,
   TextInput,
-  ActivityIndicator,
   Platform,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { BASE_COLORS } from "@/constant/colors";
 import DotsLoader from "../DotLoader";
+import ConfidenceModal from "@/components/ConfidenceModal";
 
 interface TextDisplayProps {
   title: string;
@@ -19,6 +19,7 @@ interface TextDisplayProps {
   isLoading: boolean;
   isSpeaking: boolean;
   copied: boolean;
+  language?: string;
   onChangeText?: (text: string) => void;
   onCopy: () => void;
   onSpeak: () => void;
@@ -36,11 +37,17 @@ const TextDisplay: React.FC<TextDisplayProps> = ({
   copied,
   onChangeText,
   onCopy,
+  language,
   onSpeak,
   onClear,
   editable = false,
   color = BASE_COLORS.blue,
 }) => {
+  const [confidenceModalVisible, setConfidenceModalVisible] = useState(false);
+  const handleShowConfidence = () => {
+    setConfidenceModalVisible(true);
+  };
+
   // Store the original value for non-editable fields
   const originalValue = useRef(text);
 
@@ -99,6 +106,19 @@ const TextDisplay: React.FC<TextDisplayProps> = ({
             />
           </TouchableOpacity>
 
+          {language && (
+            <TouchableOpacity
+              style={styles.controlButton}
+              onPress={handleShowConfidence}
+            >
+              <Ionicons
+                name="information-circle-outline"
+                size={20}
+                color={BASE_COLORS.orange}
+              />
+            </TouchableOpacity>
+          )}
+
           {editable && onClear && (
             <TouchableOpacity
               style={styles.controlButton}
@@ -152,6 +172,11 @@ const TextDisplay: React.FC<TextDisplayProps> = ({
           />
         )}
       </View>
+      <ConfidenceModal
+        visible={confidenceModalVisible}
+        language={language as string}
+        onClose={() => setConfidenceModalVisible(false)}
+      />
     </View>
   );
 };

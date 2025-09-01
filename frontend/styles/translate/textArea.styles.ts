@@ -48,11 +48,12 @@ export const textAreaStyles = StyleSheet.create({
   controls: {
     flexDirection: "row",
     alignItems: "center",
+    justifyContent: "center",
   },
 
   controlButton: {
-    width: isSmallScreen ? 36 : 40,
-    height: isSmallScreen ? 36 : 40,
+    width: isSmallScreen ? 26 : 30,
+    height: isSmallScreen ? 26 : 30,
     justifyContent: "center",
     alignItems: "center",
     borderRadius: isSmallScreen ? 18 : 20,
@@ -79,7 +80,7 @@ export const textAreaStyles = StyleSheet.create({
   textField: {
     fontFamily: "Poppins-Regular",
     textAlignVertical: "top",
-    fontSize: isSmallScreen ? 12 : 13,
+    fontSize: isSmallScreen ? 12 : 14,
     lineHeight: isSmallScreen ? 18 : 20,
     color: BASE_COLORS.darkText,
   },

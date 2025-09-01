@@ -289,6 +289,7 @@ const Scan: React.FC = () => {
                   isLoading={isTranslating}
                   isSpeaking={isTargetSpeaking}
                   copied={copiedTarget}
+                  language={targetLanguage}
                   onCopy={() => copyToClipboard(translatedText, "copiedTarget")}
                   onSpeak={() => handleTargetSpeech(translatedText)}
                   editable={false}
