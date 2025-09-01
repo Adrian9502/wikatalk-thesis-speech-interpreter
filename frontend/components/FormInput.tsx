@@ -140,7 +140,7 @@ const styles = StyleSheet.create({
   input: {
     fontFamily: "Poppins-Regular",
     flex: 1,
-    paddingVertical: 10,
+    paddingVertical: 4,
     fontSize: 12,
     color: "#333",
   },

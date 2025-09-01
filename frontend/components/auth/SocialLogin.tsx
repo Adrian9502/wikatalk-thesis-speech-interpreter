@@ -16,6 +16,7 @@ import {
 import { useAuthStore } from "@/store/useAuthStore";
 import CustomGoogleButton from "@/components/auth/GoogleLoginButton";
 import TermsOfUseModal from "@/components/legal/TermsOfUseModal";
+import showNotification from "@/lib/showNotification";
 const SocialLogin = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showTermsModal, setShowTermsModal] = useState(false);
@@ -30,6 +31,12 @@ const SocialLogin = () => {
         console.log("Google Play Services available:", isConfigured);
       } catch (error) {
         console.error("Google Play Services check failed:", error);
+        showNotification({
+          type: "error",
+          title: "Google Login Unavailable",
+          description:
+            "Oops! Your device doesn’t have Google Play Services, so Google login won’t work. Please use another login method.",
+        });
       }
     };
 
@@ -65,47 +72,56 @@ const SocialLogin = () => {
       console.log("Google login completed:", result);
     } catch (error: any) {
       console.error("Full Google sign-in error:", error);
+
       if (error.code) {
         switch (error.code) {
           case statusCodes.SIGN_IN_CANCELLED:
-            // Don't show alert for cancellation
+            // Don't show notification for cancellation
             console.log("Sign-in cancelled by user");
             break;
           case statusCodes.IN_PROGRESS:
-            Alert.alert("Sign in already in progress");
+            showNotification({
+              type: "info",
+              title: "Sign-In In Progress",
+              description: "Sign in is already in progress. Please wait.",
+            });
             break;
           case statusCodes.PLAY_SERVICES_NOT_AVAILABLE:
-            Alert.alert("Google Play services not available or outdated");
+            showNotification({
+              type: "error",
+              title: "Google Play Services Unavailable",
+              description:
+                "Google Play services are not available or outdated.",
+            });
             break;
           default:
             console.error(
               `Google sign in error with code: ${error.code}`,
               error
             );
-            Alert.alert(
-              "Google Sign-In Error",
-              `Error code: ${error.code} - ${error.message}`
-            );
+            showNotification({
+              type: "error",
+              title: "Google Sign-In Error",
+              description: `Error code: ${error.code} - ${error.message}`,
+            });
         }
       } else {
-        // Check if it's a failed-to-get-data error (which often happens on cancel)
         if (
           error.message &&
           error.message.includes("Failed to get user data")
         ) {
-          // This is likely a cancellation or silent failure - don't show alert
           console.log("Sign-in process did not complete");
         } else {
-          // Show alert for other errors
           const errorMessage =
             error instanceof Error
               ? `${error.name}: ${error.message}`
               : "Unknown error type";
           console.error("Google sign in error:", errorMessage);
-          Alert.alert(
-            "Google Sign-In Error",
-            `Something went wrong: ${errorMessage}`
-          );
+          showNotification({
+            type: "error",
+            title: "Google Sign-In Error",
+            description: `Something went wrong: ${errorMessage}`,
+          });
         }
       }
     } finally {
