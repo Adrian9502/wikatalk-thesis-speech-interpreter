@@ -47,13 +47,43 @@ export const LoginMethods: React.FC<LoginMethodsProps> = ({ userData }) => {
 
   // Get the actual login method used in current session
   const getCurrentSessionLoginMethod = () => {
-    const loginMethod = userData.currentLoginMethod || "manual";
+    // First try to get from currentLoginMethod (for fresh sessions)
+    const sessionMethod = userData.currentLoginMethod;
+    const authProvider = userData.authProvider || "manual";
 
-    if (loginMethod === "google") {
+    // If we have a session method and it's valid for the auth provider, use it
+    if (sessionMethod) {
+      // Validate that the session method is actually available for this user
+      const availableMethods = getAvailableMethods(authProvider);
+      const isSessionMethodValid =
+        (sessionMethod === "google" &&
+          availableMethods.includes("Google Account")) ||
+        (sessionMethod === "manual" &&
+          availableMethods.includes("Username/Email & Password"));
+
+      if (isSessionMethodValid) {
+        if (sessionMethod === "google") {
+          return { method: "Google", icon: "logo-google" };
+        } else {
+          return { method: "Username/Email & Password", icon: "mail" };
+        }
+      }
+    }
+
+    // FIXED: Fallback to authProvider if currentLoginMethod is invalid or missing
+    // For users with only one method, show that method
+    if (authProvider === "google") {
       return { method: "Google", icon: "logo-google" };
-    } else {
+    } else if (authProvider === "manual") {
+      return { method: "Username/Email & Password", icon: "mail" };
+    } else if (authProvider === "both") {
+      // For users with both methods, try to determine from other indicators
+      // or default to manual (since they originally signed up manually)
       return { method: "Username/Email & Password", icon: "mail" };
     }
+
+    // Ultimate fallback
+    return { method: "Username/Email & Password", icon: "mail" };
   };
 
   const currentLogin = getCurrentSessionLoginMethod();

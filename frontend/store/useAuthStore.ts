@@ -90,7 +90,6 @@ interface AuthState {
       photo: string | null;
     }
   ) => Promise<AuthResponse>;
-  // FIXED: Add the optional parameter to the interface
   logout: (showSuccessMessage?: boolean) => Promise<void>;
   getUserProfile: () => Promise<UserData | undefined>;
   verifyEmail: (verificationCode: string) => Promise<AuthResponse>;
@@ -265,10 +264,16 @@ export const useAuthStore = create<AuthState>()(
             setupAxiosDefaults(storedToken);
             setToken(storedToken);
 
+            // FIXED: Ensure authProvider is available for UI components
+            const userDataWithDefaults = {
+              ...userData,
+              authProvider: userData.authProvider || "manual", // Ensure authProvider exists
+            };
+
             // Set user data in state
             set({
               userToken: storedToken,
-              userData: userData,
+              userData: userDataWithDefaults,
               isAppReady: true,
             });
 
@@ -283,37 +288,30 @@ export const useAuthStore = create<AuthState>()(
 
               if (!response.success || !response.isVerified) {
                 console.log("User verification failed, logging out");
-                await get().logout(false); // FIXED: Pass false for automatic logout
-                return;
-              }
-            } catch (error: any) {
-              console.error("Error checking verification:", error);
-
-              // FIXED: Auto-logout on 401 errors (user deleted from DB)
-              if (
-                error.response?.status === 401 ||
-                error.message?.includes("User not found") ||
-                error.message?.includes("Request failed with status code 401")
-              ) {
-                console.log(
-                  "Invalid token detected (401), logging out automatically"
-                );
-                await get().logout(false); // FIXED: Pass false for automatic logout
+                await get().logout(false); // Don't show success message for automatic logout
                 return;
               }
 
-              // For other errors (network issues), don't log out automatically
-              console.warn(
-                "Network error during verification, keeping user logged in"
-              );
+              // FIXED: Refresh user profile to get latest authProvider from server
+              setTimeout(async () => {
+                console.log("Refreshing user profile to get latest data...");
+                await get().getUserProfile();
+              }, 1000);
+            } catch (tokenError) {
+              console.log("Token validation failed, logging out");
+              await get().logout(false);
+              return;
             }
-          }
-          // Handle registration verification flow
-          else if (tempUserData) {
+          } else if (tempUserData) {
+            // Handle temporary user data (email verification flow)
             try {
-              const parsedTempData = JSON.parse(tempUserData);
-              set({ userData: parsedTempData, isAppReady: true });
-              console.log("Temp user data loaded for verification flow");
+              const userData = JSON.parse(tempUserData);
+              set({
+                userData: userData,
+                userToken: null,
+                isAppReady: true,
+              });
+              console.log("Temp user data loaded, auth ready");
             } catch (error) {
               console.error("Error parsing temp user data:", error);
               set({ userData: null, userToken: null, isAppReady: true });
@@ -737,16 +735,32 @@ export const useAuthStore = create<AuthState>()(
             // Update local userData with fresh data from server
             const updatedUserData = response.data;
 
+            // FIXED: Ensure authProvider is preserved from server
+            const currentUserData = get().userData;
+            const mergedUserData = {
+              ...currentUserData,
+              ...updatedUserData,
+              // Ensure critical fields are preserved from server response
+              authProvider:
+                updatedUserData.authProvider ||
+                currentUserData?.authProvider ||
+                "manual",
+              coins: updatedUserData.coins || currentUserData?.coins || 0,
+              theme: updatedUserData.theme || currentUserData?.theme,
+              // Keep currentLoginMethod if it exists and is valid
+              currentLoginMethod: currentUserData?.currentLoginMethod,
+            };
+
             // Save to storage
             await AsyncStorage.setItem(
               "userData",
-              JSON.stringify(updatedUserData)
+              JSON.stringify(mergedUserData)
             );
 
             // Update in state
-            set({ userData: updatedUserData });
+            set({ userData: mergedUserData });
 
-            return updatedUserData;
+            return mergedUserData;
           }
         } catch (error: any) {
           console.error("Error fetching user profile:", error);
