@@ -54,7 +54,10 @@ const TargetTextArea = () => {
 
         <View style={textAreaStyles.controls}>
           <TouchableOpacity
-            style={textAreaStyles.controlButton}
+            style={[
+              textAreaStyles.controlButton,
+              isTargetSpeaking && textAreaStyles.controlButtonActive,
+            ]}
             onPress={handleTranslatedSpeech}
             disabled={!translatedText || isTranslating}
           >

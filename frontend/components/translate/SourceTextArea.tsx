@@ -46,7 +46,10 @@ const SourceTextArea = () => {
 
         <View style={textAreaStyles.controls}>
           <TouchableOpacity
-            style={textAreaStyles.controlButton}
+            style={[
+              textAreaStyles.controlButton,
+              isSourceSpeaking && textAreaStyles.controlButtonActive,
+            ]}
             onPress={handleSourceSpeech}
             disabled={!sourceText}
           >

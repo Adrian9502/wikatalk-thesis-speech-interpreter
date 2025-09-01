@@ -273,9 +273,8 @@ const styles = StyleSheet.create({
     marginLeft: 4,
     borderRadius: 18,
   },
-  // NEW: Active state for speaker button
   controlButtonActive: {
-    backgroundColor: "rgba(16, 185, 129, 0.1)", // Light green background when speaking
+    backgroundColor: "rgba(16, 185, 129, 0.1)",
   },
 });
 

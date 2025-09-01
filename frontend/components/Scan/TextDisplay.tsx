@@ -10,6 +10,7 @@ import {
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { BASE_COLORS } from "@/constant/colors";
+import DotsLoader from "../DotLoader";
 
 interface TextDisplayProps {
   title: string;
@@ -72,7 +73,10 @@ const TextDisplay: React.FC<TextDisplayProps> = ({
 
         <View style={styles.controls}>
           <TouchableOpacity
-            style={styles.controlButton}
+            style={[
+              styles.controlButton,
+              isSpeaking && styles.controlButtonActive,
+            ]}
             onPress={onSpeak}
             disabled={!text || isLoading}
           >
@@ -110,7 +114,7 @@ const TextDisplay: React.FC<TextDisplayProps> = ({
       <View style={styles.textAreaWrapper}>
         {isLoading ? (
           <View style={styles.loaderContainer}>
-            <ActivityIndicator size="small" color={color} />
+            <DotsLoader />
           </View>
         ) : (
           <TextInput
@@ -217,6 +221,9 @@ const styles = StyleSheet.create({
     backgroundColor: "#F5F5F5",
     borderRadius: 20,
     minHeight: 120,
+  },
+  controlButtonActive: {
+    backgroundColor: "rgba(16, 185, 129, 0.1)",
   },
 });
 

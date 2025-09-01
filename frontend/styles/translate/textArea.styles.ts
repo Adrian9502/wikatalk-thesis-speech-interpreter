@@ -58,6 +58,9 @@ export const textAreaStyles = StyleSheet.create({
     borderRadius: isSmallScreen ? 18 : 20,
     marginLeft: isSmallScreen ? 6 : 8,
   },
+  controlButtonActive: {
+    backgroundColor: "rgba(16, 185, 129, 0.1)",
+  },
 
   // Text area styles
   textAreaWrapper: {
