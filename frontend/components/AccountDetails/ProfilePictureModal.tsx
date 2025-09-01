@@ -41,7 +41,11 @@ const ProfilePictureModal: React.FC<ProfilePictureModalProps> = ({
                 resizeMode="contain"
                 style={styles.profileImage}
               />
-              <CloseButton onPress={onClose} />
+              <CloseButton
+                onPress={onClose}
+                size={15}
+                color={BASE_COLORS.darkText}
+              />
             </>
           )}
         </View>
@@ -55,17 +59,21 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: "rgba(0, 0, 0, 0.7)",
     justifyContent: "center",
+    borderRadius: 20,
     alignItems: "center",
   },
   imageContainer: {
     width: "70%",
     height: 300,
+    borderRadius: 20,
     position: "relative",
     alignItems: "center",
     justifyContent: "center",
   },
   profileImage: {
     width: "100%",
+    borderRadius: 20,
+
     height: "100%",
   },
 });

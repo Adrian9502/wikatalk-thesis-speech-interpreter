@@ -64,9 +64,9 @@ const ProfilePicture = React.memo(
 
 const styles = StyleSheet.create({
   profilePictureButton: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
+    width: 38,
+    height: 38,
+    borderRadius: 38,
     overflow: "hidden",
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
@@ -75,14 +75,14 @@ const styles = StyleSheet.create({
     elevation: 3,
   },
   profileImage: {
-    width: 32,
-    height: 32,
+    width: 38,
+    height: 38,
     borderRadius: 16,
   },
   profilePlaceholder: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
+    width: 38,
+    height: 38,
+    borderRadius: 38,
     justifyContent: "center",
     alignItems: "center",
   },
