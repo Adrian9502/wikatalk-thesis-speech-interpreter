@@ -1,8 +1,8 @@
 import { create } from "zustand";
+import { subscribeWithSelector } from "zustand/middleware";
 import * as Speech from "expo-speech";
 import { debounce } from "lodash";
 import { pronunciationService } from "@/services/api";
-
 
 interface PronunciationDataItem {
   english: string;
@@ -23,8 +23,6 @@ interface PronunciationItem {
 interface PronunciationData {
   [language: string]: PronunciationItem[];
 }
-
-type TransformedPronunciationData = PronunciationData;
 
 interface PronunciationState {
   // State
@@ -70,8 +68,8 @@ interface PronunciationState {
 
 const transformPronunciationData = (
   data: PronunciationDataItem[]
-): TransformedPronunciationData => {
-  const transformed: TransformedPronunciationData = {};
+): PronunciationData => {
+  const transformed: PronunciationData = {};
 
   data.forEach((entry: PronunciationDataItem) => {
     Object.entries(entry.translations).forEach(
@@ -86,11 +84,9 @@ const transformPronunciationData = (
           transformed[capitalizedLanguage] = [];
         }
 
-        // CRITICAL FIX: Check for duplicates before adding
         const englishText = entry.english;
         const translationText = translationData.translation;
 
-        // Check if this combination already exists
         const isDuplicate = transformed[capitalizedLanguage].some(
           (item: PronunciationItem) =>
             item.english === englishText && item.translation === translationText
@@ -107,18 +103,10 @@ const transformPronunciationData = (
     );
   });
 
-  console.log(
-    "[PronunciationStore] Data transformation complete (after deduplication):"
-  );
-  Object.entries(transformed).forEach(
-    ([lang, items]: [string, PronunciationItem[]]) => {
-      console.log(`  ${lang}: ${items.length} items`);
-    }
-  );
-
   return transformed;
 };
 
+// FIXED: Create store without subscribeWithSelector first, then add it
 export const usePronunciationStore = create<PronunciationState>((set, get) => ({
   // Initial state
   isLoading: false,
@@ -136,25 +124,13 @@ export const usePronunciationStore = create<PronunciationState>((set, get) => ({
   cacheExpiry: 7 * 24 * 60 * 60 * 1000, // 7 days
   isDataCached: false,
 
-  // Check if cache is valid
   isCacheValid: () => {
     const { lastFetched, cacheExpiry, isDataCached } = get();
     const now = Date.now();
     const isValid = isDataCached && now - lastFetched < cacheExpiry;
-
-    console.log("[PronunciationStore] Cache validity check:", {
-      isDataCached,
-      lastFetched: new Date(lastFetched).toISOString(),
-      timeSinceLastFetch: `${((now - lastFetched) / 1000 / 60).toFixed(
-        1
-      )} minutes`,
-      isValid,
-    });
-
     return isValid;
   },
 
-  // Clear cache
   clearCache: () => {
     console.log("[PronunciationStore] Clearing cache");
     set({
@@ -166,21 +142,13 @@ export const usePronunciationStore = create<PronunciationState>((set, get) => ({
     });
   },
 
-  // Fetch pronunciations with caching
   fetchPronunciations: async (forceRefresh = false) => {
     const { isCacheValid } = get();
 
-    // Check cache validity first unless forced refresh
     if (!forceRefresh && isCacheValid()) {
       console.log("[PronunciationStore] Using cached pronunciation data");
       return;
     }
-
-    console.log(
-      forceRefresh
-        ? "[PronunciationStore] Force refreshing pronunciation data"
-        : "[PronunciationStore] Fetching fresh pronunciation data"
-    );
 
     set({ isLoading: true, error: null });
 
@@ -195,10 +163,6 @@ export const usePronunciationStore = create<PronunciationState>((set, get) => ({
         isDataCached: true,
         error: null,
       });
-
-      console.log(
-        "[PronunciationStore] ✅ Pronunciation data fetched and cached successfully"
-      );
     } catch (error: any) {
       console.error(
         "[PronunciationStore] Error fetching pronunciation data:",
@@ -211,23 +175,18 @@ export const usePronunciationStore = create<PronunciationState>((set, get) => ({
     }
   },
 
-  setSearchTerm: (term) => set({ searchTerm: term }),
+  setSearchTerm: (term: string) => set({ searchTerm: term }),
 
-  // NEW: Clear search method
   clearSearch: () => {
     console.log("[PronunciationStore] Clearing search");
     set({ searchTerm: "" });
   },
 
-  // FIXED: Better language key lookup
   getFilteredPronunciations: (language: string, page = 1, limit = 25) => {
     const { transformedData, searchTerm } = get();
-
-    // Try exact match first, then fallback to case-insensitive search
     let languageData = transformedData[language] || [];
 
     if (languageData.length === 0) {
-      // Try case-insensitive lookup
       const languageKey = Object.keys(transformedData).find(
         (key) => key.toLowerCase() === language.toLowerCase()
       );
@@ -236,47 +195,16 @@ export const usePronunciationStore = create<PronunciationState>((set, get) => ({
       }
     }
 
-    console.log("[PronunciationStore] Language data found:", {
-      language,
-      dataLength: languageData.length,
-    });
-
-    // ENHANCED: Stricter search like Help & FAQ
     const trimmedSearchTerm = searchTerm.trim();
     const filtered =
       trimmedSearchTerm.length === 0
-        ? languageData // Return all data if no search term
-        : languageData.filter((item) => {
+        ? languageData
+        : languageData.filter((item: PronunciationItem) => {
             const lowercaseSearchTerm = trimmedSearchTerm.toLowerCase();
-
-            // STRICTER MATCHING: More precise search
-            const englishMatch = item.english
-              .toLowerCase()
-              .includes(lowercaseSearchTerm);
-            const translationMatch = item.translation
-              .toLowerCase()
-              .includes(lowercaseSearchTerm);
-            const pronunciationMatch = item.pronunciation
-              .toLowerCase()
-              .includes(lowercaseSearchTerm);
-
-            // ENHANCED: Also check for word boundaries for stricter matching
-            const englishWordMatch = item.english
-              .toLowerCase()
-              .split(" ")
-              .some((word) => word.startsWith(lowercaseSearchTerm));
-            const translationWordMatch = item.translation
-              .toLowerCase()
-              .split(" ")
-              .some((word) => word.startsWith(lowercaseSearchTerm));
-
-            // Return true if any match is found
             return (
-              englishMatch ||
-              translationMatch ||
-              pronunciationMatch ||
-              englishWordMatch ||
-              translationWordMatch
+              item.english.toLowerCase().includes(lowercaseSearchTerm) ||
+              item.translation.toLowerCase().includes(lowercaseSearchTerm) ||
+              item.pronunciation.toLowerCase().includes(lowercaseSearchTerm)
             );
           });
 
@@ -287,11 +215,8 @@ export const usePronunciationStore = create<PronunciationState>((set, get) => ({
     return result;
   },
 
-  // ENHANCED: Better total count logic
   getTotalCount: (language: string) => {
     const { transformedData, searchTerm } = get();
-
-    // Try exact match first, then fallback to case-insensitive search
     let languageData = transformedData[language] || [];
 
     if (languageData.length === 0) {
@@ -303,11 +228,10 @@ export const usePronunciationStore = create<PronunciationState>((set, get) => ({
       }
     }
 
-    // FIXED: Better search term handling for count
     const trimmedSearchTerm = searchTerm.trim();
     if (trimmedSearchTerm.length === 0) return languageData.length;
 
-    const filtered = languageData.filter((item) => {
+    const filtered = languageData.filter((item: PronunciationItem) => {
       const lowercaseSearchTerm = trimmedSearchTerm.toLowerCase();
       return (
         item.english.toLowerCase().includes(lowercaseSearchTerm) ||
@@ -319,29 +243,59 @@ export const usePronunciationStore = create<PronunciationState>((set, get) => ({
     return filtered.length;
   },
 
-  playAudio: async (index, text) => {
+  playAudio: async (index: number, text: string) => {
+    // Stop any current audio first
     await get().stopAudio();
 
-    set({ isAudioLoading: true, currentPlayingIndex: index });
+    // FIXED: Force state update immediately with object replacement
+    set(() => ({
+      currentPlayingIndex: index,
+      isAudioLoading: true,
+    }));
+
+    // Force a second update to ensure React sees the change
+    setTimeout(() => {
+      set((state) => ({
+        ...state,
+        currentPlayingIndex: index,
+        isAudioLoading: true,
+      }));
+    }, 0);
 
     Speech.speak(text, {
       language: "fil",
-      rate: 0.45,
+      rate: 0.35,
       onStart: () => {
-        set({ isAudioLoading: false });
+        set(() => ({
+          currentPlayingIndex: index,
+          isAudioLoading: false,
+        }));
       },
       onDone: () => {
-        set({ currentPlayingIndex: null });
+        set(() => ({
+          currentPlayingIndex: null,
+          isAudioLoading: false,
+        }));
       },
-      onError: () => {
-        set({ isAudioLoading: false, currentPlayingIndex: null });
+      onError: (error) => {
+        console.error(
+          `[PronunciationStore] Audio error for index ${index}:`,
+          error
+        );
+        set(() => ({
+          currentPlayingIndex: null,
+          isAudioLoading: false,
+        }));
       },
     });
   },
 
   stopAudio: async () => {
     await Speech.stop();
-    set({ currentPlayingIndex: null });
+    set(() => ({
+      currentPlayingIndex: null,
+      isAudioLoading: false,
+    }));
   },
 
   getWordOfTheDay: async () => {
@@ -366,7 +320,6 @@ export const usePronunciationStore = create<PronunciationState>((set, get) => ({
     } catch (error: any) {
       console.error("Error getting word of the day:", error);
 
-      // Fallback to local generation if API fails
       const { transformedData } = get();
       const languages = Object.keys(transformedData);
       if (languages.length > 0) {
@@ -417,6 +370,5 @@ export const usePronunciationStore = create<PronunciationState>((set, get) => ({
 
 // ENHANCED: Much faster debounce for local search + instant empty search
 export const debouncedSetSearchTerm = debounce((term: string) => {
-  console.log("[debouncedSetSearchTerm] Setting search term:", `"${term}"`);
   usePronunciationStore.getState().setSearchTerm(term);
 }, 100); // REDUCED from 300ms to 100ms for much faster response

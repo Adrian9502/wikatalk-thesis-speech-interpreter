@@ -29,15 +29,11 @@ import useProgressStore from "@/store/games/useProgressStore";
 import useGameStore from "@/store/games/useGameStore";
 import { isAllDataReady, useSplashStore } from "@/store/useSplashStore";
 
-// GLOBAL state to persist across component remounts
 let GAMES_INITIALIZED = false;
 let INITIALIZATION_PROMISE: Promise<void> | null = null;
-// NEW: Add a completion flag to prevent premature cleanup
 let INITIALIZATION_COMPLETED = false;
 
 const Games = () => {
-  // FIXED: All hooks must be called at the top level, in the same order every time
-
   // Theme and utility hooks first
   const { activeTheme } = useThemeStore();
   const dynamicStyles = getGlobalStyles(activeTheme.backgroundColor);
@@ -99,11 +95,10 @@ const Games = () => {
     showRankingsModal();
   }, [showRankingsModal]);
 
-  // FIXED: Enhanced global initialization with better state management
+  // Enhanced global initialization with better state management
   useEffect(() => {
     // If already globally initialized and completed, just sync local state
     if (GAMES_INITIALIZED && INITIALIZATION_COMPLETED) {
-      console.log("[Games] Already globally initialized, syncing local state");
       setHasInitialized(true);
       if (finishLoadTracking) finishLoadTracking();
       return;

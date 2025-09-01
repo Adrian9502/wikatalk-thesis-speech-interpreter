@@ -57,8 +57,6 @@ const Pronounce = () => {
     // Audio
     playAudio,
     stopAudio,
-    currentPlayingIndex,
-    isAudioLoading,
 
     // Actions
     fetchPronunciations,
@@ -73,39 +71,80 @@ const Pronounce = () => {
   const [isDropdownFocus, setIsDropdownFocus] = useState(false);
   const [isInitialized, setIsInitialized] = useState(false);
 
-  // FlashList ref (changed from FlatList)
   const flashListRef = useRef<FlashList<PronunciationItem>>(null);
 
-  // OPTIMIZED: Memoized filtered data with performance tracking
   const displayData = useMemo(() => {
     const startTime = Date.now();
 
-    if (!transformedData?.[selectedLanguage]) {
+    // CRITICAL: Check if transformedData exists and has content
+    if (!transformedData || Object.keys(transformedData).length === 0) {
+      console.log("[Pronounce] No transformed data available");
+      return [];
+    }
+
+    // FIXED: More flexible language matching
+    let languageData = transformedData[selectedLanguage];
+
+    // If exact match fails, try case-insensitive lookup
+    if (!languageData) {
+      const languageKey = Object.keys(transformedData).find(
+        (key) => key.toLowerCase() === selectedLanguage.toLowerCase()
+      );
+      languageData = languageKey ? transformedData[languageKey] : [];
+    }
+
+    // CRITICAL: Ensure we have an array
+    if (!Array.isArray(languageData)) {
+      console.log(`[Pronounce] Invalid data format for ${selectedLanguage}`);
+      return [];
+    }
+
+    if (languageData.length === 0) {
       console.log(`[Pronounce] No data for ${selectedLanguage}`);
       return [];
     }
 
-    let data = transformedData[selectedLanguage];
+    let data = languageData;
 
-    if (searchInput.trim()) {
-      const searchLower = searchInput.toLowerCase();
-      data = data.filter(
-        (item) =>
-          item.english.toLowerCase().includes(searchLower) ||
-          item.translation.toLowerCase().includes(searchLower) ||
-          item.pronunciation.toLowerCase().includes(searchLower)
-      );
+    // FIXED: Only filter if we have a search term
+    const trimmedSearch = searchInput.trim();
+    if (trimmedSearch) {
+      const searchLower = trimmedSearch.toLowerCase();
+      data = languageData.filter((item) => {
+        // DEFENSIVE: Ensure item properties exist and are strings
+        const english = (item.english || "").toLowerCase();
+        const translation = (item.translation || "").toLowerCase();
+        const pronunciation = (item.pronunciation || "").toLowerCase();
+
+        return (
+          english.includes(searchLower) ||
+          translation.includes(searchLower) ||
+          pronunciation.includes(searchLower)
+        );
+      });
     }
-
-    const duration = Date.now() - startTime;
-    console.log(
-      `[Pronounce] Data filtered in ${duration}ms: ${data.length} items`
-    );
 
     return data;
   }, [transformedData, selectedLanguage, searchInput]);
 
-  // INITIALIZATION - Single effect
+  //  Check if the selected language has any data at all
+  const languageHasData = useMemo(() => {
+    if (!transformedData || Object.keys(transformedData).length === 0) {
+      return false;
+    }
+
+    const languageData =
+      transformedData[selectedLanguage] ||
+      transformedData[
+        Object.keys(transformedData).find(
+          (key) => key.toLowerCase() === selectedLanguage.toLowerCase()
+        ) || ""
+      ];
+
+    return Array.isArray(languageData) && languageData.length > 0;
+  }, [transformedData, selectedLanguage]);
+
+  //Single effect
   useEffect(() => {
     let mounted = true;
 
@@ -131,24 +170,44 @@ const Pronounce = () => {
     };
   }, [fetchPronunciations, stopAudio]);
 
-  // SEARCH HANDLER - Immediate update
+  // FIXED: Debounced search to reduce excessive filtering
+  const debouncedSearchRef = useRef<NodeJS.Timeout>();
+
   const handleSearchChange = useCallback(
     (text: string) => {
-      console.log(`[Pronounce] Search: "${text}"`);
       setSearchInput(text);
-      setSearchTerm(text);
+
+      // FIXED: Debounce the search to reduce excessive logging and filtering
+      if (debouncedSearchRef.current) {
+        clearTimeout(debouncedSearchRef.current);
+      }
+
+      debouncedSearchRef.current = setTimeout(() => {
+        setSearchTerm(text);
+      }, 150); // 150ms debounce
     },
     [setSearchTerm]
   );
 
+  // Cleanup debounce on unmount
+  useEffect(() => {
+    return () => {
+      if (debouncedSearchRef.current) {
+        clearTimeout(debouncedSearchRef.current);
+      }
+    };
+  }, []);
+
   // LANGUAGE HANDLER - Simple
   const handleLanguageChange = useCallback(
     (language: string) => {
-      console.log(`[Pronounce] Language changed: ${language}`);
       stopAudio();
       setSelectedLanguage(language);
+      // Clear search when changing language
+      setSearchInput("");
+      setSearchTerm("");
     },
-    [stopAudio]
+    [stopAudio, setSearchTerm]
   );
 
   // REFRESH HANDLER - Enhanced for FlashList
@@ -167,21 +226,14 @@ const Pronounce = () => {
     }
   }, [isRefreshing, clearCache, fetchPronunciations]);
 
-  // RENDER FUNCTIONS - Optimized for FlashList
+  // RENDER FUNCTIONS
   const renderItem = useCallback(
     ({ item, index }: { item: PronunciationItem; index: number }) => (
-      <PronunciationCard
-        item={item}
-        index={index}
-        currentPlayingIndex={currentPlayingIndex}
-        isAudioLoading={isAudioLoading}
-        onPlayPress={playAudio}
-      />
+      <PronunciationCard item={item} index={index} onPlayPress={playAudio} />
     ),
-    [currentPlayingIndex, isAudioLoading, playAudio]
+    [playAudio]
   );
 
-  // OPTIMIZED: Enhanced key extractor for FlashList
   const keyExtractor = useCallback(
     (item: PronunciationItem, index: number) => {
       // Use a more stable key that includes content hash for better performance
@@ -191,13 +243,20 @@ const Pronounce = () => {
     [selectedLanguage]
   );
 
-  // OPTIMIZED: Memoized empty component
-  const ListEmptyComponent = useMemo(() => EmptyState, []);
+  // UPDATED: Enhanced ListEmptyComponent with props
+  const ListEmptyComponent = useMemo(
+    () => () =>
+      (
+        <EmptyState
+          searchTerm={searchInput}
+          selectedLanguage={selectedLanguage}
+          hasData={languageHasData}
+        />
+      ),
+    [searchInput, selectedLanguage, languageHasData]
+  );
 
-  // PERFORMANCE: Calculate estimated item size based on content
   const estimatedItemSize = useMemo(() => {
-    // Base card height + margins + padding
-    // Adjust based on your PronunciationCard actual height
     return 140; // Adjust this value based on your card's actual height
   }, []);
 
@@ -213,6 +272,7 @@ const Pronounce = () => {
       </SafeAreaView>
     );
   }
+
   const insets = useSafeAreaInsets();
 
   return (
@@ -271,6 +331,7 @@ const Pronounce = () => {
             containerStyle={styles.dropdownList}
           />
         </View>
+
         <FlashList
           ref={flashListRef}
           data={displayData}
@@ -280,7 +341,7 @@ const Pronounce = () => {
           estimatedItemSize={estimatedItemSize}
           contentContainerStyle={styles.flashListContent}
           removeClippedSubviews={true}
-          showsVerticalScrollIndicator={true}
+          showsVerticalScrollIndicator={false}
           bounces={true}
           scrollEventThrottle={16}
           keyboardShouldPersistTaps="handled"
