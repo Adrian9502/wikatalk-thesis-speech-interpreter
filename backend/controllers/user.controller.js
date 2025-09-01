@@ -1118,3 +1118,88 @@ exports.deleteAccount = async (req, res) => {
     });
   }
 };
+
+// @desc    Send user feedback via email
+// @route   POST /api/users/feedback
+// @access  Private
+exports.sendFeedback = async (req, res) => {
+  try {
+    const { feedbackType, title, message } = req.body;
+    const user = req.user; // From auth middleware
+
+    // Validate input
+    if (!feedbackType || !title?.trim() || !message?.trim()) {
+      return res.status(400).json({
+        success: false,
+        message: "All fields are required",
+      });
+    }
+
+    if (!["bug", "suggestion"].includes(feedbackType)) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid feedback type",
+      });
+    }
+
+    // Create email content
+    const emailSubject = `WikaTalk ${feedbackType === "bug" ? "Bug Report" : "Feature Suggestion"
+      }: ${title}`;
+
+    const emailBody = `
+Dear WikaTalk Team,
+
+New feedback received from the mobile app:
+
+**Feedback Details:**
+- Type: ${feedbackType === "bug" ? "Bug Report" : "Feature Suggestion"}
+- Title: ${title}
+- User: ${user.fullName} (${user.email})
+- User ID: ${user._id}
+- Submitted: ${new Date().toLocaleString()}
+
+**Description:**
+${message}
+
+**User Information:**
+- Full Name: ${user.fullName}
+- Username: ${user.username}
+- Email: ${user.email}
+- Account Created: ${user.createdAt}
+
+---
+Sent from WikaTalk Mobile App Feedback System
+    `.trim();
+
+    // Send email using your existing email service
+    const { sendFeedbackEmail } = require("../services/email.service");
+
+    await sendFeedbackEmail({
+      to: "bontojohnadrian@gmail.com",
+      subject: emailSubject,
+      body: emailBody,
+      userInfo: {
+        name: user.fullName,
+        email: user.email,
+        userId: user._id
+      },
+      feedbackData: {
+        type: feedbackType,
+        title,
+        message
+      }
+    });
+
+    res.json({
+      success: true,
+      message: "Feedback sent successfully! Thank you for helping us improve WikaTalk.",
+    });
+
+  } catch (error) {
+    console.error("Feedback submission error:", error);
+    res.status(500).json({
+      success: false,
+      message: "Failed to send feedback. Please try again later.",
+    });
+  }
+};

@@ -134,6 +134,11 @@ const Settings = () => {
           onPress: () => router.push("/(settings)/HelpAndFAQ"),
         },
         {
+          icon: "message-circle",
+          label: "Send Feedback",
+          onPress: () => router.push("/(settings)/SendFeedback"),
+        },
+        {
           icon: "headphones",
           label: "Contact Support",
           onPress: () => setContactModalVisible(true),

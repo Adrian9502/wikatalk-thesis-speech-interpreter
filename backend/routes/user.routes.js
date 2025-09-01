@@ -16,7 +16,7 @@ const {
   validatePassword,
   loginWithGoogle, requestAccountDeletion,
   verifyDeletionCode,
-  deleteAccount
+  deleteAccount, sendFeedback
 } = require("../controllers/user.controller");
 
 const { protect } = require("../middleware/auth.middleware");
@@ -40,4 +40,9 @@ router.post("/validate-password", protect, validatePassword);
 router.post('/request-deletion', protect, requestAccountDeletion);
 router.post('/verify-deletion', protect, verifyDeletionCode);
 router.delete('/delete-account', protect, deleteAccount);
+
+// @desc    Send user feedback
+// @route   POST /api/users/feedback
+// @access  Private (requires authentication)
+router.post("/feedback", protect, sendFeedback);
 module.exports = router;

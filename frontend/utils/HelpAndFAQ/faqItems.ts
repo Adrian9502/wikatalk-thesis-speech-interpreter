@@ -5,7 +5,7 @@ const faqItems: FAQItem[] = [
     category: "general",
     question: "What is WikaTalk?",
     answer:
-      "WikaTalk is a language translation application designed specifically for Filipino dialects to improve communication among locals and tourists in the Philippines. It supports 10 Filipino dialects: Tagalog, Cebuano, Hiligaynon, Ilocano, Bicol, Waray, Pangasinan, Maguindanao, Kapampangan, and Bisaya.",
+      "WikaTalk is a language translation application designed specifically for Filipino dialects to improve communication among locals and tourists in the Philippines. It supports 10 Filipino dialects: Tagalog, Cebuano, Hiligaynon, Ilocano, Bicol, Waray, Pangasinan, Maguindanao, Kapampangan, and Bisaya.\n\nOur translations use Natural Language Processing (NLP) algorithms and speech-to-text recognition technology. Translation accuracy varies by dialect and input quality, with Word Error Rates ranging from 7.29% (Hiligaynon) to 23.67% (Kapampangan).",
   },
   {
     id: 2,
@@ -171,9 +171,9 @@ const faqItems: FAQItem[] = [
   {
     id: 25,
     category: "troubleshooting",
-    question: "The speech recognition doesn't work properly. What should I do?",
+    question: "How can I get the best speech recognition results?",
     answer:
-      "For best speech recognition results:\n\n• Speak clearly and at a moderate pace\n• Minimize background noise\n• Keep your device microphone unobstructed\n• Stay within the 30-second time limit\n• Try moving to a quieter environment",
+      "For optimal speech-to-speech translation results:\n\n**Speaking Tips:**\n• Speak clearly and at a moderate pace\n• Maintain consistent volume - not too loud or too quiet\n• Minimize background noise and distractions\n• Keep your device microphone unobstructed\n• Stay within the 30-second time limit\n• Use standard pronunciation - avoid heavy accents or slang\n• Pause briefly between words if speaking quickly\n• Speak in a quiet environment when possible\n\n**Technical Tips:**\n• Ensure stable internet connection\n• Hold your device 6-8 inches from your mouth\n• Avoid speaking while moving or in windy areas\n\nRemember: Clear input leads to better translation accuracy!",
   },
   {
     id: 26,
@@ -185,9 +185,9 @@ const faqItems: FAQItem[] = [
   {
     id: 27,
     category: "troubleshooting",
-    question: "Why is the scan-to-text feature not recognizing text properly?",
+    question: "How can I get better scan-to-text results?",
     answer:
-      "The scan-to-text feature may have difficulty with:\n\n• Unusual fonts or handwriting\n• Very small text\n• Poor lighting conditions\n• Blurry images\n• Text at odd angles\n\nTry improving lighting, keeping the text flat, and holding your device steady.",
+      "For optimal text scanning and translation:\n\n**Photography Tips:**\n• Ensure good, even lighting - avoid shadows\n• Hold your device steady - use both hands if needed\n• Keep text flat and parallel to your camera\n• Fill the frame with text - get close but not too close\n• Avoid blurry, tilted, or skewed images\n• Clean your camera lens before scanning\n\n**Text Requirements:**\n• Use clear, printed text when possible\n• Avoid handwriting or unusual fonts\n• Ensure text is not too small or too large\n• Avoid reflective surfaces or glossy paper\n• Make sure text has good contrast with background\n\n**Best Practices:**\n• Take multiple photos if the first doesn't work well\n• Scan in landscape orientation for better results\n• Avoid scanning in dim or harsh lighting conditions",
   },
   {
     id: 28,
@@ -195,6 +195,13 @@ const faqItems: FAQItem[] = [
     question: "How do I access the cultural information about a dialect?",
     answer:
       "When using the translation features, you can view information about your selected dialect, including famous feasts, regions that use the dialect, symbols representing that dialect, common phrases, cultural notes, and fun facts.",
+  },
+  {
+    id: 29,
+    category: "general",
+    question: "What technology powers WikaTalk's translations?",
+    answer:
+      "WikaTalk uses Natural Language Processing (NLP) algorithms combined with speech-to-text recognition engines to provide accurate translations between Filipino dialects.\n\nOur system's reliability varies by dialect:\n\n• Hiligaynon: 92.71% accuracy (7.29% WER)\n• Tagalog: 85.90% accuracy (14.10% WER)\n• Ilocano: 85.48% accuracy (14.52% WER)\n• Cebuano: 85.34% accuracy (14.66% WER)\n• Bisaya: 85.13% accuracy (14.87% WER)\n• Bicol: 83.05% accuracy (16.95% WER)\n• Maguindanao: 83.23% accuracy (16.77% WER)\n• Pangasinan: 80.92% accuracy (19.08% WER)\n• Waray: 80.73% accuracy (19.27% WER)\n• Kapampangan: 76.33% accuracy (23.67% WER)\n\nWER = Word Error Rate. Lower percentages indicate higher accuracy.",
   },
 ];
 
