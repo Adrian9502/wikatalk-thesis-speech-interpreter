@@ -75,7 +75,6 @@ export const BASE_COLORS: Record<string, string> = {
   danger: "#F44336",
   yellow: "#FFD700",
 };
-
 export const getPositionalColors = (
   position: "top" | "bottom"
 ): Record<string, string> => {
@@ -91,6 +90,11 @@ export const getPositionalColors = (
   };
 };
 
+// Homepage gradient colors
+export const NETWORK_STATUS_BACKGROUND_COLORS = {
+  offline: "#ce1126" as const,
+  slow: "#D97706" as const,
+};
 // Homepage gradient colors
 export const HOMEPAGE_COLORS = {
   speech: ["#ac8d04ff", "#c25202ff"] as const,

@@ -14,6 +14,8 @@ import { tabPreloader } from "@/utils/tabPreloader";
 import { useFocusEffect } from "@react-navigation/native";
 import { StatusBar } from "expo-status-bar";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import NetworkStatusBar from "@/components/NetworkStatusBar";
+
 interface TabIconProps {
   Icon: React.ComponentType<any>;
   color: string;
@@ -98,6 +100,8 @@ const GameIcon: React.FC<IconProps> = React.memo(({ color, width }) => (
 ));
 
 export default function TabsLayout() {
+  // NEW: Add animated value for padding top
+  const [paddingTopAnim] = useState(new Animated.Value(0));
   const { activeTheme } = useThemeStore();
   const segments = useSegments();
   const insets = useSafeAreaInsets();
@@ -110,6 +114,19 @@ export default function TabsLayout() {
   const [currentTab, setCurrentTab] = useState<string>("Home");
   const [isTransitioning, setIsTransitioning] = useState(false);
   const [initialTabProcessed, setInitialTabProcessed] = useState(false);
+
+  // NEW: Enhanced network bar height change handler with animation
+  const handleNetworkBarHeightChange = useCallback(
+    (height: number) => {
+      // Animate the padding top to match the network bar height
+      Animated.timing(paddingTopAnim, {
+        toValue: height,
+        duration: 300, // Same duration as NetworkStatusBar animation
+        useNativeDriver: false, // Cannot use native driver for padding
+      }).start();
+    },
+    [paddingTopAnim]
+  );
 
   // CRITICAL FIX: Process initial tab immediately and prevent transitions
   useEffect(() => {
@@ -274,7 +291,7 @@ export default function TabsLayout() {
   }, [
     segments,
     currentTab,
-    initialTabProcessed, // CRITICAL: Only run after initial tab is processed
+    initialTabProcessed,
     getMainTabFromSegments,
     handleTabTransition,
   ]);
@@ -293,7 +310,6 @@ export default function TabsLayout() {
     }, [currentTab])
   );
 
-  // FIXED: Memoized tab screen configurations - ONLY 5 tabs (removed Settings completely)
   const tabScreens = React.useMemo(
     () => [
       {
@@ -336,7 +352,6 @@ export default function TabsLayout() {
     []
   );
 
-  // FIXED: TabBarBackground now properly responds to theme changes
   const TabBarBackground = React.useMemo(
     () => () =>
       (
@@ -354,7 +369,7 @@ export default function TabsLayout() {
     [currentTabColors.background]
   );
 
-  // FIXED: Memoize screen options to respond to theme changes
+  // FIXED: Update screen options to properly handle network bar spacing
   const screenOptions = useMemo(
     () => ({
       tabBarShowLabel: false,
@@ -368,47 +383,53 @@ export default function TabsLayout() {
         paddingBottom: Math.max(insets.bottom, 8),
       },
       tabBarBackground: TabBarBackground,
-      // Add lazy loading for better performance
       lazy: true,
-      // Optimize header settings
       headerShown: false,
     }),
     [currentTabColors, TabBarBackground, insets.bottom]
   );
 
   return (
-    <View style={{ flex: 1 }}>
+    // FIXED: Container with proper spacing management
+    <View style={{ flex: 1, position: "relative" }}>
       <StatusBar
         style="light"
         backgroundColor={activeTheme.backgroundColor}
         translucent={false}
       />
-      <Tabs
-        screenOptions={screenOptions}
-        // CRITICAL FIX: Always use Home as initial route
-        initialRouteName="Home"
+
+      <NetworkStatusBar onHeightChange={handleNetworkBarHeightChange} />
+
+      {/* FIXED: Animated tabs container with smooth padding animation */}
+      <Animated.View
+        style={{
+          flex: 1,
+          paddingTop: paddingTopAnim, // Animated padding
+          backgroundColor: activeTheme.backgroundColor,
+        }}
       >
-        {/* FIXED: Map through only the 5 tabs (Settings completely removed) */}
-        {tabScreens.map(({ name, title, icon: Icon, iconName }) => (
-          <Tabs.Screen
-            key={name}
-            name={name}
-            options={{
-              title,
-              headerShown: false,
-              tabBarIcon: ({ color, focused }) => (
-                <TabIcon
-                  Icon={Icon}
-                  color={color}
-                  name={iconName}
-                  focused={focused}
-                />
-              ),
-              lazy: true,
-            }}
-          />
-        ))}
-      </Tabs>
+        <Tabs screenOptions={screenOptions} initialRouteName="Home">
+          {tabScreens.map(({ name, title, icon: Icon, iconName }) => (
+            <Tabs.Screen
+              key={name}
+              name={name}
+              options={{
+                title,
+                headerShown: false,
+                tabBarIcon: ({ color, focused }) => (
+                  <TabIcon
+                    Icon={Icon}
+                    color={color}
+                    name={iconName}
+                    focused={focused}
+                  />
+                ),
+                lazy: true,
+              }}
+            />
+          ))}
+        </Tabs>
+      </Animated.View>
     </View>
   );
 }
