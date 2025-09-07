@@ -39,8 +39,7 @@ export default StyleSheet.create({
 
   // Hint Section with Letter Display and Button
   hintSection: {
-    flexDirection: "row",
-    justifyContent: "space-between",
+    flexDirection: "column",
     alignItems: "center",
     marginBottom: 20,
     gap: 16,
@@ -48,7 +47,9 @@ export default StyleSheet.create({
 
   //  Letter hint display (left side)
   letterHintContainer: {
+    minWidth: "60%",
     flex: 1,
+    maxWidth: "80%",
     padding: 12,
     borderRadius: 20,
     borderWidth: 1,
@@ -70,8 +71,6 @@ export default StyleSheet.create({
     paddingVertical: 8,
     borderWidth: 1,
     borderColor: "rgba(255, 215, 0, 0.3)",
-    minWidth: 120,
-    flex: 1,
   },
   letterHintText: {
     fontSize: 15,

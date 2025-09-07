@@ -271,7 +271,7 @@ const FillInTheBlank: React.FC<FillInTheBlankProps> = React.memo(
       if (isBackgroundCompletion) {
         userAnswerDisplay = "No answer provided";
       } else {
-        userAnswerDisplay = userAnswer || "(No answer provided)";
+        userAnswerDisplay = userAnswer || "No answer provided";
       }
 
       return {

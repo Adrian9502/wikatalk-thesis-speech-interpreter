@@ -471,13 +471,7 @@ const AnswerReview: React.FC<AnswerReviewProps> = ({
                 </View>
                 <Text style={styles.cardTitle}>Your Answer</Text>
               </View>
-              <Text
-                style={[
-                  styles.cardContent,
-                  (isBackgroundCompletion || isUserExit) &&
-                    styles.exitAnswerText,
-                ]}
-              >
+              <Text style={styles.cardContent}>
                 {safeTextRender(userAnswer) || "No answer provided"}
               </Text>
             </View>
@@ -811,10 +805,7 @@ const styles = StyleSheet.create({
     lineHeight: 22,
     textAlign: "center",
   },
-  exitAnswerText: {
-    color: "#e4a84fff",
-    fontFamily: "Poppins-SemiBold",
-  },
+
   backgroundDecor1: {
     position: "absolute",
     top: 300,
