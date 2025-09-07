@@ -320,16 +320,18 @@ const styles = StyleSheet.create({
     fontFamily: "Poppins-Medium",
     color: BASE_COLORS.white,
     paddingBottom: 4,
-    fontSize: 15,
+    fontSize: 13,
   },
   permissionButton: {
-    padding: 14,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
     backgroundColor: BASE_COLORS.lightBlue,
     borderRadius: 20,
   },
   permissionButtonText: {
     color: BASE_COLORS.blue,
-    fontFamily: "Poppins-SemiBold",
+    fontFamily: "Poppins-Medium",
+    fontSize: 12,
   },
   cameraContainer: {
     flex: 1,
@@ -356,8 +358,8 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.25,
     shadowRadius: 3.84,
     elevation: 3,
-    minHeight: 350, // Increased minimum height for better text display
-    maxHeight: "65%", // Limit maximum height to prevent overflow
+    minHeight: 350,
+    maxHeight: "65%",
   },
   progressContainer: {
     height: 20,
@@ -367,7 +369,7 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     overflow: "hidden",
     position: "relative",
-    marginBottom: 8, // Add margin for better spacing
+    marginBottom: 8,
   },
   progressBar: {
     height: "100%",
