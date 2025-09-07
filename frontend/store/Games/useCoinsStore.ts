@@ -1,10 +1,7 @@
 import { create } from "zustand";
-import axios from "axios";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { getToken } from "@/lib/authTokenManager";
-
-// Define the API URL using environment variable
-const API_URL = process.env.EXPO_PUBLIC_BACKEND_URL || "http://localhost:5000";
+import { coinsService } from "@/services/api/coinsService";
 
 // Define types
 interface ClaimedDate {
@@ -114,21 +111,18 @@ const useCoinsStore = create<CoinsState>((set, get) => ({
       }
 
       console.log("Fetching coins balance from server...");
-      const response = await axios.get(`${API_URL}/api/rewards/coins`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-        timeout: 10000,
-      });
 
-      if (response.data && typeof response.data.coins === "number") {
-        const coins = response.data.coins;
+      // NEW: Use centralized service instead of direct axios call
+      const response = await coinsService.getCoinsBalance();
+
+      if (response.success && typeof response.coins === "number") {
+        const coins = response.coins;
         await AsyncStorage.setItem("user_coins", coins.toString());
 
-        console.log("✅ Coins fetched successfully:", response.data.coins);
+        console.log("✅ Coins fetched successfully:", response.coins);
 
         set({
-          coins: response.data.coins,
+          coins: response.coins,
           isLoading: false,
           error: null,
           lastCoinsChecked: now,
@@ -136,17 +130,23 @@ const useCoinsStore = create<CoinsState>((set, get) => ({
 
         return true;
       } else {
-        console.error("Invalid coins response:", response.data);
+        console.error("Invalid coins response:", response);
         set({ isLoading: false, error: "Invalid response from server" });
         return false;
       }
     } catch (error: any) {
       console.error("Error fetching coins:", error);
 
+      // NEW: Better error handling for centralized API
+      const errorMessage =
+        error.response?.data?.message ||
+        error.message ||
+        "Failed to fetch coins";
+
       // Don't reset coins to 0 on error - keep existing value
       set({
         isLoading: false,
-        error: error.message || "Failed to fetch coins",
+        error: errorMessage,
         // Keep existing coins value on error
       });
 
@@ -164,29 +164,29 @@ const useCoinsStore = create<CoinsState>((set, get) => ({
       // Optimistically update UI
       set((state) => ({ coins: state.coins + amount }));
 
-      // Update on the server
-      await axios.post(
-        `${API_URL}/api/user/coins/add`,
-        { amount },
-        {
-          headers: {
-            Authorization: `Bearer ${await AsyncStorage.getItem("token")}`,
-          },
-        }
-      );
+      // NEW: Use centralized service instead of direct axios call
+      const response = await coinsService.addCoins({ amount });
 
-      // Update local storage
-      const updatedCoins = get().coins;
-      await AsyncStorage.setItem("user_coins", updatedCoins.toString());
-      set({ isLoading: false });
-    } catch (error) {
+      if (response.success) {
+        // Update local storage
+        const updatedCoins = get().coins;
+        await AsyncStorage.setItem("user_coins", updatedCoins.toString());
+        set({ isLoading: false });
+      } else {
+        throw new Error(response.message || "Failed to add coins");
+      }
+    } catch (error: any) {
       console.error("Error adding coins:", error);
+
+      // NEW: Better error handling for centralized API
+      const errorMessage =
+        error.response?.data?.message || error.message || "Failed to add coins";
 
       // Revert optimistic update
       set((state) => ({
         coins: state.coins - amount,
         isLoading: false,
-        error: "Failed to add coins.",
+        error: errorMessage,
       }));
     }
   },
@@ -209,30 +209,32 @@ const useCoinsStore = create<CoinsState>((set, get) => ({
       // Optimistically update UI
       set((state) => ({ coins: state.coins - amount }));
 
-      // Update on the server
-      await axios.post(
-        `${API_URL}/api/user/coins/deduct`,
-        { amount },
-        {
-          headers: {
-            Authorization: `Bearer ${await AsyncStorage.getItem("token")}`,
-          },
-        }
-      );
+      // NEW: Use centralized service instead of direct axios call
+      const response = await coinsService.deductCoins({ amount });
 
-      // Update local storage
-      const updatedCoins = get().coins;
-      await AsyncStorage.setItem("user_coins", updatedCoins.toString());
-      set({ isLoading: false });
-      return true;
-    } catch (error) {
+      if (response.success) {
+        // Update local storage
+        const updatedCoins = get().coins;
+        await AsyncStorage.setItem("user_coins", updatedCoins.toString());
+        set({ isLoading: false });
+        return true;
+      } else {
+        throw new Error(response.message || "Failed to deduct coins");
+      }
+    } catch (error: any) {
       console.error("Error deducting coins:", error);
+
+      // NEW: Better error handling for centralized API
+      const errorMessage =
+        error.response?.data?.message ||
+        error.message ||
+        "Failed to deduct coins";
 
       // Revert optimistic update
       set((state) => ({
         coins: state.coins + amount,
         isLoading: false,
-        error: "Failed to deduct coins.",
+        error: errorMessage,
       }));
       return false;
     }
@@ -263,36 +265,44 @@ const useCoinsStore = create<CoinsState>((set, get) => ({
       // Get token from authTokenManager
       const token = getToken();
       if (!token) {
-        console.log("No token available for claimDailyReward");
+        console.log("No token available for checkDailyReward");
         set({ isLoading: false, error: "Authentication required" });
         return null;
       }
 
-      const response = await axios.get(`${API_URL}/api/rewards/daily/check`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
+      // NEW: Use centralized service instead of direct axios call
+      const response = await coinsService.checkDailyReward();
 
-      if (response.data.available) {
-        set({
-          isDailyRewardAvailable: true,
-          lastCheckedDate: today,
-          lastRewardStatusChecked: Date.now(),
-          isLoading: false,
-        });
-        return true;
+      if (response.success) {
+        if (response.available) {
+          set({
+            isDailyRewardAvailable: true,
+            lastCheckedDate: today,
+            lastRewardStatusChecked: Date.now(),
+            isLoading: false,
+          });
+          return true;
+        } else {
+          set({
+            isDailyRewardAvailable: false,
+            lastCheckedDate: today,
+            lastRewardStatusChecked: Date.now(),
+            isLoading: false,
+          });
+          return false;
+        }
       } else {
-        set({
-          isDailyRewardAvailable: false,
-          lastCheckedDate: today,
-          lastRewardStatusChecked: Date.now(),
-          isLoading: false,
-        });
-        return false;
+        throw new Error(response.message || "Failed to check daily reward");
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error checking daily reward:", error);
+
+      // NEW: Better error handling for centralized API
+      const errorMessage =
+        error.response?.data?.message ||
+        error.message ||
+        "Failed to check daily reward";
+      set({ isLoading: false, error: errorMessage });
       return false;
     }
   },
@@ -310,18 +320,11 @@ const useCoinsStore = create<CoinsState>((set, get) => ({
         return null;
       }
 
-      const response = await axios.post(
-        `${API_URL}/api/rewards/daily/claim`,
-        {},
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
+      // NEW: Use centralized service instead of direct axios call
+      const response = await coinsService.claimDailyReward();
 
-      if (response.data.claimed) {
-        const amount = response.data.amount;
+      if (response.success && response.claimed) {
+        const amount = response.amount;
 
         // Update coins total
         set((state) => ({
@@ -332,12 +335,18 @@ const useCoinsStore = create<CoinsState>((set, get) => ({
         }));
 
         return amount;
+      } else {
+        throw new Error(response.message || "Failed to claim daily reward");
       }
-
-      return null;
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error claiming daily reward:", error);
-      set({ isLoading: false, error: "Failed to claim daily reward" });
+
+      // NEW: Better error handling for centralized API
+      const errorMessage =
+        error.response?.data?.message ||
+        error.message ||
+        "Failed to claim daily reward";
+      set({ isLoading: false, error: errorMessage });
       return null;
     }
   },
@@ -374,46 +383,65 @@ const useCoinsStore = create<CoinsState>((set, get) => ({
       // Clear any previous history before fetching
       set({ dailyRewardsHistory: null });
 
-      const response = await axios.get(`${API_URL}/api/rewards/daily/history`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
+      // NEW: Use centralized service instead of direct axios call
+      const response = await coinsService.getRewardsHistory();
 
-      if (response.data) {
+      if (response.success && response.history) {
         set({
-          dailyRewardsHistory: response.data,
+          dailyRewardsHistory: response.history,
           lastRewardsChecked: Date.now(),
           isLoading: false,
+          error: null,
         });
+
+        console.log(
+          "[CoinsStore] ✅ Rewards history fetched:",
+          response.history.claimedDates?.length || 0,
+          "days"
+        );
         return true;
+      } else {
+        throw new Error(response.message || "Failed to fetch rewards history");
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error fetching rewards history:", error);
-      set({ isLoading: false, error: "Failed to fetch rewards history" });
+
+      // NEW: Better error handling for centralized API
+      const errorMessage =
+        error.response?.data?.message ||
+        error.message ||
+        "Failed to fetch rewards history";
+      set({
+        isLoading: false,
+        error: errorMessage,
+        dailyRewardsHistory: null,
+      });
+      return false;
     }
   },
 
-  // Modal actions
+  // Show daily rewards modal
   showDailyRewardsModal: () => {
     set({ isDailyRewardsModalVisible: true });
   },
 
+  // Hide daily rewards modal
   hideDailyRewardsModal: () => {
     set({ isDailyRewardsModalVisible: false });
   },
 
-  // New properties for cache management
+  // Cache management
   lastCoinsChecked: 0,
   lastRewardsChecked: 0,
   lastRewardStatusChecked: 0,
 
-  // Implement the method here
+  // Method to get data synchronously (for preloaded scenarios)
   getRewardsDataSync: () => {
+    const state = get();
     return {
-      dailyRewardsHistory: get().dailyRewardsHistory,
-      isDailyRewardAvailable: get().isDailyRewardAvailable,
-      coins: get().coins,
+      dailyRewardsHistory: state.dailyRewardsHistory,
+      isDailyRewardAvailable: state.isDailyRewardAvailable,
+      coins: state.coins,
     };
   },
 

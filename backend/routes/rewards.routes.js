@@ -19,10 +19,17 @@ router.get("/daily/history", protect, async (req, res) => {
       };
     }
 
-    res.status(200).json(userRewards);
+    // FIX: Wrap response in success object to match frontend interface
+    res.status(200).json({
+      success: true,
+      history: userRewards
+    });
   } catch (error) {
     console.error("Error fetching daily rewards history:", error);
-    res.status(500).json({ message: "Server error" });
+    res.status(500).json({
+      success: false,
+      message: "Server error"
+    });
   }
 });
 
@@ -38,7 +45,10 @@ router.get("/daily/check", protect, async (req, res) => {
 
     // If no record found, reward is available
     if (!userRewards) {
-      return res.status(200).json({ available: true });
+      return res.status(200).json({
+        success: true, // ADD this
+        available: true
+      });
     }
 
     // Check if user already claimed reward today
@@ -46,10 +56,16 @@ router.get("/daily/check", protect, async (req, res) => {
       claim => new Date(claim.date).toISOString().split('T')[0] === todayFormatted
     );
 
-    res.status(200).json({ available: !claimedToday });
+    res.status(200).json({
+      success: true, // ADD this
+      available: !claimedToday
+    });
   } catch (error) {
     console.error("Error checking daily reward:", error);
-    res.status(500).json({ message: "Server error" });
+    res.status(500).json({
+      success: false, // ADD this
+      message: "Server error"
+    });
   }
 });
 
@@ -75,6 +91,7 @@ router.post("/daily/claim", protect, async (req, res) => {
 
     if (claimedToday) {
       return res.status(400).json({
+        success: false, // ADD: success property
         claimed: false,
         message: "Daily reward already claimed today"
       });
@@ -101,13 +118,17 @@ router.post("/daily/claim", protect, async (req, res) => {
     );
 
     res.status(200).json({
+      success: true, // ADD: success property
       claimed: true,
       amount,
       message: "Daily reward claimed successfully"
     });
   } catch (error) {
     console.error("Error claiming daily reward:", error);
-    res.status(500).json({ message: "Server error" });
+    res.status(500).json({
+      success: false, // ADD: success property
+      message: "Server error"
+    });
   }
 });
 
@@ -115,26 +136,26 @@ router.post("/daily/claim", protect, async (req, res) => {
 router.get("/coins", protect, async (req, res) => {
   try {
     const userId = req.user._id;
-    
+
     // Get user's coins from database
     const user = await User.findById(userId).select("coins");
-    
+
     if (!user) {
-      return res.status(404).json({ 
+      return res.status(404).json({
         success: false,
-        message: "User not found" 
+        message: "User not found"
       });
     }
-    
+
     res.status(200).json({
       success: true,
       coins: user.coins
     });
   } catch (error) {
     console.error("Error fetching user coins:", error);
-    res.status(500).json({ 
+    res.status(500).json({
       success: false,
-      message: "Server error" 
+      message: "Server error"
     });
   }
 });

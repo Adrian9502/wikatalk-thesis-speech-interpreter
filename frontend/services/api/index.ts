@@ -8,3 +8,4 @@ export { translationService } from "./translationService";
 export { pronunciationService } from "./pronunciationService";
 export { feedbackService } from "./feedbackService";
 export { rankingService } from "./rankingService";
+export { coinsService } from "./coinsService";
