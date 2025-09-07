@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import {
   View,
   StyleSheet,
@@ -12,7 +12,7 @@ import {
   Dimensions,
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
-import { MaterialCommunityIcons } from "@expo/vector-icons";
+import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
 import { BASE_COLORS } from "@/constant/colors";
 import getLanguageBackground from "@/utils/getLanguageBackground";
 
@@ -43,6 +43,9 @@ const LanguageBottomSection: React.FC<LanguageBottomSectionProps> = ({
   // Animation for pulse shadow
   const pulseAnim = useRef(new Animated.Value(0)).current;
 
+  // NEW: Add state to track if icon is ready
+  const [iconReady, setIconReady] = useState(true); // Start as true to avoid flash
+
   // Get responsive styles
   const getResponsiveStyles = () => {
     const { height, width } = Dimensions.get("window");
@@ -59,6 +62,20 @@ const LanguageBottomSection: React.FC<LanguageBottomSectionProps> = ({
       durationFontSize: isSmallScreen ? 9 : 10,
     };
   };
+
+  // NEW: Preload icon effect
+  useEffect(() => {
+    // Preload the icon immediately when component mounts
+    const preloadIcon = () => {
+      // Force render the icon off-screen to preload it
+      setIconReady(true);
+    };
+
+    // Use immediate timeout to ensure icon loads before animation
+    const timeoutId = setTimeout(preloadIcon, 0);
+
+    return () => clearTimeout(timeoutId);
+  }, []);
 
   // Microphone icon scaling animation
   useEffect(() => {
@@ -163,13 +180,17 @@ const LanguageBottomSection: React.FC<LanguageBottomSectionProps> = ({
             }}
           />
         )}
-        <Animated.View style={{ transform: [{ scale: micAnimation }] }}>
-          <MaterialCommunityIcons
-            name={recording ? "microphone" : "microphone-off"}
-            size={responsiveStyles.micIconSize}
-            color={BASE_COLORS.white}
-          />
-        </Animated.View>
+        {/* NEW: Conditional rendering with immediate display */}
+        {iconReady && (
+          <Animated.View style={{ transform: [{ scale: micAnimation }] }}>
+            <Ionicons
+              name={recording ? "mic" : "mic-off"}
+              size={responsiveStyles.micIconSize}
+              color={BASE_COLORS.white}
+              allowFontScaling={false}
+            />
+          </Animated.View>
+        )}
       </TouchableOpacity>
 
       <Pressable
