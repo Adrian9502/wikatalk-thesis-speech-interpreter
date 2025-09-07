@@ -1,14 +1,12 @@
 import { useState, useEffect, useRef } from "react";
-import axios from "axios";
-import { getToken } from "@/lib/authTokenManager";
-import { RankingData, RankingUser } from "@/types/rankingTypes";
+import { RankingData } from "@/types/rankingTypes";
 import {
   isRankingsDataPreloaded,
   getPreloadedRankings,
 } from "@/store/useSplashStore";
 import { setClearRankingsCacheFunction } from "@/utils/rankingsCache";
-
-const API_URL = process.env.EXPO_PUBLIC_BACKEND_URL || "http://localhost:5000";
+// NEW: Import the centralized service instead of axios
+import { rankingService } from "@/services/api/rankingService";
 
 // Simple in-memory cache for fallback
 const rankingsCache = new Map<
@@ -95,42 +93,18 @@ export const useRankings = (
 
       abortControllerRef.current = new AbortController();
 
-      const token = getToken();
-      if (!token) {
-        throw new Error("Authentication required");
-      }
-
-      // Build query parameters
-      const params = new URLSearchParams({
-        type: requestCategory,
-        limit: "50",
-      });
-      if (requestCategory.includes("_")) {
-        const [type, gameMode] = requestCategory.split("_");
-        params.set("type", type);
-        params.append("gameMode", gameMode);
-      }
-
       console.log(`[useRankings] Fetching fresh data for ${requestCategory}`);
 
-      const response = await axios.get(
-        `${API_URL}/api/rankings?${params.toString()}`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-          },
-          timeout: 10000,
-          signal: abortControllerRef.current.signal,
-        }
-      );
+      // NEW: Use centralized service instead of direct axios call
+      const response = await rankingService.getRankings(requestCategory, 50);
 
       // ENHANCED: Only process response if still the current category
       if (
         requestCategory === currentCategoryRef.current &&
-        response.data?.data
+        response.success &&
+        response.data
       ) {
-        const rankingData = response.data.data;
+        const rankingData = response.data;
 
         // Cache the result in hook's own cache
         rankingsCache.set(requestCategory, {
@@ -147,7 +121,7 @@ export const useRankings = (
           `[useRankings] Discarding response for ${requestCategory} (current: ${currentCategoryRef.current})`
         );
       } else {
-        throw new Error("Invalid response format");
+        throw new Error(response.message || "Invalid response format");
       }
     } catch (err: any) {
       // ENHANCED: Better error handling for canceled requests
@@ -165,7 +139,13 @@ export const useRankings = (
       // Only set error if this is still the current category
       if (requestCategory === currentCategoryRef.current) {
         console.error(`[useRankings] Error fetching ${requestCategory}:`, err);
-        setError(err.message || "Failed to fetch rankings");
+
+        // NEW: Better error handling for centralized API
+        const errorMessage =
+          err.response?.data?.message ||
+          err.message ||
+          "Failed to fetch rankings";
+        setError(errorMessage);
       }
     } finally {
       // Only update loading state if still the current category and not aborted

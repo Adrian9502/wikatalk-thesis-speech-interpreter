@@ -1,13 +1,11 @@
 import { useState, useEffect, useCallback } from "react";
-import { getToken } from "@/lib/authTokenManager";
 import { LevelData } from "@/types/gameTypes";
 import {
   getLevelDetailsForLevel,
   isLevelDetailsPrecomputed,
 } from "@/store/useSplashStore";
-import axios from "axios";
-
-const API_URL = process.env.EXPO_PUBLIC_BACKEND_URL || "http://localhost:5000";
+// NEW: Import the centralized service instead of using direct axios
+import { progressService } from "@/services/api/progressService";
 
 interface CompletedLevelDetails {
   question: string;
@@ -164,24 +162,11 @@ export const useLevelDetails = (
     setError(null);
 
     try {
-      const token = getToken();
-      if (!token) {
-        throw new Error("Authentication required");
-      }
+      // NEW: Use centralized service instead of direct axios call
+      const response = await progressService.getLevelDetails(level.id);
 
-      const formattedId = `n-${level.id}`;
-      const response = await axios({
-        method: "get",
-        url: `${API_URL}/api/userprogress/${formattedId}`,
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
-        },
-        timeout: 10000,
-      });
-
-      if (response.data.success) {
-        const progressData = response.data.progress;
+      if (response.success) {
+        const progressData = response.progress;
         const attempts = progressData.attempts || [];
         const totalAttempts = attempts.length;
         const correctAttempts = attempts.filter(
@@ -222,12 +207,12 @@ export const useLevelDetails = (
 
         setDetails(levelDetails);
       } else {
-        throw new Error(
-          response.data.message || "Failed to fetch progress data"
-        );
+        throw new Error(response.message || "Failed to fetch progress data");
       }
     } catch (err: any) {
       console.error("[useLevelDetails] Error fetching level details:", err);
+
+      // NEW: Better error handling for centralized API
       const errorMessage =
         err.response?.data?.message ||
         err.message ||

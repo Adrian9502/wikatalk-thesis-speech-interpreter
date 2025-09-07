@@ -1,8 +1,8 @@
 import { create } from "zustand";
 import { createJSONStorage, persist } from "zustand/middleware";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import axios from "axios";
 import { AppState, AppStateStatus, InteractionManager } from "react-native";
+import axios from "axios";
 import { router } from "expo-router";
 import showNotification from "@/lib/showNotification";
 import useThemeStore from "./useThemeStore";
@@ -10,7 +10,7 @@ import { getToken, setToken } from "@/lib/authTokenManager";
 import { useTranslateStore } from "./useTranslateStore";
 import { GoogleSignin } from "@react-native-google-signin/google-signin";
 import useCoinsStore from "@/store/games/useCoinsStore";
-import { authService, testAPIConnection } from "@/services/api";
+import { authService } from "@/services/api";
 import { clearAllAccountData, refreshAccountData } from "@/utils/dataManager";
 import { setLogoutCallback } from "@/services/api/baseApi";
 
@@ -134,6 +134,7 @@ interface AuthState {
 const setupAxiosDefaults = (token: string | null) => {
   if (token) {
     axios.defaults.headers.common["Authorization"] = `Bearer ${token}`;
+    axios.defaults.headers.common["Content-Type"] = "application/json";
   } else {
     delete axios.defaults.headers.common["Authorization"];
   }
@@ -143,8 +144,8 @@ const setupAxiosDefaults = (token: string | null) => {
     (response) => response,
     (error) => {
       if (error.response?.status === 401) {
-        // Handle token expiry
-        console.warn("Authentication error, may need to log in again");
+        console.log("Unauthorized request, clearing auth data");
+        // Let the app handle the redirect through the auth context
       }
       return Promise.reject(error);
     }
@@ -240,8 +241,8 @@ export const useAuthStore = create<AuthState>()(
           // Register the logout callback to break the cycle
           setLogoutCallback(get().logout);
 
-          // Test API connection
-          await testAPIConnection();
+          // NEW: Use authService.testAPIConnection instead of undefined testAPIConnection
+          await authService.testAPIConnection();
 
           // Get stored data - add tempUserData
           const [storedToken, storedUserData, tempUserData] = await Promise.all(

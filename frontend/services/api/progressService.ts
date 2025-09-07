@@ -35,6 +35,12 @@ export interface ProgressStatsResponse {
   };
 }
 
+export interface LevelDetailsResponse {
+  success: boolean;
+  progress: ProgressData;
+  message?: string;
+}
+
 export const progressService = {
   // Get all progress for user
   getAllProgress: async () => {
@@ -51,6 +57,15 @@ export const progressService = {
       success: boolean;
       progress: ProgressData;
     }>(`/api/userprogress/${quizId}`);
+    return response.data;
+  },
+
+  // NEW: Get level details for specific level (what useLevelDetails needs)
+  getLevelDetails: async (levelId: string | number) => {
+    const formattedId = `n-${levelId}`;
+    const response = await authApi.get<LevelDetailsResponse>(
+      `/api/userprogress/${formattedId}`
+    );
     return response.data;
   },
 

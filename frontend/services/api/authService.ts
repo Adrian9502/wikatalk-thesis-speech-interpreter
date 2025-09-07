@@ -120,7 +120,11 @@ export const authService = {
   },
 
   // Resend verification code
-  resendVerification: async (email: string, fullName?: string, tempToken?: string) => {
+  resendVerification: async (
+    email: string,
+    fullName?: string,
+    tempToken?: string
+  ) => {
     const response = await api.post("/api/users/resend-verification-code", {
       email,
       fullName,
@@ -190,5 +194,16 @@ export const authService = {
       imageBase64,
     });
     return response.data;
+  },
+
+  // Test API connection method
+  testAPIConnection: async () => {
+    try {
+      const response = await authApi.get("/api/test");
+      return response.data;
+    } catch (error) {
+      console.error("[AuthService] API connection test failed:", error);
+      throw error;
+    }
   },
 };
