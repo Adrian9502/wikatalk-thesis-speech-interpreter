@@ -293,7 +293,12 @@ const SendFeedback = () => {
         </ScrollView>
 
         {/* Submit Button - Fixed at bottom */}
-        <View style={styles.footer}>
+        <View
+          style={[
+            styles.footer,
+            { backgroundColor: activeTheme.backgroundColor },
+          ]}
+        >
           <TouchableOpacity
             style={[
               styles.submitButton,
@@ -493,7 +498,6 @@ const styles = StyleSheet.create({
     right: 0,
     paddingHorizontal: 16,
     paddingVertical: 16,
-    backgroundColor: "rgba(10, 15, 40, 0.95)",
     borderTopWidth: 1,
     borderTopColor: "rgba(255, 255, 255, 0.05)",
   },
