@@ -1,5 +1,4 @@
 import { useState, useEffect, useRef, useCallback } from "react";
-import axios from "axios";
 import { getToken } from "@/lib/authTokenManager";
 import { UserProgress } from "@/types/userProgress";
 import { useSplashStore } from "@/store/useSplashStore";
@@ -7,8 +6,8 @@ import useProgressStore from "@/store/games/useProgressStore";
 import { getCurrentUserId, hasUserChanged } from "@/utils/dataManager";
 import { getIndividualProgressFromCache } from "@/store/useSplashStore";
 import { calculateResetCost } from "@/utils/resetCostUtils";
-
-const API_URL = process.env.EXPO_PUBLIC_BACKEND_URL || "http://localhost:5000";
+// NEW: Import the centralized service instead of direct axios
+import { progressService } from "@/services/api/progressService";
 
 export const useUserProgress = (quizId: string | number | "global") => {
   const [progress, setProgress] = useState<any>(null);
@@ -186,21 +185,14 @@ export const useUserProgress = (quizId: string | number | "global") => {
             `[useUserProgress] Fetching all progress (force: ${forceRefresh})`
           );
 
-          const response = await axios({
-            method: "get",
-            url: `${API_URL}/api/userprogress`,
-            headers: {
-              Authorization: `Bearer ${token}`,
-              "Content-Type": "application/json",
-            },
-            timeout: 10000,
-          });
+          // NEW: Use centralized service instead of direct axios call
+          const response = await progressService.getAllProgress();
 
-          if (response.data.success) {
+          if (response.success) {
             console.log(
-              `[useUserProgress] Successfully fetched global progress: ${response.data.progressEntries.length} entries`
+              `[useUserProgress] Successfully fetched global progress: ${response.progressEntries.length} entries`
             );
-            const progressData = response.data.progressEntries;
+            const progressData = response.progressEntries;
 
             setProgress(progressData);
             progressCacheRef.current[cacheKey] = progressData;
@@ -222,20 +214,13 @@ export const useUserProgress = (quizId: string | number | "global") => {
           `[useUserProgress] Fetching progress for: ${formattedId} (force: ${forceRefresh})`
         );
 
-        const response = await axios({
-          method: "get",
-          url: `${API_URL}/api/userprogress/${formattedId}`,
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-          },
-          timeout: 10000,
-        });
+        // NEW: Use centralized service instead of direct axios call
+        const response = await progressService.getQuizProgress(formattedId);
 
-        if (response.data.success) {
+        if (response.success) {
           console.log(`[useUserProgress] Successfully fetched progress`);
 
-          const progressData = response.data.progress;
+          const progressData = response.progress;
 
           if (progressData) {
             setProgress(progressData);
@@ -261,7 +246,13 @@ export const useUserProgress = (quizId: string | number | "global") => {
         return defaultResult;
       } catch (err: any) {
         console.error(`[useUserProgress] Error:`, err.message);
-        setError(err.message);
+
+        // NEW: Better error handling for centralized API
+        const errorMessage =
+          err.response?.data?.message ||
+          err.message ||
+          "Failed to fetch progress";
+        setError(errorMessage);
 
         const defaultResult =
           quizId === "global" ? [] : createDefaultProgress(quizId);
@@ -316,35 +307,26 @@ export const useUserProgress = (quizId: string | number | "global") => {
           difficulty: difficulty || "easy",
         });
 
-        const response = await axios.post(
-          `${API_URL}/api/userprogress/${formattedQuizId}`,
+        // NEW: Use centralized service instead of direct axios call
+        const response = await progressService.updateQuizProgress(
+          formattedQuizId,
           {
             timeSpent: Number(timeSpent.toFixed(2)),
             completed,
             isCorrect,
-            difficulty: difficulty || "easy", // NEW: Include difficulty in request
-          },
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-              "Content-Type": "application/json",
-            },
-            timeout: 10000,
+            difficulty: difficulty || "easy",
           }
         );
 
-        if (response.data?.success) {
+        if (response.success) {
           console.log(`[useUserProgress] Progress updated successfully`);
 
           // NEW: Log reward information if present
-          if (response.data.reward) {
-            console.log(
-              `[useUserProgress] Reward earned:`,
-              response.data.reward
-            );
+          if (response.reward) {
+            console.log(`[useUserProgress] Reward earned:`, response.reward);
           }
 
-          const updatedProgress = response.data.progress;
+          const updatedProgress = response.progress;
 
           // Update current progress
           setProgress(updatedProgress);
@@ -358,59 +340,26 @@ export const useUserProgress = (quizId: string | number | "global") => {
           // NEW: Also invalidate the splash store individual cache for this specific quiz
           const splashStore = useSplashStore.getState();
           if (splashStore.setIndividualProgress) {
-            splashStore.setIndividualProgress(formattedQuizId, updatedProgress);
+            splashStore.setIndividualProgress(String(quizId), updatedProgress);
           }
 
-          // FIXED: Force refresh of global progress in progress store
-          if (completed && isCorrect) {
+          // FIXED: Update progress store if quiz was completed
+          if (completed) {
             console.log(
-              `[useUserProgress] Level completed! Invalidating ALL caches including global progress...`
+              `[useUserProgress] Quiz completed, refreshing progress store`
             );
-
-            // Clear progress store cache
             const progressStore = useProgressStore.getState();
-            progressStore.clearCache();
-
-            // CRITICAL: Wait for cache clear, then fetch fresh data
-            await new Promise((resolve) => setTimeout(resolve, 100));
-
-            // Force fresh fetch
-            const freshProgress = await progressStore.fetchProgress(true);
-            console.log(
-              `[useUserProgress] Fresh progress fetched after completion:`,
-              {
-                type: Array.isArray(freshProgress)
-                  ? "array"
-                  : typeof freshProgress,
-                length: Array.isArray(freshProgress)
-                  ? freshProgress.length
-                  : "not array",
-              }
-            );
-
-            // FIXED: Update individual cache with the correct variable name
-            if (splashStore.setIndividualProgress && updatedProgress) {
-              console.log(
-                `[useUserProgress] Updating individual cache with completed level data`
-              );
-              splashStore.setIndividualProgress(
-                String(quizId),
-                updatedProgress
-              );
-            }
-
-            console.log(
-              "[useUserProgress] All caches invalidated - levels and filters will be recomputed"
-            );
+            await progressStore.fetchProgress(true);
           }
 
           return {
-            ...response.data,
             success: true,
+            progress: updatedProgress,
+            reward: response.reward,
           };
         }
 
-        throw new Error(response.data?.message || "Failed to update progress");
+        throw new Error(response.message || "Failed to update progress");
       } catch (error: any) {
         const errorMessage =
           error.response?.data?.message ||
@@ -427,13 +376,10 @@ export const useUserProgress = (quizId: string | number | "global") => {
           console.log(
             `[useUserProgress] Attempting to fetch fresh data after error`
           );
-          const freshData = await fetchProgress(true); // Force refresh on error
-          if (freshData) {
-            return freshData;
-          }
+          await fetchProgress(true);
         } catch (fetchErr) {
           console.error(
-            "[useUserProgress] Failed to fetch fresh data:",
+            `[useUserProgress] Failed to fetch fresh data:`,
             fetchErr
           );
         }
@@ -463,97 +409,54 @@ export const useUserProgress = (quizId: string | number | "global") => {
     }> => {
       try {
         setIsLoading(true);
-        setError(null);
 
-        const token = getToken();
-        if (!token) {
-          setIsLoading(false);
-          return { success: false, message: "Authentication required" };
+        if (!progress || Array.isArray(progress)) {
+          throw new Error("No valid progress data found");
         }
 
-        const formattedId = formatQuizId(quizId);
-        console.log(`[useUserProgress] Resetting timer for: ${formattedId}`);
+        const originalTimeSpent = progress.totalTimeSpent || 0;
+        const cost = calculateResetCost(originalTimeSpent);
 
-        const response = await axios({
-          method: "post",
-          url: `${API_URL}/api/userprogress/${formattedId}/reset-timer`,
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-          },
-          timeout: 10000,
-        });
+        console.log(`[useUserProgress] Resetting timer for quiz ${quizId}`);
 
-        if (response.data.success) {
+        const formattedQuizId = formatQuizId(quizId);
+
+        // NEW: Use centralized service instead of direct axios call
+        const response = await progressService.resetQuizTimer(formattedQuizId);
+
+        if (response.success) {
           console.log(`[useUserProgress] Timer reset successfully`);
 
-          // CRITICAL: Create reset progress with 0 time
-          const resetProgress = {
-            ...progress,
-            totalTimeSpent: 0,
-            lastAttemptTime: 0,
-            attempts: [],
-          };
-
-          // CRITICAL: Update local state immediately
-          setProgress(resetProgress);
-
-          // CRITICAL: Clear ALL cache entries everywhere
-          console.log(
-            `[useUserProgress] Clearing ALL caches after timer reset`
-          );
-
-          // 1. Clear local cache
+          // Clear cache and refetch data
           progressCacheRef.current = {};
-
-          // 2. Clear individual progress cache
-          const splashStore = useSplashStore.getState();
-          if (splashStore.setIndividualProgress) {
-            console.log(
-              `[useUserProgress] Updating splash store with reset progress`
-            );
-            splashStore.setIndividualProgress(String(quizId), resetProgress);
-          }
-
-          // 3. Force clear splash store completely to trigger recomputation
-          splashStore.reset();
-
-          // 4. Clear progress store cache
-          const progressStore = useProgressStore.getState();
-          progressStore.clearCache();
-
-          // 5. Force refresh global progress
-          await progressStore.fetchProgress(true);
-
-          console.log(`[useUserProgress] All caches cleared and refreshed`);
+          await fetchProgress(true);
 
           return {
             success: true,
-            message: response.data.message,
-            coinsDeducted: response.data.coinsDeducted,
-            remainingCoins: response.data.remainingCoins,
-            costBreakdown: response.data.costBreakdown,
+            message: response.message,
+            coinsDeducted: response.coinsDeducted,
+            remainingCoins: response.remainingCoins,
+            costBreakdown: response.costBreakdown,
           };
         }
 
-        return {
-          success: false,
-          message: response.data.message || "Failed to reset timer",
-        };
+        throw new Error(response.message || "Failed to reset timer");
       } catch (err: any) {
-        console.error(`[useUserProgress] Reset timer error:`, err.message);
-        setError(err.message);
+        console.error(`[useUserProgress] Reset timer error:`, err);
+        const errorMessage =
+          err.response?.data?.message || err.message || "Failed to reset timer";
+        setError(errorMessage);
 
         return {
           success: false,
-          message: err.response?.data?.message || "Failed to reset timer",
+          message: errorMessage,
           costBreakdown: err.response?.data?.costBreakdown,
         };
       } finally {
         setIsLoading(false);
       }
     },
-    [progress, formatQuizId]
+    [progress, formatQuizId, fetchProgress]
   );
 
   // Clear progress function

@@ -23,6 +23,7 @@ export interface ProgressUpdateData {
   isCorrect?: boolean;
   timeSpent?: number;
   attemptNumber?: number;
+  difficulty?: string; // Add difficulty support
 }
 
 export interface ProgressStatsResponse {
@@ -41,12 +42,38 @@ export interface LevelDetailsResponse {
   message?: string;
 }
 
+// Interface for progress update response
+export interface ProgressUpdateResponse {
+  success: boolean;
+  progress: ProgressData;
+  message?: string;
+  reward?: {
+    coins: number;
+    label: string;
+    difficulty: string;
+    timeSpent: number;
+  };
+}
+
+// Interface for timer reset response
+export interface TimerResetResponse {
+  success: boolean;
+  message?: string;
+  coinsDeducted?: number;
+  remainingCoins?: number;
+  costBreakdown?: {
+    originalTimeSpent: number;
+    costReason: string;
+    timeRange: string;
+  };
+}
+
 export const progressService = {
   // Get all progress for user
   getAllProgress: async () => {
     const response = await authApi.get<{
       success: boolean;
-      progress: ProgressData[];
+      progressEntries: ProgressData[];
     }>("/api/userprogress");
     return response.data;
   },
@@ -60,7 +87,7 @@ export const progressService = {
     return response.data;
   },
 
-  // NEW: Get level details for specific level (what useLevelDetails needs)
+  // Get level details for specific level
   getLevelDetails: async (levelId: string | number) => {
     const formattedId = `n-${levelId}`;
     const response = await authApi.get<LevelDetailsResponse>(
@@ -69,12 +96,37 @@ export const progressService = {
     return response.data;
   },
 
-  // Update progress
+  // Update progress for specific quiz
+  updateQuizProgress: async (
+    quizId: string,
+    data: {
+      timeSpent: number;
+      completed: boolean;
+      isCorrect: boolean;
+      difficulty?: string;
+    }
+  ) => {
+    const response = await authApi.post<ProgressUpdateResponse>(
+      `/api/userprogress/${quizId}`,
+      data
+    );
+    return response.data;
+  },
+
+  // Update progress (generic)
   updateProgress: async (data: ProgressUpdateData) => {
     const response = await authApi.post<{
       success: boolean;
       progress: ProgressData;
     }>("/api/userprogress/update", data);
+    return response.data;
+  },
+
+  // Reset timer for specific quiz
+  resetQuizTimer: async (quizId: string) => {
+    const response = await authApi.post<TimerResetResponse>(
+      `/api/userprogress/${quizId}/reset-timer`
+    );
     return response.data;
   },
 
