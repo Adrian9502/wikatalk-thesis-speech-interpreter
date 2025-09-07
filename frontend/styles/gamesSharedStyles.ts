@@ -36,7 +36,7 @@ const gameSharedStyles = StyleSheet.create({
   },
 
   questionText: {
-    fontSize: 18,
+    fontSize: 17,
     fontFamily: "Poppins-SemiBold",
     color: BASE_COLORS.white,
     textAlign: "center",
@@ -64,7 +64,6 @@ const gameSharedStyles = StyleSheet.create({
     borderColor: BASE_COLORS.danger,
   },
 
-  // ADD: Missing option styles for MultipleChoice
   optionsContainer: {
     flex: 1,
     paddingVertical: 10,
@@ -89,7 +88,7 @@ const gameSharedStyles = StyleSheet.create({
     justifyContent: "center",
   },
   optionText: {
-    fontSize: 16,
+    fontSize: 15,
     fontFamily: "Poppins-Medium",
     color: BASE_COLORS.white,
     textAlign: "center",
