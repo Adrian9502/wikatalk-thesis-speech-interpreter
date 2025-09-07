@@ -11,20 +11,6 @@ import React from "react";
 export type GameMode = "identification" | "multipleChoice" | "fillBlanks";
 export type DifficultyLevel = "easy" | "medium" | "hard";
 
-// Play button colors based on game mode
-export const getPlayButtonColor = (gameId: string) => {
-  switch (gameId) {
-    case "multipleChoice":
-      return "#f1a849e5";
-    case "identification":
-      return "#58bdf0e0";
-    case "fillBlanks":
-      return "#f57171de";
-    default:
-      return BASE_COLORS.success;
-  }
-};
-
 /**
  * Format seconds to a human-readable string with centiseconds precision
  * FIXED: Consistent rounding to prevent display differences
@@ -103,7 +89,7 @@ const gameOptions: GameOption[] = [
   {
     id: "multipleChoice",
     title: "Multiple Choice",
-    icon: <Target width={28} height={28} color={ICON_COLORS.white} />,
+    icon: <Target width={23} height={23} color={ICON_COLORS.white} />,
     color: BASE_COLORS.blue,
     description: "Choose the correct answer from given options",
     difficulty: "Beginner",
@@ -111,7 +97,7 @@ const gameOptions: GameOption[] = [
   {
     id: "identification",
     title: "Word Identification",
-    icon: <Search width={28} height={28} color={ICON_COLORS.white} />,
+    icon: <Search width={23} height={23} color={ICON_COLORS.white} />,
     color: BASE_COLORS.orange,
     description: "Identify the correct words in context",
     difficulty: "Intermediate",
@@ -119,7 +105,7 @@ const gameOptions: GameOption[] = [
   {
     id: "fillBlanks",
     title: "Fill in the Blanks",
-    icon: <Edit3 width={28} height={28} color={ICON_COLORS.white} />,
+    icon: <Edit3 width={23} height={23} color={ICON_COLORS.white} />,
     color: BASE_COLORS.success,
     description: "Complete sentences with the right words",
     difficulty: "Advanced",

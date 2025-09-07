@@ -1,4 +1,4 @@
-import { Zap, BookOpen, Search, Edit2 } from "react-native-feather";
+import { Zap, Search, Edit2 } from "react-native-feather";
 
 type IconProps = {
   width?: number;
@@ -90,18 +90,18 @@ export const getPositionalColors = (
   };
 };
 
-// Homepage gradient colors
+// network status bar component colors
 export const NETWORK_STATUS_BACKGROUND_COLORS = {
   offline: "#ce1126" as const,
   slow: "#D97706" as const,
 };
 // Homepage gradient colors
 export const HOMEPAGE_COLORS = {
-  speech: ["#ac8d04ff", "#c25202ff"] as const,
+  speech: ["#BA8E23", "#b9a115ff"] as const,
   translate: ["#02359cff", "#0a7d94ff"] as const,
-  scan: ["#a70215ff", "#910585ff"] as const,
-  games: ["#5e049eff", "#aa0451ff"] as const,
-  pronounce: ["#019c3aff", "#ac8d04ff"] as const,
+  scan: ["#9c0202ff", "#d64343ff"] as const,
+  games: ["#6b029cff", "#a52fcfff"] as const,
+  pronounce: ["#029c35ff", "#0daf5eff"] as const,
 };
 
 // Colors for icon
@@ -122,10 +122,11 @@ export const DIFFICULTY_COLORS = {
 export const RANKING_SELECTOR_COLORS = ["#c9a60cff", "#b36b00ff"] as const;
 
 // game card game mode gradients
+
 export const GAME_MODE_GRADIENTS = {
-  multipleChoice: ["#d45c06ff", "#c9a60cff"] as const,
+  multipleChoice: ["#029c35ff", "#0daf5eff"] as const,
   identification: ["#02359cff", "#0a7d94ff"] as const,
-  fillBlanks: ["#ce1126", "#E94444"] as const,
+  fillBlanks: ["#9c0202ff", "#d64343ff"] as const,
 };
 
 // Word of the Day card gradient
@@ -133,10 +134,10 @@ export const WORD_OF_DAY_GRADIENT = ["#3168dfff", "#0a7d94ff"] as const;
 
 // Navigation colors on GameNavigation
 export const NAVIGATION_COLORS = {
-  green: ["#028633ff", "#03b845ff"] as const,
-  yellow: ["#a17d04ff", "#fd9635ff"] as const,
+  green: ["#029c35ff", "#0daf5eff"] as const,
+  yellow: ["#BA8E23", "#b9a115ff"] as const,
   blue: ["#02359cff", "#0a7d94ff"] as const,
-  red: ["#a70215ff", "#910585ff"] as const,
+  red: ["#9c0202ff", "#d64343ff"] as const,
   disabled: ["rgba(255, 255, 255, 0.15)", "rgba(255, 255, 255, 0.08)"] as const,
 };
 

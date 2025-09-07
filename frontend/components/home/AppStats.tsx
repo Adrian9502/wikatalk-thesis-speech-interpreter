@@ -2,6 +2,7 @@ import React from "react";
 import { View, Text, StyleSheet } from "react-native";
 import { BASE_COLORS } from "@/constant/colors";
 import { DIALECTS } from "@/constant/languages";
+import useThemeStore from "@/store/useThemeStore";
 
 interface AppStatsProps {
   totalPronunciationsCount: string | number;
@@ -12,6 +13,8 @@ interface AppStatsProps {
 
 const AppStats = React.memo(
   ({ totalPronunciationsCount, overallStats }: AppStatsProps) => {
+    const { activeTheme } = useThemeStore();
+
     const dialectStats = [
       { count: DIALECTS.length, label: "Filipino Dialects" },
       { count: totalPronunciationsCount, label: "Pronunciations" },
@@ -24,7 +27,12 @@ const AppStats = React.memo(
         <View style={styles.statsContainer}>
           {dialectStats.map((stat, index) => (
             <View key={index} style={styles.statItem}>
-              <Text style={[styles.statNumber, { color: BASE_COLORS.yellow }]}>
+              <Text
+                style={[
+                  styles.statNumber,
+                  { color: activeTheme.tabActiveColor },
+                ]}
+              >
                 {stat.count}
               </Text>
               <Text
@@ -56,8 +64,8 @@ const styles = StyleSheet.create({
   statsContainer: {
     flexDirection: "row",
     justifyContent: "space-around",
-    backgroundColor: "rgba(255, 255, 255, 0.08)",
-    borderColor: "rgba(255, 255, 255, 0.15)",
+    backgroundColor: "rgba(255, 255, 255, 0.15)",
+    borderColor: "rgba(255, 255, 255, 0.2)",
     borderWidth: 1,
     borderRadius: 20,
     paddingVertical: 16,

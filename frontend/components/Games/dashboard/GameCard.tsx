@@ -9,8 +9,9 @@ import {
 import { LinearGradient } from "expo-linear-gradient";
 import { TrendingUp, Play } from "react-native-feather";
 import useProgressStore from "@/store/games/useProgressStore";
-import { getGameModeGradient, getPlayButtonColor } from "@/utils/gameUtils";
+import { getGameModeGradient } from "@/utils/gameUtils";
 import { useFormattedStats } from "@/utils/gameStatsUtils";
+import { BASE_COLORS } from "@/constant/colors";
 
 interface GameCardProps {
   game: any;
@@ -53,6 +54,20 @@ const GameCard: React.FC<GameCardProps> = ({
     }),
     [onGamePress, onProgressPress]
   );
+
+  // play button colors
+  const getPlayButtonColor = (gameId: string) => {
+    switch (gameId) {
+      case "multipleChoice":
+        return "#19c48bff";
+      case "identification":
+        return "#58bdf0e0";
+      case "fillBlanks":
+        return "#f57171de";
+      default:
+        return BASE_COLORS.success;
+    }
+  };
 
   const staticStyles = useMemo(
     () => ({
@@ -178,13 +193,13 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   gameTitle: {
-    fontSize: 17,
-    fontFamily: "Poppins-Bold",
+    fontSize: 16,
+    fontFamily: "Poppins-SemiBold",
     color: "#fff",
     marginBottom: 4,
   },
   gameDescription: {
-    fontSize: 11.5,
+    fontSize: 11,
     fontFamily: "Poppins-Regular",
     color: "rgba(255, 255, 255, 0.8)",
   },
@@ -206,7 +221,7 @@ const styles = StyleSheet.create({
     borderColor: "rgba(255, 255, 255, 0.3)",
   },
   progressBtnText: {
-    fontSize: 12,
+    fontSize: 11,
     fontFamily: "Poppins-Medium",
     color: "#fff",
   },
@@ -222,7 +237,7 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   playBtnText: {
-    fontSize: 12,
+    fontSize: 11,
     fontFamily: "Poppins-Bold",
     color: "#fff",
   },
@@ -259,7 +274,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   statValue: {
-    fontSize: 14,
+    fontSize: 13,
     fontFamily: "Poppins-Bold",
     color: "#FFF",
   },

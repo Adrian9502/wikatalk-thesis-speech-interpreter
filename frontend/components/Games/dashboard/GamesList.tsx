@@ -89,7 +89,7 @@ const GamesList = React.memo(
         <View style={styles.headerRow}>
           <SectionHeader
             icon={
-              <Target width={18} height={18} color={ICON_COLORS.brightYellow} />
+              <Target width={16} height={16} color={ICON_COLORS.brightYellow} />
             }
             title="Game Modes"
             subtitle="Master skills with interactive challenges"

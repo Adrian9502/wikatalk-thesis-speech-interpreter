@@ -46,7 +46,7 @@ const styles = StyleSheet.create({
   container: {
     flexDirection: "row",
     alignItems: "center",
-    paddingVertical: 6,
+    paddingVertical: 3,
     paddingHorizontal: 12,
     backgroundColor: "rgba(255, 255, 255, 0.15)",
     borderRadius: 20,
@@ -55,7 +55,7 @@ const styles = StyleSheet.create({
   },
   coinIconContainer: {
     position: "relative",
-    marginRight: 8,
+    marginRight: 4,
   },
   coinImage: {
     width: 15,

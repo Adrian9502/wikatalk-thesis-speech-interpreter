@@ -38,7 +38,7 @@ const styles = StyleSheet.create({
     marginLeft: 8,
   },
   sectionSubtitle: {
-    fontSize: 12,
+    fontSize: 11,
     fontFamily: "Poppins-Regular",
     color: BASE_COLORS.white,
     opacity: 0.7,

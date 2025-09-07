@@ -35,13 +35,13 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: "rgba(255,255,255,0.5)",
     borderRadius: 20,
-    paddingHorizontal: 12,
-    paddingVertical: 8,
+    paddingHorizontal: 10,
+    paddingVertical: 7,
     gap: 5,
   },
   rankingsButtonText: {
     fontSize: 12,
-    fontFamily: "Poppins-Medium",
+    fontFamily: "Poppins-Regular",
     color: BASE_COLORS.white,
   },
 });

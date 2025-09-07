@@ -2,6 +2,7 @@ import React from "react";
 import { View, Text, Image, StyleSheet, Dimensions } from "react-native";
 import { Target, TrendingUp } from "react-native-feather";
 import { BASE_COLORS } from "@/constant/colors";
+import useThemeStore from "@/store/useThemeStore";
 
 const { width: screenWidth } = Dimensions.get("window");
 
@@ -15,6 +16,8 @@ interface QuickStatsProps {
 }
 
 const QuickStats = React.memo(({ overallStats, coins }: QuickStatsProps) => {
+  const { activeTheme } = useThemeStore();
+
   const quickStats = [
     {
       icon: <Target width={14} height={14} color={BASE_COLORS.yellow} />,
@@ -49,42 +52,20 @@ const QuickStats = React.memo(({ overallStats, coins }: QuickStatsProps) => {
       <Text style={styles.sectionTitle}>Your Game Progress</Text>
       <View style={styles.quickStatsGrid}>
         {quickStats.map((stat, index) => (
-          <View
-            key={index}
-            style={[
-              styles.quickStatCard,
-              {
-                borderColor: "rgba(255, 255, 255, 0.1)",
-              },
-            ]}
-          >
+          <View key={index} style={styles.quickStatCard}>
             <View style={styles.quickStatHeader}>
               {stat.icon}
-              <Text
-                style={[
-                  styles.quickStatLabel,
-                  { color: "rgba(255, 255, 255, 0.7)" },
-                ]}
-              >
-                {stat.label}
-              </Text>
+              <Text style={styles.quickStatLabel}>{stat.label}</Text>
             </View>
             <Text
               style={[
                 styles.quickStatValue,
-                { color: stat.color || BASE_COLORS.white },
+                { color: activeTheme.tabActiveColor },
               ]}
             >
               {stat.value}
             </Text>
-            <Text
-              style={[
-                styles.quickStatSubValue,
-                { color: "rgba(255, 255, 255, 0.6)" },
-              ]}
-            >
-              {stat.subValue}
-            </Text>
+            <Text style={styles.quickStatSubValue}>{stat.subValue}</Text>
           </View>
         ))}
       </View>
@@ -110,11 +91,11 @@ const styles = StyleSheet.create({
   },
   quickStatCard: {
     width: screenWidth < 350 ? "100%" : screenWidth < 400 ? "48%" : "31%",
-    backgroundColor: "rgba(255, 255, 255, 0.08)",
+    backgroundColor: "rgba(255, 255, 255, 0.15)",
     borderRadius: 20,
     padding: 12,
     borderWidth: 1,
-    borderColor: "rgba(255, 255, 255, 0.1)",
+    borderColor: "rgba(255, 255, 255, 0.2)",
     marginBottom: 10,
   },
   quickStatHeader: {
@@ -125,8 +106,8 @@ const styles = StyleSheet.create({
   },
   quickStatLabel: {
     fontSize: 10,
-    fontFamily: "Poppins-Regular",
-    color: "rgba(255, 255, 255, 0.7)",
+    fontFamily: "Poppins-Medium",
+    color: BASE_COLORS.white,
   },
   quickStatValue: {
     fontSize: 15,
@@ -135,8 +116,8 @@ const styles = StyleSheet.create({
   },
   quickStatSubValue: {
     fontSize: 9,
-    fontFamily: "Poppins-Regular",
-    color: "rgba(255, 255, 255, 0.6)",
+    fontFamily: "Poppins-Medium",
+    color: BASE_COLORS.white,
   },
   rewardCoinImage: {
     width: 14,

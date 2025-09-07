@@ -107,7 +107,7 @@ const WordOfTheDayCard = React.memo(
         {/* header */}
         <View style={styles.inlineHeaderContainer}>
           <SectionHeader
-            icon={<Star width={20} height={20} color={ICON_COLORS.gold} />}
+            icon={<Star width={16} height={16} color={ICON_COLORS.gold} />}
             title="Word of the Day"
             subtitle="Expand your vocabulary daily"
           />

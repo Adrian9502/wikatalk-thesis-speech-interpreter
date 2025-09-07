@@ -245,9 +245,8 @@ const styles = StyleSheet.create({
   },
 
   buttonGradient: {
-    paddingHorizontal: 20,
+    paddingHorizontal: 16,
     paddingVertical: 8,
-    minWidth: 160,
     alignItems: "center",
   },
 
@@ -258,28 +257,15 @@ const styles = StyleSheet.create({
   },
 
   buttonText: {
-    fontSize: 14,
+    fontSize: 12,
     fontFamily: "Poppins-Medium",
     color: BASE_COLORS.white,
     textAlign: "center",
   },
 
-  subTextContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 4,
-  },
-
-  subText: {
-    fontSize: 12,
-    fontFamily: "Poppins-Medium",
-    color: "rgba(255, 255, 255, 0.8)",
-    textAlign: "center",
-  },
-
   coinIcon: {
-    width: 14,
-    height: 14,
+    width: 12,
+    height: 12,
     marginBottom: 4,
   },
 
