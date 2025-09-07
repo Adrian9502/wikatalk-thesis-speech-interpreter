@@ -7,10 +7,8 @@ import useCoinsStore from "@/store/games/useCoinsStore";
 import { convertQuizToLevels } from "@/utils/games/convertQuizToLevels";
 import { LevelData, QuizQuestions } from "@/types/gameTypes";
 import { RankingData } from "@/types/rankingTypes";
-import axios from "axios";
+import { rankingService } from "@/services/api/rankingService";
 import { getToken } from "@/lib/authTokenManager";
-
-const API_URL = process.env.EXPO_PUBLIC_BACKEND_URL || "http://localhost:5000";
 
 interface FilteredLevels {
   all: LevelData[];
@@ -311,27 +309,12 @@ export const useSplashStore = create<SplashState>()((set, get) => ({
         try {
           console.log(`[SplashStore] Preloading ${category} rankings`);
 
-          const params = new URLSearchParams({ type: category, limit: "50" });
-          if (category.includes("_")) {
-            const [type, gameMode] = category.split("_");
-            params.set("type", type);
-            params.append("gameMode", gameMode);
-          }
+          // NEW: Use centralized service instead of direct axios call
+          const response = await rankingService.getRankings(category, 50);
 
-          const response = await axios.get(
-            `${API_URL}/api/rankings?${params.toString()}`,
-            {
-              headers: {
-                Authorization: `Bearer ${token}`,
-                "Content-Type": "application/json",
-              },
-              timeout: 8000, // Shorter timeout for splash screen
-            }
-          );
-
-          if (response.data?.data) {
+          if (response.success && response.data) {
             preloadedRankings[category] = {
-              data: response.data.data,
+              data: response.data,
               timestamp: Date.now(),
             };
             console.log(`[SplashStore] ✅ ${category} rankings preloaded`);
