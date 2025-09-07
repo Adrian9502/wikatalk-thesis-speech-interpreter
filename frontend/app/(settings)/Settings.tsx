@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { FlatList, View } from "react-native";
 import {
   SafeAreaView,
@@ -7,6 +7,7 @@ import {
 import { StatusBar } from "expo-status-bar";
 import { useAuth } from "@/context/AuthContext";
 import useThemeStore from "@/store/useThemeStore";
+import { useGameSoundStore } from "@/store/useGameSoundStore";
 import { FeatherIconName } from "@/types/types";
 import ConfirmationModal from "@/components/ConfirmationModal";
 import { globalStyles } from "@/styles/globalStyles";
@@ -69,10 +70,19 @@ const Settings = () => {
   const { logout, userData } = useAuth();
   // Get theme from store
   const { activeTheme } = useThemeStore();
+  // Game sound store
+  const { isSoundEnabled, setGameSoundEnabled, loadSoundSettings } =
+    useGameSoundStore();
+
   // Modal state
   const [logoutModalVisible, setLogoutModalVisible] = useState(false);
   const [contactModalVisible, setContactModalVisible] = useState(false);
   const [termsModalVisible, setTermsModalVisible] = useState(false);
+
+  // Load sound settings on component mount
+  useEffect(() => {
+    loadSoundSettings();
+  }, [loadSoundSettings]);
 
   // NEW: Back navigation handler
   const handleBackPress = () => {
@@ -90,7 +100,24 @@ const Settings = () => {
     }
   };
 
+  // Handle game sound toggle
+  const handleGameSoundToggle = () => {
+    setGameSoundEnabled(!isSoundEnabled);
+  };
+
   const sections: SettingSection[] = [
+    // Games Section - NEW
+    {
+      title: "Games",
+      items: [
+        {
+          icon: "volume-2",
+          label: "Game Sound Effects",
+          value: isSoundEnabled,
+          toggleSwitch: handleGameSoundToggle,
+        },
+      ],
+    },
     // Activity Section
     {
       title: "Activity",
@@ -113,7 +140,7 @@ const Settings = () => {
         },
       ],
     },
-    // Legal Section - NEW
+    // Legal Section
     {
       title: "Legal",
       items: [

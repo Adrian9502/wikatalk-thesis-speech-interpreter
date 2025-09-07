@@ -4,6 +4,7 @@ import LottieView from "lottie-react-native";
 import * as SplashScreen from "expo-splash-screen";
 import AppLoading from "@/components/AppLoading";
 import { useSplashStore } from "@/store/useSplashStore";
+import { useGameSoundStore } from "@/store/useGameSoundStore";
 
 // sound
 import { preloadSounds } from "@/utils/playSound";
@@ -11,7 +12,10 @@ import { preloadSounds } from "@/utils/playSound";
 const SplashAnimation: React.FC = () => {
   const animationRef = useRef<LottieView>(null);
   const gameDataPreloaded = useSplashStore((state) => state.gameDataPreloaded);
-
+  useEffect(() => {
+    // Load game sound settings
+    useGameSoundStore.getState().loadSoundSettings();
+  }, []);
   // preload game sound
   useEffect(() => {
     const initializeSounds = async () => {

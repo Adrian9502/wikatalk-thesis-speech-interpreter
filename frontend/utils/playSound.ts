@@ -1,10 +1,11 @@
 import { Audio } from "expo-av";
+import { useGameSoundStore } from "@/store/useGameSoundStore";
 
 // preload imports
 import coinClaimSound from "@/assets/sounds/coin-claim.mp3";
 import coinSpendSound from "@/assets/sounds/coin-spend.mp3";
 import correctAnswerSound from "@/assets/sounds/correct-answer.mp3";
-import wrongAnswerSound from "@/assets/sounds/wrong-answer.mp3"; // FIXED: Use correct filename
+import wrongAnswerSound from "@/assets/sounds/wrong-answer.mp3";
 import levelCompleteSound from "@/assets/sounds/game-level-complete.mp3";
 
 type SoundKeys =
@@ -12,14 +13,14 @@ type SoundKeys =
   | "wrong"
   | "levelComplete"
   | "coinSpend"
-  | "coinClaim"; // Added coinClaim
+  | "coinClaim";
 
 const sounds: Record<SoundKeys, any> = {
   correct: correctAnswerSound,
   wrong: wrongAnswerSound,
   levelComplete: levelCompleteSound,
   coinSpend: coinSpendSound,
-  coinClaim: coinClaimSound, // Added coinClaim
+  coinClaim: coinClaimSound,
 };
 
 // Global sound cache to prevent memory leaks
@@ -27,33 +28,28 @@ const soundCache = new Map<string, Audio.Sound>();
 
 export async function playSound(type: SoundKeys) {
   try {
-    // Check if we already have this sound loaded
-    const cachedSound = soundCache.get(type);
-
-    if (cachedSound) {
-      // Rewind and play the cached sound
-      await cachedSound.setPositionAsync(0);
-      await cachedSound.playAsync();
+    // Check if game sounds are enabled
+    const { isSoundEnabled } = useGameSoundStore.getState();
+    if (!isSoundEnabled) {
+      console.log(`[Sound] Game sound disabled, skipping ${type}`);
       return;
     }
 
-    // Create new sound
-    const { sound } = await Audio.Sound.createAsync(sounds[type]);
+    console.log(`[Sound] Playing ${type} sound`);
 
-    // Cache the sound for reuse
-    soundCache.set(type, sound);
+    // Check if sound is already cached
+    let sound = soundCache.get(type);
 
-    // Play the sound
+    if (!sound) {
+      // Create and cache new sound
+      const { sound: newSound } = await Audio.Sound.createAsync(sounds[type]);
+      soundCache.set(type, newSound);
+      sound = newSound;
+    }
+
+    // Reset position and play
+    await sound.setPositionAsync(0);
     await sound.playAsync();
-
-    // Set up cleanup when sound finishes
-    sound.setOnPlaybackStatusUpdate((status) => {
-      if (!status.isLoaded) return;
-      if (status.didJustFinish) {
-        // Don't unload immediately - keep for reuse
-        console.log(`[Sound] Finished playing: ${type}`);
-      }
-    });
   } catch (error) {
     console.warn(`[Sound] Error playing ${type}:`, error);
   }

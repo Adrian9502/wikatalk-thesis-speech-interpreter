@@ -10,6 +10,9 @@ export interface SettingsItemType {
   switchValue?: boolean;
   onSwitchChange?: (value: boolean) => void;
   customIconColor?: string;
+  // NEW: Support for toggle switches
+  value?: boolean;
+  toggleSwitch?: () => void;
 }
 
 export interface SettingsSection {

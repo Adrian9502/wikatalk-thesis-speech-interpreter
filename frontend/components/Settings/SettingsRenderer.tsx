@@ -212,6 +212,9 @@ export const SettingItemComponent = ({
           icon={item.icon}
           label={item.label}
           onPress={item.onPress}
+          showSwitch={item.showSwitch || typeof item.value === "boolean"}
+          switchValue={item.value}
+          onSwitchChange={item.toggleSwitch}
         />
       </View>
     </View>
