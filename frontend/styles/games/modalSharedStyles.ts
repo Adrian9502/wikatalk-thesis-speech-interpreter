@@ -1,3 +1,4 @@
+import { BASE_COLORS } from "@/constant/colors";
 import { StyleSheet } from "react-native";
 
 export const modalSharedStyles = StyleSheet.create({
@@ -69,12 +70,12 @@ export const modalSharedStyles = StyleSheet.create({
     textShadowOffset: { width: 0, height: 1 },
     textShadowRadius: 3,
     fontFamily: "Poppins-Bold",
-    color: "#fff",
+    color: BASE_COLORS.white,
   },
   levelTitle: {
     fontSize: 19,
     fontFamily: "Poppins-Bold",
-    color: "#fff",
+    color: BASE_COLORS.white,
     textShadowColor: "rgba(0, 0, 0, 0.5)",
     textShadowOffset: { width: 0, height: 1 },
     textShadowRadius: 3,
@@ -120,7 +121,7 @@ export const modalSharedStyles = StyleSheet.create({
   difficultyText: {
     fontSize: 11,
     fontFamily: "Poppins-SemiBold",
-    color: "#fff",
+    color: BASE_COLORS.white,
   },
 
   // Content Cards
@@ -135,13 +136,13 @@ export const modalSharedStyles = StyleSheet.create({
   cardTitle: {
     fontSize: 16,
     fontFamily: "Poppins-SemiBold",
-    color: "#fff",
+    color: BASE_COLORS.white,
     marginBottom: 8,
   },
   cardText: {
     fontSize: 15,
     fontFamily: "Poppins-Medium",
-    color: "#fff",
+    color: BASE_COLORS.white,
     lineHeight: 22,
   },
 
@@ -156,7 +157,7 @@ export const modalSharedStyles = StyleSheet.create({
     borderColor: "rgba(255, 255, 255, 0.2)",
   },
   actionButtonText: {
-    color: "#fff",
+    color: BASE_COLORS.white,
     fontFamily: "Poppins-SemiBold",
     fontSize: 16,
   },

@@ -2,6 +2,7 @@ import React from "react";
 import { View, Text, StyleSheet, ActivityIndicator } from "react-native";
 import { Clock, Calendar, Target, Award } from "react-native-feather";
 import { formatTime } from "@/utils/gameUtils";
+import { BASE_COLORS } from "@/constant/colors";
 
 interface CompletedLevelDetails {
   question: string;
@@ -85,7 +86,7 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 14,
     fontFamily: "Poppins-Medium",
-    color: "#fff",
+    color: BASE_COLORS.white,
     lineHeight: 22,
     marginBottom: 16,
   },
@@ -119,7 +120,7 @@ const styles = StyleSheet.create({
   statValue: {
     fontSize: 13,
     fontFamily: "Poppins-Medium",
-    color: "#fff",
+    color: BASE_COLORS.white,
     marginTop: 6,
     textAlign: "center",
     letterSpacing: 0.2,

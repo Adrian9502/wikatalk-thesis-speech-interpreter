@@ -301,6 +301,8 @@ const FillInTheBlankPlayingContent: React.FC<RenderPlayingContentProps> =
         >
           <ScrollView
             ref={scrollViewRef}
+            bounces={false}
+            overScrollMode="never"
             showsVerticalScrollIndicator={false}
             keyboardShouldPersistTaps="handled"
             keyboardDismissMode="interactive"

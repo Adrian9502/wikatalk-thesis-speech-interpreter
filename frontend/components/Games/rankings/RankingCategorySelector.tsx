@@ -58,6 +58,8 @@ const RankingCategorySelector: React.FC<RankingCategorySelectorProps> = ({
 
   return (
     <ScrollView
+      bounces={false}
+      overScrollMode="never"
       horizontal
       showsHorizontalScrollIndicator={false}
       contentContainerStyle={styles.container}

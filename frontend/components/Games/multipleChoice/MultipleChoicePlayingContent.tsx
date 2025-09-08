@@ -174,6 +174,8 @@ const MultipleChoicePlayingContent: React.FC<MultipleChoicePlayingContentProps> 
             </View>
 
             <ScrollView
+              bounces={false}
+              overScrollMode="never"
               showsVerticalScrollIndicator={false}
               contentContainerStyle={{ flexGrow: 1, paddingBottom: 20 }}
               nestedScrollEnabled={true}

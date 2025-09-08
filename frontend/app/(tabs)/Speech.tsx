@@ -258,6 +258,7 @@ const Speech = () => {
           <ScrollView
             showsVerticalScrollIndicator={false}
             bounces={false}
+            overScrollMode="never"
             style={styles.contentContainer}
           >
             {/* Top section */}

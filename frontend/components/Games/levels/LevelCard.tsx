@@ -264,7 +264,7 @@ const LevelCard: React.FC<LevelCardProps> = React.memo(
                   ]}
                 >
                   <View style={styles.levelLockIcon}>
-                    <Lock width={24} height={24} color="#FFFFFF" />
+                    <Lock width={24} height={24} color={BASE_COLORS.white} />
                   </View>
                   {levelProps.lockReason && (
                     <Text style={styles.lockReasonText} numberOfLines={2}>

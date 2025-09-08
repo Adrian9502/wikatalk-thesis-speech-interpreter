@@ -12,7 +12,7 @@ import { LinearGradient } from "expo-linear-gradient";
 import RankingCategorySelector from "@/components/games/rankings/RankingCategorySelector";
 import RankingContent from "@/components/games/rankings/RankingContent";
 import CloseButton from "@/components/games/buttons/CloseButton";
-import { NAVIGATION_COLORS, RANKING_COLORS } from "@/constant/colors";
+import { BASE_COLORS, RANKING_COLORS } from "@/constant/colors";
 import { InteractionManager } from "react-native";
 import ModalLoading from "../ModalLoading";
 
@@ -207,7 +207,7 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 18,
     fontFamily: "Poppins-SemiBold",
-    color: "#FFF",
+    color: BASE_COLORS.white,
     textAlign: "center",
   },
 });

@@ -11,7 +11,7 @@ import {
   ImageStyle,
 } from "react-native";
 import { RefreshCw } from "react-native-feather";
-import { ICON_COLORS } from "@/constant/colors";
+import { BASE_COLORS, ICON_COLORS } from "@/constant/colors";
 
 interface ResetButtonProps {
   // Core functionality
@@ -123,12 +123,12 @@ const ResetButton: React.FC<ResetButtonProps> = ({
         activeOpacity={0.8}
       >
         {isLoading ? (
-          <ActivityIndicator size="small" color="#fff" />
+          <ActivityIndicator size="small" color={BASE_COLORS.white} />
         ) : (
           <RefreshCw
             width={getIconSize()}
             height={getIconSize()}
-            color="#fff"
+            color={BASE_COLORS.white}
           />
         )}
         <Text style={getTextStyles()}>🪙 {cost}</Text>
@@ -144,9 +144,13 @@ const ResetButton: React.FC<ResetButtonProps> = ({
       disabled={disabled || isLoading}
     >
       {isLoading ? (
-        <ActivityIndicator size="small" color="#fff" />
+        <ActivityIndicator size="small" color={BASE_COLORS.white} />
       ) : (
-        <RefreshCw width={getIconSize()} height={getIconSize()} color="#fff" />
+        <RefreshCw
+          width={getIconSize()}
+          height={getIconSize()}
+          color={BASE_COLORS.white}
+        />
       )}
       <View style={styles.contentContainer}>
         {showCostLabel && <Text style={getTextStyles()}>{costLabel}</Text>}
@@ -214,7 +218,7 @@ const styles = StyleSheet.create({
   baseText: {
     fontSize: 12,
     fontFamily: "Poppins-Medium",
-    color: "#fff",
+    color: BASE_COLORS.white,
   } as TextStyle,
 
   mediumText: {

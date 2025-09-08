@@ -186,6 +186,7 @@ const ForgotPassword: React.FC = () => {
           keyboardShouldPersistTaps="handled"
           showsVerticalScrollIndicator={false}
           bounces={false}
+          overScrollMode="never"
         >
           {/* Logo */}
           <View style={styles.logoContainer}>
@@ -278,7 +279,10 @@ const ForgotPassword: React.FC = () => {
                       >
                         <View style={styles.buttonContent}>
                           {isLoading && (
-                            <ActivityIndicator size="small" color="#FFFFFF" />
+                            <ActivityIndicator
+                              size="small"
+                              color={BASE_COLORS.white}
+                            />
                           )}
                           <Text style={styles.buttonText}>Verify Code</Text>
                         </View>

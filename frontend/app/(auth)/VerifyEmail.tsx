@@ -133,6 +133,7 @@ const VerifyEmail: React.FC = () => {
           keyboardShouldPersistTaps="handled"
           showsVerticalScrollIndicator={false}
           bounces={false}
+          overScrollMode="never"
         >
           {/* Logo */}
           <View style={styles.logoContainer}>
@@ -192,7 +193,7 @@ const VerifyEmail: React.FC = () => {
                       {isLoading && (
                         <ActivityIndicator
                           size="small"
-                          color="#FFFFFF"
+                          color={BASE_COLORS.white}
                           style={{ marginRight: 8 }}
                         />
                       )}

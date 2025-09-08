@@ -3,6 +3,7 @@ import { View, Text, Image } from "react-native";
 import { Check, X } from "react-native-feather";
 import { rewardStyles } from "@/styles/games/rewards.styles";
 import { RewardDay } from "@/hooks/useRewards";
+import { BASE_COLORS } from "@/constant/colors";
 interface RewardDayItemProps {
   item: RewardDay;
 }
@@ -21,7 +22,7 @@ const RewardDayItem: React.FC<RewardDayItemProps> = ({ item }) => {
 
       {item.status === "claimed" ? (
         <View style={rewardStyles.checkMark}>
-          <Check width={10} height={10} color="#FFF" />
+          <Check width={10} height={10} color={BASE_COLORS.white} />
         </View>
       ) : item.status === "today" ? (
         <View style={rewardStyles.todayIndicator}>
@@ -32,7 +33,7 @@ const RewardDayItem: React.FC<RewardDayItemProps> = ({ item }) => {
         </View>
       ) : item.status === "missed" ? (
         <View style={rewardStyles.missedIndicator}>
-          <X width={10} height={10} color="#FFF" />
+          <X width={10} height={10} color={BASE_COLORS.white} />
         </View>
       ) : (
         <View style={rewardStyles.upcomingIndicator}>

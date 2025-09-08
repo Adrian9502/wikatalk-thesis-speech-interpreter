@@ -25,7 +25,7 @@ const ErrorDisplay = React.memo(
 
         {onRetry && (
           <TouchableOpacity style={styles.retryButton} onPress={onRetry}>
-            <RefreshCw width={18} height={18} color="#FFF" />
+            <RefreshCw width={18} height={18} color={BASE_COLORS.white} />
             <Text style={styles.retryText}>Retry</Text>
           </TouchableOpacity>
         )}
@@ -63,7 +63,7 @@ const styles = StyleSheet.create({
   retryText: {
     fontSize: 12,
     fontFamily: "Poppins-Medium",
-    color: "#FFF",
+    color: BASE_COLORS.white,
   },
 });
 

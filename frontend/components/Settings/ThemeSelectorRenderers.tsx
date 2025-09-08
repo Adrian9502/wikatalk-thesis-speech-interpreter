@@ -47,7 +47,9 @@ export const renderThemeItem = (
         end={{ x: 1, y: 1 }}
         style={[styles.colorPreview, isActive && styles.activeColorPreview]}
       >
-        {isActive && <Feather name="check" size={20} color="#fff" />}
+        {isActive && (
+          <Feather name="check" size={20} color={BASE_COLORS.white} />
+        )}
       </LinearGradient>
       <Text style={styles.themeName}>{theme.name}</Text>
     </TouchableOpacity>

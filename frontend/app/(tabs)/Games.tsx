@@ -287,6 +287,8 @@ const Games = () => {
         style={[dynamicStyles.container, { paddingTop: insets.top }]}
       >
         <ScrollView
+          bounces={false}
+          overScrollMode="never"
           showsVerticalScrollIndicator={false}
           contentContainerStyle={styles.scrollContent}
         >

@@ -1,3 +1,4 @@
+import { BASE_COLORS } from "@/constant/colors";
 import React from "react";
 import {
   TouchableOpacity,
@@ -23,7 +24,7 @@ const Button = ({
   title,
   onPress,
   color,
-  textColor = "#FFFFFF",
+  textColor = BASE_COLORS.white,
   style,
   textStyle,
   isLoading = false,

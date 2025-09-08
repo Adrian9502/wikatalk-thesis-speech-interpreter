@@ -1,11 +1,12 @@
 import { StyleSheet, Text, View } from "react-native";
 import React from "react";
 import { ActivityIndicator } from "react-native-paper";
+import { BASE_COLORS } from "@/constant/colors";
 
 const ModalLoading = () => {
   return (
     <View style={styles.loadingContainer}>
-      <ActivityIndicator color="#fff" size="small" />
+      <ActivityIndicator color={BASE_COLORS.white} size="small" />
       <Text style={styles.loadingText}>Loading data...</Text>
     </View>
   );

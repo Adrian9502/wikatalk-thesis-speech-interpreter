@@ -30,7 +30,7 @@ const ResetCostInfoModal: React.FC<ResetCostInfoModalProps> = ({
           style={styles.modalContainer}
         >
           <LinearGradient
-            colors={NAVIGATION_COLORS.indigo}
+            colors={NAVIGATION_COLORS.blue}
             style={styles.modalContent}
           >
             <CloseButton size={17} onPress={onClose}></CloseButton>
@@ -47,6 +47,8 @@ const ResetCostInfoModal: React.FC<ResetCostInfoModalProps> = ({
 
             {/* Cost Tiers */}
             <ScrollView
+              bounces={false}
+              overScrollMode="never"
               showsVerticalScrollIndicator={false}
               style={styles.tiersContainer}
             >

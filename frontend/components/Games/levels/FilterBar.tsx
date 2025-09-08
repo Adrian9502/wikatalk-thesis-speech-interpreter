@@ -72,6 +72,8 @@ const FilterBar: React.FC<FilterBarProps> = ({
       style={styles.filterContainer}
     >
       <ScrollView
+        bounces={false}
+        overScrollMode="never"
         horizontal
         showsHorizontalScrollIndicator={false}
         contentContainerStyle={styles.filterScrollContent}

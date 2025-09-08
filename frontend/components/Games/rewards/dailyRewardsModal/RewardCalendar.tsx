@@ -117,6 +117,8 @@ const RewardCalendar: React.FC<RewardCalendarProps> = ({
 
       {/* Days Grid - Optimized to render only visible items */}
       <ScrollView
+        bounces={false}
+        overScrollMode="never"
         ref={scrollViewRef}
         horizontal
         showsHorizontalScrollIndicator={false}

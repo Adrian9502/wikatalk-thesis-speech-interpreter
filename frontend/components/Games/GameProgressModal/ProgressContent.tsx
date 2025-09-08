@@ -157,6 +157,8 @@ const ProgressContent: React.FC<ProgressContentProps> = ({
   // Render optimized content with sections
   return (
     <ScrollView
+      bounces={false}
+      overScrollMode="never"
       style={styles.content}
       showsVerticalScrollIndicator={false}
       contentContainerStyle={styles.scrollContent}
@@ -232,7 +234,7 @@ const styles = StyleSheet.create({
   errorText: {
     fontSize: 14,
     fontFamily: "Poppins-Medium",
-    color: "#fff",
+    color: BASE_COLORS.white,
     textAlign: "center",
     marginTop: 16,
     marginBottom: 8,
@@ -249,7 +251,7 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 13,
     fontFamily: "Poppins-Medium",
-    color: "#fff",
+    color: BASE_COLORS.white,
     marginBottom: 10,
   },
   sectionContent: {

@@ -145,6 +145,8 @@ const ConfidenceModal: React.FC<ConfidenceModalProps> = ({
           </View>
 
           <ScrollView
+            bounces={false}
+            overScrollMode="never"
             style={styles.content}
             showsVerticalScrollIndicator={false}
           >

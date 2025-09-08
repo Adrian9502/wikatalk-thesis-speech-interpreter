@@ -108,7 +108,11 @@ const HelpFAQ = () => {
               )}
             </View>
           </View>
-          <ScrollView style={styles.container}>
+          <ScrollView
+            bounces={false}
+            overScrollMode="never"
+            style={styles.container}
+          >
             {searchQuery.trim() === "" ? (
               // Show categories when not searching
               categories.map((category) => (
@@ -125,9 +129,17 @@ const HelpFAQ = () => {
                       {category.title}
                     </Text>
                     {expandedCategory === category.id ? (
-                      <ChevronUp width={24} height={24} color="#ffffff" />
+                      <ChevronUp
+                        width={24}
+                        height={24}
+                        color={BASE_COLORS.white}
+                      />
                     ) : (
-                      <ChevronDown width={24} height={24} color="#ffffff" />
+                      <ChevronDown
+                        width={24}
+                        height={24}
+                        color={BASE_COLORS.white}
+                      />
                     )}
                   </TouchableOpacity>
 
@@ -183,7 +195,9 @@ const HelpFAQ = () => {
                   Search Results ({filteredFAQs.length})
                 </Text>
                 {filteredFAQs.length === 0 ? (
-                  <Text style={[styles.noResultsText, { color: "#fff" }]}>
+                  <Text
+                    style={[styles.noResultsText, { color: BASE_COLORS.white }]}
+                  >
                     No results found. Try a different search term.
                   </Text>
                 ) : (
@@ -280,7 +294,7 @@ const styles = StyleSheet.create({
   headerText: {
     fontFamily: "Poppins-Medium",
     fontSize: 20,
-    color: "#ffffff",
+    color: BASE_COLORS.white,
   },
   searchContainer: {
     paddingLeft: 16,
@@ -292,7 +306,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     borderRadius: 20,
     paddingHorizontal: 16,
-    backgroundColor: "#ffffff",
+    backgroundColor: BASE_COLORS.white,
   },
   clearButton: {
     padding: 6,
@@ -323,7 +337,7 @@ const styles = StyleSheet.create({
     width: "100%", // Ensure the header takes full width
   },
   categoryHeaderText: {
-    color: "#fff",
+    color: BASE_COLORS.white,
     fontFamily: "Poppins-Medium",
     fontSize: 15,
   },
@@ -335,7 +349,7 @@ const styles = StyleSheet.create({
     borderColor: "#e0e0e0",
   },
   questionHeader: {
-    backgroundColor: "#ffffff",
+    backgroundColor: BASE_COLORS.white,
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
@@ -362,7 +376,7 @@ const styles = StyleSheet.create({
   },
   searchResultsTitle: {
     fontSize: 15,
-    color: "#fff",
+    color: BASE_COLORS.white,
     fontFamily: "Poppins-Regular",
     marginBottom: 16,
   },
@@ -381,7 +395,7 @@ const styles = StyleSheet.create({
   },
   contactTitle: {
     fontSize: 15,
-    color: "#fff",
+    color: BASE_COLORS.white,
     fontFamily: "Poppins-Regular",
     marginBottom: 16,
   },
@@ -392,7 +406,7 @@ const styles = StyleSheet.create({
   },
   contactButtonText: {
     fontFamily: "Poppins-Regular",
-    color: "#ffffff",
+    color: BASE_COLORS.white,
     fontSize: 14,
   },
 });

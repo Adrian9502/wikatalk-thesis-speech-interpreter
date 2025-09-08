@@ -1,3 +1,4 @@
+import { BASE_COLORS } from "@/constant/colors";
 import React from "react";
 import {
   TouchableOpacity,
@@ -47,7 +48,7 @@ const CustomGoogleButton: React.FC<CustomGoogleButtonProps> = ({
       activeOpacity={0.5}
     >
       {isSubmitting ? (
-        <ActivityIndicator color="#FFFFFF" size="small" />
+        <ActivityIndicator color={BASE_COLORS.white} size="small" />
       ) : (
         <>
           <View style={styles.iconContainer}>
@@ -64,7 +65,7 @@ const styles = StyleSheet.create({
   googleButton: {
     width: "100%",
     paddingVertical: 8,
-    backgroundColor: "#FFFFFF",
+    backgroundColor: BASE_COLORS.white,
     borderRadius: 20,
     flexDirection: "row",
     justifyContent: "center",

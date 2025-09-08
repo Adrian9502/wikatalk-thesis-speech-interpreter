@@ -1,6 +1,7 @@
 import { StatItem } from "@/types/gameTypes";
 import { StyleSheet, Text, View } from "react-native";
 import React from "react";
+import { BASE_COLORS } from "@/constant/colors";
 
 const StatBox: React.FC<StatItem> = ({ icon, label, value }) => (
   <View style={styles.statBox}>
@@ -34,7 +35,7 @@ const styles = StyleSheet.create({
   statValue: {
     fontSize: 14,
     fontFamily: "Poppins-SemiBold",
-    color: "#fff",
+    color: BASE_COLORS.white,
     marginTop: 2,
     textAlign: "center",
   },

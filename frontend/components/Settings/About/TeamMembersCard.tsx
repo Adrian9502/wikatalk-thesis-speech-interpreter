@@ -124,7 +124,7 @@ const TeamMemberCard: React.FC<TeamMemberCardProps> = ({
 
 const styles = StyleSheet.create({
   card: {
-    backgroundColor: "#fff",
+    backgroundColor: BASE_COLORS.white,
     borderRadius: 20,
     padding: 16,
     marginBottom: 16,

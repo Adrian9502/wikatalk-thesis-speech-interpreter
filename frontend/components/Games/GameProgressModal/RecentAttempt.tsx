@@ -85,7 +85,7 @@ const styles = StyleSheet.create({
   attemptLevel: {
     fontSize: 13,
     fontFamily: "Poppins-Medium",
-    color: "#fff",
+    color: BASE_COLORS.white,
     flex: 1,
     marginRight: 8,
   },

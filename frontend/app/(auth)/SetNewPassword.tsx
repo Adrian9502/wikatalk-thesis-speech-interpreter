@@ -125,6 +125,7 @@ const SetNewPassword: React.FC = () => {
           keyboardShouldPersistTaps="handled"
           showsVerticalScrollIndicator={false}
           bounces={false}
+          overScrollMode="never"
         >
           {/* Logo */}
           <View style={styles.logoContainer}>
@@ -185,7 +186,7 @@ const SetNewPassword: React.FC = () => {
                       {isLoading && (
                         <ActivityIndicator
                           size="small"
-                          color="#FFFFFF"
+                          color={BASE_COLORS.white}
                           style={styles.activityIndicator}
                         />
                       )}

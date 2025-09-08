@@ -22,7 +22,11 @@ const About: React.FC = () => {
 
   return (
     <SafeAreaView style={{ flex: 1 }}>
-      <ScrollView style={dynamicStyles.container}>
+      <ScrollView
+        bounces={false}
+        overScrollMode="never"
+        style={dynamicStyles.container}
+      >
         <StatusBar
           backgroundColor={activeTheme.backgroundColor}
           barStyle="light-content"

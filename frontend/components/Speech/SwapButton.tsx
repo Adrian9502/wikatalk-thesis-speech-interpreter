@@ -125,7 +125,7 @@ const styles = StyleSheet.create({
     shadowRadius: 8,
     elevation: 8,
     borderWidth: 3,
-    borderColor: "#FFFFFF",
+    borderColor: BASE_COLORS.white,
     alignItems: "center",
     justifyContent: "center",
     overflow: "hidden",

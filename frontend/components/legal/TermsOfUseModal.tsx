@@ -98,6 +98,8 @@ const TermsOfUseModal: React.FC<TermsOfUseModalProps> = ({
 
         {/* Content */}
         <ScrollView
+          bounces={false}
+          overScrollMode="never"
           style={styles.scrollView}
           contentContainerStyle={styles.scrollContent}
           showsVerticalScrollIndicator={true}

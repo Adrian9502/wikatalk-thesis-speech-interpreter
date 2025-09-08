@@ -150,9 +150,9 @@ export const GAME_ICONS_COLORS = {
 
 // Hero gradient colors on answer review
 export const GAME_RESULT_COLORS = {
-  userExit: ["#FF9800", "#EF6C00"] as const,
-  correctAnswer: ["#22C216", "#007F3B"] as const,
-  incorrectAnswer: ["#FF2919", "#B80D5F"] as const,
+  userExit: ["#BA8E23", "#b9a115ff"] as const,
+  correctAnswer: ["#029c35ff", "#0daf5eff"] as const,
+  incorrectAnswer: ["#9c0202ff", "#d64343ff"] as const,
 };
 
 export const RANKING_COLORS = ["#053691ff", "#0a7d94ff"] as const;

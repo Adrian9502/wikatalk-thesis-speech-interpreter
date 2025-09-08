@@ -316,7 +316,7 @@ const AnswerReview: React.FC<AnswerReviewProps> = ({
           <Animatable.View
             animation="fadeIn"
             duration={500}
-            delay={delay + 400}
+            delay={delay + 200}
             style={styles.rewardFloatingCard}
           >
             <LinearGradient
@@ -346,14 +346,13 @@ const AnswerReview: React.FC<AnswerReviewProps> = ({
               </View>
 
               <Text style={styles.rewardSubtitle}>{rewardInfo.label}</Text>
-              <View style={styles.heroDecoration1} />
               <View style={styles.heroDecoration2} />
               <View style={styles.heroDecoration3} />
             </LinearGradient>
           </Animatable.View>
         )}
 
-        {/* Stats Row - SIMPLIFIED: Single fadeIn */}
+        {/* Stats Row  */}
         <View style={styles.statsRow}>
           <Animatable.View
             animation="fadeIn"
@@ -488,7 +487,6 @@ const AnswerReview: React.FC<AnswerReviewProps> = ({
         <View style={styles.backgroundDecor3} />
       </Animatable.View>
 
-      {/* NEW: Reset Timer Modal */}
       <ResetTimerModal
         visible={showResetModal}
         onClose={handleCloseModal}
@@ -600,6 +598,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "center",
     alignItems: "center",
+    flexWrap: "wrap",
     marginBottom: 20,
     gap: 12,
   },
@@ -672,8 +671,8 @@ const styles = StyleSheet.create({
   },
   rewardGradient: {
     borderRadius: 20,
-    paddingHorizontal: 20,
-    paddingVertical: 14,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
     position: "relative",
     overflow: "hidden",
     width: "100%",
@@ -682,11 +681,12 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     gap: 5,
+    marginBottom: 4,
     justifyContent: "center",
   },
   rewardTitle: {
-    fontSize: 15,
-    fontFamily: "Poppins-SemiBold",
+    fontSize: 13,
+    fontFamily: "Poppins-Medium",
     color: BASE_COLORS.white,
     textAlign: "center",
   },
@@ -703,15 +703,15 @@ const styles = StyleSheet.create({
   rewardCoinsDisplay: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 8,
+    gap: 4,
   },
   rewardCoinImage: {
-    width: 20,
-    height: 20,
+    width: 18,
+    height: 18,
   },
   rewardCoinsText: {
-    fontSize: 18,
-    fontFamily: "Poppins-Bold",
+    fontSize: 16,
+    fontFamily: "Poppins-SemiBold",
     color: BASE_COLORS.white,
     textShadowColor: "rgba(0, 0, 0, 0.3)",
     textShadowOffset: { width: 0, height: 2 },
@@ -719,7 +719,7 @@ const styles = StyleSheet.create({
   },
   rewardSubtitle: {
     fontSize: 11,
-    fontFamily: "Poppins-Medium",
+    fontFamily: "Poppins-Regular",
     color: "rgba(255, 255, 255, 0.95)",
     letterSpacing: 0.3,
     textAlign: "center",

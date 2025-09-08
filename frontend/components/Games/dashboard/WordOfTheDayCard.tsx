@@ -133,7 +133,7 @@ const WordOfTheDayCard = React.memo(
 
             <View style={styles.wordCardHeader}>
               <View style={styles.wordBadge}>
-                <Calendar width={14} height={14} color="#fff" />
+                <Calendar width={14} height={14} color={BASE_COLORS.white} />
                 <Text style={styles.wordBadgeText}>TODAY'S WORD</Text>
               </View>
               <TouchableOpacity style={styles.playButton} onPress={onPlayPress}>
@@ -239,7 +239,7 @@ const styles = StyleSheet.create({
   wordBadgeText: {
     fontSize: 10,
     fontFamily: "Poppins-Medium",
-    color: "#fff",
+    color: BASE_COLORS.white,
     textTransform: "uppercase",
     letterSpacing: 0.5,
   },
@@ -258,7 +258,7 @@ const styles = StyleSheet.create({
   wordMainText: {
     fontSize: 22,
     fontFamily: "Poppins-Bold",
-    color: "#fff",
+    color: BASE_COLORS.white,
     marginBottom: 8,
   },
   wordTranslation: {

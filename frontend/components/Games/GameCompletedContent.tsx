@@ -58,11 +58,13 @@ const GameCompletedContent: React.FC<GameCompletedContentProps> = ({
   isBackgroundCompletion = false,
   isUserExit = false,
   rewardInfo = null,
-  onTimerReset, // NEW: Add onTimerReset
+  onTimerReset,
 }) => {
   return (
     <>
       <ScrollView
+        bounces={false}
+        overScrollMode="never"
         showsVerticalScrollIndicator={false}
         contentContainerStyle={gameSharedStyles.contentContainer}
       >

@@ -54,7 +54,7 @@ const ResetTimerModal: React.FC<ResetTimerModalProps> = ({
           style={styles.modalContainer}
         >
           <LinearGradient
-            colors={NAVIGATION_COLORS.indigo}
+            colors={NAVIGATION_COLORS.blue}
             style={styles.modalContent}
           >
             {showSuccessMessage ? (
@@ -149,7 +149,10 @@ const ResetTimerModal: React.FC<ResetTimerModalProps> = ({
                         disabled={isResetting}
                       >
                         {isResetting ? (
-                          <ActivityIndicator size="small" color="#fff" />
+                          <ActivityIndicator
+                            size="small"
+                            color={BASE_COLORS.white}
+                          />
                         ) : (
                           <Text style={styles.confirmButtonText}>
                             Reset Timer

@@ -61,6 +61,8 @@ const EditProfileModal = React.memo(
             </View>
 
             <ScrollView
+              bounces={false}
+              overScrollMode="never"
               showsVerticalScrollIndicator={false}
               showsHorizontalScrollIndicator={false}
               style={styles.formContainer}

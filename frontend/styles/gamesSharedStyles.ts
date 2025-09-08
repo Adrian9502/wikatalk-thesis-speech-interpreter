@@ -77,7 +77,7 @@ const gameSharedStyles = StyleSheet.create({
   },
   selectedOption: {
     borderColor: "rgba(255, 255, 255, 0.8)",
-    shadowColor: "#fff",
+    shadowColor: BASE_COLORS.white,
     shadowOpacity: 0.3,
     shadowRadius: 8,
     shadowOffset: { width: 0, height: 2 },

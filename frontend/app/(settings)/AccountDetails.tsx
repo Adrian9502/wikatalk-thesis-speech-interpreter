@@ -66,6 +66,8 @@ const AccountDetails = () => {
 
       <ScrollView
         style={styles.scrollView}
+        bounces={false}
+        overScrollMode="never"
         showsVerticalScrollIndicator={false}
       >
         <ProfileCard

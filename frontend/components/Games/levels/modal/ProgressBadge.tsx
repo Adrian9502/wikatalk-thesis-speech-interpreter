@@ -15,6 +15,7 @@ import {
 } from "react-native-feather";
 import { formatTime } from "@/utils/gameUtils";
 import ResetButton from "@/components/games/buttons/ResetButton";
+import { BASE_COLORS } from "@/constant/colors";
 
 interface ProgressBadgeProps {
   progressInfo: {
@@ -70,7 +71,7 @@ const ProgressBadge: React.FC<ProgressBadgeProps> = ({
     return (
       <View style={[styles.progressBadge]}>
         <View style={styles.loadingContainer}>
-          <ActivityIndicator size="small" color="#fff" />
+          <ActivityIndicator size="small" color={BASE_COLORS.white} />
         </View>
       </View>
     );
@@ -92,7 +93,7 @@ const ProgressBadge: React.FC<ProgressBadgeProps> = ({
                 {/* Time Item */}
                 <View style={styles.progressItem}>
                   <View style={styles.progressItemIcon}>
-                    <Clock width={14} height={14} color="#fff" />
+                    <Clock width={14} height={14} color={BASE_COLORS.white} />
                   </View>
                   <Text style={styles.progressItemText}>
                     {formatTime(progressInfo.timeSpent)}
@@ -103,7 +104,11 @@ const ProgressBadge: React.FC<ProgressBadgeProps> = ({
                 {progressInfo.attempts > 0 && (
                   <View style={styles.progressItem}>
                     <View style={styles.progressItemIcon}>
-                      <RefreshCw width={14} height={14} color="#fff" />
+                      <RefreshCw
+                        width={14}
+                        height={14}
+                        color={BASE_COLORS.white}
+                      />
                     </View>
                     <Text style={styles.progressItemText}>
                       {progressInfo.attempts}x
@@ -187,7 +192,7 @@ const ProgressBadge: React.FC<ProgressBadgeProps> = ({
                   disabled={!canAfford || isResetting}
                 >
                   {isResetting ? (
-                    <ActivityIndicator size="small" color="#fff" />
+                    <ActivityIndicator size="small" color={BASE_COLORS.white} />
                   ) : (
                     <Text style={styles.resetConfirmButtonText}>
                       {canAfford ? "Reset" : "Can't Reset"}
@@ -222,7 +227,7 @@ const ProgressBadge: React.FC<ProgressBadgeProps> = ({
           <View style={styles.resetMessageHeader}>
             <View style={styles.resetMessageIcon}>
               {resetMessage.type === "success" ? (
-                <CheckCircle width={18} height={18} color="#fff" />
+                <CheckCircle width={18} height={18} color={BASE_COLORS.white} />
               ) : (
                 <AlertTriangle width={18} height={18} color="#FF6B6B" />
               )}

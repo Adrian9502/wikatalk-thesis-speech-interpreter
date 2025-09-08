@@ -3,6 +3,7 @@ import { View, StyleSheet, Animated } from "react-native";
 import useThemeStore from "@/store/useThemeStore";
 import * as ThemeRenderers from "@/components/settings/ThemeSelectorRenderers";
 import { ThemeOption } from "@/types/types";
+import { BASE_COLORS } from "@/constant/colors";
 
 // Category types to organize themes
 type ThemeCategory = {
@@ -121,7 +122,7 @@ const ThemeSelector = () => {
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: "#fff",
+    backgroundColor: BASE_COLORS.white,
     borderRadius: 20,
     padding: 12,
   },

@@ -121,6 +121,8 @@ const IdentificationPlayingContent: React.FC<IdentificationPlayingContentProps> 
 
       return (
         <ScrollView
+          bounces={false}
+          overScrollMode="never"
           style={gamesSharedStyles.gameContainer}
           showsVerticalScrollIndicator={false}
           nestedScrollEnabled={true}

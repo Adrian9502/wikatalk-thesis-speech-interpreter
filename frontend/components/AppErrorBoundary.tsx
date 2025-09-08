@@ -1,3 +1,4 @@
+import { BASE_COLORS } from "@/constant/colors";
 import React from "react";
 import { View, Text, StyleSheet } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -63,13 +64,13 @@ const styles = StyleSheet.create({
   errorTitle: {
     fontSize: 20,
     fontFamily: "Poppins-Bold",
-    color: "#fff",
+    color: BASE_COLORS.white,
     marginBottom: 16,
   },
   errorMessage: {
     fontSize: 14,
     fontFamily: "Poppins-Regular",
-    color: "#fff",
+    color: BASE_COLORS.white,
     textAlign: "center",
     marginBottom: 24,
   },

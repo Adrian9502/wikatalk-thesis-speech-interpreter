@@ -22,7 +22,7 @@ const EmptyState: React.FC<EmptyStateProps> = ({
     // Case 1: No data available for the selected language
     if (!hasData && selectedLanguage) {
       return {
-        icon: <Globe width={25} height={25} color="#fff" />,
+        icon: <Globe width={25} height={25} color={BASE_COLORS.white} />,
         title: `No ${selectedLanguage} data available`,
         message:
           "We're still working on adding content for this language. Please try another language or check back later.",
@@ -33,7 +33,7 @@ const EmptyState: React.FC<EmptyStateProps> = ({
     // Case 2: Search term provided but no results
     if (hasSearchTerm) {
       return {
-        icon: <Search width={25} height={25} color="#fff" />,
+        icon: <Search width={25} height={25} color={BASE_COLORS.white} />,
         title: "No results found",
         message: `No matches found for "${trimmedSearchTerm}". Try using different keywords or check your spelling.`,
         iconColor: BASE_COLORS.orange,
@@ -43,7 +43,7 @@ const EmptyState: React.FC<EmptyStateProps> = ({
     // Case 3: No search term but language has no data
     if (selectedLanguage) {
       return {
-        icon: <Globe width={25} height={25} color="#fff" />,
+        icon: <Globe width={25} height={25} color={BASE_COLORS.white} />,
         title: `No ${selectedLanguage} content`,
         message:
           "This language doesn't have any pronunciation guides yet. Try selecting a different language.",
@@ -53,7 +53,7 @@ const EmptyState: React.FC<EmptyStateProps> = ({
 
     // Case 4: Generic fallback
     return {
-      icon: <Search width={25} height={25} color="#fff" />,
+      icon: <Search width={25} height={25} color={BASE_COLORS.white} />,
       title: "No content available",
       message: "Please select a language to view pronunciation guides.",
       iconColor: BASE_COLORS.placeholderText,

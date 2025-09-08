@@ -41,7 +41,7 @@ export const rewardStyles = StyleSheet.create({
   title: {
     fontSize: 20,
     fontFamily: "Poppins-SemiBold",
-    color: "#FFF",
+    color: BASE_COLORS.white,
     textAlign: "center",
   },
 
@@ -138,13 +138,13 @@ export const rewardStyles = StyleSheet.create({
   dayLabel: {
     fontSize: 12,
     fontFamily: "Poppins-Medium",
-    color: "#FFF",
+    color: BASE_COLORS.white,
     marginBottom: 4,
   },
   dayReward: {
     fontSize: 14,
     fontFamily: "Poppins-SemiBold",
-    color: "#FFF",
+    color: BASE_COLORS.white,
   },
 
   // Indicator styles
@@ -233,7 +233,7 @@ export const rewardStyles = StyleSheet.create({
   balanceValue: {
     fontSize: 15,
     fontFamily: "Poppins-SemiBold",
-    color: "#FFF",
+    color: BASE_COLORS.white,
   },
 
   // Animation overlay

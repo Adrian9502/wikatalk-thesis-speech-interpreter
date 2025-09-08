@@ -26,9 +26,9 @@ const CameraControls: React.FC<CameraControlsProps> = ({
       disabled={isProcessing}
     >
       {isProcessing ? (
-        <ActivityIndicator size="small" color="#fff" />
+        <ActivityIndicator size="small" color={BASE_COLORS.white} />
       ) : (
-        <Ionicons name="camera" size={24} color="#fff" />
+        <Ionicons name="camera" size={24} color={BASE_COLORS.white} />
       )}
     </TouchableOpacity>
 
@@ -37,7 +37,7 @@ const CameraControls: React.FC<CameraControlsProps> = ({
       onPress={pickImage}
       disabled={isProcessing}
     >
-      <Ionicons name="images" size={20} color="#fff" />
+      <Ionicons name="images" size={20} color={BASE_COLORS.white} />
     </TouchableOpacity>
   </View>
 );

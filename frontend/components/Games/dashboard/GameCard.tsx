@@ -135,7 +135,7 @@ const GameCard: React.FC<GameCardProps> = ({
             onPress={memoizedHandlers.handleProgressPress}
             activeOpacity={0.7}
           >
-            <TrendingUp width={13} height={13} color="#fff" />
+            <TrendingUp width={13} height={13} color={BASE_COLORS.white} />
             <Text style={styles.progressBtnText}>View Progress</Text>
           </TouchableOpacity>
 
@@ -143,7 +143,7 @@ const GameCard: React.FC<GameCardProps> = ({
             style={staticStyles.playBtn}
             onPress={memoizedHandlers.handleGamePress}
           >
-            <Play width={14} height={14} color="#fff" />
+            <Play width={14} height={14} color={BASE_COLORS.white} />
             <Text style={styles.playBtnText}>PLAY</Text>
           </TouchableOpacity>
         </View>
@@ -195,7 +195,7 @@ const styles = StyleSheet.create({
   gameTitle: {
     fontSize: 16,
     fontFamily: "Poppins-SemiBold",
-    color: "#fff",
+    color: BASE_COLORS.white,
     marginBottom: 4,
   },
   gameDescription: {
@@ -223,7 +223,7 @@ const styles = StyleSheet.create({
   progressBtnText: {
     fontSize: 11,
     fontFamily: "Poppins-Medium",
-    color: "#fff",
+    color: BASE_COLORS.white,
   },
   playBtn: {
     flex: 1,
@@ -239,7 +239,7 @@ const styles = StyleSheet.create({
   playBtnText: {
     fontSize: 11,
     fontFamily: "Poppins-Bold",
-    color: "#fff",
+    color: BASE_COLORS.white,
   },
   difficultyBadge: {
     position: "absolute",
@@ -255,7 +255,7 @@ const styles = StyleSheet.create({
   difficultyText: {
     fontSize: 10,
     fontFamily: "Poppins-Regular",
-    color: "#fff",
+    color: BASE_COLORS.white,
     textTransform: "uppercase",
     letterSpacing: 0.5,
   },
@@ -276,7 +276,7 @@ const styles = StyleSheet.create({
   statValue: {
     fontSize: 13,
     fontFamily: "Poppins-Bold",
-    color: "#FFF",
+    color: BASE_COLORS.white,
   },
   statLabel: {
     fontSize: 11,

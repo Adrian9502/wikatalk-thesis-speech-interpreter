@@ -144,7 +144,7 @@ const WordOfDayModal: React.FC<WordOfDayModalProps> = ({
                 activeOpacity={0.7}
               >
                 {isLoading ? (
-                  <ActivityIndicator size="small" color="#FFF" />
+                  <ActivityIndicator size="small" color={BASE_COLORS.white} />
                 ) : (
                   <View style={styles.lottieContainer}>
                     <LottieView

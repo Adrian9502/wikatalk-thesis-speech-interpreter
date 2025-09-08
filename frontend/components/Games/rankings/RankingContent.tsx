@@ -158,6 +158,8 @@ const RankingContent: React.FC<RankingContentProps> = ({
 
       {/* Rankings List */}
       <ScrollView
+        bounces={false}
+        overScrollMode="never"
         style={styles.rankingsList}
         showsVerticalScrollIndicator={false}
         refreshControl={
@@ -246,13 +248,13 @@ const styles = StyleSheet.create({
   loadingText: {
     fontSize: 12,
     fontFamily: "Poppins-Medium",
-    color: "#fff",
+    color: BASE_COLORS.white,
     marginTop: 12,
   },
   errorText: {
     fontSize: 12,
     fontFamily: "Poppins-Medium",
-    color: "#fff",
+    color: BASE_COLORS.white,
     textAlign: "center",
     marginBottom: 6,
   },
@@ -275,12 +277,12 @@ const styles = StyleSheet.create({
   retryButtonText: {
     fontSize: 12,
     fontFamily: "Poppins-Medium",
-    color: "#fff",
+    color: BASE_COLORS.white,
   },
   emptyText: {
     fontSize: 14,
     fontFamily: "Poppins-SemiBold",
-    color: "#fff",
+    color: BASE_COLORS.white,
     textAlign: "center",
     marginBottom: 6,
   },

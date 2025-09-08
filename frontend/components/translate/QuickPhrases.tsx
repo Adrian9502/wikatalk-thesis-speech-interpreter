@@ -59,6 +59,8 @@ const QuickPhrases = ({
       {/* Category Tabs */}
       <ScrollView
         horizontal
+        bounces={false}
+        overScrollMode="never"
         showsHorizontalScrollIndicator={false}
         style={responsiveStyles.categoryScrollView}
       >
@@ -90,6 +92,8 @@ const QuickPhrases = ({
       {/* Phrases for the selected category */}
       <ScrollView
         horizontal
+        bounces={false}
+        overScrollMode="never"
         showsHorizontalScrollIndicator={false}
         style={responsiveStyles.phrasesScrollView}
       >

@@ -16,6 +16,7 @@ import { InteractionManager } from "react-native";
 import { getGameModeGradient } from "@/utils/gameUtils";
 import ModalLoading from "../ModalLoading";
 import CloseButton from "@/components/games/buttons/CloseButton";
+import { BASE_COLORS } from "@/constant/colors";
 
 // Create context for modal control
 const ProgressModalContext = createContext<{
@@ -205,11 +206,11 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 20,
     fontFamily: "Poppins-SemiBold",
-    color: "#FFF",
+    color: BASE_COLORS.white,
     textAlign: "center",
   },
   loadingText: {
-    color: "#fff",
+    color: BASE_COLORS.white,
     marginTop: 13,
     fontFamily: "Poppins-Regular",
     fontSize: 16,

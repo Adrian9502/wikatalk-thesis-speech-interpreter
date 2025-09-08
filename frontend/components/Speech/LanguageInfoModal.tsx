@@ -41,7 +41,7 @@ const LanguageInfoModal: React.FC<LanguageInfoModalProps> = ({
   const colors = {
     primary: activeTheme.secondaryColor,
     secondary: "#FF6F4A",
-    background: "#FFFFFF",
+    background: BASE_COLORS.white,
     cardBg: "#F9FAFF",
     text: "#212132",
     textLight: "#9E9EA7",
