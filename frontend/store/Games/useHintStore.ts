@@ -1,8 +1,7 @@
 import { create } from "zustand";
 import { getToken } from "@/lib/authTokenManager";
 import useCoinsStore from "./useCoinsStore";
-
-const API_URL = process.env.EXPO_PUBLIC_BACKEND_URL || "http://localhost:5000";
+import { hintService } from "@/services/api/hintService";
 
 interface HintState {
   // State
@@ -55,7 +54,7 @@ const useHintStore = create<HintState>((set, get) => ({
   currentQuestionHints: [],
   hintsUsedCount: 0,
 
-  // NEW: Get max hints for game mode
+  // Get max hints for game mode
   getMaxHints: (gameMode: string) => {
     return (
       MAX_HINTS_PER_GAME_MODE[
@@ -64,7 +63,7 @@ const useHintStore = create<HintState>((set, get) => ({
     );
   },
 
-  // UPDATED: Get hint cost with game mode support
+  // Get hint cost with game mode support
   getHintCost: (hintsUsed: number, gameMode: string) => {
     const maxHints = get().getMaxHints(gameMode);
     const nextHint = hintsUsed + 1;
@@ -76,7 +75,7 @@ const useHintStore = create<HintState>((set, get) => ({
     return HINT_COSTS[nextHint as keyof typeof HINT_COSTS] || null;
   },
 
-  // UPDATED: Check if hint can be used with game mode support
+  //  Check if hint can be used with game mode support
   canUseHint: (hintsUsed: number, gameMode: string) => {
     const maxHints = get().getMaxHints(gameMode);
     return hintsUsed < maxHints;
@@ -125,27 +124,16 @@ const useHintStore = create<HintState>((set, get) => ({
         );
       }
 
-      // API call to purchase hint
-      const response = await fetch(`${API_URL}/api/hints/purchase`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({
-          questionId,
-          gameMode,
-          currentHintsUsed: hintsUsedCount,
-        }),
+      const data = await hintService.purchaseHint({
+        questionId,
+        gameMode,
+        currentHintsUsed: hintsUsedCount,
       });
-
-      const data = await response.json();
 
       if (!data.success) {
         throw new Error(data.message || "Failed to purchase hint");
       }
 
-      // ... existing hint logic for different game modes ...
       let optionToDisable;
 
       if (gameMode === "fillBlanks") {

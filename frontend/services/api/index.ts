@@ -1,4 +1,4 @@
-// Export all services from a central location
+//  services from a central location
 export { authService } from "./authService";
 export { userService } from "./userService";
 export { gameService } from "./gameService";
@@ -9,3 +9,4 @@ export { pronunciationService } from "./pronunciationService";
 export { feedbackService } from "./feedbackService";
 export { rankingService } from "./rankingService";
 export { coinsService } from "./coinsService";
+export { hintService } from "./hintService";
