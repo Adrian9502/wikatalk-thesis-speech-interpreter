@@ -1,9 +1,10 @@
 import { create } from "zustand";
-import axios from "axios";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { UserProgress } from "@/types/userProgress";
 import { getToken } from "@/lib/authTokenManager";
 import useHintStore from "./useHintStore";
+// NEW: Import the centralized game service
+import { gameService } from "@/services/api/gameService";
 
 // Define the API URL using environment variable
 const API_URL = process.env.EXPO_PUBLIC_BACKEND_URL || "http://localhost:5000";
@@ -296,18 +297,15 @@ const useGameStore = create<QuizState>((set, get) => ({
       const token = getToken();
       if (!token) return;
 
-      const response = await axios.post(
-        `${API_URL}/api/userprogress/${levelId}`,
-        { timeSpent, completed },
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
+      // NEW: Use centralized service instead of direct axios call
+      // FIX: Ensure completed is boolean
+      const response = await gameService.updateUserProgress(levelId, {
+        timeSpent,
+        completed: completed || false, // FIX: Provide default boolean value
+      });
 
-      if (response.data.success) {
-        set({ userProgress: response.data.progress });
+      if (response.success) {
+        set({ userProgress: response.progress });
       }
     } catch (error) {
       console.error("Error updating user progress:", error);
@@ -387,42 +385,55 @@ const useGameStore = create<QuizState>((set, get) => ({
 
       // If no cache, fetch from API
       console.log("[fetchQuestions] No cache found, fetching from API");
-      const response = await axios.get(`${API_URL}/api/quiz`);
 
-      if (response.status === 200) {
-        const questionsData = response.data;
+      // NEW: Use centralized service instead of direct axios call
+      const questionsData = await gameService.getAllQuestions();
 
-        // Organize by mode and difficulty
-        const organizedQuestions = {
-          multipleChoice: { easy: [], medium: [], hard: [] },
-          identification: { easy: [], medium: [], hard: [] },
-          fillBlanks: { easy: [], medium: [], hard: [] },
-        } as QuizQuestions;
+      // Organize by mode and difficulty
+      const organizedQuestions = {
+        multipleChoice: { easy: [], medium: [], hard: [] },
+        identification: { easy: [], medium: [], hard: [] },
+        fillBlanks: { easy: [], medium: [], hard: [] },
+      } as QuizQuestions;
 
-        questionsData.forEach((q: QuestionType) => {
-          const mode = q.mode;
-          const difficulty = (q.difficulty?.toLowerCase() ||
-            "easy") as Difficulty;
+      // FIX: Type assertion to match expected format
+      questionsData.forEach((q: any) => {
+        // Transform QuizQuestion to QuestionType format
+        const transformedQuestion: QuestionType = {
+          id: q._id ? parseInt(q._id) : 0,
+          level: q.level || "Level 1",
+          difficulty: (q.difficulty?.toLowerCase() || "easy") as Difficulty,
+          mode: q.mode as GameMode,
+          title: q.title || q.question || "Untitled",
+          description: q.description || "",
+          question: q.question || "",
+          translation: q.translation || "",
+          dialect: q.dialect || "",
+          focusArea: q.focusArea || "vocabulary",
+          // Add mode-specific properties based on type
+          ...(q.mode === "multipleChoice" && { options: q.options || [] }),
+          ...(q.mode === "identification" && {
+            answer: q.correctAnswer || q.answer || "",
+            choices: q.choices || [],
+            sentence: q.sentence || q.question || "",
+          }),
+          ...(q.mode === "fillBlanks" && {
+            answer: q.correctAnswer || q.answer || "",
+            hint: q.hint || "",
+            sentence: q.sentence || q.question || "",
+          }),
+        } as QuestionType;
 
-          if (
-            organizedQuestions[mode] &&
-            organizedQuestions[mode][difficulty]
-          ) {
-            organizedQuestions[mode][difficulty].push(q as any);
-          }
-        });
+        const mode = transformedQuestion.mode;
+        const difficulty = transformedQuestion.difficulty;
 
-        // Cache the organized data
-        await cacheData(cacheKey, organizedQuestions);
-        console.log("[fetchQuestions] Cached organized questions data");
+        if (organizedQuestions[mode] && organizedQuestions[mode][difficulty]) {
+          organizedQuestions[mode][difficulty].push(transformedQuestion as any);
+        }
+      });
 
-        const now = Date.now();
-        set({
-          questions: organizedQuestions,
-          isLoading: false,
-          lastFetched: now,
-        });
-      }
+      // Cache the organized data
+      await cacheData(cacheKey, organizedQuestions);
     } catch (error) {
       console.error("Error fetching quiz questions:", error);
       set({
@@ -436,8 +447,11 @@ const useGameStore = create<QuizState>((set, get) => ({
   testConnection: async () => {
     try {
       console.log("Testing connection to backend...");
-      const response = await axios.get(`${API_URL}/api/test`);
-      console.log("Backend connection successful:", response.data);
+
+      // NEW: Use centralized service instead of direct axios call
+      const data = await gameService.testConnection();
+
+      console.log("Backend connection successful:", data);
       return true;
     } catch (error) {
       console.error("Backend connection failed:", error);
@@ -475,19 +489,16 @@ const useGameStore = create<QuizState>((set, get) => ({
       console.log(
         `[fetchQuestionsByMode] No cache found, fetching from API for ${mode}`
       );
-      const response = await axios.get(`${API_URL}/api/quiz/mode/${mode}`);
+
+      // NEW: Use centralized service instead of direct axios call
+      const responseData = await gameService.getQuestionsByMode(mode);
 
       console.log(`[fetchQuestionsByMode] API Response for ${mode}:`, {
-        status: response.status,
-        dataLength: response.data?.length || 0,
-        sampleData: response.data?.[0] || null,
+        dataLength: responseData?.length || 0,
+        sampleData: responseData?.[0] || null,
       });
 
-      if (
-        response.status === 200 &&
-        response.data &&
-        Array.isArray(response.data)
-      ) {
+      if (responseData && Array.isArray(responseData)) {
         // Process the response data with proper typing
         const processedData: {
           easy: QuestionType[];
@@ -499,31 +510,21 @@ const useGameStore = create<QuizState>((set, get) => ({
           hard: [],
         };
 
-        response.data.forEach((item: any) => {
+        responseData.forEach((item: any) => {
           // Ensure proper formatting of the question
           const formattedQuestion: QuestionType = ensureProperFormat(item);
           const difficulty = (
             formattedQuestion.difficulty || "easy"
-          ).toLowerCase() as Difficulty;
+          ).toLowerCase();
 
-          if (processedData[difficulty]) {
-            processedData[difficulty].push(formattedQuestion);
-          } else {
-            console.warn(
-              `[fetchQuestionsByMode] Unknown difficulty: ${difficulty} for item:`,
-              item
+          if (["easy", "medium", "hard"].includes(difficulty)) {
+            processedData[difficulty as keyof typeof processedData].push(
+              formattedQuestion
             );
-            processedData.easy.push(formattedQuestion); // Default to easy
           }
         });
 
-        // Debug the processed data
-        debugLevelData(mode, processedData);
-
-        // Cache the processed data
-        await cacheData(cacheKey, processedData);
-        console.log(`[fetchQuestionsByMode] Cached data for ${mode}`);
-
+        // Update state with new data
         set((state) => ({
           questions: {
             ...state.questions,
@@ -531,24 +532,28 @@ const useGameStore = create<QuizState>((set, get) => ({
           },
           lastFetched: currentTime,
           isLoading: false,
+          error: null,
         }));
 
+        // Cache the processed data
+        await cacheData(cacheKey, processedData);
+
         console.log(
-          `[fetchQuestionsByMode] Successfully processed ${response.data.length} items for ${mode}`
+          `[fetchQuestionsByMode] Successfully fetched and cached ${mode} questions`
         );
       } else {
-        throw new Error(`Invalid response format for ${mode}`);
+        throw new Error("Invalid response format");
       }
     } catch (error: any) {
       console.error(`[fetchQuestionsByMode] Error fetching ${mode}:`, error);
       set({
-        error: `Failed to fetch ${mode} questions: ${error.message}`,
+        error: `Failed to fetch ${mode} questions. Please try again.`,
         isLoading: false,
       });
     }
   },
 
-  // Fetch a specific question by level and mode
+  // FIX: Replace hardcoded axios call with gameService
   fetchQuestionsByLevelAndMode: async (level: number, mode: string) => {
     const cacheKey = `level_${level}_mode_${mode}`;
 
@@ -569,12 +574,15 @@ const useGameStore = create<QuizState>((set, get) => ({
       console.log(
         `[fetchQuestionsByLevelAndMode] No cache found, fetching from API for level ${level}, mode ${mode}`
       );
-      const response = await axios.get(
-        `${API_URL}/api/quiz/level/${level}/mode/${mode}`
+
+      // NEW: Use centralized service instead of direct axios call
+      const responseData = await gameService.getQuestionByLevelAndMode(
+        level,
+        mode
       );
 
-      if (response.status === 200 && response.data) {
-        const formattedData = ensureProperFormat(response.data);
+      if (responseData) {
+        const formattedData = ensureProperFormat(responseData);
 
         // Cache the data
         await cacheData(cacheKey, formattedData);

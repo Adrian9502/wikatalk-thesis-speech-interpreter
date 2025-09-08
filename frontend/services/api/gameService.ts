@@ -1,4 +1,4 @@
-import { authApi } from "./baseApi";
+import { authApi, api } from "./baseApi";
 import { LevelData } from "@/types/gameTypes";
 
 export interface QuizQuestion {
@@ -8,6 +8,16 @@ export interface QuizQuestion {
   mode: string;
   options?: string[];
   correctAnswer: string;
+  level?: string;
+  title?: string;
+  description?: string;
+  translation?: string;
+  dialect?: string;
+  focusArea?: string;
+  choices?: string[];
+  answer?: string;
+  hint?: string;
+  sentence?: string;
 }
 
 export interface GameLevelsResponse {
@@ -20,6 +30,25 @@ export interface DailyRewardResponse {
   coins: number;
   isAvailable: boolean;
   nextRewardTime?: string;
+}
+
+// Interface for quiz questions response
+export interface QuizQuestionsResponse {
+  success: boolean;
+  data: QuizQuestion[];
+  message?: string;
+}
+
+// Interface for user progress update
+export interface UserProgressUpdateRequest {
+  timeSpent: number;
+  completed: boolean; // FIX: Ensure this is always boolean
+}
+
+export interface UserProgressUpdateResponse {
+  success: boolean;
+  progress: any;
+  message?: string;
 }
 
 export const gameService = {
@@ -45,6 +74,44 @@ export const gameService = {
       `/api/quiz/mode/${mode}?difficulty=${difficulty}`
     );
     return response.data.questions;
+  },
+
+  // Test backend connection
+  testConnection: async () => {
+    const response = await api.get("/api/test");
+    return response.data;
+  },
+
+  // Fetch questions by mode (returns array directly like the original API call)
+  getQuestionsByMode: async (mode: string) => {
+    const response = await api.get<QuizQuestion[]>(`/api/quiz/mode/${mode}`);
+    return response.data;
+  },
+
+  // Fetch all quiz questions (returns array directly like the original API call)
+  getAllQuestions: async () => {
+    const response = await api.get<QuizQuestion[]>("/api/quiz");
+    return response.data;
+  },
+
+  // NEW: Fetch question by specific level and mode
+  getQuestionByLevelAndMode: async (level: number, mode: string) => {
+    const response = await api.get<QuizQuestion>(
+      `/api/quiz/level/${level}/mode/${mode}`
+    );
+    return response.data;
+  },
+
+  // Update user progress for a specific level
+  updateUserProgress: async (
+    levelId: string | number,
+    data: UserProgressUpdateRequest
+  ) => {
+    const response = await authApi.post<UserProgressUpdateResponse>(
+      `/api/userprogress/${levelId}`,
+      data
+    );
+    return response.data;
   },
 
   // Check for daily reward
