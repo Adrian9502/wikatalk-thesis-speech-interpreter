@@ -1,5 +1,4 @@
 import { create } from "zustand";
-import axios from "axios";
 import { getToken } from "@/lib/authTokenManager";
 import {
   GameModeProgress,
@@ -11,8 +10,8 @@ import {
   hasUserChanged,
   setCurrentUserId,
 } from "@/utils/dataManager";
-
-const API_URL = process.env.EXPO_PUBLIC_BACKEND_URL || "http://localhost:5000";
+// NEW: Import the centralized service instead of hardcoded API
+import { progressService } from "@/services/api/progressService";
 
 // Cache management
 const CACHE_EXPIRY = 5 * 60 * 1000;
@@ -415,15 +414,13 @@ async function calculateEnhancedProgress(
     // Collect recent attempts from all levels across all difficulties
     difficultyBreakdown.forEach((difficulty) => {
       difficulty.levels.forEach((level) => {
-        if (level.recentAttempts && level.recentAttempts.length > 0) {
-          const enrichedAttempts = level.recentAttempts.map((attempt) => ({
+        level.recentAttempts.forEach((attempt) => {
+          allAttempts.push({
             ...attempt,
             levelId: level.levelId,
             levelTitle: level.title,
-            difficulty: difficulty.difficulty,
-          }));
-          allAttempts.push(...enrichedAttempts);
-        }
+          });
+        });
       });
     });
 
@@ -448,7 +445,7 @@ async function calculateEnhancedProgress(
       bestTime: 0,
       worstTime: 0,
       difficultyBreakdown,
-      recentAttempts, // Add the sorted recent attempts here
+      recentAttempts,
     };
   } catch (error) {
     console.error(`Error calculating enhanced progress:`, error);
@@ -496,10 +493,6 @@ const useProgressStore = create<ProgressState>((set, get) => ({
   // NEW: Clear all account-specific data
   clearAllAccountData: () => {
     console.log("[ProgressStore] Clearing all account-specific data");
-
-    // Clear the Map cache
-    enhancedProgressCache.clear();
-
     set({
       progress: null,
       globalProgress: null,
@@ -507,28 +500,24 @@ const useProgressStore = create<ProgressState>((set, get) => ({
       error: null,
       lastFetched: 0,
       totalCompletedCount: 0,
-      totalQuizCount: getTotalQuizCount(),
+      totalQuizCount: 0,
       gameProgress: {
-        multipleChoice: {
-          completed: 0,
-          total: getQuizCountByMode("multipleChoice"),
-        },
-        identification: {
-          completed: 0,
-          total: getQuizCountByMode("identification"),
-        },
-        fillBlanks: { completed: 0, total: getQuizCountByMode("fillBlanks") },
+        multipleChoice: { completed: 0, total: 0 },
+        identification: { completed: 0, total: 0 },
+        fillBlanks: { completed: 0, total: 0 },
       },
       enhancedProgress: {},
-      lastUpdated: Date.now(),
+      lastUpdated: 0,
       currentUserId: null,
     });
   },
 
-  // ADD: Missing refreshQuizCounts implementation
   refreshQuizCounts: () => {
     const newTotalCount = getTotalQuizCount();
-    console.log(`[ProgressStore] Refreshing quiz counts: ${newTotalCount}`);
+
+    console.log(
+      `[ProgressStore] Refreshing quiz counts - Total: ${newTotalCount}`
+    );
 
     set((state) => ({
       totalQuizCount: newTotalCount,
@@ -563,56 +552,38 @@ const useProgressStore = create<ProgressState>((set, get) => ({
       forceRefresh = true;
       setCurrentUserId(newUserId);
       set({ currentUserId: newUserId });
-    } else if (currentUserId === null) {
-      setCurrentUserId(newUserId);
-      set({ currentUserId: newUserId });
     }
 
-    // Enhanced cache validation
-    const cacheAge = currentTime - lastFetched;
-    const isCacheValid =
-      lastFetched > 0 && cacheAge < CACHE_EXPIRY && !userChanged;
-
-    if (!forceRefresh && isCacheValid && progress) {
-      console.log(`[ProgressStore] Using valid cache (${cacheAge}ms old)`);
+    // Check cache validity
+    if (
+      !forceRefresh &&
+      progress &&
+      Array.isArray(progress) &&
+      currentTime - lastFetched < CACHE_EXPIRY
+    ) {
+      console.log("[ProgressStore] Using cached progress data");
       return progress;
     }
 
-    // Only log when actually fetching
-    if (forceRefresh) {
-      console.log(`[ProgressStore] Force refresh requested`);
-    } else {
-      console.log(
-        `[ProgressStore] Cache invalid (age: ${cacheAge}ms), fetching fresh data`
-      );
-    }
+    console.log(
+      `[ProgressStore] Fetching fresh progress data (force: ${forceRefresh})`
+    );
 
     try {
       set({ isLoading: true, error: null });
 
       const token = getToken();
       if (!token) {
-        // FIXED: Still refresh counts even without token
-        get().refreshQuizCounts();
-        set({
-          isLoading: false,
-          error: "Authentication required",
-        });
+        console.log("[ProgressStore] No token found");
+        set({ isLoading: false });
         return [];
       }
 
-      const response = await axios({
-        method: "get",
-        url: `${API_URL}/api/userprogress`,
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
-        },
-        timeout: 10000,
-      });
+      // NEW: Use centralized service instead of direct axios call
+      const response = await progressService.getAllProgressForStore();
 
-      if (response.data.success) {
-        const progressData = response.data.progressEntries;
+      if (response.success) {
+        const progressData = response.progressEntries;
         console.log(
           `[ProgressStore] Fresh progress fetched: ${progressData.length} entries`
         );
@@ -640,7 +611,7 @@ const useProgressStore = create<ProgressState>((set, get) => ({
 
         return progressData;
       } else {
-        throw new Error(response.data.message || "Failed to fetch progress");
+        throw new Error(response.message || "Failed to fetch progress");
       }
     } catch (error) {
       console.error("Error fetching progress:", error);
@@ -648,10 +619,13 @@ const useProgressStore = create<ProgressState>((set, get) => ({
       // FIXED: Still refresh quiz counts on error
       get().refreshQuizCounts();
 
+      // NEW: Better error handling for centralized API
+      const errorMessage =
+        error instanceof Error ? error.message : "Failed to fetch progress";
+
       set({
         isLoading: false,
-        error:
-          error instanceof Error ? error.message : "Failed to fetch progress",
+        error: errorMessage,
       });
       return progress || [];
     }
@@ -678,18 +652,17 @@ const useProgressStore = create<ProgressState>((set, get) => ({
         `[useProgressStore] Updating progress for: ${formattedId}, completed: ${completed}, isCorrect: ${isCorrect}`
       );
 
-      const response = await axios({
-        method: "post",
-        url: `${API_URL}/api/userprogress/${formattedId}`,
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
-        },
-        data: { timeSpent, completed, isCorrect },
-        timeout: 10000,
-      });
+      // NEW: Use centralized service instead of direct axios call
+      const response = await progressService.updateProgressForStore(
+        formattedId,
+        {
+          timeSpent,
+          completed,
+          isCorrect,
+        }
+      );
 
-      if (response.data.success) {
+      if (response.success) {
         console.log(`[useProgressStore] Progress update successful!`);
 
         // Always update timestamp for ANY progress update
@@ -709,114 +682,115 @@ const useProgressStore = create<ProgressState>((set, get) => ({
           // Force UI update by updating timestamp and clearing caches
           set({
             lastUpdated: Date.now(),
-            // IMPORTANT: Clear ALL enhancedProgress cache to force reload everywhere
-            enhancedProgress: {},
           });
 
-          // Clear the Map cache as well
-          enhancedProgressCache.clear();
-        } else {
-          // ADDED: Even for non-completed updates, clear the specific gameMode cache
-          // This ensures non-completion updates (like attempts) still refresh
-          const gameMode = detectGameModeFromQuizId(quizId);
-          if (gameMode) {
-            set((state) => ({
-              enhancedProgress: {
-                ...state.enhancedProgress,
-                [gameMode]: null,
-              },
-            }));
-          }
+          console.log(
+            `[useProgressStore] Global progress refreshed after completion`
+          );
         }
 
-        return response.data.progress;
+        return response.data || response;
       } else {
-        set({
-          isLoading: false,
-          error: response.data.message || "Failed to update progress",
-        });
-        return null;
+        throw new Error(response.message || "Failed to update progress");
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error updating progress:", error);
+
+      // NEW: Better error handling for centralized API
+      const errorMessage =
+        error.response?.data?.message ||
+        error.message ||
+        "Failed to update progress";
+
       set({
         isLoading: false,
-        error:
-          error instanceof Error ? error.message : "Failed to update progress",
+        error: errorMessage,
       });
       return null;
     }
   },
 
-  // Get progress for a specific game mode
   getGameModeProgress: (gameMode: string): GameModeProgress => {
     const { gameProgress } = get();
-    return gameProgress[gameMode] || { completed: 0, total: 0 };
+    return (
+      gameProgress[gameMode] || {
+        completed: 0,
+        total: getQuizCountByMode(gameMode),
+      }
+    );
   },
 
-  // Get enhanced progress data for a game mode
   getEnhancedGameProgress: async (
     gameMode: string
   ): Promise<EnhancedGameModeProgress | null> => {
+    const cacheKey = `enhanced_${gameMode}`;
+    const { enhancedProgress } = get();
+
+    // Check if we have cached data
+    if (enhancedProgress[gameMode]) {
+      console.log(
+        `[ProgressStore] Using cached enhanced progress for ${gameMode}`
+      );
+      return enhancedProgress[gameMode];
+    }
+
     try {
-      const { enhancedProgress, lastUpdated } = get();
+      // Ensure we have global progress data
+      const { globalProgress } = get();
+      let progressData = globalProgress;
 
-      // Check store cache first (fastest)
-      if (enhancedProgress[gameMode]) {
-        return enhancedProgress[gameMode];
+      if (!progressData || !Array.isArray(progressData)) {
+        console.log(
+          `[ProgressStore] No progress data, fetching for ${gameMode}`
+        );
+        progressData = await get().fetchProgress();
       }
 
-      // No cache, so load data
-      const progress = get().progress;
-      if (!progress) return null;
-
-      const enhancedData = await calculateEnhancedProgress(gameMode, progress);
-
-      // Update store
-      if (enhancedData) {
-        set((state) => ({
-          enhancedProgress: {
-            ...state.enhancedProgress,
-            [gameMode]: enhancedData,
-          },
-        }));
+      if (!progressData || !Array.isArray(progressData)) {
+        console.log(`[ProgressStore] Still no progress data for ${gameMode}`);
+        return null;
       }
+
+      console.log(
+        `[ProgressStore] Calculating enhanced progress for ${gameMode}`
+      );
+      const enhancedData = await calculateEnhancedProgress(
+        gameMode,
+        progressData
+      );
+
+      // Cache the result
+      set((state) => ({
+        enhancedProgress: {
+          ...state.enhancedProgress,
+          [gameMode]: enhancedData,
+        },
+      }));
 
       return enhancedData;
     } catch (error) {
-      console.error("Error calculating enhanced progress:", error);
+      console.error(
+        `[ProgressStore] Error getting enhanced progress for ${gameMode}:`,
+        error
+      );
       return null;
     }
   },
 
-  // Add a separate API for direct data access without state updates
   getEnhancedProgressDataSync: (gameMode: string) => {
-    // Access existing cache directly
-    const enhancedData = useProgressStore.getState().enhancedProgress[gameMode];
-    if (enhancedData) return enhancedData;
-
-    // No data available, return null
-    return null;
+    const { enhancedProgress } = get();
+    return enhancedProgress[gameMode] || null;
   },
 
-  // Clear cached data
   clearCache: () => {
     console.log("[ProgressStore] Clearing all cached data");
-
-    // Clear the Map cache as well
-    enhancedProgressCache.clear();
-
     set({
-      progress: null,
-      globalProgress: null,
       lastFetched: 0,
       enhancedProgress: {},
-      // FIXED: Also update timestamp to indicate cache was cleared
       lastUpdated: Date.now(),
     });
   },
 
-  // Timestamp for last update
   lastUpdated: Date.now(),
   currentUserId: null,
 }));

@@ -34,8 +34,7 @@ const RecentAttempt = React.memo(({ attempt, index }: RecentAttemptProps) => {
           </Text>
           <View style={styles.difficultyBadgeSmall}>
             <Text style={styles.attemptDifficulty}>
-              {attempt.difficulty?.charAt(0).toUpperCase() +
-                attempt.difficulty?.slice(1)}
+              x {attempt.attemptNumber}
             </Text>
           </View>
         </View>
@@ -57,11 +56,13 @@ const RecentAttempt = React.memo(({ attempt, index }: RecentAttemptProps) => {
         </View>
       </View>
       <View style={styles.attemptDetails}>
-        <Text style={styles.attemptTime}>
+        <View style={styles.attemptTimeContainer}>
           <Clock width={12} height={12} color={BASE_COLORS.white} />
-          {"  "}
-          {formatTime(attempt.timeSpent || 0)}
-        </Text>
+          <Text style={styles.attemptTime}>
+            {"  "}
+            {formatTime(attempt.timeSpent || 0)}
+          </Text>
+        </View>
         <Text style={styles.attemptDate}>
           {new Intl.DateTimeFormat("en-US", {
             month: "long",
@@ -125,14 +126,20 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     alignItems: "center",
   },
+  attemptTimeContainer: {
+    flexDirection: "row",
+    justifyContent: "center",
+    alignItems: "center",
+  },
   attemptTime: {
-    fontSize: 11,
-    fontFamily: "Poppins-Regular",
+    fontSize: 10,
+    marginTop: 2,
+    fontFamily: "Poppins-Medium",
     color: "rgba(255, 255, 255, 0.7)",
   },
   attemptDate: {
-    fontSize: 11,
-    fontFamily: "Poppins-Regular",
+    fontSize: 10,
+    fontFamily: "Poppins-Medium",
     color: "rgba(255, 255, 255, 0.6)",
   },
 });

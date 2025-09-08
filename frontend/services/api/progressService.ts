@@ -68,6 +68,19 @@ export interface TimerResetResponse {
   };
 }
 
+// NEW: Interface for progress store specific responses
+export interface ProgressEntriesResponse {
+  success: boolean;
+  progressEntries: ProgressData[];
+  message?: string;
+}
+
+export interface UpdateProgressRequest {
+  timeSpent: number;
+  completed: boolean;
+  isCorrect: boolean;
+}
+
 export const progressService = {
   // Get all progress for user
   getAllProgress: async () => {
@@ -75,6 +88,17 @@ export const progressService = {
       success: boolean;
       progressEntries: ProgressData[];
     }>("/api/userprogress");
+    return response.data;
+  },
+
+  // NEW: Get all progress with proper response format for useProgressStore
+  getAllProgressForStore: async () => {
+    const response = await authApi.get<ProgressEntriesResponse>(
+      "/api/userprogress",
+      {
+        timeout: 10000,
+      }
+    );
     return response.data;
   },
 
@@ -110,6 +134,20 @@ export const progressService = {
       `/api/userprogress/${quizId}`,
       data
     );
+    return response.data;
+  },
+
+  updateProgressForStore: async (
+    formattedId: string,
+    data: UpdateProgressRequest
+  ) => {
+    const response = await authApi.post<{
+      success: boolean;
+      data?: any;
+      message?: string;
+    }>(`/api/userprogress/${formattedId}`, data, {
+      timeout: 10000,
+    });
     return response.data;
   },
 
