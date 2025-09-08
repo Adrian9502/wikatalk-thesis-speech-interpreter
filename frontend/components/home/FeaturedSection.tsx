@@ -4,6 +4,7 @@ import { LinearGradient } from "expo-linear-gradient";
 import { Globe, Camera, Mic, Volume2, Target } from "react-native-feather";
 import { PanGestureHandler, State } from "react-native-gesture-handler";
 import { BASE_COLORS, HOMEPAGE_COLORS } from "@/constant/colors";
+import { COMPONENT_FONT_SIZES, POPPINS_FONT } from "@/constant/fontSizes";
 
 interface FeaturedSectionProps {
   onNavigateToTab: (tabName: string) => void;
@@ -173,8 +174,8 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   sectionTitle: {
-    fontSize: 14,
-    fontFamily: "Poppins-SemiBold",
+    fontSize: COMPONENT_FONT_SIZES.home.sectionTitle,
+    fontFamily: POPPINS_FONT.semiBold,
     color: BASE_COLORS.white,
   },
   carouselDots: {
@@ -220,14 +221,14 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   featuredTitle: {
-    fontSize: 15,
-    fontFamily: "Poppins-Bold",
+    fontSize: COMPONENT_FONT_SIZES.home.featuredTitle,
+    fontFamily: POPPINS_FONT.semiBold,
     color: BASE_COLORS.white,
     marginBottom: 4,
   },
   featuredDescription: {
-    fontSize: 11,
-    fontFamily: "Poppins-Regular",
+    fontSize: COMPONENT_FONT_SIZES.home.featuredDescription,
+    fontFamily: POPPINS_FONT.regular,
     color: "rgba(255, 255, 255, 0.8)",
     marginBottom: 4,
   },

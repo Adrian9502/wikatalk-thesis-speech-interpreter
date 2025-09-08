@@ -2,6 +2,7 @@ import React from "react";
 import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
 import { Settings } from "react-native-feather";
 import { BASE_COLORS } from "@/constant/colors";
+import { COMPONENT_FONT_SIZES, POPPINS_FONT } from "@/constant/fontSizes";
 import AppName from "@/components/AppName";
 import ProfilePicture from "./ProfilePicture";
 
@@ -64,8 +65,8 @@ const styles = StyleSheet.create({
     marginTop: 8,
   },
   welcomeText: {
-    fontSize: 12,
-    fontFamily: "Poppins-Medium",
+    fontSize: COMPONENT_FONT_SIZES.home.greeting,
+    fontFamily: POPPINS_FONT.medium,
     color: BASE_COLORS.white,
     textAlign: "left",
   },

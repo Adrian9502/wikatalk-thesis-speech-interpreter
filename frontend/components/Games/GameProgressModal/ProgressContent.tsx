@@ -109,7 +109,6 @@ const ProgressContent: React.FC<ProgressContentProps> = ({
               completionRate={Math.round(item.overallCompletionRate)}
               completed={item.completedLevels}
               total={item.totalLevels}
-              // NEW: Pass enhanced stats from centralized source
               successRate={summaryStats.successRate}
               totalTimeSpent={summaryStats.formattedTotalTime}
               totalAttempts={summaryStats.totalAttempts}
@@ -283,7 +282,7 @@ const styles = StyleSheet.create({
     borderRadius: 20,
   },
   badgeText: {
-    fontSize: 11,
+    fontSize: 10,
     fontFamily: "Poppins-Medium",
     color: BASE_COLORS.white,
   },

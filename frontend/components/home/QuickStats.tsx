@@ -2,6 +2,7 @@ import React from "react";
 import { View, Text, Image, StyleSheet, Dimensions } from "react-native";
 import { Target, TrendingUp } from "react-native-feather";
 import { BASE_COLORS } from "@/constant/colors";
+import { COMPONENT_FONT_SIZES, POPPINS_FONT } from "@/constant/fontSizes";
 import useThemeStore from "@/store/useThemeStore";
 
 const { width: screenWidth } = Dimensions.get("window");
@@ -78,8 +79,8 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   sectionTitle: {
-    fontSize: 14,
-    fontFamily: "Poppins-SemiBold",
+    fontSize: COMPONENT_FONT_SIZES.home.sectionTitle,
+    fontFamily: POPPINS_FONT.semiBold,
     marginBottom: 16,
     color: BASE_COLORS.white,
   },
@@ -105,18 +106,18 @@ const styles = StyleSheet.create({
     gap: 6,
   },
   quickStatLabel: {
-    fontSize: 10,
-    fontFamily: "Poppins-Medium",
+    fontSize: COMPONENT_FONT_SIZES.home.statsLabel,
+    fontFamily: POPPINS_FONT.medium,
     color: BASE_COLORS.white,
   },
   quickStatValue: {
-    fontSize: 15,
-    fontFamily: "Poppins-Bold",
+    fontSize: COMPONENT_FONT_SIZES.home.statsValue,
+    fontFamily: POPPINS_FONT.bold,
     marginBottom: 2,
   },
   quickStatSubValue: {
-    fontSize: 9,
-    fontFamily: "Poppins-Medium",
+    fontSize: COMPONENT_FONT_SIZES.home.statsLabel,
+    fontFamily: POPPINS_FONT.medium,
     color: BASE_COLORS.white,
   },
   rewardCoinImage: {

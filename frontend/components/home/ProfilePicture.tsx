@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { View, Image, TouchableOpacity, Text, StyleSheet } from "react-native";
 import { BASE_COLORS } from "@/constant/colors";
 import ProfilePictureModal from "@/components/accountDetails/ProfilePictureModal";
+import { COMPONENT_FONT_SIZES } from "@/constant/fontSizes";
 
 interface ProfilePictureProps {
   userData: any;
@@ -87,7 +88,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   profileInitials: {
-    fontSize: 14,
+    fontSize: COMPONENT_FONT_SIZES.home.statsValue,
     fontFamily: "Poppins-SemiBold",
     color: BASE_COLORS.white,
   },

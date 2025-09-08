@@ -4,6 +4,7 @@ import { BookOpen } from "react-native-feather";
 import { BASE_COLORS } from "@/constant/colors";
 import RankingCategorySelector from "@/components/games/rankings/RankingCategorySelector";
 import HomePageRankingContent from "./HomePageRankingContent";
+import { COMPONENT_FONT_SIZES, POPPINS_FONT } from "@/constant/fontSizes";
 
 const RankingsSection = React.memo(() => {
   const [selectedRankingCategory, setSelectedRankingCategory] =
@@ -17,10 +18,6 @@ const RankingsSection = React.memo(() => {
     <>
       <Text style={styles.sectionTitle}>Top Rankings</Text>
       <View style={styles.rankingsSection}>
-        <View style={styles.rankingsHeader}>
-          <BookOpen width={18} height={18} color={BASE_COLORS.brightYellow} />
-        </View>
-
         <RankingCategorySelector
           selectedCategory={selectedRankingCategory}
           onCategorySelect={handleRankingCategorySelect}
@@ -45,14 +42,10 @@ const styles = StyleSheet.create({
     padding: 16,
     borderRadius: 20,
   },
-  rankingsHeader: {
-    flexDirection: "row",
-    alignItems: "center",
-  },
   sectionTitle: {
-    fontSize: 14,
-    fontFamily: "Poppins-SemiBold",
+    fontSize: COMPONENT_FONT_SIZES.home.sectionTitle,
     marginBottom: 16,
+    fontFamily: POPPINS_FONT.semiBold,
     color: BASE_COLORS.white,
   },
   rankingsContentContainer: {

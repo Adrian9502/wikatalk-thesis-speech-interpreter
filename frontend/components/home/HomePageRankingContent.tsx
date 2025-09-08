@@ -14,6 +14,7 @@ import { RankingType, RankingUser } from "@/types/rankingTypes";
 import { getRankingCategory } from "@/constant/rankingConstants";
 import RankingItem from "@/components/games/rankings/RankingItem";
 import { BASE_COLORS } from "@/constant/colors";
+import { COMPONENT_FONT_SIZES, POPPINS_FONT } from "@/constant/fontSizes";
 import { useAuth } from "@/context/AuthContext";
 import { useRankingsModal } from "@/components/games/RankingsModalProvider";
 
@@ -84,7 +85,7 @@ const HomePageRankingContent: React.FC<HomePageRankingContentProps> = ({
       </View>
     );
   }
-  const qe = true;
+
   // Render error state
   if (error) {
     return (
@@ -220,9 +221,9 @@ const styles = StyleSheet.create({
     backgroundColor: "rgba(255, 255, 255, 0.1)",
     borderColor: "rgba(255, 255, 255, 0.3)",
     borderWidth: 1,
-    borderRadius: 16,
+    borderRadius: 20,
     paddingHorizontal: 12,
-    paddingVertical: 8,
+    paddingVertical: 12,
     margin: 12,
   },
   categoryTitleRow: {
@@ -234,8 +235,8 @@ const styles = StyleSheet.create({
     marginRight: 8,
   },
   categoryTitle: {
-    fontSize: 12,
-    fontFamily: "Poppins-SemiBold",
+    fontSize: COMPONENT_FONT_SIZES.card.subtitle,
+    fontFamily: POPPINS_FONT.medium,
     color: BASE_COLORS.yellow,
   },
   centerContainer: {
@@ -245,21 +246,21 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
   },
   loadingText: {
-    fontSize: 12,
-    fontFamily: "Poppins-Medium",
+    fontSize: COMPONENT_FONT_SIZES.card.caption,
+    fontFamily: POPPINS_FONT.regular,
     color: BASE_COLORS.white,
     marginTop: 12,
   },
   errorText: {
-    fontSize: 12,
-    fontFamily: "Poppins-Medium",
+    fontSize: COMPONENT_FONT_SIZES.card.caption,
+    fontFamily: POPPINS_FONT.medium,
     color: BASE_COLORS.white,
     textAlign: "center",
     marginBottom: 6,
   },
   errorSubtext: {
-    fontSize: 11,
-    fontFamily: "Poppins-Regular",
+    fontSize: COMPONENT_FONT_SIZES.card.caption,
+    fontFamily: POPPINS_FONT.regular,
     color: "rgba(255, 255, 255, 0.7)",
     textAlign: "center",
     marginBottom: 16,
@@ -274,20 +275,20 @@ const styles = StyleSheet.create({
     gap: 6,
   },
   retryButtonText: {
-    fontSize: 11,
-    fontFamily: "Poppins-Medium",
+    fontSize: COMPONENT_FONT_SIZES.card.caption,
+    fontFamily: POPPINS_FONT.medium,
     color: BASE_COLORS.white,
   },
   emptyText: {
-    fontSize: 12,
-    fontFamily: "Poppins-SemiBold",
+    fontSize: COMPONENT_FONT_SIZES.card.caption,
+    fontFamily: POPPINS_FONT.semiBold,
     color: BASE_COLORS.white,
     textAlign: "center",
     marginBottom: 6,
   },
   emptySubtext: {
-    fontSize: 11,
-    fontFamily: "Poppins-Regular",
+    fontSize: COMPONENT_FONT_SIZES.card.caption,
+    fontFamily: POPPINS_FONT.regular,
     color: "rgba(255, 255, 255, 0.7)",
     textAlign: "center",
   },
@@ -313,8 +314,8 @@ const styles = StyleSheet.create({
     backgroundColor: "rgba(255, 255, 255, 0.3)",
   },
   dividerText: {
-    fontSize: 11,
-    fontFamily: "Poppins-Medium",
+    fontSize: COMPONENT_FONT_SIZES.card.caption,
+    fontFamily: POPPINS_FONT.regular,
     color: BASE_COLORS.yellow,
     marginHorizontal: 8,
   },
@@ -327,8 +328,8 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   userRankText: {
-    fontSize: 12,
-    fontFamily: "Poppins-SemiBold",
+    fontSize: COMPONENT_FONT_SIZES.card.caption,
+    fontFamily: POPPINS_FONT.semiBold,
     color: BASE_COLORS.yellow,
   },
   viewAllContainer: {
@@ -344,8 +345,8 @@ const styles = StyleSheet.create({
     borderRadius: 20,
   },
   viewAllText: {
-    fontSize: 11,
-    fontFamily: "Poppins-Medium",
+    fontSize: COMPONENT_FONT_SIZES.card.caption,
+    fontFamily: POPPINS_FONT.regular,
     color: BASE_COLORS.white,
   },
 });

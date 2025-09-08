@@ -4,6 +4,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { RankingUser } from "@/types/rankingTypes";
 import { formatTime } from "@/utils/gameUtils";
 import { ICON_COLORS, BASE_COLORS } from "@/constant/colors";
+import { COMPONENT_FONT_SIZES, POPPINS_FONT } from "@/constant/fontSizes";
 
 interface RankingItemProps {
   user: RankingUser;
@@ -35,13 +36,25 @@ const RankingItem: React.FC<RankingItemProps> = ({
   const getRankStyle = (rank: number) => {
     switch (rank) {
       case 1:
-        return { color: ICON_COLORS.gold, fontSize: 24 as const };
+        return {
+          color: ICON_COLORS.gold,
+          fontSize: COMPONENT_FONT_SIZES.game.score,
+        };
       case 2:
-        return { color: ICON_COLORS.silver, fontSize: 24 as const };
+        return {
+          color: ICON_COLORS.silver,
+          fontSize: COMPONENT_FONT_SIZES.game.score,
+        };
       case 3:
-        return { color: ICON_COLORS.bronze, fontSize: 24 as const };
+        return {
+          color: ICON_COLORS.bronze,
+          fontSize: COMPONENT_FONT_SIZES.game.score,
+        };
       default:
-        return { color: BASE_COLORS.white, fontSize: 14 as const };
+        return {
+          color: BASE_COLORS.white,
+          fontSize: COMPONENT_FONT_SIZES.card.subtitle,
+        };
     }
   };
 
@@ -149,7 +162,7 @@ const styles = StyleSheet.create({
   },
   currentUserContainer: {
     backgroundColor: "rgba(0, 0, 0, 0.4)",
-    borderColor: ICON_COLORS.gold,
+    borderColor: BASE_COLORS.yellow,
   },
   rankContainer: {
     minWidth: 40,
@@ -157,11 +170,11 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   rankText: {
-    fontFamily: "Poppins-Medium",
+    fontFamily: POPPINS_FONT.medium,
     textAlign: "center",
   },
   currentUserText: {
-    color: ICON_COLORS.gold,
+    color: BASE_COLORS.yellow,
   },
   avatarContainer: {
     marginHorizontal: 12,
@@ -184,33 +197,33 @@ const styles = StyleSheet.create({
     borderColor: "rgba(255, 255, 255, 0.25)",
   },
   avatarText: {
-    fontSize: 16,
-    fontFamily: "Poppins-Bold",
+    fontSize: COMPONENT_FONT_SIZES.card.title,
+    fontFamily: POPPINS_FONT.bold,
     color: BASE_COLORS.white,
   },
   userInfo: {
     flex: 1,
   },
   username: {
-    fontSize: 11,
-    fontFamily: "Poppins-Regular",
+    fontSize: COMPONENT_FONT_SIZES.card.description,
+    fontFamily: POPPINS_FONT.regular,
     color: BASE_COLORS.white,
     marginBottom: 3,
   },
   valueText: {
-    fontSize: 11.5,
-    fontFamily: "Poppins-Regular",
+    fontSize: COMPONENT_FONT_SIZES.card.description,
+    fontFamily: POPPINS_FONT.regular,
     color: "rgba(255, 255, 255, 0.85)",
     marginBottom: 2,
   },
   currentUserValue: {
     color: BASE_COLORS.yellow,
-    fontFamily: "Poppins-SemiBold",
-    fontSize: 11.5,
+    fontFamily: POPPINS_FONT.semiBold,
+    fontSize: COMPONENT_FONT_SIZES.card.description,
   },
   subText: {
-    fontSize: 11,
-    fontFamily: "Poppins-Medium",
+    fontSize: COMPONENT_FONT_SIZES.card.caption,
+    fontFamily: POPPINS_FONT.medium,
     color: "rgba(255, 255, 255, 0.6)",
   },
 });

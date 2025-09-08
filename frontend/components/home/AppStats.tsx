@@ -1,6 +1,7 @@
 import React from "react";
 import { View, Text, StyleSheet } from "react-native";
 import { BASE_COLORS } from "@/constant/colors";
+import { COMPONENT_FONT_SIZES, POPPINS_FONT } from "@/constant/fontSizes";
 import { DIALECTS } from "@/constant/languages";
 import useThemeStore from "@/store/useThemeStore";
 
@@ -56,8 +57,8 @@ const styles = StyleSheet.create({
     marginBottom: 25,
   },
   sectionTitle: {
-    fontSize: 14,
-    fontFamily: "Poppins-SemiBold",
+    fontSize: COMPONENT_FONT_SIZES.home.sectionTitle,
+    fontFamily: POPPINS_FONT.semiBold,
     marginBottom: 16,
     color: BASE_COLORS.white,
   },
@@ -74,13 +75,13 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   statNumber: {
-    fontSize: 18,
-    fontFamily: "Poppins-Bold",
+    fontSize: COMPONENT_FONT_SIZES.home.statsValue,
+    fontFamily: POPPINS_FONT.bold,
     marginBottom: 4,
   },
   statLabel: {
-    fontSize: 10,
-    fontFamily: "Poppins-Regular",
+    fontSize: COMPONENT_FONT_SIZES.home.statsLabel,
+    fontFamily: POPPINS_FONT.regular,
     color: "rgba(255, 255, 255, 0.7)",
     textAlign: "center",
   },

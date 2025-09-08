@@ -9,6 +9,7 @@ import {
 import { LinearGradient } from "expo-linear-gradient";
 import { RANKING_CATEGORIES } from "@/constant/rankingConstants";
 import { BASE_COLORS, RANKING_SELECTOR_COLORS } from "@/constant/colors";
+import { COMPONENT_FONT_SIZES, POPPINS_FONT } from "@/constant/fontSizes";
 
 interface RankingCategorySelectorProps {
   selectedCategory: string;
@@ -129,15 +130,15 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   categoryTitle: {
-    fontSize: 11,
-    fontFamily: "Poppins-Medium",
+    fontSize: COMPONENT_FONT_SIZES.card.description,
+    fontFamily: POPPINS_FONT.medium,
     color: "rgba(255, 255, 255, 0.7)",
     textAlign: "center",
     lineHeight: 12,
   },
   selectedCategoryTitle: {
     color: BASE_COLORS.white,
-    fontFamily: "Poppins-SemiBold",
+    fontFamily: POPPINS_FONT.semiBold,
   },
 });
 
