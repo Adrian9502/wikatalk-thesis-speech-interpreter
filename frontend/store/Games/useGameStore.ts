@@ -3,11 +3,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { UserProgress } from "@/types/userProgress";
 import { getToken } from "@/lib/authTokenManager";
 import useHintStore from "./useHintStore";
-// NEW: Import the centralized game service
 import { gameService } from "@/services/api/gameService";
-
-// Define the API URL using environment variable
-const API_URL = process.env.EXPO_PUBLIC_BACKEND_URL || "http://localhost:5000";
 
 // Define allowed game modes and difficulties for type safety
 type GameMode = "multipleChoice" | "identification" | "fillBlanks";
