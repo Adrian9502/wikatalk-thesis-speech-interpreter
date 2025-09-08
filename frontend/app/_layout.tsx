@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useCallback } from "react";
-import { View } from "react-native";
+import { Text } from "react-native";
 import { useFonts } from "expo-font";
 import { Stack, useRouter } from "expo-router";
 import "react-native-url-polyfill/auto";
@@ -14,7 +14,7 @@ import { SafeAreaProvider } from "react-native-safe-area-context";
 import ThemeProvider from "@/components/ThemeProvider";
 import SplashAnimation from "@/components/SplashAnimation";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { InteractionManager } from "react-native";
+
 import { useSplashStore } from "@/store/useSplashStore";
 import { GoogleSignin } from "@react-native-google-signin/google-signin";
 import { initializeToken } from "@/lib/authTokenManager";
@@ -34,6 +34,10 @@ import { useAuthStore } from "@/store/useAuthStore";
 
 // Prevent the splash screen from auto-hiding
 SplashScreen.preventAutoHideAsync();
+
+// Make all Text ignore font scaling by default
+(Text as any).defaultProps = (Text as any).defaultProps || {};
+(Text as any).defaultProps.allowFontScaling = false;
 
 const RootLayout = () => {
   const router = useRouter();
