@@ -12,6 +12,7 @@ import useProgressStore from "@/store/games/useProgressStore";
 import { getGameModeGradient } from "@/utils/gameUtils";
 import { useFormattedStats } from "@/utils/gameStatsUtils";
 import { BASE_COLORS } from "@/constant/colors";
+import { POPPINS_FONT, COMPONENT_FONT_SIZES } from "@/constant/fontSizes";
 
 interface GameCardProps {
   game: any;
@@ -78,33 +79,29 @@ const GameCard: React.FC<GameCardProps> = ({
     }),
     [game.id]
   );
-  const gradientColors = useMemo(() => {
-    return getGameModeGradient(
-      game.id,
-      game.gradientColors as [string, string]
-    );
-  }, [game.id, game.gradientColors]);
 
   return (
     <View style={styles.gameCard}>
       <LinearGradient
-        colors={gradientColors}
+        colors={getGameModeGradient(game.id)}
         start={{ x: 0, y: 0 }}
         end={{ x: 1, y: 1 }}
         style={styles.gameCardGradient}
       >
-        {/* difficulty badges */}
+        {/* Decorative elements */}
+        <View style={styles.gameDecoShape1} />
+        <View style={styles.gameDecoShape2} />
+
+        {/* Difficulty badge */}
         <View style={styles.difficultyBadge}>
           <Text style={styles.difficultyText}>{game.difficulty}</Text>
         </View>
 
-        {/* header */}
+        {/* header with icon and title */}
         <View style={styles.gameHeader}>
-          {/* icon */}
           <View style={styles.gameIconContainer}>
             <View style={styles.gameIconBg}>{game.icon}</View>
           </View>
-          {/* game title and description */}
           <View style={styles.gameInfo}>
             <Text style={styles.gameTitle} numberOfLines={1}>
               {game.title}
@@ -142,9 +139,10 @@ const GameCard: React.FC<GameCardProps> = ({
           <TouchableOpacity
             style={staticStyles.playBtn}
             onPress={memoizedHandlers.handleGamePress}
+            activeOpacity={0.8}
           >
-            <Play width={14} height={14} color={BASE_COLORS.white} />
-            <Text style={styles.playBtnText}>PLAY</Text>
+            <Play width={16} height={16} color={BASE_COLORS.white} />
+            <Text style={styles.playBtnText}>Play</Text>
           </TouchableOpacity>
         </View>
 
@@ -159,17 +157,17 @@ const GameCard: React.FC<GameCardProps> = ({
 const styles = StyleSheet.create({
   gameCard: {
     borderRadius: 20,
-    overflow: "hidden",
     shadowColor: "#000",
-    shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.2,
-    shadowRadius: 10,
-    elevation: 8,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.15,
+    shadowRadius: 8,
+    elevation: 6,
+    overflow: "hidden",
   },
   gameCardGradient: {
     padding: 20,
     position: "relative",
-    minHeight: 160,
+    overflow: "hidden",
   },
   gameHeader: {
     flexDirection: "row",
@@ -180,8 +178,8 @@ const styles = StyleSheet.create({
     marginRight: 12,
   },
   gameIconBg: {
-    width: 50,
-    height: 50,
+    width: 40,
+    height: 40,
     borderRadius: 50,
     backgroundColor: "rgba(255, 255, 255, 0.2)",
     justifyContent: "center",
@@ -193,14 +191,14 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   gameTitle: {
-    fontSize: 16,
-    fontFamily: "Poppins-SemiBold",
+    fontSize: COMPONENT_FONT_SIZES.card.title,
+    fontFamily: POPPINS_FONT.semiBold,
     color: BASE_COLORS.white,
     marginBottom: 4,
   },
   gameDescription: {
-    fontSize: 11,
-    fontFamily: "Poppins-Regular",
+    fontSize: COMPONENT_FONT_SIZES.card.description,
+    fontFamily: POPPINS_FONT.regular,
     color: "rgba(255, 255, 255, 0.8)",
   },
   gameActionsRow: {
@@ -221,8 +219,8 @@ const styles = StyleSheet.create({
     borderColor: "rgba(255, 255, 255, 0.3)",
   },
   progressBtnText: {
-    fontSize: 11,
-    fontFamily: "Poppins-Medium",
+    fontSize: COMPONENT_FONT_SIZES.button.small,
+    fontFamily: POPPINS_FONT.medium,
     color: BASE_COLORS.white,
   },
   playBtn: {
@@ -237,8 +235,8 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   playBtnText: {
-    fontSize: 11,
-    fontFamily: "Poppins-Bold",
+    fontSize: COMPONENT_FONT_SIZES.button.medium,
+    fontFamily: POPPINS_FONT.semiBold,
     color: BASE_COLORS.white,
   },
   difficultyBadge: {
@@ -253,8 +251,8 @@ const styles = StyleSheet.create({
     borderRadius: 20,
   },
   difficultyText: {
-    fontSize: 10,
-    fontFamily: "Poppins-Regular",
+    fontSize: COMPONENT_FONT_SIZES.card.caption,
+    fontFamily: POPPINS_FONT.regular,
     color: BASE_COLORS.white,
     textTransform: "uppercase",
     letterSpacing: 0.5,
@@ -274,13 +272,13 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   statValue: {
-    fontSize: 13,
-    fontFamily: "Poppins-Bold",
+    fontSize: COMPONENT_FONT_SIZES.card.subtitle,
+    fontFamily: POPPINS_FONT.bold,
     color: BASE_COLORS.white,
   },
   statLabel: {
-    fontSize: 11,
-    fontFamily: "Poppins-Medium",
+    fontSize: COMPONENT_FONT_SIZES.card.description,
+    fontFamily: POPPINS_FONT.medium,
     color: "rgba(255, 255, 255, 0.8)",
     marginTop: 2,
   },
@@ -301,14 +299,13 @@ const styles = StyleSheet.create({
   },
   gameDecoShape2: {
     position: "absolute",
-    bottom: -10,
-    left: -10,
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: "rgba(255, 255, 255, 0.08)",
+    bottom: -20,
+    left: -20,
+    width: 80,
+    height: 80,
+    borderRadius: 40,
+    backgroundColor: "rgba(255, 255, 255, 0.03)",
   },
 });
 
-GameCard.displayName = "GameCard";
-export default React.memo(GameCard);
+export default GameCard;

@@ -1,5 +1,10 @@
-import { BASE_COLORS, ICON_COLORS } from "@/constant/colors";
-import { StyleSheet, Platform } from "react-native";
+import { StyleSheet } from "react-native";
+import { BASE_COLORS } from "@/constant/colors";
+import {
+  POPPINS_FONT,
+  COMPONENT_FONT_SIZES,
+  FONT_SIZES,
+} from "@/constant/fontSizes";
 
 export const rewardStyles = StyleSheet.create({
   // Modal container styles
@@ -14,17 +19,6 @@ export const rewardStyles = StyleSheet.create({
     maxWidth: 380,
     borderRadius: 20,
     overflow: "hidden",
-    ...Platform.select({
-      ios: {
-        shadowColor: "#000",
-        shadowOffset: { width: 0, height: 10 },
-        shadowOpacity: 0.3,
-        shadowRadius: 15,
-      },
-      android: {
-        elevation: 10,
-      },
-    }),
   },
   gradientBackground: {
     padding: 20,
@@ -47,10 +41,10 @@ export const rewardStyles = StyleSheet.create({
 
   // Today's reward card styles
   todayCard: {
-    backgroundColor: "rgba(255, 255, 255, 0.15)",
+    backgroundColor: "rgba(255, 255, 255, 0.12)",
     borderRadius: 20,
     padding: 16,
-    marginBottom: 20,
+    marginBottom: 16,
     borderWidth: 1,
     borderColor: "rgba(255, 255, 255, 0.2)",
   },
@@ -61,8 +55,8 @@ export const rewardStyles = StyleSheet.create({
     marginBottom: 12,
   },
   todayLabel: {
-    fontSize: 13,
-    fontFamily: "Poppins-Medium",
+    fontSize: COMPONENT_FONT_SIZES.card.subtitle,
+    fontFamily: POPPINS_FONT.semiBold,
     color: BASE_COLORS.white,
   },
   availableBadge: {
@@ -72,143 +66,150 @@ export const rewardStyles = StyleSheet.create({
     borderRadius: 20,
   },
   claimedBadge: {
-    backgroundColor: "rgba(255,255,255,0.3)",
+    backgroundColor: "#757575",
     paddingHorizontal: 8,
     paddingVertical: 4,
     borderRadius: 20,
   },
   badgeText: {
-    fontSize: 11,
-    fontFamily: "Poppins-Regular",
+    fontSize: COMPONENT_FONT_SIZES.card.caption,
+    fontFamily: POPPINS_FONT.medium,
     color: BASE_COLORS.white,
+    textTransform: "uppercase",
   },
   rewardContainer: {
     flexDirection: "row",
     alignItems: "center",
+    justifyContent: "center",
     marginBottom: 8,
   },
   rewardAmount: {
-    fontSize: 20,
-    fontFamily: "Poppins-Bold",
-    color: BASE_COLORS.white,
+    fontSize: FONT_SIZES["4xl"],
+    fontFamily: POPPINS_FONT.bold,
+    color: "#FFD700",
   },
   claimText: {
-    fontSize: 11,
-    fontFamily: "Poppins-Regular",
-    color: "rgba(255,255,255,0.8)",
+    fontSize: COMPONENT_FONT_SIZES.card.caption,
+    fontFamily: POPPINS_FONT.regular,
+    color: "rgba(255, 255, 255, 0.8)",
+    textAlign: "center",
   },
 
   // Month display styles
   monthDisplay: {
     alignItems: "center",
+    marginBottom: 12,
   },
   monthText: {
-    fontSize: 15,
-    fontFamily: "Poppins-SemiBold",
+    fontSize: COMPONENT_FONT_SIZES.card.title,
+    fontFamily: POPPINS_FONT.semiBold,
     color: BASE_COLORS.white,
   },
 
   // Calendar grid styles
   rewardsGrid: {
-    paddingHorizontal: 4,
-    paddingVertical: 10,
-    marginBottom: 20,
+    paddingHorizontal: 8,
+    gap: 8,
   },
   dayCard: {
     width: 70,
-    height: 90,
+    height: 80,
     backgroundColor: "rgba(255, 255, 255, 0.1)",
-    borderRadius: 20,
-    marginHorizontal: 4,
-    justifyContent: "center",
+    borderRadius: 12,
+    padding: 8,
     alignItems: "center",
-    position: "relative",
+    justifyContent: "space-between",
+    borderWidth: 1,
+    borderColor: "rgba(255, 255, 255, 0.2)",
   },
   todayDayCard: {
-    backgroundColor: "rgba(255, 215, 0, 0.3)",
-    borderWidth: 2,
-    borderColor: "#FFD700",
+    backgroundColor: "rgba(255, 215, 0, 0.2)",
+    borderColor: BASE_COLORS.yellow,
+    borderWidth: 1.5,
   },
   claimedDayCard: {
-    backgroundColor: "rgba(76, 175, 80, 0.3)",
+    backgroundColor: "rgba(76, 175, 80, 0.2)",
+    borderColor: BASE_COLORS.success,
   },
   missedDayCard: {
-    backgroundColor: "rgba(244, 67, 54, 0.3)",
+    backgroundColor: "rgba(244, 67, 54, 0.2)",
+    borderColor: BASE_COLORS.danger,
   },
   dayLabel: {
-    fontSize: 12,
-    fontFamily: "Poppins-Medium",
+    fontSize: COMPONENT_FONT_SIZES.card.caption,
+    fontFamily: POPPINS_FONT.medium,
     color: BASE_COLORS.white,
-    marginBottom: 4,
+    textAlign: "center",
   },
   dayReward: {
-    fontSize: 14,
-    fontFamily: "Poppins-SemiBold",
-    color: BASE_COLORS.white,
+    fontSize: COMPONENT_FONT_SIZES.card.description,
+    fontFamily: POPPINS_FONT.semiBold,
+    color: BASE_COLORS.yellow,
+    textAlign: "center",
   },
 
   // Indicator styles
   checkMark: {
-    width: 20,
-    height: 20,
-    backgroundColor: "#4CAF50",
-    borderRadius: 10,
+    width: 24,
+    height: 24,
+    borderRadius: 12,
+    backgroundColor: BASE_COLORS.success,
     justifyContent: "center",
     alignItems: "center",
-    marginBottom: 4,
-  },
-  missedIndicator: {
-    width: 20,
-    height: 20,
-    backgroundColor: "#F44336",
-    borderRadius: 10,
-    justifyContent: "center",
-    alignItems: "center",
-    marginBottom: 4,
   },
   todayIndicator: {
-    width: 20,
-    height: 20,
-    backgroundColor: "#FFD700",
-    borderRadius: 20,
+    width: 24,
+    height: 24,
+    borderRadius: 12,
+    backgroundColor: "rgba(255, 215, 0, 0.3)",
     justifyContent: "center",
     alignItems: "center",
-    marginBottom: 4,
+  },
+  missedIndicator: {
+    width: 24,
+    height: 24,
+    borderRadius: 12,
+    backgroundColor: BASE_COLORS.danger,
+    justifyContent: "center",
+    alignItems: "center",
   },
   upcomingIndicator: {
-    width: 20,
-    height: 20,
-    backgroundColor: "rgba(255, 255, 255, 0.3)",
-    borderRadius: 10,
+    width: 24,
+    height: 24,
+    borderRadius: 12,
+    backgroundColor: "rgba(255, 255, 255, 0.2)",
     justifyContent: "center",
     alignItems: "center",
-    marginBottom: 4,
   },
 
   // Buttons
   claimButton: {
-    backgroundColor: ICON_COLORS.brightYellow,
+    backgroundColor: BASE_COLORS.success,
     borderRadius: 20,
-    paddingVertical: 8,
+    paddingVertical: 12,
+    paddingHorizontal: 24,
     alignItems: "center",
-    marginBottom: 16,
+    marginVertical: 16,
   },
   claimButtonText: {
-    fontSize: 13,
-    fontFamily: "Poppins-SemiBold",
-    color: "#333",
+    fontSize: COMPONENT_FONT_SIZES.button.medium,
+    fontFamily: POPPINS_FONT.semiBold,
+    color: BASE_COLORS.white,
+    textTransform: "uppercase",
   },
   alreadyClaimedButton: {
-    backgroundColor: "rgba(255,255,255,0.2)",
+    backgroundColor: "rgba(117, 117, 117, 0.8)",
     borderRadius: 20,
-    paddingVertical: 8,
+    paddingVertical: 12,
+    paddingHorizontal: 24,
     alignItems: "center",
-    marginBottom: 16,
+    marginVertical: 16,
   },
   alreadyClaimedText: {
-    fontSize: 13,
-    fontFamily: "Poppins-SemiBold",
-    color: "rgba(255,255,255,0.7)",
+    fontSize: COMPONENT_FONT_SIZES.button.medium,
+    fontFamily: POPPINS_FONT.medium,
+    color: "rgba(255, 255, 255, 0.7)",
+    textTransform: "uppercase",
   },
 
   // Balance card
@@ -221,35 +222,19 @@ export const rewardStyles = StyleSheet.create({
     justifyContent: "center",
     backgroundColor: "rgba(255, 255, 255, 0.1)",
     borderRadius: 20,
-    padding: 8,
+    padding: 12,
     borderWidth: 1,
-    borderColor: "rgba(255, 255, 255, 0.15)",
+    borderColor: "rgba(255, 255, 255, 0.3)",
   },
   balanceLabel: {
-    fontSize: 12,
-    fontFamily: "Poppins-Regular",
-    color: "rgba(255,255,255,0.7)",
+    fontSize: COMPONENT_FONT_SIZES.card.description, // Changed from hardcoded 12
+    fontFamily: POPPINS_FONT.medium, // Changed from "Poppins-Medium"
+    color: "rgba(255, 255, 255, 0.8)",
+    marginBottom: 2,
   },
   balanceValue: {
-    fontSize: 15,
-    fontFamily: "Poppins-SemiBold",
+    fontSize: COMPONENT_FONT_SIZES.card.title,
+    fontFamily: POPPINS_FONT.semiBold,
     color: BASE_COLORS.white,
-  },
-
-  // Animation overlay
-  animationOverlay: {
-    position: "absolute",
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    justifyContent: "center",
-    alignItems: "center",
-    backgroundColor: "rgba(0,0,0,0.4)",
-    borderRadius: 20,
-  },
-  coinAnimation: {
-    width: 150,
-    height: 150,
   },
 });

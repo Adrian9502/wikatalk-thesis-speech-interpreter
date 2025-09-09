@@ -37,7 +37,7 @@ const TodayRewardCard: React.FC<TodayRewardCardProps> = ({
       <View style={rewardStyles.rewardContainer}>
         <Image
           source={require("@/assets/images/coin.png")}
-          style={{ width: 28, height: 28, marginRight: 8 }}
+          style={{ width: 20, height: 20, marginRight: 8 }}
         />
         <Text style={rewardStyles.rewardAmount}>{rewardAmount} coins</Text>
       </View>

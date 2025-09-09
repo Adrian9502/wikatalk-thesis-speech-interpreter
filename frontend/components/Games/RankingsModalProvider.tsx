@@ -15,6 +15,7 @@ import CloseButton from "@/components/games/buttons/CloseButton";
 import { BASE_COLORS, RANKING_COLORS } from "@/constant/colors";
 import { InteractionManager } from "react-native";
 import ModalLoading from "../ModalLoading";
+import { COMPONENT_FONT_SIZES, POPPINS_FONT } from "@/constant/fontSizes";
 
 // Create context for modal control
 const RankingsModalContext = createContext<{
@@ -205,8 +206,8 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   title: {
-    fontSize: 18,
-    fontFamily: "Poppins-SemiBold",
+    fontSize: COMPONENT_FONT_SIZES.card.title,
+    fontFamily: POPPINS_FONT.medium,
     color: BASE_COLORS.white,
     textAlign: "center",
   },

@@ -1,47 +1,43 @@
 import React from "react";
-import {
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  GestureResponderEvent,
-} from "react-native";
-import { Ionicons } from "@expo/vector-icons";
+import { TouchableOpacity, Text, StyleSheet } from "react-native";
 import { BASE_COLORS, ICON_COLORS } from "@/constant/colors";
+import { POPPINS_FONT, COMPONENT_FONT_SIZES } from "@/constant/fontSizes";
+import { Ionicons } from "@expo/vector-icons";
 
-type RankingButtonProps = {
-  onRankingsPress?: (event: GestureResponderEvent) => void;
-};
+interface RankingButtonProps {
+  onRankingsPress: () => void;
+}
 
 const RankingButton: React.FC<RankingButtonProps> = ({ onRankingsPress }) => {
   return (
     <TouchableOpacity
       style={styles.rankingsButton}
       onPress={onRankingsPress}
-      activeOpacity={0.8}
+      activeOpacity={0.7}
     >
-      <Ionicons name="trophy" size={15} color={ICON_COLORS.brightYellow} />
+      <Ionicons name="trophy" size={14} color={ICON_COLORS.brightYellow} />
       <Text style={styles.rankingsButtonText}>Rankings</Text>
     </TouchableOpacity>
   );
 };
 
-export default RankingButton;
-
 const styles = StyleSheet.create({
   rankingsButton: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "rgba(255,255,255,0.3)",
+    backgroundColor: "rgba(255, 255, 255, 0.1)",
     borderWidth: 1,
     borderColor: "rgba(255,255,255,0.5)",
     borderRadius: 20,
-    paddingHorizontal: 10,
+    paddingHorizontal: 12,
     paddingVertical: 7,
     gap: 5,
   },
   rankingsButtonText: {
-    fontSize: 12,
-    fontFamily: "Poppins-Regular",
+    fontSize: COMPONENT_FONT_SIZES.card.description,
+    fontFamily: POPPINS_FONT.medium,
     color: BASE_COLORS.white,
   },
 });
+
+export default RankingButton;

@@ -18,6 +18,7 @@ import { getDayRewardAmount } from "@/hooks/useRewards";
 import ModalLoading from "@/components/ModalLoading";
 import CloseButton from "../buttons/CloseButton";
 import { BASE_COLORS } from "@/constant/colors";
+import { POPPINS_FONT, COMPONENT_FONT_SIZES } from "@/constant/fontSizes";
 // sound
 import { playSound } from "@/utils/playSound";
 
@@ -235,8 +236,8 @@ const styles = StyleSheet.create({
     position: "relative",
   },
   title: {
-    fontSize: 18,
-    fontFamily: "Poppins-SemiBold",
+    fontSize: COMPONENT_FONT_SIZES.card.title,
+    fontFamily: POPPINS_FONT.semiBold,
     color: BASE_COLORS.white,
     textAlign: "center",
   },

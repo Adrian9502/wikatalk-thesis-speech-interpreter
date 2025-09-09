@@ -89,7 +89,7 @@ const gameOptions: GameOption[] = [
   {
     id: "multipleChoice",
     title: "Multiple Choice",
-    icon: <Target width={23} height={23} color={ICON_COLORS.white} />,
+    icon: <Target width={20} height={20} color={ICON_COLORS.white} />,
     color: BASE_COLORS.blue,
     description: "Choose the correct answer from given options",
     difficulty: "Beginner",
@@ -97,7 +97,7 @@ const gameOptions: GameOption[] = [
   {
     id: "identification",
     title: "Word Identification",
-    icon: <Search width={23} height={23} color={ICON_COLORS.white} />,
+    icon: <Search width={20} height={20} color={ICON_COLORS.white} />,
     color: BASE_COLORS.orange,
     description: "Identify the correct words in context",
     difficulty: "Intermediate",
@@ -105,7 +105,7 @@ const gameOptions: GameOption[] = [
   {
     id: "fillBlanks",
     title: "Fill in the Blanks",
-    icon: <Edit3 width={23} height={23} color={ICON_COLORS.white} />,
+    icon: <Edit3 width={20} height={20} color={ICON_COLORS.white} />,
     color: BASE_COLORS.success,
     description: "Complete sentences with the right words",
     difficulty: "Advanced",

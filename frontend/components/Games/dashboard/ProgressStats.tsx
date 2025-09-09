@@ -4,6 +4,7 @@ import { Award } from "react-native-feather";
 import { SectionHeader } from "@/components/games/common/SectionHeader";
 import { BASE_COLORS } from "@/constant/colors";
 import { useFormattedStats } from "@/utils/gameStatsUtils";
+import { POPPINS_FONT, COMPONENT_FONT_SIZES } from "@/constant/fontSizes";
 
 // SIMPLE: Global flag
 let PROGRESS_ANIMATION_PLAYED = false;
@@ -92,16 +93,15 @@ const styles = StyleSheet.create({
     borderColor: "rgba(255,255,255,0.2)",
     backgroundColor: "rgba(255,255,255,0.1)",
   },
-
   statNumber: {
-    fontSize: 16,
-    fontFamily: "Poppins-SemiBold",
+    fontSize: COMPONENT_FONT_SIZES.card.title,
+    fontFamily: POPPINS_FONT.semiBold,
     color: BASE_COLORS.white,
     marginBottom: 4,
   },
   statText: {
-    fontSize: 11,
-    fontFamily: "Poppins-Regular",
+    fontSize: COMPONENT_FONT_SIZES.card.description,
+    fontFamily: POPPINS_FONT.regular,
     color: BASE_COLORS.white,
     textAlign: "center",
   },
@@ -114,8 +114,8 @@ const styles = StyleSheet.create({
     backgroundColor: "rgba(255,255,255,0.1)",
   },
   progressSummaryText: {
-    fontSize: 12,
-    fontFamily: "Poppins-Regular",
+    fontSize: COMPONENT_FONT_SIZES.card.description,
+    fontFamily: POPPINS_FONT.regular,
     color: BASE_COLORS.white,
     textAlign: "center",
   },

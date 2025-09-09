@@ -14,6 +14,7 @@ import { RankingType, RankingUser } from "@/types/rankingTypes";
 import { getRankingCategory } from "@/constant/rankingConstants";
 import RankingItem from "./RankingItem";
 import { BASE_COLORS, ICON_COLORS } from "@/constant/colors";
+import { POPPINS_FONT, COMPONENT_FONT_SIZES } from "@/constant/fontSizes";
 import { useAuth } from "@/context/AuthContext";
 
 interface RankingContentProps {
@@ -229,13 +230,13 @@ const styles = StyleSheet.create({
     marginRight: 8,
   },
   categoryTitle: {
-    fontSize: 14,
-    fontFamily: "Poppins-SemiBold",
+    fontSize: COMPONENT_FONT_SIZES.card.subtitle,
+    fontFamily: POPPINS_FONT.semiBold,
     color: ICON_COLORS.brightYellow,
   },
   categoryDescription: {
-    fontSize: 11,
-    fontFamily: "Poppins-Medium",
+    fontSize: COMPONENT_FONT_SIZES.card.description,
+    fontFamily: POPPINS_FONT.medium,
     color: "rgba(255, 255, 255, 0.8)",
     textAlign: "center",
   },
@@ -246,21 +247,21 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
   },
   loadingText: {
-    fontSize: 12,
-    fontFamily: "Poppins-Medium",
+    fontSize: COMPONENT_FONT_SIZES.card.description,
+    fontFamily: POPPINS_FONT.medium,
     color: BASE_COLORS.white,
     marginTop: 12,
   },
   errorText: {
-    fontSize: 12,
-    fontFamily: "Poppins-Medium",
+    fontSize: COMPONENT_FONT_SIZES.card.description,
+    fontFamily: POPPINS_FONT.medium,
     color: BASE_COLORS.white,
     textAlign: "center",
     marginBottom: 6,
   },
   errorSubtext: {
-    fontSize: 12,
-    fontFamily: "Poppins-Regular",
+    fontSize: COMPONENT_FONT_SIZES.card.description,
+    fontFamily: POPPINS_FONT.regular,
     color: "rgba(255, 255, 255, 0.7)",
     textAlign: "center",
     marginBottom: 16,
@@ -275,20 +276,20 @@ const styles = StyleSheet.create({
     gap: 6,
   },
   retryButtonText: {
-    fontSize: 12,
-    fontFamily: "Poppins-Medium",
+    fontSize: COMPONENT_FONT_SIZES.card.description,
+    fontFamily: POPPINS_FONT.medium,
     color: BASE_COLORS.white,
   },
   emptyText: {
-    fontSize: 14,
-    fontFamily: "Poppins-SemiBold",
+    fontSize: COMPONENT_FONT_SIZES.card.subtitle,
+    fontFamily: POPPINS_FONT.semiBold,
     color: BASE_COLORS.white,
     textAlign: "center",
     marginBottom: 6,
   },
   emptySubtext: {
-    fontSize: 11,
-    fontFamily: "Poppins-Regular",
+    fontSize: COMPONENT_FONT_SIZES.card.description,
+    fontFamily: POPPINS_FONT.regular,
     color: "rgba(255, 255, 255, 0.7)",
     textAlign: "center",
   },
@@ -314,9 +315,9 @@ const styles = StyleSheet.create({
     backgroundColor: "rgba(255, 255, 255, 0.3)",
   },
   dividerText: {
-    fontSize: 12,
-    fontFamily: "Poppins-Medium",
-    color: "#FFD700",
+    fontSize: COMPONENT_FONT_SIZES.card.description,
+    fontFamily: POPPINS_FONT.medium,
+    color: BASE_COLORS.yellow,
     marginHorizontal: 8,
   },
   userRankCard: {
@@ -328,9 +329,9 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   userRankText: {
-    fontSize: 14,
-    fontFamily: "Poppins-SemiBold",
-    color: "#FFD700",
+    fontSize: COMPONENT_FONT_SIZES.card.subtitle,
+    fontFamily: POPPINS_FONT.semiBold,
+    color: BASE_COLORS.yellow,
   },
 });
 

@@ -145,6 +145,9 @@ const HomePageRankingContent: React.FC<HomePageRankingContentProps> = ({
               {selectedCategoryData.title}
             </Text>
           </View>
+          <Text style={styles.categoryDescription}>
+            {selectedCategoryData.description}
+          </Text>
         </View>
       )}
 
@@ -238,6 +241,13 @@ const styles = StyleSheet.create({
     fontSize: COMPONENT_FONT_SIZES.card.subtitle,
     fontFamily: POPPINS_FONT.medium,
     color: BASE_COLORS.yellow,
+  },
+  categoryDescription: {
+    fontSize: COMPONENT_FONT_SIZES.card.description,
+    fontFamily: POPPINS_FONT.medium,
+    color: "rgba(255, 255, 255, 0.8)",
+    textAlign: "center",
+    marginTop: 4,
   },
   centerContainer: {
     flex: 1,

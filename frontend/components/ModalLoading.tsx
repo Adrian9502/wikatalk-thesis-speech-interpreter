@@ -2,6 +2,7 @@ import { StyleSheet, Text, View } from "react-native";
 import React from "react";
 import { ActivityIndicator } from "react-native-paper";
 import { BASE_COLORS } from "@/constant/colors";
+import { FONT_SIZES, POPPINS_FONT } from "@/constant/fontSizes";
 
 const ModalLoading = () => {
   return (
@@ -21,8 +22,8 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   loadingText: {
-    fontSize: 14,
-    fontFamily: "Poppins-Medium",
+    fontSize: FONT_SIZES.md,
+    fontFamily: POPPINS_FONT.regular,
     color: "rgba(255, 255, 255, 0.8)",
     marginTop: 16,
   },

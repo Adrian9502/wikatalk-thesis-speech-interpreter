@@ -2,6 +2,7 @@ import React from "react";
 import { View, Text, StyleSheet } from "react-native";
 import { DifficultyProgress } from "@/types/gameProgressTypes";
 import { BASE_COLORS } from "@/constant/colors";
+import { POPPINS_FONT, COMPONENT_FONT_SIZES } from "@/constant/fontSizes";
 
 interface DifficultyCardProps {
   diffProgress: DifficultyProgress;
@@ -101,12 +102,13 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   difficultyStars: {
-    fontSize: 13,
+    fontSize: COMPONENT_FONT_SIZES.card.title,
     marginRight: 8,
   },
   difficultyTitle: {
-    fontSize: 15,
-    fontFamily: "Poppins-SemiBold",
+    fontSize: COMPONENT_FONT_SIZES.card.title,
+    marginTop: 2,
+    fontFamily: POPPINS_FONT.semiBold,
     color: BASE_COLORS.white,
   },
   difficultyBadge: {
@@ -115,8 +117,8 @@ const styles = StyleSheet.create({
     borderRadius: 20,
   },
   difficultyBadgeText: {
-    fontSize: 12,
-    fontFamily: "Poppins-Medium",
+    fontSize: COMPONENT_FONT_SIZES.card.description,
+    fontFamily: POPPINS_FONT.medium,
     color: BASE_COLORS.white,
   },
   difficultyStats: {
@@ -129,15 +131,16 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   difficultyStatLabel: {
-    fontSize: 11,
-    fontFamily: "Poppins-Medium",
+    fontSize: COMPONENT_FONT_SIZES.card.description,
+    fontFamily: POPPINS_FONT.medium,
     color: "rgba(255, 255, 255, 0.7)",
     marginBottom: 2,
   },
   difficultyStatValue: {
-    fontSize: 13,
-    fontFamily: "Poppins-SemiBold",
+    fontSize: COMPONENT_FONT_SIZES.card.title,
+    fontFamily: POPPINS_FONT.medium,
     color: BASE_COLORS.white,
+    marginVertical: 3,
   },
   progressBarContainer: {
     alignItems: "center",
@@ -155,8 +158,9 @@ const styles = StyleSheet.create({
     borderRadius: 3,
   },
   progressBarText: {
-    fontSize: 11,
-    fontFamily: "Poppins-Medium",
+    fontSize: COMPONENT_FONT_SIZES.card.caption,
+    fontFamily: POPPINS_FONT.medium,
+    marginTop: 2,
     color: "rgba(255, 255, 255, 0.7)",
   },
 });

@@ -8,6 +8,11 @@ import RecentAttempt from "./RecentAttempt";
 import { BASE_COLORS, ICON_COLORS } from "@/constant/colors";
 // NEW: Import centralized stats utilities
 import { useGameModeSummaryStats } from "@/utils/gameStatsUtils";
+import {
+  POPPINS_FONT,
+  COMPONENT_FONT_SIZES,
+  FONT_SIZES,
+} from "@/constant/fontSizes";
 
 interface ProgressContentProps {
   progressData: EnhancedGameModeProgress | null;
@@ -231,16 +236,16 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   errorText: {
-    fontSize: 14,
-    fontFamily: "Poppins-Medium",
+    fontSize: COMPONENT_FONT_SIZES.card.subtitle,
+    fontFamily: POPPINS_FONT.medium,
     color: BASE_COLORS.white,
     textAlign: "center",
     marginTop: 16,
     marginBottom: 8,
   },
   errorSubtext: {
-    fontSize: 12,
-    fontFamily: "Poppins-Regular",
+    fontSize: COMPONENT_FONT_SIZES.card.description,
+    fontFamily: POPPINS_FONT.regular,
     color: "rgba(255, 255, 255, 0.6)",
     textAlign: "center",
   },
@@ -248,8 +253,8 @@ const styles = StyleSheet.create({
     marginBottom: 15,
   },
   sectionTitle: {
-    fontSize: 13,
-    fontFamily: "Poppins-Medium",
+    fontSize: COMPONENT_FONT_SIZES.card.subtitle,
+    fontFamily: POPPINS_FONT.medium,
     color: BASE_COLORS.white,
     marginBottom: 10,
   },
@@ -271,19 +276,19 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   summaryLabel: {
-    fontSize: 12,
-    fontFamily: "Poppins-Medium",
+    fontSize: COMPONENT_FONT_SIZES.card.description,
+    fontFamily: POPPINS_FONT.medium,
     color: BASE_COLORS.white,
   },
   completionBadge: {
     backgroundColor: BASE_COLORS.success,
     paddingHorizontal: 8,
-    paddingVertical: 4,
+    paddingVertical: 5,
     borderRadius: 20,
   },
   badgeText: {
-    fontSize: 10,
-    fontFamily: "Poppins-Medium",
+    fontSize: COMPONENT_FONT_SIZES.card.caption,
+    fontFamily: POPPINS_FONT.medium,
     color: BASE_COLORS.white,
   },
   progressSummary: {
@@ -296,19 +301,19 @@ const styles = StyleSheet.create({
     alignItems: "baseline",
   },
   completedText: {
-    fontSize: 22,
-    fontFamily: "Poppins-Bold",
+    fontSize: FONT_SIZES["3xl"],
+    fontFamily: POPPINS_FONT.semiBold,
     color: ICON_COLORS.brightYellow,
   },
   totalText: {
-    fontSize: 17,
-    fontFamily: "Poppins-Medium",
+    fontSize: COMPONENT_FONT_SIZES.card.title,
+    fontFamily: POPPINS_FONT.medium,
     color: BASE_COLORS.white,
     marginLeft: 4,
   },
   encouragementText: {
-    fontSize: 11,
-    fontFamily: "Poppins-Regular",
+    fontSize: COMPONENT_FONT_SIZES.card.description,
+    fontFamily: POPPINS_FONT.regular,
     color: "rgba(255,255,255,0.8)",
   },
   attemptsTitle: {

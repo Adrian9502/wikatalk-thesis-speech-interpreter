@@ -193,26 +193,4 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
   },
-  headerContent: {
-    flexDirection: "row",
-    justifyContent: "center",
-    alignItems: "center",
-    marginBottom: 20,
-    position: "absolute",
-    top: 60,
-    left: 0,
-    right: 0,
-  },
-  title: {
-    fontSize: 20,
-    fontFamily: "Poppins-SemiBold",
-    color: BASE_COLORS.white,
-    textAlign: "center",
-  },
-  loadingText: {
-    color: BASE_COLORS.white,
-    marginTop: 13,
-    fontFamily: "Poppins-Regular",
-    fontSize: 16,
-  },
 });

@@ -1,6 +1,7 @@
 import { BASE_COLORS, TITLE_COLORS } from "@/constant/colors";
 import React from "react";
 import { View, Text, StyleSheet } from "react-native";
+import { POPPINS_FONT, COMPONENT_FONT_SIZES } from "@/constant/fontSizes";
 
 interface StatBoxProps {
   value: string | number;
@@ -28,15 +29,15 @@ const styles = StyleSheet.create({
     borderColor: "rgba(255, 255, 255, 0.15)",
   },
   statValue: {
-    fontSize: 14,
-    fontFamily: "Poppins-Bold",
-    color: TITLE_COLORS.customYellow,
+    fontSize: COMPONENT_FONT_SIZES.card.subtitle,
+    fontFamily: POPPINS_FONT.bold,
+    color: BASE_COLORS.yellow,
     marginTop: 6,
     marginBottom: 2,
   },
   statLabel: {
-    fontSize: 11,
-    fontFamily: "Poppins-Medium",
+    fontSize: COMPONENT_FONT_SIZES.card.description,
+    fontFamily: POPPINS_FONT.medium,
     color: BASE_COLORS.white,
     textAlign: "center",
   },

@@ -4,6 +4,7 @@ import * as Animatable from "react-native-animatable";
 import { Clock, CheckCircle, XCircle } from "react-native-feather";
 import { formatTime } from "@/utils/gameUtils";
 import { BASE_COLORS } from "@/constant/colors";
+import { POPPINS_FONT, COMPONENT_FONT_SIZES } from "@/constant/fontSizes";
 
 interface RecentAttemptProps {
   attempt: {
@@ -84,8 +85,8 @@ const styles = StyleSheet.create({
     marginRight: 8,
   },
   attemptLevel: {
-    fontSize: 13,
-    fontFamily: "Poppins-Medium",
+    fontSize: COMPONENT_FONT_SIZES.card.description,
+    fontFamily: POPPINS_FONT.medium,
     color: BASE_COLORS.white,
     flex: 1,
     marginRight: 8,
@@ -97,8 +98,8 @@ const styles = StyleSheet.create({
     borderRadius: 8,
   },
   attemptDifficulty: {
-    fontSize: 9,
-    fontFamily: "Poppins-Medium",
+    fontSize: COMPONENT_FONT_SIZES.card.caption,
+    fontFamily: POPPINS_FONT.medium,
     color: "rgba(255, 255, 255, 0.8)",
   },
   attemptItem: {
@@ -132,14 +133,14 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   attemptTime: {
-    fontSize: 10,
+    fontSize: COMPONENT_FONT_SIZES.card.caption,
     marginTop: 2,
-    fontFamily: "Poppins-Medium",
+    fontFamily: POPPINS_FONT.regular,
     color: "rgba(255, 255, 255, 0.7)",
   },
   attemptDate: {
-    fontSize: 10,
-    fontFamily: "Poppins-Medium",
+    fontSize: COMPONENT_FONT_SIZES.card.caption,
+    fontFamily: POPPINS_FONT.regular,
     color: "rgba(255, 255, 255, 0.6)",
   },
 });
