@@ -15,6 +15,7 @@ import { LinearGradient } from "expo-linear-gradient";
 import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
 import { BASE_COLORS } from "@/constant/colors";
 import getLanguageBackground from "@/utils/getLanguageBackground";
+import { FONT_SIZES, POPPINS_FONT } from "@/constant/fontSizes";
 
 interface LanguageBottomSectionProps {
   language: string;
@@ -58,8 +59,9 @@ const LanguageBottomSection: React.FC<LanguageBottomSectionProps> = ({
       micIconSize: isSmallScreen ? 24 : 28,
       marginRight: isSmallScreen ? 12 : 16,
       borderRadius: isSmallScreen ? 16 : 20,
-      fontSize: isSmallScreen ? 10 : 11,
-      durationFontSize: isSmallScreen ? 9 : 10,
+      // UPDATED: Use font sizing system
+      fontSize: FONT_SIZES.sm, // Consistent language label size
+      durationFontSize: FONT_SIZES.xs, // Consistent duration text size
     };
   };
 
@@ -279,7 +281,7 @@ const styles = StyleSheet.create({
   },
   languageName: {
     color: BASE_COLORS.white,
-    fontFamily: "Poppins-Medium",
+    fontFamily: POPPINS_FONT.medium, // UPDATED: Use font constant
   },
   // recording info
   recordingInfo: {
@@ -293,12 +295,12 @@ const styles = StyleSheet.create({
   },
   durationText: {
     color: BASE_COLORS.white,
-    fontFamily: "Poppins-SemiBold",
+    fontFamily: POPPINS_FONT.semiBold, // UPDATED: Use font constant
   },
   minimumText: {
     color: "rgba(255, 255, 255, 0.7)",
-    fontSize: 11,
-    fontFamily: "Poppins-Regular",
+    fontSize: FONT_SIZES.sm, // UPDATED: Use font sizing system
+    fontFamily: POPPINS_FONT.regular, // UPDATED: Use font constant
   },
 });
 

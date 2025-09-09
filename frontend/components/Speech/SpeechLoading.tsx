@@ -11,6 +11,7 @@ import DotsLoader from "@/components/DotLoader";
 import useThemeStore from "@/store/useThemeStore";
 import { Modal } from "react-native";
 import { BASE_COLORS } from "@/constant/colors";
+import { FONT_SIZES, POPPINS_FONT } from "@/constant/fontSizes";
 
 interface SpeechLoadingProps {
   onCancel?: () => void;
@@ -130,10 +131,10 @@ const styles = StyleSheet.create({
     maxWidth: 280,
   },
   loadingText: {
-    fontFamily: "Poppins-Regular",
+    fontFamily: POPPINS_FONT.regular, // UPDATED: Use font constant
     color: BASE_COLORS.white,
     textAlign: "center",
-    fontSize: 12,
+    fontSize: FONT_SIZES.md, // UPDATED: Use font sizing system
     marginBottom: 16,
     letterSpacing: 0.3,
   },
@@ -151,8 +152,8 @@ const styles = StyleSheet.create({
     borderColor: "rgba(255, 255, 255, 0.2)",
   },
   cancelButtonText: {
-    fontSize: 10,
-    fontFamily: "Poppins-Medium",
+    fontSize: FONT_SIZES.xs, // UPDATED: Use font sizing system
+    fontFamily: POPPINS_FONT.medium, // UPDATED: Use font constant
     color: "white",
   },
 });

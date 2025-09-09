@@ -3,6 +3,7 @@ import { View, Image, Text, StyleSheet } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { BannerSection as BannerSectionType } from "@/types/languageInfo";
 import { BASE_COLORS } from "@/constant/colors";
+import { FONT_SIZES, POPPINS_FONT } from "@/constant/fontSizes";
 
 interface BannerSectionProps {
   data: BannerSectionType["data"];
@@ -57,8 +58,8 @@ const styles = StyleSheet.create({
   },
   regionText: {
     color: BASE_COLORS.white,
-    fontFamily: "Poppins-Medium",
-    fontSize: 12,
+    fontFamily: POPPINS_FONT.medium,
+    fontSize: FONT_SIZES.md,
   },
 });
 

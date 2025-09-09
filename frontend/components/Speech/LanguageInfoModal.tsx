@@ -14,6 +14,7 @@ import SectionRenderer from "@/components/speech/languageInfoModal/SectionRender
 import { createSections } from "@/utils/speech/languageInfoSection";
 import CloseButton from "../games/buttons/CloseButton";
 import { BASE_COLORS } from "@/constant/colors";
+import { COMPONENT_FONT_SIZES, POPPINS_FONT } from "@/constant/fontSizes";
 
 interface LanguageInfoModalProps {
   visible: boolean;
@@ -91,6 +92,8 @@ const LanguageInfoModal: React.FC<LanguageInfoModalProps> = ({
           <FlatList
             data={sections}
             overScrollMode="never"
+            showsVerticalScrollIndicator={false}
+            showsHorizontalScrollIndicator={false}
             keyExtractor={(item) => item.id}
             renderItem={({ item }) => (
               <SectionRenderer item={item} colors={colors} />
@@ -128,8 +131,8 @@ const styles = StyleSheet.create({
   },
   titleText: {
     color: BASE_COLORS.white,
-    fontFamily: "Poppins-Medium",
-    fontSize: 14,
+    fontFamily: POPPINS_FONT.medium,
+    fontSize: COMPONENT_FONT_SIZES.card.title,
     textAlign: "center",
   },
   listContent: {

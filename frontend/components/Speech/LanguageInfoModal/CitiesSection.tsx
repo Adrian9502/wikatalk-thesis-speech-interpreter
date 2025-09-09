@@ -2,6 +2,7 @@ import React from "react";
 import { View, Text, StyleSheet } from "react-native";
 import { MapPin } from "react-native-feather";
 import { CitiesSection as CitiesSectionType } from "@/types/languageInfo";
+import { FONT_SIZES, POPPINS_FONT } from "@/constant/fontSizes";
 
 interface CitiesSectionProps {
   data: CitiesSectionType["data"];
@@ -42,8 +43,8 @@ const CitiesSection: React.FC<CitiesSectionProps> = ({ data, colors }) => {
             <Text
               style={{
                 color: colors.text,
-                fontFamily: "Poppins-Regular",
-                fontSize: 12,
+                fontFamily: POPPINS_FONT.regular,
+                fontSize: FONT_SIZES.sm,
               }}
             >
               {city}
@@ -67,8 +68,8 @@ const styles = StyleSheet.create({
     marginBottom: 12,
   },
   sectionTitle: {
-    fontFamily: "Poppins-Medium",
-    fontSize: 13,
+    fontFamily: POPPINS_FONT.medium,
+    fontSize: FONT_SIZES.lg,
     marginLeft: 8,
   },
   tagsContainer: {

@@ -26,6 +26,7 @@ import useThemeStore from "@/store/useThemeStore";
 import { getGlobalStyles } from "@/styles/globalStyles";
 import { globalSpeechManager } from "@/utils/globalSpeechManager";
 import { useFocusEffect } from "@react-navigation/native";
+import { FONT_SIZES, POPPINS_FONT } from "@/constant/fontSizes";
 
 // Define types for the state and hook returns
 interface ScanTranslateState {
@@ -317,10 +318,10 @@ const styles = StyleSheet.create({
   },
   permissionText: {
     textAlign: "center",
-    fontFamily: "Poppins-Medium",
+    fontFamily: POPPINS_FONT.medium,
     color: BASE_COLORS.white,
     paddingBottom: 4,
-    fontSize: 13,
+    fontSize: FONT_SIZES.lg,
   },
   permissionButton: {
     paddingHorizontal: 12,
@@ -330,8 +331,8 @@ const styles = StyleSheet.create({
   },
   permissionButtonText: {
     color: BASE_COLORS.blue,
-    fontFamily: "Poppins-Medium",
-    fontSize: 12,
+    fontFamily: POPPINS_FONT.medium,
+    fontSize: FONT_SIZES.md,
   },
   cameraContainer: {
     flex: 1,
@@ -381,7 +382,7 @@ const styles = StyleSheet.create({
     width: "100%",
     textAlign: "center",
     color: "white",
-    fontFamily: "Poppins-Regular",
-    fontSize: 12,
+    fontFamily: POPPINS_FONT.regular,
+    fontSize: FONT_SIZES.lg,
   },
 });

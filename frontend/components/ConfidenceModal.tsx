@@ -12,6 +12,11 @@ import { AlertCircle, X, Info, BarChart2 } from "react-native-feather";
 import { BASE_COLORS } from "@/constant/colors";
 import useThemeStore from "@/store/useThemeStore";
 import CloseButton from "./games/buttons/CloseButton";
+import {
+  COMPONENT_FONT_SIZES,
+  FONT_SIZES,
+  POPPINS_FONT,
+} from "@/constant/fontSizes";
 
 interface ConfidenceModalProps {
   visible: boolean;
@@ -252,7 +257,10 @@ const ConfidenceModal: React.FC<ConfidenceModalProps> = ({
 
             {/* Language Ranking */}
             <View style={styles.rankingSection}>
-              <Text style={styles.sectionTitle}>Accuracy Rankings</Text>
+              <View style={styles.rankingTitle}>
+                <BarChart2 width={16} height={16} color={BASE_COLORS.orange} />
+                <Text style={styles.sectionTitle}>Accuracy Rankings</Text>
+              </View>
               <Text style={styles.rankingSubtitle}>
                 How {language} compares to other dialects
               </Text>
@@ -368,8 +376,8 @@ const styles = StyleSheet.create({
     position: "relative",
   },
   headerTitle: {
-    fontSize: 14,
-    fontFamily: "Poppins-SemiBold",
+    fontSize: COMPONENT_FONT_SIZES.card.title,
+    fontFamily: POPPINS_FONT.medium,
     color: BASE_COLORS.white,
   },
   content: {
@@ -386,8 +394,8 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   languageName: {
-    fontSize: 16,
-    fontFamily: "Poppins-SemiBold",
+    fontSize: COMPONENT_FONT_SIZES.card.title,
+    fontFamily: POPPINS_FONT.semiBold,
     color: BASE_COLORS.darkText,
   },
   rankBadge: {
@@ -397,14 +405,14 @@ const styles = StyleSheet.create({
     borderRadius: 12,
   },
   rankText: {
-    fontSize: 11,
-    fontFamily: "Poppins-Medium",
+    fontSize: COMPONENT_FONT_SIZES.card.description,
+    fontFamily: POPPINS_FONT.medium,
     color: BASE_COLORS.orange,
   },
   accuracyCard: {
-    backgroundColor: "#FDFAF6",
-    borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.7)",
+    backgroundColor: "#FAF9F6",
+    borderWidth: 0.5,
+    borderColor: "#F0EAD6",
     borderRadius: 20,
     padding: 16,
   },
@@ -418,12 +426,12 @@ const styles = StyleSheet.create({
     alignItems: "flex-start",
   },
   accuracyValue: {
-    fontSize: 20,
-    fontFamily: "Poppins-Bold",
+    fontSize: FONT_SIZES["2xl"],
+    fontFamily: POPPINS_FONT.bold,
   },
   accuracyLabel: {
-    fontSize: 11,
-    fontFamily: "Poppins-Regular",
+    fontSize: FONT_SIZES.xs,
+    fontFamily: POPPINS_FONT.medium,
     color: BASE_COLORS.placeholderText,
     marginTop: -4,
   },
@@ -431,14 +439,14 @@ const styles = StyleSheet.create({
     alignItems: "flex-end",
   },
   werLabel: {
-    fontSize: 11,
-    fontFamily: "Poppins-Regular",
+    fontSize: FONT_SIZES.xs,
+    fontFamily: POPPINS_FONT.medium,
     color: BASE_COLORS.placeholderText,
   },
   werValue: {
-    fontSize: 14,
-    fontFamily: "Poppins-SemiBold",
-    color: BASE_COLORS.darkText,
+    fontSize: FONT_SIZES.xl,
+    fontFamily: POPPINS_FONT.medium,
+    color: BASE_COLORS.danger,
   },
   confidenceBadge: {
     flexDirection: "row",
@@ -456,12 +464,12 @@ const styles = StyleSheet.create({
     marginRight: 6,
   },
   confidenceText: {
-    fontSize: 12,
-    fontFamily: "Poppins-Medium",
+    fontSize: COMPONENT_FONT_SIZES.card.description,
+    fontFamily: POPPINS_FONT.medium,
   },
   description: {
-    fontSize: 12,
-    fontFamily: "Poppins-Regular",
+    fontSize: COMPONENT_FONT_SIZES.card.caption,
+    fontFamily: POPPINS_FONT.medium,
     color: BASE_COLORS.placeholderText,
     lineHeight: 18,
   },
@@ -475,9 +483,13 @@ const styles = StyleSheet.create({
     alignItems: "center",
     marginBottom: 12,
   },
+  rankingTitle: {
+    flexDirection: "row",
+    alignItems: "center",
+  },
   sectionTitle: {
-    fontSize: 13,
-    fontFamily: "Poppins-Medium",
+    fontSize: COMPONENT_FONT_SIZES.card.subtitle,
+    fontFamily: POPPINS_FONT.medium,
     color: BASE_COLORS.darkText,
     marginLeft: 6,
   },
@@ -489,8 +501,8 @@ const styles = StyleSheet.create({
     borderLeftColor: BASE_COLORS.blue,
   },
   infoText: {
-    fontSize: 11.5,
-    fontFamily: "Poppins-Regular",
+    fontSize: COMPONENT_FONT_SIZES.card.description,
+    fontFamily: POPPINS_FONT.regular,
     color: BASE_COLORS.darkText,
     lineHeight: 18,
     marginBottom: 8,
@@ -521,8 +533,8 @@ const styles = StyleSheet.create({
     marginRight: 10,
   },
   tipText: {
-    fontSize: 11.5,
-    fontFamily: "Poppins-Regular",
+    fontSize: COMPONENT_FONT_SIZES.card.description,
+    fontFamily: POPPINS_FONT.regular,
     color: BASE_COLORS.darkText,
     lineHeight: 18,
     flex: 1,
@@ -532,10 +544,11 @@ const styles = StyleSheet.create({
     paddingTop: 16,
   },
   rankingSubtitle: {
-    fontSize: 11,
-    fontFamily: "Poppins-Regular",
+    fontSize: COMPONENT_FONT_SIZES.card.caption,
+    fontFamily: POPPINS_FONT.regular,
     color: BASE_COLORS.placeholderText,
     marginBottom: 12,
+    marginTop: 5,
   },
   rankingList: {
     backgroundColor: BASE_COLORS.white,
@@ -562,8 +575,8 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   rankingPosition: {
-    fontSize: 12,
-    fontFamily: "Poppins-Medium",
+    fontSize: COMPONENT_FONT_SIZES.card.caption,
+    fontFamily: POPPINS_FONT.medium,
     color: BASE_COLORS.placeholderText,
     width: 24,
   },
@@ -571,18 +584,18 @@ const styles = StyleSheet.create({
     color: BASE_COLORS.orange,
   },
   rankingLanguage: {
-    fontSize: 13,
-    fontFamily: "Poppins-Regular",
+    fontSize: COMPONENT_FONT_SIZES.card.subtitle,
+    fontFamily: POPPINS_FONT.regular,
     color: BASE_COLORS.darkText,
     marginLeft: 8,
   },
   rankingLanguageSelected: {
-    fontFamily: "Poppins-Medium",
+    fontFamily: POPPINS_FONT.medium,
     color: BASE_COLORS.orange,
   },
   rankingAccuracy: {
-    fontSize: 12,
-    fontFamily: "Poppins-Medium",
+    fontSize: COMPONENT_FONT_SIZES.card.subtitle,
+    fontFamily: POPPINS_FONT.medium,
     color: BASE_COLORS.darkText,
   },
   rankingAccuracySelected: {
@@ -593,7 +606,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   rankingDividerText: {
-    fontSize: 12,
+    fontSize: COMPONENT_FONT_SIZES.card.caption,
     color: BASE_COLORS.placeholderText,
   },
 });

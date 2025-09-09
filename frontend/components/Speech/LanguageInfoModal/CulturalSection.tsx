@@ -2,6 +2,7 @@ import React from "react";
 import { View, Text, StyleSheet } from "react-native";
 import { Info } from "react-native-feather";
 import { CulturalSection as CulturalSectionType } from "@/types/languageInfo";
+import { FONT_SIZES, POPPINS_FONT } from "@/constant/fontSizes";
 
 interface CulturalSectionProps {
   data: CulturalSectionType["data"];
@@ -29,8 +30,8 @@ const CulturalSection: React.FC<CulturalSectionProps> = ({ data, colors }) => {
           <Text
             style={{
               color: colors.text,
-              fontFamily: "Poppins-Regular",
-              fontSize: 12,
+              fontFamily: POPPINS_FONT.regular,
+              fontSize: FONT_SIZES.md,
             }}
           >
             {data.symbol}
@@ -44,8 +45,8 @@ const CulturalSection: React.FC<CulturalSectionProps> = ({ data, colors }) => {
             style={{
               color: colors.text,
               lineHeight: 20,
-              fontSize: 12,
-              fontFamily: "Poppins-Regular",
+              fontSize: FONT_SIZES.md,
+              fontFamily: POPPINS_FONT.regular,
             }}
           >
             {data.fact}
@@ -68,8 +69,8 @@ const styles = StyleSheet.create({
     marginBottom: 12,
   },
   sectionTitle: {
-    fontFamily: "Poppins-Medium",
-    fontSize: 13,
+    fontFamily: POPPINS_FONT.medium,
+    fontSize: FONT_SIZES.lg,
     marginLeft: 8,
   },
   culturalBox: {
@@ -85,8 +86,8 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   culturalLabel: {
-    fontFamily: "Poppins-Medium",
-    fontSize: 13,
+    fontFamily: POPPINS_FONT.medium,
+    fontSize: FONT_SIZES.lg,
     marginBottom: 8,
   },
 });

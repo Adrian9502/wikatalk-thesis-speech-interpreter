@@ -6,6 +6,11 @@ import { DIALECTS } from "@/constant/languages";
 import { BASE_COLORS } from "@/constant/colors";
 import useLanguageStore from "@/store/useLanguageStore";
 import ConfidenceModal from "@/components/ConfidenceModal";
+import {
+  FONT_SIZES,
+  POPPINS_FONT,
+  COMPONENT_FONT_SIZES,
+} from "@/constant/fontSizes";
 
 interface LanguageSectionHeaderProps {
   position: "top" | "bottom";
@@ -257,8 +262,8 @@ const styles = StyleSheet.create({
     borderColor: BASE_COLORS.borderColor,
   },
   dropdownText: {
-    fontSize: 14,
-    fontFamily: "Poppins-Regular",
+    fontSize: COMPONENT_FONT_SIZES.translation.language, // UPDATED: Use component font sizing
+    fontFamily: POPPINS_FONT.regular, // UPDATED: Use font constant
   },
   controls: {
     flexDirection: "row",

@@ -10,6 +10,11 @@ import {
 import { BASE_COLORS } from "@/constant/colors";
 import useLanguageStore from "@/store/useLanguageStore";
 import { INITIAL_TEXT, ERROR_TEXT } from "@/store/useLanguageStore";
+import {
+  FONT_SIZES,
+  POPPINS_FONT,
+  COMPONENT_FONT_SIZES,
+} from "@/constant/fontSizes";
 
 interface TextAreaSectionProps {
   textField: string;
@@ -51,8 +56,9 @@ const TextAreaSection: React.FC<TextAreaSectionProps> = ({
       minHeight: isVerySmallScreen ? 80 : isSmallScreen ? 100 : 120, // Reduced min height for very small screens
       padding: isVerySmallScreen ? 12 : 16, // Reduced padding
       borderRadius: isVerySmallScreen ? 14 : 20,
-      fontSize: isVerySmallScreen ? 13 : 14, // Slightly smaller font for very small screens
-      lineHeight: isVerySmallScreen ? 18 : 20,
+      // UPDATED: Use component font sizing system
+      fontSize: COMPONENT_FONT_SIZES.translation.sourceText, // Use translation text size
+      lineHeight: COMPONENT_FONT_SIZES.translation.sourceText * 1.4, // Calculate line height
     };
   };
 
@@ -267,7 +273,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   textField: {
-    fontFamily: "Poppins-Regular",
+    fontFamily: POPPINS_FONT.regular, // UPDATED: Use font constant
     textAlignVertical: "top",
   },
   loadingContainer: {

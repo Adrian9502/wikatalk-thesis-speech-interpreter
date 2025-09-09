@@ -2,6 +2,7 @@ import React from "react";
 import { View, Text, StyleSheet } from "react-native";
 import { MessageCircle } from "react-native-feather";
 import { PhrasesSection as PhrasesSectionType } from "@/types/languageInfo";
+import { FONT_SIZES, POPPINS_FONT } from "@/constant/fontSizes";
 
 interface PhrasesSectionProps {
   data: PhrasesSectionType["data"];
@@ -60,8 +61,8 @@ const styles = StyleSheet.create({
     marginBottom: 12,
   },
   sectionTitle: {
-    fontFamily: "Poppins-Medium",
-    fontSize: 13,
+    fontFamily: POPPINS_FONT.medium,
+    fontSize: FONT_SIZES.lg,
     marginLeft: 8,
   },
   phrasesColumn: {
@@ -80,12 +81,12 @@ const styles = StyleSheet.create({
   },
   phraseLabel: {
     marginBottom: 8,
-    fontSize: 13,
-    fontFamily: "Poppins-Medium",
+    fontSize: FONT_SIZES.lg,
+    fontFamily: POPPINS_FONT.medium,
   },
   phraseText: {
-    fontSize: 12,
-    fontFamily: "Poppins-Regular",
+    fontSize: FONT_SIZES.md,
+    fontFamily: POPPINS_FONT.regular,
   },
 });
 

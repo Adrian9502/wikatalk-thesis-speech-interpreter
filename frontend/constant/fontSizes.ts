@@ -84,6 +84,16 @@ export const COMPONENT_FONT_SIZES = {
     pronunciation: FONT_SIZES.sm,
   },
 
+  // ADDED: Speech-specific components
+  speech: {
+    recordingDuration: FONT_SIZES.xs,
+    languageLabel: FONT_SIZES.sm,
+    errorMessage: FONT_SIZES.md,
+    loadingText: FONT_SIZES.md,
+    modalTitle: FONT_SIZES.lg,
+    dropdownText: FONT_SIZES.md,
+  },
+
   // Home page components
   home: {
     greeting: FONT_SIZES.sm,
