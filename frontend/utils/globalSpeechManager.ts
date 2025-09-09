@@ -17,16 +17,21 @@ class GlobalSpeechManager {
 
   async stopAllSpeech(): Promise<void> {
     try {
+      console.log("[GlobalSpeechManager] Stopping all speech");
+
       if (await Speech.isSpeakingAsync()) {
         await Speech.stop();
       }
 
       this.isGlobalSpeaking = false;
 
+      // Stop speech in all stores
       useLanguageStore.getState().stopSpeech();
       useTranslateStore.getState().stopSpeech();
       useScanTranslateStore.getState().stopSpeech();
-      usePronunciationStore.getState().stopAudio();
+
+      // UPDATED: Also stop pronunciation audio
+      await usePronunciationStore.getState().stopAudio();
     } catch (error) {
       console.error("[GlobalSpeechManager] Error stopping speech:", error);
     }

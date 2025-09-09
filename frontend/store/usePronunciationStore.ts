@@ -266,12 +266,14 @@ export const usePronunciationStore = create<PronunciationState>((set, get) => ({
       language: "fil",
       rate: 0.35,
       onStart: () => {
+        console.log(`[PronunciationStore] Audio started for index ${index}`);
         set(() => ({
           currentPlayingIndex: index,
           isAudioLoading: false,
         }));
       },
       onDone: () => {
+        console.log(`[PronunciationStore] Audio completed for index ${index}`);
         set(() => ({
           currentPlayingIndex: null,
           isAudioLoading: false,
@@ -291,11 +293,21 @@ export const usePronunciationStore = create<PronunciationState>((set, get) => ({
   },
 
   stopAudio: async () => {
-    await Speech.stop();
-    set(() => ({
-      currentPlayingIndex: null,
-      isAudioLoading: false,
-    }));
+    console.log("[PronunciationStore] Stopping audio");
+    try {
+      await Speech.stop();
+      set(() => ({
+        currentPlayingIndex: null,
+        isAudioLoading: false,
+      }));
+    } catch (error) {
+      console.error("[PronunciationStore] Error stopping audio:", error);
+      // Still reset state even if stop fails
+      set(() => ({
+        currentPlayingIndex: null,
+        isAudioLoading: false,
+      }));
+    }
   },
 
   getWordOfTheDay: async () => {

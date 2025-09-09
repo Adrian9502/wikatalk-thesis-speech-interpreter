@@ -31,6 +31,7 @@ import { BASE_COLORS } from "@/constant/colors";
 import { Dropdown } from "react-native-element-dropdown";
 import { DIALECTS } from "@/constant/languages";
 import { Ionicons } from "@expo/vector-icons";
+import { COMPONENT_FONT_SIZES } from "@/constant/fontSizes";
 
 const Pronounce = () => {
   // Stop speech when tab focused
@@ -64,7 +65,6 @@ const Pronounce = () => {
     clearCache,
   } = usePronunciationStore();
 
-  // LOCAL STATE - Simplified
   const [selectedLanguage, setSelectedLanguage] = useState("Cebuano");
   const [searchInput, setSearchInput] = useState("");
   const [isRefreshing, setIsRefreshing] = useState(false);
@@ -74,8 +74,6 @@ const Pronounce = () => {
   const flashListRef = useRef<FlashList<PronunciationItem>>(null);
 
   const displayData = useMemo(() => {
-    const startTime = Date.now();
-
     // CRITICAL: Check if transformedData exists and has content
     if (!transformedData || Object.keys(transformedData).length === 0) {
       console.log("[Pronounce] No transformed data available");
@@ -323,7 +321,7 @@ const Pronounce = () => {
             renderRightIcon={() => (
               <Ionicons
                 name={isDropdownFocus ? "chevron-up" : "chevron-down"}
-                size={15}
+                size={COMPONENT_FONT_SIZES.card.subtitle} // UPDATED: Use card subtitle size
                 color={BASE_COLORS.blue}
               />
             )}

@@ -5,11 +5,19 @@ import {
   TouchableOpacity,
   ActivityIndicator,
   StyleSheet,
+  Dimensions,
 } from "react-native";
 import { BASE_COLORS } from "@/constant/colors";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { Globe } from "react-native-feather";
 import { usePronunciationStore } from "@/store/usePronunciationStore";
+import { POPPINS_FONT, COMPONENT_FONT_SIZES } from "@/constant/fontSizes";
+
+const { width: screenWidth, height: screenHeight } = Dimensions.get("window");
+
+// Check for different screen sizes
+const isSmallScreen = screenWidth <= 384 && screenHeight <= 1280; // Nexus 4 and similar
+const isMediumScreen = screenWidth <= 414 && screenHeight <= 896; // iPhone X/11 and similar
 
 // Define the PronunciationItem interface
 interface PronunciationItem {
@@ -35,49 +43,110 @@ const PronunciationCard = React.memo(
     const isAudioLoading = usePronunciationStore(
       (state) => state.isAudioLoading
     );
+    // ADDED: Get stopAudio function from store
+    const stopAudio = usePronunciationStore((state) => state.stopAudio);
 
     const isCurrentPlaying = currentPlayingIndex === index;
     const isAudioLoadingForThis = isAudioLoading && isCurrentPlaying;
 
     const [isProcessing, setIsProcessing] = useState(false);
 
+    // UPDATED: Enhanced play button handler with stop functionality
     const handlePlayPress = useCallback(async () => {
       if (isProcessing) {
         return;
       }
 
+      setIsProcessing(true);
+
       try {
-        await onPlayPress(index, item.translation);
+        // If this card is currently playing or loading, stop the audio
+        if (isCurrentPlaying || isAudioLoadingForThis) {
+          console.log(`[PronunciationCard] Stopping audio for index ${index}`);
+          await stopAudio();
+        } else {
+          // If not playing, start playing
+          console.log(`[PronunciationCard] Starting audio for index ${index}`);
+          await onPlayPress(index, item.translation);
+        }
+      } catch (error) {
+        console.error(`[PronunciationCard] Error handling play/stop:`, error);
       } finally {
+        // Add a small delay to prevent rapid button presses
         setTimeout(() => setIsProcessing(false), 300);
       }
-    }, [index, item.translation, onPlayPress, isProcessing]);
+    }, [
+      index,
+      item.translation,
+      onPlayPress,
+      stopAudio,
+      isProcessing,
+      isCurrentPlaying,
+      isAudioLoadingForThis,
+    ]);
+
+    // Get responsive dimensions
+    const getResponsiveDimensions = () => {
+      return {
+        cardPadding: isSmallScreen ? 12 : 16,
+        iconSize: isSmallScreen ? 14 : 16,
+        buttonSize: isSmallScreen ? 36 : 40,
+        iconContainerSize: isSmallScreen ? 28 : 32,
+        borderRadius: 25,
+        marginVertical: isSmallScreen ? 6 : 8,
+        marginBottom: isSmallScreen ? 8 : 12,
+        accentBarHeight: isSmallScreen ? 4 : 6,
+        liveDotSize: isSmallScreen ? 6 : 8,
+        pronunciationPadding: isSmallScreen ? 8 : 12,
+        playIconSize: isSmallScreen ? 15 : 17,
+      };
+    };
+
+    const dimensions = getResponsiveDimensions();
 
     return (
       <View
-        style={[styles.cardContainer, isCurrentPlaying && styles.cardActive]}
+        style={[
+          styles.cardContainer,
+          {
+            marginVertical: dimensions.marginVertical,
+            borderRadius: dimensions.borderRadius,
+          },
+          isCurrentPlaying && styles.cardActive,
+        ]}
         removeClippedSubviews={false}
         collapsable={false}
       >
         {/* Accent bar */}
         <View
-          style={[styles.accentBar, isCurrentPlaying && styles.accentBarActive]}
+          style={[
+            styles.accentBar,
+            { height: dimensions.accentBarHeight },
+            isCurrentPlaying && styles.accentBarActive,
+          ]}
         />
 
-        <View style={styles.cardWrapper}>
+        <View style={[{ padding: dimensions.cardPadding }]}>
           {/* English Text */}
-          <View style={styles.topRow}>
+          <View
+            style={[styles.topRow, { marginBottom: dimensions.marginBottom }]}
+          >
             <View
               style={[
                 styles.iconContainer,
                 styles.englishIconContainer,
+                {
+                  width: dimensions.iconContainerSize,
+                  height: dimensions.iconContainerSize,
+                  borderRadius: dimensions.iconContainerSize / 2,
+                },
                 isCurrentPlaying && styles.englishIconContainerActive,
               ]}
             >
               <Globe
                 color={isCurrentPlaying ? BASE_COLORS.orange : BASE_COLORS.blue}
-                width={16}
-                height={16}
+                width={dimensions.iconSize}
+                height={dimensions.iconSize}
               />
             </View>
             <Text style={styles.englishText} numberOfLines={2}>
@@ -85,13 +154,22 @@ const PronunciationCard = React.memo(
             </Text>
             {isCurrentPlaying && (
               <View style={styles.liveIndicator}>
-                <View style={styles.liveDot} />
+                <View
+                  style={[
+                    styles.liveDot,
+                    {
+                      width: dimensions.liveDotSize,
+                      height: dimensions.liveDotSize,
+                      borderRadius: dimensions.liveDotSize / 2,
+                    },
+                  ]}
+                />
               </View>
             )}
           </View>
 
           {/* Translation */}
-          <View style={styles.middleRow}>
+          <View style={[{ marginBottom: dimensions.marginBottom }]}>
             <View
               style={{
                 flexDirection: "row",
@@ -99,8 +177,8 @@ const PronunciationCard = React.memo(
                 backgroundColor: isCurrentPlaying
                   ? BASE_COLORS.lightPink
                   : BASE_COLORS.lightBlue,
-                padding: 12,
-                borderRadius: 20,
+                padding: dimensions.pronunciationPadding,
+                borderRadius: isSmallScreen ? 16 : 20,
                 borderLeftWidth: 3,
                 borderLeftColor: isCurrentPlaying
                   ? BASE_COLORS.orange
@@ -109,7 +187,7 @@ const PronunciationCard = React.memo(
             >
               <MaterialCommunityIcons
                 name="translate"
-                size={14}
+                size={dimensions.iconSize - 2} // Slightly smaller for translate icon
                 color={isCurrentPlaying ? BASE_COLORS.orange : BASE_COLORS.blue}
                 style={styles.arrowIcon}
               />
@@ -137,6 +215,11 @@ const PronunciationCard = React.memo(
                 style={[
                   styles.iconContainer,
                   styles.pronunciationIconContainer,
+                  {
+                    width: dimensions.iconContainerSize,
+                    height: dimensions.iconContainerSize,
+                    borderRadius: dimensions.iconContainerSize / 2,
+                  },
                   isCurrentPlaying
                     ? styles.pronunciationIconContainerActive
                     : styles.pronunciationIconContainerInactive,
@@ -144,7 +227,7 @@ const PronunciationCard = React.memo(
               >
                 <MaterialCommunityIcons
                   name={isCurrentPlaying ? "volume-high" : "volume-medium"}
-                  size={16}
+                  size={dimensions.iconSize}
                   color={
                     isCurrentPlaying
                       ? BASE_COLORS.orange
@@ -153,7 +236,16 @@ const PronunciationCard = React.memo(
                 />
               </View>
 
-              <View style={styles.pronunciationContainer}>
+              <View
+                style={[
+                  styles.pronunciationContainer,
+                  {
+                    paddingHorizontal: dimensions.pronunciationPadding,
+                    paddingVertical: isSmallScreen ? 6 : 8,
+                    borderRadius: isSmallScreen ? 6 : 8,
+                  },
+                ]}
+              >
                 {item.pronunciation && (
                   <Text
                     style={[
@@ -170,18 +262,25 @@ const PronunciationCard = React.memo(
 
             <TouchableOpacity
               style={[
-                styles.audioButton,
+                {
+                  width: dimensions.buttonSize,
+                  height: dimensions.buttonSize,
+                  borderRadius: dimensions.buttonSize / 2,
+                },
                 isCurrentPlaying && styles.audioButtonActive,
               ]}
               onPress={handlePlayPress}
               activeOpacity={0.8}
               delayPressIn={0}
               delayPressOut={0}
-              disabled={isAudioLoadingForThis || isProcessing}
+              disabled={isProcessing}
             >
               <View
                 style={[
                   styles.audioButtonWrapper,
+                  {
+                    borderRadius: dimensions.buttonSize / 2,
+                  },
                   isCurrentPlaying && styles.audioButtonWrapperActive,
                 ]}
               >
@@ -189,8 +288,8 @@ const PronunciationCard = React.memo(
                   <ActivityIndicator size="small" color={BASE_COLORS.white} />
                 ) : (
                   <MaterialCommunityIcons
-                    name={isCurrentPlaying ? "pause" : "play"}
-                    size={17}
+                    name={isCurrentPlaying ? "stop" : "play"}
+                    size={dimensions.playIconSize}
                     color={BASE_COLORS.white}
                   />
                 )}
@@ -208,8 +307,6 @@ export default PronunciationCard;
 
 const styles = StyleSheet.create({
   cardContainer: {
-    marginVertical: 8,
-    borderRadius: 16,
     backgroundColor: BASE_COLORS.white,
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
@@ -225,27 +322,20 @@ const styles = StyleSheet.create({
     elevation: 6,
   },
   accentBar: {
-    height: 6,
     backgroundColor: BASE_COLORS.lightBlue,
   },
   accentBarActive: {
-    backgroundColor: BASE_COLORS.orange,
+    backgroundColor: BASE_COLORS.lightPink,
   },
-  cardWrapper: {
-    padding: 16,
-  },
+
   topRow: {
     flexDirection: "row",
     alignItems: "center",
-    marginBottom: 12,
   },
   iconContainer: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
     justifyContent: "center",
     alignItems: "center",
-    marginRight: 12,
+    marginRight: isSmallScreen ? 10 : 12,
   },
   englishIconContainer: {
     backgroundColor: `${BASE_COLORS.blue}15`,
@@ -257,29 +347,24 @@ const styles = StyleSheet.create({
     borderColor: `${BASE_COLORS.orange}25`,
   },
   englishText: {
-    fontSize: 15,
-    fontFamily: "Poppins-Medium",
+    fontSize: COMPONENT_FONT_SIZES.card.title,
+    fontFamily: POPPINS_FONT.medium,
     color: BASE_COLORS.darkText,
     flex: 1,
   },
   liveIndicator: {
-    marginLeft: 8,
+    marginLeft: isSmallScreen ? 6 : 8,
   },
   liveDot: {
-    width: 8,
-    height: 8,
-    borderRadius: 3,
     backgroundColor: BASE_COLORS.success,
   },
-  middleRow: {
-    marginBottom: 12,
-  },
+
   arrowIcon: {
-    marginRight: 12,
+    marginRight: isSmallScreen ? 10 : 12,
   },
   translationText: {
-    fontSize: 14,
-    fontFamily: "Poppins-Medium",
+    fontSize: COMPONENT_FONT_SIZES.card.subtitle,
+    fontFamily: POPPINS_FONT.medium,
     flex: 1,
   },
   bottomRow: {
@@ -291,7 +376,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     flex: 1,
-    marginRight: 12,
+    marginRight: isSmallScreen ? 10 : 12,
   },
   pronunciationIconContainer: {
     backgroundColor: "rgba(158, 158, 167, 0.1)",
@@ -306,23 +391,15 @@ const styles = StyleSheet.create({
   pronunciationContainer: {
     flex: 1,
     backgroundColor: "rgba(158, 158, 167, 0.1)",
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-    borderRadius: 8,
   },
   pronunciationText: {
-    fontFamily: "Poppins-Regular",
-    fontSize: 13,
+    fontFamily: POPPINS_FONT.regular,
+    fontSize: COMPONENT_FONT_SIZES.card.subtitle,
     color: BASE_COLORS.placeholderText,
   },
   pronunciationTextActive: {
     color: BASE_COLORS.orange,
-    fontFamily: "Poppins-Medium",
-  },
-  audioButton: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
+    fontFamily: POPPINS_FONT.medium,
   },
   audioButtonActive: {
     shadowColor: BASE_COLORS.orange,
@@ -334,7 +411,7 @@ const styles = StyleSheet.create({
   audioButtonWrapper: {
     width: "100%",
     height: "100%",
-    borderRadius: 20,
+
     backgroundColor: BASE_COLORS.blue,
     justifyContent: "center",
     alignItems: "center",

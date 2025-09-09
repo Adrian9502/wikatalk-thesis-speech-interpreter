@@ -1,8 +1,25 @@
 import React, { useState, useCallback } from "react";
-import { View, TextInput, TouchableOpacity, StyleSheet } from "react-native";
+import {
+  View,
+  TextInput,
+  TouchableOpacity,
+  StyleSheet,
+  Dimensions,
+} from "react-native";
 import { BASE_COLORS } from "@/constant/colors";
 import { Search, X } from "react-native-feather";
 import CloseButton from "../games/buttons/CloseButton";
+import {
+  FONT_SIZES,
+  POPPINS_FONT,
+  COMPONENT_FONT_SIZES,
+} from "@/constant/fontSizes"; // ADDED: Import font constants
+
+const { width: screenWidth, height: screenHeight } = Dimensions.get("window");
+
+// Check for different screen sizes
+const isSmallScreen = screenWidth <= 384 && screenHeight <= 1280; // Nexus 4 and similar
+const isMediumScreen = screenWidth <= 414 && screenHeight <= 896; // iPhone X/11 and similar
 
 interface SearchBarProps {
   searchInput: string;
@@ -27,16 +44,52 @@ const SearchBar = React.memo(
       [setSearchInput]
     );
 
+    // Get responsive dimensions
+    const getResponsiveDimensions = () => {
+      return {
+        paddingHorizontal: isSmallScreen ? 10 : 12,
+        paddingVertical: isSmallScreen ? 5 : 6,
+        borderRadius: isSmallScreen ? 16 : 20,
+        iconContainerSize: isSmallScreen ? 22 : 26,
+        iconSize: isSmallScreen ? 12 : 14,
+        clearButtonSize: isSmallScreen ? 20 : 24,
+        clearIconSize: isSmallScreen ? 11 : 13,
+        marginRight: isSmallScreen ? 10 : 12,
+        marginLeft: isSmallScreen ? 6 : 8,
+      };
+    };
+
+    const dimensions = getResponsiveDimensions();
+
     return (
       <View
         style={[
           styles.searchContainer,
+          {
+            paddingHorizontal: dimensions.paddingHorizontal,
+            paddingVertical: dimensions.paddingVertical,
+            borderRadius: dimensions.borderRadius,
+          },
           isFocused && styles.searchContainerFocused,
         ]}
       >
         {/* Search Icon Container */}
-        <View style={styles.iconContainer}>
-          <Search width={14} height={14} color={BASE_COLORS.white} />
+        <View
+          style={[
+            styles.iconContainer,
+            {
+              width: dimensions.iconContainerSize,
+              height: dimensions.iconContainerSize,
+              borderRadius: dimensions.iconContainerSize / 2,
+              marginRight: dimensions.marginRight,
+            },
+          ]}
+        >
+          <Search
+            width={dimensions.iconSize}
+            height={dimensions.iconSize}
+            color={BASE_COLORS.white}
+          />
         </View>
 
         {/* Text Input */}
@@ -57,11 +110,24 @@ const SearchBar = React.memo(
         {searchInput.length > 0 && (
           <TouchableOpacity
             onPress={handleClear}
-            style={styles.clearButton}
+            style={{ marginLeft: dimensions.marginLeft }}
             hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
           >
-            <View style={styles.clearButtonWrapper}>
-              <X width={13} height={13} color={BASE_COLORS.darkText} />
+            <View
+              style={[
+                styles.clearButtonWrapper,
+                {
+                  width: dimensions.clearButtonSize,
+                  height: dimensions.clearButtonSize,
+                  borderRadius: dimensions.clearButtonSize / 2,
+                },
+              ]}
+            >
+              <X
+                width={dimensions.clearIconSize}
+                height={dimensions.clearIconSize}
+                color={BASE_COLORS.darkText}
+              />
             </View>
           </TouchableOpacity>
         )}
@@ -74,9 +140,7 @@ const styles = StyleSheet.create({
   searchContainer: {
     flexDirection: "row",
     alignItems: "center",
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 20,
+    // paddingHorizontal, paddingVertical, and borderRadius are set dynamically via style prop
     borderWidth: 1.5,
     backgroundColor: BASE_COLORS.white,
     borderColor: BASE_COLORS.borderColor,
@@ -95,32 +159,21 @@ const styles = StyleSheet.create({
 
   // Icon Container
   iconContainer: {
-    width: 26,
     backgroundColor: BASE_COLORS.blue,
-    height: 26,
-    borderRadius: 16,
     justifyContent: "center",
     alignItems: "center",
-    marginRight: 12,
   },
 
   // Text Input
   searchInput: {
     flex: 1,
-    fontFamily: "Poppins-Regular",
-    fontSize: 13,
+    fontFamily: POPPINS_FONT.medium,
+    fontSize: COMPONENT_FONT_SIZES.input.text,
     color: BASE_COLORS.darkText,
     paddingVertical: 0,
   },
 
-  // Clear Button
-  clearButton: {
-    marginLeft: 8,
-  },
   clearButtonWrapper: {
-    width: 24,
-    height: 24,
-    borderRadius: 12,
     justifyContent: "center",
     alignItems: "center",
   },

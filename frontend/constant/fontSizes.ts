@@ -103,12 +103,26 @@ export const COMPONENT_FONT_SIZES = {
     statusText: FONT_SIZES.sm,
   },
 
+  pronunciation: {
+    headerTitle: FONT_SIZES.xl,
+    cardTitle: FONT_SIZES.xl,
+    cardTranslation: FONT_SIZES.md,
+    cardPronunciation: FONT_SIZES.md,
+    searchPlaceholder: FONT_SIZES.md,
+    dropdownText: FONT_SIZES.md,
+    emptyStateTitle: FONT_SIZES["2xl"],
+    emptyStateText: FONT_SIZES.md,
+    errorTitle: FONT_SIZES["2xl"],
+    errorText: FONT_SIZES.md,
+    buttonText: FONT_SIZES.md,
+  },
+
   // Home page components
   home: {
     greeting: FONT_SIZES.sm,
     sectionTitle: FONT_SIZES.lg,
-    featuredTitle: FONT_SIZES.lg, // Reduced from 15 to xl (13-15)
-    featuredDescription: FONT_SIZES.sm, // Keep small for descriptions
+    featuredTitle: FONT_SIZES.lg,
+    featuredDescription: FONT_SIZES.sm,
     statsValue: FONT_SIZES["2xl"],
     statsLabel: FONT_SIZES.xs,
   },
