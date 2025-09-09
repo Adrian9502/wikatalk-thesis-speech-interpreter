@@ -85,7 +85,7 @@ export const textAreaStyles = StyleSheet.create({
   textField: {
     fontFamily: POPPINS_FONT.regular,
     textAlignVertical: "top",
-    fontSize: COMPONENT_FONT_SIZES.input.text,
+    fontSize: FONT_SIZES["2xl"],
     lineHeight: COMPONENT_FONT_SIZES.translation.sourceText * 1.4,
     color: BASE_COLORS.darkText,
   },

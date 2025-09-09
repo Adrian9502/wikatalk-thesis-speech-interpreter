@@ -8,6 +8,7 @@ import {
   Platform,
   TouchableWithoutFeedback,
   Keyboard,
+  Dimensions,
 } from "react-native";
 import { CameraView, useCameraPermissions } from "expo-camera";
 import * as ImagePicker from "expo-image-picker";
@@ -26,7 +27,17 @@ import useThemeStore from "@/store/useThemeStore";
 import { getGlobalStyles } from "@/styles/globalStyles";
 import { globalSpeechManager } from "@/utils/globalSpeechManager";
 import { useFocusEffect } from "@react-navigation/native";
-import { FONT_SIZES, POPPINS_FONT } from "@/constant/fontSizes";
+import {
+  FONT_SIZES,
+  POPPINS_FONT,
+  COMPONENT_FONT_SIZES,
+} from "@/constant/fontSizes";
+
+const { width: screenWidth, height: screenHeight } = Dimensions.get("window");
+
+// Check if it's a small screen (like Nexus 4)
+const isSmallScreen = screenWidth <= 384 && screenHeight <= 1280;
+const isMediumScreen = screenWidth <= 414 && screenHeight <= 896;
 
 // Define types for the state and hook returns
 interface ScanTranslateState {
@@ -41,6 +52,7 @@ interface ScanTranslateState {
   clearText: () => void;
   updateState: (state: Partial<ScanTranslateState>) => void;
   translateDetectedText: (text: string) => Promise<void>;
+  resetSpeechStates: () => void;
   debouncedTranslateText: (text: string) => void;
   copyToClipboard: (
     text: string,
@@ -79,6 +91,7 @@ const Scan: React.FC = () => {
     handleSourceSpeech,
     handleTargetSpeech,
     stopSpeech,
+    resetSpeechStates,
     copiedSource,
     copiedTarget,
   } = useScanTranslateStore() as ScanTranslateState;
@@ -89,14 +102,18 @@ const Scan: React.FC = () => {
   // Focus effect for speech management
   useFocusEffect(
     React.useCallback(() => {
-      console.log("[Scan] Tab focused, stopping all speech");
+      console.log(
+        "[Scan] Tab focused, stopping all speech and resetting states"
+      );
       globalSpeechManager.stopAllSpeech();
+      resetSpeechStates();
 
       return () => {
         console.log("[Scan] Tab losing focus");
         globalSpeechManager.stopAllSpeech();
+        resetSpeechStates();
       };
-    }, [])
+    }, [resetSpeechStates])
   );
 
   // Effects - always in same order
@@ -166,7 +183,39 @@ const Scan: React.FC = () => {
     }
   };
 
-  // FIXED: Early returns after all hooks are called
+  // Get responsive styles based on screen size
+  const getResponsiveStyles = () => {
+    // Calculate available height for layout (subtract safe area and some padding)
+    const availableHeight = screenHeight - insets.top - insets.bottom - 40; // 40px for padding
+
+    return {
+      // Container padding
+      containerPadding: isSmallScreen ? 8 : isMediumScreen ? 12 : 16,
+
+      // Camera view height - FIXED: Convert percentages to actual pixel values
+      cameraHeight: isSmallScreen
+        ? Math.floor(availableHeight * 0.28)
+        : isMediumScreen
+        ? Math.floor(availableHeight * 0.32)
+        : Math.floor(availableHeight * 0.35),
+
+      // Translation container
+      translationMargin: isSmallScreen ? 8 : 16,
+      translationPadding: isSmallScreen ? 12 : 16,
+      translationPaddingTop: isSmallScreen ? 16 : 20,
+
+      // Min height for translation container
+      translationMinHeight: isSmallScreen ? 280 : 350,
+
+      // Max height for translation container - FIXED: Convert to pixel values
+      translationMaxHeight: isSmallScreen
+        ? Math.floor(availableHeight * 0.7)
+        : Math.floor(availableHeight * 0.65),
+    };
+  };
+
+  const responsiveStyles = getResponsiveStyles();
+
   // Render permission request screen
   if (!permission) {
     return (
@@ -212,18 +261,30 @@ const Scan: React.FC = () => {
     <SafeAreaView
       onStartShouldSetResponder={() => true}
       edges={["left", "right"]}
-      style={[dynamicStyles.container, { paddingTop: insets.top }]}
+      style={[
+        dynamicStyles.container,
+        {
+          paddingTop: insets.top,
+        },
+      ]}
     >
       <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
         <View style={{ flex: 1 }}>
           <KeyboardAvoidingView
             behavior={Platform.OS === "ios" ? "padding" : "height"}
             style={styles.keyboardView}
-            keyboardVerticalOffset={Platform.OS === "ios" ? 0 : 20}
+            keyboardVerticalOffset={
+              Platform.OS === "ios" ? 0 : isSmallScreen ? 10 : 20
+            }
             enabled={true}
           >
             <View style={styles.cameraContainer}>
-              <View style={styles.cameraViewContainer}>
+              <View
+                style={[
+                  styles.cameraViewContainer,
+                  { height: responsiveStyles.cameraHeight },
+                ]}
+              >
                 <CameraView
                   style={{ flex: 1 }}
                   facing="back"
@@ -243,7 +304,18 @@ const Scan: React.FC = () => {
                 />
               </View>
 
-              <View style={styles.translationContainer}>
+              <View
+                style={[
+                  styles.translationContainer,
+                  {
+                    marginVertical: responsiveStyles.translationMargin,
+                    padding: responsiveStyles.translationPadding,
+                    paddingTop: responsiveStyles.translationPaddingTop,
+                    minHeight: responsiveStyles.translationMinHeight,
+                    maxHeight: responsiveStyles.translationMaxHeight,
+                  },
+                ]}
+              >
                 <LanguageSelector
                   targetLanguage={targetLanguage}
                   onLanguageChange={(language: string) => {
@@ -253,7 +325,12 @@ const Scan: React.FC = () => {
                 />
 
                 {isProcessing && (
-                  <View style={styles.progressContainer}>
+                  <View
+                    style={[
+                      styles.progressContainer,
+                      { marginBottom: isSmallScreen ? 6 : 8 },
+                    ]}
+                  >
                     <View
                       style={[
                         styles.progressBar,
@@ -321,7 +398,7 @@ const styles = StyleSheet.create({
     fontFamily: POPPINS_FONT.medium,
     color: BASE_COLORS.white,
     paddingBottom: 4,
-    fontSize: FONT_SIZES.lg,
+    fontSize: COMPONENT_FONT_SIZES.translation.language,
   },
   permissionButton: {
     paddingHorizontal: 12,
@@ -332,25 +409,22 @@ const styles = StyleSheet.create({
   permissionButtonText: {
     color: BASE_COLORS.blue,
     fontFamily: POPPINS_FONT.medium,
-    fontSize: FONT_SIZES.md,
+    fontSize: COMPONENT_FONT_SIZES.translation.pronunciation,
   },
   cameraContainer: {
     flex: 1,
   },
   cameraViewContainer: {
-    height: "35%",
-    borderRadius: 20,
+    // Height is now set dynamically via style prop using pixel values
+    borderRadius: isSmallScreen ? 16 : 20, // UPDATED: Responsive border radius
     overflow: "hidden",
     shadowColor: "#000",
     elevation: 3,
   },
   translationContainer: {
     flex: 1,
-    marginVertical: 16,
     backgroundColor: BASE_COLORS.lightBlue,
-    borderRadius: 20,
-    padding: 16,
-    paddingTop: 20,
+    borderRadius: isSmallScreen ? 16 : 20, // UPDATED: Responsive border radius
     shadowColor: "#000",
     shadowOffset: {
       width: 0,
@@ -359,23 +433,22 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.25,
     shadowRadius: 3.84,
     elevation: 3,
-    minHeight: 350,
-    maxHeight: "65%",
+    // Other properties are now set dynamically via style prop
   },
   progressContainer: {
-    height: 20,
+    height: isSmallScreen ? 18 : 20, // UPDATED: Responsive height
     justifyContent: "center",
     alignItems: "center",
     backgroundColor: BASE_COLORS.orange,
-    borderRadius: 20,
+    borderRadius: isSmallScreen ? 16 : 20, // UPDATED: Responsive border radius
     overflow: "hidden",
     position: "relative",
-    marginBottom: 8,
+    // marginBottom is now set dynamically via style prop
   },
   progressBar: {
     height: "100%",
     backgroundColor: BASE_COLORS.blue,
-    borderRadius: 10,
+    borderRadius: isSmallScreen ? 8 : 10, // UPDATED: Responsive border radius
   },
   progressText: {
     position: "absolute",
@@ -383,6 +456,6 @@ const styles = StyleSheet.create({
     textAlign: "center",
     color: "white",
     fontFamily: POPPINS_FONT.regular,
-    fontSize: FONT_SIZES.lg,
+    fontSize: COMPONENT_FONT_SIZES.translation.pronunciation,
   },
 });

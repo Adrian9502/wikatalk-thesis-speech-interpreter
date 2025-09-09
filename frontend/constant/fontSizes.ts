@@ -76,15 +76,15 @@ export const COMPONENT_FONT_SIZES = {
     level: FONT_SIZES.sm,
   },
 
-  // Translation components
+  // Translation components (used by both Translate and Scan tabs)
   translation: {
-    sourceText: FONT_SIZES.lg,
-    translatedText: FONT_SIZES.lg,
+    sourceText: FONT_SIZES["2xl"],
+    translatedText: FONT_SIZES["2xl"],
     language: FONT_SIZES.lg,
     pronunciation: FONT_SIZES.sm,
   },
 
-  // ADDED: Speech-specific components
+  // Speech-specific components
   speech: {
     recordingDuration: FONT_SIZES.xs,
     languageLabel: FONT_SIZES.sm,
@@ -92,6 +92,15 @@ export const COMPONENT_FONT_SIZES = {
     loadingText: FONT_SIZES.md,
     modalTitle: FONT_SIZES.lg,
     dropdownText: FONT_SIZES.md,
+  },
+
+  // Scan-specific components
+  scan: {
+    permissionText: FONT_SIZES.lg,
+    permissionButton: FONT_SIZES.sm,
+    progressText: FONT_SIZES.sm,
+    cameraLabel: FONT_SIZES.md,
+    statusText: FONT_SIZES.sm,
   },
 
   // Home page components

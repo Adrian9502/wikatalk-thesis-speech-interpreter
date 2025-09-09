@@ -6,11 +6,23 @@ import {
   StyleSheet,
   TextInput,
   Platform,
+  Dimensions,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { BASE_COLORS } from "@/constant/colors";
 import DotsLoader from "../DotLoader";
 import ConfidenceModal from "@/components/ConfidenceModal";
+import {
+  FONT_SIZES,
+  POPPINS_FONT,
+  COMPONENT_FONT_SIZES,
+} from "@/constant/fontSizes";
+
+const { width: screenWidth, height: screenHeight } = Dimensions.get("window");
+
+// Check if it's a small screen (like Nexus 4)
+const isSmallScreen = screenWidth <= 384 && screenHeight <= 1280;
+const isMediumScreen = screenWidth <= 414 && screenHeight <= 896;
 
 interface TextDisplayProps {
   title: string;
@@ -73,8 +85,29 @@ const TextDisplay: React.FC<TextDisplayProps> = ({
     }
   };
 
+  // Get responsive dimensions
+  const getResponsiveDimensions = () => {
+    return {
+      minHeight: isSmallScreen ? 80 : isMediumScreen ? 100 : 120,
+      maxHeight: isSmallScreen ? 140 : isMediumScreen ? 160 : 200,
+      padding: isSmallScreen ? 10 : 12,
+      marginVertical: isSmallScreen ? 4 : 6,
+      borderRadius: isSmallScreen ? 16 : 20,
+      controlButtonSize: isSmallScreen ? 32 : 40,
+      controlButtonHeight: isSmallScreen ? 25 : 30,
+      iconSize: isSmallScreen ? 15 : 17,
+    };
+  };
+
+  const dimensions = getResponsiveDimensions();
+
   return (
-    <View style={styles.textSection}>
+    <View
+      style={[
+        styles.textSection,
+        { marginVertical: dimensions.marginVertical },
+      ]}
+    >
       <View style={styles.sectionHeader}>
         <Text style={[styles.sectionTitle, { color }]}>{title}</Text>
 
@@ -82,6 +115,10 @@ const TextDisplay: React.FC<TextDisplayProps> = ({
           <TouchableOpacity
             style={[
               styles.controlButton,
+              {
+                width: dimensions.controlButtonSize,
+                height: dimensions.controlButtonHeight,
+              },
               isSpeaking && styles.controlButtonActive,
             ]}
             onPress={onSpeak}
@@ -89,31 +126,43 @@ const TextDisplay: React.FC<TextDisplayProps> = ({
           >
             <Ionicons
               name={isSpeaking ? "volume-high" : "volume-medium-outline"}
-              size={18}
+              size={dimensions.iconSize}
               color={isSpeaking ? BASE_COLORS.success : color}
             />
           </TouchableOpacity>
 
           <TouchableOpacity
-            style={styles.controlButton}
+            style={[
+              styles.controlButton,
+              {
+                width: dimensions.controlButtonSize,
+                height: dimensions.controlButtonHeight,
+              },
+            ]}
             onPress={onCopy}
             disabled={!text || isLoading}
           >
             <Ionicons
               name={copied ? "checkmark-circle" : "copy-outline"}
-              size={18}
+              size={dimensions.iconSize}
               color={copied ? BASE_COLORS.success : color}
             />
           </TouchableOpacity>
 
           {language && (
             <TouchableOpacity
-              style={styles.controlButton}
+              style={[
+                styles.controlButton,
+                {
+                  width: dimensions.controlButtonSize,
+                  height: dimensions.controlButtonHeight,
+                },
+              ]}
               onPress={handleShowConfidence}
             >
               <Ionicons
                 name="information-circle-outline"
-                size={20}
+                size={isSmallScreen ? 18 : 20}
                 color={BASE_COLORS.orange}
               />
             </TouchableOpacity>
@@ -121,19 +170,45 @@ const TextDisplay: React.FC<TextDisplayProps> = ({
 
           {editable && onClear && (
             <TouchableOpacity
-              style={styles.controlButton}
+              style={[
+                styles.controlButton,
+                {
+                  width: dimensions.controlButtonSize,
+                  height: dimensions.controlButtonHeight,
+                },
+              ]}
               onPress={onClear}
               disabled={!text || isLoading}
             >
-              <Ionicons name="trash-outline" size={18} color={color} />
+              <Ionicons
+                name="trash-outline"
+                size={dimensions.iconSize}
+                color={color}
+              />
             </TouchableOpacity>
           )}
         </View>
       </View>
 
-      <View style={styles.textAreaWrapper}>
+      <View
+        style={[
+          styles.textAreaWrapper,
+          {
+            minHeight: dimensions.minHeight,
+            maxHeight: dimensions.maxHeight,
+          },
+        ]}
+      >
         {isLoading ? (
-          <View style={styles.loaderContainer}>
+          <View
+            style={[
+              styles.loaderContainer,
+              {
+                minHeight: dimensions.minHeight,
+                borderRadius: dimensions.borderRadius,
+              },
+            ]}
+          >
             <DotsLoader />
           </View>
         ) : (
@@ -143,6 +218,12 @@ const TextDisplay: React.FC<TextDisplayProps> = ({
             multiline
             style={[
               styles.textArea,
+              {
+                minHeight: dimensions.minHeight,
+                maxHeight: dimensions.maxHeight,
+                padding: dimensions.padding,
+                borderRadius: dimensions.borderRadius,
+              },
               styles.textField,
               !text && !editable
                 ? styles.placeholderText
@@ -184,68 +265,57 @@ const TextDisplay: React.FC<TextDisplayProps> = ({
 const styles = StyleSheet.create({
   textSection: {
     flex: 1,
-    marginVertical: 6,
-    minHeight: 140,
+    minHeight: isSmallScreen ? 100 : 140,
   },
   sectionHeader: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    marginBottom: 4,
+    marginBottom: isSmallScreen ? 3 : 4,
   },
   sectionTitle: {
-    fontSize: 14,
-    fontFamily: "Poppins-Medium",
+    fontSize: COMPONENT_FONT_SIZES.translation.language,
+    fontFamily: POPPINS_FONT.medium,
   },
   controls: {
     flexDirection: "row",
     alignItems: "center",
   },
   controlButton: {
-    width: 40,
-    height: 35,
     justifyContent: "center",
     alignItems: "center",
-    borderRadius: 20,
-    marginLeft: 4,
+    borderRadius: 25,
+    marginLeft: isSmallScreen ? 3 : 4,
   },
   textAreaWrapper: {
     flex: 1,
-    minHeight: 120,
-    maxHeight: 200,
   },
   textArea: {
     flex: 1,
-    backgroundColor: "#F5F5F5",
-    borderRadius: 20,
-    minHeight: 120,
-    maxHeight: 200,
-    padding: 12,
+    backgroundColor: BASE_COLORS.offWhite,
   },
   textField: {
-    fontFamily: "Poppins-Regular",
-    fontSize: 14,
+    fontFamily: POPPINS_FONT.regular,
+    fontSize: COMPONENT_FONT_SIZES.translation.sourceText,
     color: BASE_COLORS.darkText,
     textAlignVertical: "top",
   },
   translatedText: {
-    fontSize: 14,
-    fontFamily: "Poppins-Regular",
+    fontSize: COMPONENT_FONT_SIZES.translation.translatedText,
+    fontFamily: POPPINS_FONT.regular,
     color: BASE_COLORS.darkText,
-    lineHeight: 20,
+    lineHeight: COMPONENT_FONT_SIZES.translation.translatedText * 1.4,
   },
   placeholderText: {
-    fontSize: 14,
-    fontFamily: "Poppins-Regular",
+    fontSize: COMPONENT_FONT_SIZES.translation.sourceText,
+    fontFamily: POPPINS_FONT.regular,
     color: BASE_COLORS.placeholderText,
   },
   loaderContainer: {
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
-    backgroundColor: "#F5F5F5",
-    borderRadius: 20,
-    minHeight: 120,
+    backgroundColor: BASE_COLORS.offWhite,
   },
   controlButtonActive: {
     backgroundColor: "rgba(16, 185, 129, 0.1)",

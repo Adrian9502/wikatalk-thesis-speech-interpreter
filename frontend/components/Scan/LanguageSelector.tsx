@@ -4,6 +4,11 @@ import { Dropdown } from "react-native-element-dropdown";
 import { Ionicons } from "@expo/vector-icons";
 import { DIALECTS } from "@/constant/languages";
 import { BASE_COLORS } from "@/constant/colors";
+import {
+  FONT_SIZES,
+  POPPINS_FONT,
+  COMPONENT_FONT_SIZES,
+} from "@/constant/fontSizes";
 
 interface LanguageSelectorProps {
   targetLanguage: string;
@@ -69,8 +74,8 @@ const styles = StyleSheet.create({
     zIndex: 100,
   },
   languageLabel: {
-    fontSize: 14,
-    fontFamily: "Poppins-Medium",
+    fontSize: COMPONENT_FONT_SIZES.translation.language, // UPDATED: Use translation language size
+    fontFamily: POPPINS_FONT.medium, // UPDATED: Use font constant
     color: BASE_COLORS.blue,
     marginRight: 12,
     minWidth: 100,
@@ -94,8 +99,8 @@ const styles = StyleSheet.create({
     elevation: 6,
   },
   dropdownText: {
-    fontSize: 14,
-    fontFamily: "Poppins-Regular",
+    fontSize: COMPONENT_FONT_SIZES.translation.language, // UPDATED: Use translation language size
+    fontFamily: POPPINS_FONT.regular, // UPDATED: Use font constant
   },
 });
 

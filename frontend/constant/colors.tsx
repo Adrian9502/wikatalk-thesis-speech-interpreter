@@ -74,6 +74,7 @@ export const BASE_COLORS: Record<string, string> = {
   success: "#10B981",
   danger: "#F44336",
   yellow: "#FFD700",
+  offWhite: "#F5F5F5",
 };
 export const getPositionalColors = (
   position: "top" | "bottom"

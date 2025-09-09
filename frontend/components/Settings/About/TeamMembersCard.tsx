@@ -192,7 +192,7 @@ const styles = StyleSheet.create({
   socialButtonContainer: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "#f5f5f5",
+    backgroundColor: BASE_COLORS.offWhite,
     borderRadius: 20,
     paddingHorizontal: 2,
   },

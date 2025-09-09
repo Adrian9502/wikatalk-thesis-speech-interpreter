@@ -47,6 +47,7 @@ interface ScanTranslateState {
   // Methods
   updateState: (newState: Partial<ScanTranslateState>) => void;
   translateDetectedText: (text: string, immediate?: boolean) => Promise<void>;
+  resetSpeechStates: () => void;
   debouncedTranslateText: (text: string) => void;
   clearText: () => void;
   copyToClipboard: (
@@ -105,6 +106,15 @@ export const useScanTranslateStore = create<ScanTranslateState>((set, get) => ({
         isTranslating: false,
       });
     }
+  },
+
+  // reset speech states
+  resetSpeechStates: () => {
+    console.log("[ScanTranslateStore] Resetting speech states");
+    set({
+      isSourceSpeaking: false,
+      isTargetSpeaking: false,
+    });
   },
 
   // Debounced translation - called from UI
