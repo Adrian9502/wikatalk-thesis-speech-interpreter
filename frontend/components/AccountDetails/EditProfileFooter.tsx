@@ -2,13 +2,14 @@ import React from "react";
 import { View, Text, TouchableOpacity, ActivityIndicator } from "react-native";
 import styles from "@/styles/editProfileStyles";
 import { BASE_COLORS } from "@/constant/colors";
+import { COMPONENT_FONT_SIZES, POPPINS_FONT } from "@/constant/fontSizes";
 
 interface ModalFooterProps {
   onSave: () => void;
   onClose: () => void;
   isLoading: boolean;
   theme: any;
-  hasImageChanged?: boolean; // NEW: Add prop to indicate if image was changed
+  hasImageChanged?: boolean;
 }
 
 // Memoize the loading indicator
@@ -20,7 +21,7 @@ const LoadingIndicator = React.memo(() => (
   />
 ));
 
-// NEW: Enhanced save button content with better messaging
+// Enhanced save button content with better messaging
 const SaveButtonContent = React.memo(
   ({
     isLoading,
@@ -29,11 +30,16 @@ const SaveButtonContent = React.memo(
     isLoading: boolean;
     hasImageChanged?: boolean;
   }) => {
-    // Show different text based on whether image is being uploaded
     const buttonText = React.useMemo(() => {
       if (!isLoading) return "Save Changes";
       return hasImageChanged ? "Uploading..." : "Saving...";
     }, [isLoading, hasImageChanged]);
+
+    const textStyle = {
+      fontSize: COMPONENT_FONT_SIZES.button.medium,
+      fontFamily: POPPINS_FONT.medium,
+      color: BASE_COLORS.white,
+    };
 
     return (
       <View
@@ -44,15 +50,21 @@ const SaveButtonContent = React.memo(
         }}
       >
         {isLoading && <LoadingIndicator />}
-        <Text style={styles.saveButtonText}>{buttonText}</Text>
+        <Text style={textStyle}>{buttonText}</Text>
       </View>
     );
   }
 );
 
-const CancelButtonText = React.memo(({ color }: { color: string }) => (
-  <Text style={[styles.cancelButtonText, { color }]}>Cancel</Text>
-));
+const CancelButtonText = React.memo(({ color }: { color: string }) => {
+  const textStyle = {
+    fontSize: COMPONENT_FONT_SIZES.button.small,
+    fontFamily: POPPINS_FONT.medium,
+    color: color,
+  };
+
+  return <Text style={textStyle}>Cancel</Text>;
+});
 
 const EditProfileFooter = React.memo(
   ({
@@ -60,18 +72,12 @@ const EditProfileFooter = React.memo(
     onClose,
     isLoading,
     theme,
-    hasImageChanged = false, // NEW: Default value
+    hasImageChanged,
   }: ModalFooterProps) => {
-    // Memoize style objects
-    const saveButtonStyle = React.useMemo(
-      () => [styles.saveButton, { backgroundColor: theme.secondaryColor }],
-      [theme.secondaryColor, styles.saveButton]
-    );
-
     return (
       <>
         <TouchableOpacity
-          style={saveButtonStyle}
+          style={[styles.saveButton, { backgroundColor: theme.secondaryColor }]}
           onPress={onSave}
           disabled={isLoading}
           activeOpacity={0.8}

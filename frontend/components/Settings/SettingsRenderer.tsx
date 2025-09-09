@@ -4,6 +4,7 @@ import { Feather } from "@expo/vector-icons";
 import SettingItem from "@/components/settings/SettingItem";
 import ThemeSelector from "@/components/settings/ThemeSelector";
 import { BASE_COLORS, TITLE_COLORS } from "@/constant/colors";
+import { COMPONENT_FONT_SIZES, POPPINS_FONT } from "@/constant/fontSizes";
 import Ionicons from "react-native-vector-icons/Ionicons";
 import { UserData } from "@/store/useAuthStore";
 import { SettingsSection, SettingsItemType } from "@/types/settingsTypes";
@@ -70,7 +71,6 @@ export const LoginMethods: React.FC<LoginMethodsProps> = ({ userData }) => {
       }
     }
 
-    // FIXED: Fallback to authProvider if currentLoginMethod is invalid or missing
     // For users with only one method, show that method
     if (authProvider === "google") {
       return { method: "Google", icon: "logo-google" };
@@ -239,8 +239,8 @@ export const LogoutButton = ({
 
 const styles = StyleSheet.create({
   headerText: {
-    fontSize: 15,
-    fontFamily: "Poppins-SemiBold",
+    fontSize: COMPONENT_FONT_SIZES.settings.itemTitle,
+    fontFamily: POPPINS_FONT.semiBold,
     color: BASE_COLORS.white,
     marginBottom: 7,
   },
@@ -248,9 +248,9 @@ const styles = StyleSheet.create({
     marginVertical: 20,
   },
   sectionTitle: {
-    fontSize: 12,
+    fontSize: COMPONENT_FONT_SIZES.settings.sectionHeader,
     color: BASE_COLORS.white,
-    fontFamily: "Poppins-Medium",
+    fontFamily: POPPINS_FONT.medium,
     marginBottom: 5,
   },
   settingItemCard: {
@@ -273,8 +273,8 @@ const styles = StyleSheet.create({
   },
   logoutText: {
     color: BASE_COLORS.white,
-    fontSize: 13,
-    fontFamily: "Poppins-Medium",
+    fontSize: COMPONENT_FONT_SIZES.card.description,
+    fontFamily: POPPINS_FONT.medium,
   },
   card: {
     backgroundColor: BASE_COLORS.white,
@@ -306,8 +306,8 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   sectionSubtitle: {
-    fontSize: 11,
-    fontFamily: "Poppins-Medium",
+    fontSize: COMPONENT_FONT_SIZES.settings.sectionHeader,
+    fontFamily: POPPINS_FONT.medium,
     color: "#666",
     marginBottom: 12,
   },
@@ -323,8 +323,8 @@ const styles = StyleSheet.create({
     borderLeftColor: BASE_COLORS.blue,
   },
   methodText: {
-    fontSize: 12,
-    fontFamily: "Poppins-Regular",
+    fontSize: COMPONENT_FONT_SIZES.card.subtitle,
+    fontFamily: POPPINS_FONT.regular,
     color: BASE_COLORS.darkText,
     marginLeft: 12,
   },
@@ -341,8 +341,8 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
   },
   currentMethodText: {
-    fontSize: 12,
-    fontFamily: "Poppins-Regular",
+    fontSize: COMPONENT_FONT_SIZES.card.subtitle,
+    fontFamily: POPPINS_FONT.regular,
     color: BASE_COLORS.darkText,
     marginLeft: 12,
   },

@@ -16,6 +16,7 @@ import { ChevronDown, ChevronUp, Search, X } from "react-native-feather";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import useThemeStore from "@/store/useThemeStore";
 import { BASE_COLORS } from "@/constant/colors";
+import { COMPONENT_FONT_SIZES, POPPINS_FONT } from "@/constant/fontSizes";
 import faqItems from "@/utils/helpAndFAQ/faqItems";
 import { FAQItem } from "@/types/faqItems";
 import categories from "@/utils/helpAndFAQ/categories";
@@ -59,11 +60,10 @@ const HelpFAQ = () => {
     }
   };
 
-  // Hardware back button handling - ADD this while keeping Header functionality
   useHardwareBack({
     enabled: true,
     fallbackRoute: "/(settings)/Settings",
-    useExistingHeaderLogic: true, // Use same logic as Header component
+    useExistingHeaderLogic: true,
   });
 
   return (
@@ -79,15 +79,15 @@ const HelpFAQ = () => {
             backgroundColor={activeTheme.backgroundColor}
             barStyle="light-content"
           />
-          {/* Header - KEEP existing functionality */}
+          {/* Header */}
           <View style={styles.headerContainer}>
             <Header title="Help & FAQ" />
           </View>
           <View style={styles.searchContainer}>
             <View style={[styles.searchBar]}>
               <Search
-                width={20}
-                height={20}
+                width={16}
+                height={16}
                 color={BASE_COLORS.darkText}
                 style={styles.searchIcon}
               />
@@ -130,14 +130,14 @@ const HelpFAQ = () => {
                     </Text>
                     {expandedCategory === category.id ? (
                       <ChevronUp
-                        width={24}
-                        height={24}
+                        width={16}
+                        height={16}
                         color={BASE_COLORS.white}
                       />
                     ) : (
                       <ChevronDown
-                        width={24}
-                        height={24}
+                        width={16}
+                        height={16}
                         color={BASE_COLORS.white}
                       />
                     )}
@@ -162,14 +162,14 @@ const HelpFAQ = () => {
                               </Text>
                               {expandedQuestions.includes(item.id) ? (
                                 <ChevronUp
-                                  width={24}
-                                  height={24}
+                                  width={16}
+                                  height={16}
                                   color={BASE_COLORS.darkText}
                                 />
                               ) : (
                                 <ChevronDown
-                                  width={24}
-                                  height={24}
+                                  width={16}
+                                  height={16}
                                   color={BASE_COLORS.darkText}
                                 />
                               )}
@@ -213,14 +213,14 @@ const HelpFAQ = () => {
                         </Text>
                         {expandedQuestions.includes(item.id) ? (
                           <ChevronUp
-                            width={20}
-                            height={20}
+                            width={16}
+                            height={16}
                             color={BASE_COLORS.darkText}
                           />
                         ) : (
                           <ChevronDown
-                            width={20}
-                            height={20}
+                            width={16}
+                            height={16}
                             color={BASE_COLORS.darkText}
                           />
                         )}
@@ -292,8 +292,8 @@ const styles = StyleSheet.create({
     width: 40,
   },
   headerText: {
-    fontFamily: "Poppins-Medium",
-    fontSize: 20,
+    fontFamily: POPPINS_FONT.medium,
+    fontSize: COMPONENT_FONT_SIZES.navigation.headerTitle,
     color: BASE_COLORS.white,
   },
   searchContainer: {
@@ -319,27 +319,28 @@ const styles = StyleSheet.create({
   searchInput: {
     flex: 1,
     height: 40,
-    fontSize: 14,
-    fontFamily: "Poppins-Regular",
+    fontSize: COMPONENT_FONT_SIZES.input.text,
+    fontFamily: POPPINS_FONT.regular,
   },
   categoryContainer: {
     borderRadius: 20,
     overflow: "hidden",
     marginHorizontal: 16,
     marginBottom: 16,
-    alignItems: "center", // Center categories when collapsed
+    alignItems: "center",
   },
   categoryHeader: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    padding: 16,
-    width: "100%", // Ensure the header takes full width
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    width: "100%",
   },
   categoryHeaderText: {
     color: BASE_COLORS.white,
-    fontFamily: "Poppins-Medium",
-    fontSize: 15,
+    fontFamily: POPPINS_FONT.medium,
+    fontSize: COMPONENT_FONT_SIZES.card.subtitle,
   },
   questionsContainer: {
     width: "100%",
@@ -357,16 +358,16 @@ const styles = StyleSheet.create({
   },
   questionText: {
     flex: 1,
-    fontFamily: "Poppins-Medium",
-    fontSize: 14,
+    fontFamily: POPPINS_FONT.medium,
+    fontSize: COMPONENT_FONT_SIZES.card.subtitle,
   },
   answerContainer: {
     padding: 16,
     backgroundColor: "#f9f9f9",
   },
   answerText: {
-    fontFamily: "Poppins-Regular",
-    fontSize: 13,
+    fontFamily: POPPINS_FONT.regular,
+    fontSize: COMPONENT_FONT_SIZES.card.subtitle,
     lineHeight: 20,
   },
   searchResultsContainer: {
@@ -375,14 +376,14 @@ const styles = StyleSheet.create({
     paddingRight: 16,
   },
   searchResultsTitle: {
-    fontSize: 15,
+    fontSize: COMPONENT_FONT_SIZES.card.subtitle,
     color: BASE_COLORS.white,
-    fontFamily: "Poppins-Regular",
+    fontFamily: POPPINS_FONT.regular,
     marginBottom: 16,
   },
   noResultsText: {
-    fontSize: 14,
-    fontFamily: "Poppins-Regular",
+    fontSize: COMPONENT_FONT_SIZES.card.subtitle,
+    fontFamily: POPPINS_FONT.regular,
     textAlign: "center",
     padding: 20,
   },
@@ -394,9 +395,9 @@ const styles = StyleSheet.create({
     marginHorizontal: 16,
   },
   contactTitle: {
-    fontSize: 15,
+    fontSize: COMPONENT_FONT_SIZES.card.description,
     color: BASE_COLORS.white,
-    fontFamily: "Poppins-Regular",
+    fontFamily: POPPINS_FONT.regular,
     marginBottom: 16,
   },
   contactButton: {
@@ -405,9 +406,9 @@ const styles = StyleSheet.create({
     borderRadius: 20,
   },
   contactButtonText: {
-    fontFamily: "Poppins-Regular",
+    fontFamily: POPPINS_FONT.regular,
     color: BASE_COLORS.white,
-    fontSize: 14,
+    fontSize: COMPONENT_FONT_SIZES.card.subtitle,
   },
 });
 

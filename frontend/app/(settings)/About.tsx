@@ -8,16 +8,16 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { StatusBar } from "react-native";
 import teamMembers from "@/utils/about/teamMembers";
 import { useHardwareBack } from "@/hooks/useHardwareBack";
+import { COMPONENT_FONT_SIZES, POPPINS_FONT } from "@/constant/fontSizes";
 
 const About: React.FC = () => {
   const { activeTheme } = useThemeStore();
   const dynamicStyles = getGlobalStyles(activeTheme.backgroundColor);
 
-  // Hardware back button handling - ADD this while keeping Header functionality
   useHardwareBack({
     enabled: true,
     fallbackRoute: "/(settings)/Settings",
-    useExistingHeaderLogic: true, // Use same logic as Header component
+    useExistingHeaderLogic: true,
   });
 
   return (
@@ -48,9 +48,9 @@ const About: React.FC = () => {
 
         <View style={styles.descriptionSection}>
           <Text style={styles.descriptionText}>
-            <Text style={{ fontFamily: "Poppins-SemiBold" }}>WikaTalk</Text>: A
-            Mobile-Based Filipino Dialect Interpreter with Gamified Features
-            using Natural Language Processing (NLP).
+            <Text style={styles.appName}>WikaTalk</Text>: A Mobile-Based
+            Filipino Dialect Interpreter with Gamified Features using Natural
+            Language Processing (NLP).
           </Text>
           <Text style={styles.descriptionText}>
             This application was developed as part of our undergraduate thesis
@@ -73,9 +73,12 @@ const styles = StyleSheet.create({
   },
   descriptionText: {
     marginBottom: 4,
-    fontSize: 13,
-    fontFamily: "Poppins-Regular",
+    fontSize: COMPONENT_FONT_SIZES.card.description,
+    fontFamily: POPPINS_FONT.regular,
     color: "white",
     lineHeight: 20,
+  },
+  appName: {
+    fontFamily: POPPINS_FONT.semiBold,
   },
 });

@@ -1,11 +1,12 @@
 import React, { useState, useCallback } from "react";
-import { View, TouchableOpacity, Text } from "react-native";
+import { View, TouchableOpacity, Text, StyleSheet } from "react-native";
 import { Edit2, ChevronRight } from "react-native-feather";
-import styles from "@/styles/accountDetailsStyles";
 import EditProfileModal from "./EditProfileModal";
 import { useAuth } from "@/context/AuthContext";
 import showNotification from "@/lib/showNotification";
 import { useAuthStore } from "@/store/useAuthStore";
+import { BASE_COLORS } from "@/constant/colors";
+import { COMPONENT_FONT_SIZES, POPPINS_FONT } from "@/constant/fontSizes";
 
 // Memoize the icon components
 const EditIcon = React.memo((props: any) => <Edit2 {...props} />);
@@ -123,10 +124,10 @@ const EditProfileSection = React.memo(
           activeOpacity={0.7}
         >
           <View style={iconContainerStyle}>
-            <EditIcon width={18} height={18} color={theme.secondaryColor} />
+            <EditIcon width={16} height={16} color={theme.secondaryColor} />
           </View>
           <Text style={styles.settingText}>Edit Profile</Text>
-          <ChevronIcon width={18} height={18} color="#C0C0C8" />
+          <ChevronIcon width={16} height={16} color="#C0C0C8" />
         </TouchableOpacity>
 
         {userData && (
@@ -145,3 +146,32 @@ const EditProfileSection = React.memo(
 
 EditProfileSection.displayName = "EditProfileSection";
 export default EditProfileSection;
+
+const styles = StyleSheet.create({
+  card: {
+    backgroundColor: BASE_COLORS.white,
+    borderRadius: 20,
+    overflow: "hidden",
+  },
+
+  settingItem: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingVertical: 12,
+    paddingHorizontal: 15,
+  },
+  settingText: {
+    flex: 1,
+    fontSize: COMPONENT_FONT_SIZES.settings.sectionHeader,
+    color: BASE_COLORS.darkText,
+    fontFamily: POPPINS_FONT.regular,
+  },
+  settingIconContainer: {
+    width: 30,
+    height: 30,
+    borderRadius: 20,
+    justifyContent: "center",
+    alignItems: "center",
+    marginRight: 16,
+  },
+});

@@ -25,11 +25,13 @@ import { TabType } from "@/types/types";
 import { format } from "date-fns";
 import DotsLoader from "@/components/DotLoader";
 import { BASE_COLORS } from "@/constant/colors";
+import { COMPONENT_FONT_SIZES, POPPINS_FONT } from "@/constant/fontSizes";
 import createAuthenticatedApi from "@/lib/api";
 import showNotification from "@/lib/showNotification";
 import { Header } from "@/components/Header";
 import { useHardwareBack } from "@/hooks/useHardwareBack";
 import { RefreshControl } from "react-native-gesture-handler";
+import AppLoading from "@/components/AppLoading";
 
 // Get screen width for swipe calculations
 const { width: SCREEN_WIDTH } = Dimensions.get("window");
@@ -83,6 +85,14 @@ const TranslationHistory: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [refreshing, setRefreshing] = useState(false);
+  // Add tab-specific loading states
+  const [tabLoadingStates, setTabLoadingStates] = useState<
+    Record<TabType, boolean>
+  >({
+    Speech: true,
+    Translate: false,
+    Scan: false,
+  });
 
   // Refs for performance
   const abortControllerRef = useRef<AbortController | null>(null);
@@ -129,11 +139,12 @@ const TranslationHistory: React.FC = () => {
     [activeTab]
   );
 
-  // Optimized fetch function with abort controller
+  // Optimized fetch function with abort controller and tab-specific loading
   const fetchHistory = useCallback(
     async (tabType: TabType) => {
       try {
-        setLoading(true);
+        // Set tab-specific loading state
+        setTabLoadingStates((prev) => ({ ...prev, [tabType]: true }));
         setError(null);
 
         // Cancel previous request
@@ -193,6 +204,7 @@ const TranslationHistory: React.FC = () => {
         // Only update loading state if the request wasn't aborted
         if (!abortControllerRef.current?.signal.aborted) {
           setLoading(false);
+          setTabLoadingStates((prev) => ({ ...prev, [tabType]: false }));
         }
       }
     },
@@ -398,6 +410,13 @@ const TranslationHistory: React.FC = () => {
 
   // Current data - Now properly typed
   const currentData: OptimizedHistoryItem[] = historyItems[activeTab];
+  const isCurrentTabLoading = tabLoadingStates[activeTab];
+
+  // Show full-screen loading only for initial load
+  if (loading && currentData.length === 0 && activeTab === "Speech") {
+    return <AppLoading />;
+  }
+
   return (
     <SafeAreaView
       style={[
@@ -426,7 +445,8 @@ const TranslationHistory: React.FC = () => {
         failOffsetY={[-50, 50]} // Allow vertical scrolling in FlashList
       >
         <View style={styles.swipeContainer}>
-          {loading && currentData.length === 0 ? (
+          {/* Show loading when switching tabs and no data yet */}
+          {isCurrentTabLoading && currentData.length === 0 ? (
             <View style={styles.loadingContainer}>
               <DotsLoader />
             </View>
@@ -507,8 +527,8 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   errorText: {
-    fontFamily: "Poppins-Regular",
-    fontSize: 12,
+    fontFamily: POPPINS_FONT.regular,
+    fontSize: COMPONENT_FONT_SIZES.card.description,
     marginBottom: 12,
   },
   retryButton: {
@@ -517,9 +537,9 @@ const styles = StyleSheet.create({
     borderRadius: 20,
   },
   retryButtonText: {
-    fontSize: 12,
+    fontSize: COMPONENT_FONT_SIZES.card.description,
     color: BASE_COLORS.white,
-    fontFamily: "Poppins-Regular",
+    fontFamily: POPPINS_FONT.regular,
   },
 });
 

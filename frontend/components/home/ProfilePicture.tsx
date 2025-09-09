@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { View, Image, TouchableOpacity, Text, StyleSheet } from "react-native";
 import { BASE_COLORS } from "@/constant/colors";
 import ProfilePictureModal from "@/components/accountDetails/ProfilePictureModal";
-import { COMPONENT_FONT_SIZES, FONT_SIZES } from "@/constant/fontSizes";
+import { FONT_SIZES, POPPINS_FONT } from "@/constant/fontSizes";
 
 interface ProfilePictureProps {
   userData: any;
@@ -89,7 +89,7 @@ const styles = StyleSheet.create({
   },
   profileInitials: {
     fontSize: FONT_SIZES["2xl"],
-    fontFamily: "Poppins-SemiBold",
+    fontFamily: POPPINS_FONT.semiBold,
     color: BASE_COLORS.white,
   },
 });

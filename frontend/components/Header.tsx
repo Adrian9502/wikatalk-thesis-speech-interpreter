@@ -2,6 +2,7 @@ import React from "react";
 import { View, Text, TouchableOpacity } from "react-native";
 import { ArrowLeft } from "react-native-feather";
 import { BASE_COLORS } from "@/constant/colors";
+
 import styles from "@/styles/accountDetailsStyles";
 import { useNavigation } from "expo-router";
 
@@ -41,7 +42,7 @@ export const Header = ({
           <ArrowLeft width={18} height={18} color={BASE_COLORS.white} />
         </TouchableOpacity>
       ) : (
-        <View style={styles.placeholderView} /> // Placeholder to maintain layout
+        <View style={styles.placeholderView} />
       )}
       <View style={styles.headerTitleContainer}>
         <Text style={styles.headerTitle}>{title}</Text>

@@ -80,7 +80,6 @@ const EditProfileModal = React.memo(
                 <Text style={styles.errorText}>{errorState.error}</Text>
               ) : null}
 
-              <Text style={styles.sectionTitle}>Basic Information</Text>
               <BasicInfoForm control={control} errors={formState.errors} />
 
               <PasswordSection

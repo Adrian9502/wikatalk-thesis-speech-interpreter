@@ -10,6 +10,7 @@ import { AlertCircle, AlertTriangle, KeyRound } from "lucide-react-native";
 import { BASE_COLORS, TITLE_COLORS } from "@/constant/colors";
 import ConfirmationModal from "@/components/ConfirmationModal";
 import CloseButton from "../games/buttons/CloseButton";
+import { COMPONENT_FONT_SIZES, POPPINS_FONT } from "@/constant/fontSizes";
 
 // Define validation schema
 const verificationCodeSchema = yup.object({
@@ -270,6 +271,11 @@ const DeleteAccount = () => {
 
             <Button
               title="Resend Code"
+              textStyle={{
+                fontSize: COMPONENT_FONT_SIZES.card.description,
+                fontFamily: POPPINS_FONT.regular,
+                marginTop: 12,
+              }}
               onPress={handleResendCode}
               disabled={!canResend || isLoading}
               textColor={
@@ -308,6 +314,11 @@ const DeleteAccount = () => {
             {/* cancel button */}
             <Button
               title="Cancel"
+              textStyle={{
+                fontSize: COMPONENT_FONT_SIZES.card.description,
+                fontFamily: POPPINS_FONT.regular,
+                marginTop: 12,
+              }}
               textColor={BASE_COLORS.placeholderText}
               onPress={handleAttemptClose}
             />
@@ -339,7 +350,7 @@ const DeleteAccount = () => {
           <View style={styles.modalContainer}>
             <View style={styles.headerContainer}>
               <Text style={styles.headerTitle}>Delete Account</Text>
-              <CloseButton size={17} onPress={handleAttemptClose}></CloseButton>
+              <CloseButton size={14} onPress={handleAttemptClose}></CloseButton>
             </View>
 
             <View style={{ padding: 16 }}>
@@ -387,6 +398,23 @@ const styles = StyleSheet.create({
     alignItems: "center",
     padding: 20,
   },
+  button: {
+    backgroundColor: TITLE_COLORS.customRed,
+    borderRadius: 20,
+    paddingVertical: 10,
+    alignItems: "center",
+    justifyContent: "center",
+    marginBottom: 8,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+  },
+  buttonText: {
+    color: BASE_COLORS.white,
+    fontFamily: POPPINS_FONT.medium,
+    fontSize: COMPONENT_FONT_SIZES.card.description,
+  },
   modalContainer: {
     width: "90%",
     maxWidth: 400,
@@ -404,20 +432,20 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "center",
     alignItems: "center",
-    padding: 15,
+    paddingVertical: 12,
     backgroundColor: TITLE_COLORS.customRed,
     position: "relative",
   },
   headerTitle: {
     color: BASE_COLORS.white,
-    fontFamily: "Poppins-Medium",
-    fontSize: 14,
+    fontFamily: POPPINS_FONT.medium,
+    fontSize: COMPONENT_FONT_SIZES.card.title,
     textAlign: "center",
   },
   description: {
-    fontSize: 12,
-    margin: 12,
-    fontFamily: "Poppins-Regular",
+    fontSize: COMPONENT_FONT_SIZES.card.subtitle,
+    margin: 16,
+    fontFamily: POPPINS_FONT.regular,
     textAlign: "center",
   },
   warningContainer: {
@@ -431,16 +459,16 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   warningText: {
-    fontSize: 11,
-    fontFamily: "Poppins-Regular",
+    fontSize: COMPONENT_FONT_SIZES.card.description,
+    fontFamily: POPPINS_FONT.regular,
     flex: 1,
     marginLeft: 12,
   },
   dangerText: {
-    flex: 1,
+    fontFamily: POPPINS_FONT.regular,
+    fontSize: COMPONENT_FONT_SIZES.card.description,
     marginLeft: 12,
-    fontSize: 13,
-    fontFamily: "Poppins-Regular",
+    flex: 1,
   },
   buttonContainer: {
     marginTop: 8,
@@ -462,22 +490,22 @@ const styles = StyleSheet.create({
   },
   errorText: {
     color: TITLE_COLORS.customRed,
-    fontSize: 12,
+    fontSize: COMPONENT_FONT_SIZES.card.description,
     marginLeft: 4,
-    fontFamily: "Poppins-Medium",
+    fontFamily: POPPINS_FONT.regular,
   },
   countdown: {
     textAlign: "center",
     marginBottom: 16,
-    fontSize: 12,
-    fontFamily: "Poppins-Regular",
+    fontSize: COMPONENT_FONT_SIZES.card.description,
+    fontFamily: POPPINS_FONT.regular,
     color: "#555",
   },
   expired: {
     textAlign: "center",
     marginBottom: 16,
     color: TITLE_COLORS.customRed,
-    fontSize: 12,
+    fontSize: COMPONENT_FONT_SIZES.card.description,
   },
 });
 

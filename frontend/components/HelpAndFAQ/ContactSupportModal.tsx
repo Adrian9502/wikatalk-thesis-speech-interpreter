@@ -10,6 +10,7 @@ import {
 } from "react-native";
 import { Mail, Github } from "react-native-feather";
 import { BASE_COLORS } from "@/constant/colors";
+import { COMPONENT_FONT_SIZES, POPPINS_FONT } from "@/constant/fontSizes";
 import useThemeStore from "@/store/useThemeStore";
 import { Feather } from "@expo/vector-icons";
 import CloseButton from "../games/buttons/CloseButton";
@@ -141,18 +142,20 @@ const styles = StyleSheet.create({
 
   modalTitle: {
     color: BASE_COLORS.white,
-    fontFamily: "Poppins-Medium",
-    fontSize: 14,
+    fontFamily: POPPINS_FONT.medium,
+    fontSize: COMPONENT_FONT_SIZES.card.subtitle,
     textAlign: "center",
   },
 
   modalBody: {
     padding: 10,
+    paddingBottom: 20,
+    justifyContent: "center",
     alignItems: "center",
   },
   contactText: {
-    fontFamily: "Poppins-Regular",
-    fontSize: 12,
+    fontFamily: POPPINS_FONT.regular,
+    fontSize: COMPONENT_FONT_SIZES.card.description,
     color: BASE_COLORS.darkText,
     textAlign: "center",
     marginBottom: 26,
@@ -185,9 +188,9 @@ const styles = StyleSheet.create({
   },
   iconText: {
     color: BASE_COLORS.white,
-    fontFamily: "Poppins-Regular",
-    fontSize: 11,
-    marginTop: 5,
+    fontFamily: POPPINS_FONT.medium,
+    fontSize: COMPONENT_FONT_SIZES.card.caption,
+    marginTop: 4,
   },
 });
 

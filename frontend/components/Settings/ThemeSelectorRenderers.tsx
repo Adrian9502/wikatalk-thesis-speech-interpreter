@@ -3,6 +3,7 @@ import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { Feather } from "@expo/vector-icons";
 import { BASE_COLORS } from "@/constant/colors";
+import { COMPONENT_FONT_SIZES, POPPINS_FONT } from "@/constant/fontSizes";
 import { ThemeOption } from "@/types/types";
 
 // Render functions
@@ -74,8 +75,8 @@ const styles = StyleSheet.create({
     marginBottom: 5,
   },
   title: {
-    fontSize: 13,
-    fontFamily: "Poppins-Regular",
+    fontSize: COMPONENT_FONT_SIZES.card.description,
+    fontFamily: POPPINS_FONT.regular,
     color: BASE_COLORS.darkText,
   },
   expandButtonContainer: {
@@ -84,8 +85,8 @@ const styles = StyleSheet.create({
   },
   expandButton: {
     color: BASE_COLORS.blue,
-    fontSize: 12,
-    fontFamily: "Poppins-Regular",
+    fontSize: COMPONENT_FONT_SIZES.card.caption,
+    fontFamily: POPPINS_FONT.regular,
   },
   expandIcon: {
     marginLeft: 4,
@@ -116,8 +117,8 @@ const styles = StyleSheet.create({
     backgroundColor: BASE_COLORS.blue,
   },
   themeName: {
-    fontSize: 11,
-    fontFamily: "Poppins-Regular",
+    fontSize: COMPONENT_FONT_SIZES.settings.itemDescription,
+    fontFamily: POPPINS_FONT.regular,
     textAlign: "center",
     color: BASE_COLORS.darkText,
   },

@@ -1,78 +1,79 @@
+import React from "react";
 import {
-  StyleSheet,
-  Text,
-  View,
-  TouchableOpacity,
   Modal,
-  BackHandler,
+  View,
+  Text,
+  TouchableOpacity,
+  StyleSheet,
+  ActivityIndicator,
 } from "react-native";
-import React, { useEffect } from "react";
-import { TITLE_COLORS, BASE_COLORS } from "@/constant/colors";
 import { AlertTriangle } from "react-native-feather";
+import { BASE_COLORS, TITLE_COLORS } from "@/constant/colors";
+import { COMPONENT_FONT_SIZES, POPPINS_FONT } from "@/constant/fontSizes";
+
 interface ConfirmationModalProps {
   visible: boolean;
   title: string;
   text: string;
-  confirmButtonText: string;
   onCancel: () => void;
   onConfirm: () => void;
+  confirmButtonText?: string;
+  cancelButtonText?: string;
+  isLoading?: boolean;
 }
+
 const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
   visible,
   title,
   text,
-  confirmButtonText,
   onCancel,
   onConfirm,
+  confirmButtonText = "Confirm",
+  cancelButtonText = "Cancel",
+  isLoading = false,
 }) => {
-  // Handle hardware back button for modal
-  useEffect(() => {
-    if (!visible) return;
-
-    const backHandler = BackHandler.addEventListener(
-      "hardwareBackPress",
-      () => {
-        onCancel(); // Same as pressing Cancel button
-        return true; // Prevent default behavior
-      }
-    );
-
-    return () => backHandler.remove();
-  }, [visible, onCancel]);
-
   return (
     <Modal
-      transparent
       visible={visible}
+      transparent
       animationType="fade"
-      onRequestClose={onCancel}
       statusBarTranslucent={true}
+      onRequestClose={onCancel}
     >
       <View style={styles.modalOverlay}>
         <View style={styles.modalContainer}>
           <View style={styles.modalIconContainer}>
             <AlertTriangle
-              width={22}
-              height={22}
+              width={24}
+              height={24}
               color={TITLE_COLORS.customRed}
             />
           </View>
+
           <Text style={styles.modalTitle}>{title}</Text>
           <Text style={styles.modalText}>{text}</Text>
 
-          <View style={styles.modalButtonContainer}>
+          <View style={styles.buttonContainer}>
             <TouchableOpacity
-              style={[styles.modalButton, styles.cancelButton]}
+              style={styles.cancelButton}
               onPress={onCancel}
+              disabled={isLoading}
             >
-              <Text style={styles.cancelButtonText}>Cancel</Text>
+              <Text style={styles.cancelButtonText}>{cancelButtonText}</Text>
             </TouchableOpacity>
 
             <TouchableOpacity
-              style={[styles.modalButton, styles.deleteButton]}
+              style={[styles.confirmButton, isLoading && styles.disabledButton]}
               onPress={onConfirm}
+              disabled={isLoading}
             >
-              <Text style={styles.deleteButtonText}>{confirmButtonText}</Text>
+              {isLoading ? (
+                <ActivityIndicator size="small" color={BASE_COLORS.white} />
+              ) : (
+                <Text style={styles.confirmButtonText}>
+                  {confirmButtonText}
+                </Text>
+              )}
             </TouchableOpacity>
           </View>
         </View>
@@ -81,10 +82,7 @@ const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
   );
 };
 
-export default ConfirmationModal;
-
 const styles = StyleSheet.create({
-  // Modal styles
   modalOverlay: {
     flex: 1,
     justifyContent: "center",
@@ -113,47 +111,54 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   modalTitle: {
-    fontSize: 14,
-    fontFamily: "Poppins-SemiBold",
+    fontSize: COMPONENT_FONT_SIZES.card.title,
+    fontFamily: POPPINS_FONT.semiBold,
     color: TITLE_COLORS.customRed,
-    marginBottom: 8,
+    marginBottom: 16,
   },
   modalText: {
-    fontSize: 12,
-    fontFamily: "Poppins-Regular",
+    fontSize: COMPONENT_FONT_SIZES.card.subtitle,
+    fontFamily: POPPINS_FONT.regular,
     color: BASE_COLORS.darkText,
+    textAlign: "center",
     marginBottom: 24,
     lineHeight: 20,
-    textAlign: "center",
   },
-  modalButtonContainer: {
+  buttonContainer: {
     flexDirection: "row",
-    justifyContent: "center",
     width: "100%",
     gap: 12,
+    marginTop: 8,
   },
-  modalButton: {
+  cancelButton: {
+    flex: 1,
     paddingVertical: 8,
-    paddingHorizontal: 12,
     borderRadius: 20,
-    minWidth: 120,
+    backgroundColor: BASE_COLORS.offWhite,
     alignItems: "center",
     justifyContent: "center",
   },
-  cancelButton: {
-    backgroundColor: TITLE_COLORS.customWhite,
-  },
-  deleteButton: {
+  confirmButton: {
+    flex: 1,
+    paddingVertical: 8,
+    borderRadius: 20,
     backgroundColor: TITLE_COLORS.customRed,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  disabledButton: {
+    opacity: 0.6,
   },
   cancelButtonText: {
-    color: TITLE_COLORS.customRed,
-    fontFamily: "Poppins-Regular",
-    fontSize: 12,
+    fontSize: COMPONENT_FONT_SIZES.button.small,
+    fontFamily: POPPINS_FONT.medium,
+    color: BASE_COLORS.darkText,
   },
-  deleteButtonText: {
+  confirmButtonText: {
+    fontSize: COMPONENT_FONT_SIZES.button.small,
+    fontFamily: POPPINS_FONT.medium,
     color: BASE_COLORS.white,
-    fontFamily: "Poppins-Medium",
-    fontSize: 12,
   },
 });
+
+export default ConfirmationModal;

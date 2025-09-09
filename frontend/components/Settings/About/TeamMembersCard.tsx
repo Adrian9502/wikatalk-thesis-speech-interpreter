@@ -14,6 +14,11 @@ import {
 import Clipboard from "@react-native-clipboard/clipboard";
 import { Feather } from "@expo/vector-icons";
 import { BASE_COLORS } from "@/constant/colors";
+import {
+  COMPONENT_FONT_SIZES,
+  FONT_SIZES,
+  POPPINS_FONT,
+} from "@/constant/fontSizes";
 import { SocialLink, SocialLinkType } from "@/types/teamMebersTypes";
 
 // Define props interface for the component
@@ -59,19 +64,19 @@ const TeamMemberCard: React.FC<TeamMemberCardProps> = ({
   const renderSocialIcon = (type: SocialLinkType) => {
     switch (type) {
       case "facebook":
-        return <Feather name="facebook" size={22} color="#3b5998" />;
+        return <Feather name="facebook" size={18} color="#3b5998" />;
       case "github":
-        return <Feather name="github" size={22} color="#333" />;
+        return <Feather name="github" size={18} color="#333" />;
       case "twitter":
-        return <Feather name="twitter" size={22} color="#1DA1F2" />;
+        return <Feather name="twitter" size={18} color="#1DA1F2" />;
       case "linkedin":
-        return <Feather name="linkedin" size={22} color="#0077B5" />;
+        return <Feather name="linkedin" size={18} color="#0077B5" />;
       case "mail":
-        return <Feather name="mail" size={22} color="#ce1126" />;
+        return <Feather name="mail" size={18} color="#ce1126" />;
       case "instagram":
-        return <Feather name="instagram" size={22} color="#E1306C" />;
+        return <Feather name="instagram" size={18} color="#E1306C" />;
       default:
-        return <Feather name="link" size={22} color="#555" />;
+        return <Feather name="link" size={18} color="#555" />;
     }
   };
 
@@ -155,27 +160,27 @@ const styles = StyleSheet.create({
     marginRight: 12,
   },
   avatarText: {
-    fontSize: 24,
-    fontWeight: "bold",
+    fontSize: FONT_SIZES["2xl"],
+    fontFamily: POPPINS_FONT.bold,
     color: "#555",
   },
   headerInfo: {
     flex: 1,
   },
   name: {
-    fontSize: 15,
-    fontFamily: "Poppins-Medium",
+    fontSize: COMPONENT_FONT_SIZES.settings.itemTitle,
+    fontFamily: POPPINS_FONT.medium,
     color: "#333",
   },
   role: {
-    fontSize: 14,
+    fontSize: COMPONENT_FONT_SIZES.card.description,
     color: "#666",
     marginTop: 2,
-    fontFamily: "Poppins-Regular",
+    fontFamily: POPPINS_FONT.regular,
   },
   bio: {
-    fontSize: 13,
-    fontFamily: "Poppins-Regular",
+    fontSize: COMPONENT_FONT_SIZES.card.subtitle,
+    fontFamily: POPPINS_FONT.regular,
     color: "#444",
     lineHeight: 20,
     marginBottom: 12,

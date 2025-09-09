@@ -2,6 +2,7 @@ import React from "react";
 import { View, Text, StyleSheet, ActivityIndicator } from "react-native";
 import { Upload } from "lucide-react-native";
 import { BASE_COLORS } from "@/constant/colors";
+import { COMPONENT_FONT_SIZES, POPPINS_FONT } from "@/constant/fontSizes";
 
 interface ImageUploadProgressProps {
   visible: boolean;
@@ -54,8 +55,8 @@ const styles = StyleSheet.create({
     gap: 10,
   },
   uploadProgressTitle: {
-    fontSize: 11,
-    fontFamily: "Poppins-Medium",
+    fontSize: COMPONENT_FONT_SIZES.card.description,
+    fontFamily: POPPINS_FONT.medium,
   },
 });
 

@@ -1,6 +1,11 @@
 import React from "react";
 import { View, Text, StyleSheet } from "react-native";
 import { BASE_COLORS } from "@/constant/colors";
+import {
+  COMPONENT_FONT_SIZES,
+  FONT_SIZES,
+  POPPINS_FONT,
+} from "@/constant/fontSizes";
 
 interface InfoItemProps {
   icon: React.ReactNode;
@@ -73,19 +78,19 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   infoLabel: {
-    fontSize: 11,
-    fontFamily: "Poppins-Regular",
+    fontSize: FONT_SIZES.sm,
+    fontFamily: POPPINS_FONT.regular,
     color: BASE_COLORS.placeholderText,
     marginBottom: 2,
   },
   infoValue: {
-    fontSize: 13,
-    fontFamily: "Poppins-Medium",
+    fontSize: COMPONENT_FONT_SIZES.settings.sectionHeader,
+    fontFamily: POPPINS_FONT.regular,
   },
   divider: {
     height: 1,
-    backgroundColor: BASE_COLORS.borderColor,
-    marginLeft: 60,
+    backgroundColor: "#E5E7EB",
+    marginHorizontal: 15,
   },
 });
 

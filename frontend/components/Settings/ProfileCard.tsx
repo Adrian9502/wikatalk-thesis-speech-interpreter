@@ -2,7 +2,13 @@ import { Image, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import React, { useState } from "react";
 import { User } from "react-native-feather";
 import { BASE_COLORS } from "@/constant/colors";
+import {
+  COMPONENT_FONT_SIZES,
+  FONT_SIZES,
+  POPPINS_FONT,
+} from "@/constant/fontSizes";
 import ProfilePictureModal from "../accountDetails/ProfilePictureModal";
+
 const ProfileCard = ({
   userData,
   themeColor,
@@ -26,8 +32,8 @@ const ProfileCard = ({
             />
           ) : (
             <Text style={styles.avatarText}>
-              {userData?.fullName?.charAt(0) ||
-                userData?.username?.charAt(0) ||
+              {userData?.fullName?.charAt(0).toUpperCase() ||
+                userData?.username?.charAt(0).toUpperCase() ||
                 "U"}
             </Text>
           )}
@@ -65,6 +71,7 @@ const ProfileCard = ({
     </>
   );
 };
+
 export default ProfileCard;
 
 const styles = StyleSheet.create({
@@ -72,7 +79,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     backgroundColor: BASE_COLORS.white,
-    paddingVertical: 16,
+    paddingVertical: 12,
     paddingHorizontal: 20,
     borderRadius: 20,
     shadowColor: "#000",
@@ -100,9 +107,9 @@ const styles = StyleSheet.create({
     borderRadius: 30,
   },
   avatarText: {
-    fontSize: 24,
+    fontSize: FONT_SIZES["3xl"],
     color: "white",
-    fontFamily: "Poppins-SemiBold",
+    fontFamily: POPPINS_FONT.semiBold,
   },
   userInfoContainer: {
     flex: 1,
@@ -113,15 +120,15 @@ const styles = StyleSheet.create({
     marginBottom: 4,
   },
   infoLabel: {
-    fontSize: 11,
-    fontFamily: "Poppins-Medium",
+    fontSize: COMPONENT_FONT_SIZES.settings.itemDescription,
+    fontFamily: POPPINS_FONT.medium,
     color: BASE_COLORS.placeholderText,
     marginRight: 6,
     minWidth: 35,
   },
   userName: {
-    fontSize: 14,
-    fontFamily: "Poppins-SemiBold",
+    fontSize: COMPONENT_FONT_SIZES.card.subtitle,
+    fontFamily: POPPINS_FONT.medium,
     color: BASE_COLORS.darkText,
     flex: 1,
   },
@@ -139,13 +146,13 @@ const styles = StyleSheet.create({
     backgroundColor: "rgba(0, 0, 0, 0.02)",
   },
   usernameText: {
-    fontSize: 11,
-    fontFamily: "Poppins-Medium",
+    fontSize: COMPONENT_FONT_SIZES.settings.itemDescription,
+    fontFamily: POPPINS_FONT.medium,
     marginLeft: 3,
   },
   userEmail: {
-    fontSize: 11,
-    fontFamily: "Poppins-Regular",
+    fontSize: COMPONENT_FONT_SIZES.settings.itemDescription,
+    fontFamily: POPPINS_FONT.regular,
     color: BASE_COLORS.placeholderText,
     marginTop: 2,
   },

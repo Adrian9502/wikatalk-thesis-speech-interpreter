@@ -1,84 +1,85 @@
 import React from "react";
-import { View } from "react-native";
-import { User, Mail, Calendar, Shield } from "react-native-feather";
-import { formatDate } from "@/utils/formatDate";
-import { UserDataTypes } from "@/types/types";
-import { InfoItem } from "@/components/accountDetails/InfoItem";
-import styles from "@/styles/accountDetailsStyles";
+import { View, StyleSheet } from "react-native";
+import { Mail, User, Calendar, Smartphone } from "react-native-feather";
+import { InfoItem } from "./InfoItem";
+import { BASE_COLORS } from "@/constant/colors";
 
-type InfoSectionProps = {
-  userData: UserDataTypes;
+interface InfoSectionProps {
+  userData: any;
   theme: any;
-};
-
-// Memoize icon components
-const UserIcon = React.memo((props: any) => <User {...props} />);
-const MailIcon = React.memo((props: any) => <Mail {...props} />);
-const CalendarIcon = React.memo((props: any) => <Calendar {...props} />);
-const ShieldIcon = React.memo((props: any) => <Shield {...props} />);
+}
 
 export const InfoSection = React.memo(
   ({ userData, theme }: InfoSectionProps) => {
-    // Memoize formatted date to prevent recalculation
-    const formattedDate = React.useMemo(
-      () => formatDate(userData.createdAt as string),
-      [userData.createdAt]
-    );
-
-    // Memoize verification status
-    const verificationStatus = React.useMemo(
-      () => (userData.isVerified ? "Verified" : "Not Verified"),
-      [userData.isVerified]
-    );
+    const infoItems = [
+      {
+        icon: <User width={16} height={16} color={theme.secondaryColor} />,
+        label: "Full Name",
+        value: userData?.fullName || "Not provided",
+      },
+      {
+        icon: <User width={16} height={16} color={theme.secondaryColor} />,
+        label: "Username",
+        value: userData?.username || "Not provided",
+      },
+      {
+        icon: <Mail width={16} height={16} color={theme.secondaryColor} />,
+        label: "Email",
+        value: userData?.email || "Not provided",
+      },
+      {
+        icon: <Calendar width={16} height={16} color={theme.secondaryColor} />,
+        label: "Joined",
+        value: userData?.createdAt
+          ? new Date(userData.createdAt).toLocaleDateString("en-US", {
+              year: "numeric",
+              month: "long",
+              day: "numeric",
+            })
+          : "Not available",
+      },
+      {
+        icon: (
+          <Smartphone width={16} height={16} color={theme.secondaryColor} />
+        ),
+        label: "Login Method",
+        value:
+          userData?.authProvider === "google"
+            ? "Google Account"
+            : "Email & Password",
+      },
+    ];
 
     return (
       <View style={styles.card}>
-        <InfoItem
-          icon={
-            <UserIcon width={16} height={16} color={theme.secondaryColor} />
-          }
-          label="Name"
-          value={userData.fullName || "Not provided"}
-          theme={theme}
-        />
-        <InfoItem
-          icon={
-            <UserIcon width={16} height={16} color={theme.secondaryColor} />
-          }
-          label="Username"
-          value={userData.username || "Not provided"}
-          theme={theme}
-        />
-        <InfoItem
-          icon={
-            <MailIcon width={16} height={16} color={theme.secondaryColor} />
-          }
-          label="Email"
-          value={userData.email || "Not provided"}
-          theme={theme}
-          showDivider
-        />
-        <InfoItem
-          icon={
-            <CalendarIcon width={16} height={16} color={theme.secondaryColor} />
-          }
-          label="Account created at"
-          value={formattedDate}
-          theme={theme}
-          showDivider
-        />
-        <InfoItem
-          icon={
-            <ShieldIcon width={16} height={16} color={theme.secondaryColor} />
-          }
-          label="Verification Status"
-          value={verificationStatus}
-          theme={theme}
-          isLast
-        />
+        {infoItems.map((item, index) => (
+          <InfoItem
+            key={item.label}
+            icon={item.icon}
+            label={item.label}
+            value={item.value}
+            theme={theme}
+            showDivider={true}
+            isLast={index === infoItems.length - 1}
+          />
+        ))}
       </View>
     );
   }
 );
+
+const styles = StyleSheet.create({
+  card: {
+    backgroundColor: BASE_COLORS.white,
+    borderRadius: 20,
+    overflow: "hidden",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+    marginBottom: 16,
+  },
+});
 
 InfoSection.displayName = "InfoSection";

@@ -17,6 +17,7 @@ import {
   TapGestureHandlerGestureEvent,
 } from "react-native-gesture-handler";
 import { BASE_COLORS, TITLE_COLORS } from "@/constant/colors";
+import { COMPONENT_FONT_SIZES, POPPINS_FONT } from "@/constant/fontSizes";
 import { HistoryItemType } from "@/types/types";
 import TranslationText from "./TranslationText";
 
@@ -306,9 +307,9 @@ const styles = StyleSheet.create({
     alignSelf: "center",
   },
   dateText: {
-    fontFamily: "Poppins-Regular",
+    fontFamily: POPPINS_FONT.regular,
     color: BASE_COLORS.white,
-    fontSize: 11,
+    fontSize: COMPONENT_FONT_SIZES.card.caption,
   },
   deleteIcon: {
     padding: 5,
@@ -340,8 +341,8 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   languageText: {
-    fontSize: 13,
-    fontFamily: "Poppins-Medium",
+    fontSize: COMPONENT_FONT_SIZES.card.subtitle,
+    fontFamily: POPPINS_FONT.medium,
     color: TITLE_COLORS.customWhite,
   },
   exchangeIconContainer: {
@@ -382,9 +383,9 @@ const styles = StyleSheet.create({
     borderTopColor: "#f0f0f0",
   },
   expandCollapseText: {
-    fontFamily: "Poppins-Regular",
+    fontFamily: POPPINS_FONT.regular,
     color: BASE_COLORS.blue,
-    fontSize: 12,
+    fontSize: COMPONENT_FONT_SIZES.card.description,
     marginRight: 5,
   },
 });

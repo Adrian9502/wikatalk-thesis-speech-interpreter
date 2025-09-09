@@ -15,6 +15,7 @@ import {
 } from "react-native-safe-area-context";
 import { StatusBar } from "expo-status-bar";
 import { BASE_COLORS } from "@/constant/colors";
+import { COMPONENT_FONT_SIZES, POPPINS_FONT } from "@/constant/fontSizes";
 import { Send, AlertCircle, MessageSquare, X } from "react-native-feather";
 import MaterialCommunityIcons from "react-native-vector-icons/MaterialCommunityIcons";
 import showNotification from "@/lib/showNotification";
@@ -346,8 +347,8 @@ const styles = StyleSheet.create({
     marginBottom: 24,
   },
   sectionTitle: {
-    fontSize: 14,
-    fontFamily: "Poppins-Medium",
+    fontSize: COMPONENT_FONT_SIZES.card.title,
+    fontFamily: POPPINS_FONT.medium,
     color: BASE_COLORS.white,
     flexDirection: "row",
     alignItems: "center",
@@ -393,8 +394,8 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   typeLabel: {
-    fontSize: 13,
-    fontFamily: "Poppins-Medium",
+    fontSize: COMPONENT_FONT_SIZES.card.subtitle,
+    fontFamily: POPPINS_FONT.medium,
     color: BASE_COLORS.white,
     marginBottom: 2,
   },
@@ -402,8 +403,8 @@ const styles = StyleSheet.create({
     color: BASE_COLORS.blue,
   },
   typeDescription: {
-    fontSize: 11,
-    fontFamily: "Poppins-Regular",
+    fontSize: COMPONENT_FONT_SIZES.card.description,
+    fontFamily: POPPINS_FONT.regular,
     color: "rgba(255, 255, 255, 0.6)",
   },
   typeDescriptionSelected: {
@@ -430,8 +431,8 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 14,
     paddingRight: 50,
-    fontSize: 14,
-    fontFamily: "Poppins-Regular",
+    fontSize: COMPONENT_FONT_SIZES.input.text,
+    fontFamily: POPPINS_FONT.regular,
     color: BASE_COLORS.white,
     minHeight: 48,
   },
@@ -440,8 +441,8 @@ const styles = StyleSheet.create({
     paddingTop: 14,
     paddingBottom: 8,
     paddingRight: 50,
-    fontSize: 13,
-    fontFamily: "Poppins-Regular",
+    fontSize: COMPONENT_FONT_SIZES.input.text,
+    fontFamily: POPPINS_FONT.regular,
     color: BASE_COLORS.white,
     minHeight: 120,
   },
@@ -475,8 +476,8 @@ const styles = StyleSheet.create({
     backgroundColor: "rgba(255, 255, 255, 0.02)",
   },
   characterCount: {
-    fontSize: 10,
-    fontFamily: "Poppins-Regular",
+    fontSize: COMPONENT_FONT_SIZES.card.caption,
+    fontFamily: POPPINS_FONT.regular,
     color: "rgba(255, 255, 255, 0.5)",
     textAlign: "right",
   },
@@ -488,8 +489,8 @@ const styles = StyleSheet.create({
     borderLeftColor: BASE_COLORS.blue,
   },
   infoText: {
-    fontSize: 11,
-    fontFamily: "Poppins-Regular",
+    fontSize: COMPONENT_FONT_SIZES.card.description,
+    fontFamily: POPPINS_FONT.regular,
     color: "rgba(255, 255, 255, 0.7)",
     lineHeight: 18,
   },
@@ -524,8 +525,8 @@ const styles = StyleSheet.create({
     marginRight: 8,
   },
   submitButtonText: {
-    fontSize: 13,
-    fontFamily: "Poppins-Regular",
+    fontSize: COMPONENT_FONT_SIZES.button.medium,
+    fontFamily: POPPINS_FONT.regular,
     color: BASE_COLORS.white,
   },
 });

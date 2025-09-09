@@ -49,7 +49,7 @@ export const COMPONENT_FONT_SIZES = {
   input: {
     placeholder: FONT_SIZES.md,
     text: FONT_SIZES.xl,
-    label: FONT_SIZES.sm,
+    label: FONT_SIZES.md,
   },
 
   // Cards

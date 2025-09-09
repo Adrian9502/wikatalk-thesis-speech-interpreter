@@ -1,6 +1,7 @@
 import { StyleSheet, Text, View } from "react-native";
 import React from "react";
 import { BASE_COLORS } from "@/constant/colors";
+import { COMPONENT_FONT_SIZES, POPPINS_FONT } from "@/constant/fontSizes";
 
 interface TranslationTextProps {
   label: string;
@@ -42,8 +43,8 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   textLabel: {
-    fontSize: 11,
-    fontFamily: "Poppins-Regular",
+    fontSize: COMPONENT_FONT_SIZES.card.caption,
+    fontFamily: POPPINS_FONT.regular,
     color: BASE_COLORS.placeholderText,
     marginRight: 6,
   },
@@ -52,14 +53,14 @@ const styles = StyleSheet.create({
   },
   originalText: {
     color: BASE_COLORS.blue,
-    fontSize: 12,
-    fontFamily: "Poppins-Medium",
+    fontSize: COMPONENT_FONT_SIZES.card.subtitle,
+    fontFamily: POPPINS_FONT.regular,
     lineHeight: 22,
   },
   translatedText: {
     color: BASE_COLORS.orange,
-    fontSize: 12,
-    fontFamily: "Poppins-Medium",
+    fontSize: COMPONENT_FONT_SIZES.card.subtitle,
+    fontFamily: POPPINS_FONT.regular,
     lineHeight: 22,
   },
 });

@@ -9,6 +9,7 @@ import {
 } from "react-native";
 import { Feather } from "@expo/vector-icons";
 import { BASE_COLORS } from "@/constant/colors";
+import { COMPONENT_FONT_SIZES, POPPINS_FONT } from "@/constant/fontSizes";
 import { FeatherIconName } from "@/types/types";
 import useThemeStore from "@/store/useThemeStore";
 
@@ -54,7 +55,7 @@ const SettingItem: React.FC<SettingItemProps> = ({
     <TouchableOpacity
       style={[styles.container, customContainerStyle]}
       onPress={handlePress}
-      activeOpacity={showSwitch ? 1 : 0.7} // Disable touch feedback for switch items
+      activeOpacity={showSwitch ? 1 : 0.7}
     >
       <View style={styles.leftContent}>
         <View
@@ -65,7 +66,7 @@ const SettingItem: React.FC<SettingItemProps> = ({
         >
           <Feather
             name={icon}
-            size={16}
+            size={15}
             color={customIconColor || activeTheme.secondaryColor}
           />
         </View>
@@ -103,7 +104,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "space-between",
     paddingVertical: 12,
-    paddingHorizontal: 15,
+    paddingHorizontal: 16,
   },
   leftContent: {
     flexDirection: "row",
@@ -122,14 +123,14 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   label: {
-    fontSize: 13,
+    fontSize: COMPONENT_FONT_SIZES.settings.sectionHeader,
     color: BASE_COLORS.darkText,
-    fontFamily: "Poppins-Regular",
+    fontFamily: POPPINS_FONT.regular,
   },
   description: {
-    fontSize: 11,
+    fontSize: COMPONENT_FONT_SIZES.settings.itemDescription,
     color: BASE_COLORS.placeholderText,
-    fontFamily: "Poppins-Regular",
+    fontFamily: POPPINS_FONT.regular,
     marginTop: 2,
     lineHeight: 14,
   },

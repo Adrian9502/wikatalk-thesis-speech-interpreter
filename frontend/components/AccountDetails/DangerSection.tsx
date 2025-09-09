@@ -4,10 +4,11 @@ import { AlertTriangle } from "lucide-react-native";
 import useThemeStore from "@/store/useThemeStore";
 import DeleteAccount from "./DeleteAccount";
 import { BASE_COLORS } from "@/constant/colors";
+import { COMPONENT_FONT_SIZES, POPPINS_FONT } from "@/constant/fontSizes";
 
 // Memoize the warning icon
 const WarningIcon = React.memo(() => (
-  <AlertTriangle size={18} color={BASE_COLORS.danger} style={styles.icon} />
+  <AlertTriangle size={16} color={BASE_COLORS.danger} style={styles.icon} />
 ));
 
 // Memoize the warning text component
@@ -46,7 +47,7 @@ export const DangerSection = React.memo(() => {
 const styles = StyleSheet.create({
   warningContainer: {
     flexDirection: "row",
-    backgroundColor: "#f2f0f0",
+    backgroundColor: BASE_COLORS.white,
     borderRadius: 20,
     padding: 12,
     alignItems: "flex-start",
@@ -58,8 +59,8 @@ const styles = StyleSheet.create({
   warningText: {
     marginLeft: 10,
     flex: 1,
-    fontSize: 12,
-    fontFamily: "Poppins-Regular",
+    fontSize: COMPONENT_FONT_SIZES.card.description,
+    fontFamily: POPPINS_FONT.regular,
   },
   buttonContainer: {
     marginTop: 20,

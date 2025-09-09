@@ -1,5 +1,6 @@
 import { StyleSheet } from "react-native";
 import { BASE_COLORS } from "@/constant/colors";
+import { COMPONENT_FONT_SIZES, POPPINS_FONT } from "@/constant/fontSizes";
 
 export default StyleSheet.create({
   modalOverlay: {
@@ -31,8 +32,8 @@ export default StyleSheet.create({
   },
   headerTitle: {
     color: BASE_COLORS.white,
-    fontFamily: "Poppins-Medium",
-    fontSize: 14,
+    fontFamily: POPPINS_FONT.medium,
+    fontSize: COMPONENT_FONT_SIZES.card.title,
     textAlign: "center",
   },
   formContainer: {
@@ -72,26 +73,26 @@ export default StyleSheet.create({
   },
   passwordErrorText: {
     color: BASE_COLORS.orange,
-    fontFamily: "Poppins-Regular",
-    fontSize: 12,
+    fontFamily: POPPINS_FONT.regular,
+    fontSize: COMPONENT_FONT_SIZES.card.description,
     marginBottom: 12,
     textAlign: "center",
   },
   errorText: {
     color: BASE_COLORS.orange,
-    fontFamily: "Poppins-Regular",
-    fontSize: 12,
+    fontFamily: POPPINS_FONT.regular,
+    fontSize: COMPONENT_FONT_SIZES.card.description,
     textAlign: "center",
   },
   inputLabel: {
-    fontSize: 13,
-    fontFamily: "Poppins-Medium",
+    fontSize: COMPONENT_FONT_SIZES.input.label,
+    fontFamily: POPPINS_FONT.medium,
     color: BASE_COLORS.darkText,
     marginBottom: 5,
   },
   sectionTitle: {
-    fontSize: 14,
-    fontFamily: "Poppins-SemiBold",
+    fontSize: COMPONENT_FONT_SIZES.card.subtitle,
+    fontFamily: POPPINS_FONT.semiBold,
     color: BASE_COLORS.darkText,
     marginTop: 8,
     marginBottom: 12,
@@ -106,7 +107,7 @@ export default StyleSheet.create({
     marginTop: 8,
   },
   saveButton: {
-    paddingVertical: 8,
+    paddingVertical: 6,
     borderRadius: 20,
     alignItems: "center",
     justifyContent: "center",
@@ -114,8 +115,8 @@ export default StyleSheet.create({
   },
   saveButtonText: {
     color: "white",
-    fontSize: 13,
-    fontFamily: "Poppins-Medium",
+    fontSize: COMPONENT_FONT_SIZES.button.medium,
+    fontFamily: POPPINS_FONT.medium,
   },
   cancelButton: {
     paddingVertical: 12,
@@ -124,8 +125,8 @@ export default StyleSheet.create({
     marginTop: 8,
   },
   cancelButtonText: {
-    fontSize: 11,
-    fontFamily: "Poppins-Medium",
+    fontSize: COMPONENT_FONT_SIZES.button.small,
+    fontFamily: POPPINS_FONT.medium,
   },
   passwordField: {
     flexDirection: "row",
@@ -146,14 +147,13 @@ export default StyleSheet.create({
   },
   invalidPasswordText: {
     color: BASE_COLORS.orange,
-    fontFamily: "Poppins-Regular",
-    fontSize: 11,
+    fontFamily: POPPINS_FONT.regular,
+    fontSize: COMPONENT_FONT_SIZES.card.description,
     marginLeft: 6,
-    marginTop: 2,
   },
   googleUserInfoContainer: {
     flexDirection: "row",
-    backgroundColor: "#f2f0f0",
+    backgroundColor: BASE_COLORS.offWhite,
     borderRadius: 20,
     padding: 12,
     marginVertical: 14,
@@ -163,8 +163,8 @@ export default StyleSheet.create({
   googleUserInfoText: {
     marginLeft: 10,
     flex: 1,
-    fontSize: 12,
-    fontFamily: "Poppins-Regular",
+    fontSize: COMPONENT_FONT_SIZES.card.subtitle,
+    fontFamily: POPPINS_FONT.regular,
     lineHeight: 20,
   },
 });
