@@ -19,15 +19,25 @@ import { COMPONENT_FONT_SIZES, POPPINS_FONT } from "@/constant/fontSizes";
 
 const { width: screenWidth } = Dimensions.get("window");
 
-// Responsive icon sizes based on screen width
+// Calculate available width per tab
+const getTabWidth = () => {
+  const padding = 20; // Account for screen padding
+  const availableWidth = screenWidth - padding;
+  return availableWidth / 6; // 6 tabs
+};
+
+// Responsive icon sizes and spacing based on screen width
 const getResponsiveIconSizes = () => {
   const isSmallScreen = screenWidth <= 384; // Small phones
   const isMediumScreen = screenWidth <= 414; // iPhone X/11 size
+  const tabWidth = getTabWidth();
 
   return {
-    focused: isSmallScreen ? 16 : isMediumScreen ? 17 : 18,
-    unfocused: isSmallScreen ? 15 : isMediumScreen ? 16 : 17,
-    gameIcon: isSmallScreen ? 16 : isMediumScreen ? 17 : 18,
+    focused: isSmallScreen ? 14 : isMediumScreen ? 15 : 16,
+    unfocused: isSmallScreen ? 13 : isMediumScreen ? 14 : 15,
+    gameIcon: isSmallScreen ? 14 : isMediumScreen ? 15 : 16,
+    fontSize: tabWidth < 60 ? 8 : tabWidth < 70 ? 9 : 10,
+    marginTop: tabWidth < 60 ? 2 : 3,
   };
 };
 
@@ -54,6 +64,7 @@ const TabIcon: React.FC<TabIconProps> = React.memo(
 
     // Get responsive icon sizes
     const iconSizes = getResponsiveIconSizes();
+    const tabWidth = getTabWidth();
 
     useEffect(() => {
       // Batch animations together for better performance
@@ -76,7 +87,8 @@ const TabIcon: React.FC<TabIconProps> = React.memo(
         style={{
           alignItems: "center",
           justifyContent: "center",
-          width: 70,
+          width: tabWidth, // Dynamic width based on screen
+          paddingHorizontal: 2, // Small padding to prevent edge cutoff
         }}
       >
         <Animated.View
@@ -96,14 +108,18 @@ const TabIcon: React.FC<TabIconProps> = React.memo(
 
           <Animated.Text
             style={{
-              fontSize: COMPONENT_FONT_SIZES.navigation.tabLabel,
+              fontSize: iconSizes.fontSize,
               textAlign: "center",
               color: color,
               fontFamily: focused ? POPPINS_FONT.medium : POPPINS_FONT.regular,
-              marginTop: 5,
+              marginTop: iconSizes.marginTop,
               opacity,
+              width: tabWidth - 4, // Leave small margin for padding
             }}
             numberOfLines={1}
+            adjustsFontSizeToFit={true} // This will shrink font if needed
+            minimumFontScale={0.8} // Minimum scale factor
+            ellipsizeMode="tail" // Add ... at end if still too long
           >
             {name}
           </Animated.Text>
@@ -125,14 +141,12 @@ const GameIcon: React.FC<IconProps> = React.memo(({ color, width }) => {
 });
 
 export default function TabsLayout() {
-  // NEW: Add animated value for padding top
   const [paddingTopAnim] = useState(new Animated.Value(0));
   const { activeTheme } = useThemeStore();
   const segments = useSegments();
   const insets = useSafeAreaInsets();
   const params = useLocalSearchParams();
 
-  // CRITICAL FIX: Get initial tab from params with proper fallback
   const initialTabParam = (params.initialTab as string) || "Home";
 
   // FIXED: Start with Home always, don't change based on segments initially
@@ -146,14 +160,13 @@ export default function TabsLayout() {
       // Animate the padding top to match the network bar height
       Animated.timing(paddingTopAnim, {
         toValue: height,
-        duration: 300, // Same duration as NetworkStatusBar animation
-        useNativeDriver: false, // Cannot use native driver for padding
+        duration: 300,
+        useNativeDriver: false,
       }).start();
     },
     [paddingTopAnim]
   );
 
-  // CRITICAL FIX: Process initial tab immediately and prevent transitions
   useEffect(() => {
     console.log(`[TabsLayout] Initial tab parameter: ${initialTabParam}`);
 
@@ -192,7 +205,6 @@ export default function TabsLayout() {
 
   // Helper function to get the main tab from segments
   const getMainTabFromSegments = useCallback((segments: string[]): string => {
-    // FIXED: Only include the 5 main tabs (removed Settings)
     const mainTabs = [
       "Home",
       "Speech",
@@ -394,7 +406,6 @@ export default function TabsLayout() {
     [currentTabColors.background]
   );
 
-  // FIXED: Update screen options to properly handle network bar spacing
   const screenOptions = useMemo(
     () => ({
       tabBarShowLabel: false,
@@ -406,6 +417,7 @@ export default function TabsLayout() {
         paddingTop: 10,
         borderTopWidth: 0,
         paddingBottom: Math.max(insets.bottom, 8),
+        paddingHorizontal: 0, // Remove horizontal padding to maximize space
       },
       tabBarBackground: TabBarBackground,
       lazy: true,
@@ -415,7 +427,6 @@ export default function TabsLayout() {
   );
 
   return (
-    // FIXED: Container with proper spacing management
     <View style={{ flex: 1, position: "relative" }}>
       <StatusBar
         style="light"
@@ -425,7 +436,6 @@ export default function TabsLayout() {
 
       <NetworkStatusBar onHeightChange={handleNetworkBarHeightChange} />
 
-      {/* FIXED: Animated tabs container with smooth padding animation */}
       <Animated.View
         style={{
           flex: 1,

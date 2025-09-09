@@ -10,6 +10,11 @@ import {
 import QUICK_PHRASES from "@/constant/quickPhrases";
 import { LanguageOption } from "@/types/types";
 import { BASE_COLORS } from "@/constant/colors";
+import {
+  FONT_SIZES,
+  POPPINS_FONT,
+  COMPONENT_FONT_SIZES,
+} from "@/constant/fontSizes";
 
 const { width: screenWidth, height: screenHeight } = Dimensions.get("window");
 
@@ -118,9 +123,9 @@ const getResponsiveStyles = () => {
     },
     title: {
       color: BASE_COLORS.blue,
-      fontFamily: "Poppins-Medium",
+      fontFamily: POPPINS_FONT.medium,
       marginBottom: isSmallScreen ? 6 : 8,
-      fontSize: isSmallScreen ? 13 : 14,
+      fontSize: COMPONENT_FONT_SIZES.translation.language,
     },
     categoryScrollView: {
       marginBottom: isSmallScreen ? 6 : 8,
@@ -141,8 +146,8 @@ const getResponsiveStyles = () => {
       borderColor: BASE_COLORS.lightBlue,
     },
     categoryText: {
-      fontFamily: "Poppins-Regular",
-      fontSize: isSmallScreen ? 12 : 13,
+      fontFamily: POPPINS_FONT.regular,
+      fontSize: COMPONENT_FONT_SIZES.translation.pronunciation,
     },
     activeTabText: {
       color: BASE_COLORS.white,
@@ -165,8 +170,8 @@ const getResponsiveStyles = () => {
     },
     phraseText: {
       color: BASE_COLORS.blue,
-      fontSize: isSmallScreen ? 11 : 12,
-      fontFamily: "Poppins-Regular",
+      fontSize: COMPONENT_FONT_SIZES.translation.pronunciation,
+      fontFamily: POPPINS_FONT.regular,
     },
   });
 };

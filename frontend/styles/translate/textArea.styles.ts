@@ -1,5 +1,10 @@
 import { StyleSheet, Dimensions } from "react-native";
 import { BASE_COLORS } from "@/constant/colors";
+import {
+  FONT_SIZES,
+  POPPINS_FONT,
+  COMPONENT_FONT_SIZES,
+} from "@/constant/fontSizes";
 
 const { width: screenWidth, height: screenHeight } = Dimensions.get("window");
 
@@ -41,8 +46,8 @@ export const textAreaStyles = StyleSheet.create({
   },
 
   sectionTitle: {
-    fontSize: isSmallScreen ? 14 : 15,
-    fontFamily: "Poppins-Medium",
+    fontSize: COMPONENT_FONT_SIZES.translation.language,
+    fontFamily: POPPINS_FONT.medium,
   },
 
   controls: {
@@ -78,10 +83,10 @@ export const textAreaStyles = StyleSheet.create({
   },
 
   textField: {
-    fontFamily: "Poppins-Regular",
+    fontFamily: POPPINS_FONT.regular,
     textAlignVertical: "top",
-    fontSize: isSmallScreen ? 12 : 14,
-    lineHeight: isSmallScreen ? 18 : 20,
+    fontSize: COMPONENT_FONT_SIZES.input.text,
+    lineHeight: COMPONENT_FONT_SIZES.translation.sourceText * 1.4,
     color: BASE_COLORS.darkText,
   },
 
@@ -108,8 +113,8 @@ export const textAreaStyles = StyleSheet.create({
   },
 
   errorText: {
-    fontSize: isSmallScreen ? 13 : 14,
+    fontSize: COMPONENT_FONT_SIZES.input.text,
     textAlign: "center",
-    fontFamily: "Poppins-Regular",
+    fontFamily: POPPINS_FONT.regular,
   },
 });

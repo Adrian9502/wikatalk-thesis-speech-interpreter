@@ -48,7 +48,7 @@ export const COMPONENT_FONT_SIZES = {
   // Input fields
   input: {
     placeholder: FONT_SIZES.md,
-    text: FONT_SIZES.lg,
+    text: FONT_SIZES.xl,
     label: FONT_SIZES.sm,
   },
 
@@ -80,7 +80,7 @@ export const COMPONENT_FONT_SIZES = {
   translation: {
     sourceText: FONT_SIZES.lg,
     translatedText: FONT_SIZES.lg,
-    language: FONT_SIZES.md,
+    language: FONT_SIZES.lg,
     pronunciation: FONT_SIZES.sm,
   },
 
