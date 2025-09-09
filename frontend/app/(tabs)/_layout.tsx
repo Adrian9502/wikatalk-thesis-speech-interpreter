@@ -1,4 +1,4 @@
-import { View, Animated, InteractionManager } from "react-native";
+import { View, Animated, InteractionManager, Dimensions } from "react-native";
 import React, {
   useRef,
   useEffect,
@@ -15,6 +15,21 @@ import { useFocusEffect } from "@react-navigation/native";
 import { StatusBar } from "expo-status-bar";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import NetworkStatusBar from "@/components/NetworkStatusBar";
+import { COMPONENT_FONT_SIZES, POPPINS_FONT } from "@/constant/fontSizes";
+
+const { width: screenWidth } = Dimensions.get("window");
+
+// Responsive icon sizes based on screen width
+const getResponsiveIconSizes = () => {
+  const isSmallScreen = screenWidth <= 384; // Small phones
+  const isMediumScreen = screenWidth <= 414; // iPhone X/11 size
+
+  return {
+    focused: isSmallScreen ? 16 : isMediumScreen ? 17 : 18,
+    unfocused: isSmallScreen ? 15 : isMediumScreen ? 16 : 17,
+    gameIcon: isSmallScreen ? 16 : isMediumScreen ? 17 : 18,
+  };
+};
 
 interface TabIconProps {
   Icon: React.ComponentType<any>;
@@ -36,6 +51,9 @@ const TabIcon: React.FC<TabIconProps> = React.memo(
     // Optimized animation with native driver and reduced re-renders
     const opacity = useRef(new Animated.Value(focused ? 1 : 0.6)).current;
     const scale = useRef(new Animated.Value(focused ? 1.05 : 1)).current;
+
+    // Get responsive icon sizes
+    const iconSizes = getResponsiveIconSizes();
 
     useEffect(() => {
       // Batch animations together for better performance
@@ -70,18 +88,18 @@ const TabIcon: React.FC<TabIconProps> = React.memo(
         >
           <Icon
             stroke={color}
-            width={focused ? 18 : 17}
-            height={focused ? 18 : 17}
+            width={focused ? iconSizes.focused : iconSizes.unfocused}
+            height={focused ? iconSizes.focused : iconSizes.unfocused}
             strokeWidth={focused ? 1.5 : 1}
             color={color}
           />
 
           <Animated.Text
             style={{
-              fontSize: 11,
+              fontSize: COMPONENT_FONT_SIZES.navigation.tabLabel,
               textAlign: "center",
               color: color,
-              fontFamily: focused ? "Poppins-Medium" : "Poppins-Regular",
+              fontFamily: focused ? POPPINS_FONT.medium : POPPINS_FONT.regular,
               marginTop: 5,
               opacity,
             }}
@@ -95,9 +113,16 @@ const TabIcon: React.FC<TabIconProps> = React.memo(
   }
 );
 
-const GameIcon: React.FC<IconProps> = React.memo(({ color, width }) => (
-  <Ionicons name="game-controller-outline" size={width} color={color} />
-));
+const GameIcon: React.FC<IconProps> = React.memo(({ color, width }) => {
+  const iconSizes = getResponsiveIconSizes();
+  return (
+    <Ionicons
+      name="game-controller-outline"
+      size={width || iconSizes.gameIcon}
+      color={color}
+    />
+  );
+});
 
 export default function TabsLayout() {
   // NEW: Add animated value for padding top
