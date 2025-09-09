@@ -1,9 +1,10 @@
 import React from "react";
 import { View, Text, StyleSheet } from "react-native";
 import { BASE_COLORS } from "@/constant/colors";
+import { POPPINS_FONT, COMPONENT_FONT_SIZES } from "@/constant/fontSizes";
 
 interface SectionHeaderProps {
-  icon: React.ReactNode;
+  icon?: React.ReactNode;
   title: string;
   subtitle: string;
 }
@@ -32,17 +33,15 @@ const styles = StyleSheet.create({
     marginBottom: 4,
   },
   sectionMainTitle: {
-    fontSize: 15,
-    fontFamily: "Poppins-Bold",
+    fontSize: COMPONENT_FONT_SIZES.game.instruction,
+    fontFamily: POPPINS_FONT.semiBold,
     color: BASE_COLORS.white,
     marginLeft: 8,
   },
   sectionSubtitle: {
-    fontSize: 11,
-    fontFamily: "Poppins-Regular",
-    color: BASE_COLORS.white,
-    opacity: 0.7,
-    lineHeight: 20,
+    fontSize: COMPONENT_FONT_SIZES.card.description, // Changed from hardcoded 11
+    fontFamily: POPPINS_FONT.regular, // Changed from "Poppins-Regular"
+    color: "rgba(255, 255, 255, 0.7)",
   },
 });
 

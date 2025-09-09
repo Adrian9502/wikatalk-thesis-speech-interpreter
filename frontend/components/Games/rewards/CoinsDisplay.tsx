@@ -8,6 +8,7 @@ import {
   ActivityIndicator,
 } from "react-native";
 import { BASE_COLORS, TITLE_COLORS } from "@/constant/colors";
+import { POPPINS_FONT, COMPONENT_FONT_SIZES } from "@/constant/fontSizes";
 import useCoinsStore from "@/store/games/useCoinsStore";
 
 interface CoinsDisplayProps {
@@ -46,35 +47,39 @@ const styles = StyleSheet.create({
   container: {
     flexDirection: "row",
     alignItems: "center",
-    paddingVertical: 3,
-    paddingHorizontal: 12,
-    backgroundColor: "rgba(255, 255, 255, 0.15)",
-    borderRadius: 20,
-    borderWidth: 1,
+    backgroundColor: "rgba(255, 255, 255, 0.1)",
     borderColor: "rgba(255, 255, 255, 0.2)",
+    borderWidth: 1,
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 20,
+    gap: 8,
   },
   coinIconContainer: {
     position: "relative",
-    marginRight: 4,
   },
   coinImage: {
     width: 15,
     height: 15,
   },
-  coinsText: {
-    marginTop: 2,
-    color: BASE_COLORS.white,
-    fontFamily: "Poppins-Medium",
-    fontSize: 13,
-  },
   notificationBadge: {
     position: "absolute",
-    top: -4,
-    left: -8,
+    top: -2,
+    right: -2,
     width: 8,
     height: 8,
     borderRadius: 4,
-    backgroundColor: TITLE_COLORS.customRed,
+    backgroundColor: "#FF6B6B",
+    borderWidth: 0.5,
+    borderColor: "white",
+    zIndex: 1,
+  },
+  coinsText: {
+    fontSize: COMPONENT_FONT_SIZES.card.subtitle,
+    fontFamily: POPPINS_FONT.semiBold,
+    marginTop: 2,
+    color: BASE_COLORS.white,
   },
 });
+
 export default CoinsDisplay;

@@ -16,6 +16,11 @@ import {
   ICON_COLORS,
   WORD_OF_DAY_GRADIENT,
 } from "@/constant/colors";
+import {
+  POPPINS_FONT,
+  COMPONENT_FONT_SIZES,
+  FONT_SIZES,
+} from "@/constant/fontSizes";
 
 interface WordOfTheDayCardProps {
   wordOfTheDay: any;
@@ -237,8 +242,8 @@ const styles = StyleSheet.create({
     gap: 6,
   },
   wordBadgeText: {
-    fontSize: 10,
-    fontFamily: "Poppins-Medium",
+    fontSize: COMPONENT_FONT_SIZES.card.caption,
+    fontFamily: POPPINS_FONT.medium,
     color: BASE_COLORS.white,
     textTransform: "uppercase",
     letterSpacing: 0.5,
@@ -256,14 +261,14 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   wordMainText: {
-    fontSize: 22,
-    fontFamily: "Poppins-Bold",
+    fontSize: FONT_SIZES["3xl"],
+    fontFamily: POPPINS_FONT.semiBold,
     color: BASE_COLORS.white,
     marginBottom: 8,
   },
   wordTranslation: {
-    fontSize: 16,
-    fontFamily: "Poppins-Medium",
+    fontSize: COMPONENT_FONT_SIZES.card.title,
+    fontFamily: POPPINS_FONT.medium,
     color: BASE_COLORS.white,
   },
   wordCardFooter: {
@@ -272,8 +277,8 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   exploreText: {
-    fontSize: 11,
-    fontFamily: "Poppins-Regular",
+    fontSize: COMPONENT_FONT_SIZES.card.description,
+    fontFamily: POPPINS_FONT.regular,
     color: "rgba(255, 255, 255, 0.6)",
   },
   arrowContainer: {

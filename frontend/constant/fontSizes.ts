@@ -71,7 +71,7 @@ export const COMPONENT_FONT_SIZES = {
   game: {
     question: FONT_SIZES["2xl"],
     answer: FONT_SIZES.lg,
-    instruction: FONT_SIZES.md,
+    instruction: FONT_SIZES.xl,
     score: FONT_SIZES.xl,
     level: FONT_SIZES.sm,
   },

@@ -12,6 +12,11 @@ import { LinearGradient } from "expo-linear-gradient";
 import LottieView from "lottie-react-native";
 import CloseButton from "./buttons/CloseButton";
 import { BASE_COLORS, WORD_OF_DAY_GRADIENT } from "@/constant/colors";
+import {
+  POPPINS_FONT,
+  COMPONENT_FONT_SIZES,
+  FONT_SIZES,
+} from "@/constant/fontSizes";
 
 interface WordOfDayModalProps {
   visible: boolean;
@@ -80,7 +85,7 @@ const WordOfDayModal: React.FC<WordOfDayModalProps> = ({
             style={styles.gradientBackground}
           >
             {/* Close Button */}
-            <CloseButton size={17} onPress={onClose} />
+            <CloseButton size={14} onPress={onClose} />
 
             {/* Header Section */}
             <View style={styles.headerSection}>
@@ -190,6 +195,7 @@ const WordOfDayModal: React.FC<WordOfDayModalProps> = ({
     </Modal>
   );
 };
+
 const styles = StyleSheet.create({
   overlay: {
     flex: 1,
@@ -221,11 +227,11 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   headerTitle: {
-    fontSize: 20,
-    fontFamily: "Poppins-SemiBold",
+    fontSize: COMPONENT_FONT_SIZES.card.title,
+    fontFamily: POPPINS_FONT.semiBold,
     color: BASE_COLORS.white,
-
     textAlign: "center",
+    marginBottom: 5,
   },
   wordCard: {
     backgroundColor: "rgba(255, 255, 255, 0.12)",
@@ -244,16 +250,16 @@ const styles = StyleSheet.create({
     transform: [{ translateY: -30 }],
   },
   languageText: {
-    fontSize: 15,
-    fontFamily: "Poppins-SemiBold",
+    fontSize: COMPONENT_FONT_SIZES.card.subtitle,
+    fontFamily: POPPINS_FONT.semiBold,
     color: BASE_COLORS.white,
     textShadowColor: "rgba(0, 0, 0, 0.5)",
     textShadowOffset: { width: 0, height: 1 },
     textShadowRadius: 3,
   },
   wordText: {
-    fontSize: 26,
-    fontFamily: "Poppins-Bold",
+    fontSize: FONT_SIZES["4xl"],
+    fontFamily: POPPINS_FONT.semiBold,
     color: BASE_COLORS.white,
     textAlign: "center",
     letterSpacing: 0.5,
@@ -270,8 +276,8 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   translationText: {
-    fontSize: 20,
-    fontFamily: "Poppins-SemiBold",
+    fontSize: FONT_SIZES["3xl"],
+    fontFamily: POPPINS_FONT.semiBold,
     color: "rgba(255, 255, 255, 0.9)",
     textAlign: "center",
   },
@@ -283,8 +289,8 @@ const styles = StyleSheet.create({
     marginTop: 10,
   },
   pronunciationText: {
-    fontSize: 15,
-    fontFamily: "Poppins-SemiBold",
+    fontSize: COMPONENT_FONT_SIZES.card.subtitle,
+    fontFamily: POPPINS_FONT.semiBold,
     color: "rgba(255, 255, 255, 0.9)",
     textAlign: "center",
     letterSpacing: 0.5,
@@ -326,8 +332,8 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   audioLabelText: {
-    fontSize: 11,
-    fontFamily: "Poppins-Medium",
+    fontSize: COMPONENT_FONT_SIZES.card.description,
+    fontFamily: POPPINS_FONT.regular,
     color: "rgba(255, 255, 255, 0.6)",
     textAlign: "center",
   },
@@ -337,10 +343,11 @@ const styles = StyleSheet.create({
     marginTop: 8,
   },
   noteText: {
-    fontSize: 11,
-    fontFamily: "Poppins-Regular",
+    fontSize: COMPONENT_FONT_SIZES.card.description,
+    fontFamily: POPPINS_FONT.regular,
     color: "rgba(255, 255, 255, 0.7)",
     textAlign: "center",
   },
 });
+
 export default memo(WordOfDayModal);
