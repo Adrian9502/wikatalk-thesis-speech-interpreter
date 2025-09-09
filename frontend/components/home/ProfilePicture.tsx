@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { View, Image, TouchableOpacity, Text, StyleSheet } from "react-native";
 import { BASE_COLORS } from "@/constant/colors";
 import ProfilePictureModal from "@/components/accountDetails/ProfilePictureModal";
-import { COMPONENT_FONT_SIZES } from "@/constant/fontSizes";
+import { COMPONENT_FONT_SIZES, FONT_SIZES } from "@/constant/fontSizes";
 
 interface ProfilePictureProps {
   userData: any;
@@ -42,8 +42,8 @@ const ProfilePicture = React.memo(
               ]}
             >
               <Text style={styles.profileInitials}>
-                {userData?.fullName?.charAt(0) ||
-                  userData?.username?.charAt(0) ||
+                {userData?.fullName?.charAt(0)?.toUpperCase() ||
+                  userData?.username?.charAt(0)?.toUpperCase() ||
                   "U"}
               </Text>
             </View>
@@ -88,7 +88,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   profileInitials: {
-    fontSize: COMPONENT_FONT_SIZES.home.statsValue,
+    fontSize: FONT_SIZES["2xl"],
     fontFamily: "Poppins-SemiBold",
     color: BASE_COLORS.white,
   },
