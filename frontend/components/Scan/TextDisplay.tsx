@@ -1,4 +1,4 @@
-import React, { useRef, useState } from "react";
+import React, { useRef, useState, useEffect } from "react";
 import {
   View,
   Text,
@@ -64,7 +64,7 @@ const TextDisplay: React.FC<TextDisplayProps> = ({
   const originalValue = useRef(text);
 
   // Update the ref when text changes
-  React.useEffect(() => {
+  useEffect(() => {
     if (!editable) {
       originalValue.current = text;
     }
@@ -256,6 +256,7 @@ const TextDisplay: React.FC<TextDisplayProps> = ({
       <ConfidenceModal
         visible={confidenceModalVisible}
         language={language as string}
+        type="ocr"
         onClose={() => setConfidenceModalVisible(false)}
       />
     </View>
