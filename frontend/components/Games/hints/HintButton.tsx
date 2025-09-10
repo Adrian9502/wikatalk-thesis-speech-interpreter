@@ -8,6 +8,7 @@ import useCoinsStore from "@/store/games/useCoinsStore";
 
 // sound
 import { playSound } from "@/utils/playSound";
+import { COMPONENT_FONT_SIZES, POPPINS_FONT } from "@/constant/fontSizes";
 
 interface HintButtonProps {
   questionId: string;
@@ -197,7 +198,6 @@ const HintButton: React.FC<HintButtonProps> = ({
         </LinearGradient>
       </TouchableOpacity>
 
-      {/* UPDATED: Hints Used Indicator with dynamic max */}
       {hintsUsedCount > 0 && (
         <View style={styles.hintsUsedContainer}>
           <Text style={styles.hintsUsedText}>
@@ -257,8 +257,8 @@ const styles = StyleSheet.create({
   },
 
   buttonText: {
-    fontSize: 12,
-    fontFamily: "Poppins-Medium",
+    fontSize: COMPONENT_FONT_SIZES.button.medium,
+    fontFamily: POPPINS_FONT.medium,
     color: BASE_COLORS.white,
     textAlign: "center",
   },
@@ -276,7 +276,7 @@ const styles = StyleSheet.create({
   },
   hintsUsedText: {
     fontSize: 11,
-    fontFamily: "Poppins-Medium",
+    fontFamily: POPPINS_FONT.medium,
     color: "rgba(255, 255, 255, 0.7)",
   },
   hintsProgress: {
@@ -297,7 +297,7 @@ const styles = StyleSheet.create({
   errorText: {
     fontSize: 11,
     color: "#FF6B6B",
-    fontFamily: "Poppins-Medium",
+    fontFamily: POPPINS_FONT.medium,
     textAlign: "center",
     backgroundColor: "rgba(255, 107, 107, 0.1)",
     paddingHorizontal: 12,

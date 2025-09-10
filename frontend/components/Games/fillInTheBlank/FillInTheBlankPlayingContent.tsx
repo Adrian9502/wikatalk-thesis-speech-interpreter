@@ -345,7 +345,7 @@ const FillInTheBlankPlayingContent: React.FC<RenderPlayingContentProps> =
               {/* Left side: Letter hint display */}
               <View style={styles.letterHintContainer}>
                 <View style={styles.letterHintHeader}>
-                  <Text style={styles.letterHintLabel}>Hint:</Text>
+                  <Text style={styles.letterHintLabel}>Hint</Text>
                 </View>
                 <View style={styles.letterHintDisplay}>
                   <Text style={styles.letterHintText}>
@@ -513,7 +513,7 @@ const FillInTheBlankPlayingContent: React.FC<RenderPlayingContentProps> =
                 >
                   <Icon
                     name="activity"
-                    size={16}
+                    size={13}
                     color={
                       showHint ? BASE_COLORS.white : "rgba(255, 255, 255, 0.7)"
                     }
@@ -538,11 +538,11 @@ const FillInTheBlankPlayingContent: React.FC<RenderPlayingContentProps> =
                   activeOpacity={0.7}
                 >
                   {showTranslation ? (
-                    <EyeOff width={16} height={16} color={BASE_COLORS.white} />
+                    <EyeOff width={13} height={13} color={BASE_COLORS.white} />
                   ) : (
                     <Eye
-                      width={16}
-                      height={16}
+                      width={13}
+                      height={13}
                       color="rgba(255, 255, 255, 0.7)"
                     />
                   )}
@@ -573,7 +573,7 @@ const FillInTheBlankPlayingContent: React.FC<RenderPlayingContentProps> =
                   style={styles.helpCardGradient}
                 >
                   <View style={styles.helpCardHeader}>
-                    <Icon name="activity" size={18} color="#FFC107" />
+                    <Icon name="activity" size={13} color="#FFC107" />
                     <Text style={styles.helpCardTitle}>Hint</Text>
                   </View>
                   <Text style={styles.helpCardText}>
@@ -600,7 +600,7 @@ const FillInTheBlankPlayingContent: React.FC<RenderPlayingContentProps> =
                   style={styles.helpCardGradient}
                 >
                   <View style={styles.helpCardHeader}>
-                    <Eye width={18} height={18} color="#2196F3" />
+                    <Eye width={13} height={13} color="#2196F3" />
                     <Text style={styles.helpCardTitle}>Translation</Text>
                   </View>
                   <Text style={styles.helpCardText}>

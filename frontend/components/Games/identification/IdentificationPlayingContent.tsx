@@ -14,8 +14,8 @@ import styles from "@/styles/games/identification.styles";
 import gamesSharedStyles from "@/styles/gamesSharedStyles";
 import { safeTextRender } from "@/utils/textUtils";
 import LevelTitleHeader from "@/components/games/LevelTitleHeader";
-import HintButton from "@/components/games/hints/HintButton"; // NEW: Import HintButton
-import useHintStore from "@/store/games/useHintStore"; // NEW: Import hint store
+import HintButton from "@/components/games/hints/HintButton";
+import useHintStore from "@/store/games/useHintStore";
 
 interface IdentificationPlayingContentProps {
   difficulty: string;

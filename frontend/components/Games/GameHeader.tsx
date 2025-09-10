@@ -4,6 +4,11 @@ import { ArrowLeft } from "react-native-feather";
 import { BASE_COLORS } from "@/constant/colors";
 import { useNavigation } from "expo-router";
 import StatsContainer from "@/components/games/StatsContainer";
+import {
+  COMPONENT_FONT_SIZES,
+  FONT_SIZES,
+  POPPINS_FONT,
+} from "@/constant/fontSizes";
 
 interface RewardInfo {
   coins: number;
@@ -71,7 +76,7 @@ const GameHeader = ({
             disabled={disableBack}
             activeOpacity={0.7}
           >
-            <ArrowLeft width={20} height={20} color={BASE_COLORS.white} />
+            <ArrowLeft width={15} height={15} color={BASE_COLORS.white} />
           </TouchableOpacity>
         ) : (
           <View style={styles.placeholder} />
@@ -132,8 +137,8 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
   },
   title: {
-    fontSize: 17,
-    fontFamily: "Poppins-SemiBold",
+    fontSize: FONT_SIZES["3xl"],
+    fontFamily: POPPINS_FONT.semiBold,
     color: BASE_COLORS.white,
     letterSpacing: 0.7,
     textAlign: "center",

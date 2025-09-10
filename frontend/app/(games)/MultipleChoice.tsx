@@ -5,8 +5,6 @@ import React, {
   useRef,
   useState,
 } from "react";
-import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
-import { LinearGradient } from "expo-linear-gradient";
 import useGameStore from "@/store/games/useGameStore";
 import GameContainer from "@/components/games/GameContainer";
 import GamePlayingContent from "@/components/games/GamePlayingContent";
@@ -20,7 +18,7 @@ import { useTimerReset } from "@/hooks/games/useTimerReset";
 import { useAppStateProgress } from "@/hooks/games/useAppStateProgress";
 import useProgressStore from "@/store/games/useProgressStore";
 import useCoinsStore from "@/store/games/useCoinsStore";
-import useHintStore from "@/store/games/useHintStore"; // Keep for reset functionality
+import useHintStore from "@/store/games/useHintStore";
 
 interface MultipleChoiceProps {
   levelId: number;

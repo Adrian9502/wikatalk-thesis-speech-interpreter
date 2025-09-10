@@ -65,8 +65,6 @@ const StatsContainer: React.FC<StatsContainerProps> = ({
         </Animatable.View>
       )}
 
-      {/*  Center Section - Difficulty Badge */}
-
       {/* Right Section - User Balance */}
       {variant === "playing" && (
         <Animatable.View
@@ -88,18 +86,18 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     alignItems: "center",
     marginBottom: 8,
-    paddingHorizontal: 4, // Add padding for better spacing
+    paddingHorizontal: 4,
   },
   completedStatsContainer: {
     justifyContent: "center",
   },
 
-  // NEW: Section styles for better layout control
   timerSection: {
     flex: 1,
     flexDirection: "row",
     gap: 8,
-    alignItems: "flex-start",
+    alignItems: "center",
+    justifyContent: "center",
   },
   centerSection: {
     flex: 1,
@@ -110,7 +108,6 @@ const styles = StyleSheet.create({
     alignItems: "flex-end",
   },
 
-  // Timer container (simplified)
   timeContainer: {
     flexDirection: "row",
     alignItems: "center",
@@ -119,7 +116,7 @@ const styles = StyleSheet.create({
     paddingVertical: 6,
     borderWidth: 1,
     borderRadius: 20,
-    borderColor: "rgba(255, 255, 255, 0.12)",
+    borderColor: "rgba(255, 255, 255, 0.3)",
     minWidth: 100,
   },
 });

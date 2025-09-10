@@ -3,6 +3,7 @@ import { View, Text, StyleSheet } from "react-native";
 import { Clock } from "react-native-feather";
 import { BASE_COLORS } from "@/constant/colors";
 import useGameStore from "@/store/games/useGameStore";
+import { COMPONENT_FONT_SIZES, POPPINS_FONT } from "@/constant/fontSizes";
 
 interface TimerProps {
   isRunning: boolean;
@@ -123,7 +124,7 @@ const Timer: React.FC<TimerProps> = React.memo(
 
     return (
       <View style={styles.timerContainer}>
-        <Clock width={16} height={16} color={BASE_COLORS.white} />
+        <Clock width={14} height={14} color={BASE_COLORS.white} />
         <Text style={styles.timerText}>{displayTime}</Text>
       </View>
     );
@@ -138,9 +139,9 @@ const styles = StyleSheet.create({
   },
   timerText: {
     color: BASE_COLORS.white,
-    fontSize: 13,
-    fontFamily: "Poppins-Medium",
-    marginLeft: 6,
+    fontSize: COMPONENT_FONT_SIZES.card.subtitle,
+    fontFamily: POPPINS_FONT.medium,
+    marginLeft: 8,
   },
 });
 

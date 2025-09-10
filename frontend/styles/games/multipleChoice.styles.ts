@@ -1,5 +1,6 @@
 import { StyleSheet } from "react-native";
 import { BASE_COLORS } from "@/constant/colors";
+import { COMPONENT_FONT_SIZES, POPPINS_FONT } from "@/constant/fontSizes";
 
 export default StyleSheet.create({
   // Enhanced Options
@@ -14,8 +15,8 @@ export default StyleSheet.create({
     paddingHorizontal: 4,
   },
   optionsTitle: {
-    fontSize: 14,
-    fontFamily: "Poppins-Medium",
+    fontSize: COMPONENT_FONT_SIZES.card.subtitle,
+    fontFamily: POPPINS_FONT.medium,
     color: "rgba(255, 255, 255, 0.8)",
   },
   optionsIndicator: {
@@ -50,16 +51,16 @@ export default StyleSheet.create({
     width: 40,
     height: 40,
     borderRadius: 20,
-    backgroundColor: "rgba(255, 255, 255, 0.15)",
+    backgroundColor: "rgba(255, 255, 255, 0.10)",
     justifyContent: "center",
     alignItems: "center",
     marginRight: 16,
-    borderWidth: 2,
-    borderColor: "rgba(255, 255, 255, 0.2)",
+    borderWidth: 1,
+    borderColor: "rgba(255, 255, 255, 0.4)",
   },
   optionLetterText: {
-    fontSize: 15,
-    fontFamily: "Poppins-Medium",
+    fontSize: COMPONENT_FONT_SIZES.card.title,
+    fontFamily: POPPINS_FONT.medium,
     color: BASE_COLORS.white,
   },
   optionContent: {
@@ -67,8 +68,8 @@ export default StyleSheet.create({
     paddingRight: 16,
   },
   optionText: {
-    fontSize: 14,
-    fontFamily: "Poppins-Medium",
+    fontSize: COMPONENT_FONT_SIZES.button.medium,
+    fontFamily: POPPINS_FONT.medium,
     color: BASE_COLORS.white,
     lineHeight: 22,
   },

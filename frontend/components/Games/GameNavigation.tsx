@@ -31,6 +31,7 @@ import useGameStore from "@/store/games/useGameStore";
 import useProgressStore from "@/store/games/useProgressStore";
 import { useSplashStore } from "@/store/useSplashStore";
 import LevelInfoModal from "@/components/games/levels/LevelInfoModal";
+import { COMPONENT_FONT_SIZES, POPPINS_FONT } from "@/constant/fontSizes";
 
 const { width: screenWidth } = Dimensions.get("window");
 
@@ -734,17 +735,18 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   primaryActionTitle: {
-    fontSize: 14,
-    fontFamily: "Poppins-SemiBold",
+    fontSize: COMPONENT_FONT_SIZES.card.title,
+    fontFamily: POPPINS_FONT.semiBold,
     color: BASE_COLORS.white,
   },
   primaryActionSubtitle: {
-    fontSize: 12,
-    fontFamily: "Poppins-Medium",
-    color: "rgba(255, 255, 255, 0.85)",
+    fontSize: COMPONENT_FONT_SIZES.card.subtitle,
+    fontFamily: POPPINS_FONT.medium,
+    color: BASE_COLORS.white,
+    opacity: 0.8,
   },
   disabledText: {
-    color: "rgba(255, 255, 255, 0.5)",
+    opacity: 0.5,
   },
 
   // Quick Navigation
@@ -769,13 +771,12 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   quickNavText: {
-    fontSize: 12,
-    fontFamily: "Poppins-Medium",
+    fontSize: COMPONENT_FONT_SIZES.card.subtitle,
+    fontFamily: POPPINS_FONT.medium,
     color: BASE_COLORS.white,
   },
 
   // Game Modes
-
   gameModesHeader: {
     flexDirection: "row",
     alignItems: "center",
@@ -784,8 +785,8 @@ const styles = StyleSheet.create({
     gap: 6,
   },
   gameModesTitle: {
-    fontSize: 15,
-    fontFamily: "Poppins-SemiBold",
+    fontSize: COMPONENT_FONT_SIZES.card.title,
+    fontFamily: POPPINS_FONT.medium,
     color: BASE_COLORS.white,
   },
   gameModesGrid: {
@@ -798,7 +799,7 @@ const styles = StyleSheet.create({
     overflow: "hidden",
   },
   gameModeGradient: {
-    paddingVertical: 8,
+    paddingVertical: 12,
     paddingHorizontal: 16,
     alignItems: "center",
     borderRadius: 20,
@@ -816,16 +817,17 @@ const styles = StyleSheet.create({
     borderColor: "rgba(255, 255, 255, 0.2)",
   },
   gameModeTitle: {
-    fontSize: 12,
-    fontFamily: "Poppins-Medium",
+    fontSize: COMPONENT_FONT_SIZES.card.subtitle,
+    fontFamily: POPPINS_FONT.medium,
     color: BASE_COLORS.white,
     textAlign: "center",
     lineHeight: 14,
   },
   gameModeSubtitle: {
-    fontSize: 10,
-    fontFamily: "Poppins-Regular",
-    color: "rgba(255, 255, 255, 0.60)",
+    fontSize: COMPONENT_FONT_SIZES.card.caption,
+    fontFamily: POPPINS_FONT.regular,
+    color: BASE_COLORS.white,
+    opacity: 0.6,
     textAlign: "center",
   },
 });

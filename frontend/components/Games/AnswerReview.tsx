@@ -23,6 +23,11 @@ import { useSplashStore } from "@/store/useSplashStore";
 
 // sound
 import { playSound } from "@/utils/playSound";
+import {
+  COMPONENT_FONT_SIZES,
+  FONT_SIZES,
+  POPPINS_FONT,
+} from "@/constant/fontSizes";
 
 const { width: screenWidth } = Dimensions.get("window");
 
@@ -534,15 +539,15 @@ const styles = StyleSheet.create({
     borderColor: "rgba(255, 255, 255, 0.4)",
   },
   heroTitle: {
-    fontSize: 22,
-    fontFamily: "Poppins-Bold",
+    fontSize: FONT_SIZES["4xl"],
+    fontFamily: POPPINS_FONT.bold,
     color: BASE_COLORS.white,
     marginBottom: 8,
     textAlign: "center",
   },
   heroMessage: {
-    fontSize: 14,
-    fontFamily: "Poppins-Medium",
+    fontSize: COMPONENT_FONT_SIZES.card.subtitle,
+    fontFamily: POPPINS_FONT.medium,
     color: "rgba(255, 255, 255, 0.9)",
     textAlign: "center",
     lineHeight: 24,
@@ -579,16 +584,14 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   resetSuccessIndicator: {
-    backgroundColor: "rgba(63, 212, 68, 0.75)",
-    paddingHorizontal: 20,
-    paddingVertical: 8,
+    backgroundColor: BASE_COLORS.success,
+    paddingHorizontal: 16,
+    paddingVertical: 6,
     borderRadius: 20,
-    borderColor: "rgba(62, 223, 67, 1)",
-    borderWidth: 1,
   },
   resetSuccessText: {
-    fontSize: 12,
-    fontFamily: "Poppins-SemiBold",
+    fontSize: COMPONENT_FONT_SIZES.card.subtitle,
+    fontFamily: POPPINS_FONT.medium,
     color: BASE_COLORS.white,
     textAlign: "center",
     letterSpacing: 0.5,
@@ -626,22 +629,22 @@ const styles = StyleSheet.create({
     minHeight: 135,
   },
   statsLabel: {
-    fontSize: 12,
-    fontFamily: "Poppins-Medium",
+    fontSize: COMPONENT_FONT_SIZES.card.description,
+    fontFamily: POPPINS_FONT.medium,
     color: "rgba(255, 255, 255, 0.8)",
     marginBottom: 4,
   },
   statsValue: {
-    fontSize: 15,
-    fontFamily: "Poppins-SemiBold",
+    fontSize: COMPONENT_FONT_SIZES.card.title,
+    fontFamily: POPPINS_FONT.semiBold,
     color: BASE_COLORS.white,
     textAlign: "center",
   },
   levelTitleLabel: {
-    fontFamily: "Poppins-Bold",
+    fontFamily: POPPINS_FONT.bold,
     color: TITLE_COLORS.customYellow,
     textAlign: "center",
-    fontSize: 15,
+    fontSize: COMPONENT_FONT_SIZES.card.title,
   },
   resetSection: {
     position: "absolute",
@@ -685,8 +688,8 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   rewardTitle: {
-    fontSize: 13,
-    fontFamily: "Poppins-Medium",
+    fontSize: COMPONENT_FONT_SIZES.card.subtitle,
+    fontFamily: POPPINS_FONT.medium,
     color: BASE_COLORS.white,
     textAlign: "center",
   },
@@ -710,16 +713,16 @@ const styles = StyleSheet.create({
     height: 18,
   },
   rewardCoinsText: {
-    fontSize: 16,
-    fontFamily: "Poppins-SemiBold",
+    fontSize: COMPONENT_FONT_SIZES.card.title,
+    fontFamily: POPPINS_FONT.semiBold,
     color: BASE_COLORS.white,
     textShadowColor: "rgba(0, 0, 0, 0.3)",
     textShadowOffset: { width: 0, height: 2 },
     textShadowRadius: 4,
   },
   rewardSubtitle: {
-    fontSize: 11,
-    fontFamily: "Poppins-Regular",
+    fontSize: COMPONENT_FONT_SIZES.card.description,
+    fontFamily: POPPINS_FONT.regular,
     color: "rgba(255, 255, 255, 0.95)",
     letterSpacing: 0.3,
     textAlign: "center",
@@ -734,11 +737,10 @@ const styles = StyleSheet.create({
     backgroundColor: "rgba(255, 255, 255, 0.15)",
   },
   sectionTitleText: {
-    fontSize: 14,
-    fontFamily: "Poppins-SemiBold",
+    fontSize: COMPONENT_FONT_SIZES.card.title,
+    fontFamily: POPPINS_FONT.semiBold,
     color: BASE_COLORS.white,
     textAlign: "center",
-    letterSpacing: 0.5,
   },
   combinedCardContainer: {
     alignSelf: "center",
@@ -794,13 +796,13 @@ const styles = StyleSheet.create({
     color: BASE_COLORS.white,
   },
   cardTitle: {
-    fontSize: 14,
-    fontFamily: "Poppins-SemiBold",
+    fontSize: COMPONENT_FONT_SIZES.card.subtitle,
+    fontFamily: POPPINS_FONT.semiBold,
     color: BASE_COLORS.white,
   },
   cardContent: {
-    fontSize: 13,
-    fontFamily: "Poppins-Medium",
+    fontSize: COMPONENT_FONT_SIZES.card.title,
+    fontFamily: POPPINS_FONT.medium,
     color: "rgba(255, 255, 255, 0.9)",
     lineHeight: 22,
     textAlign: "center",

@@ -123,7 +123,7 @@ export const modalSharedStyles = StyleSheet.create({
     borderRadius: 20,
   },
   difficultyText: {
-    fontSize: COMPONENT_FONT_SIZES.card.subtitle,
+    fontSize: COMPONENT_FONT_SIZES.card.description,
     fontFamily: POPPINS_FONT.medium,
     color: BASE_COLORS.white,
   },

@@ -1,5 +1,10 @@
 import { StyleSheet, Dimensions } from "react-native";
 import { BASE_COLORS, ICON_COLORS } from "@/constant/colors";
+import {
+  COMPONENT_FONT_SIZES,
+  FONT_SIZES,
+  POPPINS_FONT,
+} from "@/constant/fontSizes";
 
 const { width: screenWidth } = Dimensions.get("window");
 const isSmallScreen = screenWidth < 380;
@@ -19,8 +24,8 @@ export default StyleSheet.create({
     gap: 12,
   },
   attemptsLabel: {
-    fontSize: 13,
-    fontFamily: "Poppins-Medium",
+    fontSize: COMPONENT_FONT_SIZES.card.subtitle,
+    fontFamily: POPPINS_FONT.medium,
     color: "rgba(255, 255, 255, 0.8)",
   },
   heartsContainer: {
@@ -28,10 +33,10 @@ export default StyleSheet.create({
     gap: 4,
   },
   heartIcon: {
-    fontSize: 16,
+    fontSize: COMPONENT_FONT_SIZES.card.subtitle,
   },
   heartActive: {
-    color: "#FF6B6B",
+    color: BASE_COLORS.danger,
   },
   heartInactive: {
     color: "rgba(255, 255, 255, 0.3)",
@@ -50,7 +55,7 @@ export default StyleSheet.create({
     minWidth: "60%",
     flex: 1,
     maxWidth: "80%",
-    padding: 12,
+    padding: 15,
     borderRadius: 20,
     borderWidth: 1,
     backgroundColor: "rgba(255, 255, 255, 0.15)",
@@ -60,8 +65,11 @@ export default StyleSheet.create({
     marginBottom: 8,
   },
   letterHintLabel: {
-    fontSize: 12,
-    fontFamily: "Poppins-SemiBold",
+    fontSize: COMPONENT_FONT_SIZES.card.title,
+    letterSpacing: 1,
+    fontFamily: POPPINS_FONT.semiBold,
+    textTransform: "uppercase",
+    textAlign: "center",
     color: "rgba(255, 255, 255, 0.9)",
   },
   letterHintDisplay: {
@@ -73,8 +81,8 @@ export default StyleSheet.create({
     borderColor: "rgba(255, 215, 0, 0.3)",
   },
   letterHintText: {
-    fontSize: 15,
-    fontFamily: "Poppins-Bold",
+    fontSize: FONT_SIZES["2xl"],
+    fontFamily: POPPINS_FONT.bold,
     color: ICON_COLORS.brightYellow,
     textAlign: "center",
     letterSpacing: 2,
@@ -95,31 +103,30 @@ export default StyleSheet.create({
   },
   inputLabel: {
     fontSize: 14,
-    fontFamily: "Poppins-Medium",
+    fontFamily: POPPINS_FONT.medium,
     color: "rgba(255, 255, 255, 0.8)",
   },
   inputWrapper: {
     flexDirection: "row",
     alignItems: "center",
     gap: 12,
-    paddingHorizontal: 20,
   },
   inputContainer: {
     flex: 1,
     flexDirection: "row",
     alignItems: "center",
     borderRadius: 20,
-    backgroundColor: "rgba(255, 255, 255, 0.15)",
+    backgroundColor: "rgba(255, 255, 255, 0.10)",
     borderWidth: 1,
-    borderColor: "rgba(255, 255, 255, 0.4)",
+    borderColor: "rgba(255, 255, 255, 0.3)",
     paddingHorizontal: isSmallScreen ? 10 : 12,
     minHeight: 34,
     minWidth: isSmallScreen ? 200 : 250,
   },
   input: {
     flex: 1,
-    fontSize: isSmallScreen ? 13 : 14,
-    fontFamily: "Poppins-Medium",
+    fontSize: COMPONENT_FONT_SIZES.navigation.title,
+    fontFamily: POPPINS_FONT.regular,
     color: BASE_COLORS.white,
     paddingVertical: 10,
     paddingHorizontal: 15,
@@ -128,7 +135,7 @@ export default StyleSheet.create({
   clearButton: {
     padding: 4,
     borderRadius: 12,
-    backgroundColor: "rgba(255, 255, 255, 0.1)",
+    backgroundColor: "rgba(255, 255, 255, 0.2)",
   },
   submitButton: {
     borderRadius: 20,
@@ -144,13 +151,13 @@ export default StyleSheet.create({
   },
   submitGradient: {
     paddingHorizontal: isSmallScreen ? 20 : 24,
-    paddingVertical: isSmallScreen ? 10 : 12,
+    paddingVertical: isSmallScreen ? 6 : 8,
     alignItems: "center",
     minWidth: isSmallScreen ? 80 : 100,
   },
   submitButtonText: {
-    fontSize: isSmallScreen ? 12 : 14,
-    fontFamily: "Poppins-SemiBold",
+    fontSize: COMPONENT_FONT_SIZES.button.medium,
+    fontFamily: POPPINS_FONT.medium,
     color: BASE_COLORS.white,
   },
   submitButtonTextDisabled: {
@@ -181,14 +188,14 @@ export default StyleSheet.create({
     flex: 1,
   },
   feedbackTitle: {
-    fontSize: 16,
-    fontFamily: "Poppins-SemiBold",
+    fontSize: COMPONENT_FONT_SIZES.card.title,
+    fontFamily: POPPINS_FONT.semiBold,
     color: BASE_COLORS.white,
     marginBottom: 2,
   },
   feedbackText: {
-    fontSize: 13,
-    fontFamily: "Poppins-Regular",
+    fontSize: COMPONENT_FONT_SIZES.card.subtitle,
+    fontFamily: POPPINS_FONT.regular,
     color: "rgba(255, 255, 255, 0.9)",
   },
 
@@ -197,8 +204,8 @@ export default StyleSheet.create({
     marginBottom: 20,
   },
   helpTitle: {
-    fontSize: 12,
-    fontFamily: "Poppins-Medium",
+    fontSize: COMPONENT_FONT_SIZES.card.subtitle,
+    fontFamily: POPPINS_FONT.medium,
     color: "rgba(255, 255, 255, 0.8)",
     textAlign: "center",
     marginBottom: 12,
@@ -225,8 +232,8 @@ export default StyleSheet.create({
     borderColor: "rgba(255, 255, 255, 0.4)",
   },
   helpButtonText: {
-    fontSize: 12,
-    fontFamily: "Poppins-Medium",
+    fontSize: COMPONENT_FONT_SIZES.card.description,
+    fontFamily: POPPINS_FONT.regular,
     color: "rgba(255, 255, 255, 0.7)",
   },
   helpButtonTextActive: {
@@ -235,12 +242,11 @@ export default StyleSheet.create({
 
   // Help Cards
   helpCard: {
-    marginBottom: 16,
+    marginBottom: 20,
   },
   helpCardGradient: {
     borderRadius: 20,
-    paddingVertical: 12,
-    paddingHorizontal: 16,
+    paddingVertical: 8,
     marginHorizontal: 20,
   },
   helpCardHeader: {
@@ -251,13 +257,13 @@ export default StyleSheet.create({
     gap: 8,
   },
   helpCardTitle: {
-    fontSize: 13,
-    fontFamily: "Poppins-SemiBold",
+    fontSize: COMPONENT_FONT_SIZES.card.subtitle,
+    fontFamily: POPPINS_FONT.semiBold,
     color: BASE_COLORS.white,
   },
   helpCardText: {
-    fontSize: 12,
-    fontFamily: "Poppins-Regular",
+    fontSize: COMPONENT_FONT_SIZES.card.description,
+    fontFamily: POPPINS_FONT.regular,
     color: "rgba(255, 255, 255, 0.9)",
     textAlign: "center",
     lineHeight: 18,
@@ -271,7 +277,7 @@ export default StyleSheet.create({
   },
   loadingText: {
     fontSize: 14,
-    fontFamily: "Poppins-Medium",
+    fontFamily: POPPINS_FONT.medium,
     color: "rgba(255, 255, 255, 0.7)",
     marginTop: 12,
   },

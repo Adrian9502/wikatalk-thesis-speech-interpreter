@@ -1,5 +1,6 @@
 import { StyleSheet } from "react-native";
 import { BASE_COLORS } from "@/constant/colors";
+import { FONT_SIZES, POPPINS_FONT } from "@/constant/fontSizes";
 
 const gameSharedStyles = StyleSheet.create({
   // Base container styles
@@ -36,8 +37,8 @@ const gameSharedStyles = StyleSheet.create({
   },
 
   questionText: {
-    fontSize: 17,
-    fontFamily: "Poppins-SemiBold",
+    fontSize: FONT_SIZES["3xl"],
+    fontFamily: POPPINS_FONT.semiBold,
     color: BASE_COLORS.white,
     textAlign: "center",
     marginBottom: 10,
@@ -52,7 +53,7 @@ const gameSharedStyles = StyleSheet.create({
     position: "relative",
     overflow: "hidden",
     borderWidth: 1,
-    borderColor: "rgba(255, 255, 255, 0.1)",
+    borderColor: "rgba(255, 255, 255, 0.4)",
     minHeight: 60,
   },
   correctOption: {

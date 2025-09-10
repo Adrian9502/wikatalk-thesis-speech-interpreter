@@ -35,7 +35,7 @@ const styles = StyleSheet.create({
     borderColor: "rgba(255, 255, 255, 0.4)",
   },
   focusAreaText: {
-    fontSize: COMPONENT_FONT_SIZES.card.subtitle,
+    fontSize: COMPONENT_FONT_SIZES.card.description,
     fontFamily: POPPINS_FONT.medium,
     color: BASE_COLORS.white,
   },

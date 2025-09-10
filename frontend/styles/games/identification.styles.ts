@@ -1,5 +1,6 @@
 import { StyleSheet } from "react-native";
 import { BASE_COLORS } from "@/constant/colors";
+import { COMPONENT_FONT_SIZES, POPPINS_FONT } from "@/constant/fontSizes";
 
 export default StyleSheet.create({
   scrollContainer: {
@@ -13,15 +14,16 @@ export default StyleSheet.create({
     marginBottom: 16,
   },
   instructionsTitle: {
-    fontSize: 14,
-    fontFamily: "Poppins-Medium",
-    color: "rgba(255, 255, 255, 0.9)",
+    fontSize: COMPONENT_FONT_SIZES.card.subtitle,
+    fontFamily: POPPINS_FONT.medium,
+    color: BASE_COLORS.white,
     marginBottom: 4,
   },
   instructionsText: {
-    fontSize: 12,
-    fontFamily: "Poppins-Regular",
-    color: "rgba(255, 255, 255, 0.7)",
+    fontSize: COMPONENT_FONT_SIZES.card.description,
+    fontFamily: POPPINS_FONT.regular,
+    color: BASE_COLORS.white,
+    opacity: 0.8,
     textAlign: "center",
     marginBottom: 16,
   },
@@ -57,23 +59,11 @@ export default StyleSheet.create({
   selectedWordCard: {
     borderColor: "rgb(255, 255, 255)",
   },
-  incorrectWordCard: {
-    borderColor: "#F44336",
-    shadowColor: "#F44336",
-    shadowOpacity: 0.3,
-  },
-  wordGradient: {
-    flexDirection: "row",
-    alignItems: "center",
-    padding: 12,
-    minHeight: 40,
-    position: "relative",
-  },
 
   wordNumber: {
-    width: 28,
-    height: 28,
-    borderRadius: 14,
+    width: 30,
+    height: 30,
+    borderRadius: 20,
     backgroundColor: "rgba(255, 255, 255, 0.15)",
     justifyContent: "center",
     alignItems: "center",
@@ -82,8 +72,8 @@ export default StyleSheet.create({
     borderColor: "rgba(255, 255, 255, 0.2)",
   },
   wordNumberText: {
-    fontSize: 12,
-    fontFamily: "Poppins-Bold",
+    fontSize: COMPONENT_FONT_SIZES.card.subtitle,
+    fontFamily: POPPINS_FONT.medium,
     color: BASE_COLORS.white,
   },
 
@@ -92,9 +82,10 @@ export default StyleSheet.create({
     paddingRight: 8,
   },
   wordText: {
-    fontSize: 14,
-    fontFamily: "Poppins-Medium",
+    fontSize: COMPONENT_FONT_SIZES.button.medium,
+    fontFamily: POPPINS_FONT.medium,
     color: BASE_COLORS.white,
+    lineHeight: 22,
   },
 
   resultIcon: {
@@ -122,8 +113,8 @@ export default StyleSheet.create({
     paddingVertical: 40,
   },
   noOptionsText: {
-    fontSize: 14,
-    fontFamily: "Poppins-Medium",
+    fontSize: COMPONENT_FONT_SIZES.card.title,
+    fontFamily: POPPINS_FONT.medium,
     color: "rgba(255, 255, 255, 0.6)",
     textAlign: "center",
   },
@@ -137,8 +128,8 @@ export default StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
-    paddingHorizontal: 16,
-    paddingVertical: 10,
+    paddingHorizontal: 20,
+    paddingVertical: 8,
     borderRadius: 20,
     backgroundColor: "rgba(255, 255, 255, 0.1)",
     borderWidth: 1,
@@ -147,12 +138,12 @@ export default StyleSheet.create({
     marginVertical: 12,
   },
   translationButtonActive: {
-    backgroundColor: "rgba(255, 255, 255, 0.2)",
-    borderColor: "rgba(255, 255, 255, 0.4)",
+    backgroundColor: "rgba(255, 255, 255, 0.15)",
+    borderColor: "rgba(255, 255, 255, 0.3)",
   },
   translationButtonText: {
-    fontSize: 13,
-    fontFamily: "Poppins-Medium",
+    fontSize: COMPONENT_FONT_SIZES.button.small,
+    fontFamily: POPPINS_FONT.medium,
     color: "rgba(255, 255, 255, 0.7)",
   },
   translationButtonTextActive: {
@@ -166,7 +157,7 @@ export default StyleSheet.create({
   translationCardGradient: {
     borderRadius: 20,
     paddingVertical: 12,
-    paddingHorizontal: 16,
+    paddingHorizontal: 24,
   },
   translationCardHeader: {
     flexDirection: "row",
@@ -176,14 +167,14 @@ export default StyleSheet.create({
     gap: 8,
   },
   translationCardTitle: {
-    fontSize: 13,
-    fontFamily: "Poppins-SemiBold",
+    fontSize: COMPONENT_FONT_SIZES.card.title,
+    fontFamily: POPPINS_FONT.semiBold,
     color: BASE_COLORS.white,
   },
   translationCardText: {
-    fontSize: 12,
-    fontFamily: "Poppins-Regular",
-    color: "rgba(255, 255, 255, 0.9)",
+    fontSize: COMPONENT_FONT_SIZES.card.subtitle,
+    fontFamily: POPPINS_FONT.regular,
+    color: BASE_COLORS.white,
     textAlign: "center",
     lineHeight: 20,
   },

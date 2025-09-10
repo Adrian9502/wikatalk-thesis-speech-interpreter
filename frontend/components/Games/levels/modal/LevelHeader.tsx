@@ -49,8 +49,8 @@ const LevelHeader: React.FC<LevelHeaderProps> = ({
               .map((_, index) => (
                 <Star
                   key={index}
-                  width={14}
-                  height={14}
+                  width={13}
+                  height={13}
                   fill={
                     index < starCount ? ICON_COLORS.brightYellow : "transparent"
                   }
