@@ -5,13 +5,13 @@ import Feather from "react-native-vector-icons/Feather";
 export const renderFocusIcon = (focusArea: string = "vocabulary") => {
   switch (focusArea.toLowerCase()) {
     case "grammar":
-      return <Feather name="type" size={17} color={BASE_COLORS.white} />;
+      return <Feather name="type" size={14} color={BASE_COLORS.white} />;
     case "vocabulary":
-      return <Feather name="book-open" size={17} color={BASE_COLORS.white} />;
+      return <Feather name="book-open" size={14} color={BASE_COLORS.white} />;
     case "pronunciation":
-      return <Feather name="volume-2" size={17} color={BASE_COLORS.white} />;
+      return <Feather name="volume-2" size={14} color={BASE_COLORS.white} />;
     default:
-      return <Feather name="book-open" size={18} color={BASE_COLORS.white} />;
+      return <Feather name="book-open" size={14} color={BASE_COLORS.white} />;
   }
 };
 

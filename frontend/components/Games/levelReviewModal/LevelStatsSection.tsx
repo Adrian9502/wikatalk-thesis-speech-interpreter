@@ -1,9 +1,11 @@
 import React from "react";
-import { View, Text, StyleSheet, ActivityIndicator } from "react-native";
-import { Clock, Calendar, Target, Award } from "react-native-feather";
+import { View, Text, StyleSheet, Dimensions } from "react-native";
+
 import { formatTime } from "@/utils/gameUtils";
 import { BASE_COLORS } from "@/constant/colors";
-
+import { COMPONENT_FONT_SIZES, POPPINS_FONT } from "@/constant/fontSizes";
+const { width: screenWidth } = Dimensions.get("window");
+const isSmallScreen = screenWidth < 350; // Adjust threshold as needed
 interface CompletedLevelDetails {
   question: string;
   answer: string;
@@ -28,7 +30,7 @@ const LevelStatsSection: React.FC<LevelStatsSectionProps> = ({ details }) => {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Level Details</Text>
+      <Text style={styles.title}>Level Stats</Text>
       {/* First Row - Time and Date */}
       <View style={styles.statsRow}>
         {/* Time spent */}
@@ -84,24 +86,24 @@ const styles = StyleSheet.create({
     paddingHorizontal: 4,
   },
   title: {
-    fontSize: 14,
-    fontFamily: "Poppins-Medium",
+    fontSize: COMPONENT_FONT_SIZES.card.subtitle,
+    fontFamily: POPPINS_FONT.medium,
     color: BASE_COLORS.white,
-    lineHeight: 22,
-    marginBottom: 16,
+    marginBottom: 8,
   },
   statsRow: {
     flexDirection: "row",
     flexWrap: "wrap",
-    justifyContent: "space-between",
+    justifyContent: isSmallScreen ? "center" : "space-between",
     marginBottom: 16,
   },
   statItem: {
-    flexBasis: "48%",
+    flexBasis: isSmallScreen ? "100%" : "48%",
+    marginBottom: isSmallScreen ? 8 : 0,
   },
   statLabel: {
-    fontSize: 11,
-    fontFamily: "Poppins-Regular",
+    fontSize: COMPONENT_FONT_SIZES.card.caption,
+    fontFamily: POPPINS_FONT.regular,
     color: "rgba(255, 255, 255,0.9)",
     textAlign: "center",
     letterSpacing: 0.3,
@@ -109,8 +111,8 @@ const styles = StyleSheet.create({
   statBox: {
     width: "100%",
     borderWidth: 1,
-    borderColor: "rgba(255, 255, 255, 0.2)",
-    backgroundColor: "rgba(255, 255, 255, 0.1)",
+    borderColor: "rgba(255, 255, 255, 0.4)",
+    backgroundColor: "rgba(255, 255, 255, 0.15)",
     borderRadius: 20,
     padding: 8,
     alignItems: "center",
@@ -118,8 +120,8 @@ const styles = StyleSheet.create({
     minHeight: 50,
   },
   statValue: {
-    fontSize: 13,
-    fontFamily: "Poppins-Medium",
+    fontSize: COMPONENT_FONT_SIZES.card.subtitle,
+    fontFamily: POPPINS_FONT.medium,
     color: BASE_COLORS.white,
     marginTop: 6,
     textAlign: "center",

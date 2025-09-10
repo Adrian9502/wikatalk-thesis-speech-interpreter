@@ -10,8 +10,8 @@ import {
   TextStyle,
   ImageStyle,
 } from "react-native";
-import { RefreshCw } from "react-native-feather";
 import { BASE_COLORS, ICON_COLORS } from "@/constant/colors";
+import { COMPONENT_FONT_SIZES, POPPINS_FONT } from "@/constant/fontSizes";
 
 interface ResetButtonProps {
   // Core functionality
@@ -122,14 +122,8 @@ const ResetButton: React.FC<ResetButtonProps> = ({
         disabled={disabled || isLoading}
         activeOpacity={0.8}
       >
-        {isLoading ? (
+        {isLoading && (
           <ActivityIndicator size="small" color={BASE_COLORS.white} />
-        ) : (
-          <RefreshCw
-            width={getIconSize()}
-            height={getIconSize()}
-            color={BASE_COLORS.white}
-          />
         )}
         <Text style={getTextStyles()}>🪙 {cost}</Text>
       </TouchableOpacity>
@@ -143,14 +137,8 @@ const ResetButton: React.FC<ResetButtonProps> = ({
       onPress={onPress}
       disabled={disabled || isLoading}
     >
-      {isLoading ? (
+      {isLoading && (
         <ActivityIndicator size="small" color={BASE_COLORS.white} />
-      ) : (
-        <RefreshCw
-          width={getIconSize()}
-          height={getIconSize()}
-          color={BASE_COLORS.white}
-        />
       )}
       <View style={styles.contentContainer}>
         {showCostLabel && <Text style={getTextStyles()}>{costLabel}</Text>}
@@ -173,7 +161,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "center",
     alignItems: "center",
-    backgroundColor: "rgba(245, 47, 47, 0.9)",
+    backgroundColor: BASE_COLORS.danger,
     borderRadius: 20,
     borderWidth: 1,
     borderColor: "rgba(255, 255, 255, 0.3)",
@@ -216,8 +204,8 @@ const styles = StyleSheet.create({
 
   // Text styles
   baseText: {
-    fontSize: 12,
-    fontFamily: "Poppins-Medium",
+    fontSize: COMPONENT_FONT_SIZES.card.subtitle,
+    fontFamily: POPPINS_FONT.medium,
     color: BASE_COLORS.white,
   } as TextStyle,
 
@@ -227,23 +215,23 @@ const styles = StyleSheet.create({
 
   // Cost styles
   baseCost: {
-    fontSize: 12,
-    fontFamily: "Poppins-SemiBold",
+    fontSize: COMPONENT_FONT_SIZES.card.subtitle,
+    fontFamily: POPPINS_FONT.semiBold,
     color: ICON_COLORS.brightYellow,
   } as TextStyle,
 
   mediumCost: {
-    fontSize: 13,
+    fontSize: COMPONENT_FONT_SIZES.card.subtitle,
   } as TextStyle,
 
   coinImage: {
-    width: 15,
-    height: 15,
+    width: 13,
+    height: 13,
   } as ImageStyle,
 
   mediumCoinImage: {
-    width: 16,
-    height: 16,
+    width: 14,
+    height: 14,
   } as ImageStyle,
 });
 

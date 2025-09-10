@@ -1,4 +1,9 @@
 import { BASE_COLORS } from "@/constant/colors";
+import {
+  COMPONENT_FONT_SIZES,
+  FONT_SIZES,
+  POPPINS_FONT,
+} from "@/constant/fontSizes";
 import { StyleSheet } from "react-native";
 
 export const modalSharedStyles = StyleSheet.create({
@@ -55,43 +60,42 @@ export const modalSharedStyles = StyleSheet.create({
   },
   levelNumberContainer: {
     borderRadius: 20,
-    paddingVertical: 7,
+    paddingVertical: 4,
     paddingHorizontal: 18,
     flex: 0,
-    backgroundColor: "rgba(255, 255, 255, 0.25)",
+    backgroundColor: "rgba(255, 255, 255, 0.15)",
+    borderWidth: 1,
+    borderColor: "rgba(255, 255, 255, 0.4)",
     justifyContent: "center",
     alignItems: "center",
-    marginBottom: 8,
+    marginBottom: 16,
   },
   levelNumber: {
-    fontSize: 15,
-
+    fontSize: COMPONENT_FONT_SIZES.card.title,
     textShadowColor: "rgba(0, 0, 0, 0.5)",
     textShadowOffset: { width: 0, height: 1 },
     textShadowRadius: 3,
-    fontFamily: "Poppins-Bold",
+    fontFamily: POPPINS_FONT.bold,
     color: BASE_COLORS.white,
   },
   levelTitle: {
-    fontSize: 19,
-    fontFamily: "Poppins-Bold",
+    fontSize: FONT_SIZES["3xl"],
+    fontFamily: POPPINS_FONT.bold,
     color: BASE_COLORS.white,
     textShadowColor: "rgba(0, 0, 0, 0.5)",
     textShadowOffset: { width: 0, height: 1 },
     textShadowRadius: 3,
     textAlign: "center",
-    marginBottom: 8,
+    marginBottom: 12,
   },
 
   // Badges
   completedBadge: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "rgba(63, 212, 68, 0.75)",
-    borderColor: "rgba(62, 223, 67, 1)",
-    borderWidth: 1,
-    paddingVertical: 5,
-    paddingHorizontal: 10,
+    backgroundColor: BASE_COLORS.success,
+    paddingVertical: 4,
+    paddingHorizontal: 12,
     borderRadius: 20,
     zIndex: 5,
   },
@@ -119,59 +123,9 @@ export const modalSharedStyles = StyleSheet.create({
     borderRadius: 20,
   },
   difficultyText: {
-    fontSize: 11,
-    fontFamily: "Poppins-SemiBold",
+    fontSize: COMPONENT_FONT_SIZES.card.subtitle,
+    fontFamily: POPPINS_FONT.medium,
     color: BASE_COLORS.white,
-  },
-
-  // Content Cards
-  contentCard: {
-    backgroundColor: "rgba(255, 255, 255, 0.15)",
-    borderRadius: 20,
-    padding: 16,
-    marginBottom: 16,
-    borderWidth: 1,
-    borderColor: "rgba(255, 255, 255, 0.1)",
-  },
-  cardTitle: {
-    fontSize: 16,
-    fontFamily: "Poppins-SemiBold",
-    color: BASE_COLORS.white,
-    marginBottom: 8,
-  },
-  cardText: {
-    fontSize: 15,
-    fontFamily: "Poppins-Medium",
-    color: BASE_COLORS.white,
-    lineHeight: 22,
-  },
-
-  // Action Buttons
-  actionButton: {
-    backgroundColor: "rgba(255, 255, 255, 0.15)",
-    borderRadius: 20,
-    paddingVertical: 16,
-    alignItems: "center",
-    marginTop: 16,
-    borderWidth: 1,
-    borderColor: "rgba(255, 255, 255, 0.2)",
-  },
-  actionButtonText: {
-    color: BASE_COLORS.white,
-    fontFamily: "Poppins-SemiBold",
-    fontSize: 16,
-  },
-
-  // Loading States
-  loadingContainer: {
-    padding: 24,
-    alignItems: "center",
-  },
-  loadingText: {
-    color: "rgba(255, 255, 255, 0.8)",
-    fontFamily: "Poppins-Medium",
-    marginTop: 12,
-    fontSize: 14,
   },
 
   // Close and Start button
@@ -182,8 +136,8 @@ export const modalSharedStyles = StyleSheet.create({
     alignItems: "center",
   },
   startAndCloseText: {
-    fontSize: 14,
-    fontFamily: "Poppins-SemiBold",
+    fontSize: COMPONENT_FONT_SIZES.button.medium,
+    fontFamily: POPPINS_FONT.medium,
     color: "#000",
   },
 });

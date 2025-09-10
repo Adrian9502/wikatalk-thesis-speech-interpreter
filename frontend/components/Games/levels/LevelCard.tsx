@@ -199,8 +199,8 @@ const LevelCard: React.FC<LevelCardProps> = React.memo(
             {levelProps.isCompleted && (
               <View style={styles.completedPill}>
                 <Check
-                  width={13}
-                  height={13}
+                  width={12}
+                  height={12}
                   color={BASE_COLORS.white}
                   strokeWidth={2}
                 />
@@ -229,8 +229,8 @@ const LevelCard: React.FC<LevelCardProps> = React.memo(
                     {starsArray.map((i) => (
                       <Star
                         key={i}
-                        width={14}
-                        height={14}
+                        width={13}
+                        height={13}
                         fill={
                           i < levelProps.starCount
                             ? ICON_COLORS.brightYellow

@@ -12,7 +12,7 @@ interface ErrorStateProps {
 const ErrorState: React.FC<ErrorStateProps> = ({ error, onRetry }) => {
   return (
     <View style={styles.errorContainer}>
-      <AlertTriangle width={48} height={48} color={BASE_COLORS.error} />
+      <AlertTriangle width={40} height={40} color={BASE_COLORS.error} />
       <Text style={styles.errorTitle}>Unable to Load Levels</Text>
       <Text style={styles.errorMessage}>{error.message}</Text>
       <TouchableOpacity onPress={onRetry} style={styles.retryButton}>

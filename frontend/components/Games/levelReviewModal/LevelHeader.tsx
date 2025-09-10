@@ -7,6 +7,7 @@ import { renderFocusIcon } from "@/utils/games/renderFocusIcon";
 import modalSharedStyles from "@/styles/games/modalSharedStyles";
 import FocusAreaBadge from "@/components/games/FocusAreaBadge";
 import { BASE_COLORS } from "@/constant/colors";
+import { COMPONENT_FONT_SIZES, POPPINS_FONT } from "@/constant/fontSizes";
 
 interface LevelHeaderProps {
   level: LevelData;
@@ -60,7 +61,7 @@ const LevelHeader: React.FC<LevelHeaderProps> = ({ level }) => {
       {/* Completed badge */}
       <View style={styles.completedBadgeContainer}>
         <View style={modalSharedStyles.completedBadge}>
-          <Check width={16} height={16} color={BASE_COLORS.white} />
+          <Check width={13} height={13} color={BASE_COLORS.white} />
           <Text style={styles.completedText}>Level Finished</Text>
         </View>
       </View>
@@ -81,8 +82,8 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   completedText: {
-    fontSize: 13,
-    fontFamily: "Poppins-Medium",
+    fontSize: COMPONENT_FONT_SIZES.card.description,
+    fontFamily: POPPINS_FONT.medium,
     color: BASE_COLORS.white,
     marginLeft: 4,
   },

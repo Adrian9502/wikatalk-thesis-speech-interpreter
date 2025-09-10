@@ -1,4 +1,9 @@
 import { BASE_COLORS } from "@/constant/colors";
+import {
+  FONT_SIZES,
+  COMPONENT_FONT_SIZES,
+  POPPINS_FONT,
+} from "@/constant/fontSizes";
 import { StyleSheet } from "react-native";
 
 export const styles = StyleSheet.create({
@@ -44,8 +49,8 @@ export const styles = StyleSheet.create({
     justifyContent: "center",
   },
   progressItemText: {
-    fontSize: 11,
-    fontFamily: "Poppins-Medium",
+    fontSize: COMPONENT_FONT_SIZES.card.description,
+    fontFamily: POPPINS_FONT.medium,
     color: BASE_COLORS.white,
     textAlign: "center",
   },
@@ -62,8 +67,7 @@ export const styles = StyleSheet.create({
   resetConfirmationContent: {
     alignItems: "center",
     justifyContent: "center",
-    paddingVertical: 6,
-    paddingHorizontal: 12,
+    padding: 12,
     backgroundColor: "rgba(255, 255, 255, 0.1)",
     borderWidth: 1,
     borderRadius: 20,
@@ -77,13 +81,13 @@ export const styles = StyleSheet.create({
     gap: 6,
   },
   resetConfirmationTitle: {
-    fontSize: 14,
-    fontFamily: "Poppins-SemiBold",
+    fontSize: COMPONENT_FONT_SIZES.card.title,
+    fontFamily: POPPINS_FONT.medium,
     color: BASE_COLORS.white,
   },
   resetConfirmationText: {
-    fontSize: 12,
-    fontFamily: "Poppins-Medium",
+    fontSize: COMPONENT_FONT_SIZES.card.subtitle,
+    fontFamily: POPPINS_FONT.regular,
     color: BASE_COLORS.white,
     textAlign: "center",
   },
@@ -95,16 +99,18 @@ export const styles = StyleSheet.create({
   },
   resetCancelButton: {
     backgroundColor: "rgba(255, 255, 255, 0.2)",
-    paddingHorizontal: 8,
+    paddingHorizontal: 12,
     paddingVertical: 4,
     borderRadius: 20,
     minWidth: 60,
     borderWidth: 1,
+    alignItems: "center",
+    justifyContent: "center",
     borderColor: "rgba(255, 255, 255, 0.3)",
   },
   resetCancelButtonText: {
-    fontSize: 11,
-    fontFamily: "Poppins-Medium",
+    fontSize: COMPONENT_FONT_SIZES.card.description,
+    fontFamily: POPPINS_FONT.medium,
     color: BASE_COLORS.white,
     textAlign: "center",
   },
@@ -122,8 +128,8 @@ export const styles = StyleSheet.create({
     opacity: 0.6,
   },
   resetConfirmButtonText: {
-    fontSize: 12,
-    fontFamily: "Poppins-SemiBold",
+    fontSize: COMPONENT_FONT_SIZES.card.description,
+    fontFamily: POPPINS_FONT.medium,
     color: BASE_COLORS.white,
     textAlign: "center",
   },
@@ -147,7 +153,7 @@ export const styles = StyleSheet.create({
     gap: 4,
   },
   resetConfirmationSeparator: {
-    fontSize: 13,
+    fontSize: FONT_SIZES.lg,
     fontFamily: "Poppins-Medium",
     color: "rgba(255, 255, 255, 0.8)",
   },
@@ -174,8 +180,10 @@ export const styles = StyleSheet.create({
     marginRight: 8,
   },
   resetMessageTitle: {
-    fontSize: 11,
-    fontFamily: "Poppins-Medium",
+    fontSize: COMPONENT_FONT_SIZES.card.subtitle,
+    borderWidth: 2,
+    borderColor: "red",
+    fontFamily: POPPINS_FONT.medium,
     color: BASE_COLORS.white,
   },
   descriptionContainer: {
@@ -183,8 +191,8 @@ export const styles = StyleSheet.create({
     marginBottom: 20,
   },
   levelDescription: {
-    fontSize: 15,
-    fontFamily: "Poppins-Medium",
+    fontSize: COMPONENT_FONT_SIZES.card.title,
+    fontFamily: POPPINS_FONT.medium,
     color: BASE_COLORS.white,
     textAlign: "center",
     lineHeight: 24,
@@ -198,13 +206,13 @@ export const styles = StyleSheet.create({
     paddingHorizontal: 4,
   },
   infoLabel: {
-    fontSize: 13,
-    fontFamily: "Poppins-Medium",
+    fontSize: COMPONENT_FONT_SIZES.card.subtitle,
+    fontFamily: POPPINS_FONT.medium,
     color: BASE_COLORS.white,
   },
   infoValue: {
-    fontSize: 14,
-    fontFamily: "Poppins-SemiBold",
+    fontSize: COMPONENT_FONT_SIZES.card.title,
+    fontFamily: POPPINS_FONT.semiBold,
     color: BASE_COLORS.white,
   },
   rulesContainer: {
@@ -216,14 +224,14 @@ export const styles = StyleSheet.create({
     borderColor: "rgba(255, 255, 255, 0.2)",
   },
   rulesTitle: {
-    fontSize: 14,
-    fontFamily: "Poppins-SemiBold",
+    fontSize: FONT_SIZES.lg,
+    fontFamily: POPPINS_FONT.semiBold,
     color: BASE_COLORS.white,
     marginBottom: 8,
   },
   rulesText: {
-    fontSize: 12,
-    fontFamily: "Poppins-Regular",
+    fontSize: FONT_SIZES.md,
+    fontFamily: POPPINS_FONT.regular,
     color: BASE_COLORS.white,
     lineHeight: 22,
   },
@@ -237,8 +245,8 @@ export const styles = StyleSheet.create({
     paddingHorizontal: 12,
   },
   noProgressText: {
-    fontSize: 12,
-    fontFamily: "Poppins-Medium",
+    fontSize: FONT_SIZES.md,
+    fontFamily: POPPINS_FONT.medium,
     color: "rgba(255, 255, 255, 0.7)",
     textAlign: "center",
   },
@@ -249,13 +257,12 @@ export const styles = StyleSheet.create({
     gap: 8,
   },
   infoButton: {
-    width: 25,
-    height: 25,
     borderRadius: 15,
     backgroundColor: "rgba(255, 255, 255, 0.15)",
     justifyContent: "center",
     alignItems: "center",
     borderWidth: 1,
+    padding: 6,
     borderColor: "rgba(255, 255, 255, 0.4)",
   },
 });

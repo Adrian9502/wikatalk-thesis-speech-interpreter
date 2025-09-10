@@ -7,6 +7,7 @@ import { BASE_COLORS, ICON_COLORS } from "@/constant/colors";
 import { NAVIGATION_COLORS } from "@/constant/colors";
 import costTiers from "@/utils/games/costTiers";
 import CloseButton from "../buttons/CloseButton";
+import { COMPONENT_FONT_SIZES, POPPINS_FONT } from "@/constant/fontSizes";
 interface ResetCostInfoModalProps {
   visible: boolean;
   onClose: () => void;
@@ -33,7 +34,7 @@ const ResetCostInfoModal: React.FC<ResetCostInfoModalProps> = ({
             colors={NAVIGATION_COLORS.blue}
             style={styles.modalContent}
           >
-            <CloseButton size={17} onPress={onClose}></CloseButton>
+            <CloseButton size={14} onPress={onClose}></CloseButton>
             {/* Header */}
             <View style={styles.header}>
               <Text style={styles.title}>Reset Cost Information</Text>
@@ -117,14 +118,14 @@ const styles = StyleSheet.create({
     alignSelf: "center",
   },
   title: {
-    fontSize: 18,
-    fontFamily: "Poppins-SemiBold",
+    fontSize: COMPONENT_FONT_SIZES.card.title,
+    fontFamily: POPPINS_FONT.medium,
     color: BASE_COLORS.white,
     textAlign: "center",
   },
   description: {
-    fontSize: 12,
-    fontFamily: "Poppins-Regular",
+    fontSize: COMPONENT_FONT_SIZES.card.description,
+    fontFamily: POPPINS_FONT.regular,
     color: "rgba(255, 255, 255, 0.9)",
     marginBottom: 20,
     textAlign: "center",
@@ -153,13 +154,13 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   tierTime: {
-    fontSize: 13,
-    fontFamily: "Poppins-SemiBold",
+    fontSize: COMPONENT_FONT_SIZES.card.subtitle,
+    fontFamily: POPPINS_FONT.semiBold,
     color: BASE_COLORS.white,
   },
   tierDesc: {
-    fontSize: 11,
-    fontFamily: "Poppins-Regular",
+    fontSize: COMPONENT_FONT_SIZES.card.description,
+    fontFamily: POPPINS_FONT.regular,
     color: "rgba(255, 255, 255, 0.7)",
   },
   tierCost: {
@@ -171,10 +172,11 @@ const styles = StyleSheet.create({
     borderRadius: 20,
   },
   costText: {
-    fontSize: 13,
-    fontFamily: "Poppins-SemiBold",
+    fontSize: COMPONENT_FONT_SIZES.card.subtitle,
+    fontFamily: POPPINS_FONT.semiBold,
     color: ICON_COLORS.brightYellow,
-    marginLeft: 4,
+    marginLeft: 6,
+    marginTop: 2,
   },
   footer: {
     backgroundColor: "rgba(255, 255, 255, 0.1)",
@@ -182,8 +184,8 @@ const styles = StyleSheet.create({
     padding: 12,
   },
   footerText: {
-    fontSize: 12,
-    fontFamily: "Poppins-Medium",
+    fontSize: COMPONENT_FONT_SIZES.card.description,
+    fontFamily: POPPINS_FONT.medium,
     color: "rgba(255, 255, 255, 0.8)",
     textAlign: "center",
   },

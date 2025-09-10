@@ -5,7 +5,7 @@ import { formatDifficulty } from "@/utils/games/difficultyUtils";
 import FocusAreaBadge from "@/components/games/FocusAreaBadge";
 import modalSharedStyles from "@/styles/games/modalSharedStyles";
 import CloseButton from "../../buttons/CloseButton";
-import { ICON_COLORS } from "@/constant/colors";
+import { BASE_COLORS, ICON_COLORS } from "@/constant/colors";
 
 interface LevelHeaderProps {
   levelData: any;
@@ -49,8 +49,8 @@ const LevelHeader: React.FC<LevelHeaderProps> = ({
               .map((_, index) => (
                 <Star
                   key={index}
-                  width={16}
-                  height={16}
+                  width={14}
+                  height={14}
                   fill={
                     index < starCount ? ICON_COLORS.brightYellow : "transparent"
                   }
@@ -68,7 +68,7 @@ const LevelHeader: React.FC<LevelHeaderProps> = ({
         </View>
         <FocusAreaBadge focusArea={levelData.focusArea} />
         <TouchableOpacity style={styles.infoButton} onPress={onShowCostInfo}>
-          <Info width={16} height={16} color="rgba(255, 255, 255, 0.7)" />
+          <Info width={15} height={15} color={BASE_COLORS.white} />
         </TouchableOpacity>
       </View>
     </>

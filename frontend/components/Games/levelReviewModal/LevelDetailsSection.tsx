@@ -1,4 +1,5 @@
 import { BASE_COLORS } from "@/constant/colors";
+import { COMPONENT_FONT_SIZES, POPPINS_FONT } from "@/constant/fontSizes";
 import { trimEnd } from "lodash";
 import React from "react";
 import { View, Text, StyleSheet } from "react-native";
@@ -73,7 +74,7 @@ const styles = StyleSheet.create({
   },
   errorText: {
     color: "#ff6b6b",
-    fontFamily: "Poppins-Medium",
+    fontFamily: POPPINS_FONT.medium,
     textAlign: "center",
     fontSize: 16,
     marginTop: 8,
@@ -89,15 +90,15 @@ const styles = StyleSheet.create({
     marginBottom: 12,
   },
   sectionLabel: {
-    fontSize: 14,
-    fontFamily: "Poppins-Medium",
+    fontSize: COMPONENT_FONT_SIZES.card.subtitle,
+    fontFamily: POPPINS_FONT.medium,
     color: BASE_COLORS.white,
     marginBottom: 8,
   },
   questionContainer: {
     borderWidth: 1,
     borderColor: "rgba(255, 255, 255, 0.4)",
-    backgroundColor: "rgba(255, 255, 255, 0.2)",
+    backgroundColor: "rgba(255, 255, 255, 0.15)",
     borderRadius: 20,
     alignItems: "center",
     justifyContent: "center",
@@ -105,14 +106,14 @@ const styles = StyleSheet.create({
     minHeight: 50,
   },
   questionText: {
-    fontSize: 13,
-    fontFamily: "Poppins-Medium",
+    fontSize: COMPONENT_FONT_SIZES.card.title,
+    fontFamily: POPPINS_FONT.medium,
     color: BASE_COLORS.white,
     textAlign: "center",
   },
   answerContainer: {
     borderWidth: 1,
-    borderColor: "rgba(255, 255, 255, 0.20)",
+    borderColor: "rgba(255, 255, 255, 0.4)",
     backgroundColor: "rgba(255, 255, 255, 0.15)",
     borderRadius: 20,
     flexDirection: "row",
@@ -122,8 +123,8 @@ const styles = StyleSheet.create({
     padding: 8,
   },
   answerText: {
-    fontSize: 13,
-    fontFamily: "Poppins-Medium",
+    fontSize: COMPONENT_FONT_SIZES.card.title,
+    fontFamily: POPPINS_FONT.medium,
     color: BASE_COLORS.white,
     textAlign: "center",
   },
