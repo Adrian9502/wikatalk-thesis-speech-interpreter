@@ -12,6 +12,7 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 import { X, FileText } from "react-native-feather";
 import { BASE_COLORS } from "@/constant/colors";
+import { COMPONENT_FONT_SIZES, POPPINS_FONT } from "@/constant/fontSizes";
 import useThemeStore from "@/store/useThemeStore";
 import { TERMS_OF_USE_CONTENT, TERMS_OF_USE_DATE } from "@/utils/termsOfUse";
 import CloseButton from "../games/buttons/CloseButton";
@@ -264,8 +265,8 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   headerTitle: {
-    fontSize: 15,
-    fontFamily: "Poppins-SemiBold",
+    fontSize: COMPONENT_FONT_SIZES.card.title,
+    fontFamily: POPPINS_FONT.semiBold,
     color: BASE_COLORS.white,
     marginLeft: 10,
   },
@@ -275,8 +276,8 @@ const styles = StyleSheet.create({
     backgroundColor: "rgba(255, 255, 255, 0.05)",
   },
   dateText: {
-    fontSize: 11,
-    fontFamily: "Poppins-Regular",
+    fontSize: COMPONENT_FONT_SIZES.card.description,
+    fontFamily: POPPINS_FONT.regular,
     color: "rgba(255, 255, 255, 0.7)",
     textAlign: "center",
   },
@@ -289,7 +290,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   scrollContent: {
-    paddingBottom: 30,
+    paddingBottom: 10,
     flexGrow: 1, // Changed from minHeight to flexGrow
   },
   contentContainer: {
@@ -299,16 +300,16 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   headerText: {
-    fontSize: 14,
-    fontFamily: "Poppins-Bold",
+    fontSize: COMPONENT_FONT_SIZES.card.title,
+    fontFamily: POPPINS_FONT.bold,
     color: BASE_COLORS.white,
     marginBottom: 12,
     marginTop: 20,
     lineHeight: 24,
   },
   contentText: {
-    fontSize: 12,
-    fontFamily: "Poppins-Regular",
+    fontSize: COMPONENT_FONT_SIZES.card.subtitle,
+    fontFamily: POPPINS_FONT.regular,
     color: "rgba(255, 255, 255, 0.9)",
     lineHeight: 20,
     marginBottom: 16,
@@ -328,8 +329,8 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   acceptButtonText: {
-    fontSize: 12,
-    fontFamily: "Poppins-SemiBold",
+    fontSize: COMPONENT_FONT_SIZES.card.subtitle,
+    fontFamily: POPPINS_FONT.semiBold,
     color: BASE_COLORS.white,
   },
   declineButton: {
@@ -337,8 +338,8 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   declineButtonText: {
-    fontSize: 12,
-    fontFamily: "Poppins-Regular",
+    fontSize: COMPONENT_FONT_SIZES.card.subtitle,
+    fontFamily: POPPINS_FONT.regular,
     color: "rgba(255, 255, 255, 0.7)",
   },
 });
