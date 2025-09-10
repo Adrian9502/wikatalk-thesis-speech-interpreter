@@ -4,7 +4,6 @@ import {
   Text,
   View,
   ActivityIndicator,
-  InteractionManager,
   StyleSheet,
   TouchableWithoutFeedback,
   Keyboard,
@@ -19,6 +18,7 @@ import { useAuth } from "@/context/AuthContext";
 import FormMessage from "@/components/FormMessage";
 import { useValidation } from "@/context/ValidationContext";
 import { BASE_COLORS, TITLE_COLORS } from "@/constant/colors";
+import { COMPONENT_FONT_SIZES, POPPINS_FONT } from "@/constant/fontSizes";
 import Logo from "@/components/Logo";
 import useThemeStore from "@/store/useThemeStore";
 import { getGlobalStyles } from "@/styles/globalStyles";
@@ -152,7 +152,7 @@ const VerifyEmail: React.FC = () => {
               <View style={styles.formContainer}>
                 {/* Display sent email */}
                 <View style={styles.emailContainer}>
-                  <Mail size={20} color="#0038A8" />
+                  <Mail size={14} color="#4A6FFF" />
                   <Text style={styles.emailText}>{userData?.email}</Text>
                 </View>
 
@@ -264,15 +264,15 @@ const styles = StyleSheet.create({
     elevation: 5,
   },
   titleText: {
-    fontSize: 18,
-    fontFamily: "Poppins-SemiBold",
+    fontSize: COMPONENT_FONT_SIZES.navigation.headerTitle,
+    fontFamily: POPPINS_FONT.semiBold,
     color: BASE_COLORS.blue,
     marginBottom: 8,
   },
   descriptionText: {
     textAlign: "center",
-    fontSize: 12,
-    fontFamily: "Poppins-Regular",
+    fontSize: COMPONENT_FONT_SIZES.card.subtitle,
+    fontFamily: POPPINS_FONT.regular,
     color: BASE_COLORS.darkText,
     marginBottom: 8,
     paddingHorizontal: 8,
@@ -286,14 +286,16 @@ const styles = StyleSheet.create({
     alignItems: "center",
     backgroundColor: "#F0F8FF",
     borderRadius: 20,
-    padding: 12,
+    paddingVertical: 8,
+    paddingHorizontal: 12,
     marginBottom: 16,
-    borderWidth: 0.5,
+    borderWidth: 1,
     borderColor: BASE_COLORS.blue,
   },
   emailText: {
     marginLeft: 8,
-    fontFamily: "Poppins-Regular",
+    fontFamily: POPPINS_FONT.regular,
+    fontSize: COMPONENT_FONT_SIZES.input.text,
     color: BASE_COLORS.darkText,
   },
   noteContainer: {
@@ -306,8 +308,8 @@ const styles = StyleSheet.create({
   },
   noteText: {
     textAlign: "center",
-    fontSize: 12,
-    fontFamily: "Poppins-Regular",
+    fontSize: COMPONENT_FONT_SIZES.card.description,
+    fontFamily: POPPINS_FONT.regular,
     color: BASE_COLORS.darkText,
   },
   buttonContainer: {
@@ -317,7 +319,7 @@ const styles = StyleSheet.create({
   },
   submitButton: {
     backgroundColor: TITLE_COLORS.customRed,
-    paddingVertical: 8,
+    paddingVertical: 7,
     alignItems: "center",
     justifyContent: "center",
     borderRadius: 20,
@@ -329,8 +331,8 @@ const styles = StyleSheet.create({
   },
   buttonText: {
     color: "white",
-    fontSize: 13,
-    fontFamily: "Poppins-Medium",
+    fontSize: COMPONENT_FONT_SIZES.button.medium,
+    fontFamily: POPPINS_FONT.medium,
   },
   resendButton: {
     marginTop: 12,
@@ -341,15 +343,15 @@ const styles = StyleSheet.create({
   },
   resendButtonText: {
     color: "#0038A8",
-    fontSize: 12,
-    fontFamily: "Poppins-Regular",
+    fontSize: COMPONENT_FONT_SIZES.card.subtitle,
+    fontFamily: POPPINS_FONT.regular,
   },
   resendDisabledText: {
     color: "#777d87",
   },
   goBackText: {
-    fontSize: 11,
-    fontFamily: "Poppins-Regular",
+    fontSize: COMPONENT_FONT_SIZES.card.description,
+    fontFamily: POPPINS_FONT.regular,
     color: "#777d87",
     marginTop: 16,
     textAlign: "center",

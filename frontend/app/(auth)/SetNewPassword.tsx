@@ -23,6 +23,7 @@ import showNotification from "@/lib/showNotification";
 import useThemeStore from "@/store/useThemeStore";
 import { getGlobalStyles } from "@/styles/globalStyles";
 import { BASE_COLORS, TITLE_COLORS } from "@/constant/colors";
+import { COMPONENT_FONT_SIZES, POPPINS_FONT } from "@/constant/fontSizes";
 import AppLoading from "@/components/AppLoading";
 import Logo from "@/components/Logo";
 
@@ -153,7 +154,7 @@ const SetNewPassword: React.FC = () => {
 
                 {/* Display email */}
                 <View style={styles.emailContainer}>
-                  <Mail size={20} color="#0038A8" />
+                  <Mail size={14} color="#4A6FFF" />
                   <Text style={styles.emailText}>{email ?? "Loading..."}</Text>
                 </View>
 
@@ -235,16 +236,16 @@ const styles = StyleSheet.create({
     elevation: 3,
   },
   headerTitle: {
-    fontSize: 18,
-    fontFamily: "Poppins-SemiBold",
-    color: TITLE_COLORS.customBlue,
+    fontSize: COMPONENT_FONT_SIZES.navigation.headerTitle,
+    fontFamily: POPPINS_FONT.semiBold,
+    color: BASE_COLORS.blue,
     marginBottom: 8,
   },
   headerSubtitle: {
     textAlign: "center",
-    fontFamily: "Poppins-Regular",
+    fontFamily: POPPINS_FONT.regular,
     marginBottom: 8,
-    fontSize: 12,
+    fontSize: COMPONENT_FONT_SIZES.card.description,
     color: BASE_COLORS.placeholderText,
   },
   formInnerContainer: {
@@ -255,16 +256,18 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     backgroundColor: "#F0F8FF",
-    borderRadius: 16,
-    padding: 12,
-    marginBottom: 12,
+    borderRadius: 20,
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+    marginBottom: 16,
     borderWidth: 1,
-    borderColor: TITLE_COLORS.customBlue,
+    borderColor: BASE_COLORS.blue,
   },
   emailText: {
     marginLeft: 8,
-    color: TITLE_COLORS.customBlue,
-    fontFamily: "Poppins-Regular",
+    fontFamily: POPPINS_FONT.regular,
+    fontSize: COMPONENT_FONT_SIZES.input.text,
+    color: BASE_COLORS.darkText,
   },
   buttonContainer: {
     width: "100%",
@@ -279,7 +282,7 @@ const styles = StyleSheet.create({
   },
   resetButton: {
     backgroundColor: TITLE_COLORS.customRed,
-    paddingVertical: 10,
+    paddingVertical: 7,
     alignItems: "center",
     justifyContent: "center",
     borderRadius: 20,
@@ -293,15 +296,15 @@ const styles = StyleSheet.create({
     marginRight: 8,
   },
   buttonText: {
-    color: "white",
-    fontSize: 13,
-    fontFamily: "Poppins-Medium",
+    color: BASE_COLORS.white,
+    fontSize: COMPONENT_FONT_SIZES.button.medium,
+    fontFamily: POPPINS_FONT.medium,
   },
   goBackText: {
-    fontSize: 11,
+    fontSize: COMPONENT_FONT_SIZES.card.description,
     color: BASE_COLORS.placeholderText,
     marginTop: 12,
-    fontFamily: "Poppins-Regular",
+    fontFamily: POPPINS_FONT.regular,
     textAlign: "center",
   },
 });

@@ -1,7 +1,8 @@
 import React from "react";
-import { StyleSheet, View, Text, TouchableOpacity } from "react-native";
+import { StyleSheet, View, Text } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import CloseButton from "./games/buttons/CloseButton";
+import { COMPONENT_FONT_SIZES, POPPINS_FONT } from "@/constant/fontSizes";
 
 interface FormMessageProps {
   message: string;
@@ -54,7 +55,7 @@ const FormMessage: React.FC<FormMessageProps> = ({
       <View style={styles.content}>
         <Ionicons
           name={getIcon()}
-          size={20}
+          size={15}
           color={getTextColor()}
           style={styles.icon}
         />
@@ -92,8 +93,8 @@ const styles = StyleSheet.create({
     marginRight: 8,
   },
   message: {
-    fontSize: 12,
-    fontFamily: "Poppins-Regular",
+    fontSize: COMPONENT_FONT_SIZES.card.subtitle,
+    fontFamily: POPPINS_FONT.regular,
     flex: 1,
   },
 });

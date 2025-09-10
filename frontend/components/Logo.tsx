@@ -1,6 +1,7 @@
 import { View, Image, Text, StyleSheet } from "react-native";
 import React from "react";
 import { BASE_COLORS, TITLE_COLORS } from "@/constant/colors";
+import { COMPONENT_FONT_SIZES, POPPINS_FONT } from "@/constant/fontSizes";
 
 interface LogoProps {
   logoSize?: number;
@@ -10,11 +11,19 @@ interface LogoProps {
 }
 
 const Logo: React.FC<LogoProps> = ({
-  logoSize = 100,
-  wikaTextSize = 30,
-  talkTextSize = 30,
-  taglineTextSize = 14,
+  logoSize = 90,
+  wikaTextSize,
+  talkTextSize,
+  taglineTextSize,
 }) => {
+  // Use responsive font sizes if not provided as props
+  const responsiveWikaTextSize =
+    wikaTextSize || COMPONENT_FONT_SIZES.navigation.headerTitle * 1.5;
+  const responsiveTalkTextSize =
+    talkTextSize || COMPONENT_FONT_SIZES.navigation.headerTitle * 1.5;
+  const responsiveTaglineTextSize =
+    taglineTextSize || COMPONENT_FONT_SIZES.card.subtitle;
+
   return (
     <View style={styles.container}>
       <Image
@@ -33,20 +42,20 @@ const Logo: React.FC<LogoProps> = ({
         <Text
           style={[
             styles.wikaText,
-            { color: "#FFEC18", fontSize: wikaTextSize },
+            { color: "#FFEC18", fontSize: responsiveWikaTextSize },
           ]}
           allowFontScaling={false}
         >
           Wika
         </Text>
         <Text
-          style={[styles.talkText, { fontSize: talkTextSize }]}
+          style={[styles.talkText, { fontSize: responsiveTalkTextSize }]}
           allowFontScaling={false}
         >
           Talk
         </Text>
       </View>
-      <Text style={[styles.tagline, { fontSize: taglineTextSize }]}>
+      <Text style={[styles.tagline, { fontSize: responsiveTaglineTextSize }]}>
         Speak Freely, Understand Instantly.
       </Text>
     </View>
@@ -57,26 +66,26 @@ const styles = StyleSheet.create({
   container: {
     width: "100%",
     alignItems: "center",
-    marginBottom: 15,
+    marginBottom: 30,
     justifyContent: "center",
   },
   logo: {
     // width and height will be overridden by props
   },
   wikaText: {
-    fontFamily: "Poppins-Bold",
+    fontFamily: POPPINS_FONT.bold,
     // fontSize will be overridden by props
     color: TITLE_COLORS.customYellow,
     flexShrink: 1,
   },
   talkText: {
-    fontFamily: "Poppins-Bold",
+    fontFamily: POPPINS_FONT.bold,
     // fontSize will be overridden by props
     color: BASE_COLORS.white,
     flexShrink: 1,
   },
   tagline: {
-    fontFamily: "Poppins-Medium",
+    fontFamily: POPPINS_FONT.medium,
     // fontSize will be overridden by props
     marginTop: -10,
     color: TITLE_COLORS.customWhite,
