@@ -1,3 +1,4 @@
+import { sub } from "date-fns";
 import { Dimensions } from "react-native";
 
 const { width: screenWidth, height: screenHeight } = Dimensions.get("window");
@@ -50,6 +51,7 @@ export const COMPONENT_FONT_SIZES = {
     placeholder: FONT_SIZES.md,
     text: FONT_SIZES.xl,
     label: FONT_SIZES.md,
+    subLabel: FONT_SIZES.sm,
   },
 
   // Cards

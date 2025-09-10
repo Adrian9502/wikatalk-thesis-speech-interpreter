@@ -1,9 +1,8 @@
 import React, { useState } from "react";
 import { Text, StyleSheet, TouchableOpacity } from "react-native";
-import { Control } from "react-hook-form";
-
 import { User, Lock, Mail } from "lucide-react-native";
 import { BASE_COLORS } from "@/constant/colors";
+import { COMPONENT_FONT_SIZES, POPPINS_FONT } from "@/constant/fontSizes";
 import TermsOfUseModal from "@/components/legal/TermsOfUseModal";
 
 import FormInput from "@/components/FormInput";
@@ -100,14 +99,14 @@ const SignUpForm: React.FC<SignUpFormProps> = ({ control, errors }) => {
 const styles = StyleSheet.create({
   helpText: {
     padding: 2,
-    fontFamily: "Poppins-Regular",
+    fontFamily: POPPINS_FONT.regular,
     marginBottom: 4,
-    fontSize: 11,
+    fontSize: COMPONENT_FONT_SIZES.card.description,
     textAlign: "center",
     color: BASE_COLORS.placeholderText,
   },
   helpTextBold: {
-    fontFamily: "Poppins-Medium",
+    fontFamily: POPPINS_FONT.medium,
   },
   // term of use styles
   termsTextContainer: {
@@ -119,8 +118,8 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   termsText: {
-    fontSize: 11,
-    fontFamily: "Poppins-Regular",
+    fontSize: COMPONENT_FONT_SIZES.card.description,
+    fontFamily: POPPINS_FONT.regular,
     color: BASE_COLORS.placeholderText,
     textAlign: "center",
     lineHeight: 16,
@@ -131,8 +130,8 @@ const styles = StyleSheet.create({
     flexShrink: 1,
   },
   termsLink: {
-    fontSize: 11,
-    fontFamily: "Poppins-Medium",
+    fontSize: COMPONENT_FONT_SIZES.card.description,
+    fontFamily: POPPINS_FONT.medium,
     color: BASE_COLORS.blue,
     textDecorationLine: "underline",
   },

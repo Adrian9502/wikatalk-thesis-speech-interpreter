@@ -1,4 +1,5 @@
 import { BASE_COLORS } from "@/constant/colors";
+import { COMPONENT_FONT_SIZES, POPPINS_FONT } from "@/constant/fontSizes";
 import React from "react";
 import {
   TouchableOpacity,
@@ -79,8 +80,8 @@ const styles = StyleSheet.create({
   },
   buttonText: {
     color: "#757575",
-    fontSize: 12,
-    fontFamily: "Poppins-Regular",
+    fontSize: COMPONENT_FONT_SIZES.button.medium,
+    fontFamily: POPPINS_FONT.regular,
   },
 });
 

@@ -7,6 +7,7 @@ import {
   StyleSheet,
 } from "react-native";
 import { BASE_COLORS, TITLE_COLORS } from "@/constant/colors";
+import { COMPONENT_FONT_SIZES, POPPINS_FONT } from "@/constant/fontSizes";
 
 interface AuthTabsProps {
   activeTab: "signin" | "signup";
@@ -94,19 +95,17 @@ const styles = StyleSheet.create({
     marginBottom: 16,
     borderRadius: 20,
     overflow: "hidden",
-    height: 44,
   },
   tabButton: {
     flex: 1,
-    paddingVertical: 12,
+    paddingVertical: 8,
     alignItems: "center",
     justifyContent: "center",
     zIndex: 2,
   },
   tabButtonText: {
-    fontFamily: "Poppins-Medium",
-    fontSize: 12,
-    fontWeight: "600",
+    fontFamily: POPPINS_FONT.medium,
+    fontSize: COMPONENT_FONT_SIZES.button.medium,
   },
   tabIndicator: {
     position: "absolute",

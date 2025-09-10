@@ -9,6 +9,7 @@ import {
   TouchableOpacity,
 } from "react-native";
 import { BASE_COLORS, TITLE_COLORS } from "@/constant/colors";
+import { COMPONENT_FONT_SIZES, POPPINS_FONT } from "@/constant/fontSizes";
 
 interface SubmitButtonProps {
   activeTab: "signin" | "signup";
@@ -58,7 +59,7 @@ const SubmitButton: React.FC<SubmitButtonProps> = ({
 
 const styles = StyleSheet.create({
   submitButton: {
-    paddingVertical: 10,
+    paddingVertical: 7,
     alignItems: "center",
     justifyContent: "center",
     borderRadius: 20,
@@ -70,8 +71,8 @@ const styles = StyleSheet.create({
   },
   submitButtonText: {
     color: BASE_COLORS.white,
-    fontSize: 13,
-    fontFamily: "Poppins-Medium",
+    fontSize: COMPONENT_FONT_SIZES.button.medium,
+    fontFamily: POPPINS_FONT.medium,
   },
 });
 

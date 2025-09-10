@@ -8,6 +8,7 @@ import {
   TouchableOpacity,
 } from "react-native";
 import { BASE_COLORS } from "@/constant/colors";
+import { COMPONENT_FONT_SIZES, POPPINS_FONT } from "@/constant/fontSizes";
 import {
   statusCodes,
   GoogleSignin,
@@ -17,6 +18,7 @@ import { useAuthStore } from "@/store/useAuthStore";
 import CustomGoogleButton from "@/components/auth/GoogleLoginButton";
 import TermsOfUseModal from "@/components/legal/TermsOfUseModal";
 import showNotification from "@/lib/showNotification";
+
 const SocialLogin = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showTermsModal, setShowTermsModal] = useState(false);
@@ -35,7 +37,7 @@ const SocialLogin = () => {
           type: "error",
           title: "Google Login Unavailable",
           description:
-            "Oops! Your device doesn’t have Google Play Services, so Google login won’t work. Please use another login method.",
+            "Oops! Your device doesn't have Google Play Services, so Google login won't work. Please use another login method.",
         });
       }
     };
@@ -191,7 +193,8 @@ const styles = StyleSheet.create({
   },
   dividerText: {
     paddingHorizontal: 8,
-    fontSize: 11,
+    fontSize: COMPONENT_FONT_SIZES.card.description,
+    fontFamily: POPPINS_FONT.regular,
   },
   socialButtonsContainer: {
     flexDirection: "row",
@@ -211,8 +214,8 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   termsText: {
-    fontSize: 11,
-    fontFamily: "Poppins-Regular",
+    fontSize: COMPONENT_FONT_SIZES.card.description,
+    fontFamily: POPPINS_FONT.regular,
     color: BASE_COLORS.placeholderText,
     textAlign: "center",
     lineHeight: 16,
@@ -222,8 +225,8 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   termsLink: {
-    fontSize: 11,
-    fontFamily: "Poppins-Medium",
+    fontSize: COMPONENT_FONT_SIZES.card.description,
+    fontFamily: POPPINS_FONT.medium,
     color: BASE_COLORS.blue,
     textDecorationLine: "underline",
   },

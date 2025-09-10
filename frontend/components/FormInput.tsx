@@ -10,6 +10,8 @@ import { LucideIcon, Eye, EyeOff, X } from "lucide-react-native";
 import { useState } from "react";
 import { Control, Controller, FieldValues, Path } from "react-hook-form";
 import React from "react";
+import { COMPONENT_FONT_SIZES, POPPINS_FONT } from "@/constant/fontSizes";
+import { BASE_COLORS } from "@/constant/colors";
 
 // Generic FormInput component that works with any form type
 interface FormInputProps<T extends FieldValues> {
@@ -56,7 +58,7 @@ const FormInput = <T extends FieldValues>({
             >
               {IconComponent && (
                 <IconComponent
-                  size={16}
+                  size={14}
                   color="#4A6FFF"
                   style={styles.inputIcon}
                 />
@@ -98,9 +100,9 @@ const FormInput = <T extends FieldValues>({
                   onPress={() => setIsPasswordVisible(!isPasswordVisible)}
                 >
                   {isPasswordVisible ? (
-                    <Eye size={16} color="#888" />
+                    <Eye size={14} color="#888" />
                   ) : (
-                    <EyeOff size={16} color="#888" />
+                    <EyeOff size={14} color="#888" />
                   )}
                 </TouchableOpacity>
               )}
@@ -132,16 +134,16 @@ const styles = StyleSheet.create({
     borderColor: "rgba(0,0,0,0.1)",
   },
   inputContainerError: {
-    borderColor: "#EF4444",
+    borderColor: BASE_COLORS.danger,
   },
   inputIcon: {
     marginRight: 10,
   },
   input: {
-    fontFamily: "Poppins-Regular",
+    fontFamily: POPPINS_FONT.regular,
     flex: 1,
-    paddingVertical: 4,
-    fontSize: 12,
+    paddingVertical: 6,
+    fontSize: COMPONENT_FONT_SIZES.input.text,
     color: "#333",
   },
   actionIcon: {
@@ -154,8 +156,8 @@ const styles = StyleSheet.create({
     paddingVertical: 2,
   },
   errorText: {
-    color: "#EF4444",
-    fontSize: 10,
+    color: BASE_COLORS.danger,
+    fontSize: COMPONENT_FONT_SIZES.input.subLabel,
     fontFamily: "Poppins-Regular",
   },
 });
