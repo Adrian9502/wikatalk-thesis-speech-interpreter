@@ -129,7 +129,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   title: {
-    fontSize: COMPONENT_FONT_SIZES.card.title,
+    fontSize: COMPONENT_FONT_SIZES.card.subtitle,
     fontFamily: POPPINS_FONT.semiBold,
     color: "#333",
     marginBottom: 2,

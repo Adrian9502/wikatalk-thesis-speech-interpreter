@@ -151,11 +151,9 @@ const Index = () => {
       <View style={[dynamicStyles.container]}>
         <StatusBar style="light" />
         <ScrollView
-          overScrollMode="never"
           contentContainerStyle={{ flexGrow: 1, justifyContent: "center" }}
           keyboardShouldPersistTaps="handled"
           showsVerticalScrollIndicator={false}
-          bounces={false}
         >
           <View
             style={{ width: "100%", alignItems: "center", paddingVertical: 20 }}

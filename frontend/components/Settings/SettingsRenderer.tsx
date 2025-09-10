@@ -273,7 +273,7 @@ const styles = StyleSheet.create({
   },
   logoutText: {
     color: BASE_COLORS.white,
-    fontSize: COMPONENT_FONT_SIZES.card.description,
+    fontSize: COMPONENT_FONT_SIZES.button.medium,
     fontFamily: POPPINS_FONT.medium,
   },
   card: {

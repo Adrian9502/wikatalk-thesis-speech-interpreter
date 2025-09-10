@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useRef, useState } from "react";
 import {
   Modal,
   View,
@@ -7,12 +7,14 @@ import {
   TouchableOpacity,
   StyleSheet,
   Platform,
+  Dimensions,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { X, FileText } from "react-native-feather";
 import { BASE_COLORS } from "@/constant/colors";
 import useThemeStore from "@/store/useThemeStore";
 import { TERMS_OF_USE_CONTENT, TERMS_OF_USE_DATE } from "@/utils/termsOfUse";
+import CloseButton from "../games/buttons/CloseButton";
 
 interface TermsOfUseModalProps {
   visible: boolean;
@@ -30,6 +32,49 @@ const TermsOfUseModal: React.FC<TermsOfUseModalProps> = ({
   title = "Terms of Use",
 }) => {
   const { activeTheme } = useThemeStore();
+  const scrollViewRef = useRef<ScrollView>(null);
+  const [contentHeight, setContentHeight] = useState(0);
+  const [scrollViewHeight, setScrollViewHeight] = useState(0);
+  const [forceUpdate, setForceUpdate] = useState(0);
+
+  // Force ScrollView to be scrollable when modal becomes visible
+  useEffect(() => {
+    if (visible) {
+      // Reset state when modal opens
+      setForceUpdate((prev) => prev + 1);
+
+      // Multiple attempts to activate scrolling
+      const timer1 = setTimeout(() => {
+        if (scrollViewRef.current) {
+          scrollViewRef.current.scrollTo({ y: 1, animated: false });
+          setTimeout(() => {
+            scrollViewRef.current?.scrollTo({ y: 0, animated: false });
+          }, 50);
+        }
+      }, 100);
+
+      const timer2 = setTimeout(() => {
+        if (scrollViewRef.current) {
+          scrollViewRef.current.flashScrollIndicators();
+        }
+      }, 300);
+
+      const timer3 = setTimeout(() => {
+        if (scrollViewRef.current) {
+          scrollViewRef.current.scrollTo({ y: 2, animated: false });
+          setTimeout(() => {
+            scrollViewRef.current?.scrollTo({ y: 0, animated: false });
+          }, 50);
+        }
+      }, 500);
+
+      return () => {
+        clearTimeout(timer1);
+        clearTimeout(timer2);
+        clearTimeout(timer3);
+      };
+    }
+  }, [visible]);
 
   const handleAccept = () => {
     if (onAccept) {
@@ -62,18 +107,54 @@ const TermsOfUseModal: React.FC<TermsOfUseModalProps> = ({
     });
   };
 
+  const handleContentSizeChange = (
+    contentWidth: number,
+    contentHeight: number
+  ) => {
+    setContentHeight(contentHeight);
+    // Force scroll activation
+    if (scrollViewRef.current && contentHeight > scrollViewHeight) {
+      setTimeout(() => {
+        scrollViewRef.current?.flashScrollIndicators();
+        scrollViewRef.current?.scrollTo({ y: 1, animated: false });
+        setTimeout(() => {
+          scrollViewRef.current?.scrollTo({ y: 0, animated: false });
+        }, 10);
+      }, 50);
+    }
+  };
+
+  const handleScrollViewLayout = (event: any) => {
+    const { height } = event.nativeEvent.layout;
+    setScrollViewHeight(height);
+  };
+
   return (
     <Modal
       visible={visible}
       animationType="slide"
-      presentationStyle="pageSheet"
+      presentationStyle="fullScreen"
       statusBarTranslucent={true}
+      supportedOrientations={["portrait"]}
+      onShow={() => {
+        // Additional safety - trigger scroll activation when modal shows
+        setTimeout(() => {
+          if (scrollViewRef.current) {
+            scrollViewRef.current.scrollTo({ y: 1, animated: false });
+            setTimeout(() => {
+              scrollViewRef.current?.scrollTo({ y: 0, animated: false });
+              scrollViewRef.current?.flashScrollIndicators();
+            }, 50);
+          }
+        }, 100);
+      }}
     >
       <SafeAreaView
         style={[
           styles.container,
           { backgroundColor: activeTheme.backgroundColor },
         ]}
+        edges={["top", "bottom", "left", "right"]}
       >
         {/* Header */}
         <View
@@ -83,12 +164,10 @@ const TermsOfUseModal: React.FC<TermsOfUseModalProps> = ({
           ]}
         >
           <View style={styles.headerLeft}>
-            <FileText width={20} height={20} color={BASE_COLORS.white} />
+            <FileText width={15} height={15} color={BASE_COLORS.white} />
             <Text style={styles.headerTitle}>{title}</Text>
           </View>
-          <TouchableOpacity onPress={onClose} style={styles.closeButton}>
-            <X width={20} height={20} color={BASE_COLORS.white} />
-          </TouchableOpacity>
+          <CloseButton onPress={onClose} size={15} />
         </View>
 
         {/* Last Updated */}
@@ -96,18 +175,47 @@ const TermsOfUseModal: React.FC<TermsOfUseModalProps> = ({
           <Text style={styles.dateText}>Last updated: {TERMS_OF_USE_DATE}</Text>
         </View>
 
-        {/* Content */}
-        <ScrollView
-          bounces={false}
-          overScrollMode="never"
-          style={styles.scrollView}
-          contentContainerStyle={styles.scrollContent}
-          showsVerticalScrollIndicator={true}
-        >
-          <View style={styles.contentContainer}>
-            {formatContent(TERMS_OF_USE_CONTENT)}
-          </View>
-        </ScrollView>
+        {/* Content - Key changes here */}
+        <View style={styles.scrollContainer}>
+          <ScrollView
+            key={`scroll-${forceUpdate}`} // Force re-render
+            ref={scrollViewRef}
+            style={styles.scrollView}
+            contentContainerStyle={[
+              styles.scrollContent,
+              // Ensure minimum height for scrolling
+              { minHeight: Math.max(1200, scrollViewHeight + 100) },
+            ]}
+            showsVerticalScrollIndicator={true}
+            nestedScrollEnabled={false} // Changed to false to avoid conflicts
+            keyboardShouldPersistTaps="handled"
+            bounces={true} // Enable bounces for better scroll detection
+            overScrollMode="never" // Changed from "never"
+            scrollEnabled={true}
+            directionalLockEnabled={true}
+            // Force enable scroll indicators
+            persistentScrollbar={Platform.OS === "android"}
+            indicatorStyle="white"
+            scrollIndicatorInsets={{ right: 2 }}
+            // Layout handler
+            onLayout={handleScrollViewLayout}
+            // Content size change handler
+            onContentSizeChange={handleContentSizeChange}
+            // Scroll handlers for debugging
+            onScroll={(event) => {
+              // Optional: Add scroll debugging
+              // console.log('Scroll Y:', event.nativeEvent.contentOffset.y);
+            }}
+            scrollEventThrottle={16}
+            // Additional props for better scrolling
+            automaticallyAdjustContentInsets={false}
+            contentInsetAdjustmentBehavior="never"
+          >
+            <View style={styles.contentContainer}>
+              {formatContent(TERMS_OF_USE_CONTENT)}
+            </View>
+          </ScrollView>
+        </View>
 
         {/* Accept Button (for registration flow) */}
         {showAcceptButton && (
@@ -161,11 +269,6 @@ const styles = StyleSheet.create({
     color: BASE_COLORS.white,
     marginLeft: 10,
   },
-  closeButton: {
-    padding: 8,
-    borderRadius: 16,
-    backgroundColor: "rgba(255, 255, 255, 0.1)",
-  },
   dateContainer: {
     paddingHorizontal: 20,
     paddingVertical: 12,
@@ -177,15 +280,23 @@ const styles = StyleSheet.create({
     color: "rgba(255, 255, 255, 0.7)",
     textAlign: "center",
   },
+  // New container for the scroll view
+  scrollContainer: {
+    flex: 1,
+    backgroundColor: "transparent",
+  },
   scrollView: {
     flex: 1,
   },
   scrollContent: {
-    paddingBottom: 20,
+    paddingBottom: 30,
+    flexGrow: 1, // Changed from minHeight to flexGrow
   },
   contentContainer: {
     paddingHorizontal: 20,
     paddingTop: 20,
+    paddingBottom: 20,
+    flex: 1,
   },
   headerText: {
     fontSize: 14,
