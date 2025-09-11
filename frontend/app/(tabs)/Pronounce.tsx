@@ -67,6 +67,8 @@ const Pronounce = () => {
     fetchPronunciations,
     setSearchTerm,
     clearCache,
+    // NEW: Add cache validation method
+    isCacheValid,
   } = usePronunciationStore();
 
   const [selectedLanguage, setSelectedLanguage] = useState("Cebuano");
@@ -76,6 +78,16 @@ const Pronounce = () => {
   const [isInitialized, setIsInitialized] = useState(false);
 
   const flashListRef = useRef<FlashList<PronunciationItem>>(null);
+
+  // NEW: Check if we have cached data available immediately
+  const hasCachedData = useMemo(() => {
+    return transformedData && Object.keys(transformedData).length > 0;
+  }, [transformedData]);
+
+  // NEW: Check if cache is valid on mount
+  const hasValidCache = useMemo(() => {
+    return isCacheValid() && hasCachedData;
+  }, [isCacheValid, hasCachedData]);
 
   const displayData = useMemo(() => {
     // CRITICAL: Check if transformedData exists and has content
@@ -146,13 +158,27 @@ const Pronounce = () => {
     return Array.isArray(languageData) && languageData.length > 0;
   }, [transformedData, selectedLanguage]);
 
-  //Single effect
+  // UPDATED: Enhanced initialization effect
   useEffect(() => {
     let mounted = true;
 
     const initialize = async () => {
       try {
         console.log("[Pronounce] Initializing data...");
+
+        // NEW: If we have valid cache, mark as initialized immediately
+        if (hasValidCache) {
+          console.log(
+            "[Pronounce] Using valid cached data, setting initialized immediately"
+          );
+          if (mounted) {
+            setIsInitialized(true);
+          }
+          return;
+        }
+
+        // If no valid cache, fetch data
+        console.log("[Pronounce] No valid cache, fetching data...");
         await fetchPronunciations(false);
 
         if (mounted) {
@@ -161,6 +187,10 @@ const Pronounce = () => {
         }
       } catch (error) {
         console.error("[Pronounce] Initialization error:", error);
+        // Even on error, mark as initialized to show error state
+        if (mounted) {
+          setIsInitialized(true);
+        }
       }
     };
 
@@ -170,7 +200,7 @@ const Pronounce = () => {
       mounted = false;
       stopAudio();
     };
-  }, [fetchPronunciations, stopAudio]);
+  }, [fetchPronunciations, stopAudio, hasValidCache]);
 
   // FIXED: Debounced search to reduce excessive filtering
   const debouncedSearchRef = useRef<NodeJS.Timeout>();
@@ -262,12 +292,12 @@ const Pronounce = () => {
     return 140; // Adjust this value based on your card's actual height
   }, []);
 
-  // LOADING STATES
-  if (!isInitialized && isLoading) {
+  // UPDATED: Show AppLoading only when actually loading without valid cache
+  if (!isInitialized && isLoading && !hasValidCache) {
     return <AppLoading />;
   }
 
-  if (error && !isInitialized) {
+  if (error && !isInitialized && !hasValidCache) {
     return (
       <SafeAreaView style={[dynamicStyles.container, styles.centerContainer]}>
         <ErrorState onRetry={() => fetchPronunciations(true)} />

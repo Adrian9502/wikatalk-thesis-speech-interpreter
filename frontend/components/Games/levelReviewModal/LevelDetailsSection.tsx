@@ -73,17 +73,17 @@ const styles = StyleSheet.create({
     borderColor: "rgba(255, 255, 255,0.2)",
   },
   errorText: {
-    color: "#ff6b6b",
+    color: BASE_COLORS.danger,
     fontFamily: POPPINS_FONT.medium,
     textAlign: "center",
-    fontSize: 16,
+    fontSize: COMPONENT_FONT_SIZES.card.title,
     marginTop: 8,
   },
   errorHint: {
     color: BASE_COLORS.white,
     fontFamily: "Poppins-Regular",
     textAlign: "center",
-    fontSize: 13,
+    fontSize: COMPONENT_FONT_SIZES.card.subtitle,
     marginTop: 4,
   },
   sectionContainer: {

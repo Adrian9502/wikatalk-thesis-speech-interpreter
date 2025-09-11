@@ -2,10 +2,10 @@ import { StatItem } from "@/types/gameTypes";
 import { StyleSheet, Text, View } from "react-native";
 import React from "react";
 import { BASE_COLORS } from "@/constant/colors";
+import { COMPONENT_FONT_SIZES, POPPINS_FONT } from "@/constant/fontSizes";
 
-const StatBox: React.FC<StatItem> = ({ icon, label, value }) => (
+const StatBox: React.FC<StatItem> = ({ label, value }) => (
   <View style={styles.statBox}>
-    {icon}
     <Text style={styles.statLabel}>{label}</Text>
     <Text style={styles.statValue}>{value}</Text>
   </View>
@@ -14,29 +14,30 @@ const StatBox: React.FC<StatItem> = ({ icon, label, value }) => (
 export default StatBox;
 
 const styles = StyleSheet.create({
+  statLabel: {
+    fontSize: COMPONENT_FONT_SIZES.card.caption,
+    fontFamily: POPPINS_FONT.regular,
+    color: "rgba(255, 255, 255,0.9)",
+    textAlign: "center",
+    letterSpacing: 0.3,
+  },
   statBox: {
-    flex: 1,
+    width: "100%",
     borderWidth: 1,
-    borderColor: "rgba(255, 255, 255, 0.20)",
+    borderColor: "rgba(255, 255, 255, 0.4)",
     backgroundColor: "rgba(255, 255, 255, 0.15)",
     borderRadius: 20,
-    padding: 12,
+    padding: 8,
     alignItems: "center",
     justifyContent: "center",
-    minHeight: 80,
-  },
-  statLabel: {
-    fontSize: 13,
-    fontFamily: "Poppins-Medium",
-    color: "rgba(255, 255, 255, 0.7)",
-    marginTop: 6,
-    textAlign: "center",
+    minHeight: 50,
   },
   statValue: {
-    fontSize: 14,
-    fontFamily: "Poppins-SemiBold",
+    fontSize: COMPONENT_FONT_SIZES.card.subtitle,
+    fontFamily: POPPINS_FONT.medium,
     color: BASE_COLORS.white,
-    marginTop: 2,
+    marginTop: 6,
     textAlign: "center",
+    letterSpacing: 0.2,
   },
 });

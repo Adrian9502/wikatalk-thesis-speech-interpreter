@@ -72,7 +72,6 @@ export interface QuizQuestions {
 
 // Level review modal
 export interface StatItem {
-  icon: React.ReactNode;
   label: string;
   value: string;
   subValue?: string;

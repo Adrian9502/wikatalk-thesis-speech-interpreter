@@ -15,6 +15,7 @@ import LevelInfoModal from "@/components/games/levels/LevelInfoModal";
 import MultipleChoice from "./MultipleChoice";
 import Identification from "./Identification";
 import FillInTheBlank from "./FillInTheBlank";
+import { COMPONENT_FONT_SIZES, POPPINS_FONT } from "@/constant/fontSizes";
 
 const Questions = () => {
   const params = useLocalSearchParams();
@@ -437,8 +438,8 @@ const styles = StyleSheet.create({
     padding: 20,
   },
   errorText: {
-    fontSize: 18,
-    fontFamily: "Poppins-Medium",
+    fontSize: COMPONENT_FONT_SIZES.card.title,
+    fontFamily: POPPINS_FONT.medium,
     color: BASE_COLORS.white,
     textAlign: "center",
     marginBottom: 20,
@@ -450,8 +451,8 @@ const styles = StyleSheet.create({
     borderRadius: 20,
   },
   backButtonText: {
-    fontSize: 16,
-    fontFamily: "Poppins-SemiBold",
+    fontSize: COMPONENT_FONT_SIZES.card.subtitle,
+    fontFamily: POPPINS_FONT.medium,
     color: BASE_COLORS.white,
   },
 });

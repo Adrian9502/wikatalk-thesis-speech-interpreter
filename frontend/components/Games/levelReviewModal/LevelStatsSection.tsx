@@ -4,8 +4,9 @@ import { View, Text, StyleSheet, Dimensions } from "react-native";
 import { formatTime } from "@/utils/gameUtils";
 import { BASE_COLORS } from "@/constant/colors";
 import { COMPONENT_FONT_SIZES, POPPINS_FONT } from "@/constant/fontSizes";
+import StatBox from "./StatBox";
 const { width: screenWidth } = Dimensions.get("window");
-const isSmallScreen = screenWidth < 350; // Adjust threshold as needed
+const isSmallScreen = screenWidth < 350;
 interface CompletedLevelDetails {
   question: string;
   answer: string;
@@ -35,22 +36,15 @@ const LevelStatsSection: React.FC<LevelStatsSectionProps> = ({ details }) => {
       <View style={styles.statsRow}>
         {/* Time spent */}
         <View style={styles.statItem}>
-          <View style={styles.statBox}>
-            <Text style={styles.statLabel}>Time Spent</Text>
-            <Text style={styles.statValue}>
-              {details ? formatTime(details.timeSpent || 0) : "--"}
-            </Text>
-          </View>
+          <StatBox
+            label="Time Spent"
+            value={details ? formatTime(details.timeSpent || 0) : "--"}
+          />
         </View>
 
         {/* Completion date */}
         <View style={styles.statItem}>
-          <View style={styles.statBox}>
-            <Text style={styles.statLabel}>Completed</Text>
-            <Text style={styles.statValue} numberOfLines={2}>
-              {completionDate || "--"}
-            </Text>
-          </View>
+          <StatBox label="Completed" value={completionDate || "--"} />
         </View>
       </View>
 
@@ -58,22 +52,18 @@ const LevelStatsSection: React.FC<LevelStatsSectionProps> = ({ details }) => {
       <View style={styles.statsRow}>
         {/* Total attempts */}
         <View style={styles.statItem}>
-          <View style={styles.statBox}>
-            <Text style={styles.statLabel}>Attempts</Text>
-            <Text style={styles.statValue}>
-              {details?.totalAttempts || "--"}
-            </Text>
-          </View>
+          <StatBox
+            label="Attempts"
+            value={details?.totalAttempts.toString() || "--"}
+          />
         </View>
 
         {/* Success rate */}
         <View style={styles.statItem}>
-          <View style={styles.statBox}>
-            <Text style={styles.statLabel}>Success Rate</Text>
-            <Text style={styles.statValue}>
-              {details ? `${successRate}%` : "--"}
-            </Text>
-          </View>
+          <StatBox
+            label="Success Rate"
+            value={details ? `${successRate}%` : "--"}
+          />
         </View>
       </View>
     </View>
@@ -100,32 +90,6 @@ const styles = StyleSheet.create({
   statItem: {
     flexBasis: isSmallScreen ? "100%" : "48%",
     marginBottom: isSmallScreen ? 8 : 0,
-  },
-  statLabel: {
-    fontSize: COMPONENT_FONT_SIZES.card.caption,
-    fontFamily: POPPINS_FONT.regular,
-    color: "rgba(255, 255, 255,0.9)",
-    textAlign: "center",
-    letterSpacing: 0.3,
-  },
-  statBox: {
-    width: "100%",
-    borderWidth: 1,
-    borderColor: "rgba(255, 255, 255, 0.4)",
-    backgroundColor: "rgba(255, 255, 255, 0.15)",
-    borderRadius: 20,
-    padding: 8,
-    alignItems: "center",
-    justifyContent: "center",
-    minHeight: 50,
-  },
-  statValue: {
-    fontSize: COMPONENT_FONT_SIZES.card.subtitle,
-    fontFamily: POPPINS_FONT.medium,
-    color: BASE_COLORS.white,
-    marginTop: 6,
-    textAlign: "center",
-    letterSpacing: 0.2,
   },
 });
 

@@ -1,6 +1,10 @@
 import { StyleSheet } from "react-native";
 import { BASE_COLORS } from "@/constant/colors";
-import { FONT_SIZES, POPPINS_FONT } from "@/constant/fontSizes";
+import {
+  COMPONENT_FONT_SIZES,
+  FONT_SIZES,
+  POPPINS_FONT,
+} from "@/constant/fontSizes";
 
 const gameSharedStyles = StyleSheet.create({
   // Base container styles
@@ -89,8 +93,8 @@ const gameSharedStyles = StyleSheet.create({
     justifyContent: "center",
   },
   optionText: {
-    fontSize: 15,
-    fontFamily: "Poppins-Medium",
+    fontSize: COMPONENT_FONT_SIZES.card.title,
+    fontFamily: POPPINS_FONT.medium,
     color: BASE_COLORS.white,
     textAlign: "center",
     lineHeight: 22,

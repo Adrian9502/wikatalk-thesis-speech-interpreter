@@ -210,7 +210,7 @@ const styles = StyleSheet.create({
   } as TextStyle,
 
   mediumText: {
-    fontSize: 13,
+    fontSize: COMPONENT_FONT_SIZES.card.subtitle,
   } as TextStyle,
 
   // Cost styles

@@ -3,6 +3,7 @@ import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
 import * as Animatable from "react-native-animatable";
 import { AlertCircle, RefreshCw } from "react-native-feather";
 import { BASE_COLORS } from "@/constant/colors";
+import { COMPONENT_FONT_SIZES, POPPINS_FONT } from "@/constant/fontSizes";
 
 interface ErrorDisplayProps {
   message?: string;
@@ -46,8 +47,8 @@ const styles = StyleSheet.create({
   text: {
     marginTop: 12,
     marginBottom: 16,
-    fontSize: 14,
-    fontFamily: "Poppins-Medium",
+    fontSize: COMPONENT_FONT_SIZES.card.title,
+    fontFamily: POPPINS_FONT.medium,
     color: BASE_COLORS.white,
     textAlign: "center",
   },
@@ -61,8 +62,8 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   retryText: {
-    fontSize: 12,
-    fontFamily: "Poppins-Medium",
+    fontSize: COMPONENT_FONT_SIZES.button.medium,
+    fontFamily: POPPINS_FONT.medium,
     color: BASE_COLORS.white,
   },
 });

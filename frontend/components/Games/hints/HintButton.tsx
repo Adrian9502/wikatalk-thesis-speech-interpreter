@@ -275,7 +275,7 @@ const styles = StyleSheet.create({
     gap: 6,
   },
   hintsUsedText: {
-    fontSize: 11,
+    fontSize: COMPONENT_FONT_SIZES.card.subtitle,
     fontFamily: POPPINS_FONT.medium,
     color: "rgba(255, 255, 255, 0.7)",
   },
@@ -295,8 +295,8 @@ const styles = StyleSheet.create({
 
   // Error Text
   errorText: {
-    fontSize: 11,
-    color: "#FF6B6B",
+    fontSize: COMPONENT_FONT_SIZES.card.subtitle,
+    color: BASE_COLORS.danger,
     fontFamily: POPPINS_FONT.medium,
     textAlign: "center",
     backgroundColor: "rgba(255, 107, 107, 0.1)",

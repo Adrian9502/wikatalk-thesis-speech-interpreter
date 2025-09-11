@@ -33,8 +33,8 @@ export const rewardStyles = StyleSheet.create({
     position: "relative",
   },
   title: {
-    fontSize: 20,
-    fontFamily: "Poppins-SemiBold",
+    fontSize: COMPONENT_FONT_SIZES.card.title,
+    fontFamily: POPPINS_FONT.semiBold,
     color: BASE_COLORS.white,
     textAlign: "center",
   },

@@ -8,6 +8,7 @@ import {
 } from "@/constant/colors";
 import { WifiOff, AlertTriangle } from "react-native-feather";
 import { useNetworkStore } from "@/store/useNetworkStore";
+import { COMPONENT_FONT_SIZES, POPPINS_FONT } from "@/constant/fontSizes";
 
 interface NetworkStatusBarProps {
   onHeightChange?: (height: number) => void;
@@ -147,8 +148,8 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   text: {
-    fontSize: 10,
-    fontFamily: "Poppins-Regular",
+    fontSize: COMPONENT_FONT_SIZES.card.description,
+    fontFamily: POPPINS_FONT.regular,
     textAlign: "center",
   },
 });

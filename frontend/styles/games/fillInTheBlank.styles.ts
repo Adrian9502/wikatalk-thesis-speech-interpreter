@@ -276,7 +276,7 @@ export default StyleSheet.create({
     alignItems: "center",
   },
   loadingText: {
-    fontSize: 14,
+    fontSize: COMPONENT_FONT_SIZES.card.subtitle,
     fontFamily: POPPINS_FONT.medium,
     color: "rgba(255, 255, 255, 0.7)",
     marginTop: 12,

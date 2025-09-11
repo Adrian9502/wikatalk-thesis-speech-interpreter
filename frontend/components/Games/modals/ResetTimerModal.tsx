@@ -13,6 +13,7 @@ import { BASE_COLORS } from "@/constant/colors";
 import { NAVIGATION_COLORS } from "@/constant/colors";
 import { StyleSheet } from "react-native";
 import CloseButton from "../buttons/CloseButton";
+import { COMPONENT_FONT_SIZES, POPPINS_FONT } from "@/constant/fontSizes";
 
 interface ResetTimerModalProps {
   visible: boolean;
@@ -204,16 +205,16 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   modalTitle: {
-    fontSize: 18,
-    fontFamily: "Poppins-SemiBold",
+    fontSize: COMPONENT_FONT_SIZES.card.title,
+    fontFamily: POPPINS_FONT.semiBold,
     color: BASE_COLORS.white,
   },
   modalBody: {
     marginBottom: 24,
   },
   modalText: {
-    fontSize: 12,
-    fontFamily: "Poppins-Medium",
+    fontSize: COMPONENT_FONT_SIZES.card.description,
+    fontFamily: POPPINS_FONT.medium,
     color: BASE_COLORS.white,
     lineHeight: 24,
     textAlign: "center",
@@ -231,8 +232,8 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   costLabel: {
-    fontSize: 12,
-    fontFamily: "Poppins-Medium",
+    fontSize: COMPONENT_FONT_SIZES.card.description,
+    fontFamily: POPPINS_FONT.regular,
     color: "rgba(255, 255, 255, 0.8)",
   },
   costValue: {
@@ -241,8 +242,8 @@ const styles = StyleSheet.create({
     gap: 6,
   },
   costText: {
-    fontSize: 13,
-    fontFamily: "Poppins-SemiBold",
+    fontSize: COMPONENT_FONT_SIZES.card.subtitle,
+    fontFamily: POPPINS_FONT.medium,
     color: BASE_COLORS.white,
   },
   coinImage: {
@@ -257,27 +258,27 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: "rgba(255, 255, 255, 0.1)",
     borderRadius: 20,
-    paddingVertical: 8,
+    paddingVertical: 6,
     alignItems: "center",
   },
   cancelButtonText: {
-    fontSize: 12,
-    fontFamily: "Poppins-Medium",
+    fontSize: COMPONENT_FONT_SIZES.button.medium,
+    fontFamily: POPPINS_FONT.medium,
     color: BASE_COLORS.white,
   },
   confirmButton: {
     flex: 1,
-    backgroundColor: "#F44336",
+    backgroundColor: BASE_COLORS.danger,
     borderRadius: 20,
-    paddingVertical: 8,
+    paddingVertical: 6,
     alignItems: "center",
   },
   confirmButtonDisabled: {
     backgroundColor: "rgba(244, 67, 54, 0.5)",
   },
   confirmButtonText: {
-    fontSize: 12,
-    fontFamily: "Poppins-Medium",
+    fontSize: COMPONENT_FONT_SIZES.button.medium,
+    fontFamily: POPPINS_FONT.medium,
     color: BASE_COLORS.white,
   },
   successHeader: {
@@ -285,16 +286,16 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   successTitle: {
-    fontSize: 18,
-    fontFamily: "Poppins-SemiBold",
+    fontSize: COMPONENT_FONT_SIZES.card.title,
+    fontFamily: POPPINS_FONT.semiBold,
     color: BASE_COLORS.white,
   },
   successBody: {
     marginBottom: 24,
   },
   successText: {
-    fontSize: 12,
-    fontFamily: "Poppins-Medium",
+    fontSize: COMPONENT_FONT_SIZES.card.subtitle,
+    fontFamily: POPPINS_FONT.medium,
     color: BASE_COLORS.white,
     textAlign: "center",
     lineHeight: 24,
@@ -310,8 +311,8 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   successButtonText: {
-    fontSize: 12,
-    fontFamily: "Poppins-Medium",
+    fontSize: COMPONENT_FONT_SIZES.card.subtitle,
+    fontFamily: POPPINS_FONT.medium,
     color: BASE_COLORS.white,
   },
 });

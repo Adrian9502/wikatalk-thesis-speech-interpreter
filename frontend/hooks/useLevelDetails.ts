@@ -186,7 +186,7 @@ export const useLevelDetails = (
         );
         const formattedDate = completedDate.toLocaleDateString("en-US", {
           year: "numeric",
-          month: "long",
+          month: "short",
           day: "numeric",
         });
 
