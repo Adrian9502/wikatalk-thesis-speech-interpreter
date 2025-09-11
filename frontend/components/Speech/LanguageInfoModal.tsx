@@ -85,7 +85,7 @@ const LanguageInfoModal: React.FC<LanguageInfoModalProps> = ({
             ]}
           >
             <Text style={[styles.titleText, { color: colors.background }]}>
-              {languageName} Dialect
+              {languageName} Language
             </Text>
           </View>
           {/* Content using FlatList with the extracted renderer */}
