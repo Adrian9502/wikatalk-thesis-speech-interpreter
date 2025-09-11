@@ -31,7 +31,11 @@ import { BASE_COLORS } from "@/constant/colors";
 import { Dropdown } from "react-native-element-dropdown";
 import { DIALECTS } from "@/constant/languages";
 import { Ionicons } from "@expo/vector-icons";
-import { COMPONENT_FONT_SIZES } from "@/constant/fontSizes";
+import {
+  COMPONENT_FONT_SIZES,
+  FONT_SIZES,
+  POPPINS_FONT,
+} from "@/constant/fontSizes";
 
 const Pronounce = () => {
   // Stop speech when tab focused
@@ -304,6 +308,11 @@ const Pronounce = () => {
               styles.dropdown,
               isDropdownFocus && { borderColor: BASE_COLORS.blue },
             ]}
+            itemTextStyle={{
+              fontSize: FONT_SIZES.lg,
+              fontFamily: POPPINS_FONT.regular,
+              color: BASE_COLORS.darkText,
+            }}
             placeholderStyle={styles.dropdownPlaceholder}
             selectedTextStyle={styles.dropdownSelectedText}
             data={DIALECTS}
@@ -321,7 +330,7 @@ const Pronounce = () => {
             renderRightIcon={() => (
               <Ionicons
                 name={isDropdownFocus ? "chevron-up" : "chevron-down"}
-                size={COMPONENT_FONT_SIZES.card.subtitle} // UPDATED: Use card subtitle size
+                size={COMPONENT_FONT_SIZES.card.subtitle}
                 color={BASE_COLORS.blue}
               />
             )}

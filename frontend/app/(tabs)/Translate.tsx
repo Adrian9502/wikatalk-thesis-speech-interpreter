@@ -167,6 +167,11 @@ const Translate = () => {
                       },
                       isSourceFocus && { borderColor: BASE_COLORS.blue },
                     ]}
+                    itemTextStyle={{
+                      fontSize: FONT_SIZES.lg,
+                      fontFamily: POPPINS_FONT.regular,
+                      color: BASE_COLORS.darkText,
+                    }}
                     placeholderStyle={[
                       styles.dropdownText,
                       { color: BASE_COLORS.placeholderText },
@@ -241,6 +246,11 @@ const Translate = () => {
                       },
                       isTargetFocus && { borderColor: BASE_COLORS.orange },
                     ]}
+                    itemTextStyle={{
+                      fontSize: FONT_SIZES.lg,
+                      fontFamily: POPPINS_FONT.regular,
+                      color: BASE_COLORS.darkText,
+                    }}
                     placeholderStyle={[
                       styles.dropdownText,
                       { color: BASE_COLORS.placeholderText },
@@ -319,6 +329,7 @@ const styles = StyleSheet.create({
     borderRadius: isSmallScreen ? 18 : 20,
     borderWidth: 1,
     height: isSmallScreen ? 37 : 41,
+    borderColor: BASE_COLORS.borderColor,
     paddingHorizontal: isSmallScreen ? 10 : 12,
   },
   dropdownList: {
@@ -330,6 +341,7 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.1,
     shadowRadius: 8,
     elevation: 6,
+    overflow: "hidden",
     borderColor: BASE_COLORS.borderColor,
   },
   dropdownText: {

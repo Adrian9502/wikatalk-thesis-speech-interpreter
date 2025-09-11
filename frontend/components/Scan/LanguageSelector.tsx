@@ -34,6 +34,11 @@ const LanguageSelector: React.FC<LanguageSelectorProps> = ({
             },
             isFocused && { borderColor: BASE_COLORS.blue },
           ]}
+          itemTextStyle={{
+            fontSize: FONT_SIZES.lg,
+            fontFamily: POPPINS_FONT.regular,
+            color: BASE_COLORS.darkText,
+          }}
           placeholderStyle={[styles.dropdownText, { color: BASE_COLORS.blue }]}
           selectedTextStyle={[
             styles.dropdownText,
@@ -88,6 +93,8 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     height: 40,
     paddingHorizontal: 12,
+    borderWidth: 1,
+    borderColor: BASE_COLORS.borderColor,
   },
   dropdownList: {
     borderRadius: 20,
@@ -97,6 +104,7 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.1,
     shadowRadius: 8,
     elevation: 6,
+    overflow: "hidden",
   },
   dropdownText: {
     fontSize: COMPONENT_FONT_SIZES.translation.language, // UPDATED: Use translation language size

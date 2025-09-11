@@ -76,18 +76,19 @@ export const pronunciationStyles = StyleSheet.create({
   },
   dropdownPlaceholder: {
     fontSize: FONT_SIZES.lg,
-    fontFamily: POPPINS_FONT.medium,
+    fontFamily: POPPINS_FONT.regular,
     color: BASE_COLORS.placeholderText,
   },
   dropdownSelectedText: {
     fontSize: FONT_SIZES.lg,
-    fontFamily: POPPINS_FONT.medium,
+    fontFamily: POPPINS_FONT.regular,
     color: BASE_COLORS.blue,
   },
   dropdownList: {
-    borderRadius: isSmallScreen ? 16 : 20,
+    borderRadius: 20,
     backgroundColor: BASE_COLORS.white,
     shadowColor: "#000",
+    overflow: "hidden",
     shadowOffset: { width: 0, height: 6 },
     shadowOpacity: 0.1,
     shadowRadius: 8,
