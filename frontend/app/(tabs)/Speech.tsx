@@ -238,58 +238,46 @@ const Speech = () => {
     };
   }, [stopSpeech]);
 
-  const keyboardOffset =
-    Platform.OS === "ios"
-      ? 90 + insets.bottom // For iOS include the bottom inset
-      : 0; // Android doesn't need this offset with height behavior
-
   return (
     <SafeAreaView
       edges={["left", "right"]}
       style={[dynamicStyles.container, { paddingTop: insets.top }]}
     >
       <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
-        <KeyboardAvoidingView
-          behavior={Platform.OS === "ios" ? "padding" : "height"}
-          style={styles.keyboardAvoidingView}
-          keyboardVerticalOffset={keyboardOffset}
-          enabled={true}
+        <ScrollView
+          showsVerticalScrollIndicator={false}
+          bounces={false}
+          overScrollMode="never"
+          style={styles.contentContainer}
         >
-          <ScrollView
-            showsVerticalScrollIndicator={false}
-            bounces={false}
-            overScrollMode="never"
-            style={styles.contentContainer}
-          >
-            {/* Top section */}
-            <LanguageSection
-              position="top"
-              handlePress={handleMicPress}
-              recording={!!recording && recordingUser === 2}
-              userId={2}
-              onTextAreaFocus={handleTextAreaFocus}
-              recordingDuration={recordingDuration}
-            />
+          {/* Top section */}
+          <LanguageSection
+            position="top"
+            handlePress={handleMicPress}
+            recording={!!recording && recordingUser === 2}
+            userId={2}
+            onTextAreaFocus={handleTextAreaFocus}
+            recordingDuration={recordingDuration}
+          />
 
-            {/* Middle Section - Exchange icon */}
-            <View style={styles.middleSection}>
-              <SwapButton
-                onPress={handleSwapLanguages}
-                borderStyle={styles.swapButtonBorder}
-              />
-            </View>
-
-            {/* Bottom section */}
-            <LanguageSection
-              position="bottom"
-              handlePress={handleMicPress}
-              recording={!!recording && recordingUser === 1}
-              userId={1}
-              onTextAreaFocus={handleTextAreaFocus}
-              recordingDuration={recordingDuration}
+          {/* Middle Section - Exchange icon */}
+          <View style={styles.middleSection}>
+            <SwapButton
+              onPress={handleSwapLanguages}
+              borderStyle={styles.swapButtonBorder}
             />
-          </ScrollView>
-        </KeyboardAvoidingView>
+          </View>
+
+          {/* Bottom section */}
+          <LanguageSection
+            position="bottom"
+            handlePress={handleMicPress}
+            recording={!!recording && recordingUser === 1}
+            userId={1}
+            onTextAreaFocus={handleTextAreaFocus}
+            recordingDuration={recordingDuration}
+          />
+        </ScrollView>
       </TouchableWithoutFeedback>
 
       {/* Language Information Modal */}

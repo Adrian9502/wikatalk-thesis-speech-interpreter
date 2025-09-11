@@ -139,10 +139,10 @@ const LanguageSection: React.FC<LanguageSectionProps> = ({
         minHeight = height * 0.45;
         padding = 12;
       } else {
-        // Top section when keyboard is visible - shrink more
-        sectionHeight = isVerySmallScreen ? height * 0.25 : height * 0.28;
-        minHeight = height * 0.22;
-        padding = 8;
+        // FIXED: Top section when keyboard is visible - maintain reasonable minimum height
+        sectionHeight = isVerySmallScreen ? height * 0.35 : height * 0.38; // Increased from 0.25/0.28
+        minHeight = isVerySmallScreen ? height * 0.32 : height * 0.35; // Increased from 0.22
+        padding = 12; // Increased padding slightly
       }
     } else {
       // FIXED: Normal state - better distribution for small screens
