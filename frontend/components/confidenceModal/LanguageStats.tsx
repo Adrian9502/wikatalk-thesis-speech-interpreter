@@ -12,9 +12,13 @@ interface LanguageStatsProps {
   currentRank: number;
   accuracy: number;
   wer: number;
+  untrainedAccuracy: number;
+  accuracyImprovement: number;
+  percentageDecrease: number;
   color: string;
   confidenceLevel: string;
   description: string;
+  classification: string;
 }
 
 const LanguageStats: React.FC<LanguageStatsProps> = ({
@@ -22,9 +26,13 @@ const LanguageStats: React.FC<LanguageStatsProps> = ({
   currentRank,
   accuracy,
   wer,
+  untrainedAccuracy,
+  accuracyImprovement,
+  percentageDecrease,
   color,
   confidenceLevel,
   description,
+  classification,
 }) => {
   return (
     <View style={styles.currentStatsSection}>
@@ -41,7 +49,7 @@ const LanguageStats: React.FC<LanguageStatsProps> = ({
             <Text style={[styles.accuracyValue, { color }]}>
               {accuracy.toFixed(1)}%
             </Text>
-            <Text style={styles.accuracyLabel}>Accuracy</Text>
+            <Text style={styles.accuracyLabel}>Current Accuracy</Text>
           </View>
 
           <View style={styles.werInfo}>
@@ -50,17 +58,52 @@ const LanguageStats: React.FC<LanguageStatsProps> = ({
           </View>
         </View>
 
-        <View
-          style={[styles.confidenceBadge, { backgroundColor: `${color}15` }]}
-        >
-          <View style={[styles.confidenceDot, { backgroundColor: color }]} />
-          <Text style={[styles.confidenceText, { color }]}>
-            {confidenceLevel === "high"
-              ? "High Confidence"
-              : confidenceLevel === "medium"
-              ? "Moderate Confidence"
-              : "Lower Confidence"}
-          </Text>
+        {/* New improvement metrics section */}
+        <View style={styles.improvementMetrics}>
+          <View style={styles.metricItem}>
+            <Text style={styles.metricLabel}>Before Training</Text>
+            <Text style={styles.metricValue}>
+              {untrainedAccuracy.toFixed(1)}%
+            </Text>
+          </View>
+          <View style={styles.metricItem}>
+            <Text style={styles.metricLabel}>Improvement</Text>
+            <Text style={[styles.metricValue, styles.improvementValue]}>
+              +{accuracyImprovement.toFixed(1)}%
+            </Text>
+          </View>
+          <View style={styles.metricItem}>
+            <Text style={styles.metricLabel}>WER Reduction</Text>
+            <Text style={[styles.metricValue, styles.improvementValue]}>
+              {percentageDecrease.toFixed(1)}%
+            </Text>
+          </View>
+        </View>
+
+        <View style={styles.badgeContainer}>
+          <View
+            style={[styles.confidenceBadge, { backgroundColor: `${color}15` }]}
+          >
+            <View style={[styles.confidenceDot, { backgroundColor: color }]} />
+            <Text style={[styles.confidenceText, { color }]}>
+              {confidenceLevel === "high"
+                ? "High Confidence"
+                : confidenceLevel === "medium"
+                ? "Moderate Confidence"
+                : "Lower Confidence"}
+            </Text>
+          </View>
+
+          <View
+            style={[
+              styles.classificationBadge,
+              { backgroundColor: `${color}10` },
+            ]}
+          >
+            <Text style={[styles.classificationText, { color }]}>
+              {classification}
+            </Text>
+          </View>
         </View>
 
         <Text style={styles.description}>{description}</Text>
@@ -81,25 +124,25 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   languageName: {
-    fontSize: COMPONENT_FONT_SIZES.card.title,
+    fontSize: FONT_SIZES["2xl"],
     fontFamily: POPPINS_FONT.semiBold,
     color: BASE_COLORS.darkText,
   },
   rankBadge: {
-    backgroundColor: BASE_COLORS.lightPink,
+    backgroundColor: BASE_COLORS.blue,
     paddingHorizontal: 12,
     paddingVertical: 4,
-    borderRadius: 12,
+    borderRadius: 20,
   },
   rankText: {
     fontSize: COMPONENT_FONT_SIZES.card.description,
     fontFamily: POPPINS_FONT.medium,
-    color: BASE_COLORS.orange,
+    color: BASE_COLORS.white,
   },
   accuracyCard: {
-    backgroundColor: "#FAF9F6",
-    borderWidth: 0.5,
-    borderColor: "#F0EAD6",
+    borderWidth: 1,
+    borderColor: BASE_COLORS.borderColor,
+    backgroundColor: BASE_COLORS.white,
     borderRadius: 20,
     padding: 16,
   },
@@ -107,7 +150,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    marginBottom: 12,
+    marginBottom: 16,
   },
   accuracyNumber: {
     alignItems: "flex-start",
@@ -117,7 +160,7 @@ const styles = StyleSheet.create({
     fontFamily: POPPINS_FONT.bold,
   },
   accuracyLabel: {
-    fontSize: FONT_SIZES.xs,
+    fontSize: FONT_SIZES.sm,
     fontFamily: POPPINS_FONT.medium,
     color: BASE_COLORS.placeholderText,
     marginTop: -4,
@@ -126,36 +169,74 @@ const styles = StyleSheet.create({
     alignItems: "flex-end",
   },
   werLabel: {
-    fontSize: FONT_SIZES.xs,
+    fontSize: FONT_SIZES.sm,
     fontFamily: POPPINS_FONT.medium,
     color: BASE_COLORS.placeholderText,
   },
   werValue: {
     fontSize: FONT_SIZES.xl,
-    fontFamily: POPPINS_FONT.medium,
+    fontFamily: POPPINS_FONT.semiBold,
     color: BASE_COLORS.danger,
+  },
+  improvementMetrics: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    marginBottom: 16,
+    paddingHorizontal: 4,
+  },
+  metricItem: {
+    alignItems: "center",
+    flex: 1,
+  },
+  metricLabel: {
+    fontSize: FONT_SIZES.sm,
+    fontFamily: POPPINS_FONT.medium,
+    color: BASE_COLORS.placeholderText,
+    textAlign: "center",
+  },
+  metricValue: {
+    fontSize: FONT_SIZES.lg,
+    fontFamily: POPPINS_FONT.semiBold,
+    color: BASE_COLORS.darkText,
+    marginTop: 2,
+  },
+  improvementValue: {
+    color: BASE_COLORS.success,
+  },
+  badgeContainer: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 12,
   },
   confidenceBadge: {
     flexDirection: "row",
     alignItems: "center",
-    alignSelf: "flex-start",
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 20,
-    marginBottom: 12,
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 16,
   },
   confidenceDot: {
-    width: 8,
-    height: 8,
-    borderRadius: 4,
-    marginRight: 6,
+    width: 6,
+    height: 6,
+    borderRadius: 3,
+    marginRight: 4,
   },
   confidenceText: {
-    fontSize: COMPONENT_FONT_SIZES.card.description,
+    fontSize: FONT_SIZES.sm,
     fontFamily: POPPINS_FONT.medium,
   },
+  classificationBadge: {
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 16,
+  },
+  classificationText: {
+    fontSize: FONT_SIZES.sm,
+    fontFamily: POPPINS_FONT.semiBold,
+  },
   description: {
-    fontSize: COMPONENT_FONT_SIZES.card.caption,
+    fontSize: FONT_SIZES.sm,
     fontFamily: POPPINS_FONT.medium,
     color: BASE_COLORS.placeholderText,
     lineHeight: 18,

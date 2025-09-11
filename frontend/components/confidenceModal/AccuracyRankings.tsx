@@ -6,16 +6,18 @@ import { COMPONENT_FONT_SIZES, POPPINS_FONT } from "@/constant/fontSizes";
 
 interface LanguageStat {
   displayName: string;
-  accuracy: number;
+  trainedAccuracy: number; // Updated from 'accuracy'
   wer: number;
+  percentageDecrease: number; // Added
+  classification: string; // Added
   isSelected: boolean;
 }
 
 interface AccuracyRankingsProps {
   language: string;
-  allStats: LanguageStat[];
+  allStats: (LanguageStat | null)[]; // Updated to handle potential null values
   currentRank: number;
-  accuracy: number;
+  accuracy: number; // This is trainedAccuracy from parent
 }
 
 const AccuracyRankings: React.FC<AccuracyRankingsProps> = ({
@@ -24,6 +26,11 @@ const AccuracyRankings: React.FC<AccuracyRankingsProps> = ({
   currentRank,
   accuracy,
 }) => {
+  // Filter out null values
+  const validStats = allStats.filter(
+    (stat): stat is LanguageStat => stat !== null
+  );
+
   return (
     <View style={styles.rankingSection}>
       <View style={styles.rankingTitle}>
@@ -31,16 +38,17 @@ const AccuracyRankings: React.FC<AccuracyRankingsProps> = ({
         <Text style={styles.sectionTitle}>Accuracy Rankings</Text>
       </View>
       <Text style={styles.rankingSubtitle}>
-        How {language} compares to other dialects
+        How {language} compares to other dialects (post-training accuracy)
       </Text>
 
       <View style={styles.rankingList}>
-        {allStats.slice(0, 5).map((stat, index) => (
+        {validStats.slice(0, 5).map((stat, index) => (
           <View
             key={stat.displayName}
             style={[
               styles.rankingItem,
               stat.isSelected && styles.rankingItemSelected,
+              index === validStats.slice(0, 5).length - 1 && styles.lastItem,
             ]}
           >
             <View style={styles.rankingLeft}>
@@ -52,23 +60,31 @@ const AccuracyRankings: React.FC<AccuracyRankingsProps> = ({
               >
                 #{index + 1}
               </Text>
+              <View style={styles.languageInfo}>
+                <Text
+                  style={[
+                    styles.rankingLanguage,
+                    stat.isSelected && styles.rankingLanguageSelected,
+                  ]}
+                >
+                  {stat.displayName}
+                </Text>
+                <Text style={styles.classificationText}>
+                  {stat.classification}
+                </Text>
+              </View>
+            </View>
+            <View style={styles.rankingRight}>
               <Text
                 style={[
-                  styles.rankingLanguage,
-                  stat.isSelected && styles.rankingLanguageSelected,
+                  styles.rankingAccuracy,
+                  stat.isSelected && styles.rankingAccuracySelected,
                 ]}
               >
-                {stat.displayName}
+                {stat.trainedAccuracy.toFixed(1)}%
               </Text>
+              <Text style={styles.werText}>{stat.wer.toFixed(1)}% WER</Text>
             </View>
-            <Text
-              style={[
-                styles.rankingAccuracy,
-                stat.isSelected && styles.rankingAccuracySelected,
-              ]}
-            >
-              {stat.accuracy.toFixed(1)}%
-            </Text>
           </View>
         ))}
 
@@ -77,7 +93,13 @@ const AccuracyRankings: React.FC<AccuracyRankingsProps> = ({
             <View style={styles.rankingDivider}>
               <Text style={styles.rankingDividerText}>...</Text>
             </View>
-            <View style={[styles.rankingItem, styles.rankingItemSelected]}>
+            <View
+              style={[
+                styles.rankingItem,
+                styles.rankingItemSelected,
+                styles.lastItem,
+              ]}
+            >
               <View style={styles.rankingLeft}>
                 <Text
                   style={[
@@ -87,20 +109,27 @@ const AccuracyRankings: React.FC<AccuracyRankingsProps> = ({
                 >
                   #{currentRank}
                 </Text>
+                <View style={styles.languageInfo}>
+                  <Text
+                    style={[
+                      styles.rankingLanguage,
+                      styles.rankingLanguageSelected,
+                    ]}
+                  >
+                    {language}
+                  </Text>
+                </View>
+              </View>
+              <View style={styles.rankingRight}>
                 <Text
                   style={[
-                    styles.rankingLanguage,
-                    styles.rankingLanguageSelected,
+                    styles.rankingAccuracy,
+                    styles.rankingAccuracySelected,
                   ]}
                 >
-                  {language}
+                  {accuracy.toFixed(1)}%
                 </Text>
               </View>
-              <Text
-                style={[styles.rankingAccuracy, styles.rankingAccuracySelected]}
-              >
-                {accuracy.toFixed(1)}%
-              </Text>
             </View>
           </>
         )}
@@ -146,9 +175,11 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: BASE_COLORS.borderColor,
   },
+  lastItem: {
+    borderBottomWidth: 0,
+  },
   rankingItemSelected: {
     backgroundColor: BASE_COLORS.lightPink,
-    borderBottomColor: BASE_COLORS.orange,
   },
   rankingLeft: {
     flexDirection: "row",
@@ -164,15 +195,27 @@ const styles = StyleSheet.create({
   rankingPositionSelected: {
     color: BASE_COLORS.orange,
   },
+  languageInfo: {
+    marginLeft: 8,
+    flex: 1,
+  },
   rankingLanguage: {
     fontSize: COMPONENT_FONT_SIZES.card.subtitle,
     fontFamily: POPPINS_FONT.regular,
     color: BASE_COLORS.darkText,
-    marginLeft: 8,
   },
   rankingLanguageSelected: {
     fontFamily: POPPINS_FONT.medium,
     color: BASE_COLORS.orange,
+  },
+  classificationText: {
+    fontSize: COMPONENT_FONT_SIZES.card.caption - 1,
+    fontFamily: POPPINS_FONT.regular,
+    color: BASE_COLORS.placeholderText,
+    marginTop: 1,
+  },
+  rankingRight: {
+    alignItems: "flex-end",
   },
   rankingAccuracy: {
     fontSize: COMPONENT_FONT_SIZES.card.subtitle,
@@ -181,6 +224,12 @@ const styles = StyleSheet.create({
   },
   rankingAccuracySelected: {
     color: BASE_COLORS.orange,
+  },
+  werText: {
+    fontSize: COMPONENT_FONT_SIZES.card.caption - 1,
+    fontFamily: POPPINS_FONT.regular,
+    color: BASE_COLORS.placeholderText,
+    marginTop: 1,
   },
   rankingDivider: {
     padding: 8,

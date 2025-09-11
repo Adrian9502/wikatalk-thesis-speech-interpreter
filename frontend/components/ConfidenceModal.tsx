@@ -28,71 +28,101 @@ const ConfidenceModal: React.FC<ConfidenceModalProps> = ({
     return null;
   }
 
-  // Word Error Rate data
-  const werByDialect: { [key: string]: { [key: string]: string | number } } = {
+  // CORRECTED: Updated WER data based on research with proper structure
+  const werByDialect: {
+    [key: string]: {
+      WER_Untrained: number;
+      WER_Trained: number;
+      PercentageDecrease: number;
+      Classification: string;
+      AudioDuration?: number;
+    };
+  } = {
     bik: {
-      WER_Trained: 10.70,
-      WER_Not_Trained: 60.00,
+      WER_Untrained: 60.0,
+      WER_Trained: 10.7,
+      PercentageDecrease: 82.17,
       Classification: "Good",
+      AudioDuration: 4729.6,
     },
     ceb: {
+      WER_Untrained: 50.73,
       WER_Trained: 12.77,
-      WER_Not_Trained: 50.73,
+      PercentageDecrease: 74.83,
       Classification: "Good",
+      AudioDuration: 43826.04,
     },
     hil: {
+      WER_Untrained: 57.11,
       WER_Trained: 4.44,
-      WER_Not_Trained: 57.11,
+      PercentageDecrease: 92.23,
       Classification: "Excellent",
+      AudioDuration: 5794.69,
     },
     ilo: {
+      WER_Untrained: 87.72,
       WER_Trained: 7.73,
-      WER_Not_Trained: 87.72,
+      PercentageDecrease: 91.19,
       Classification: "High Accuracy",
+      AudioDuration: 5569.83,
     },
     mrw: {
+      WER_Untrained: 83.5,
       WER_Trained: 11.39,
-      WER_Not_Trained: 83.50,
+      PercentageDecrease: 86.36,
       Classification: "Good",
+      AudioDuration: 6387.01,
     },
     pag: {
+      WER_Untrained: 84.39,
       WER_Trained: 8.69,
-      WER_Not_Trained: 84.39,
+      PercentageDecrease: 89.7,
       Classification: "High Accuracy",
+      AudioDuration: 14518.55,
     },
     tgl: {
+      WER_Untrained: 26.28,
       WER_Trained: 12.16,
-      WER_Not_Trained: 26.28,
+      PercentageDecrease: 53.73,
       Classification: "Good",
+      AudioDuration: 27752.52,
     },
     war: {
+      WER_Untrained: 74.36,
       WER_Trained: 15.05,
-      WER_Not_Trained: 74.36,
+      PercentageDecrease: 79.76,
       Classification: "Good",
+      AudioDuration: 5233.41,
     },
     pam: {
+      WER_Untrained: 79.13,
       WER_Trained: 11.68,
-      WER_Not_Trained: 79.13,
+      PercentageDecrease: 85.24,
       Classification: "Good",
+      AudioDuration: 4865.35,
     },
     bisaya: {
+      WER_Untrained: 65.19,
       WER_Trained: 8.31,
-      WER_Not_Trained: 65.19,
+      PercentageDecrease: 87.25,
       Classification: "High Accuracy",
+      // AudioDuration: NaN in research
     },
   };
 
-  // Language name mapping for display
+  // CORRECTED: Updated language name mapping
   const languageMapping: { [key: string]: string } = {
     Tagalog: "tgl",
     Cebuano: "ceb",
     Hiligaynon: "hil",
     Ilocano: "ilo",
-    Bicol: "bik",
+    Bikol: "bik", // Fixed: was "Bicol"
+    Bikolano: "bik", // Added alternative name
     Waray: "war",
     Pangasinan: "pag",
-    Maguindanao: "mrw",
-    Kapampangan: "pam",
+    Maranao: "mrw", // Fixed: was "Maguindanao"
+    Kapampangan: "pam", // Fixed: was "Kapampangan"
+    Pampanga: "pam", // Added alternative name
     Bisaya: "bisaya",
   };
 
@@ -104,58 +134,105 @@ const ConfidenceModal: React.FC<ConfidenceModalProps> = ({
     return languageMapping[trimmedName] || trimmedName.toLowerCase();
   };
 
+  // CORRECTED: Proper accuracy and confidence calculations
   const getConfidenceData = (lang: string) => {
     const langKey = getLanguageKey(lang);
-    const wer = werByDialect[langKey] || { WER_Trained: 15, WER_Not_Trained: 75, Classification: "Unknown" };
-    const accuracy =
-      Math.round(
-        (Number(wer.WER_Not_Trained) - Number(wer.WER_Trained)) * 100
-      ) / 100;
+    const werData = werByDialect[langKey] || {
+      WER_Untrained: 75,
+      WER_Trained: 15,
+      PercentageDecrease: 80,
+      Classification: "Unknown",
+    };
 
+    // FIXED: Proper accuracy calculation
+    // Accuracy = 100 - WER (since WER is error rate)
+    const trainedAccuracy = Math.round((100 - werData.WER_Trained) * 100) / 100;
+    const untrainedAccuracy =
+      Math.round((100 - werData.WER_Untrained) * 100) / 100;
+
+    // Performance improvement (how much accuracy gained)
+    const accuracyImprovement =
+      Math.round((trainedAccuracy - untrainedAccuracy) * 100) / 100;
+
+    // Use research-based percentage decrease
+    const percentageDecrease = werData.PercentageDecrease;
+
+    // FIXED: Classification based on research WER ranges
     let confidenceLevel: "high" | "medium" | "low" = "medium";
     let color = BASE_COLORS.orange;
     let description = "";
 
-    if (accuracy >= 85) {
+    if (werData.WER_Trained <= 5) {
+      // Excellent (≤5% WER)
       confidenceLevel = "high";
       color = BASE_COLORS.success;
-      description = "Excellent translation accuracy. Very reliable results.";
-    } else if (accuracy >= 80) {
+      description = "Excellent transcription accuracy. Very reliable results.";
+    } else if (werData.WER_Trained <= 10) {
+      // High Accuracy (>5% WER ≤10% WER)
+      confidenceLevel = "high";
+      color = BASE_COLORS.success;
+      description = "High transcription accuracy. Very reliable results.";
+    } else if (werData.WER_Trained <= 25) {
+      // Good (>10% WER ≤25% WER)
       confidenceLevel = "medium";
       color = BASE_COLORS.orange;
-      description = "Good translation accuracy. Generally reliable results.";
+      description = "Good transcription accuracy. Generally reliable results.";
     } else {
+      // Moderate or Poor (>25% WER)
       confidenceLevel = "low";
       color = BASE_COLORS.danger;
-      description = "Lower translation accuracy. Results may need review.";
+      description = "Lower transcription accuracy. Results may need review.";
     }
 
-    return { accuracy, wer, confidenceLevel, color, description };
+    return {
+      trainedAccuracy,
+      untrainedAccuracy,
+      accuracyImprovement,
+      percentageDecrease,
+      werData,
+      confidenceLevel,
+      color,
+      description,
+    };
   };
 
-  const { accuracy, wer, confidenceLevel, color, description } =
-    getConfidenceData(language);
+  const {
+    trainedAccuracy,
+    untrainedAccuracy,
+    accuracyImprovement,
+    percentageDecrease,
+    werData,
+    confidenceLevel,
+    color,
+    description,
+  } = getConfidenceData(language);
 
-  // Get all languages sorted by accuracy for comparison
+  // CORRECTED: Get all languages sorted by trained accuracy for comparison
   const getAllLanguageStats = () => {
     return Object.entries(languageMapping)
       .map(([displayName, code]) => {
-        const werData = werByDialect[code];
-        const werTrained = werData && typeof werData.WER_Trained === "number" ? werData.WER_Trained : 15;
-        const werNotTrained = werData && typeof werData.WER_Not_Trained === "number" ? werData.WER_Not_Trained : 75;
-        const accuracy = Math.round((werNotTrained - werTrained) * 100) / 100;
+        const data = werByDialect[code];
+        if (!data) return null;
+
+        const trainedAccuracy =
+          Math.round((100 - data.WER_Trained) * 100) / 100;
+        const werTrained = data.WER_Trained;
+
         return {
           displayName,
-          accuracy,
+          trainedAccuracy,
           wer: werTrained,
+          percentageDecrease: data.PercentageDecrease,
+          classification: data.Classification,
           isSelected: displayName === language,
         };
       })
-      .sort((a, b) => b.accuracy - a.accuracy);
+      .filter(Boolean) // Remove null entries
+      .sort((a, b) => b!.trainedAccuracy - a!.trainedAccuracy); // Sort by accuracy (highest first)
   };
 
   const allStats = getAllLanguageStats();
-  const currentRank = allStats.findIndex((stat) => stat.isSelected) + 1;
+  const currentRank = allStats.findIndex((stat) => stat?.isSelected) + 1;
 
   return (
     <Modal
@@ -191,15 +268,25 @@ const ConfidenceModal: React.FC<ConfidenceModalProps> = ({
             <LanguageStats
               language={language}
               currentRank={currentRank}
-              accuracy={accuracy}
-              wer={typeof wer.WER_Trained === "number" ? wer.WER_Trained : 0}
+              accuracy={trainedAccuracy} // Now shows actual accuracy %
+              wer={werData.WER_Trained} // Shows trained WER
+              untrainedAccuracy={untrainedAccuracy} // Additional metric
+              accuracyImprovement={accuracyImprovement} // Shows improvement in accuracy points
+              percentageDecrease={percentageDecrease} // Shows research-based % decrease
               color={color}
               confidenceLevel={confidenceLevel}
               description={description}
+              classification={werData.Classification} // Research-based classification
             />
 
             {/* What This Means Section */}
-            <InfoSection language={language} wer={typeof wer === "number" ? wer : 0} />
+            <InfoSection
+              language={language}
+              wer={werData.WER_Trained}
+              untrainedWer={werData.WER_Untrained}
+              percentageDecrease={percentageDecrease}
+              classification={werData.Classification}
+            />
 
             {/* Tips Section - Show both speech and OCR tips if type is OCR */}
             {type === "ocr" && <TipsSection type="ocr" />}
@@ -210,7 +297,7 @@ const ConfidenceModal: React.FC<ConfidenceModalProps> = ({
               language={language}
               allStats={allStats}
               currentRank={currentRank}
-              accuracy={accuracy}
+              accuracy={trainedAccuracy}
             />
           </ScrollView>
         </View>
