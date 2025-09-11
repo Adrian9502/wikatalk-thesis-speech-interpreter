@@ -29,17 +29,57 @@ const ConfidenceModal: React.FC<ConfidenceModalProps> = ({
   }
 
   // Word Error Rate data
-  const werByDialect: { [key: string]: number } = {
-    bik: 16.95,
-    ceb: 14.66,
-    hil: 7.29,
-    ilo: 14.52,
-    mrw: 16.77,
-    pag: 19.08,
-    tgl: 14.1,
-    war: 19.27,
-    pam: 23.67,
-    bisaya: 14.87,
+  const werByDialect: { [key: string]: { [key: string]: string | number } } = {
+    bik: {
+      WER_Trained: 10.70,
+      WER_Not_Trained: 60.00,
+      Classification: "Good",
+    },
+    ceb: {
+      WER_Trained: 12.77,
+      WER_Not_Trained: 50.73,
+      Classification: "Good",
+    },
+    hil: {
+      WER_Trained: 4.44,
+      WER_Not_Trained: 57.11,
+      Classification: "Excellent",
+    },
+    ilo: {
+      WER_Trained: 7.73,
+      WER_Not_Trained: 87.72,
+      Classification: "High Accuracy",
+    },
+    mrw: {
+      WER_Trained: 11.39,
+      WER_Not_Trained: 83.50,
+      Classification: "Good",
+    },
+    pag: {
+      WER_Trained: 8.69,
+      WER_Not_Trained: 84.39,
+      Classification: "High Accuracy",
+    },
+    tgl: {
+      WER_Trained: 12.16,
+      WER_Not_Trained: 26.28,
+      Classification: "Good",
+    },
+    war: {
+      WER_Trained: 15.05,
+      WER_Not_Trained: 74.36,
+      Classification: "Good",
+    },
+    pam: {
+      WER_Trained: 11.68,
+      WER_Not_Trained: 79.13,
+      Classification: "Good",
+    },
+    bisaya: {
+      WER_Trained: 8.31,
+      WER_Not_Trained: 65.19,
+      Classification: "High Accuracy",
+    },
   };
 
   // Language name mapping for display
@@ -66,8 +106,11 @@ const ConfidenceModal: React.FC<ConfidenceModalProps> = ({
 
   const getConfidenceData = (lang: string) => {
     const langKey = getLanguageKey(lang);
-    const wer = werByDialect[langKey] || 15;
-    const accuracy = Math.round((100 - wer) * 100) / 100;
+    const wer = werByDialect[langKey] || { WER_Trained: 15, WER_Not_Trained: 75, Classification: "Unknown" };
+    const accuracy =
+      Math.round(
+        (Number(wer.WER_Not_Trained) - Number(wer.WER_Trained)) * 100
+      ) / 100;
 
     let confidenceLevel: "high" | "medium" | "low" = "medium";
     let color = BASE_COLORS.orange;
@@ -97,12 +140,14 @@ const ConfidenceModal: React.FC<ConfidenceModalProps> = ({
   const getAllLanguageStats = () => {
     return Object.entries(languageMapping)
       .map(([displayName, code]) => {
-        const wer = werByDialect[code] || 15;
-        const accuracy = Math.round((100 - wer) * 100) / 100;
+        const werData = werByDialect[code];
+        const werTrained = werData && typeof werData.WER_Trained === "number" ? werData.WER_Trained : 15;
+        const werNotTrained = werData && typeof werData.WER_Not_Trained === "number" ? werData.WER_Not_Trained : 75;
+        const accuracy = Math.round((werNotTrained - werTrained) * 100) / 100;
         return {
           displayName,
           accuracy,
-          wer,
+          wer: werTrained,
           isSelected: displayName === language,
         };
       })
@@ -147,14 +192,14 @@ const ConfidenceModal: React.FC<ConfidenceModalProps> = ({
               language={language}
               currentRank={currentRank}
               accuracy={accuracy}
-              wer={wer}
+              wer={typeof wer.WER_Trained === "number" ? wer.WER_Trained : 0}
               color={color}
               confidenceLevel={confidenceLevel}
               description={description}
             />
 
             {/* What This Means Section */}
-            <InfoSection language={language} wer={wer} />
+            <InfoSection language={language} wer={typeof wer === "number" ? wer : 0} />
 
             {/* Tips Section - Show both speech and OCR tips if type is OCR */}
             {type === "ocr" && <TipsSection type="ocr" />}
