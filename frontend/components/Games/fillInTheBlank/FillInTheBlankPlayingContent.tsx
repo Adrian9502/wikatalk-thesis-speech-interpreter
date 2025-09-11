@@ -22,8 +22,8 @@ import { getGameModeGradient } from "@/utils/gameUtils";
 import styles from "@/styles/games/fillInTheBlank.styles";
 import gamesSharedStyles from "@/styles/gamesSharedStyles";
 import LevelTitleHeader from "@/components/games/LevelTitleHeader";
-import HintButton from "@/components/games/hints/HintButton"; // NEW: Import HintButton
-import useHintStore from "@/store/games/useHintStore"; // NEW: Import hint store
+import HintButton from "@/components/games/hints/HintButton";
+import useHintStore from "@/store/games/useHintStore";
 import Icon from "react-native-vector-icons/Feather";
 import { useNavigation } from "expo-router";
 
@@ -344,9 +344,7 @@ const FillInTheBlankPlayingContent: React.FC<RenderPlayingContentProps> =
             <View style={styles.hintSection}>
               {/* Left side: Letter hint display */}
               <View style={styles.letterHintContainer}>
-                <View style={styles.letterHintHeader}>
-                  <Text style={styles.letterHintLabel}>Hint</Text>
-                </View>
+                <Text style={styles.letterHintLabel}>Hint:</Text>
                 <View style={styles.letterHintDisplay}>
                   <Text style={styles.letterHintText}>
                     {hintsUsedCount > 0

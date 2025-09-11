@@ -105,7 +105,19 @@ const MultipleChoicePlayingContent: React.FC<MultipleChoicePlayingContentProps> 
       );
 
       return (
-        <View style={gamesSharedStyles.gameContainer}>
+        <ScrollView
+          bounces={false}
+          overScrollMode="never"
+          style={gamesSharedStyles.gameContainer}
+          showsVerticalScrollIndicator={false}
+          keyboardShouldPersistTaps="handled"
+          keyboardDismissMode="interactive"
+          removeClippedSubviews={false}
+          contentContainerStyle={{
+            paddingVertical: 10,
+            paddingBottom: 40,
+          }}
+        >
           {/* Question Card */}
           <View style={gamesSharedStyles.questionCardContainer}>
             <LinearGradient
@@ -239,7 +251,7 @@ const MultipleChoicePlayingContent: React.FC<MultipleChoicePlayingContentProps> 
               })}
             </ScrollView>
           </View>
-        </View>
+        </ScrollView>
       );
     }
   );

@@ -589,11 +589,6 @@ export const levelStyles = StyleSheet.create({
     alignItems: "center",
     borderRadius: 20,
     backgroundColor: "rgba(255, 255, 255, 0.1)",
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.15,
-    shadowRadius: 3,
-    elevation: 2,
   },
   filterLoadingOverlay: {
     flex: 1,

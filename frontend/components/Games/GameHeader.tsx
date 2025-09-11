@@ -65,7 +65,7 @@ const GameHeader = ({
   };
 
   return (
-    <View style={styles.headerContainer}>
+    <>
       {/* Main Header Row */}
       <View style={styles.headerRow}>
         {/* Left section - Back button */}
@@ -103,15 +103,11 @@ const GameHeader = ({
           variant={variant}
         />
       )}
-    </View>
+    </>
   );
 };
 
 const styles = StyleSheet.create({
-  headerContainer: {
-    paddingTop: 10,
-    paddingBottom: 15,
-  },
   headerRow: {
     flexDirection: "row",
     justifyContent: "space-between",

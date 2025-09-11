@@ -55,20 +55,18 @@ export default StyleSheet.create({
     minWidth: "60%",
     flex: 1,
     maxWidth: "80%",
-    padding: 15,
+    padding: 10,
     borderRadius: 20,
     borderWidth: 1,
     backgroundColor: "rgba(255, 255, 255, 0.15)",
     borderColor: "rgba(255, 255, 255, 0.3)",
+    gap: 2,
   },
-  letterHintHeader: {
-    marginBottom: 8,
-  },
+
   letterHintLabel: {
-    fontSize: COMPONENT_FONT_SIZES.card.title,
+    fontSize: COMPONENT_FONT_SIZES.card.subtitle,
     letterSpacing: 1,
     fontFamily: POPPINS_FONT.semiBold,
-    textTransform: "uppercase",
     textAlign: "center",
     color: "rgba(255, 255, 255, 0.9)",
   },
@@ -102,13 +100,15 @@ export default StyleSheet.create({
     marginBottom: 12,
   },
   inputLabel: {
-    fontSize: 14,
+    fontSize: COMPONENT_FONT_SIZES.card.subtitle,
     fontFamily: POPPINS_FONT.medium,
     color: "rgba(255, 255, 255, 0.8)",
   },
   inputWrapper: {
     flexDirection: "row",
     alignItems: "center",
+    flexWrap: "wrap",
+    justifyContent: "center",
     gap: 12,
   },
   inputContainer: {
