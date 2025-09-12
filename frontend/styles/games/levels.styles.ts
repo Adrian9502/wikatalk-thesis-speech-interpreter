@@ -24,7 +24,7 @@ export const levelStyles = StyleSheet.create({
   },
   decorativeCircle1: {
     position: "absolute",
-    top: -100,
+    top: 10,
     right: -80,
     width: 200,
     height: 200,
