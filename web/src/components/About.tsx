@@ -1,42 +1,78 @@
 import React from "react";
 import { COLORS, FEATURE_COLORS } from "../constants/colors";
+import { IoGameController } from "react-icons/io5";
+import { GrLanguage } from "react-icons/gr";
+import { FaCheckCircle } from "react-icons/fa";
+import {
+  FaPlaneDeparture,
+  FaGraduationCap,
+  FaUsers,
+  FaMicroscope,
+  FaRobot,
+} from "react-icons/fa6";
 
 const About: React.FC = () => {
-  const stats = [
-    { number: "28+", label: "Theme Colors", icon: "🎨" },
-    { number: "5+", label: "Game Modes", icon: "🎮" },
-    { number: "4+", label: "Filipino Dialects", icon: "🗣️" },
-    { number: "100%", label: "Free to Use", icon: "💎" },
-  ];
-
   const highlights = [
     {
-      title: "Advanced AI Technology",
+      title: "Advanced NLP Technology",
       description:
-        "Powered by cutting-edge machine learning algorithms for accurate translation and speech recognition.",
-      icon: "🤖",
+        "Powered by natural language processing algorithms for real-time speech-to-speech interpretation with confidence scoring.",
+      icon: FaRobot,
       gradient: FEATURE_COLORS.translate.gradient,
     },
     {
-      title: "Gamified Experience",
+      title: "Gamified Learning Experience",
       description:
-        "Learn through interactive quizzes, daily rewards, and competitive ranking systems.",
-      icon: "🏆",
+        "Interactive quizzes, daily challenges, level progression, and rewards system to make dialect learning engaging and fun.",
+      icon: IoGameController,
       gradient: FEATURE_COLORS.games.gradient,
     },
     {
-      title: "Cultural Preservation",
+      title: "Cultural Bridge",
       description:
-        "Supporting the preservation and promotion of Filipino dialects and cultural heritage.",
-      icon: "🏛️",
+        "Promoting respect and inclusivity among Filipino dialect speakers while preserving linguistic diversity.",
+      icon: GrLanguage,
       gradient: FEATURE_COLORS.speech.gradient,
     },
     {
-      title: "Accessibility First",
+      title: "ISO 25010 Compliant",
       description:
-        "Designed to be inclusive and accessible for learners of all ages and skill levels.",
-      icon: "♿",
-      gradient: FEATURE_COLORS.pronounce.gradient,
+        "Built with international standards ensuring functionality, usability, reliability, maintainability, and security.",
+      icon: FaCheckCircle,
+      gradient: FEATURE_COLORS.white.gradient,
+      iconColor: "text-emerald-600",
+    },
+  ];
+
+  const beneficiaries = [
+    {
+      title: "Tourists",
+      description:
+        "Seamless communication with locals across different parts of the Philippines, ensuring worry-free travel experiences.",
+      icon: FaPlaneDeparture,
+
+      gradient: FEATURE_COLORS.games.gradient,
+    },
+    {
+      title: "Learners",
+      description:
+        "Interactive platform for learning Filipino dialects through engaging games and vocabulary expansion.",
+      icon: FaGraduationCap,
+      gradient: FEATURE_COLORS.translate.gradient,
+    },
+    {
+      title: "Community",
+      description:
+        "Breaking language barriers and promoting understanding between speakers of different Filipino dialects.",
+      icon: FaUsers,
+      gradient: FEATURE_COLORS.speech.gradient,
+    },
+    {
+      title: "Researchers",
+      description:
+        "Advancing research in mobile translation technology and natural language processing for local languages.",
+      icon: FaMicroscope,
+      gradient: FEATURE_COLORS.games.gradient,
     },
   ];
 
@@ -58,152 +94,207 @@ const About: React.FC = () => {
         {/* Section Header */}
         <div className="text-center mb-16">
           <h2
-            className="text-3xl md:text-4xl lg:text-5xl font-bold mb-6"
+            className="text-2xl md:text-3xl lg:text-5xl font-bold pb-2 mb-6"
             style={{ color: COLORS.text.primary }}
           >
-            About
-            <span
-              className="bg-gradient-to-r bg-clip-text text-transparent ml-3"
-              style={{
-                backgroundImage: `linear-gradient(45deg, ${COLORS.text.yellow}, ${COLORS.primary.blue})`,
-              }}
-            >
-              WikaTalk
-            </span>
+            About {"  "}
+            <span style={{ color: COLORS.text.yellow }}>Wika</span>
+            <span style={{ color: COLORS.text.primary }}>Talk</span>
           </h2>
           <p
-            className="text-lg md:text-xl max-w-4xl mx-auto leading-relaxed"
+            className="text-sm md:text-lg max-w-3xl mx-auto leading-relaxed"
             style={{ color: COLORS.text.secondary }}
           >
-            WikaTalk is a comprehensive Filipino dialect interpreter designed to
-            bridge communication gaps and promote cultural understanding through
-            innovative technology and gamified learning experiences.
+            A comprehensive mobile application designed for smooth and efficient
+            speech-to-speech interpretation of Filipino languages, serving as a
+            communication tool that bridges language barriers and promotes
+            cultural understanding through innovative technology and gamified
+            learning experiences.
           </p>
         </div>
 
-        {/* Stats Grid */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-6 mb-16">
-          {stats.map((stat, index) => (
-            <div
-              key={index}
-              className="text-center p-6 rounded-2xl border transition-all duration-300 hover:scale-105"
-              style={{
-                backgroundColor: COLORS.background.light,
-                borderColor: `${COLORS.primary.blue}30`,
-              }}
-            >
-              <div className="text-4xl mb-3">{stat.icon}</div>
-              <div
-                className="text-2xl md:text-3xl font-bold mb-2"
-                style={{ color: COLORS.text.yellow }}
-              >
-                {stat.number}
-              </div>
-              <div
-                className="text-sm font-medium"
-                style={{ color: COLORS.text.secondary }}
-              >
-                {stat.label}
-              </div>
-            </div>
-          ))}
-        </div>
-
-        {/* Main Content Grid */}
-        <div className="lg:grid lg:grid-cols-2 lg:gap-16 items-center mb-16">
-          {/* Left Content */}
-          <div>
-            <h3
-              className="text-2xl md:text-3xl font-bold mb-6"
-              style={{ color: COLORS.text.primary }}
-            >
-              Bridging Filipino Communities Through Technology
-            </h3>
-            <div
-              className="space-y-4 text-lg leading-relaxed"
-              style={{ color: COLORS.text.secondary }}
-            >
-              <p>
-                WikaTalk was created to address the communication challenges
-                between different Filipino dialect speakers. Our mission is to
-                preserve and promote the rich linguistic diversity of the
-                Philippines while making it accessible to everyone.
-              </p>
-              <p>
-                Through advanced AI technology, we provide real-time
-                translation, speech recognition, and interactive learning
-                experiences that make dialect learning engaging and effective.
-              </p>
-              <p>
-                Whether you're a Filipino wanting to connect with your roots, a
-                student learning about Philippine culture, or someone interested
-                in linguistic diversity, WikaTalk is designed for you.
-              </p>
-            </div>
-          </div>
-
-          {/* Right Content - Features */}
-          <div className="mt-12 lg:mt-0">
-            <h4
-              className="text-xl font-bold mb-6"
-              style={{ color: COLORS.text.primary }}
-            >
-              What Makes WikaTalk Special
-            </h4>
-            <div className="space-y-4">
-              {[
-                "Real-time speech-to-text translation",
-                "Camera-based text recognition and translation",
-                "Interactive quiz games with rewards",
-                "Daily challenges and progress tracking",
-                "Comprehensive pronunciation guides",
-                "User-friendly interface with 28 theme options",
-              ].map((feature, index) => (
-                <div key={index} className="flex items-center space-x-3">
-                  <div
-                    className="w-2 h-2 rounded-full"
-                    style={{ backgroundColor: COLORS.text.yellow }}
-                  />
-                  <span style={{ color: COLORS.text.secondary }}>
-                    {feature}
-                  </span>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-
-        {/* Highlights Grid */}
-        <div className="grid md:grid-cols-2 gap-8">
-          {highlights.map((highlight, index) => (
-            <div
-              key={index}
-              className="p-6 rounded-2xl border transition-all duration-300 hover:scale-105"
-              style={{
-                backgroundColor: COLORS.background.light,
-                borderColor: `${COLORS.primary.blue}30`,
-              }}
-            >
-              <div
-                className="w-12 h-12 rounded-xl flex items-center justify-center text-2xl mb-4"
-                style={{ background: highlight.gradient }}
-              >
-                {highlight.icon}
-              </div>
+        {/* Research Objectives Section */}
+        <div className="mb-16">
+          <h3
+            className="text-2xl md:text-3xl font-bold mb-8 text-center"
+            style={{ color: COLORS.text.primary }}
+          >
+            Research Objectives & Innovation
+          </h3>
+          <div className="lg:grid lg:grid-cols-2 lg:gap-16 items-start">
+            {/* Left Content - General Objective */}
+            <div>
               <h4
-                className="text-xl font-bold mb-3"
+                className="text-lg md:text-xl font-bold mb-4"
                 style={{ color: COLORS.text.primary }}
               >
-                {highlight.title}
+                Our Mission
               </h4>
               <p
-                className="leading-relaxed"
+                className="text-sm md:text-base leading-relaxed mb-6"
                 style={{ color: COLORS.text.secondary }}
               >
-                {highlight.description}
+                WikaTalk addresses communication challenges between different
+                Filipino dialect speakers by providing real-time interpretation
+                of the top 10 languages in the Philippines. Our goal is to
+                enable efficient communication while allowing users to immerse
+                themselves in Filipino culture through seamless language
+                translation.
               </p>
             </div>
-          ))}
+
+            {/* Right Content - Key Features */}
+            <div>
+              <h4
+                className="text-lg md:text-xl font-bold mb-6"
+                style={{ color: COLORS.text.primary }}
+              >
+                Core Features
+              </h4>
+              <div className="space-y-4">
+                {[
+                  "Real-time speech-to-speech translation",
+                  "Camera-based OCR text translation",
+                  "Multiple game modes: Multiple Choice, Fill in the Blank, Identification",
+                  "Level progression with coins, hints, and rewards system",
+                  "Daily challenges and pronunciation practice",
+                  "10 Filipino languages support (Tagalog, Cebuano, Hiligaynon, etc.)",
+                  "Confidence scoring for translation accuracy",
+                ].map((feature, index) => (
+                  <div key={index} className="flex items-center space-x-3">
+                    <div
+                      className="w-2 h-2 rounded-full"
+                      style={{ backgroundColor: COLORS.text.yellow }}
+                    />
+                    <span
+                      className="text-sm md:text-base"
+                      style={{ color: COLORS.text.secondary }}
+                    >
+                      {feature}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Technical Innovation */}
+        <div className="grid md:grid-cols-2 gap-8 mb-16">
+          {highlights.map((highlight, index) => {
+            const IconComponent = highlight.icon;
+            return (
+              <div
+                key={index}
+                className="p-6 rounded-2xl border transition-all duration-300 hover:scale-105 items-center"
+                style={{
+                  backgroundColor: COLORS.background.light,
+                  borderColor: `${COLORS.primary.blue}30`,
+                }}
+              >
+                <div className="flex items-center gap-4 mb-4 sm:flex-col sm:items-start md:flex-row md:items-center ">
+                  <div
+                    className="w-12 h-12 rounded-xl flex items-center justify-center text-2xl mb-4"
+                    style={{ background: highlight.gradient }}
+                  >
+                    <IconComponent
+                      className={highlight.iconColor || "text-white"}
+                      size={24}
+                    />
+                  </div>
+                  <h4
+                    className="text-xl font-bold mb-3"
+                    style={{ color: COLORS.text.primary }}
+                  >
+                    {highlight.title}
+                  </h4>
+                </div>
+                <p
+                  className="text-sm md:text-base leading-relaxed"
+                  style={{ color: COLORS.text.secondary }}
+                >
+                  {highlight.description}
+                </p>
+              </div>
+            );
+          })}
+        </div>
+
+        {/* Beneficiaries Section */}
+        <div>
+          <h3
+            className="text-2xl md:text-3xl font-bold mb-8 text-center"
+            style={{ color: COLORS.text.primary }}
+          >
+            Who Benefits from WikaTalk
+          </h3>
+          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+            {beneficiaries.map((beneficiary, index) => {
+              const IconComponent = beneficiary.icon;
+              return (
+                <div
+                  key={index}
+                  className="text-center p-6 rounded-2xl border transition-all duration-300 flex flex-col items-center justify-center hover:scale-105"
+                  style={{
+                    backgroundColor: COLORS.background.light,
+                    borderColor: `${COLORS.primary.blue}30`,
+                  }}
+                >
+                  <div
+                    className="text-4xl w-16 h-16 rounded-xl mb-4 flex items-center justify-center"
+                    style={{
+                      backgroundImage: beneficiary.gradient,
+                      backgroundSize: "cover",
+                      backgroundPosition: "center",
+                    }}
+                  >
+                    <IconComponent className={`text-white text-4xl mx-auto`} />
+                  </div>
+                  <h4
+                    className="text-lg font-bold mb-3"
+                    style={{ color: COLORS.text.primary }}
+                  >
+                    {beneficiary.title}
+                  </h4>
+                  <p
+                    className="text-sm leading-relaxed"
+                    style={{ color: COLORS.text.secondary }}
+                  >
+                    {beneficiary.description}
+                  </p>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* Impact Statement */}
+        <div className="mt-16 text-center">
+          <div
+            className="max-w-4xl mx-auto p-8 rounded-2xl border"
+            style={{
+              backgroundColor: COLORS.background.light,
+              borderColor: `${COLORS.primary.blue}30`,
+            }}
+          >
+            <h4
+              className="text-lg md:text-xl font-bold mb-4"
+              style={{ color: COLORS.text.primary }}
+            >
+              Breaking Language Barriers, Building Cultural Bridges
+            </h4>
+            <p
+              className="text-sm md:text-lg leading-relaxed"
+              style={{ color: COLORS.text.secondary }}
+            >
+              WikaTalk addresses the challenge where Filipino languages are
+              sometimes misunderstood or mocked due to language barriers. By
+              facilitating understanding across different languages and
+              promoting respect among dialect speakers, we're building a more
+              inclusive Philippines where linguistic diversity is celebrated and
+              preserved.
+            </p>
+          </div>
         </div>
       </div>
     </section>

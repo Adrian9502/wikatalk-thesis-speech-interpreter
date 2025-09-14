@@ -77,4 +77,9 @@ export const FEATURE_COLORS = {
     primary: "#1F51FF",
     gradient: "linear-gradient(135deg, #1F51FF 0%, #0A7D94 100%)",
   },
+  // white
+  white: {
+    primary: "#fff",
+    gradient: "linear-gradient(135deg, #fff 0%, #fff 100%)",
+  },
 } as const;
