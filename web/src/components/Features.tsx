@@ -1,74 +1,83 @@
 import React from "react";
 import { COLORS, FEATURE_COLORS } from "../constants/colors";
+import { IoGameController } from "react-icons/io5";
+import { FaMicrophone, FaVolumeHigh } from "react-icons/fa6";
+import { RiTranslate2 } from "react-icons/ri";
+import { FaCamera } from "react-icons/fa";
+import { GiProgression } from "react-icons/gi";
 
 const Features: React.FC = () => {
   const features = [
     {
-      icon: "🗣️",
-      title: "Speech Recognition",
+      icon: FaMicrophone,
+      title: "Voice Translation",
       description:
-        "Convert speech to text and translate between Filipino dialects in real-time with advanced AI technology.",
+        "Speak naturally and get instant translations across Filipino dialects. Your words are captured, converted, and played back in the chosen language.",
       gradient: FEATURE_COLORS.speech.gradient,
       details: [
-        "Real-time voice translation",
-        "Pronunciation assistance",
-        "Voice recording & playback",
+        "Translate spoken words in real-time",
+        "Accurate speech-to-text conversion",
+        "Playback translations for clarity",
       ],
     },
     {
-      icon: "🔤",
+      icon: RiTranslate2,
       title: "Text Translation",
       description:
-        "Instant text translation between multiple Filipino dialects with context-aware accuracy.",
+        "Translate written text quickly across multiple Filipino dialects, with results that maintain context and meaning.",
       gradient: FEATURE_COLORS.translate.gradient,
       details: [
-        "Multi-dialect support",
+        "Supports over 10 dialects",
         "Context-aware translation",
-        "Translation history",
+        "View and manage translation history",
       ],
     },
     {
-      icon: "📷",
-      title: "Camera Scan",
+      icon: FaCamera,
+      title: "Camera Translation",
       description:
-        "Scan text from images and translate them instantly using advanced OCR technology.",
+        "Use your camera to scan and translate text from signs, menus, or documents instantly.",
       gradient: FEATURE_COLORS.scan.gradient,
       details: [
-        "OCR text recognition",
-        "Image-to-text conversion",
-        "Instant translation",
+        "Optical character recognition (OCR)",
+        "Convert images into text",
+        "Immediate translation output",
       ],
     },
     {
-      icon: "🎮",
-      title: "Gamified Learning",
+      icon: IoGameController,
+      title: "Interactive Learning",
       description:
-        "Learn through interactive games, quizzes, and challenges with rewards and progress tracking.",
+        "Improve your language skills with games, quizzes, and challenges that make learning fun and rewarding.",
       gradient: FEATURE_COLORS.games.gradient,
       details: [
-        "Interactive quizzes",
-        "Level progression",
-        "Daily rewards system",
+        "Multiple game modes: Multiple Choice, Fill in the Blank, Identification",
+        "Track level progression and difficulty",
+        "Earn coins, hints, and daily rewards",
       ],
     },
     {
-      icon: "🎯",
-      title: "Pronunciation Guide",
+      icon: FaVolumeHigh,
+      title: "Pronunciation Practice",
       description:
-        "Perfect your pronunciation with AI-powered feedback and speech analysis.",
+        "Hear and practice correct pronunciation with instant feedback to improve your speaking skills.",
       gradient: FEATURE_COLORS.pronounce.gradient,
-      details: ["Speech analysis", "Pronunciation scoring", "Audio feedback"],
+      details: [
+        "Listen to correct pronunciation via speech playback",
+        "Compare your pronunciation with examples",
+        "Practice speaking along with audio prompts",
+      ],
     },
     {
-      icon: "📊",
-      title: "Progress Tracking",
+      icon: GiProgression,
+      title: "Learning Progress",
       description:
-        "Monitor your learning journey with detailed analytics and achievement systems.",
-      gradient: COLORS.gradients.primary,
+        "Monitor your performance and progress in games and challenges with detailed statistics and insights.",
+      gradient: FEATURE_COLORS.progress.gradient,
       details: [
-        "Learning analytics",
-        "Achievement badges",
-        "Performance insights",
+        "Track overall progress and completion rates in each game mode",
+        "See detailed performance by difficulty level",
+        "Track your ranking and view total time spent learning",
       ],
     },
   ];
@@ -90,96 +99,108 @@ const Features: React.FC = () => {
         {/* Section Header */}
         <div className="text-center mb-16">
           <h2
-            className="text-3xl md:text-4xl lg:text-5xl font-bold mb-6"
+            className="text-2xl md:text-3xl lg:text-5xl font-bold pb-2 mb-6"
             style={{ color: COLORS.text.primary }}
           >
             Powerful Features for
             <span
-              className="block bg-gradient-to-r bg-clip-text text-transparent"
+              className="block bg-gradient-to-r bg-clip-text text-transparent leading-tight pb-1"
               style={{
-                backgroundImage: `linear-gradient(45deg, ${COLORS.text.yellow}, ${COLORS.primary.blue})`,
+                backgroundImage: `linear-gradient(
+                  90deg, 
+                  ${COLORS.primary.blue}, 
+                  ${COLORS.primary.red} , 
+                  ${COLORS.primary.yellow} , 
+                  ${COLORS.primary.white} 
+                )`,
               }}
             >
               Language Learning
             </span>
           </h2>
           <p
-            className="text-lg md:text-xl max-w-3xl mx-auto leading-relaxed"
+            className="text-md md:text-xl max-w-3xl mx-auto leading-relaxed"
             style={{ color: COLORS.text.secondary }}
           >
             Discover a comprehensive suite of tools designed to make learning
-            Filipino dialects engaging, effective, and enjoyable.
+            Filipino language engaging, effective, and enjoyable.
           </p>
         </div>
 
         {/* Features Grid */}
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {features.map((feature, index) => (
-            <div
-              key={index}
-              className="group relative p-6 rounded-2xl border transition-all duration-300 hover:scale-105 hover:shadow-2xl cursor-pointer"
-              style={{
-                backgroundColor: COLORS.background.light,
-                borderColor: `${COLORS.primary.blue}30`,
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.borderColor = COLORS.primary.blue;
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.borderColor = `${COLORS.primary.blue}30`;
-              }}
-            >
-              {/* Background Gradient */}
+          {features.map((feature, index) => {
+            const IconComponent = feature.icon;
+            return (
               <div
-                className="absolute inset-0 rounded-2xl opacity-0 group-hover:opacity-10 transition-opacity duration-300"
-                style={{ background: feature.gradient }}
-              />
-
-              {/* Content */}
-              <div className="relative z-10">
-                {/* Icon */}
+                key={index}
+                className="group relative p-6 rounded-2xl border transition-all duration-300 hover:scale-105 hover:shadow-2xl cursor-pointer"
+                style={{
+                  backgroundColor: COLORS.background.light,
+                  borderColor: `${COLORS.primary.blue}30`,
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.borderColor = COLORS.primary.blue;
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.borderColor = `${COLORS.primary.blue}30`;
+                }}
+              >
+                {/* Background Gradient */}
                 <div
-                  className="w-16 h-16 rounded-xl flex items-center justify-center text-3xl mb-4"
+                  className="absolute inset-0 rounded-2xl opacity-0 group-hover:opacity-10 transition-opacity duration-300"
                   style={{ background: feature.gradient }}
-                >
-                  {feature.icon}
-                </div>
+                />
 
-                {/* Title */}
-                <h3
-                  className="text-xl font-bold mb-3"
-                  style={{ color: COLORS.text.primary }}
-                >
-                  {feature.title}
-                </h3>
-
-                {/* Description */}
-                <p
-                  className="mb-4 leading-relaxed"
-                  style={{ color: COLORS.text.secondary }}
-                >
-                  {feature.description}
-                </p>
-
-                {/* Feature Details */}
-                <ul className="space-y-2">
-                  {feature.details.map((detail, detailIndex) => (
-                    <li
-                      key={detailIndex}
-                      className="flex items-center text-sm"
-                      style={{ color: COLORS.text.secondary }}
+                {/* Content */}
+                <div className="relative z-10">
+                  {/* Icon and Title - Side by side on small devices, stacked on larger */}
+                  <div className="flex items-center gap-4 mb-4 sm:flex-col sm:items-start md:flex-row md:items-center">
+                    {/* Icon */}
+                    <div
+                      className="w-12 h-12 sm:w-16 sm:h-16 rounded-xl flex items-center justify-center text-white flex-shrink-0"
+                      style={{ background: feature.gradient }}
                     >
-                      <div
-                        className="w-1.5 h-1.5 rounded-full mr-3"
-                        style={{ backgroundColor: COLORS.text.yellow }}
-                      />
-                      {detail}
-                    </li>
-                  ))}
-                </ul>
+                      <IconComponent className="w-6 h-6 sm:w-8 sm:h-8" />
+                    </div>
+
+                    {/* Title */}
+                    <h3
+                      className="text-lg md:text-xl font-bold"
+                      style={{ color: COLORS.text.primary }}
+                    >
+                      {feature.title}
+                    </h3>
+                  </div>
+
+                  {/* Description */}
+                  <p
+                    className="text-sm sm:text-md mb-4 leading-relaxed"
+                    style={{ color: COLORS.text.secondary }}
+                  >
+                    {feature.description}
+                  </p>
+
+                  {/* Feature Details */}
+                  <ul className="space-y-2">
+                    {feature.details.map((detail, detailIndex) => (
+                      <li
+                        key={detailIndex}
+                        className="flex items-center text-sm"
+                        style={{ color: COLORS.text.secondary }}
+                      >
+                        <div
+                          className="w-1.5 h-1.5 rounded-full mr-3"
+                          style={{ backgroundColor: COLORS.text.yellow }}
+                        />
+                        {detail}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       </div>
     </section>
