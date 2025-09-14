@@ -97,7 +97,7 @@ const Features: React.FC = () => {
             <span
               className="block bg-gradient-to-r bg-clip-text text-transparent"
               style={{
-                backgroundImage: `linear-gradient(45deg, ${COLORS.text.accent}, ${COLORS.primary.blue})`,
+                backgroundImage: `linear-gradient(45deg, ${COLORS.text.yellow}, ${COLORS.primary.blue})`,
               }}
             >
               Language Learning
@@ -171,7 +171,7 @@ const Features: React.FC = () => {
                     >
                       <div
                         className="w-1.5 h-1.5 rounded-full mr-3"
-                        style={{ backgroundColor: COLORS.text.accent }}
+                        style={{ backgroundColor: COLORS.text.yellow }}
                       />
                       {detail}
                     </li>

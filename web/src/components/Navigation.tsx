@@ -16,27 +16,24 @@ const Navigation: React.FC = () => {
       className="fixed top-0 w-full z-50 backdrop-blur-md"
       style={{
         backgroundColor: COLORS.background.overlay,
-        borderBottom: `1px solid ${COLORS.secondary.lightBlue}30`,
+        borderBottom: `1px solid ${COLORS.secondary.lightBlue}50`,
       }}
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
           {/* Logo */}
-          <div className="flex items-center space-x-3">
-            <div
-              className="w-10 h-10 rounded-lg flex items-center justify-center font-bold text-lg"
-              style={{
-                background: COLORS.gradients.secondary,
-                color: COLORS.text.primary,
-              }}
-            >
-              W
-            </div>
+          <div className="flex items-center">
             <span
-              className="text-xl font-bold"
-              style={{ color: COLORS.text.accent }}
+              className="text-lg sm:text-xl md:text-2xl font-bold"
+              style={{ color: COLORS.text.yellow }}
             >
-              WikaTalk
+              Wika
+            </span>
+            <span
+              className="text-lg sm:text-xl md:text-2xl font-bold"
+              style={{ color: COLORS.text.primary }}
+            >
+              Talk
             </span>
           </div>
 
@@ -47,18 +44,23 @@ const Navigation: React.FC = () => {
                 <a
                   key={item.name}
                   href={item.href}
-                  className="px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200 hover:scale-105"
+                  className="relative px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200  group"
                   style={{
                     color: COLORS.text.secondary,
                   }}
                   onMouseEnter={(e) => {
-                    e.currentTarget.style.color = COLORS.text.accent;
+                    e.currentTarget.style.color = COLORS.text.yellow;
                   }}
                   onMouseLeave={(e) => {
                     e.currentTarget.style.color = COLORS.text.secondary;
                   }}
                 >
                   {item.name}
+                  {/* Animated underline */}
+                  <span
+                    className="absolute bottom-0 left-0 w-0 h-0.5 transition-all duration-300 ease-out group-hover:w-full"
+                    style={{ backgroundColor: COLORS.text.yellow }}
+                  ></span>
                 </a>
               ))}
             </div>
@@ -105,7 +107,7 @@ const Navigation: React.FC = () => {
                 <a
                   key={item.name}
                   href={item.href}
-                  className="block px-3 py-2 rounded-md text-base font-medium transition-colors duration-200"
+                  className="block px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200"
                   style={{ color: COLORS.text.secondary }}
                   onClick={() => setIsOpen(false)}
                 >

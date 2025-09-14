@@ -20,7 +20,7 @@ export const COLORS = {
 
   // Background variants
   background: {
-    primary: "#0F1642",
+    primary: "#0A0F28",
     dark: "#0A0E2A",
     light: "#1A2355",
     white: "#FFFFFF",
@@ -31,7 +31,7 @@ export const COLORS = {
   text: {
     primary: "#FFFFFF",
     secondary: "rgba(255, 255, 255, 0.8)",
-    accent: "#FFD700",
+    yellow: "#FFD700",
     dark: "#1F2937",
   },
 

@@ -65,7 +65,7 @@ const About: React.FC = () => {
             <span
               className="bg-gradient-to-r bg-clip-text text-transparent ml-3"
               style={{
-                backgroundImage: `linear-gradient(45deg, ${COLORS.text.accent}, ${COLORS.primary.blue})`,
+                backgroundImage: `linear-gradient(45deg, ${COLORS.text.yellow}, ${COLORS.primary.blue})`,
               }}
             >
               WikaTalk
@@ -95,7 +95,7 @@ const About: React.FC = () => {
               <div className="text-4xl mb-3">{stat.icon}</div>
               <div
                 className="text-2xl md:text-3xl font-bold mb-2"
-                style={{ color: COLORS.text.accent }}
+                style={{ color: COLORS.text.yellow }}
               >
                 {stat.number}
               </div>
@@ -162,7 +162,7 @@ const About: React.FC = () => {
                 <div key={index} className="flex items-center space-x-3">
                   <div
                     className="w-2 h-2 rounded-full"
-                    style={{ backgroundColor: COLORS.text.accent }}
+                    style={{ backgroundColor: COLORS.text.yellow }}
                   />
                   <span style={{ color: COLORS.text.secondary }}>
                     {feature}

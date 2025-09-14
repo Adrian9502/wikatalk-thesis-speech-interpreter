@@ -52,7 +52,7 @@ const Footer: React.FC = () => {
               </div>
               <span
                 className="text-2xl font-bold"
-                style={{ color: COLORS.text.accent }}
+                style={{ color: COLORS.text.yellow }}
               >
                 WikaTalk
               </span>
@@ -107,7 +107,7 @@ const Footer: React.FC = () => {
                     className="transition-colors duration-200 hover:underline"
                     style={{ color: COLORS.text.secondary }}
                     onMouseEnter={(e) => {
-                      e.currentTarget.style.color = COLORS.text.accent;
+                      e.currentTarget.style.color = COLORS.text.yellow;
                     }}
                     onMouseLeave={(e) => {
                       e.currentTarget.style.color = COLORS.text.secondary;
@@ -135,7 +135,7 @@ const Footer: React.FC = () => {
                     className="transition-colors duration-200 hover:underline"
                     style={{ color: COLORS.text.secondary }}
                     onMouseEnter={(e) => {
-                      e.currentTarget.style.color = COLORS.text.accent;
+                      e.currentTarget.style.color = COLORS.text.yellow;
                     }}
                     onMouseLeave={(e) => {
                       e.currentTarget.style.color = COLORS.text.secondary;
@@ -163,7 +163,7 @@ const Footer: React.FC = () => {
                     className="transition-colors duration-200 hover:underline"
                     style={{ color: COLORS.text.secondary }}
                     onMouseEnter={(e) => {
-                      e.currentTarget.style.color = COLORS.text.accent;
+                      e.currentTarget.style.color = COLORS.text.yellow;
                     }}
                     onMouseLeave={(e) => {
                       e.currentTarget.style.color = COLORS.text.secondary;
@@ -195,7 +195,7 @@ const Footer: React.FC = () => {
               className="transition-colors duration-200 hover:underline"
               style={{ color: COLORS.text.secondary }}
               onMouseEnter={(e) => {
-                e.currentTarget.style.color = COLORS.text.accent;
+                e.currentTarget.style.color = COLORS.text.yellow;
               }}
               onMouseLeave={(e) => {
                 e.currentTarget.style.color = COLORS.text.secondary;
@@ -208,7 +208,7 @@ const Footer: React.FC = () => {
               className="transition-colors duration-200 hover:underline"
               style={{ color: COLORS.text.secondary }}
               onMouseEnter={(e) => {
-                e.currentTarget.style.color = COLORS.text.accent;
+                e.currentTarget.style.color = COLORS.text.yellow;
               }}
               onMouseLeave={(e) => {
                 e.currentTarget.style.color = COLORS.text.secondary;
