@@ -45,6 +45,15 @@ export const COLORS = {
   },
 } as const;
 
+// 1F51FF - blue
+// FF3B30 - red
+// FFDC04 - yellow
+export const BUTTON_GRADIENTS = {
+  yellowToRed: "linear-gradient(135deg, #1F51FF 0%, #FF3B30 100%)",
+  redToBlue: "linear-gradient(135deg, #1F51FF 0%, #FF3B30 100%)",
+  yellow: "linear-gradient(135deg, #FFDC04 0%, #B9A115 100%)",
+};
+
 // Feature specific colors
 export const FEATURE_COLORS = {
   // yellow

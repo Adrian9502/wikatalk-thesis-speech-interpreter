@@ -2,6 +2,7 @@ import React from "react";
 import { COLORS } from "../constants/colors";
 import homeScreen from "../assets/homepage.jpg";
 import wikatalkLogo from "../assets/wikatalk-logo.png";
+import { BUTTON_GRADIENTS } from "../constants/colors";
 
 const Hero: React.FC = () => {
   return (
@@ -67,7 +68,7 @@ const Hero: React.FC = () => {
                 href="#download"
                 className="px-8 py-4 rounded-full font-semibold text-md sm:text-lg transition-all duration-300 hover:scale-105 hover:shadow-lg flex items-center justify-center"
                 style={{
-                  background: COLORS.gradients.secondary,
+                  background: BUTTON_GRADIENTS.yellowToRed,
                   color: COLORS.text.primary,
                 }}
               >

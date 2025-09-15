@@ -226,7 +226,9 @@ const About: React.FC = () => {
             className="text-2xl md:text-3xl font-bold mb-8 text-center"
             style={{ color: COLORS.text.primary }}
           >
-            Who Benefits from WikaTalk
+            Who Benefits from{" "}
+            <span style={{ color: COLORS.text.yellow }}>Wika</span>
+            <span style={{ color: COLORS.text.primary }}>Talk</span>
           </h3>
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
             {beneficiaries.map((beneficiary, index) => {
