@@ -1,6 +1,6 @@
 import React from "react";
 import { COLORS } from "../constants/colors";
-import homeScreen from "../assets/homepage.jpg";
+import homeScreen from "../assets/home-screen.jpg";
 import wikatalkLogo from "../assets/wikatalk-logo.png";
 import { BUTTON_GRADIENTS } from "../constants/colors";
 
@@ -52,7 +52,7 @@ const Hero: React.FC = () => {
 
             {/* description */}
             <h2 className="text-lg mb-4 md:text-xl font-semibold">
-              Learn Philippine languages the fun way.
+              Learn Philippine languages in an engaging way.
             </h2>
 
             <p

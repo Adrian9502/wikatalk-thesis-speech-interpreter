@@ -10,9 +10,9 @@ const Features: React.FC = () => {
   const features = [
     {
       icon: FaMicrophone,
-      title: "Voice Translation",
+      title: "Speech Translation",
       description:
-        "Speak naturally and get instant translations across Filipino dialects. Your words are captured, converted, and played back in the chosen language.",
+        "Speak naturally and get instant translations across Filipino languages. Your words are captured, converted, and played back in the chosen language.",
       gradient: FEATURE_COLORS.speech.gradient,
       details: [
         "Translate spoken words in real-time",
@@ -24,10 +24,10 @@ const Features: React.FC = () => {
       icon: RiTranslate2,
       title: "Text Translation",
       description:
-        "Translate written text quickly across multiple Filipino dialects, with results that maintain context and meaning.",
+        "Translate written text quickly across multiple Filipino languages, with results that maintain context and meaning.",
       gradient: FEATURE_COLORS.translate.gradient,
       details: [
-        "Supports over 10 dialects",
+        "Supports over 10 languages",
         "Context-aware translation",
         "View and manage translation history",
       ],

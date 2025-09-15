@@ -5,6 +5,7 @@ import Download from "./components/Download";
 import About from "./components/About";
 import Footer from "./components/Footer";
 import Navigation from "./components/Navigation";
+import Explore from "./components/Explore";
 
 function App() {
   return (
@@ -18,6 +19,7 @@ function App() {
       <Navigation />
       <Hero />
       <Features />
+      <Explore />
       <About />
       <Download />
       <Footer />
