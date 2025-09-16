@@ -310,6 +310,35 @@ const sendFeedbackEmail = async ({ to, subject, body, userInfo, feedbackData }) 
   }
 };
 
+// SEND FEEDBACK FROM WEB
+const sendEmail = async ({ to, subject, html, text }) => {
+  try {
+    const emailTransporter = getEmailTransporter();
+
+    const mailOptions = {
+      from: {
+        name: "WikaTalk",
+        address: "noreply@wikatalk.com",
+      },
+      to,
+      subject,
+      html,
+      text, // Fallback plain text version
+    };
+
+    const result = await emailTransporter.sendMail(mailOptions);
+    console.log("Email sent successfully:", result.messageId);
+
+    return {
+      success: true,
+      messageId: result.messageId,
+    };
+  } catch (error) {
+    console.error("Error sending email:", error);
+    throw error;
+  }
+};
+
 module.exports = {
   sendVerificationEmail,
   sendPasswordChangedEmail,
@@ -318,5 +347,5 @@ module.exports = {
   sendAccountDeletionEmail,
   sendAccountDeletionConfirmationEmail,
   sendFeedbackEmail,
-  getEmailTransporter, // Export the helper function
+  getEmailTransporter, sendEmail
 };

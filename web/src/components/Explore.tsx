@@ -186,7 +186,7 @@ const Explore: React.FC = () => {
         </div>
 
         {/* Main Carousel Content */}
-        <div className="lg:grid pt-6 lg:grid-cols-12 lg:gap-8 items-center">
+        <div className="lg:grid pt-6 pb-24 lg:pb-0  lg:grid-cols-12 lg:gap-8 items-center">
           {/* Left Content - Description */}
           <div className="lg:col-span-5 pb-24 lg:pb-0 mb-12 lg:mb-0 text-center lg:text-left">
             <AnimatePresence mode="wait">
@@ -253,7 +253,7 @@ const Explore: React.FC = () => {
                   prevSlide();
                   setIsAutoPlaying(false);
                 }}
-                className="absolute left-4 z-20 p-2 rounded-full transition-all duration-300 hover:scale-110 hover:shadow-lg"
+                className="absolute -left-2 lg:left-4 z-20 p-2 rounded-full transition-all duration-300 hover:scale-110 hover:shadow-lg"
                 style={{
                   backgroundColor: `${COLORS.background.light}cc`,
                   color: COLORS.primary.blue,
@@ -268,7 +268,7 @@ const Explore: React.FC = () => {
                   nextSlide();
                   setIsAutoPlaying(false);
                 }}
-                className="absolute right-4 z-20 p-2 rounded-full transition-all duration-300 hover:scale-110 hover:shadow-lg"
+                className="absolute -right-2 lg:right-4 z-20 p-2 rounded-full transition-all duration-300 hover:scale-110 hover:shadow-lg"
                 style={{
                   backgroundColor: `${COLORS.background.light}cc`,
                   color: COLORS.primary.blue,

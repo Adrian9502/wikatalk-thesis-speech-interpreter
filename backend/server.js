@@ -41,6 +41,7 @@ const userProgressRoutes = require("./routes/userProgress.routes");
 const wordOfDayRoutes = require("./routes/wordOfDay.routes")
 const rankingRoutes = require('./routes/ranking.routes');
 const hintRoutes = require('./routes/hints.routes')
+
 // Base route
 app.get("/", (req, res) => {
   res.send("WikaTalk API is running");

@@ -1121,18 +1121,41 @@ exports.deleteAccount = async (req, res) => {
 
 // @desc    Send user feedback via email
 // @route   POST /api/users/feedback
-// @access  Private
+// @access  Public/Private (handles both authenticated and unauthenticated requests)
 exports.sendFeedback = async (req, res) => {
   try {
-    const { feedbackType, title, message } = req.body;
-    const user = req.user; // From auth middleware
+    const { feedbackType, title, message, name, email, subject, source = 'app' } = req.body;
+    const user = req.user; // From auth middleware (will be undefined for web requests)
 
-    // Validate input
-    if (!feedbackType || !title?.trim() || !message?.trim()) {
-      return res.status(400).json({
-        success: false,
-        message: "All fields are required",
-      });
+    // Check if this is an authenticated request (mobile app) or web request
+    const isAuthenticatedRequest = !!user;
+
+    // Validate input based on request type
+    if (isAuthenticatedRequest) {
+      // Mobile app validation (requires auth)
+      if (!feedbackType || !title?.trim() || !message?.trim()) {
+        return res.status(400).json({
+          success: false,
+          message: "All fields are required",
+        });
+      }
+    } else {
+      // Web validation (no auth required)
+      if (!feedbackType || !name?.trim() || !email?.trim() || !subject?.trim() || !message?.trim()) {
+        return res.status(400).json({
+          success: false,
+          message: "All fields are required",
+        });
+      }
+
+      // Validate email format for web requests
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(email)) {
+        return res.status(400).json({
+          success: false,
+          message: "Invalid email format",
+        });
+      }
     }
 
     if (!["bug", "suggestion"].includes(feedbackType)) {
@@ -1142,11 +1165,14 @@ exports.sendFeedback = async (req, res) => {
       });
     }
 
-    // Create email content
-    const emailSubject = `WikaTalk ${feedbackType === "bug" ? "Bug Report" : "Feature Suggestion"
-      }: ${title}`;
+    // Create email content based on request source
+    let emailSubject, emailBody, userInfo, feedbackData;
 
-    const emailBody = `
+    if (isAuthenticatedRequest) {
+      // Mobile app format
+      emailSubject = `WikaTalk ${feedbackType === "bug" ? "Bug Report" : "Feature Suggestion"} (Mobile): ${title}`;
+
+      emailBody = `
 Dear WikaTalk Team,
 
 New feedback received from the mobile app:
@@ -1169,7 +1195,54 @@ ${message}
 
 ---
 Sent from WikaTalk Mobile App Feedback System
-    `.trim();
+      `.trim();
+
+      userInfo = {
+        name: user.fullName,
+        email: user.email,
+        userId: user._id
+      };
+
+      feedbackData = {
+        type: feedbackType,
+        title,
+        message
+      };
+    } else {
+      // Web format
+      emailSubject = `WikaTalk ${feedbackType === "bug" ? "Bug Report" : "Feature Suggestion"} (Web): ${subject}`;
+
+      emailBody = `
+Dear WikaTalk Team,
+
+New feedback received from the website:
+
+**Feedback Details:**
+- Type: ${feedbackType === "bug" ? "Bug Report" : "Feature Suggestion"}
+- Subject: ${subject}
+- From: ${name} (${email})
+- Source: Website
+- Submitted: ${new Date().toLocaleString()}
+
+**Description:**
+${message}
+
+---
+Sent from WikaTalk Website Feedback System
+      `.trim();
+
+      userInfo = {
+        name,
+        email,
+        userId: 'web-user'
+      };
+
+      feedbackData = {
+        type: feedbackType,
+        title: subject,
+        message
+      };
+    }
 
     // Send email using your existing email service
     const { sendFeedbackEmail } = require("../services/email.service");
@@ -1178,17 +1251,16 @@ Sent from WikaTalk Mobile App Feedback System
       to: "bontojohnadrian@gmail.com",
       subject: emailSubject,
       body: emailBody,
-      userInfo: {
-        name: user.fullName,
-        email: user.email,
-        userId: user._id
-      },
-      feedbackData: {
-        type: feedbackType,
-        title,
-        message
-      }
+      userInfo,
+      feedbackData
     });
+
+    // Log the feedback
+    const logMessage = isAuthenticatedRequest
+      ? `[Mobile Feedback] ${feedbackType} received from ${user.fullName} (${user.email}): ${title}`
+      : `[Web Feedback] ${feedbackType} received from ${name} (${email}): ${subject}`;
+
+    console.log(logMessage);
 
     res.json({
       success: true,
