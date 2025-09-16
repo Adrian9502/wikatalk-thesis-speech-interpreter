@@ -212,8 +212,7 @@ const Footer: React.FC = () => {
               className="text-sm mb-4 md:mb-0"
               style={{ color: COLORS.text.secondary }}
             >
-              © {new Date().getFullYear()} WikaTalk. All rights reserved. Made
-              with ❤️ for Filipino culture.
+              © {new Date().getFullYear()} WikaTalk. All rights reserved.
             </p>
             <div className="flex space-x-6 text-sm">
               <button

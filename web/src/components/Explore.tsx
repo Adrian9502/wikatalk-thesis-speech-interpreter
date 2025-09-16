@@ -123,6 +123,7 @@ const Explore: React.FC = () => {
     return () => clearInterval(interval);
   }, [isAutoPlaying, currentIndex]);
 
+  // Enhanced animation variants - NO transitions in variants
   const phoneVariants = {
     enter: (direction: number) => ({
       x: direction > 0 ? 300 : -300,
@@ -152,38 +153,96 @@ const Explore: React.FC = () => {
     exit: { opacity: 0, y: -20 },
   };
 
+  const headerVariants = {
+    hidden: { opacity: 0, y: 50 },
+    visible: { opacity: 1, y: 0 }, // No transition here
+  };
+
+  const buttonHoverVariants = {
+    hover: { scale: 1.1, boxShadow: "0 8px 20px rgba(0,0,0,0.2)" }, // No transition here
+    tap: { scale: 0.95 },
+  };
+
+  const dotVariants = {
+    inactive: { scale: 1, opacity: 0.5 },
+    active: { scale: 1.3, opacity: 1 }, // No transition here
+  };
+
   return (
     <section id="explore" className="py-20 relative overflow-hidden">
-      {/* Background decorative elements */}
+      {/* Enhanced Background decorative elements */}
       <div className="absolute inset-0 overflow-hidden">
-        <div
+        <motion.div
+          animate={{
+            scale: [1, 1.05, 1],
+            rotate: [0, 1, 0],
+          }}
+          transition={{
+            duration: 10,
+            repeat: Infinity,
+            ease: "easeInOut",
+          }}
           className="absolute top-20 left-10 w-96 h-96 rounded-full opacity-5"
           style={{ background: COLORS.gradients.primary }}
         />
-        <div
+        <motion.div
+          animate={{
+            scale: [1, 1.05, 1],
+            rotate: [0, 1, 0],
+          }}
+          transition={{
+            duration: 10,
+            repeat: Infinity,
+            ease: "easeInOut",
+            delay: 2,
+          }}
           className="absolute bottom-20 right-10 w-72 h-72 rounded-full opacity-10"
           style={{ background: COLORS.gradients.secondary }}
         />
       </div>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-        {/* Section Header */}
-        <div className="text-center mb-16">
-          <h2
+        {/* Enhanced Section Header */}
+        <motion.div
+          className="text-center mb-16"
+          variants={headerVariants}
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true, amount: 0.3 }}
+          transition={{ duration: 0.8, ease: "easeOut" }} // Transition here
+        >
+          <motion.h2
             className="text-2xl md:text-3xl lg:text-5xl font-bold pb-2 mb-6"
             style={{ color: COLORS.text.primary }}
           >
-            Explore <span style={{ color: COLORS.text.yellow }}>Wika</span>
-            <span style={{ color: COLORS.text.primary }}>Talk</span>
-          </h2>
-          <p
+            Explore{" "}
+            <motion.span
+              style={{ color: COLORS.text.yellow }}
+              whileHover={{ scale: 1.1 }}
+              transition={{ type: "spring", stiffness: 300 }}
+            >
+              Wika
+            </motion.span>
+            <motion.span
+              style={{ color: COLORS.text.primary }}
+              whileHover={{ scale: 1.1 }}
+              transition={{ type: "spring", stiffness: 300 }}
+            >
+              Talk
+            </motion.span>
+          </motion.h2>
+          <motion.p
             className="text-sm md:text-lg max-w-3xl mx-auto leading-relaxed"
             style={{ color: COLORS.text.secondary }}
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ delay: 0.3, duration: 0.6 }}
           >
             Take a closer look at how WikaTalk transforms your language learning
             experience
-          </p>
-        </div>
+          </motion.p>
+        </motion.div>
 
         {/* Main Carousel Content */}
         <div className="lg:grid pt-6 pb-24 lg:pb-0  lg:grid-cols-12 lg:gap-8 items-center">
@@ -196,35 +255,58 @@ const Explore: React.FC = () => {
                 initial="enter"
                 animate="center"
                 exit="exit"
-                transition={{ duration: 0.3 }}
+                transition={{ duration: 0.5, ease: "easeInOut" }}
               >
-                <h3
+                <motion.h3
                   className="text-2xl md:text-3xl font-bold mb-4"
                   style={{ color: COLORS.text.primary }}
+                  initial={{ opacity: 0, x: -20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: 0.2, duration: 0.5 }}
                 >
                   {appScreens[currentIndex].title}
-                </h3>
-                <p
+                </motion.h3>
+                <motion.p
                   className="text-base lg:text-lg mb-6 leading-relaxed"
                   style={{ color: COLORS.text.secondary }}
+                  initial={{ opacity: 0, x: -20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: 0.3, duration: 0.5 }}
                 >
                   {appScreens[currentIndex].description}
-                </p>
+                </motion.p>
 
                 {/* Feature List */}
                 <ul className="space-y-3 mb-8">
                   {appScreens[currentIndex].features.map((feature, index) => (
                     <motion.li
                       key={feature}
-                      initial={{ opacity: 0, x: -20 }}
+                      initial={{ opacity: 0, x: -30 }}
                       animate={{ opacity: 1, x: 0 }}
-                      transition={{ delay: index * 0.1 + 0.2 }}
+                      transition={{
+                        delay: index * 0.1 + 0.4,
+                        duration: 0.5,
+                        ease: "easeOut",
+                      }}
                       className="flex items-center justify-center lg:justify-start text-sm md:text-base"
                       style={{ color: COLORS.text.secondary }}
+                      whileHover={{
+                        x: 5,
+                        color: COLORS.text.primary,
+                        transition: { duration: 0.2 },
+                      }}
                     >
-                      <div
+                      <motion.div
                         className="w-2 h-2 rounded-full mr-3"
                         style={{ backgroundColor: COLORS.text.yellow }}
+                        animate={{
+                          scale: [1, 1.3, 1],
+                        }}
+                        transition={{
+                          duration: 2,
+                          repeat: Infinity,
+                          delay: index * 0.2,
+                        }}
                       />
                       {feature}
                     </motion.li>
@@ -232,51 +314,82 @@ const Explore: React.FC = () => {
                 </ul>
 
                 {/* Screen Counter */}
-                <div className="flex items-center justify-center lg:justify-start gap-2">
+                <motion.div
+                  className="flex items-center justify-center lg:justify-start gap-2"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ delay: 0.8, duration: 0.5 }}
+                >
                   <span
                     className="text-sm font-medium"
                     style={{ color: COLORS.text.secondary }}
                   >
                     {currentIndex + 1} of {appScreens.length}
                   </span>
-                </div>
+                </motion.div>
               </motion.div>
             </AnimatePresence>
           </div>
 
-          {/* Right Content - Phone Carousel */}
+          {/* Right Content - Enhanced Phone Carousel */}
           <div className="lg:col-span-7 relative flex justify-center">
-            <div className="relative flex justify-center items-center h-96 lg:h-[500px] w-full">
-              {/* Navigation Buttons */}
-              <button
+            <motion.div
+              className="relative flex justify-center items-center h-96 lg:h-[500px] w-full"
+              animate={{
+                y: [-5, 5, -5],
+              }}
+              transition={{
+                duration: 3,
+                repeat: Infinity,
+                ease: "easeInOut",
+              }}
+            >
+              {/* Enhanced Navigation Buttons */}
+              <motion.button
                 onClick={() => {
                   prevSlide();
                   setIsAutoPlaying(false);
                 }}
-                className="absolute -left-2 lg:left-4 z-20 p-2 rounded-full transition-all duration-300 hover:scale-110 hover:shadow-lg"
+                className="absolute -left-2 lg:left-4 z-20 p-2 rounded-full transition-all duration-300"
                 style={{
                   backgroundColor: `${COLORS.background.light}cc`,
                   color: COLORS.primary.blue,
                   border: `2px solid ${COLORS.primary.blue}30`,
                 }}
+                variants={buttonHoverVariants}
+                whileHover="hover"
+                whileTap="tap"
+                transition={{
+                  type: "spring" as const,
+                  stiffness: 300,
+                  damping: 20,
+                }}
               >
                 <ChevronLeft className="w-6 h-6" />
-              </button>
+              </motion.button>
 
-              <button
+              <motion.button
                 onClick={() => {
                   nextSlide();
                   setIsAutoPlaying(false);
                 }}
-                className="absolute -right-2 lg:right-4 z-20 p-2 rounded-full transition-all duration-300 hover:scale-110 hover:shadow-lg"
+                className="absolute -right-2 lg:right-4 z-20 p-2 rounded-full transition-all duration-300"
                 style={{
                   backgroundColor: `${COLORS.background.light}cc`,
                   color: COLORS.primary.blue,
                   border: `2px solid ${COLORS.primary.blue}30`,
                 }}
+                variants={buttonHoverVariants}
+                whileHover="hover"
+                whileTap="tap"
+                transition={{
+                  type: "spring" as const,
+                  stiffness: 300,
+                  damping: 20,
+                }}
               >
                 <ChevronRight className="w-6 h-6" />
-              </button>
+              </motion.button>
 
               {/* Phone Frame Container */}
               <div className="relative w-72 h-[500px] flex justify-center items-center">
@@ -290,63 +403,94 @@ const Explore: React.FC = () => {
                     exit="exit"
                     transition={{
                       x: { type: "spring", stiffness: 300, damping: 30 },
-                      opacity: { duration: 0.3 },
-                      scale: { duration: 0.3 },
-                      rotateY: { duration: 0.3 },
+                      opacity: { duration: 0.4 },
+                      scale: { duration: 0.4 },
+                      rotateY: { duration: 0.4 },
                     }}
                     className="absolute"
                   >
-                    {/* Outer Phone Border */}
-                    <div
+                    {/* Enhanced Outer Phone Border */}
+                    <motion.div
                       className="w-72 p-[6px] rounded-[2.5rem] shadow-2xl"
                       style={{
                         backgroundColor: COLORS.secondary.darkGray,
                       }}
+                      whileHover={{
+                        scale: 1.02,
+                        rotateY: 5,
+                        boxShadow: "0 30px 60px rgba(0,0,0,0.3)",
+                      }}
+                      transition={{ type: "spring", stiffness: 300 }}
                     >
                       {/* Screen Content */}
                       <div className="w-full h-full rounded-[2rem] overflow-hidden relative">
-                        <div
+                        <motion.div
                           className="w-full h-full flex items-center justify-center"
                           style={{ backgroundColor: COLORS.background.dark }}
+                          whileHover={{ scale: 1.01 }}
                         >
-                          <img
+                          <motion.img
                             src={appScreens[currentIndex].image}
                             alt={`${appScreens[currentIndex].title} Screenshot`}
                             className="w-full h-full object-cover rounded-[2rem]"
                             draggable="false"
+                            initial={{ scale: 1.1, opacity: 0 }}
+                            animate={{ scale: 1, opacity: 1 }}
+                            transition={{ duration: 0.6, ease: "easeOut" }}
                           />
-                        </div>
+                        </motion.div>
                       </div>
-                    </div>
+                    </motion.div>
                   </motion.div>
                 </AnimatePresence>
               </div>
-            </div>
+            </motion.div>
           </div>
         </div>
 
-        {/* Dot Indicators */}
-        <div className="flex justify-center space-x-3 mt-12">
+        {/* Enhanced Dot Indicators */}
+        <motion.div
+          className="flex justify-center space-x-3 mt-12"
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ delay: 0.5, duration: 0.6 }}
+        >
           {appScreens.map((_, index) => (
-            <button
+            <motion.button
               key={index}
               onClick={() => goToSlide(index)}
-              className="w-3 h-3 rounded-full transition-all duration-300 hover:scale-125"
+              className="w-3 h-3 rounded-full transition-all duration-300"
               style={{
                 backgroundColor:
                   index === currentIndex
                     ? COLORS.primary.blue
                     : `${COLORS.primary.blue}30`,
               }}
+              variants={dotVariants}
+              animate={index === currentIndex ? "active" : "inactive"}
+              transition={{
+                type: "spring" as const,
+                stiffness: 300,
+                damping: 20,
+              }}
+              whileHover={{ scale: 1.4 }}
+              whileTap={{ scale: 0.9 }}
             />
           ))}
-        </div>
+        </motion.div>
 
-        {/* Auto-play Control */}
-        <div className="flex justify-center mt-6">
-          <button
+        {/* Enhanced Auto-play Control */}
+        <motion.div
+          className="flex justify-center mt-6"
+          initial={{ opacity: 0 }}
+          whileInView={{ opacity: 1 }}
+          viewport={{ once: true }}
+          transition={{ delay: 0.7, duration: 0.6 }}
+        >
+          <motion.button
             onClick={() => setIsAutoPlaying(!isAutoPlaying)}
-            className="px-4 py-2 rounded-full text-sm font-medium transition-all duration-300 hover:scale-105"
+            className="px-4 py-2 rounded-full text-sm font-medium transition-all duration-300"
             style={{
               backgroundColor: isAutoPlaying
                 ? `${COLORS.primary.blue}20`
@@ -354,10 +498,17 @@ const Explore: React.FC = () => {
               color: COLORS.text.secondary,
               border: `1px solid ${COLORS.primary.blue}30`,
             }}
+            whileHover={{
+              scale: 1.05,
+              backgroundColor: isAutoPlaying
+                ? `${COLORS.primary.blue}30`
+                : `${COLORS.secondary.darkGray}30`,
+            }}
+            whileTap={{ scale: 0.95 }}
           >
             {isAutoPlaying ? "Pause Auto-play" : "Resume Auto-play"}
-          </button>
-        </div>
+          </motion.button>
+        </motion.div>
       </div>
     </section>
   );
