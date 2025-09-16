@@ -9,8 +9,8 @@
       "description": "Understanding common Tagalog verbs",
       "question": "What is the meaning of 'Naglalakad'?",
       "options": [
-        { "id": "a", "text": "Sitting", "isCorrect": false },
-        { "id": "b", "text": "Walking", "isCorrect": true },
+        { "id": "a", "text": "Walking", "isCorrect": true },
+        { "id": "b", "text": "Sitting", "isCorrect": false },
         { "id": "c", "text": "Sleeping", "isCorrect": false },
         { "id": "d", "text": "Eating", "isCorrect": false }
       ],
@@ -26,8 +26,8 @@
       "question": "What is the meaning of 'Kumakain'?",
       "options": [
         { "id": "a", "text": "Sleeping", "isCorrect": false },
-        { "id": "b", "text": "Eating", "isCorrect": true },
-        { "id": "c", "text": "Jumping", "isCorrect": false },
+        { "id": "b", "text": "Jumping", "isCorrect": false },
+        { "id": "c", "text": "Eating", "isCorrect": true },
         { "id": "d", "text": "Washing", "isCorrect": false }
       ],
       "focusArea": "vocabulary"
@@ -41,9 +41,9 @@
       "description": "Understand basic Cebuano verbs",
       "question": "What does 'Tulog ko' mean?",
       "options": [
-        { "id": "a", "text": "I’m sleeping", "isCorrect": true },
-        { "id": "b", "text": "I’m working", "isCorrect": false },
-        { "id": "c", "text": "I’m cooking", "isCorrect": false },
+        { "id": "a", "text": "I’m working", "isCorrect": false },
+        { "id": "b", "text": "I’m cooking", "isCorrect": false },
+        { "id": "c", "text": "I’m sleeping", "isCorrect": true },
         { "id": "d", "text": "I’m running", "isCorrect": false }
       ],
       "focusArea": "vocabulary"
@@ -57,10 +57,10 @@
       "description": "Beginner-level Hiligaynon verb",
       "question": "What does 'Nagakanta siya' mean?",
       "options": [
-        { "id": "a", "text": "He is eating", "isCorrect": false },
-        { "id": "b", "text": "He is singing", "isCorrect": true },
-        { "id": "c", "text": "He is jumping", "isCorrect": false },
-        { "id": "d", "text": "He is fixing", "isCorrect": false }
+        { "id": "a", "text": "He is jumping", "isCorrect": false },
+        { "id": "b", "text": "He is fixing", "isCorrect": false },
+        { "id": "c", "text": "He is eating", "isCorrect": false },
+        { "id": "d", "text": "He is singing", "isCorrect": true }
       ],
       "focusArea": "vocabulary"
     },
@@ -71,12 +71,12 @@
       "mode": "multipleChoice",
       "title": "Kapampangan: Simple Actions",
       "description": "Understanding basic Kapampangan verbs",
-      "question": "What does \"Mangan ku\" mean?",
+      "question": "What does 'Mangan ku' mean?",
       "options": [
-        { "id": "a", "text": "I will sleep", "isCorrect": false },
-        { "id": "b", "text": "I will eat", "isCorrect": true },
-        { "id": "c", "text": "I will play", "isCorrect": false },
-        { "id": "d", "text": "I will run", "isCorrect": false }
+        { "id": "a", "text": "I will eat", "isCorrect": true },
+        { "id": "b", "text": "I will run", "isCorrect": false },
+        { "id": "c", "text": "I will sleep", "isCorrect": false },
+        { "id": "d", "text": "I will play", "isCorrect": false }
       ],
       "focusArea": "vocabulary"
     },
@@ -89,8 +89,8 @@
       "description": "Recognize common verbs in Ilocano",
       "question": "What is the meaning of \"Aginom ti danum\"?",
       "options": [
-        { "id": "a", "text": "Eat food", "isCorrect": false },
-        { "id": "b", "text": "Drink water", "isCorrect": true },
+        { "id": "a", "text": "Drink water", "isCorrect": true },
+        { "id": "b", "text": "Eat food", "isCorrect": false },
         { "id": "c", "text": "Go to school", "isCorrect": false },
         { "id": "d", "text": "Wash dishes", "isCorrect": false }
       ],
@@ -105,9 +105,9 @@
       "description": "Understanding everyday Waray phrases",
       "question": "What does \"Nakaligo na hiya\" mean?",
       "options": [
-        { "id": "a", "text": "She is cooking", "isCorrect": false },
-        { "id": "b", "text": "She has taken a bath", "isCorrect": true },
-        { "id": "c", "text": "She is reading", "isCorrect": false },
+        { "id": "a", "text": "She is reading", "isCorrect": false },
+        { "id": "b", "text": "She is cooking", "isCorrect": false },
+        { "id": "c", "text": "She has taken a bath", "isCorrect": true },
         { "id": "d", "text": "She is writing", "isCorrect": false }
       ],
       "focusArea": "grammar"
@@ -121,10 +121,10 @@
       "description": "Identify basic Bicol verbs",
       "question": "What does \"Nagbabasa siya nin libro\" mean?",
       "options": [
-        { "id": "a", "text": "He is dancing", "isCorrect": false },
-        { "id": "b", "text": "He is reading a book", "isCorrect": true },
-        { "id": "c", "text": "He is fixing the bed", "isCorrect": false },
-        { "id": "d", "text": "He is listening to music", "isCorrect": false }
+        { "id": "a", "text": "He is fixing the bed", "isCorrect": false },
+        { "id": "b", "text": "He is listening to music", "isCorrect": false },
+        { "id": "c", "text": "He is dancing", "isCorrect": false },
+        { "id": "d", "text": "He is reading a book", "isCorrect": true }
       ],
       "focusArea": "vocabulary"
     },
@@ -137,8 +137,8 @@
       "description": "Simple Cebuano expressions",
       "question": "What does \"Maligo ko karon\" mean?",
       "options": [
-        { "id": "a", "text": "I will cook later", "isCorrect": false },
-        { "id": "b", "text": "I will take a bath later", "isCorrect": true },
+        { "id": "a", "text": "I will take a bath later", "isCorrect": true },
+        { "id": "b", "text": "I will cook later", "isCorrect": false },
         { "id": "c", "text": "I will drive later", "isCorrect": false },
         { "id": "d", "text": "I will walk outside", "isCorrect": false }
       ],
@@ -153,10 +153,10 @@
       "description": "Recognizing beginner-level verbs",
       "question": "What does \"Nagakape si tatay\" mean?",
       "options": [
-        { "id": "a", "text": "Father is reading", "isCorrect": false },
+        { "id": "a", "text": "Father is cooking rice", "isCorrect": false },
         { "id": "b", "text": "Father is working", "isCorrect": false },
-        { "id": "c", "text": "Father is drinking coffee", "isCorrect": true },
-        { "id": "d", "text": "Father is cooking rice", "isCorrect": false }
+        { "id": "c", "text": "Father is reading", "isCorrect": false },
+        { "id": "d", "text": "Father is drinking coffee", "isCorrect": true }
       ],
       "focusArea": "vocabulary"
     },
@@ -169,10 +169,10 @@
       "description": "Understand Tagalog verb usage",
       "question": "What does \"Naglalakad siya papunta sa paaralan.\" mean?",
       "options": [
-        { "id": "a", "text": "She is running to school", "isCorrect": false },
-        { "id": "b", "text": "She is walking to school", "isCorrect": true },
-        { "id": "c", "text": "She is skipping school", "isCorrect": false },
-        { "id": "d", "text": "She is leaving school", "isCorrect": false }
+        { "id": "a", "text": "She is leaving school", "isCorrect": false },
+        { "id": "b", "text": "She is skipping school", "isCorrect": false },
+        { "id": "c", "text": "She is running to school", "isCorrect": false },
+        { "id": "d", "text": "She is walking to school", "isCorrect": true }
       ],
       "focusArea": "grammar"
     },
@@ -187,22 +187,22 @@
       "options": [
         {
           "id": "a",
-          "text": "They are eating in the plaza",
+          "text": "They are selling in the plaza",
           "isCorrect": false
         },
         {
           "id": "b",
+          "text": "They are eating in the plaza",
+          "isCorrect": false
+        },
+        {
+          "id": "c",
           "text": "They are playing in the plaza",
           "isCorrect": true
         },
         {
-          "id": "c",
-          "text": "They are sleeping in the plaza",
-          "isCorrect": false
-        },
-        {
           "id": "d",
-          "text": "They are selling in the plaza",
+          "text": "They are sleeping in the plaza",
           "isCorrect": false
         }
       ],
@@ -217,14 +217,14 @@
       "description": "Translate a routine sentence",
       "question": "What does \"Agluto isuna ti pinitpit nga utong.\" mean?",
       "options": [
-        { "id": "a", "text": "She is washing vegetables", "isCorrect": false },
         {
-          "id": "b",
+          "id": "a",
           "text": "She is cooking chopped string beans",
           "isCorrect": true
         },
-        { "id": "c", "text": "She is peeling fruits", "isCorrect": false },
-        { "id": "d", "text": "She is slicing meat", "isCorrect": false }
+        { "id": "b", "text": "She is peeling fruits", "isCorrect": false },
+        { "id": "c", "text": "She is slicing meat", "isCorrect": false },
+        { "id": "d", "text": "She is washing vegetables", "isCorrect": false }
       ],
       "focusArea": "vocabulary"
     },
@@ -237,10 +237,10 @@
       "description": "Understand a common household activity",
       "question": "What does \"Ginahugas niya ang mga plato.\" mean?",
       "options": [
-        { "id": "a", "text": "He is breaking the plates", "isCorrect": false },
-        { "id": "b", "text": "He is washing the dishes", "isCorrect": true },
-        { "id": "c", "text": "He is cooking rice", "isCorrect": false },
-        { "id": "d", "text": "He is cleaning the table", "isCorrect": false }
+        { "id": "a", "text": "He is cooking rice", "isCorrect": false },
+        { "id": "b", "text": "He is breaking the plates", "isCorrect": false },
+        { "id": "c", "text": "He is cleaning the table", "isCorrect": false },
+        { "id": "d", "text": "He is washing the dishes", "isCorrect": true }
       ],
       "focusArea": "grammar"
     },
@@ -253,8 +253,8 @@
       "description": "Interpret verbs used in daily activities",
       "question": "What does \"Nagpapakakan siya nin irak\" mean?",
       "options": [
-        { "id": "a", "text": "He is planting rice", "isCorrect": false },
-        { "id": "b", "text": "He is feeding the baby", "isCorrect": true },
+        { "id": "a", "text": "He is feeding the baby", "isCorrect": true },
+        { "id": "b", "text": "He is planting rice", "isCorrect": false },
         { "id": "c", "text": "He is selling vegetables", "isCorrect": false },
         { "id": "d", "text": "He is buying rice", "isCorrect": false }
       ],
@@ -274,13 +274,13 @@
           "text": "He is making bread at the store",
           "isCorrect": false
         },
+        { "id": "b", "text": "He is selling bread", "isCorrect": false },
         {
-          "id": "b",
+          "id": "c",
           "text": "He is buying bread at the store",
           "isCorrect": true
         },
-        { "id": "c", "text": "He is throwing bread", "isCorrect": false },
-        { "id": "d", "text": "He is selling bread", "isCorrect": false }
+        { "id": "d", "text": "He is throwing bread", "isCorrect": false }
       ],
       "focusArea": "vocabulary"
     },
@@ -293,10 +293,10 @@
       "description": "Translate intent behind a Pangasinan verb",
       "question": "What does \"Man-ebak ya balet\" mean?",
       "options": [
-        { "id": "a", "text": "He is going to clean", "isCorrect": false },
-        { "id": "b", "text": "He is going home", "isCorrect": true },
+        { "id": "a", "text": "He is going home", "isCorrect": true },
+        { "id": "b", "text": "He is traveling", "isCorrect": false },
         { "id": "c", "text": "He is going to work", "isCorrect": false },
-        { "id": "d", "text": "He is traveling", "isCorrect": false }
+        { "id": "d", "text": "He is going to clean", "isCorrect": false }
       ],
       "focusArea": "vocabulary"
     },
@@ -310,9 +310,9 @@
       "question": "What does \"Napan ako sa panampalay.\" mean?",
       "options": [
         { "id": "a", "text": "I harvested fish", "isCorrect": false },
-        { "id": "b", "text": "I went to the rice field", "isCorrect": true },
-        { "id": "c", "text": "I built a house", "isCorrect": false },
-        { "id": "d", "text": "I went to market", "isCorrect": false }
+        { "id": "b", "text": "I built a house", "isCorrect": false },
+        { "id": "c", "text": "I went to market", "isCorrect": false },
+        { "id": "d", "text": "I went to the rice field", "isCorrect": true }
       ],
       "focusArea": "vocabulary"
     },
@@ -325,10 +325,10 @@
       "description": "Recognizing patterns of behavior",
       "question": "What does \"Mibasa ku king librung Ingles.\" mean?",
       "options": [
-        { "id": "a", "text": "I wrote a book", "isCorrect": false },
-        { "id": "b", "text": "I read the English book", "isCorrect": true },
-        { "id": "c", "text": "I bought a dictionary", "isCorrect": false },
-        { "id": "d", "text": "I opened a package", "isCorrect": false }
+        { "id": "a", "text": "I read the English book", "isCorrect": true },
+        { "id": "b", "text": "I opened a package", "isCorrect": false },
+        { "id": "c", "text": "I wrote a book", "isCorrect": false },
+        { "id": "d", "text": "I bought a dictionary", "isCorrect": false }
       ],
       "focusArea": "vocabulary"
     },
@@ -341,10 +341,10 @@
       "description": "Understanding middle-difficulty verb",
       "question": "What does \"Naglimpyo siya sa kwarto.\" mean?",
       "options": [
-        { "id": "a", "text": "He is painting the room", "isCorrect": false },
-        { "id": "b", "text": "He is cleaning the room", "isCorrect": true },
-        { "id": "c", "text": "He is designing the room", "isCorrect": false },
-        { "id": "d", "text": "He is entering the room", "isCorrect": false }
+        { "id": "a", "text": "He is entering the room", "isCorrect": false },
+        { "id": "b", "text": "He is designing the room", "isCorrect": false },
+        { "id": "c", "text": "He is cleaning the room", "isCorrect": true },
+        { "id": "d", "text": "He is painting the room", "isCorrect": false }
       ],
       "focusArea": "grammar"
     },
@@ -358,12 +358,12 @@
       "question": "What does \"Nagsusulat siya ng liham sa kanyang kaibigan.\" mean?",
       "options": [
         { "id": "a", "text": "She is texting her friend", "isCorrect": false },
+        { "id": "b", "text": "She is calling her friend", "isCorrect": false },
         {
-          "id": "b",
+          "id": "c",
           "text": "She is writing a letter to her friend",
           "isCorrect": true
         },
-        { "id": "c", "text": "She is calling her friend", "isCorrect": false },
         { "id": "d", "text": "She is ignoring her friend", "isCorrect": false }
       ],
       "focusArea": "grammar"
@@ -377,18 +377,14 @@
       "description": "Daily household verb",
       "question": "What does \"Nanglaba ko ganina buntag.\" mean?",
       "options": [
-        {
-          "id": "a",
-          "text": "I was sweeping this morning",
-          "isCorrect": false
-        },
+        { "id": "a", "text": "I cleaned the garden", "isCorrect": false },
         {
           "id": "b",
           "text": "I did the laundry this morning",
           "isCorrect": true
         },
-        { "id": "c", "text": "I cleaned the garden", "isCorrect": false },
-        { "id": "d", "text": "I studied this morning", "isCorrect": false }
+        { "id": "c", "text": "I studied this morning", "isCorrect": false },
+        { "id": "d", "text": "I was sweeping this morning", "isCorrect": false }
       ],
       "focusArea": "vocabulary"
     },
@@ -401,14 +397,10 @@
       "description": "Transportation-related activity",
       "question": "What does \"Mapan isuna idiay mercado.\" mean?",
       "options": [
-        { "id": "a", "text": "He is avoiding the market", "isCorrect": false },
-        { "id": "b", "text": "He is going to the market", "isCorrect": true },
-        {
-          "id": "c",
-          "text": "He is cooking at the market",
-          "isCorrect": false
-        },
-        { "id": "d", "text": "He is lost at the market", "isCorrect": false }
+        { "id": "a", "text": "He is going to the market", "isCorrect": true },
+        { "id": "b", "text": "He is lost at the market", "isCorrect": false },
+        { "id": "c", "text": "He is avoiding the market", "isCorrect": false },
+        { "id": "d", "text": "He is cooking at the market", "isCorrect": false }
       ],
       "focusArea": "vocabulary"
     },
@@ -421,18 +413,18 @@
       "description": "Action involving eating",
       "question": "What does \"Nagapanihapon sila sang aga.\" mean?",
       "options": [
+        { "id": "a", "text": "They are cooking lunch", "isCorrect": false },
+        { "id": "b", "text": "They are skipping dinner", "isCorrect": false },
         {
-          "id": "a",
+          "id": "c",
           "text": "They are eating breakfast in the evening",
           "isCorrect": false
         },
         {
-          "id": "b",
+          "id": "d",
           "text": "They are having dinner in the morning",
           "isCorrect": true
-        },
-        { "id": "c", "text": "They are skipping dinner", "isCorrect": false },
-        { "id": "d", "text": "They are cooking lunch", "isCorrect": false }
+        }
       ],
       "focusArea": "grammar"
     },
@@ -446,9 +438,9 @@
       "question": "What does \"Mapalit ako hin gatas.\" mean?",
       "options": [
         { "id": "a", "text": "I will drink milk", "isCorrect": false },
-        { "id": "b", "text": "I will buy milk", "isCorrect": true },
-        { "id": "c", "text": "I will boil milk", "isCorrect": false },
-        { "id": "d", "text": "I will spill the milk", "isCorrect": false }
+        { "id": "b", "text": "I will boil milk", "isCorrect": false },
+        { "id": "c", "text": "I will spill the milk", "isCorrect": false },
+        { "id": "d", "text": "I will buy milk", "isCorrect": true }
       ],
       "focusArea": "vocabulary"
     },
@@ -461,10 +453,10 @@
       "description": "Dialogue verb",
       "question": "What does \"Nagtaram siya sa maestro.\" mean?",
       "options": [
-        { "id": "a", "text": "He argued with the teacher", "isCorrect": false },
-        { "id": "b", "text": "He talked to the teacher", "isCorrect": true },
-        { "id": "c", "text": "He yelled at the teacher", "isCorrect": false },
-        { "id": "d", "text": "He ignored the teacher", "isCorrect": false }
+        { "id": "a", "text": "He talked to the teacher", "isCorrect": true },
+        { "id": "b", "text": "He argued with the teacher", "isCorrect": false },
+        { "id": "c", "text": "He ignored the teacher", "isCorrect": false },
+        { "id": "d", "text": "He yelled at the teacher", "isCorrect": false }
       ],
       "focusArea": "vocabulary"
     },
@@ -477,10 +469,10 @@
       "description": "Understanding motion",
       "question": "What does \"Lumwal ya king balay.\" mean?",
       "options": [
-        { "id": "a", "text": "He entered the house", "isCorrect": false },
-        { "id": "b", "text": "He went out of the house", "isCorrect": true },
-        { "id": "c", "text": "He ran around the house", "isCorrect": false },
-        { "id": "d", "text": "He cleaned the house", "isCorrect": false }
+        { "id": "a", "text": "He cleaned the house", "isCorrect": false },
+        { "id": "b", "text": "He ran around the house", "isCorrect": false },
+        { "id": "c", "text": "He went out of the house", "isCorrect": true },
+        { "id": "d", "text": "He entered the house", "isCorrect": false }
       ],
       "focusArea": "vocabulary"
     },
@@ -493,10 +485,10 @@
       "description": "Regular school activity",
       "question": "What does \"Nanlapus la ed klase.\" mean?",
       "options": [
-        { "id": "a", "text": "They failed the class", "isCorrect": false },
-        { "id": "b", "text": "They finished class", "isCorrect": true },
-        { "id": "c", "text": "They missed the exam", "isCorrect": false },
-        { "id": "d", "text": "They started a fight", "isCorrect": false }
+        { "id": "a", "text": "They missed the exam", "isCorrect": false },
+        { "id": "b", "text": "They started a fight", "isCorrect": false },
+        { "id": "c", "text": "They finished class", "isCorrect": true },
+        { "id": "d", "text": "They failed the class", "isCorrect": false }
       ],
       "focusArea": "grammar"
     },
@@ -511,13 +503,13 @@
       "options": [
         {
           "id": "a",
-          "text": "I’ll arrive at work tomorrow",
-          "isCorrect": false
+          "text": "I’ll resign from work tomorrow",
+          "isCorrect": true
         },
         {
           "id": "b",
-          "text": "I’ll resign from work tomorrow",
-          "isCorrect": true
+          "text": "I’ll arrive at work tomorrow",
+          "isCorrect": false
         },
         {
           "id": "c",
@@ -537,10 +529,10 @@
       "description": "Action and feeling",
       "question": "What does \"Nalipay ako sa imo tabang.\" mean?",
       "options": [
-        { "id": "a", "text": "I am angry with your help", "isCorrect": false },
-        { "id": "b", "text": "I am happy with your help", "isCorrect": true },
-        { "id": "c", "text": "I am confused by your help", "isCorrect": false },
-        { "id": "d", "text": "I am questioning your help", "isCorrect": false }
+        { "id": "a", "text": "I am questioning your help", "isCorrect": false },
+        { "id": "b", "text": "I am confused by your help", "isCorrect": false },
+        { "id": "c", "text": "I am happy with your help", "isCorrect": true },
+        { "id": "d", "text": "I am angry with your help", "isCorrect": false }
       ],
       "focusArea": "vocabulary"
     },
@@ -555,18 +547,18 @@
       "options": [
         {
           "id": "a",
+          "text": "He will listen to the lecture tomorrow morning",
+          "isCorrect": true
+        },
+        {
+          "id": "b",
           "text": "He is listening to the lecture now",
           "isCorrect": false
         },
         {
-          "id": "b",
+          "id": "c",
           "text": "He listened to the lecture earlier",
           "isCorrect": false
-        },
-        {
-          "id": "c",
-          "text": "He will listen to the lecture tomorrow morning",
-          "isCorrect": true
         },
         { "id": "d", "text": "He forgot the lecture", "isCorrect": false }
       ],
@@ -581,12 +573,12 @@
       "description": "Understand passive structure",
       "question": "What does \"Gipalit ang libro sa tindahan.\" mean?",
       "options": [
-        { "id": "a", "text": "The store bought a book", "isCorrect": false },
         {
-          "id": "b",
+          "id": "a",
           "text": "The book was bought at the store",
           "isCorrect": true
         },
+        { "id": "b", "text": "The store bought a book", "isCorrect": false },
         {
           "id": "c",
           "text": "They sold a book to the store",
@@ -611,20 +603,24 @@
       "options": [
         {
           "id": "a",
-          "text": "They arrived at home then helped",
+          "text": "They went home to ask for help",
           "isCorrect": false
         },
         {
           "id": "b",
+          "text": "They fought at home",
+          "isCorrect": false
+        },
+        {
+          "id": "c",
           "text": "After helping each other, they came home",
           "isCorrect": true
         },
         {
-          "id": "c",
-          "text": "They went home to ask for help",
+          "id": "d",
+          "text": "They arrived at home then helped",
           "isCorrect": false
-        },
-        { "id": "d", "text": "They fought at home", "isCorrect": false }
+        }
       ],
       "focusArea": "grammar"
     },
@@ -639,13 +635,13 @@
       "options": [
         {
           "id": "a",
-          "text": "He skipped class without reason",
-          "isCorrect": false
+          "text": "He didn’t attend class because of the storm",
+          "isCorrect": true
         },
         {
           "id": "b",
-          "text": "He didn’t attend class because of the storm",
-          "isCorrect": true
+          "text": "He skipped class without reason",
+          "isCorrect": false
         },
         {
           "id": "c",
@@ -672,11 +668,15 @@
         },
         {
           "id": "b",
+          "text": "He is being forced to pass",
+          "isCorrect": false
+        },
+        {
+          "id": "c",
           "text": "If he doesn’t study, he won’t pass",
           "isCorrect": true
         },
-        { "id": "c", "text": "He failed but he studied", "isCorrect": false },
-        { "id": "d", "text": "He is being forced to pass", "isCorrect": false }
+        { "id": "d", "text": "He failed but he studied", "isCorrect": false }
       ],
       "focusArea": "grammar"
     },
@@ -691,13 +691,13 @@
       "options": [
         {
           "id": "a",
-          "text": "I will start cooking when you arrive",
-          "isCorrect": false
+          "text": "I will have finished cooking before you arrive",
+          "isCorrect": true
         },
         {
           "id": "b",
-          "text": "I will have finished cooking before you arrive",
-          "isCorrect": true
+          "text": "I will start cooking when you arrive",
+          "isCorrect": false
         },
         {
           "id": "c",
@@ -720,10 +720,14 @@
         { "id": "a", "text": "If he’s sleepy, he’ll run", "isCorrect": false },
         {
           "id": "b",
+          "text": "He won’t eat if he’s late",
+          "isCorrect": false
+        },
+        {
+          "id": "c",
           "text": "If he’s not happy, he won’t go",
           "isCorrect": true
         },
-        { "id": "c", "text": "He won’t eat if he’s late", "isCorrect": false },
         { "id": "d", "text": "If he’s fast, he’ll win", "isCorrect": false }
       ],
       "focusArea": "grammar"
@@ -737,13 +741,17 @@
       "description": "Identify emotional tone and action",
       "question": "What does \"Sayang, dai ko nadara an payong.\" mean?",
       "options": [
-        { "id": "a", "text": "I didn’t bring my shoes", "isCorrect": false },
+        {
+          "id": "a",
+          "text": "I left my friend",
+          "isCorrect": false
+        },
         {
           "id": "b",
           "text": "Too bad, I didn’t bring the umbrella",
           "isCorrect": true
         },
-        { "id": "c", "text": "I left my friend", "isCorrect": false },
+        { "id": "c", "text": "I didn’t bring my shoes", "isCorrect": false },
         { "id": "d", "text": "I missed the train", "isCorrect": false }
       ],
       "focusArea": "vocabulary"
@@ -759,13 +767,13 @@
       "options": [
         {
           "id": "a",
-          "text": "I’m going to the church now",
-          "isCorrect": false
+          "text": "I was supposed to go to church but I forgot",
+          "isCorrect": true
         },
         {
           "id": "b",
-          "text": "I was supposed to go to church but I forgot",
-          "isCorrect": true
+          "text": "I’m going to the church now",
+          "isCorrect": false
         },
         {
           "id": "c",
@@ -787,13 +795,13 @@
       "options": [
         {
           "id": "a",
-          "text": "I’m mocking the elder’s advice",
-          "isCorrect": false
+          "text": "I respect the guidance of the elder",
+          "isCorrect": true
         },
         {
           "id": "b",
-          "text": "I respect the guidance of the elder",
-          "isCorrect": true
+          "text": "I’m mocking the elder’s advice",
+          "isCorrect": false
         },
         { "id": "c", "text": "I forgot the elder’s name", "isCorrect": false },
         { "id": "d", "text": "I rejected the instruction", "isCorrect": false }
@@ -827,13 +835,13 @@
       "options": [
         {
           "id": "a",
-          "text": "He wants his parents to leave",
-          "isCorrect": false
+          "text": "He tried hard to make his parents happy",
+          "isCorrect": true
         },
         {
           "id": "b",
-          "text": "He tried hard to make his parents happy",
-          "isCorrect": true
+          "text": "He wants his parents to leave",
+          "isCorrect": false
         },
         {
           "id": "c",
@@ -893,11 +901,15 @@
       "description": "Multiclausal statement",
       "question": "What does \"Han natapos an klase, kinadto hiya ha library.\" mean?",
       "options": [
-        { "id": "a", "text": "He stayed in class", "isCorrect": false },
         {
-          "id": "b",
+          "id": "a",
           "text": "After class ended, he went to the library",
           "isCorrect": true
+        },
+        {
+          "id": "b",
+          "text": "He stayed in class",
+          "isCorrect": false
         },
         { "id": "c", "text": "He returned home", "isCorrect": false },
         { "id": "d", "text": "He skipped class", "isCorrect": false }
@@ -913,18 +925,18 @@
       "description": "Expressing opinion indirectly",
       "question": "What does \"Agko panangaro ed desisyonna.\" mean?",
       "options": [
+        { "id": "a", "text": "I copied his idea", "isCorrect": false },
+        { "id": "b", "text": "I helped him decide", "isCorrect": false },
         {
-          "id": "a",
-          "text": "I fully support his decision",
-          "isCorrect": false
-        },
-        {
-          "id": "b",
+          "id": "c",
           "text": "I do not agree with his decision",
           "isCorrect": true
         },
-        { "id": "c", "text": "I copied his idea", "isCorrect": false },
-        { "id": "d", "text": "I helped him decide", "isCorrect": false }
+        {
+          "id": "d",
+          "text": "I fully support his decision",
+          "isCorrect": false
+        }
       ],
       "focusArea": "vocabulary"
     },
@@ -937,18 +949,14 @@
       "description": "Reading timeline in actions",
       "question": "What does \"Pagkatapos maglinis, nagluto siya nin hapunan.\" mean?",
       "options": [
-        { "id": "a", "text": "He cooked while cleaning", "isCorrect": false },
+        { "id": "a", "text": "He skipped dinner", "isCorrect": false },
+        { "id": "b", "text": "He cooked while cleaning", "isCorrect": false },
         {
-          "id": "b",
+          "id": "c",
           "text": "After cleaning, he cooked dinner",
           "isCorrect": true
         },
-        {
-          "id": "c",
-          "text": "He forgot to clean and cook",
-          "isCorrect": false
-        },
-        { "id": "d", "text": "He skipped dinner", "isCorrect": false }
+        { "id": "d", "text": "He forgot to clean and cook", "isCorrect": false }
       ],
       "focusArea": "grammar"
     },
@@ -961,14 +969,14 @@
       "description": "Indirect thinking or doubt",
       "question": "What does \"Murag wala siya kasabot sa giistorya.\" mean?",
       "options": [
-        { "id": "a", "text": "He understands clearly", "isCorrect": false },
+        { "id": "a", "text": "He is repeating the words", "isCorrect": false },
+        { "id": "b", "text": "He understands clearly", "isCorrect": false },
+        { "id": "c", "text": "He is translating it", "isCorrect": false },
         {
-          "id": "b",
+          "id": "d",
           "text": "It seems he didn’t understand what was said",
           "isCorrect": true
-        },
-        { "id": "c", "text": "He is repeating the words", "isCorrect": false },
-        { "id": "d", "text": "He is translating it", "isCorrect": false }
+        }
       ],
       "focusArea": "vocabulary"
     },
@@ -981,14 +989,14 @@
       "description": "Comparing past and present",
       "question": "What does \"Eya agpang keng sinabi nang Maria.\" mean?",
       "options": [
-        { "id": "a", "text": "He agrees with Maria", "isCorrect": false },
+        { "id": "a", "text": "He admires Maria", "isCorrect": false },
+        { "id": "b", "text": "He listens to Maria", "isCorrect": false },
+        { "id": "c", "text": "He agrees with Maria", "isCorrect": false },
         {
-          "id": "b",
+          "id": "d",
           "text": "He does not agree with what Maria said",
           "isCorrect": true
-        },
-        { "id": "c", "text": "He listens to Maria", "isCorrect": false },
-        { "id": "d", "text": "He admires Maria", "isCorrect": false }
+        }
       ],
       "focusArea": "grammar"
     },
@@ -1001,17 +1009,18 @@
       "description": "Emotive and abstract phrase",
       "question": "What does \"Kalilintad su kinaandam\" mean?",
       "options": [
-        { "id": "a", "text": "Peace is forbidden", "isCorrect": false },
-        { "id": "b", "text": "Noise is acceptable", "isCorrect": false },
+        { "id": "a", "text": "Noise is acceptable", "isCorrect": false },
+        { "id": "b", "text": "Courage brings confusion", "isCorrect": false },
         {
           "id": "c",
           "text": "Peace comes from preparedness",
           "isCorrect": true
         },
-        { "id": "d", "text": "Courage brings confusion", "isCorrect": false }
+        { "id": "d", "text": "Peace is forbidden", "isCorrect": false }
       ],
       "focusArea": "vocabulary"
     },
+
     {
       "questionId": 51,
       "level": "Level 1",
@@ -1022,14 +1031,14 @@
       "question": "I Maria ang ___ nang Juan.",
       "answer": "indu",
       "options": [
-        { "id": "a", "text": "tatang" },
-        { "id": "b", "text": "anak" },
-        { "id": "c", "text": "indu" },
-        { "id": "d", "text": "tita" },
-        { "id": "e", "text": "apu" },
-        { "id": "f", "text": "kuya" },
-        { "id": "g", "text": "asawa" },
-        { "id": "h", "text": "pamangkin" }
+        { "id": "a", "text": "pamangkin" },
+        { "id": "b", "text": "asawa" },
+        { "id": "c", "text": "tatang" },
+        { "id": "d", "text": "indu" },
+        { "id": "e", "text": "anak" },
+        { "id": "f", "text": "tita" },
+        { "id": "g", "text": "kuya" },
+        { "id": "h", "text": "apu" }
       ],
       "translation": "Maria is Juan’s mother.",
       "focusArea": "vocabulary"
@@ -1044,14 +1053,14 @@
       "question": "Nag-ulan og kusog nga ___.",
       "answer": "ulan",
       "options": [
-        { "id": "a", "text": "kahoy" },
+        { "id": "a", "text": "daplin" },
         { "id": "b", "text": "ulan" },
-        { "id": "c", "text": "hangin" },
-        { "id": "d", "text": "adlaw" },
-        { "id": "e", "text": "daplin" },
-        { "id": "f", "text": "eskuylahan" },
-        { "id": "g", "text": "ulap" },
-        { "id": "h", "text": "payong" }
+        { "id": "c", "text": "ulap" },
+        { "id": "d", "text": "hangin" },
+        { "id": "e", "text": "kahoy" },
+        { "id": "f", "text": "adlaw" },
+        { "id": "g", "text": "payong" },
+        { "id": "h", "text": "eskuylahan" }
       ],
       "translation": "Heavy water is pouring (It's raining heavily).",
       "focusArea": "vocabulary"
@@ -1066,14 +1075,14 @@
       "question": "Itugotmo ti ___ idiay kwarto.",
       "answer": "silya",
       "options": [
-        { "id": "a", "text": "lampara" },
-        { "id": "b", "text": "silya" },
-        { "id": "c", "text": "lutuan" },
-        { "id": "d", "text": "bintana" },
-        { "id": "e", "text": "kutsara" },
-        { "id": "f", "text": "lapis" },
-        { "id": "g", "text": "libro" },
-        { "id": "h", "text": "kurtina" }
+        { "id": "a", "text": "lapis" },
+        { "id": "b", "text": "libro" },
+        { "id": "c", "text": "bintana" },
+        { "id": "d", "text": "lampara" },
+        { "id": "e", "text": "silya" },
+        { "id": "f", "text": "lutuan" },
+        { "id": "g", "text": "kurtina" },
+        { "id": "h", "text": "kutsara" }
       ],
       "translation": "Bring the chair to the room.",
       "focusArea": "vocabulary"
@@ -1088,14 +1097,14 @@
       "question": "Kumain siya ng ___.",
       "answer": "kanin",
       "options": [
-        { "id": "a", "text": "upuan" },
-        { "id": "b", "text": "sapatos" },
-        { "id": "c", "text": "tubig" },
-        { "id": "d", "text": "kanin" },
-        { "id": "e", "text": "baso" },
-        { "id": "f", "text": "mesa" },
-        { "id": "g", "text": "ilaw" },
-        { "id": "h", "text": "bag" }
+        { "id": "a", "text": "kanin" },
+        { "id": "b", "text": "upuan" },
+        { "id": "c", "text": "bag" },
+        { "id": "d", "text": "sapatos" },
+        { "id": "e", "text": "mesa" },
+        { "id": "f", "text": "ilaw" },
+        { "id": "g", "text": "baso" },
+        { "id": "h", "text": "tubig" }
       ],
       "translation": "He ate rice.",
       "focusArea": "vocabulary"
@@ -1110,14 +1119,14 @@
       "question": "Nag-aalmusal ako kada ___.",
       "answer": "aga",
       "options": [
-        { "id": "a", "text": "hapon" },
-        { "id": "b", "text": "gabi" },
-        { "id": "c", "text": "tanghali" },
-        { "id": "d", "text": "aga" },
-        { "id": "e", "text": "lunes" },
+        { "id": "a", "text": "aga" },
+        { "id": "b", "text": "adlaw" },
+        { "id": "c", "text": "lunes" },
+        { "id": "d", "text": "gabi" },
+        { "id": "e", "text": "ulan" },
         { "id": "f", "text": "init" },
-        { "id": "g", "text": "ulan" },
-        { "id": "h", "text": "adlaw" }
+        { "id": "g", "text": "hapon" },
+        { "id": "h", "text": "tanghali" }
       ],
       "translation": "I eat breakfast every morning.",
       "focusArea": "vocabulary"
@@ -1132,14 +1141,14 @@
       "question": "Hiya nag-___ han irimnan.",
       "answer": "inom",
       "options": [
-        { "id": "a", "text": "luto" },
-        { "id": "b", "text": "kaon" },
-        { "id": "c", "text": "inom" },
-        { "id": "d", "text": "lakat" },
-        { "id": "e", "text": "tulo" },
-        { "id": "f", "text": "tuok" },
-        { "id": "g", "text": "himo" },
-        { "id": "h", "text": "lingkod" }
+        { "id": "a", "text": "tuok" },
+        { "id": "b", "text": "lingkod" },
+        { "id": "c", "text": "lakat" },
+        { "id": "d", "text": "inom" },
+        { "id": "e", "text": "luto" },
+        { "id": "f", "text": "himo" },
+        { "id": "g", "text": "kaon" },
+        { "id": "h", "text": "tulo" }
       ],
       "translation": "He drank at the store.",
       "focusArea": "vocabulary"
@@ -1154,14 +1163,14 @@
       "question": "Ang _______ iyo an lugar kun sain nakukuha an mga libro.",
       "answer": "librarya",
       "options": [
-        { "id": "a", "text": "kwarto" },
-        { "id": "b", "text": "librarya" },
+        { "id": "a", "text": "lapis" },
+        { "id": "b", "text": "kwarto" },
         { "id": "c", "text": "banyo" },
-        { "id": "d", "text": "silid" },
-        { "id": "e", "text": "kusina" },
-        { "id": "f", "text": "silya" },
-        { "id": "g", "text": "papel" },
-        { "id": "h", "text": "lapis" }
+        { "id": "d", "text": "librarya" },
+        { "id": "e", "text": "silid" },
+        { "id": "f", "text": "kusina" },
+        { "id": "g", "text": "silya" },
+        { "id": "h", "text": "papel" }
       ],
       "translation": "The library is where books come from.",
       "focusArea": "vocabulary"
@@ -1176,13 +1185,13 @@
       "question": "Gamit na ___ sa pagluto.",
       "answer": "kawa",
       "options": [
-        { "id": "a", "text": "kawa" },
-        { "id": "b", "text": "payong" },
-        { "id": "c", "text": "lapis" },
-        { "id": "d", "text": "sapatos" },
-        { "id": "e", "text": "telepono" },
-        { "id": "f", "text": "libro" },
-        { "id": "g", "text": "silya" },
+        { "id": "a", "text": "libro" },
+        { "id": "b", "text": "kawa" },
+        { "id": "c", "text": "silya" },
+        { "id": "d", "text": "payong" },
+        { "id": "e", "text": "sapatos" },
+        { "id": "f", "text": "lapis" },
+        { "id": "g", "text": "telepono" },
         { "id": "h", "text": "ilaw" }
       ],
       "translation": "Use the pan for cooking.",
@@ -1198,14 +1207,14 @@
       "question": "So sala et ___.",
       "answer": "bale",
       "options": [
-        { "id": "a", "text": "bale" },
-        { "id": "b", "text": "tanap" },
-        { "id": "c", "text": "lababo" },
-        { "id": "d", "text": "danum" },
-        { "id": "e", "text": "silid" },
-        { "id": "f", "text": "simbaan" },
-        { "id": "g", "text": "payong" },
-        { "id": "h", "text": "sayan" }
+        { "id": "a", "text": "payong" },
+        { "id": "b", "text": "sayan" },
+        { "id": "c", "text": "bale" },
+        { "id": "d", "text": "lababo" },
+        { "id": "e", "text": "tanap" },
+        { "id": "f", "text": "silid" },
+        { "id": "g", "text": "danum" },
+        { "id": "h", "text": "simbaan" }
       ],
       "translation": "The living room is inside the house.",
       "focusArea": "vocabulary"
@@ -1220,14 +1229,14 @@
       "question": "Nagbisti siya og ___.",
       "answer": "sinina",
       "options": [
-        { "id": "a", "text": "sinina" },
-        { "id": "b", "text": "lapis" },
-        { "id": "c", "text": "papel" },
-        { "id": "d", "text": "plato" },
-        { "id": "e", "text": "bangko" },
-        { "id": "f", "text": "saging" },
-        { "id": "g", "text": "libro" },
-        { "id": "h", "text": "sapatos" }
+        { "id": "a", "text": "sapatos" },
+        { "id": "b", "text": "sinina" },
+        { "id": "c", "text": "bangko" },
+        { "id": "d", "text": "lapis" },
+        { "id": "e", "text": "papel" },
+        { "id": "f", "text": "plato" },
+        { "id": "g", "text": "saging" },
+        { "id": "h", "text": "libro" }
       ],
       "translation": "He wore clothes.",
       "focusArea": "vocabulary"
@@ -1242,13 +1251,13 @@
       "question": "Ang mga bata ay naglalaro sa tabi ng ___.",
       "answer": "ilog",
       "options": [
-        { "id": "a", "text": "mesa" },
-        { "id": "b", "text": "ilog" },
-        { "id": "c", "text": "pinto" },
+        { "id": "a", "text": "silid" },
+        { "id": "b", "text": "mesa" },
+        { "id": "c", "text": "kotse" },
         { "id": "d", "text": "bag" },
-        { "id": "e", "text": "silid" },
-        { "id": "f", "text": "aso" },
-        { "id": "g", "text": "kotse" },
+        { "id": "e", "text": "ilog" },
+        { "id": "f", "text": "pinto" },
+        { "id": "g", "text": "aso" },
         { "id": "h", "text": "paaralan" }
       ],
       "translation": "The children are playing by the river.",
@@ -1264,14 +1273,14 @@
       "question": "Ang ___ misinggit og kusog.",
       "answer": "iro",
       "options": [
-        { "id": "a", "text": "iro" },
-        { "id": "b", "text": "isda" },
-        { "id": "c", "text": "saging" },
-        { "id": "d", "text": "papel" },
-        { "id": "e", "text": "tawo" },
-        { "id": "f", "text": "sinina" },
-        { "id": "g", "text": "bayabas" },
-        { "id": "h", "text": "lapis" }
+        { "id": "a", "text": "bayabas" },
+        { "id": "b", "text": "sinina" },
+        { "id": "c", "text": "lapis" },
+        { "id": "d", "text": "tawo" },
+        { "id": "e", "text": "iro" },
+        { "id": "f", "text": "papel" },
+        { "id": "g", "text": "saging" },
+        { "id": "h", "text": "isda" }
       ],
       "translation": "The dog barked loudly.",
       "focusArea": "vocabulary"
@@ -1286,12 +1295,12 @@
       "question": "Agsang-atak kada ___.",
       "answer": "bigat",
       "options": [
-        { "id": "a", "text": "bigat" },
-        { "id": "b", "text": "rabii" },
+        { "id": "a", "text": "rabii" },
+        { "id": "b", "text": "bigat" },
         { "id": "c", "text": "turog" },
-        { "id": "d", "text": "init" },
+        { "id": "d", "text": "lamesa" },
         { "id": "e", "text": "aldaw" },
-        { "id": "f", "text": "lamesa" },
+        { "id": "f", "text": "init" },
         { "id": "g", "text": "balay" },
         { "id": "h", "text": "libro" }
       ],
@@ -1308,14 +1317,14 @@
       "question": "Pakidalang yang ___ king kwartu.",
       "answer": "kutson",
       "options": [
-        { "id": "a", "text": "lamesa" },
+        { "id": "a", "text": "ilaw" },
         { "id": "b", "text": "kutson" },
-        { "id": "c", "text": "upuan" },
-        { "id": "d", "text": "ilaw" },
-        { "id": "e", "text": "bintana" },
+        { "id": "c", "text": "kutsara" },
+        { "id": "d", "text": "upuan" },
+        { "id": "e", "text": "lamesa" },
         { "id": "f", "text": "kurtina" },
         { "id": "g", "text": "radyo" },
-        { "id": "h", "text": "kutsara" }
+        { "id": "h", "text": "bintana" }
       ],
       "translation": "Please bring the mattress to the room.",
       "focusArea": "vocabulary"
@@ -1330,13 +1339,13 @@
       "question": "Adto hiya ha ___.",
       "answer": "merkado",
       "options": [
-        { "id": "a", "text": "balay" },
-        { "id": "b", "text": "merkado" },
-        { "id": "c", "text": "eskwelahan" },
-        { "id": "d", "text": "simbahan" },
-        { "id": "e", "text": "pista" },
-        { "id": "f", "text": "tubig" },
-        { "id": "g", "text": "lapis" },
+        { "id": "a", "text": "pista" },
+        { "id": "b", "text": "simbahan" },
+        { "id": "c", "text": "lapis" },
+        { "id": "d", "text": "merkado" },
+        { "id": "e", "text": "tubig" },
+        { "id": "f", "text": "balay" },
+        { "id": "g", "text": "eskwelahan" },
         { "id": "h", "text": "libro" }
       ],
       "translation": "He/She went to the market.",
@@ -1352,13 +1361,13 @@
       "question": "Gusto ko mag-___ sang tubig.",
       "answer": "inom",
       "options": [
-        { "id": "a", "text": "kaon" },
-        { "id": "b", "text": "inom" },
-        { "id": "c", "text": "luto" },
+        { "id": "a", "text": "lingkod" },
+        { "id": "b", "text": "siling" },
+        { "id": "c", "text": "inom" },
         { "id": "d", "text": "tulog" },
         { "id": "e", "text": "lakat" },
-        { "id": "f", "text": "siling" },
-        { "id": "g", "text": "lingkod" },
+        { "id": "f", "text": "kaon" },
+        { "id": "g", "text": "luto" },
         { "id": "h", "text": "tan-aw" }
       ],
       "translation": "I want to drink water.",
@@ -1374,14 +1383,14 @@
       "question": "Siya na ___ sa giyera.",
       "answer": "hadlok",
       "options": [
-        { "id": "a", "text": "rido" },
+        { "id": "a", "text": "kalipay" },
         { "id": "b", "text": "hadlok" },
-        { "id": "c", "text": "sakit" },
-        { "id": "d", "text": "lakat" },
-        { "id": "e", "text": "ampo" },
-        { "id": "f", "text": "ilok" },
-        { "id": "g", "text": "kalipay" },
-        { "id": "h", "text": "palad" }
+        { "id": "c", "text": "rido" },
+        { "id": "d", "text": "palad" },
+        { "id": "e", "text": "lakat" },
+        { "id": "f", "text": "sakit" },
+        { "id": "g", "text": "ampo" },
+        { "id": "h", "text": "ilok" }
       ],
       "translation": "He/She is already afraid of the war.",
       "focusArea": "vocabulary"
@@ -1396,14 +1405,14 @@
       "question": "Gamitin mo ya ___ ed pagpaayos.",
       "answer": "martilyo",
       "options": [
-        { "id": "a", "text": "kutsilyo" },
-        { "id": "b", "text": "libro" },
-        { "id": "c", "text": "martilyo" },
-        { "id": "d", "text": "palad" },
-        { "id": "e", "text": "paso" },
-        { "id": "f", "text": "lamesa" },
-        { "id": "g", "text": "lapis" },
-        { "id": "h", "text": "silya" }
+        { "id": "a", "text": "martilyo" },
+        { "id": "b", "text": "lapis" },
+        { "id": "c", "text": "palad" },
+        { "id": "d", "text": "libro" },
+        { "id": "e", "text": "kutsilyo" },
+        { "id": "f", "text": "silya" },
+        { "id": "g", "text": "paso" },
+        { "id": "h", "text": "lamesa" }
       ],
       "translation": "Use the hammer for fixing.",
       "focusArea": "vocabulary"
@@ -1418,14 +1427,14 @@
       "question": "Nagsakay sila og ___.",
       "answer": "jeep",
       "options": [
-        { "id": "a", "text": "jeep" },
-        { "id": "b", "text": "lamesa" },
-        { "id": "c", "text": "sapatos" },
-        { "id": "d", "text": "sinina" },
-        { "id": "e", "text": "balay" },
-        { "id": "f", "text": "kape" },
-        { "id": "g", "text": "bangko" },
-        { "id": "h", "text": "papel" }
+        { "id": "a", "text": "bangko" },
+        { "id": "b", "text": "balay" },
+        { "id": "c", "text": "jeep" },
+        { "id": "d", "text": "sapatos" },
+        { "id": "e", "text": "lamesa" },
+        { "id": "f", "text": "papel" },
+        { "id": "g", "text": "sinina" },
+        { "id": "h", "text": "kape" }
       ],
       "translation": "They rode a jeep.",
       "focusArea": "vocabulary"
@@ -1440,14 +1449,14 @@
       "question": "Ang ___ nagtutokdo sa mga estudyante.",
       "answer": "maestro",
       "options": [
-        { "id": "a", "text": "maestro" },
-        { "id": "b", "text": "pulis" },
-        { "id": "c", "text": "doktor" },
-        { "id": "d", "text": "inhenyero" },
+        { "id": "a", "text": "inhenyero" },
+        { "id": "b", "text": "mananayaw" },
+        { "id": "c", "text": "tindera" },
+        { "id": "d", "text": "doktor" },
         { "id": "e", "text": "guwardya" },
-        { "id": "f", "text": "drayber" },
-        { "id": "g", "text": "mananayaw" },
-        { "id": "h", "text": "tindera" }
+        { "id": "f", "text": "maestro" },
+        { "id": "g", "text": "pulis" },
+        { "id": "h", "text": "drayber" }
       ],
       "translation": "The teacher teaches the students.",
       "focusArea": "vocabulary"
@@ -1462,14 +1471,14 @@
       "question": "Nasa ___ ang remote.",
       "answer": "mesa",
       "options": [
-        { "id": "a", "text": "mesa" },
+        { "id": "a", "text": "ilaw" },
         { "id": "b", "text": "bintana" },
-        { "id": "c", "text": "sahig" },
+        { "id": "c", "text": "mesa" },
         { "id": "d", "text": "dingding" },
-        { "id": "e", "text": "hagdan" },
-        { "id": "f", "text": "upuan" },
-        { "id": "g", "text": "ilaw" },
-        { "id": "h", "text": "kurtina" }
+        { "id": "e", "text": "upuan" },
+        { "id": "f", "text": "hagdan" },
+        { "id": "g", "text": "kurtina" },
+        { "id": "h", "text": "sahig" }
       ],
       "translation": "The remote is on the table.",
       "focusArea": "vocabulary"
@@ -1484,14 +1493,14 @@
       "question": "Molakaw ko kada ___.",
       "answer": "buntag",
       "options": [
-        { "id": "a", "text": "buntag" },
-        { "id": "b", "text": "udto" },
-        { "id": "c", "text": "gabii" },
-        { "id": "d", "text": "adlaw" },
-        { "id": "e", "text": "semana" },
-        { "id": "f", "text": "bulan" },
+        { "id": "a", "text": "udto" },
+        { "id": "b", "text": "bulan" },
+        { "id": "c", "text": "daplin" },
+        { "id": "d", "text": "gabii" },
+        { "id": "e", "text": "buntag" },
+        { "id": "f", "text": "adlaw" },
         { "id": "g", "text": "tuig" },
-        { "id": "h", "text": "daplin" }
+        { "id": "h", "text": "semana" }
       ],
       "translation": "I leave every morning.",
       "focusArea": "vocabulary"
@@ -1506,14 +1515,14 @@
       "question": "Nagmasakit ang akon ___.",
       "answer": "tiyan",
       "options": [
-        { "id": "a", "text": "tiyan" },
-        { "id": "b", "text": "ulo" },
-        { "id": "c", "text": "tiil" },
-        { "id": "d", "text": "mata" },
-        { "id": "e", "text": "kamot" },
-        { "id": "f", "text": "baba" },
-        { "id": "g", "text": "ilong" },
-        { "id": "h", "text": "dunggan" }
+        { "id": "a", "text": "baba" },
+        { "id": "b", "text": "mata" },
+        { "id": "c", "text": "tiyan" },
+        { "id": "d", "text": "dunggan" },
+        { "id": "e", "text": "tiil" },
+        { "id": "f", "text": "ulo" },
+        { "id": "g", "text": "kamot" },
+        { "id": "h", "text": "ilong" }
       ],
       "translation": "My stomach hurts.",
       "focusArea": "vocabulary"
@@ -1528,14 +1537,14 @@
       "question": "Nag___ hiya han assignment.",
       "answer": "surat",
       "options": [
-        { "id": "a", "text": "basa" },
-        { "id": "b", "text": "surat" },
-        { "id": "c", "text": "tuon" },
-        { "id": "d", "text": "patik" },
-        { "id": "e", "text": "lingkod" },
-        { "id": "f", "text": "iskwela" },
-        { "id": "g", "text": "istorya" },
-        { "id": "h", "text": "luto" }
+        { "id": "a", "text": "tuon" },
+        { "id": "b", "text": "basa" },
+        { "id": "c", "text": "lingkod" },
+        { "id": "d", "text": "luto" },
+        { "id": "e", "text": "surat" },
+        { "id": "f", "text": "patik" },
+        { "id": "g", "text": "iskwela" },
+        { "id": "h", "text": "istorya" }
       ],
       "translation": "He is writing the assignment.",
       "focusArea": "vocabulary"
@@ -1550,14 +1559,14 @@
       "question": "Adda kami iti ___ idiay bukid.",
       "answer": "kayo",
       "options": [
-        { "id": "a", "text": "kayo" },
-        { "id": "b", "text": "danum" },
-        { "id": "c", "text": "bato" },
-        { "id": "d", "text": "daga" },
-        { "id": "e", "text": "lamesa" },
-        { "id": "f", "text": "libro" },
-        { "id": "g", "text": "lampara" },
-        { "id": "h", "text": "bintana" }
+        { "id": "a", "text": "lampara" },
+        { "id": "b", "text": "kayo" },
+        { "id": "c", "text": "daga" },
+        { "id": "d", "text": "lamesa" },
+        { "id": "e", "text": "danum" },
+        { "id": "f", "text": "bintana" },
+        { "id": "g", "text": "bato" },
+        { "id": "h", "text": "libro" }
       ],
       "translation": "We were at the tree in the mountain.",
       "focusArea": "vocabulary"
@@ -1572,14 +1581,14 @@
       "question": "Makanyan yang ___ pamung makanya.",
       "answer": "lugud",
       "options": [
-        { "id": "a", "text": "galit" },
+        { "id": "a", "text": "takot" },
         { "id": "b", "text": "lugud" },
-        { "id": "c", "text": "takot" },
+        { "id": "c", "text": "galit" },
         { "id": "d", "text": "lungkot" },
-        { "id": "e", "text": "saya" },
+        { "id": "e", "text": "tuwa" },
         { "id": "f", "text": "himutok" },
-        { "id": "g", "text": "pighati" },
-        { "id": "h", "text": "tuwa" }
+        { "id": "g", "text": "saya" },
+        { "id": "h", "text": "pighati" }
       ],
       "translation": "That shows love.",
       "focusArea": "vocabulary"
@@ -1594,14 +1603,14 @@
       "question": "So bata na ___ ed labas.",
       "answer": "tagem",
       "options": [
-        { "id": "a", "text": "tagem" },
-        { "id": "b", "text": "laya" },
-        { "id": "c", "text": "lakat" },
-        { "id": "d", "text": "dalagan" },
+        { "id": "a", "text": "dalagan" },
+        { "id": "b", "text": "lakat" },
+        { "id": "c", "text": "tagem" },
+        { "id": "d", "text": "awit" },
         { "id": "e", "text": "sakay" },
-        { "id": "f", "text": "awit" },
-        { "id": "g", "text": "inom" },
-        { "id": "h", "text": "kaon" }
+        { "id": "f", "text": "laya" },
+        { "id": "g", "text": "kaon" },
+        { "id": "h", "text": "inom" }
       ],
       "translation": "The child is playing outside.",
       "focusArea": "vocabulary"
@@ -1617,13 +1626,13 @@
       "answer": "kankanen",
       "options": [
         { "id": "a", "text": "bayabas" },
-        { "id": "b", "text": "asin" },
-        { "id": "c", "text": "kankanen" },
-        { "id": "d", "text": "sabaw" },
-        { "id": "e", "text": "tubig" },
-        { "id": "f", "text": "gatas" },
-        { "id": "g", "text": "pansit" },
-        { "id": "h", "text": "kape" }
+        { "id": "b", "text": "kankanen" },
+        { "id": "c", "text": "sabaw" },
+        { "id": "d", "text": "gatas" },
+        { "id": "e", "text": "asin" },
+        { "id": "f", "text": "pansit" },
+        { "id": "g", "text": "kape" },
+        { "id": "h", "text": "tubig" }
       ],
       "translation": "We ate some snacks.",
       "focusArea": "vocabulary"
@@ -1638,14 +1647,14 @@
       "question": "Matulog ko kada ___.",
       "answer": "gabii",
       "options": [
-        { "id": "a", "text": "aga" },
-        { "id": "b", "text": "udto" },
-        { "id": "c", "text": "hapon" },
-        { "id": "d", "text": "gabii" },
-        { "id": "e", "text": "adlaw" },
+        { "id": "a", "text": "buntag" },
+        { "id": "b", "text": "adlaw" },
+        { "id": "c", "text": "gabii" },
+        { "id": "d", "text": "udto" },
+        { "id": "e", "text": "aga" },
         { "id": "f", "text": "semana" },
         { "id": "g", "text": "tuig" },
-        { "id": "h", "text": "buntag" }
+        { "id": "h", "text": "hapon" }
       ],
       "translation": "I sleep every night.",
       "focusArea": "vocabulary"
@@ -1660,14 +1669,14 @@
       "question": "Siya masyado nang ___.",
       "answer": "masaya",
       "options": [
-        { "id": "a", "text": "masubo" },
-        { "id": "b", "text": "masaya" },
-        { "id": "c", "text": "mangirit" },
-        { "id": "d", "text": "magtangis" },
-        { "id": "e", "text": "magtakbo" },
-        { "id": "f", "text": "magkanta" },
+        { "id": "a", "text": "magtula" },
+        { "id": "b", "text": "magtakbo" },
+        { "id": "c", "text": "masaya" },
+        { "id": "d", "text": "mangirit" },
+        { "id": "e", "text": "masubo" },
+        { "id": "f", "text": "magtangis" },
         { "id": "g", "text": "mangita" },
-        { "id": "h", "text": "magtula" }
+        { "id": "h", "text": "magkanta" }
       ],
       "translation": "He is very happy now.",
       "focusArea": "vocabulary"
@@ -1683,13 +1692,13 @@
       "answer": "nagbubuhos ng pawis",
       "options": [
         { "id": "a", "text": "kumakain ng apoy" },
-        { "id": "b", "text": "nagbubuhos ng pawis" },
-        { "id": "c", "text": "umaasang bula" },
-        { "id": "d", "text": "sumasayaw sa alon" },
-        { "id": "e", "text": "lumilipad sa ulap" },
-        { "id": "f", "text": "bumabangka sa dalawang ilog" },
+        { "id": "b", "text": "tumatawid sa apoy" },
+        { "id": "c", "text": "nagbubuhos ng pawis" },
+        { "id": "d", "text": "umaasang bula" },
+        { "id": "e", "text": "sumasayaw sa alon" },
+        { "id": "f", "text": "lumilipad sa ulap" },
         { "id": "g", "text": "nagtatago sa anino" },
-        { "id": "h", "text": "tumatawid sa apoy" }
+        { "id": "h", "text": "bumabangka sa dalawang ilog" }
       ],
       "translation": "He is pouring sweat into his studies—never giving up even when it's hard.",
       "focusArea": "vocabulary"
@@ -1704,14 +1713,14 @@
       "question": "Ang taong ___, dali rang masuko.",
       "answer": "init ug ulo",
       "options": [
-        { "id": "a", "text": "puti og mata" },
-        { "id": "b", "text": "taas og dungog" },
-        { "id": "c", "text": "init ug ulo" },
-        { "id": "d", "text": "baga og nawong" },
-        { "id": "e", "text": "daku og tiyan" },
-        { "id": "f", "text": "gamay og pasensya" },
-        { "id": "g", "text": "way batasan" },
-        { "id": "h", "text": "maayo mohilak" }
+        { "id": "a", "text": "maayo mohilak" },
+        { "id": "b", "text": "init ug ulo" },
+        { "id": "c", "text": "puti og mata" },
+        { "id": "d", "text": "way batasan" },
+        { "id": "e", "text": "gamay og pasensya" },
+        { "id": "f", "text": "baga og nawong" },
+        { "id": "g", "text": "daku og tiyan" },
+        { "id": "h", "text": "taas og dungog" }
       ],
       "translation": "A hot-headed person gets angry easily.",
       "focusArea": "vocabulary"
@@ -1726,13 +1735,13 @@
       "question": "Daydiay nga lalaki ket ___.",
       "answer": "mangiparangarang",
       "options": [
-        { "id": "a", "text": "mangiparangarang" },
-        { "id": "b", "text": "agpanunot" },
-        { "id": "c", "text": "agtuytoy" },
-        { "id": "d", "text": "agayat" },
-        { "id": "e", "text": "agdaldalus" },
-        { "id": "f", "text": "agawid" },
-        { "id": "g", "text": "agbirok" },
+        { "id": "a", "text": "agbirok" },
+        { "id": "b", "text": "agawid" },
+        { "id": "c", "text": "mangiparangarang" },
+        { "id": "d", "text": "agtuytoy" },
+        { "id": "e", "text": "agpanunot" },
+        { "id": "f", "text": "agayat" },
+        { "id": "g", "text": "agdaldalus" },
         { "id": "h", "text": "agbisi" }
       ],
       "translation": "That man is boastful.",
@@ -1748,8 +1757,8 @@
       "question": "Nag-___ siya kasabay kang marhay na tadhana.",
       "answer": "sumabay sa hangin",
       "options": [
-        { "id": "a", "text": "sumabay sa hangin" },
-        { "id": "b", "text": "tungtong sa ulap" },
+        { "id": "a", "text": "tungtong sa ulap" },
+        { "id": "b", "text": "sumabay sa hangin" },
         { "id": "c", "text": "labay sa tubig" },
         { "id": "d", "text": "lusong sa baha" },
         { "id": "e", "text": "layag sa ulan" },
@@ -1770,14 +1779,14 @@
       "question": "Kinahanglan niya hin ___.",
       "answer": "panlimbasog",
       "options": [
-        { "id": "a", "text": "kalipay" },
-        { "id": "b", "text": "panlimbasog" },
-        { "id": "c", "text": "kusog" },
+        { "id": "a", "text": "kusog" },
+        { "id": "b", "text": "kalipay" },
+        { "id": "c", "text": "panlimbasog" },
         { "id": "d", "text": "gahum" },
-        { "id": "e", "text": "damgo" },
-        { "id": "f", "text": "pagkabuotan" },
+        { "id": "e", "text": "pasensya" },
+        { "id": "f", "text": "damgo" },
         { "id": "g", "text": "panalangin" },
-        { "id": "h", "text": "pasensya" }
+        { "id": "h", "text": "pagkabuotan" }
       ],
       "translation": "He needs effort.",
       "focusArea": "vocabulary"
@@ -1792,14 +1801,14 @@
       "question": "Siya nag-ampo para sa ___.",
       "answer": "kapya",
       "options": [
-        { "id": "a", "text": "kapya" },
+        { "id": "a", "text": "bayok" },
         { "id": "b", "text": "pananum" },
-        { "id": "c", "text": "kalilang" },
-        { "id": "d", "text": "kulintang" },
+        { "id": "c", "text": "badjao" },
+        { "id": "d", "text": "pakaradi" },
         { "id": "e", "text": "saging" },
-        { "id": "f", "text": "pakaradi" },
-        { "id": "g", "text": "badjao" },
-        { "id": "h", "text": "bayok" }
+        { "id": "f", "text": "kapya" },
+        { "id": "g", "text": "kalilang" },
+        { "id": "h", "text": "kulintang" }
       ],
       "translation": "He prayed for peace.",
       "focusArea": "vocabulary"
@@ -1815,13 +1824,13 @@
       "answer": "kabaldugan",
       "options": [
         { "id": "a", "text": "kaluguran" },
-        { "id": "b", "text": "kabaldugan" },
-        { "id": "c", "text": "pamagmasusi" },
+        { "id": "b", "text": "alang-alang" },
+        { "id": "c", "text": "kabaldugan" },
         { "id": "d", "text": "lalang" },
         { "id": "e", "text": "panyulung" },
         { "id": "f", "text": "agyu" },
         { "id": "g", "text": "luklukan" },
-        { "id": "h", "text": "alang-alang" }
+        { "id": "h", "text": "pamagmasusi" }
       ],
       "translation": "It has deeper meaning.",
       "focusArea": "vocabulary"
@@ -1836,14 +1845,14 @@
       "question": "Ag ___ tolay ed gabi.",
       "answer": "makaras",
       "options": [
-        { "id": "a", "text": "makaras" },
-        { "id": "b", "text": "maganap" },
-        { "id": "c", "text": "mapalaba" },
-        { "id": "d", "text": "manlangoy" },
-        { "id": "e", "text": "mapilas" },
-        { "id": "f", "text": "makilab" },
-        { "id": "g", "text": "mapungtot" },
-        { "id": "h", "text": "magiliw" }
+        { "id": "a", "text": "mapilas" },
+        { "id": "b", "text": "makilab" },
+        { "id": "c", "text": "makaras" },
+        { "id": "d", "text": "maganap" },
+        { "id": "e", "text": "manlangoy" },
+        { "id": "f", "text": "mapalaba" },
+        { "id": "g", "text": "magiliw" },
+        { "id": "h", "text": "mapungtot" }
       ],
       "translation": "The person rushed through the night.",
       "focusArea": "vocabulary"
@@ -1858,14 +1867,14 @@
       "question": "Ang walay kahadlok, ___ sa disgrasya.",
       "answer": "duol",
       "options": [
-        { "id": "a", "text": "duol" },
-        { "id": "b", "text": "suod" },
-        { "id": "c", "text": "likay" },
-        { "id": "d", "text": "balik" },
+        { "id": "a", "text": "molayo" },
+        { "id": "b", "text": "hilom" },
+        { "id": "c", "text": "balik" },
+        { "id": "d", "text": "duol" },
         { "id": "e", "text": "sayo" },
-        { "id": "f", "text": "hilom" },
-        { "id": "g", "text": "molayo" },
-        { "id": "h", "text": "hagbong" }
+        { "id": "f", "text": "hagbong" },
+        { "id": "g", "text": "suod" },
+        { "id": "h", "text": "likay" }
       ],
       "translation": "He who is not afraid is close to danger.",
       "focusArea": "vocabulary"
@@ -1880,14 +1889,14 @@
       "question": "Gindala niya ang ___ sang iya lolo.",
       "answer": "tangkal",
       "options": [
-        { "id": "a", "text": "kopya" },
-        { "id": "b", "text": "tangkal" },
-        { "id": "c", "text": "sumbrero" },
-        { "id": "d", "text": "balon" },
-        { "id": "e", "text": "basket" },
-        { "id": "f", "text": "tabungos" },
-        { "id": "g", "text": "punot" },
-        { "id": "h", "text": "lukot" }
+        { "id": "a", "text": "tabungos" },
+        { "id": "b", "text": "sumbrero" },
+        { "id": "c", "text": "punot" },
+        { "id": "d", "text": "lukot" },
+        { "id": "e", "text": "tangkal" },
+        { "id": "f", "text": "basket" },
+        { "id": "g", "text": "kopya" },
+        { "id": "h", "text": "balon" }
       ],
       "translation": "He brought his grandfather's cage.",
       "focusArea": "vocabulary"
@@ -1902,14 +1911,14 @@
       "question": "Ginamit ng panday ang ___.",
       "answer": "pamukpok",
       "options": [
-        { "id": "a", "text": "pamukpok" },
-        { "id": "b", "text": "lapis" },
-        { "id": "c", "text": "martilyo" },
+        { "id": "a", "text": "lapis" },
+        { "id": "b", "text": "palu-palo" },
+        { "id": "c", "text": "pamukpok" },
         { "id": "d", "text": "kutsilyo" },
-        { "id": "e", "text": "itak" },
+        { "id": "e", "text": "martilyo" },
         { "id": "f", "text": "palakol" },
-        { "id": "g", "text": "kawayan" },
-        { "id": "h", "text": "palu-palo" }
+        { "id": "g", "text": "itak" },
+        { "id": "h", "text": "kawayan" }
       ],
       "translation": "The blacksmith used the mallet.",
       "focusArea": "vocabulary"
@@ -1924,14 +1933,14 @@
       "question": "Nagsul-ob siya og ___.",
       "answer": "patadyong",
       "options": [
-        { "id": "a", "text": "patadyong" },
-        { "id": "b", "text": "barong" },
-        { "id": "c", "text": "saya" },
+        { "id": "a", "text": "barong" },
+        { "id": "b", "text": "bayo" },
+        { "id": "c", "text": "patadyong" },
         { "id": "d", "text": "palda" },
-        { "id": "e", "text": "sinina" },
-        { "id": "f", "text": "pantalon" },
+        { "id": "e", "text": "saya" },
+        { "id": "f", "text": "sinina" },
         { "id": "g", "text": "kalo" },
-        { "id": "h", "text": "bayo" }
+        { "id": "h", "text": "pantalon" }
       ],
       "translation": "She wore a patadyong.",
       "focusArea": "vocabulary"
@@ -1946,14 +1955,14 @@
       "question": "Adda iti ___ ti pusok.",
       "answer": "panagsangit",
       "options": [
-        { "id": "a", "text": "panagsangit" },
-        { "id": "b", "text": "panagngina" },
-        { "id": "c", "text": "panagduadua" },
-        { "id": "d", "text": "panagrigrigat" },
-        { "id": "e", "text": "panagpatingga" },
-        { "id": "f", "text": "panagpanunot" },
+        { "id": "a", "text": "panagduadua" },
+        { "id": "b", "text": "panagsangit" },
+        { "id": "c", "text": "panagngina" },
+        { "id": "d", "text": "panagserbi" },
+        { "id": "e", "text": "panagpanunot" },
+        { "id": "f", "text": "panagrigrigat" },
         { "id": "g", "text": "panagdait" },
-        { "id": "h", "text": "panagserbi" }
+        { "id": "h", "text": "panagpatingga" }
       ],
       "translation": "There is weeping in my heart.",
       "focusArea": "vocabulary"
@@ -1968,14 +1977,14 @@
       "question": "Si lola may marhay na ___.",
       "answer": "paninindugan",
       "options": [
-        { "id": "a", "text": "paninindugan" },
-        { "id": "b", "text": "paglaom" },
-        { "id": "c", "text": "pagburukas" },
-        { "id": "d", "text": "pahayag" },
-        { "id": "e", "text": "pagkamuot" },
-        { "id": "f", "text": "kabikas" },
-        { "id": "g", "text": "panaghisgot" },
-        { "id": "h", "text": "tinampo" }
+        { "id": "a", "text": "paglaom" },
+        { "id": "b", "text": "kabikas" },
+        { "id": "c", "text": "panaghisgot" },
+        { "id": "d", "text": "pagkamuot" },
+        { "id": "e", "text": "paninindugan" },
+        { "id": "f", "text": "pagburukas" },
+        { "id": "g", "text": "tinampo" },
+        { "id": "h", "text": "pahayag" }
       ],
       "translation": "Grandma has good principles.",
       "focusArea": "vocabulary"
@@ -1990,14 +1999,14 @@
       "question": "Iton kabubwason kinahanglan protektaran an ___.",
       "answer": "kalibungan",
       "options": [
-        { "id": "a", "text": "kinabuhi" },
-        { "id": "b", "text": "kalibungan" },
-        { "id": "c", "text": "katungod" },
-        { "id": "d", "text": "kadagatan" },
-        { "id": "e", "text": "pagkatawo" },
-        { "id": "f", "text": "kapanginano" },
-        { "id": "g", "text": "kaopayan" },
-        { "id": "h", "text": "katawhayan" }
+        { "id": "a", "text": "katawhayan" },
+        { "id": "b", "text": "kapanginano" },
+        { "id": "c", "text": "kalibungan" },
+        { "id": "d", "text": "pagkatawo" },
+        { "id": "e", "text": "kaopayan" },
+        { "id": "f", "text": "kinabuhi" },
+        { "id": "g", "text": "katungod" },
+        { "id": "h", "text": "kadagatan" }
       ],
       "translation": "The future requires protecting the environment.",
       "focusArea": "vocabulary"
@@ -2012,14 +2021,14 @@
       "question": "Importante ang ___.",
       "answer": "pagpasalamat",
       "options": [
-        { "id": "a", "text": "pagpasalamat" },
+        { "id": "a", "text": "kagila" },
         { "id": "b", "text": "pagari" },
-        { "id": "c", "text": "kulintang" },
+        { "id": "c", "text": "pagpasalamat" },
         { "id": "d", "text": "panulakan" },
-        { "id": "e", "text": "kagila" },
+        { "id": "e", "text": "padaga" },
         { "id": "f", "text": "lunsay" },
         { "id": "g", "text": "ginawi" },
-        { "id": "h", "text": "padaga" }
+        { "id": "h", "text": "kulintang" }
       ],
       "translation": "Gratitude is important.",
       "focusArea": "vocabulary"
@@ -2034,14 +2043,14 @@
       "question": "Ing lalaking ita mapalyaring ___.",
       "answer": "matibe",
       "options": [
-        { "id": "a", "text": "matibe" },
+        { "id": "a", "text": "mapali" },
         { "id": "b", "text": "makanyan" },
-        { "id": "c", "text": "masikan" },
+        { "id": "c", "text": "matibe" },
         { "id": "d", "text": "mapalyaring" },
-        { "id": "e", "text": "makuyad" },
+        { "id": "e", "text": "masikan" },
         { "id": "f", "text": "matulid" },
         { "id": "g", "text": "marangal" },
-        { "id": "h", "text": "mapali" }
+        { "id": "h", "text": "makuyad" }
       ],
       "translation": "That man may be strong.",
       "focusArea": "vocabulary"
@@ -2056,14 +2065,14 @@
       "question": "Ya panagbiag met la ya ___.",
       "answer": "alikew",
       "options": [
-        { "id": "a", "text": "alikew" },
-        { "id": "b", "text": "awan" },
-        { "id": "c", "text": "andag" },
+        { "id": "a", "text": "awan" },
+        { "id": "b", "text": "abong" },
+        { "id": "c", "text": "alikew" },
         { "id": "d", "text": "tangbang" },
-        { "id": "e", "text": "siled" },
+        { "id": "e", "text": "laktod" },
         { "id": "f", "text": "panluwes" },
-        { "id": "g", "text": "abong" },
-        { "id": "h", "text": "laktod" }
+        { "id": "g", "text": "siled" },
+        { "id": "h", "text": "andag" }
       ],
       "translation": "Life is just a passage.",
       "focusArea": "vocabulary"
@@ -2078,14 +2087,14 @@
       "question": "Siya kay ___ nga tawo.",
       "answer": "maisugon",
       "options": [
-        { "id": "a", "text": "maisugon" },
-        { "id": "b", "text": "matahum" },
+        { "id": "a", "text": "matahum" },
+        { "id": "b", "text": "maisugon" },
         { "id": "c", "text": "maanyag" },
-        { "id": "d", "text": "buotan" },
-        { "id": "e", "text": "matino" },
+        { "id": "d", "text": "matino" },
+        { "id": "e", "text": "buotan" },
         { "id": "f", "text": "matinud-anon" },
-        { "id": "g", "text": "mabination" },
-        { "id": "h", "text": "mapadayunon" }
+        { "id": "g", "text": "mapadayunon" },
+        { "id": "h", "text": "mabination" }
       ],
       "translation": "He is a brave person.",
       "focusArea": "vocabulary"
@@ -2100,14 +2109,14 @@
       "question": "Ginsunod nila ang ___.",
       "answer": "pamuluyag",
       "options": [
-        { "id": "a", "text": "pamuluyag" },
-        { "id": "b", "text": "kasal" },
-        { "id": "c", "text": "pamangkot" },
-        { "id": "d", "text": "panghagad" },
-        { "id": "e", "text": "handum" },
-        { "id": "f", "text": "pagdaug" },
-        { "id": "g", "text": "pagtudlo" },
-        { "id": "h", "text": "paandam" }
+        { "id": "a", "text": "handum" },
+        { "id": "b", "text": "panghagad" },
+        { "id": "c", "text": "pamuluyag" },
+        { "id": "d", "text": "pagtudlo" },
+        { "id": "e", "text": "pagdaug" },
+        { "id": "f", "text": "kasal" },
+        { "id": "g", "text": "paandam" },
+        { "id": "h", "text": "pamangkot" }
       ],
       "translation": "They followed the courtship tradition.",
       "focusArea": "vocabulary"
