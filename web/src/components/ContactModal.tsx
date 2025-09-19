@@ -1,7 +1,7 @@
 import React, { useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { COLORS } from "../constants/colors";
-import { FaFacebook, FaGithub } from "react-icons/fa6";
+import { FaFacebook, FaGithub, FaRegMessage } from "react-icons/fa6";
 import { GoLinkExternal } from "react-icons/go";
 import { SiGmail } from "react-icons/si";
 import { IoMdClose } from "react-icons/io";
@@ -112,7 +112,7 @@ const ContactModal: React.FC<ContactModalProps> = ({ isOpen, onClose }) => {
               style={{ borderColor: `${COLORS.primary.blue}30` }}
             >
               <div className="flex items-center space-x-3">
-                <FaFacebook
+                <FaRegMessage
                   className="w-6 h-6"
                   style={{ color: COLORS.text.yellow }}
                 />

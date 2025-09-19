@@ -83,7 +83,7 @@ const Hero: React.FC = () => {
             <motion.div
               className="flex justify-center mb-6"
               variants={logoVariants}
-              transition={{ duration: 0.8, ease: "easeOut" }} // Transition here
+              transition={{ duration: 0.8, ease: "easeOut" }}
             >
               <motion.img
                 src={wikatalkLogo}
@@ -101,7 +101,7 @@ const Hero: React.FC = () => {
             <motion.h1
               className="text-4xl md:text-5xl lg:text-6xl font-bold"
               variants={itemVariants}
-              transition={{ duration: 0.6, ease: "easeOut" }} // Transition here
+              transition={{ duration: 0.6, ease: "easeOut" }}
             >
               <motion.span
                 style={{ color: COLORS.text.yellow }}
@@ -124,7 +124,7 @@ const Hero: React.FC = () => {
               className="text-sm md:text-lg mb-6 leading-relaxed"
               style={{ color: COLORS.text.secondary }}
               variants={itemVariants}
-              transition={{ duration: 0.6, ease: "easeOut" }} // Transition here
+              transition={{ duration: 0.6, ease: "easeOut" }}
             >
               Speak Freely, Understand Instantly.
             </motion.p>
@@ -133,7 +133,7 @@ const Hero: React.FC = () => {
             <motion.h2
               className="text-lg mb-4 md:text-xl font-semibold"
               variants={itemVariants}
-              transition={{ duration: 0.6, ease: "easeOut" }} // Transition here
+              transition={{ duration: 0.6, ease: "easeOut" }}
             >
               Learn Philippine languages in an engaging way.
             </motion.h2>
@@ -142,7 +142,7 @@ const Hero: React.FC = () => {
               className="text-base lg:text-lg mb-8 leading-relaxed"
               style={{ color: COLORS.text.secondary }}
               variants={itemVariants}
-              transition={{ duration: 0.6, ease: "easeOut" }} // Transition here
+              transition={{ duration: 0.6, ease: "easeOut" }}
             >
               Translate instantly, play interactive games, and earn rewards as
               you explore Tagalog, Cebuano, Ilocano, and more.
@@ -151,7 +151,7 @@ const Hero: React.FC = () => {
             <motion.div
               className="flex flex-col sm:flex-row gap-4 justify-center"
               variants={itemVariants}
-              transition={{ duration: 0.6, ease: "easeOut" }} // Transition here
+              transition={{ duration: 0.6, ease: "easeOut" }}
             >
               <motion.a
                 href="#download"
@@ -208,7 +208,7 @@ const Hero: React.FC = () => {
             variants={phoneVariants}
             initial="hidden"
             animate="visible"
-            transition={{ duration: 0.8, ease: "easeOut", delay: 0.3 }} // Transition here
+            transition={{ duration: 0.8, ease: "easeOut", delay: 0.3 }}
           >
             <motion.div
               className="relative mx-auto w-full rounded-lg"
@@ -227,11 +227,6 @@ const Hero: React.FC = () => {
                   style={{
                     backgroundColor: COLORS.secondary.darkGray,
                   }}
-                  whileHover={{
-                    scale: 1.05,
-                    rotateY: 10,
-                    boxShadow: "0 25px 50px rgba(0,0,0,0.3)",
-                  }}
                   transition={{ type: "spring", stiffness: 300 }}
                 >
                   {/* Screen Content */}
@@ -239,7 +234,6 @@ const Hero: React.FC = () => {
                     <motion.div
                       className="w-full h-full flex items-center justify-center"
                       style={{ backgroundColor: COLORS.background.dark }}
-                      whileHover={{ scale: 1.02 }}
                     >
                       <motion.img
                         src={homeScreen}

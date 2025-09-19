@@ -24,18 +24,20 @@ const Navigation: React.FC = () => {
         <div className="flex justify-between items-center h-16">
           {/* Logo */}
           <div className="flex items-center">
-            <span
-              className="text-lg sm:text-xl md:text-2xl font-bold"
-              style={{ color: COLORS.text.yellow }}
-            >
-              Wika
-            </span>
-            <span
-              className="text-lg sm:text-xl md:text-2xl font-bold"
-              style={{ color: COLORS.text.primary }}
-            >
-              Talk
-            </span>
+            <a href="#home" className="flex items-center">
+              <span
+                className="text-lg sm:text-xl md:text-2xl font-bold"
+                style={{ color: COLORS.text.yellow }}
+              >
+                Wika
+              </span>
+              <span
+                className="text-lg sm:text-xl md:text-2xl font-bold"
+                style={{ color: COLORS.text.primary }}
+              >
+                Talk
+              </span>
+            </a>
           </div>
 
           {/* Desktop Navigation */}

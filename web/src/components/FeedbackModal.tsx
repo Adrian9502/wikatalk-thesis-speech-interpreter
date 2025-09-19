@@ -1,10 +1,9 @@
 import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { COLORS } from "../constants/colors";
-import { FaBug, FaLightbulb, FaUser } from "react-icons/fa6";
+import { FaBug, FaLightbulb } from "react-icons/fa6";
 import { IoMdClose } from "react-icons/io";
 import { BsFillSendFill } from "react-icons/bs";
-import { SiGmail } from "react-icons/si";
 import { LuMessageSquare } from "react-icons/lu";
 
 interface FeedbackModalProps {
@@ -341,7 +340,6 @@ const FeedbackModal: React.FC<FeedbackModalProps> = ({ isOpen, onClose }) => {
                       className="block text-sm font-medium mb-2"
                       style={{ color: COLORS.text.primary }}
                     >
-                      <FaUser className="w-4 h-4 inline mr-2" />
                       Name *
                     </label>
                     <input
@@ -364,7 +362,6 @@ const FeedbackModal: React.FC<FeedbackModalProps> = ({ isOpen, onClose }) => {
                       className="block text-sm font-medium mb-2"
                       style={{ color: COLORS.text.primary }}
                     >
-                      <SiGmail className="w-4 h-4 inline mr-2" />
                       Email *
                     </label>
                     <input
