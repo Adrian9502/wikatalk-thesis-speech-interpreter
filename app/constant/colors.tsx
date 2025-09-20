@@ -99,15 +99,15 @@ export const NETWORK_STATUS_BACKGROUND_COLORS = {
 // Homepage gradient colors
 export const HOMEPAGE_COLORS = {
   // blue
-  speech: ["#2B52AD", "#3B6FE5"] as const,
+  speech: ["#1d4ed8", "#3b82f6", "#60a5fa"] as const,
   // red
-  translate: ["#AD2B2B", "#E53B3B"] as const,
+  translate: ["#dc2626", "#ef4444", "#f87171"] as const,
   // yellow
-  scan: ["#AD8A2B", "#E5C33B"] as const,
-  // blue
-  games: ["#2B52AD", "#3B6FE5"] as const,
+  scan: ["#d97706", "#f59e0b", "#fbbf24"] as const,
   // red
-  pronounce: ["#AD2B2B", "#E53B3B"] as const,
+  games: ["#dc2626", "#ef4444", "#f87171"] as const,
+  // blue
+  pronounce: ["#1d4ed8", "#3b82f6", "#60a5fa"] as const,
 };
 
 // Colors for icon
@@ -130,9 +130,9 @@ export const RANKING_SELECTOR_COLORS = ["#c9a60cff", "#b36b00ff"] as const;
 // game card game mode gradients
 
 export const GAME_MODE_GRADIENTS = {
-  multipleChoice: ["#029c35ff", "#0daf5eff"] as const,
-  identification: ["#02359cff", "#0a7d94ff"] as const,
-  fillBlanks: ["#9c0202ff", "#d64343ff"] as const,
+  multipleChoice: ["#d97706", "#f59e0b", "#fbbf24"] as const,
+  identification: ["#dc2626", "#ef4444", "#f87171"] as const,
+  fillBlanks: ["#1d4ed8", "#3b82f6", "#60a5fa"] as const,
 };
 
 // Word of the Day card gradient

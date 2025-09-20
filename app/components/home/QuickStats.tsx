@@ -1,11 +1,8 @@
 import React from "react";
-import { View, Text, Image, StyleSheet, Dimensions } from "react-native";
+import { View, Text, Image, StyleSheet } from "react-native";
 import { Target, TrendingUp } from "react-native-feather";
 import { BASE_COLORS } from "@/constant/colors";
 import { COMPONENT_FONT_SIZES, POPPINS_FONT } from "@/constant/fontSizes";
-import useThemeStore from "@/store/useThemeStore";
-
-const { width: screenWidth } = Dimensions.get("window");
 
 interface QuickStatsProps {
   overallStats: {
@@ -17,56 +14,60 @@ interface QuickStatsProps {
 }
 
 const QuickStats = React.memo(({ overallStats, coins }: QuickStatsProps) => {
-  const { activeTheme } = useThemeStore();
-
   const quickStats = [
     {
-      icon: <Target width={14} height={14} color={BASE_COLORS.yellow} />,
+      icon: <Target width={18} height={18} color="#60a5fa" />,
       label: "Quiz Levels",
       value: overallStats.completed,
-      subValue: `${overallStats.total} total`,
-      color: BASE_COLORS.yellow,
+      subValue: `of ${overallStats.total}`,
+      accentColor: "#60a5fa",
     },
     {
-      icon: <TrendingUp width={14} height={14} color={BASE_COLORS.success} />,
+      icon: <TrendingUp width={18} height={18} color="#f87171" />,
       label: "Progress",
       value: overallStats.percentage,
       subValue: "completion",
-      color: BASE_COLORS.success,
+      accentColor: "#f87171",
     },
     {
       icon: (
         <Image
           source={require("@/assets/images/coin.png")}
-          style={styles.rewardCoinImage}
+          style={styles.coinImage}
         />
       ),
       label: "Coins",
       value: coins.toString(),
       subValue: "earned",
-      color: BASE_COLORS.yellow,
+      accentColor: "#fbbf24",
     },
   ];
 
   return (
     <View style={styles.quickStatsSection}>
       <Text style={styles.sectionTitle}>Your Game Progress</Text>
-      <View style={styles.quickStatsGrid}>
+      <View style={styles.statsContainer}>
         {quickStats.map((stat, index) => (
-          <View key={index} style={styles.quickStatCard}>
-            <View style={styles.quickStatHeader}>
-              {stat.icon}
-              <Text style={styles.quickStatLabel}>{stat.label}</Text>
+          <View key={index} style={styles.statCard}>
+            <View style={styles.statRow}>
+              <View style={styles.leftSection}>
+                <View
+                  style={[
+                    styles.iconWrapper,
+                    { backgroundColor: `${stat.accentColor}15` },
+                  ]}
+                >
+                  {stat.icon}
+                </View>
+                <View style={styles.labelSection}>
+                  <Text style={styles.statLabel}>{stat.label}</Text>
+                  <Text style={styles.statSubValue}>{stat.subValue}</Text>
+                </View>
+              </View>
+              <Text style={[styles.statValue, { color: stat.accentColor }]}>
+                {stat.value}
+              </Text>
             </View>
-            <Text
-              style={[
-                styles.quickStatValue,
-                { color: activeTheme.tabActiveColor },
-              ]}
-            >
-              {stat.value}
-            </Text>
-            <Text style={styles.quickStatSubValue}>{stat.subValue}</Text>
           </View>
         ))}
       </View>
@@ -76,7 +77,7 @@ const QuickStats = React.memo(({ overallStats, coins }: QuickStatsProps) => {
 
 const styles = StyleSheet.create({
   quickStatsSection: {
-    marginBottom: 16,
+    marginBottom: 25,
   },
   sectionTitle: {
     fontSize: COMPONENT_FONT_SIZES.home.sectionTitle,
@@ -84,45 +85,56 @@ const styles = StyleSheet.create({
     marginBottom: 16,
     color: BASE_COLORS.white,
   },
-  quickStatsGrid: {
-    flexDirection: "row",
-    flexWrap: "wrap",
-    justifyContent: "space-between",
-    gap: 10,
+  statsContainer: {
+    gap: 12,
   },
-  quickStatCard: {
-    width: screenWidth < 350 ? "100%" : screenWidth < 400 ? "48%" : "31%",
-    backgroundColor: "rgba(255, 255, 255, 0.15)",
-    borderRadius: 20,
-    padding: 12,
+  statCard: {
+    backgroundColor: "rgba(255, 255, 255, 0.08)",
+    borderRadius: 16,
+    padding: 20,
     borderWidth: 1,
     borderColor: "rgba(255, 255, 255, 0.2)",
-    marginBottom: 10,
   },
-  quickStatHeader: {
+  statRow: {
     flexDirection: "row",
     alignItems: "center",
-    marginBottom: 8,
-    gap: 6,
+    justifyContent: "space-between",
   },
-  quickStatLabel: {
-    fontSize: COMPONENT_FONT_SIZES.home.statsLabel,
+  leftSection: {
+    flexDirection: "row",
+    alignItems: "center",
+    flex: 1,
+  },
+  iconWrapper: {
+    width: 40,
+    height: 40,
+    borderRadius: 12,
+    justifyContent: "center",
+    alignItems: "center",
+    marginRight: 16,
+  },
+  labelSection: {
+    flex: 1,
+  },
+  statLabel: {
+    fontSize: 14,
     fontFamily: POPPINS_FONT.medium,
     color: BASE_COLORS.white,
-  },
-  quickStatValue: {
-    fontSize: COMPONENT_FONT_SIZES.home.statsValue,
-    fontFamily: POPPINS_FONT.bold,
     marginBottom: 2,
   },
-  quickStatSubValue: {
-    fontSize: COMPONENT_FONT_SIZES.home.statsLabel,
-    fontFamily: POPPINS_FONT.medium,
-    color: BASE_COLORS.white,
+  statSubValue: {
+    fontSize: COMPONENT_FONT_SIZES.home.featuredDescription,
+    fontFamily: POPPINS_FONT.regular,
+    color: "rgba(255, 255, 255, 0.5)",
   },
-  rewardCoinImage: {
-    width: 14,
-    height: 14,
+  statValue: {
+    fontSize: COMPONENT_FONT_SIZES.home.statsValue,
+    fontFamily: POPPINS_FONT.bold,
+    textAlign: "right",
+  },
+  coinImage: {
+    width: 18,
+    height: 18,
     resizeMode: "contain",
   },
 });

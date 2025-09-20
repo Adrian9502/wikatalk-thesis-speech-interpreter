@@ -10,7 +10,7 @@ import { LinearGradient } from "expo-linear-gradient";
 import { Globe, Camera, Mic, Volume2, Target } from "react-native-feather";
 import { BASE_COLORS, HOMEPAGE_COLORS } from "@/constant/colors";
 import { COMPONENT_FONT_SIZES, POPPINS_FONT } from "@/constant/fontSizes";
-import { Ionicons } from "@expo/vector-icons";
+import { Ionicons, MaterialIcons } from "@expo/vector-icons";
 
 interface ExploreProps {
   onNavigateToTab: (tabName: string) => void;
@@ -35,7 +35,7 @@ const Explore = React.memo(({ onNavigateToTab }: ExploreProps) => {
 
   const features = [
     {
-      icon: <Mic width={24} height={24} color={BASE_COLORS.white} />,
+      icon: <Ionicons name="mic-outline" size={24} color={BASE_COLORS.white} />,
       title: "Speech",
       // BLUE
       gradient: HOMEPAGE_COLORS.speech,
@@ -43,7 +43,9 @@ const Explore = React.memo(({ onNavigateToTab }: ExploreProps) => {
       shadowColor: "#3b82f6",
     },
     {
-      icon: <Globe width={24} height={24} color={BASE_COLORS.white} />,
+      icon: (
+        <MaterialIcons name="translate" size={24} color={BASE_COLORS.white} />
+      ),
       title: "Translate",
       // RED
       gradient: HOMEPAGE_COLORS.translate,
@@ -51,7 +53,9 @@ const Explore = React.memo(({ onNavigateToTab }: ExploreProps) => {
       shadowColor: "#ef4444",
     },
     {
-      icon: <Camera width={24} height={24} color={BASE_COLORS.white} />,
+      icon: (
+        <Ionicons name="camera-outline" size={24} color={BASE_COLORS.white} />
+      ),
       title: "Scan",
       // YELLOW
       gradient: HOMEPAGE_COLORS.scan,
@@ -73,7 +77,13 @@ const Explore = React.memo(({ onNavigateToTab }: ExploreProps) => {
       shadowColor: "#ef4444",
     },
     {
-      icon: <Volume2 width={24} height={24} color={BASE_COLORS.white} />,
+      icon: (
+        <Ionicons
+          name="volume-high-outline"
+          size={24}
+          color={BASE_COLORS.white}
+        />
+      ),
       title: "Pronounce",
       // BLUE
       gradient: HOMEPAGE_COLORS.pronounce,

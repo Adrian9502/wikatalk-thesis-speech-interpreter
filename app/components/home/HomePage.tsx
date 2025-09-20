@@ -18,7 +18,7 @@ import HomeHeader from "./HomeHeader";
 import QuickStats from "./QuickStats";
 import FeaturedSection from "./FeaturedSection";
 import AppStats from "./AppStats";
-import AllFeatures from "./AllFeatures";
+import Explore from "./Explore";
 import RankingsSection from "./RankingsSection";
 
 interface HomePageProps {
@@ -145,24 +145,18 @@ const HomePage: React.FC<HomePageProps> = ({ onNavigateToTab, onReady }) => {
               firstName={firstName}
               onSettingsPress={handleSettingsPress}
             />
-
+            {/* Explore Section */}
+            <Explore onNavigateToTab={onNavigateToTab} />
             {/* Quick Stats Cards */}
             <QuickStats overallStats={overallStats} coins={coins} />
-
             {/* Featured Section */}
-            <FeaturedSection onNavigateToTab={onNavigateToTab} />
-
             {/* Statistics Section */}
-            <AppStats
+            {/* <AppStats
               totalPronunciationsCount={totalPronunciationsCount}
               overallStats={overallStats}
-            />
-
-            {/* All Features Section */}
-            <AllFeatures onNavigateToTab={onNavigateToTab} />
-
+            /> */}
             {/* Rankings Section */}
-            <RankingsSection />
+            {/* <RankingsSection /> */}
           </ScrollView>
         </Animated.View>
       </SafeAreaView>
