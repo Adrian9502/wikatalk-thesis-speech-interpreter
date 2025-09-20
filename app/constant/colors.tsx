@@ -98,11 +98,16 @@ export const NETWORK_STATUS_BACKGROUND_COLORS = {
 };
 // Homepage gradient colors
 export const HOMEPAGE_COLORS = {
-  speech: ["#BA8E23", "#b9a115ff"] as const,
-  translate: ["#02359cff", "#0a7d94ff"] as const,
-  scan: ["#9c0202ff", "#d64343ff"] as const,
-  games: ["#6b029cff", "#a52fcfff"] as const,
-  pronounce: ["#029c35ff", "#0daf5eff"] as const,
+  // blue
+  speech: ["#2B52AD", "#3B6FE5"] as const,
+  // red
+  translate: ["#AD2B2B", "#E53B3B"] as const,
+  // yellow
+  scan: ["#AD8A2B", "#E5C33B"] as const,
+  // blue
+  games: ["#2B52AD", "#3B6FE5"] as const,
+  // red
+  pronounce: ["#AD2B2B", "#E53B3B"] as const,
 };
 
 // Colors for icon

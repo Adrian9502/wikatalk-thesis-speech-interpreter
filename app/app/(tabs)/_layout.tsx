@@ -7,15 +7,14 @@ import React, {
   useMemo,
 } from "react";
 import { Tabs, useLocalSearchParams, useSegments } from "expo-router";
-import { Mic, Camera, Globe, Volume2, Home } from "react-native-feather";
 import useThemeStore from "@/store/useThemeStore";
-import { Ionicons } from "@expo/vector-icons";
+import { Ionicons, MaterialIcons } from "@expo/vector-icons";
 import { tabPreloader } from "@/utils/tabPreloader";
 import { useFocusEffect } from "@react-navigation/native";
 import { StatusBar } from "expo-status-bar";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import NetworkStatusBar from "@/components/NetworkStatusBar";
-import { COMPONENT_FONT_SIZES, POPPINS_FONT } from "@/constant/fontSizes";
+import { POPPINS_FONT } from "@/constant/fontSizes";
 
 const { width: screenWidth } = Dimensions.get("window");
 
@@ -129,11 +128,65 @@ const TabIcon: React.FC<TabIconProps> = React.memo(
   }
 );
 
+const HomeIcon: React.FC<IconProps> = React.memo(({ color, width }) => {
+  const iconSizes = getResponsiveIconSizes();
+  return (
+    <Ionicons
+      name="home-outline"
+      size={width || iconSizes.gameIcon}
+      color={color}
+    />
+  );
+});
+
+const SpeechIcon: React.FC<IconProps> = React.memo(({ color, width }) => {
+  const iconSizes = getResponsiveIconSizes();
+  return (
+    <Ionicons
+      name="mic-outline"
+      size={width || iconSizes.gameIcon}
+      color={color}
+    />
+  );
+});
+
+const TranslateIcon: React.FC<IconProps> = React.memo(({ color, width }) => {
+  const iconSizes = getResponsiveIconSizes();
+  return (
+    <MaterialIcons
+      name="translate"
+      size={width || iconSizes.gameIcon}
+      color={color}
+    />
+  );
+});
+const ScanIcon: React.FC<IconProps> = React.memo(({ color, width }) => {
+  const iconSizes = getResponsiveIconSizes();
+  return (
+    <Ionicons
+      name="camera-outline"
+      size={width || iconSizes.gameIcon}
+      color={color}
+    />
+  );
+});
+
 const GameIcon: React.FC<IconProps> = React.memo(({ color, width }) => {
   const iconSizes = getResponsiveIconSizes();
   return (
     <Ionicons
       name="game-controller-outline"
+      size={width || iconSizes.gameIcon}
+      color={color}
+    />
+  );
+});
+
+const PronounceIcon: React.FC<IconProps> = React.memo(({ color, width }) => {
+  const iconSizes = getResponsiveIconSizes();
+  return (
+    <Ionicons
+      name="volume-high-outline"
       size={width || iconSizes.gameIcon}
       color={color}
     />
@@ -352,25 +405,25 @@ export default function TabsLayout() {
       {
         name: "Home",
         title: "Home",
-        icon: Home,
+        icon: HomeIcon,
         iconName: "Home",
       },
       {
         name: "Speech",
         title: "Speech",
-        icon: Mic,
+        icon: SpeechIcon,
         iconName: "Speech",
       },
       {
         name: "Translate",
         title: "Translate",
-        icon: Globe,
+        icon: TranslateIcon,
         iconName: "Translate",
       },
       {
         name: "Scan",
         title: "Scan",
-        icon: Camera,
+        icon: ScanIcon,
         iconName: "Scan",
       },
       {
@@ -382,7 +435,7 @@ export default function TabsLayout() {
       {
         name: "Pronounce",
         title: "Pronounce",
-        icon: Volume2,
+        icon: PronounceIcon,
         iconName: "Pronounce",
       },
     ],
