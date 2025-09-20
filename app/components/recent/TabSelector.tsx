@@ -9,8 +9,7 @@ import {
 import { BASE_COLORS } from "@/constant/colors";
 import { COMPONENT_FONT_SIZES, POPPINS_FONT } from "@/constant/fontSizes";
 import { TabType } from "@/types/types";
-import { getTabIcon } from "@/utils/recent/getTabIcon";
-import { Feather } from "@expo/vector-icons";
+import { Ionicons, MaterialIcons } from "@expo/vector-icons";
 
 interface TabSelectorProps {
   activeTab: TabType;
@@ -30,6 +29,31 @@ const TabSelector: React.FC<TabSelectorProps> = ({
     return index * (100 / tabs.length);
   };
 
+  // Get tab icon based on tab type
+  const getTabIcon = (tab: TabType, isActive: boolean) => {
+    const iconColor = isActive ? BASE_COLORS.white : BASE_COLORS.blue;
+    const iconSize = 15;
+
+    switch (tab) {
+      case "Speech":
+        return (
+          <Ionicons name="mic-outline" size={iconSize} color={iconColor} />
+        );
+      case "Translate":
+        return (
+          <MaterialIcons name="translate" size={iconSize} color={iconColor} />
+        );
+      case "Scan":
+        return (
+          <Ionicons name="camera-outline" size={iconSize} color={iconColor} />
+        );
+      default:
+        return (
+          <Ionicons name="mic-outline" size={iconSize} color={iconColor} />
+        );
+    }
+  };
+
   // Animate indicator when active tab changes
   useEffect(() => {
     const targetPosition = getIndicatorPosition(activeTab);
@@ -43,7 +67,6 @@ const TabSelector: React.FC<TabSelectorProps> = ({
 
   const renderTab = (tab: TabType, index: number) => {
     const isActive = activeTab === tab;
-    const iconName = getTabIcon(tab);
 
     return (
       <TouchableOpacity
@@ -52,11 +75,7 @@ const TabSelector: React.FC<TabSelectorProps> = ({
         onPress={() => onTabChange(tab)}
         activeOpacity={0.7}
       >
-        <Feather
-          name={iconName}
-          size={14}
-          color={isActive ? BASE_COLORS.white : BASE_COLORS.blue}
-        />
+        {getTabIcon(tab, isActive)}
         <Text style={[styles.tabText, isActive && styles.activeTabText]}>
           {tab}
         </Text>
