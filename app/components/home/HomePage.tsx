@@ -13,13 +13,12 @@ import { usePronunciationStore } from "@/store/usePronunciationStore";
 import { useFormattedStats } from "@/utils/gameStatsUtils";
 import AppLoading from "../AppLoading";
 
-// Import new components
+// Import components
 import HomeHeader from "./HomeHeader";
-import QuickStats from "./QuickStats";
-import FeaturedSection from "./FeaturedSection";
-import AppStats from "./AppStats";
 import Explore from "./Explore";
-import RankingsSection from "./RankingsSection";
+import TranslationHistory from "./TranslationHistory";
+import { router } from "expo-router";
+import WordOfTheDay from "./WordOfTheDay";
 
 interface HomePageProps {
   onNavigateToTab: (tabName: string) => void;
@@ -100,6 +99,10 @@ const HomePage: React.FC<HomePageProps> = ({ onNavigateToTab, onReady }) => {
     onNavigateToTab("Settings");
   };
 
+  const handleNavigateToHistory = () => {
+    router.push("/(settings)/TranslationHistory");
+  };
+
   // Don't render content until data is loaded
   if (!dataLoaded) {
     return <AppLoading />;
@@ -145,18 +148,17 @@ const HomePage: React.FC<HomePageProps> = ({ onNavigateToTab, onReady }) => {
               firstName={firstName}
               onSettingsPress={handleSettingsPress}
             />
-            {/* Explore Section */}
+
+            {/* Core Translation Features */}
             <Explore onNavigateToTab={onNavigateToTab} />
-            {/* Quick Stats Cards */}
-            <QuickStats overallStats={overallStats} coins={coins} />
-            {/* Featured Section */}
-            {/* Statistics Section */}
-            {/* <AppStats
-              totalPronunciationsCount={totalPronunciationsCount}
-              overallStats={overallStats}
-            /> */}
-            {/* Rankings Section */}
-            {/* <RankingsSection /> */}
+
+            <WordOfTheDay />
+
+            {/* Recent Translations */}
+            <TranslationHistory
+              onNavigateToHistory={handleNavigateToHistory}
+              onNavigateToTab={onNavigateToTab}
+            />
           </ScrollView>
         </Animated.View>
       </SafeAreaView>

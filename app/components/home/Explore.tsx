@@ -35,7 +35,7 @@ const Explore = React.memo(({ onNavigateToTab }: ExploreProps) => {
 
   const features = [
     {
-      icon: <Ionicons name="mic-outline" size={24} color={BASE_COLORS.white} />,
+      icon: <Ionicons name="mic-outline" size={20} color={BASE_COLORS.white} />,
       title: "Speech",
       // BLUE
       gradient: HOMEPAGE_COLORS.speech,
@@ -44,7 +44,7 @@ const Explore = React.memo(({ onNavigateToTab }: ExploreProps) => {
     },
     {
       icon: (
-        <MaterialIcons name="translate" size={24} color={BASE_COLORS.white} />
+        <MaterialIcons name="translate" size={20} color={BASE_COLORS.white} />
       ),
       title: "Translate",
       // RED
@@ -54,7 +54,7 @@ const Explore = React.memo(({ onNavigateToTab }: ExploreProps) => {
     },
     {
       icon: (
-        <Ionicons name="camera-outline" size={24} color={BASE_COLORS.white} />
+        <Ionicons name="camera-outline" size={20} color={BASE_COLORS.white} />
       ),
       title: "Scan",
       // YELLOW
@@ -66,7 +66,7 @@ const Explore = React.memo(({ onNavigateToTab }: ExploreProps) => {
       icon: (
         <Ionicons
           name="game-controller-outline"
-          size={24}
+          size={20}
           color={BASE_COLORS.white}
         />
       ),
@@ -80,7 +80,7 @@ const Explore = React.memo(({ onNavigateToTab }: ExploreProps) => {
       icon: (
         <Ionicons
           name="volume-high-outline"
-          size={24}
+          size={20}
           color={BASE_COLORS.white}
         />
       ),
@@ -177,7 +177,7 @@ const Explore = React.memo(({ onNavigateToTab }: ExploreProps) => {
 
 const styles = StyleSheet.create({
   ExploreSection: {
-    marginBottom: 30,
+    marginBottom: 20,
   },
   header: {
     flexDirection: "row",
@@ -196,13 +196,13 @@ const styles = StyleSheet.create({
   row: {
     flexDirection: "row",
     justifyContent: "flex-start",
-    marginBottom: 20,
+    marginBottom: 12,
   },
   centeredRow: {
     justifyContent: "center",
   },
   featureCard: {
-    height: 100,
+    height: 80,
     borderRadius: 20,
     overflow: "hidden",
     shadowColor: "#000",
@@ -218,8 +218,8 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   iconContainer: {
-    width: 44,
-    height: 44,
+    width: 40,
+    height: 40,
     borderRadius: 20,
     backgroundColor: "rgba(255, 255, 255, 0.2)",
     justifyContent: "center",
