@@ -1,5 +1,5 @@
-import React, { useEffect, useState, useCallback } from "react";
-import { Text } from "react-native";
+import React, { useEffect, useState, useCallback, useMemo } from "react";
+import { Text, InteractionManager } from "react-native";
 import { useFonts } from "expo-font";
 import { Stack, useRouter } from "expo-router";
 import "react-native-url-polyfill/auto";
@@ -9,12 +9,11 @@ import { PaperProvider } from "react-native-paper";
 import { AuthProvider } from "@/context/AuthContext";
 import { NotifierWrapper } from "react-native-notifier";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
-
+import { CopilotProvider } from "react-native-copilot";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import ThemeProvider from "@/components/ThemeProvider";
 import SplashAnimation from "@/components/SplashAnimation";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-
 import { useSplashStore } from "@/store/useSplashStore";
 import { GoogleSignin } from "@react-native-google-signin/google-signin";
 import { initializeToken } from "@/lib/authTokenManager";
@@ -31,6 +30,7 @@ import useProgressStore from "@/store/games/useProgressStore";
 import useGameStore from "@/store/games/useGameStore";
 import useCoinsStore from "@/store/games/useCoinsStore";
 import { useAuthStore } from "@/store/useAuthStore";
+import { BASE_COLORS } from "@/constant/colors";
 
 // Prevent the splash screen from auto-hiding
 SplashScreen.preventAutoHideAsync();
@@ -41,6 +41,7 @@ SplashScreen.preventAutoHideAsync();
 
 const RootLayout = () => {
   const router = useRouter();
+
   const [fontsLoaded, error] = useFonts({
     "Poppins-Black": require("../assets/fonts/Poppins-Black.ttf"),
     "Poppins-Bold": require("../assets/fonts/Poppins-Bold.ttf"),
@@ -56,7 +57,6 @@ const RootLayout = () => {
   const { splashShown, markSplashShown, markLoadingComplete } =
     useSplashStore();
 
-  // SIMPLIFIED: Remove all HomePage-related state
   const [themeReady, setThemeReady] = useState<boolean>(false);
   const [manuallyCheckedToken, setManuallyCheckedToken] =
     useState<boolean>(false);
@@ -70,7 +70,39 @@ const RootLayout = () => {
     setThemeReady(true);
   }, []);
 
-  // Google Sign in
+  // Optimized Copilot configuration with better performance
+  const copilotConfig = useMemo(
+    () => ({
+      tooltipStyle: {
+        backgroundColor: BASE_COLORS.white,
+        borderRadius: 20,
+        paddingTop: 15,
+        paddingBottom: 15,
+        paddingHorizontal: 20,
+        marginTop: 40,
+        shadowColor: "#000",
+        shadowOffset: {
+          width: 0,
+          height: 2,
+        },
+        shadowOpacity: 0.25,
+        shadowRadius: 3.84,
+        elevation: 5,
+      },
+      // Performance optimizations
+      backdropColor: "rgba(0, 0, 0, 0.7)",
+      animated: false, // Keep animations disabled
+      overlay: "svg" as const,
+      // Additional optimizations
+      maskOffset: 0,
+      arrowColor: BASE_COLORS.white,
+      borderRadius: 20,
+    }),
+
+    []
+  );
+
+  // Google Sign in setup
   useEffect(() => {
     const googleWebClientId = process.env.EXPO_PUBLIC_GOOGLE_CLIENT_ID_WEB;
     const googleIosClientId = process.env.EXPO_PUBLIC_GOOGLE_CLIENT_ID_IOS;
@@ -88,31 +120,30 @@ const RootLayout = () => {
     if (error) throw error;
   }, [error]);
 
-  // Manually check for token as early as possible
+  // Initialize app with better performance
   useEffect(() => {
     const initializeApp = async () => {
       try {
-        // Initialize token first
         await initializeToken();
-
-        // Then check token
         const token = await AsyncStorage.getItem("userToken");
         setHasToken(!!token);
         setManuallyCheckedToken(true);
         console.log("Manual token check complete, token exists:", !!token);
 
-        // If we have a token, start preloading game data in parallel
+        // Use InteractionManager for better performance
         if (token) {
-          useSplashStore
-            .getState()
-            .preloadGameData()
-            .then((success) => {
-              console.log(
-                `[Layout] Game data preloading ${
-                  success ? "successful" : "failed"
-                }`
-              );
-            });
+          InteractionManager.runAfterInteractions(() => {
+            useSplashStore
+              .getState()
+              .preloadGameData()
+              .then((success) => {
+                console.log(
+                  `[Layout] Game data preloading ${
+                    success ? "successful" : "failed"
+                  }`
+                );
+              });
+          });
         }
       } catch (e) {
         console.error("Error checking token:", e);
@@ -123,7 +154,7 @@ const RootLayout = () => {
     initializeApp();
   }, []);
 
-  // Add force timeout to prevent infinite loading
+  // Force timeout with better cleanup
   useEffect(() => {
     const forceTimeout = setTimeout(() => {
       console.log("Force ending splash animation after timeout");
@@ -135,7 +166,7 @@ const RootLayout = () => {
     return () => clearTimeout(forceTimeout);
   }, [markLoadingComplete, markSplashShown]);
 
-  // FIXED: Enhanced navigation logic to prevent Speech screen flash
+  // Enhanced navigation with InteractionManager
   useEffect(() => {
     if (
       fontsLoaded &&
@@ -144,37 +175,40 @@ const RootLayout = () => {
       !initialRouteReady
     ) {
       console.log("All resources loaded, manually checked token:", hasToken);
-
-      // Mark check as complete to avoid multiple runs
       setInitialRouteReady(true);
 
-      const initialNavigate = async () => {
-        try {
-          if (hasToken) {
-            // FIXED: Navigate directly to the specific Home tab route
-            console.log("Token found, navigating directly to Home tab");
-            await router.replace("/(tabs)/Home");
-          } else {
-            console.log("No token, showing login screen");
-            await router.replace("/");
-          }
+      const initialNavigate = () => {
+        // Use InteractionManager for smoother navigation
+        InteractionManager.runAfterInteractions(async () => {
+          try {
+            if (hasToken) {
+              console.log("Token found, navigating directly to Home tab");
+              await router.replace("/(tabs)/Home");
+            } else {
+              console.log("No token, showing login screen");
+              await router.replace("/");
+            }
 
-          // Hide splash after navigation
-          console.log("Navigation complete, hiding splash screen");
-          setShowSplashAnimation(false);
-          markSplashShown();
-          markLoadingComplete();
-        } catch (error) {
-          console.error("Navigation error:", error);
-          setTimeout(() => {
-            setShowSplashAnimation(false);
-            markSplashShown();
-            markLoadingComplete();
-          }, 1000);
-        }
+            console.log("Navigation complete, hiding splash screen");
+
+            // Use requestAnimationFrame for smoother transition
+            requestAnimationFrame(() => {
+              setShowSplashAnimation(false);
+              markSplashShown();
+              markLoadingComplete();
+            });
+          } catch (error) {
+            console.error("Navigation error:", error);
+            setTimeout(() => {
+              setShowSplashAnimation(false);
+              markSplashShown();
+              markLoadingComplete();
+            }, 1000);
+          }
+        });
       };
 
-      // CRITICAL: Remove the timeout delay - navigate immediately
+      // Execute immediately
       initialNavigate();
     }
   }, [
@@ -188,14 +222,13 @@ const RootLayout = () => {
     markSplashShown,
   ]);
 
-  // Register stores with dataManager to break circular dependencies
+  // Register stores with dataManager
   useEffect(() => {
     registerSplashStore(useSplashStore.getState());
     registerProgressStore(useProgressStore.getState());
     registerGameStore(useGameStore.getState());
     registerCoinsStore(useCoinsStore.getState());
 
-    // Set initial user ID
     const authState = useAuthStore.getState();
     const userId = authState.userData?.id || authState.userData?.email || null;
     setCurrentUserId(userId);
@@ -213,49 +246,57 @@ const RootLayout = () => {
     return unsubscribe;
   }, []);
 
-  // Only show splash animation at first
+  // Show splash animation
   if (showSplashAnimation && !splashShown) {
     return <SplashAnimation />;
   }
 
-  // FIXED: Show Stack navigator with correct initial route
   return (
-    <GestureHandlerRootView style={{ flex: 1 }}>
-      <SafeAreaProvider>
-        <AuthProvider>
-          <ThemeProvider onThemeReady={handleThemeReady}>
-            <ProgressModalProvider>
-              <RankingsModalProvider>
-                <PaperProvider>
-                  <ValidationProvider>
-                    <NotifierWrapper>
-                      <Stack screenOptions={{ headerShown: false }}>
-                        <Stack.Screen
-                          name="index"
-                          options={{ headerShown: false }}
-                        />
-                        <Stack.Screen
-                          name="(auth)"
-                          options={{ headerShown: false }}
-                        />
-                        <Stack.Screen
-                          name="(tabs)"
-                          options={{ headerShown: false }}
-                        />
-                        <Stack.Screen
-                          name="(settings)"
-                          options={{ headerShown: false }}
-                        />
-                      </Stack>
-                    </NotifierWrapper>
-                  </ValidationProvider>
-                </PaperProvider>
-              </RankingsModalProvider>
-            </ProgressModalProvider>
-          </ThemeProvider>
-        </AuthProvider>
-      </SafeAreaProvider>
-    </GestureHandlerRootView>
+    <CopilotProvider {...copilotConfig}>
+      <GestureHandlerRootView style={{ flex: 1 }}>
+        <SafeAreaProvider>
+          <AuthProvider>
+            <ThemeProvider onThemeReady={handleThemeReady}>
+              <ProgressModalProvider>
+                <RankingsModalProvider>
+                  <PaperProvider>
+                    <ValidationProvider>
+                      <NotifierWrapper>
+                        <Stack
+                          screenOptions={{
+                            headerShown: false,
+                            // Add performance optimizations
+                            animationTypeForReplace: "pop",
+                            animation: "fade",
+                          }}
+                        >
+                          <Stack.Screen
+                            name="index"
+                            options={{ headerShown: false }}
+                          />
+                          <Stack.Screen
+                            name="(auth)"
+                            options={{ headerShown: false }}
+                          />
+                          <Stack.Screen
+                            name="(tabs)"
+                            options={{ headerShown: false }}
+                          />
+                          <Stack.Screen
+                            name="(settings)"
+                            options={{ headerShown: false }}
+                          />
+                        </Stack>
+                      </NotifierWrapper>
+                    </ValidationProvider>
+                  </PaperProvider>
+                </RankingsModalProvider>
+              </ProgressModalProvider>
+            </ThemeProvider>
+          </AuthProvider>
+        </SafeAreaProvider>
+      </GestureHandlerRootView>
+    </CopilotProvider>
   );
 };
 
