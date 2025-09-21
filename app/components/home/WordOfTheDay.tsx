@@ -7,9 +7,8 @@ import {
   FONT_SIZES,
   POPPINS_FONT,
 } from "@/constant/fontSizes";
-import { Volume2, Calendar } from "react-native-feather";
+import { Calendar } from "react-native-feather";
 import { usePronunciationStore } from "@/store/usePronunciationStore";
-import useThemeStore from "@/store/useThemeStore";
 
 import { format } from "date-fns";
 import { Ionicons } from "@expo/vector-icons";
@@ -23,7 +22,7 @@ const WordOfTheDay = React.memo(() => {
     return null;
   }
 
-  const { english, translation, language } = wordOfTheDay;
+  const { english, translation, language, pronunciation } = wordOfTheDay;
 
   // Format today's date since we don't have createdAt
   const formattedDate = format(new Date(), "MMMM d, yyyy");
@@ -52,6 +51,16 @@ const WordOfTheDay = React.memo(() => {
 
             {/* Language */}
             <Text style={styles.languageText}>{language}</Text>
+
+            {/* Pronunciation */}
+            <View style={styles.pronunciationContainer}>
+              <Ionicons
+                name="volume-high-outline"
+                size={14}
+                color={BASE_COLORS.white}
+              />
+              <Text style={styles.pronunciationText}>{pronunciation}</Text>
+            </View>
 
             {/* Translation */}
             <View style={styles.translationContainer}>
@@ -134,6 +143,25 @@ const styles = StyleSheet.create({
     fontSize: FONT_SIZES.xl,
     color: "rgba(255, 255, 255, 0.8)",
     marginBottom: 8,
+  },
+  pronunciationContainer: {
+    marginTop: 4,
+    flexDirection: "row",
+    justifyContent: "center",
+    alignItems: "center",
+    gap: 4,
+    alignSelf: "flex-start",
+    paddingHorizontal: 8,
+    borderWidth: 1,
+    padding: 2,
+    borderRadius: 20,
+    borderColor: "rgba(255,255,255,0.3)",
+    backgroundColor: "rgba(255,255,255,0.08)",
+  },
+  pronunciationText: {
+    fontFamily: POPPINS_FONT.semiBold,
+    fontSize: FONT_SIZES.lg,
+    color: BASE_COLORS.white,
   },
   translationContainer: {
     marginTop: 4,
