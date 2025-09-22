@@ -43,35 +43,6 @@ import { useTutorial } from "@/context/TutorialContext";
 import { PRONOUNCE_TUTORIAL } from "@/constants/tutorials";
 
 const Pronounce = () => {
-  // Tutorial hook
-  const { startTutorial, isTutorialCompleted } = useTutorial();
-
-  // Stop speech when tab focused and handle tutorial
-  useFocusEffect(
-    React.useCallback(() => {
-      console.log("[Pronounce] Tab focused, stopping all speech");
-      globalSpeechManager.stopAllSpeech();
-
-      // Start tutorial if not completed and data is ready
-      if (!isTutorialCompleted(PRONOUNCE_TUTORIAL.id) && hasValidCache) {
-        const timer = setTimeout(() => {
-          startTutorial(PRONOUNCE_TUTORIAL);
-        }, 500); // Small delay for better UX
-
-        return () => {
-          clearTimeout(timer);
-          console.log("[Pronounce] Tab losing focus");
-          globalSpeechManager.stopAllSpeech();
-        };
-      }
-
-      return () => {
-        console.log("[Pronounce] Tab losing focus");
-        globalSpeechManager.stopAllSpeech();
-      };
-    }, [startTutorial, isTutorialCompleted])
-  );
-
   const { activeTheme } = useThemeStore();
   const dynamicStyles = getGlobalStyles(activeTheme.backgroundColor);
 
@@ -110,6 +81,48 @@ const Pronounce = () => {
   const hasValidCache = useMemo(() => {
     return isCacheValid() && hasCachedData;
   }, [isCacheValid, hasCachedData]);
+
+  const { startTutorial, shouldShowTutorial } = useTutorial();
+
+  // Then update the useFocusEffect:
+  useFocusEffect(
+    React.useCallback(() => {
+      console.log("[Pronounce] Tab focused, stopping all speech");
+      globalSpeechManager.stopAllSpeech();
+
+      // ENHANCED: Check tutorial status asynchronously
+      const checkAndStartTutorial = async () => {
+        if (hasValidCache) {
+          try {
+            const shouldShow = await shouldShowTutorial(
+              PRONOUNCE_TUTORIAL.id,
+              PRONOUNCE_TUTORIAL.version
+            );
+            if (shouldShow) {
+              const timer = setTimeout(() => {
+                startTutorial(PRONOUNCE_TUTORIAL);
+              }, 500);
+
+              return () => {
+                clearTimeout(timer);
+                console.log("[Pronounce] Tab losing focus");
+                globalSpeechManager.stopAllSpeech();
+              };
+            }
+          } catch (error) {
+            console.error("[Pronounce] Error checking tutorial status:", error);
+          }
+        }
+      };
+
+      checkAndStartTutorial();
+
+      return () => {
+        console.log("[Pronounce] Tab losing focus");
+        globalSpeechManager.stopAllSpeech();
+      };
+    }, [startTutorial, shouldShowTutorial, hasValidCache])
+  );
 
   const displayData = useMemo(() => {
     // CRITICAL: Check if transformedData exists and has content

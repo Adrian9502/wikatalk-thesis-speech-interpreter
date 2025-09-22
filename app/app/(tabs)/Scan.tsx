@@ -67,11 +67,6 @@ interface ScanTranslateState {
 }
 
 const Scan: React.FC = () => {
-  // FIXED: All hooks must be called at the top level, in the same order every time
-
-  // Tutorial hook
-  const { startTutorial, isTutorialCompleted } = useTutorial();
-
   // Theme and utility hooks first
   const { activeTheme } = useThemeStore();
   const dynamicStyles = getGlobalStyles(activeTheme.backgroundColor);
@@ -104,8 +99,9 @@ const Scan: React.FC = () => {
 
   // Processing hooks
   const { isProcessing, ocrProgress, recognizeText } = useImageProcessing();
+  const { startTutorial, shouldShowTutorial } = useTutorial();
 
-  // Focus effect for speech management and tutorial
+  // Then update the useFocusEffect:
   useFocusEffect(
     React.useCallback(() => {
       console.log(
@@ -114,19 +110,33 @@ const Scan: React.FC = () => {
       globalSpeechManager.stopAllSpeech();
       resetSpeechStates();
 
-      // Start tutorial if not completed and permission is granted
-      if (!isTutorialCompleted(SCAN_TUTORIAL.id) && permission?.granted) {
-        const timer = setTimeout(() => {
-          startTutorial(SCAN_TUTORIAL);
-        }, 500); // Small delay for better UX
+      // ENHANCED: Check tutorial status asynchronously
+      const checkAndStartTutorial = async () => {
+        if (permission?.granted) {
+          try {
+            const shouldShow = await shouldShowTutorial(
+              SCAN_TUTORIAL.id,
+              SCAN_TUTORIAL.version
+            );
+            if (shouldShow) {
+              const timer = setTimeout(() => {
+                startTutorial(SCAN_TUTORIAL);
+              }, 500);
 
-        return () => {
-          clearTimeout(timer);
-          console.log("[Scan] Tab losing focus");
-          globalSpeechManager.stopAllSpeech();
-          resetSpeechStates();
-        };
-      }
+              return () => {
+                clearTimeout(timer);
+                console.log("[Scan] Tab losing focus");
+                globalSpeechManager.stopAllSpeech();
+                resetSpeechStates();
+              };
+            }
+          } catch (error) {
+            console.error("[Scan] Error checking tutorial status:", error);
+          }
+        }
+      };
+
+      checkAndStartTutorial();
 
       return () => {
         console.log("[Scan] Tab losing focus");
@@ -136,7 +146,7 @@ const Scan: React.FC = () => {
     }, [
       resetSpeechStates,
       startTutorial,
-      isTutorialCompleted,
+      shouldShowTutorial,
       permission?.granted,
     ])
   );
@@ -213,7 +223,7 @@ const Scan: React.FC = () => {
     const permissionResult = await requestPermission();
 
     // If permission is granted and tutorial hasn't been completed, start it
-    if (permissionResult.granted && !isTutorialCompleted(SCAN_TUTORIAL.id)) {
+    if (permissionResult.granted && !shouldShowTutorial(SCAN_TUTORIAL.id)) {
       setTimeout(() => {
         startTutorial(SCAN_TUTORIAL);
       }, 800); // Delay to allow camera to initialize

@@ -48,32 +48,43 @@ const isSmallScreen = screenWidth <= 384 && screenHeight <= 1280;
 
 const Translate = () => {
   // Tutorial hook
-  const { startTutorial, isTutorialCompleted } = useTutorial();
+  const { startTutorial, shouldShowTutorial } = useTutorial();
 
-  // stop ongoing speech
   useFocusEffect(
     React.useCallback(() => {
       console.log("[Translate] Tab focused, stopping all speech");
       globalSpeechManager.stopAllSpeech();
 
-      // Start tutorial if not completed
-      if (!isTutorialCompleted(TRANSLATE_TUTORIAL.id)) {
-        const timer = setTimeout(() => {
-          startTutorial(TRANSLATE_TUTORIAL);
-        }, 500); // Small delay for better UX
+      // ENHANCED: Check tutorial status asynchronously
+      const checkAndStartTutorial = async () => {
+        try {
+          const shouldShow = await shouldShowTutorial(
+            TRANSLATE_TUTORIAL.id,
+            TRANSLATE_TUTORIAL.version
+          );
+          if (shouldShow) {
+            const timer = setTimeout(() => {
+              startTutorial(TRANSLATE_TUTORIAL);
+            }, 500);
 
-        return () => {
-          clearTimeout(timer);
-          console.log("[Translate] Tab losing focus");
-          globalSpeechManager.stopAllSpeech();
-        };
-      }
+            return () => {
+              clearTimeout(timer);
+              console.log("[Translate] Tab losing focus");
+              globalSpeechManager.stopAllSpeech();
+            };
+          }
+        } catch (error) {
+          console.error("[Translate] Error checking tutorial status:", error);
+        }
+      };
+
+      checkAndStartTutorial();
 
       return () => {
         console.log("[Translate] Tab losing focus");
         globalSpeechManager.stopAllSpeech();
       };
-    }, [startTutorial, isTutorialCompleted])
+    }, [startTutorial, shouldShowTutorial])
   );
 
   // Theme store

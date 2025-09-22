@@ -34,11 +34,13 @@ const HomePage: React.FC<HomePageProps> = ({ onNavigateToTab, onReady }) => {
   const { activeTheme } = useThemeStore();
   const { userData } = useAuth();
   const { wordOfTheDay, getWordOfTheDay } = usePronunciationStore();
-  const { startTutorial, isTutorialCompleted } = useTutorial();
+  const { startTutorial, shouldShowTutorial } = useTutorial(); // CHANGED: Use shouldShowTutorial instead of isTutorialCompleted
   const insets = useSafeAreaInsets();
 
-  // Add state to track data readiness
+  // Add state to track data readiness and tutorial status
   const [dataLoaded, setDataLoaded] = useState(false);
+  const [tutorialStatusChecked, setTutorialStatusChecked] = useState(false);
+  const [shouldStartTutorial, setShouldStartTutorial] = useState(false);
   const [, setAnimationComplete] = useState(false);
 
   // Use refs to prevent tutorial restarts
@@ -62,6 +64,35 @@ const HomePage: React.FC<HomePageProps> = ({ onNavigateToTab, onReady }) => {
   const handleNavigateToHistory = useCallback(() => {
     router.push("/(settings)/TranslationHistory");
   }, []);
+
+  // NEW: Check tutorial status when user data is available
+  useEffect(() => {
+    const checkTutorialStatus = async () => {
+      if (!userData || tutorialStatusChecked) return;
+
+      try {
+        console.log(
+          "[HomePage] Checking tutorial status for user:",
+          userData.id || userData._id
+        );
+        const shouldShow = await shouldShowTutorial(
+          HOME_TUTORIAL.id,
+          HOME_TUTORIAL.version
+        );
+        console.log("[HomePage] Should show home tutorial:", shouldShow);
+
+        setShouldStartTutorial(shouldShow);
+        setTutorialStatusChecked(true);
+      } catch (error) {
+        console.error("[HomePage] Error checking tutorial status:", error);
+        // Default to not showing tutorial on error
+        setShouldStartTutorial(false);
+        setTutorialStatusChecked(true);
+      }
+    };
+
+    checkTutorialStatus();
+  }, [userData, tutorialStatusChecked, shouldShowTutorial]);
 
   // Initialize data and track readiness
   useEffect(() => {
@@ -101,12 +132,15 @@ const HomePage: React.FC<HomePageProps> = ({ onNavigateToTab, onReady }) => {
     };
   }, [wordOfTheDay, getWordOfTheDay, onReady]);
 
-  // Handle animations and tutorial start
+  // ENHANCED: Handle animations and tutorial start with proper checks
   useEffect(() => {
-    if (dataLoaded && componentMountedRef.current) {
-      console.log("[HomePage] Starting animations");
+    if (dataLoaded && tutorialStatusChecked && componentMountedRef.current) {
+      console.log(
+        "[HomePage] Starting animations, shouldStartTutorial:",
+        shouldStartTutorial
+      );
 
-      // Start animations once data is loaded
+      // Start animations once data is loaded and tutorial status is checked
       Animated.parallel([
         Animated.timing(fadeAnim, {
           toValue: 1,
@@ -123,13 +157,16 @@ const HomePage: React.FC<HomePageProps> = ({ onNavigateToTab, onReady }) => {
           console.log("[HomePage] Animation completed");
           setAnimationComplete(true);
 
-          // Start tutorial after animation completes if not completed
+          // Start tutorial after animation completes if needed
           if (
             !tutorialStartedRef.current &&
-            !isTutorialCompleted(HOME_TUTORIAL.id)
+            shouldStartTutorial // CHANGED: Use shouldStartTutorial state
           ) {
             setTimeout(() => {
               if (componentMountedRef.current) {
+                console.log(
+                  "[HomePage] Starting home tutorial for new/incomplete user"
+                );
                 tutorialStartedRef.current = true;
                 startTutorial(HOME_TUTORIAL);
               }
@@ -138,10 +175,17 @@ const HomePage: React.FC<HomePageProps> = ({ onNavigateToTab, onReady }) => {
         }
       });
     }
-  }, [dataLoaded, fadeAnim, slideAnim, startTutorial, isTutorialCompleted]);
+  }, [
+    dataLoaded,
+    tutorialStatusChecked,
+    shouldStartTutorial,
+    fadeAnim,
+    slideAnim,
+    startTutorial,
+  ]);
 
-  // Don't render content until data is loaded
-  if (!dataLoaded) {
+  // Don't render content until data is loaded and tutorial status is checked
+  if (!dataLoaded || !tutorialStatusChecked) {
     return <AppLoading />;
   }
 

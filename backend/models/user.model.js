@@ -35,10 +35,9 @@ const userSchema = new mongoose.Schema(
     },
     authProvider: {
       type: String,
-      enum: ["manual", "google", "both"], // Add "both" option
+      enum: ["manual", "google", "both"],
       default: "manual",
     },
-
     createdAt: {
       type: Date,
       default: Date.now,
@@ -55,8 +54,7 @@ const userSchema = new mongoose.Schema(
       type: Date,
       default: Date.now,
     },
-
-    // Verification fields (keep these for email verification)
+    // Verification fields
     verificationToken: String,
     verificationTokenExpires: Date,
     verificationCode: {
@@ -73,7 +71,7 @@ const userSchema = new mongoose.Schema(
     // Store theme
     theme: {
       type: String,
-      default: "Default Navy", // Default theme name
+      default: "Default Navy",
     },
     deletionCode: {
       type: String,
@@ -86,7 +84,7 @@ const userSchema = new mongoose.Schema(
       type: Date,
       default: null,
     },
-    // user coins
+    // User coins
     coins: {
       type: Number,
       default: 0,
@@ -97,9 +95,95 @@ const userSchema = new mongoose.Schema(
       total: { type: Number, default: 0 },
       lastReset: { type: Date, default: Date.now },
     },
+    // NEW: App tutorial tracking
+    appTutorial: {
+      home: {
+        hasSeen: { type: Boolean, default: false },
+        version: { type: Number, default: 1 },
+        completedAt: { type: Date, default: null },
+      },
+      speech: {
+        hasSeen: { type: Boolean, default: false },
+        version: { type: Number, default: 1 },
+        completedAt: { type: Date, default: null },
+      },
+      translate: {
+        hasSeen: { type: Boolean, default: false },
+        version: { type: Number, default: 1 },
+        completedAt: { type: Date, default: null },
+      },
+      scan: {
+        hasSeen: { type: Boolean, default: false },
+        version: { type: Number, default: 1 },
+        completedAt: { type: Date, default: null },
+      },
+      games: {
+        hasSeen: { type: Boolean, default: false },
+        version: { type: Number, default: 1 },
+        completedAt: { type: Date, default: null },
+      },
+      pronounce: {
+        hasSeen: { type: Boolean, default: false },
+        version: { type: Number, default: 1 },
+        completedAt: { type: Date, default: null },
+      },
+    },
   },
   { timestamps: true }
 );
+
+// Add method to mark tutorial as seen
+userSchema.methods.markTutorialAsSeen = function (tutorialName, version = 1) {
+  if (!this.appTutorial) {
+    this.appTutorial = {};
+  }
+
+  if (!this.appTutorial[tutorialName]) {
+    this.appTutorial[tutorialName] = {};
+  }
+
+  this.appTutorial[tutorialName].hasSeen = true;
+  this.appTutorial[tutorialName].version = version;
+  this.appTutorial[tutorialName].completedAt = new Date();
+
+  return this.save();
+};
+
+// Add method to check if tutorial needs to be shown
+userSchema.methods.shouldShowTutorial = function (tutorialName, currentVersion = 1) {
+  if (!this.appTutorial || !this.appTutorial[tutorialName]) {
+    return true; // Show tutorial if not tracked yet
+  }
+
+  const tutorial = this.appTutorial[tutorialName];
+
+  // Show if user hasn't seen it or if version is newer
+  return !tutorial.hasSeen || tutorial.version < currentVersion;
+};
+
+// Add method to get tutorial status
+userSchema.methods.getTutorialStatus = function () {
+  const tutorialNames = ['home', 'speech', 'translate', 'scan', 'games', 'pronounce'];
+  const status = {};
+
+  tutorialNames.forEach(name => {
+    if (this.appTutorial && this.appTutorial[name]) {
+      status[name] = {
+        hasSeen: this.appTutorial[name].hasSeen,
+        version: this.appTutorial[name].version,
+        completedAt: this.appTutorial[name].completedAt,
+      };
+    } else {
+      status[name] = {
+        hasSeen: false,
+        version: 1,
+        completedAt: null,
+      };
+    }
+  });
+
+  return status;
+};
 
 // Add method to generate verification token
 userSchema.methods.generateVerificationToken = function () {

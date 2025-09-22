@@ -30,8 +30,8 @@ import { useTutorial } from "@/context/TutorialContext";
 import { SPEECH_TUTORIAL } from "@/constants/tutorials";
 
 const Speech = () => {
-  // Tutorial hook
-  const { startTutorial, isTutorialCompleted } = useTutorial();
+  // FIXED: Tutorial hook - add shouldShowTutorial to destructuring
+  const { startTutorial, shouldShowTutorial } = useTutorial();
 
   // stop ongoing speech
   useFocusEffect(
@@ -39,25 +39,34 @@ const Speech = () => {
       console.log("[Speech] Tab focused, stopping all speech");
       globalSpeechManager.stopAllSpeech();
 
-      // Start tutorial if not completed
-      if (!isTutorialCompleted(SPEECH_TUTORIAL.id)) {
-        const timer = setTimeout(() => {
-          startTutorial(SPEECH_TUTORIAL);
-        }, 500); // Small delay for better UX
+      // ENHANCED: Check tutorial status asynchronously
+      const checkAndStartTutorial = async () => {
+        try {
+          const shouldShow = await shouldShowTutorial(
+            SPEECH_TUTORIAL.id,
+            SPEECH_TUTORIAL.version
+          );
+          if (shouldShow) {
+            const timer = setTimeout(() => {
+              startTutorial(SPEECH_TUTORIAL);
+            }, 500);
 
-        return () => {
-          clearTimeout(timer);
-          console.log("[Speech] Tab losing focus");
-          globalSpeechManager.stopAllSpeech();
-        };
-      }
+            return () => clearTimeout(timer);
+          }
+        } catch (error) {
+          console.error("[Speech] Error checking tutorial status:", error);
+        }
+      };
+
+      checkAndStartTutorial();
 
       return () => {
         console.log("[Speech] Tab losing focus");
         globalSpeechManager.stopAllSpeech();
       };
-    }, [startTutorial, isTutorialCompleted])
+    }, [startTutorial, shouldShowTutorial])
   );
+
   // Theme store
   const { activeTheme } = useThemeStore();
   // Get the dynamic styles based on the current theme

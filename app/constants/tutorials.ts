@@ -3,6 +3,7 @@ import { TutorialConfig } from "@/context/TutorialContext";
 export const HOME_TUTORIAL: TutorialConfig = {
   id: "home_tutorial",
   name: "Home Page Tutorial",
+  version: 1, // NEW: Add version
   autoStart: true,
   steps: [
     {
@@ -59,6 +60,7 @@ export const HOME_TUTORIAL: TutorialConfig = {
 export const SPEECH_TUTORIAL: TutorialConfig = {
   id: "speech_tutorial",
   name: "Speech Translation Tutorial",
+  version: 1, // NEW: Add version
   steps: [
     {
       id: "top-section",
@@ -90,6 +92,7 @@ export const SPEECH_TUTORIAL: TutorialConfig = {
 export const TRANSLATE_TUTORIAL: TutorialConfig = {
   id: "translate_tutorial",
   name: "Text Translation Tutorial",
+  version: 1, // NEW: Add version
   steps: [
     {
       id: "language-selection",
@@ -139,6 +142,7 @@ export const TRANSLATE_TUTORIAL: TutorialConfig = {
 export const SCAN_TUTORIAL: TutorialConfig = {
   id: "scan_tutorial",
   name: "Camera Scan Tutorial",
+  version: 1, // NEW: Add version
   steps: [
     {
       id: "camera-section",
@@ -170,6 +174,7 @@ export const SCAN_TUTORIAL: TutorialConfig = {
 export const GAMES_TUTORIAL: TutorialConfig = {
   id: "games_tutorial",
   name: "Games & Learning Tutorial",
+  version: 1, // NEW: Add version
   steps: [
     {
       id: "word-of-day-section",
@@ -201,6 +206,7 @@ export const GAMES_TUTORIAL: TutorialConfig = {
 export const PRONOUNCE_TUTORIAL: TutorialConfig = {
   id: "pronounce_tutorial",
   name: "Pronunciation Guide Tutorial",
+  version: 1, // NEW: Add version
   steps: [
     {
       id: "search-bar",

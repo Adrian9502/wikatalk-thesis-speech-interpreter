@@ -39,9 +39,6 @@ let INITIALIZATION_PROMISE: Promise<void> | null = null;
 let INITIALIZATION_COMPLETED = false;
 
 const Games = () => {
-  // Tutorial hook
-  const { startTutorial, isTutorialCompleted } = useTutorial();
-
   // Theme and utility hooks first
   const { activeTheme } = useThemeStore();
   const dynamicStyles = getGlobalStyles(activeTheme.backgroundColor);
@@ -75,31 +72,45 @@ const Games = () => {
   // Ref hooks - always in same order
   const lastClickRef = useRef<number>(0);
   const focusRefreshInProgress = useRef(false);
+  const { startTutorial, shouldShowTutorial } = useTutorial();
 
-  // Focus effect for speech management and tutorial
   useFocusEffect(
     React.useCallback(() => {
       console.log("[Games] Tab focused, stopping all speech");
       globalSpeechManager.stopAllSpeech();
 
-      // Start tutorial if not completed and data is initialized
-      if (!isTutorialCompleted(GAMES_TUTORIAL.id) && hasInitialized) {
-        const timer = setTimeout(() => {
-          startTutorial(GAMES_TUTORIAL);
-        }, 500); // Small delay for better UX
+      // ENHANCED: Check tutorial status asynchronously
+      const checkAndStartTutorial = async () => {
+        if (hasInitialized) {
+          try {
+            const shouldShow = await shouldShowTutorial(
+              GAMES_TUTORIAL.id,
+              GAMES_TUTORIAL.version
+            );
+            if (shouldShow) {
+              const timer = setTimeout(() => {
+                startTutorial(GAMES_TUTORIAL);
+              }, 500);
 
-        return () => {
-          clearTimeout(timer);
-          console.log("[Games] Tab losing focus");
-          globalSpeechManager.stopAllSpeech();
-        };
-      }
+              return () => {
+                clearTimeout(timer);
+                console.log("[Games] Tab losing focus");
+                globalSpeechManager.stopAllSpeech();
+              };
+            }
+          } catch (error) {
+            console.error("[Games] Error checking tutorial status:", error);
+          }
+        }
+      };
+
+      checkAndStartTutorial();
 
       return () => {
         console.log("[Games] Tab losing focus");
         globalSpeechManager.stopAllSpeech();
       };
-    }, [startTutorial, isTutorialCompleted, hasInitialized])
+    }, [startTutorial, shouldShowTutorial, hasInitialized])
   );
 
   // Initialize Word of the Day when component mounts
