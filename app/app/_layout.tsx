@@ -75,7 +75,7 @@ const RootLayout = () => {
   const copilotConfig = useMemo(
     () => ({
       tooltipComponent: CustomTooltip as any,
-      backdropColor: "rgba(0, 0, 0, 0.7)",
+      backdropColor: "rgba(0, 0, 0, 0.9)",
       animated: true,
       overlay: "svg" as const,
       maskOffset: 5,
@@ -243,9 +243,26 @@ const RootLayout = () => {
   if (showSplashAnimation && !splashShown) {
     return <SplashAnimation />;
   }
-  //
+  // @ts-ignore
+  const svgMaskPath = ({ size, position, canvasSize }) => {
+    // individual paddings
+    const padTop = -40;
+    const padBottom = 20;
+    const padLeft = 5;
+    const padRight = 5;
+
+    const x = position.x._value - padLeft;
+    const y = position.y._value - padTop;
+    const w = size.x._value + padLeft + padRight;
+    const h = size.y._value + padTop + padBottom;
+
+    return `M0,0H${canvasSize.x}V${canvasSize.y}H0V0ZM${x},${y}H${x + w}V${
+      y + h
+    }H${x}V${y}Z`;
+  };
+
   return (
-    <CopilotProvider {...copilotConfig}>
+    <CopilotProvider {...copilotConfig} svgMaskPath={svgMaskPath}>
       <GestureHandlerRootView style={{ flex: 1 }}>
         <SafeAreaProvider>
           <AuthProvider>
