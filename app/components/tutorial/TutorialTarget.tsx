@@ -57,13 +57,14 @@ export const TutorialTarget: React.FC<TutorialTargetProps> = ({
     }
   }, [isActive, currentStep, id, registerTarget]);
 
-  // ENHANCED: Better flex detection for scan components
+  // ENHANCED: Better flex detection for all components
   const needsFlexLayout =
     id.includes("text-area") ||
     id.includes("source-area") ||
     id.includes("target-area") ||
     id.includes("translation-section") ||
-    id.includes("scan-translation");
+    id.includes("scan-translation") ||
+    id.includes("games-modes"); // Added games support
 
   const wrapperStyle: ViewStyle = {
     // IMPORTANT: For components that need flex layout, inherit flex behavior

@@ -111,8 +111,29 @@ export const SCAN_TUTORIAL: TutorialConfig = {
     },
     {
       id: "translation-section",
-      text: "Translation section: Select target language from dropdown. Detected text appears with audio playback, copy, and clear options. Translation results show below with audio playback, copy, and accuracy info icons.",
+      text: "Select target language from dropdown. Detected text appears with audio playback, copy, and clear options. Translation results show below with audio playback, copy, and accuracy info icons.",
       target: "scan-translation-section",
+      order: 2,
+      placement: "top",
+    },
+  ],
+};
+
+export const GAMES_TUTORIAL: TutorialConfig = {
+  id: "games_tutorial",
+  name: "Games & Learning Tutorial",
+  steps: [
+    {
+      id: "word-of-day-section",
+      text: "Learn new vocabulary every day! Tap the card to hear pronunciation and collect your daily coins.",
+      target: "games-word-of-day-section",
+      order: 1,
+      placement: "bottom",
+    },
+    {
+      id: "game-modes-section",
+       text: "Practice Filipino languages through fun games! Choose from 3 game modes: Multiple Choice, Word Identification, and Fill in the Blank. Use your coins to buy hints and check your progress here.",
+      target: "games-modes-section",
       order: 2,
       placement: "top",
     },

@@ -29,11 +29,19 @@ import useProgressStore from "@/store/games/useProgressStore";
 import useGameStore from "@/store/games/useGameStore";
 import { isAllDataReady, useSplashStore } from "@/store/useSplashStore";
 
+// Tutorial imports
+import { TutorialTarget } from "@/components/tutorial/TutorialTarget";
+import { useTutorial } from "@/context/TutorialContext";
+import { GAMES_TUTORIAL } from "@/constants/tutorials";
+
 let GAMES_INITIALIZED = false;
 let INITIALIZATION_PROMISE: Promise<void> | null = null;
 let INITIALIZATION_COMPLETED = false;
 
 const Games = () => {
+  // Tutorial hook
+  const { startTutorial, isTutorialCompleted } = useTutorial();
+
   // Theme and utility hooks first
   const { activeTheme } = useThemeStore();
   const dynamicStyles = getGlobalStyles(activeTheme.backgroundColor);
@@ -68,17 +76,30 @@ const Games = () => {
   const lastClickRef = useRef<number>(0);
   const focusRefreshInProgress = useRef(false);
 
-  // Focus effect for speech management
+  // Focus effect for speech management and tutorial
   useFocusEffect(
     React.useCallback(() => {
       console.log("[Games] Tab focused, stopping all speech");
       globalSpeechManager.stopAllSpeech();
 
+      // Start tutorial if not completed and data is initialized
+      if (!isTutorialCompleted(GAMES_TUTORIAL.id) && hasInitialized) {
+        const timer = setTimeout(() => {
+          startTutorial(GAMES_TUTORIAL);
+        }, 500); // Small delay for better UX
+
+        return () => {
+          clearTimeout(timer);
+          console.log("[Games] Tab losing focus");
+          globalSpeechManager.stopAllSpeech();
+        };
+      }
+
       return () => {
         console.log("[Games] Tab losing focus");
         globalSpeechManager.stopAllSpeech();
       };
-    }, [])
+    }, [startTutorial, isTutorialCompleted, hasInitialized])
   );
 
   // Initialize Word of the Day when component mounts
@@ -175,9 +196,6 @@ const Games = () => {
   // FIXED: Optimized focus effect to reduce background refresh frequency
   useFocusEffect(
     React.useCallback(() => {
-      console.log("[Games] Tab focused, stopping all speech");
-      globalSpeechManager.stopAllSpeech();
-
       // ENHANCED: Less aggressive refresh logic
       if (hasInitialized && !focusRefreshInProgress.current) {
         const progressStore = useProgressStore.getState();
@@ -218,11 +236,6 @@ const Games = () => {
           }, 300); // Add small delay before starting refresh
         }
       }
-
-      return () => {
-        console.log("[Games] Tab losing focus");
-        globalSpeechManager.stopAllSpeech();
-      };
     }, [fetchProgress, hasInitialized])
   );
 
@@ -292,23 +305,27 @@ const Games = () => {
           showsVerticalScrollIndicator={false}
           contentContainerStyle={styles.scrollContent}
         >
-          {/* Word of the Day card with coin display component */}
-          <WordOfTheDayCard
-            wordOfTheDay={wordOfTheDay}
-            isPlaying={isWordOfDayPlaying}
-            isLoading={isAudioLoading && isWordOfDayPlaying}
-            onCardPress={() => setWordOfDayModalVisible(true)}
-            onPlayPress={playWordOfDay}
-            onCoinsPress={openRewardsModal}
-          />
+          {/* Word of the Day and Daily Rewards Section */}
+          <TutorialTarget id="games-word-of-day-section">
+            <WordOfTheDayCard
+              wordOfTheDay={wordOfTheDay}
+              isPlaying={isWordOfDayPlaying}
+              isLoading={isAudioLoading && isWordOfDayPlaying}
+              onCardPress={() => setWordOfDayModalVisible(true)}
+              onPlayPress={playWordOfDay}
+              onCoinsPress={openRewardsModal}
+            />
+          </TutorialTarget>
 
-          {/* Game modes list */}
-          <GamesList
-            key="games-list-persistent"
-            onGamePress={handleGamePress}
-            onProgressPress={handleProgressPress}
-            onRankingsPress={handleShowRankings}
-          />
+          {/* Game modes list with rankings */}
+          <TutorialTarget id="games-modes-section">
+            <GamesList
+              key="games-list-persistent"
+              onGamePress={handleGamePress}
+              onProgressPress={handleProgressPress}
+              onRankingsPress={handleShowRankings}
+            />
+          </TutorialTarget>
 
           {/* Progress Summary section */}
           <ProgressStats />
