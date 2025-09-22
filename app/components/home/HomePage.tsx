@@ -39,7 +39,7 @@ const HomePage: React.FC<HomePageProps> = ({ onNavigateToTab, onReady }) => {
 
   // Add state to track data readiness
   const [dataLoaded, setDataLoaded] = useState(false);
-  const [animationComplete, setAnimationComplete] = useState(false);
+  const [, setAnimationComplete] = useState(false);
 
   // Use refs to prevent tutorial restarts
   const tutorialStartedRef = useRef<boolean>(false);
@@ -178,14 +178,12 @@ const HomePage: React.FC<HomePageProps> = ({ onNavigateToTab, onReady }) => {
             contentContainerStyle={styles.scrollContent}
           >
             {/* Header Section */}
-            <TutorialTarget id="home-header">
-              <HomeHeader
-                userData={userData}
-                activeTheme={activeTheme}
-                firstName={firstName}
-                onSettingsPress={handleSettingsPress}
-              />
-            </TutorialTarget>
+            <HomeHeader
+              userData={userData}
+              activeTheme={activeTheme}
+              firstName={firstName}
+              onSettingsPress={handleSettingsPress}
+            />
 
             <TutorialTarget id="explore-section">
               <Explore onNavigateToTab={onNavigateToTab} />
