@@ -7,7 +7,10 @@ import {
   Animated,
   TouchableWithoutFeedback,
   Text,
+  StatusBar,
+  Platform,
 } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useTutorial } from "@/context/TutorialContext";
 import CustomTooltip from "@/components/CustomTooltip";
 
@@ -15,10 +18,23 @@ const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get("window");
 
 export const TutorialOverlay: React.FC = () => {
   const { isActive, currentStep, getTargetMeasurement } = useTutorial();
+  const insets = useSafeAreaInsets();
 
   const [fadeAnim] = useState(new Animated.Value(0));
   const [pulseAnim] = useState(new Animated.Value(1));
   const [targetMeasurement, setTargetMeasurement] = useState<any>(null);
+
+  // Calculate the actual status bar height
+  const getStatusBarHeight = () => {
+    if (Platform.OS === "ios") {
+      return insets.top;
+    } else {
+      // For Android, use StatusBar.currentHeight or fallback to insets.top
+      return StatusBar.currentHeight || insets.top || 0;
+    }
+  };
+
+  const statusBarHeight = getStatusBarHeight();
 
   useEffect(() => {
     if (isActive) {
@@ -26,6 +42,7 @@ export const TutorialOverlay: React.FC = () => {
         "[TutorialOverlay] Tutorial is active, current step:",
         currentStep
       );
+      console.log("[TutorialOverlay] Status bar height:", statusBarHeight);
 
       // Fade in the overlay
       Animated.timing(fadeAnim, {
@@ -63,7 +80,16 @@ export const TutorialOverlay: React.FC = () => {
           console.log("[TutorialOverlay] Got measurement:", measurement);
 
           if (measurement && measurement.width > 0 && measurement.height > 0) {
-            setTargetMeasurement(measurement);
+            // FIXED: Adjust measurement to account for status bar
+            const adjustedMeasurement = {
+              ...measurement,
+              y: measurement.y + statusBarHeight, // Add status bar height to Y position
+            };
+            console.log(
+              "[TutorialOverlay] Adjusted measurement:",
+              adjustedMeasurement
+            );
+            setTargetMeasurement(adjustedMeasurement);
           } else {
             // Retry after a short delay
             setTimeout(checkForMeasurement, 100);
@@ -87,13 +113,20 @@ export const TutorialOverlay: React.FC = () => {
         useNativeDriver: true,
       }).start();
     }
-  }, [isActive, currentStep, fadeAnim, pulseAnim, getTargetMeasurement]);
+  }, [
+    isActive,
+    currentStep,
+    fadeAnim,
+    pulseAnim,
+    getTargetMeasurement,
+    statusBarHeight,
+  ]);
 
   if (!isActive || !currentStep) {
     return null;
   }
 
-  // Calculate tooltip position
+  // Calculate tooltip position with status bar adjustment
   const getTooltipPosition = () => {
     if (!targetMeasurement) {
       return {
@@ -105,16 +138,32 @@ export const TutorialOverlay: React.FC = () => {
 
     const { x, y, width, height } = targetMeasurement;
     const placement = currentStep.placement || "bottom";
+    const tooltipHeight = 180; // Approximate tooltip height
+    const padding = 20; // Additional space between tooltip and target
 
     switch (placement) {
       case "top":
+        // FIXED: For "top" placement, position tooltip above the target with proper spacing
+        const topPosition = y - tooltipHeight - padding;
+
+        // If tooltip would go off-screen at the top, position it below instead
+        if (topPosition < 50) {
+          console.log(
+            "[TutorialOverlay] Tooltip would go off-screen, positioning below target"
+          );
+          return {
+            top: y + height + padding,
+            left: Math.max(20, Math.min(x - 100, SCREEN_WIDTH - 290)),
+          };
+        }
+
         return {
-          bottom: SCREEN_HEIGHT - y + 10,
+          top: topPosition,
           left: Math.max(20, Math.min(x - 100, SCREEN_WIDTH - 290)),
         };
       case "bottom":
         return {
-          top: y + height + 10,
+          top: y + height + padding,
           left: Math.max(20, Math.min(x - 100, SCREEN_WIDTH - 290)),
         };
       case "center":
@@ -137,9 +186,12 @@ export const TutorialOverlay: React.FC = () => {
     }
 
     const { x, y, width, height } = targetMeasurement;
-    const padding = 8;
+    const padding = 16;
 
-    console.log("[TutorialOverlay] Creating hole at:", { x, y, width, height });
+    console.log(
+      "[TutorialOverlay] Creating hole at (with status bar adjustment):",
+      { x, y, width, height }
+    );
 
     // Ensure coordinates are valid
     if (x < 0 || y < 0 || width <= 0 || height <= 0) {
@@ -219,7 +271,7 @@ export const TutorialOverlay: React.FC = () => {
     if (!targetMeasurement) return null;
 
     const { x, y, width, height } = targetMeasurement;
-    const padding = 8;
+    const padding = 16;
 
     if (x < 0 || y < 0 || width <= 0 || height <= 0) {
       return null;
@@ -238,11 +290,6 @@ export const TutorialOverlay: React.FC = () => {
           },
         ]}
       >
-        {/* Multiple glow layers for better effect */}
-        {/* <View style={[styles.glowLayer, styles.glow1]} /> */}
-        {/* <View style={[styles.glowLayer, styles.glow2]} /> */}
-        {/* <View style={[styles.glowLayer, styles.glow3]} /> */}
-
         {/* Main highlight border */}
         <View style={styles.highlightBorder} />
       </Animated.View>
@@ -254,26 +301,9 @@ export const TutorialOverlay: React.FC = () => {
       visible={isActive}
       transparent
       animationType="none"
-      statusBarTranslucent
+      statusBarTranslucent={true} // IMPORTANT: This allows the modal to cover the status bar
     >
       <Animated.View style={[styles.overlay, { opacity: fadeAnim }]}>
-        {/* Debug info (remove in production) */}
-        {/* <View style={styles.debugInfo}>
-          <Text style={styles.debugText}>
-            Target: {currentStep?.target || "none"}
-          </Text>
-          <Text style={styles.debugText}>
-            Measurement:{" "}
-            {targetMeasurement
-              ? `${Math.round(targetMeasurement.x)},${Math.round(
-                  targetMeasurement.y
-                )} ${Math.round(targetMeasurement.width)}x${Math.round(
-                  targetMeasurement.height
-                )}`
-              : "none"}
-          </Text>
-        </View> */}
-
         {/* Dark overlay sections with hole */}
         <TouchableWithoutFeedback onPress={() => {}}>
           <View style={StyleSheet.absoluteFillObject}>
@@ -311,22 +341,16 @@ const styles = StyleSheet.create({
   },
   overlaySection: {
     position: "absolute",
-
     backgroundColor: "rgba(0, 0, 0, 0.9)",
   },
   highlightContainer: {
     position: "absolute",
-    borderRadius: 20,
-  },
-  glowLayer: {
-    ...StyleSheet.absoluteFillObject,
-    borderRadius: 20,
-    backgroundColor: "transparent",
+    borderRadius: 24,
   },
   highlightBorder: {
     ...StyleSheet.absoluteFillObject,
-    borderRadius: 20,
-    borderWidth: 2,
+    borderRadius: 24,
+    borderWidth: 3,
     borderColor: "#3B6FE5",
     backgroundColor: "transparent",
   },
@@ -334,19 +358,4 @@ const styles = StyleSheet.create({
     position: "absolute",
     zIndex: 1000,
   },
-  // Debug styles (remove in production)
-  // debugInfo: {
-  //   position: "absolute",
-  //   top: 50,
-  //   left: 20,
-  //   backgroundColor: "rgba(0, 0, 0, 0.8)",
-  //   padding: 10,
-  //   borderRadius: 5,
-  //   zIndex: 999,
-  // },
-  // debugText: {
-  //   color: "white",
-  //   fontSize: 12,
-  //   fontFamily: "monospace",
-  // },
 });

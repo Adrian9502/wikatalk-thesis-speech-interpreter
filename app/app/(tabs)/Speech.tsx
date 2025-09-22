@@ -25,19 +25,38 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { globalSpeechManager } from "@/utils/globalSpeechManager";
 import { useFocusEffect } from "@react-navigation/native";
 import { Dimensions } from "react-native";
+import { TutorialTarget } from "@/components/tutorial/TutorialTarget";
+import { useTutorial } from "@/context/TutorialContext";
+import { SPEECH_TUTORIAL } from "@/constants/tutorials";
 
 const Speech = () => {
+  // Tutorial hook
+  const { startTutorial, isTutorialCompleted } = useTutorial();
+
   // stop ongoing speech
   useFocusEffect(
     React.useCallback(() => {
       console.log("[Speech] Tab focused, stopping all speech");
       globalSpeechManager.stopAllSpeech();
 
+      // Start tutorial if not completed
+      if (!isTutorialCompleted(SPEECH_TUTORIAL.id)) {
+        const timer = setTimeout(() => {
+          startTutorial(SPEECH_TUTORIAL);
+        }, 500); // Small delay for better UX
+
+        return () => {
+          clearTimeout(timer);
+          console.log("[Speech] Tab losing focus");
+          globalSpeechManager.stopAllSpeech();
+        };
+      }
+
       return () => {
         console.log("[Speech] Tab losing focus");
         globalSpeechManager.stopAllSpeech();
       };
-    }, [])
+    }, [startTutorial, isTutorialCompleted])
   );
   // Theme store
   const { activeTheme } = useThemeStore();
@@ -251,14 +270,16 @@ const Speech = () => {
           style={styles.contentContainer}
         >
           {/* Top section */}
-          <LanguageSection
-            position="top"
-            handlePress={handleMicPress}
-            recording={!!recording && recordingUser === 2}
-            userId={2}
-            onTextAreaFocus={handleTextAreaFocus}
-            recordingDuration={recordingDuration}
-          />
+          <TutorialTarget id="speech-top-section">
+            <LanguageSection
+              position="top"
+              handlePress={handleMicPress}
+              recording={!!recording && recordingUser === 2}
+              userId={2}
+              onTextAreaFocus={handleTextAreaFocus}
+              recordingDuration={recordingDuration}
+            />
+          </TutorialTarget>
 
           {/* Middle Section - Exchange icon */}
           <View style={styles.middleSection}>
@@ -269,14 +290,16 @@ const Speech = () => {
           </View>
 
           {/* Bottom section */}
-          <LanguageSection
-            position="bottom"
-            handlePress={handleMicPress}
-            recording={!!recording && recordingUser === 1}
-            userId={1}
-            onTextAreaFocus={handleTextAreaFocus}
-            recordingDuration={recordingDuration}
-          />
+          <TutorialTarget id="speech-bottom-section">
+            <LanguageSection
+              position="bottom"
+              handlePress={handleMicPress}
+              recording={!!recording && recordingUser === 1}
+              userId={1}
+              onTextAreaFocus={handleTextAreaFocus}
+              recordingDuration={recordingDuration}
+            />
+          </TutorialTarget>
         </ScrollView>
       </TouchableWithoutFeedback>
 
