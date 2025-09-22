@@ -79,7 +79,7 @@ const RootLayout = () => {
       animated: true,
       overlay: "svg" as const,
       maskOffset: 5,
-      //  Remove default tooltip styling
+      arrowColor: "transparent",
       tooltipStyle: {
         backgroundColor: "transparent",
         padding: 0,
@@ -89,8 +89,8 @@ const RootLayout = () => {
         shadowOpacity: 0,
         elevation: 0,
       },
-      // Optional: Remove arrow if causing issues
-      arrowColor: "transparent",
+      animationDuration: 300,
+      androidStatusBarVisible: false,
     }),
     []
   );
@@ -258,7 +258,6 @@ const RootLayout = () => {
                         <Stack
                           screenOptions={{
                             headerShown: false,
-                            // Add performance optimizations
                             animationTypeForReplace: "pop",
                             animation: "fade",
                           }}

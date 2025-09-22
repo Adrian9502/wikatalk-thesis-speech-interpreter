@@ -1,4 +1,10 @@
-import React, { useState, useEffect, useRef, useCallback } from "react";
+import React, {
+  useState,
+  useEffect,
+  useRef,
+  useCallback,
+  useMemo,
+} from "react";
 import { View, StyleSheet, ScrollView, Animated, Text } from "react-native";
 import {
   SafeAreaView,
@@ -45,10 +51,10 @@ const HomePage: React.FC<HomePageProps> = ({ onNavigateToTab, onReady }) => {
   } = useTutorial("homepage");
 
   // Create walkthrough components
-  const ExploreStep = walkthroughable(View);
-  const WordStep = walkthroughable(View);
-  const HistoryStep = walkthroughable(View);
-  const TutorialTrigger = walkthroughable(View);
+  const ExploreStep = useMemo(() => walkthroughable(View), []);
+  const WordStep = useMemo(() => walkthroughable(View), []);
+  const HistoryStep = useMemo(() => walkthroughable(View), []);
+  const TutorialTrigger = useMemo(() => walkthroughable(View), []);
 
   // Add state to track data readiness
   const [dataLoaded, setDataLoaded] = useState(false);
@@ -59,9 +65,10 @@ const HomePage: React.FC<HomePageProps> = ({ onNavigateToTab, onReady }) => {
   const componentMountedRef = useRef<boolean>(false);
 
   // Get user first name
-  const firstName = (userData?.fullName || userData?.username || "").split(
-    " "
-  )[0];
+  const firstName = useMemo(
+    () => (userData?.fullName || userData?.username || "").split(" ")[0],
+    [userData?.fullName, userData?.username]
+  );
 
   // Animation values
   const fadeAnim = useState(() => new Animated.Value(0))[0];
@@ -148,18 +155,18 @@ const HomePage: React.FC<HomePageProps> = ({ onNavigateToTab, onReady }) => {
       !tutorialStartedRef.current &&
       !tutorialLoading
     ) {
-      console.log("[HomePage] Conditions met for tutorial start");
       tutorialStartedRef.current = true;
 
-      // Start tutorial after a small delay to ensure everything is rendered
-      const tutorialTimeout = setTimeout(() => {
-        if (componentMountedRef.current && !hasSeenTutorial) {
-          console.log("[HomePage] Starting tutorial now");
-          startTutorial();
-        }
-      }, 500);
+      // Use requestAnimationFrame instead of setTimeout for better performance
+      const startTutorial = () => {
+        requestAnimationFrame(() => {
+          if (componentMountedRef.current && !hasSeenTutorial) {
+            startTutorial();
+          }
+        });
+      };
 
-      return () => clearTimeout(tutorialTimeout);
+      startTutorial();
     }
   }, [
     animationComplete,

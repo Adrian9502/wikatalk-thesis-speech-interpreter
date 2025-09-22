@@ -8,76 +8,104 @@ const TUTORIAL_STORAGE_KEY = "app_tutorial_completed";
 export const useTutorial = (tutorialName: string = "homepage") => {
   const [hasSeenTutorial, setHasSeenTutorial] = useState<boolean>(true);
   const [isLoading, setIsLoading] = useState<boolean>(true);
-  const { start, stop, copilotEvents } = useCopilot();
+  const { start, stop, copilotEvents, currentStep } = useCopilot();
 
-  // Use refs to prevent re-renders from affecting the tutorial
+  // Use refs to prevent unnecessary re-renders
   const tutorialInProgressRef = useRef<boolean>(false);
   const hasSeenTutorialRef = useRef<boolean>(true);
-  const eventListenersRef = useRef<any[]>([]);
+  const mountedRef = useRef<boolean>(true);
+  const completionTimeoutRef = useRef<NodeJS.Timeout>();
 
-  // Optimized tutorial status check
-  const checkTutorialStatus = useCallback(async () => {
+  // Memoized tutorial status check
+  const checkTutorialStatus = useCallback(async (): Promise<boolean> => {
+    if (!mountedRef.current) return true;
+
     try {
       const tutorialData = await AsyncStorage.getItem(TUTORIAL_STORAGE_KEY);
       const tutorials = tutorialData ? JSON.parse(tutorialData) : {};
       const hasSeen = tutorials[tutorialName] === true;
 
-      setHasSeenTutorial(hasSeen);
-      hasSeenTutorialRef.current = hasSeen;
-      console.log(`[useTutorial] Tutorial ${tutorialName} status:`, hasSeen);
+      if (mountedRef.current) {
+        setHasSeenTutorial(hasSeen);
+        hasSeenTutorialRef.current = hasSeen;
+      }
 
       return hasSeen;
     } catch (error) {
-      console.error("Error checking tutorial status:", error);
-      setHasSeenTutorial(true);
-      hasSeenTutorialRef.current = true;
+      console.error(
+        `[useTutorial] Error checking tutorial status for ${tutorialName}:`,
+        error
+      );
+
+      if (mountedRef.current) {
+        setHasSeenTutorial(true);
+        hasSeenTutorialRef.current = true;
+      }
       return true;
     }
   }, [tutorialName]);
 
-  // Check tutorial status on mount
+  // Initialize tutorial status
   useEffect(() => {
+    let cancelled = false;
+
     const initializeTutorialStatus = async () => {
       await checkTutorialStatus();
-      setIsLoading(false);
+
+      if (!cancelled && mountedRef.current) {
+        setIsLoading(false);
+      }
     };
 
     initializeTutorialStatus();
+
+    return () => {
+      cancelled = true;
+    };
   }, [checkTutorialStatus]);
 
-  // Optimized mark tutorial as completed
+  // Debounced mark tutorial as completed
   const markTutorialCompleted = useCallback(async () => {
-    if (hasSeenTutorialRef.current) return; // Already completed
+    if (hasSeenTutorialRef.current || !mountedRef.current) return;
 
-    try {
-      console.log(
-        `[useTutorial] Marking tutorial ${tutorialName} as completed`
-      );
+    // Clear any existing timeout
+    if (completionTimeoutRef.current) {
+      clearTimeout(completionTimeoutRef.current);
+    }
 
-      // Use InteractionManager for better performance
-      InteractionManager.runAfterInteractions(async () => {
+    // Debounce completion to prevent multiple calls
+    completionTimeoutRef.current = setTimeout(async () => {
+      if (!mountedRef.current || hasSeenTutorialRef.current) return;
+
+      try {
         const tutorialData = await AsyncStorage.getItem(TUTORIAL_STORAGE_KEY);
         const tutorials = tutorialData ? JSON.parse(tutorialData) : {};
-        tutorials[tutorialName] = true;
 
-        await AsyncStorage.setItem(
-          TUTORIAL_STORAGE_KEY,
-          JSON.stringify(tutorials)
+        if (tutorials[tutorialName] !== true) {
+          tutorials[tutorialName] = true;
+          await AsyncStorage.setItem(
+            TUTORIAL_STORAGE_KEY,
+            JSON.stringify(tutorials)
+          );
+
+          if (mountedRef.current) {
+            setHasSeenTutorial(true);
+            hasSeenTutorialRef.current = true;
+            tutorialInProgressRef.current = false;
+          }
+        }
+      } catch (error) {
+        console.error(
+          `[useTutorial] Error marking tutorial ${tutorialName} as completed:`,
+          error
         );
-
-        setHasSeenTutorial(true);
-        hasSeenTutorialRef.current = true;
-        tutorialInProgressRef.current = false;
-      });
-    } catch (error) {
-      console.error("Error marking tutorial as completed:", error);
-    }
+      }
+    }, 200); // 200ms debounce
   }, [tutorialName]);
 
-  // Reset tutorial status
+  // Reset tutorial
   const resetTutorial = useCallback(async () => {
     try {
-      console.log(`[useTutorial] Resetting tutorial ${tutorialName}`);
       const tutorialData = await AsyncStorage.getItem(TUTORIAL_STORAGE_KEY);
       const tutorials = tutorialData ? JSON.parse(tutorialData) : {};
       tutorials[tutorialName] = false;
@@ -87,110 +115,79 @@ export const useTutorial = (tutorialName: string = "homepage") => {
         JSON.stringify(tutorials)
       );
 
-      setHasSeenTutorial(false);
-      hasSeenTutorialRef.current = false;
-      tutorialInProgressRef.current = false;
+      if (mountedRef.current) {
+        setHasSeenTutorial(false);
+        hasSeenTutorialRef.current = false;
+        tutorialInProgressRef.current = false;
+      }
     } catch (error) {
-      console.error("Error resetting tutorial:", error);
+      console.error(
+        `[useTutorial] Error resetting tutorial ${tutorialName}:`,
+        error
+      );
     }
   }, [tutorialName]);
 
-  // Optimized start tutorial function
+  // Start tutorial with proper guards
   const startTutorial = useCallback(() => {
-    console.log(
-      `[useTutorial] startTutorial called - hasSeenTutorial: ${hasSeenTutorialRef.current}, isLoading: ${isLoading}, inProgress: ${tutorialInProgressRef.current}`
-    );
-
     if (
       !hasSeenTutorialRef.current &&
       !isLoading &&
-      !tutorialInProgressRef.current
+      !tutorialInProgressRef.current &&
+      mountedRef.current
     ) {
-      console.log(`[useTutorial] Starting tutorial ${tutorialName}`);
       tutorialInProgressRef.current = true;
 
-      // Use InteractionManager for smoother tutorial start
-      InteractionManager.runAfterInteractions(() => {
-        requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        if (mountedRef.current) {
           start();
-        });
-      });
-    } else {
-      console.log(`[useTutorial] Skipping tutorial start - conditions not met`);
-    }
-  }, [start, isLoading, tutorialName]);
-
-  // Optimized event listeners setup
-  useEffect(() => {
-    if (!copilotEvents) return;
-
-    const setupEventListeners = () => {
-      try {
-        // Clean up previous listeners
-        eventListenersRef.current.forEach((listener) => {
-          if (typeof listener === "function") {
-            listener();
-          }
-        });
-        eventListenersRef.current = [];
-
-        // Handle tutorial stop (user closes or completes)
-        const stopListener = copilotEvents.on("stop", () => {
-          console.log(`[useTutorial] Tutorial stopped`);
-          tutorialInProgressRef.current = false;
-          markTutorialCompleted();
-        });
-
-        // Handle step changes to detect completion
-        const stepChangeListener = copilotEvents.on(
-          "stepChange",
-          (step: any) => {
-            console.log(`[useTutorial] Step changed:`, step);
-
-            // If step is null/undefined, tutorial is complete
-            if (!step) {
-              console.log(`[useTutorial] Tutorial completed via stepChange`);
-              tutorialInProgressRef.current = false;
-              markTutorialCompleted();
-            }
-          }
-        );
-
-        // Store listeners for cleanup
-        eventListenersRef.current = [stopListener, stepChangeListener];
-      } catch (error) {
-        console.warn("Error setting up copilot event listeners:", error);
-      }
-    };
-
-    // Setup listeners after interactions complete
-    InteractionManager.runAfterInteractions(() => {
-      setupEventListeners();
-    });
-
-    return () => {
-      // Cleanup listeners
-      eventListenersRef.current.forEach((listener) => {
-        try {
-          if (typeof listener === "function") {
-            listener();
-          }
-        } catch (error) {
-          console.warn("Error cleaning up event listener:", error);
         }
       });
-      eventListenersRef.current = [];
+    }
+  }, [start, isLoading]);
+
+  // Custom stop function that marks tutorial as completed
+  const stopTutorial = useCallback(() => {
+    if (tutorialInProgressRef.current) {
+      tutorialInProgressRef.current = false;
+      stop();
+      markTutorialCompleted();
+    }
+  }, [stop, markTutorialCompleted]);
+
+  // Monitor currentStep changes instead of using event listeners
+  const previousStepRef = useRef(currentStep);
+  useEffect(() => {
+    const prevStep = previousStepRef.current;
+    previousStepRef.current = currentStep;
+
+    // If we had a step before and now we don't, tutorial completed
+    if (prevStep && !currentStep && tutorialInProgressRef.current) {
+      tutorialInProgressRef.current = false;
+      markTutorialCompleted();
+    }
+  }, [currentStep, markTutorialCompleted]);
+
+  // Cleanup on unmount
+  useEffect(() => {
+    return () => {
+      mountedRef.current = false;
+      if (completionTimeoutRef.current) {
+        clearTimeout(completionTimeoutRef.current);
+      }
     };
-  }, [copilotEvents, markTutorialCompleted]);
+  }, []);
 
   return {
     hasSeenTutorial,
     isLoading,
     startTutorial,
+    stopTutorial, // Use this instead of stop directly
     markTutorialCompleted,
     resetTutorial,
     start,
     stop,
     copilotEvents,
+    currentStep,
   };
 };

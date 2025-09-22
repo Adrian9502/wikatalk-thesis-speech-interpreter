@@ -1,9 +1,3 @@
-import { BASE_COLORS } from "@/constant/colors";
-import {
-  COMPONENT_FONT_SIZES,
-  FONT_SIZES,
-  POPPINS_FONT,
-} from "@/constant/fontSizes";
 import React from "react";
 import {
   View,
@@ -16,21 +10,19 @@ import { useCopilot } from "react-native-copilot";
 
 const { width: screenWidth } = Dimensions.get("window");
 
-// Updated interface to match TooltipProps from react-native-copilot
 interface CustomTooltipProps {
-  labels?: Partial<Record<"skip" | "previous" | "next" | "finish", string>>;
+  labels?: {
+    skip?: string;
+    previous?: string;
+    next?: string;
+    finish?: string;
+  };
 }
 
-const CustomTooltip: React.FC<CustomTooltipProps> = (props) => {
-  console.log("CustomTooltip props:", props);
-
-  // Use the useCopilot hook to get step data and navigation functions
+const CustomTooltip: React.FC<CustomTooltipProps> = ({ labels = {} }) => {
   const { isFirstStep, isLastStep, currentStep, goToNext, goToPrev, stop } =
     useCopilot();
 
-  const { labels = {} } = props;
-
-  // Default labels
   const defaultLabels = {
     skip: "Skip",
     previous: "Previous",
@@ -39,67 +31,43 @@ const CustomTooltip: React.FC<CustomTooltipProps> = (props) => {
     ...labels,
   };
 
-  // Get tooltip text from currentStep
   const tooltipText = currentStep?.text || "Tutorial step";
-
-  console.log("Current step from useCopilot:", currentStep);
-  console.log("Tooltip text:", tooltipText);
-
-  // Handle button actions using useCopilot functions
-  const onSkip = () => {
-    console.log("Skip button pressed");
-    stop();
-  };
-
-  const onPrevious = () => {
-    console.log("Previous button pressed");
-    goToPrev();
-  };
-
-  const onNext = () => {
-    console.log("Next button pressed");
-    if (isLastStep) {
-      stop();
-    } else {
-      goToNext();
-    }
-  };
 
   return (
     <View style={styles.tooltipContainer}>
-      {/* Step indicator */}
       {currentStep?.order && (
         <View style={styles.stepIndicator}>
           <Text style={styles.stepText}>Step {currentStep.order}</Text>
         </View>
       )}
 
-      {/* Tooltip content */}
       <Text style={styles.tooltipText}>{tooltipText}</Text>
 
-      {/* Navigation buttons */}
       <View style={styles.buttonContainer}>
-        {/* Skip/Previous/Next button row */}
         <View style={styles.buttonRow}>
-          {/* Skip button  */}
           <TouchableOpacity
-            onPress={onSkip}
+            onPress={stop}
             style={[styles.button, styles.skipButton]}
           >
             <Text style={[styles.buttonText, styles.skipButtonText]}>
               {defaultLabels.skip}
             </Text>
           </TouchableOpacity>
-          {/* Previous button - only show if not first step */}
+
           {!isFirstStep && (
-            <TouchableOpacity onPress={onPrevious} style={styles.button}>
+            <TouchableOpacity onPress={goToPrev} style={styles.button}>
               <Text style={styles.buttonText}>{defaultLabels.previous}</Text>
             </TouchableOpacity>
           )}
 
-          {/* Next/Finish button */}
           <TouchableOpacity
-            onPress={onNext}
+            onPress={() => {
+              if (isLastStep) {
+                stop();
+              } else {
+                goToNext();
+              }
+            }}
             style={[
               styles.button,
               styles.primaryButton,
@@ -118,7 +86,6 @@ const CustomTooltip: React.FC<CustomTooltipProps> = (props) => {
 
 const styles = StyleSheet.create({
   tooltipContainer: {
-    // backgroundColor: "#3B6FE5",
     backgroundColor: "#3B6FE5",
     borderRadius: 20,
     maxWidth: screenWidth - 40,
@@ -132,9 +99,6 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.3,
     shadowRadius: 6,
     elevation: 8,
-    // borderWidth: 1,
-    // borderColor: "#f0f0f0",
-    // These are key additions to prevent the default wrapper styling
     alignSelf: "center",
     position: "relative",
   },
@@ -147,15 +111,15 @@ const styles = StyleSheet.create({
     marginBottom: 12,
   },
   stepText: {
-    fontSize: FONT_SIZES.sm,
+    fontSize: 14,
     fontFamily: "Poppins-Medium",
-    color: BASE_COLORS.darkText,
+    color: "#333",
     textAlign: "center",
   },
   tooltipText: {
-    fontSize: FONT_SIZES.lg,
-    color: BASE_COLORS.white,
-    fontFamily: POPPINS_FONT.medium,
+    fontSize: 16,
+    color: "#FFFFFF",
+    fontFamily: "Poppins-Medium",
     marginBottom: 8,
     textAlign: "center",
   },
@@ -173,21 +137,20 @@ const styles = StyleSheet.create({
   },
   button: {
     backgroundColor: "#f8f9fa",
-    paddingVertical: 4,
-    paddingHorizontal: 6,
+    paddingVertical: 8,
+    paddingHorizontal: 12,
     borderRadius: 20,
     minWidth: 70,
-    maxWidth: 80,
   },
   skipButton: {
-    backgroundColor: BASE_COLORS.white,
+    backgroundColor: "#FFFFFF",
   },
   primaryButton: {
-    backgroundColor: "#FFF",
+    backgroundColor: "#FFFFFF",
   },
   buttonText: {
-    fontSize: COMPONENT_FONT_SIZES.button.small,
-    fontFamily: POPPINS_FONT.medium,
+    fontSize: 12,
+    fontFamily: "Poppins-Medium",
     color: "#495057",
     textAlign: "center",
   },
@@ -195,7 +158,7 @@ const styles = StyleSheet.create({
     color: "#333",
   },
   primaryButtonText: {
-    color: BASE_COLORS.darkText,
+    color: "#333",
   },
 });
 
