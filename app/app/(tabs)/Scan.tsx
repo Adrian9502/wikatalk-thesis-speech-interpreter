@@ -32,6 +32,9 @@ import {
   POPPINS_FONT,
   COMPONENT_FONT_SIZES,
 } from "@/constant/fontSizes";
+import { TutorialTarget } from "@/components/tutorial/TutorialTarget";
+import { useTutorial } from "@/context/TutorialContext";
+import { SCAN_TUTORIAL } from "@/constants/tutorials";
 
 const { width: screenWidth, height: screenHeight } = Dimensions.get("window");
 
@@ -66,6 +69,9 @@ interface ScanTranslateState {
 const Scan: React.FC = () => {
   // FIXED: All hooks must be called at the top level, in the same order every time
 
+  // Tutorial hook
+  const { startTutorial, isTutorialCompleted } = useTutorial();
+
   // Theme and utility hooks first
   const { activeTheme } = useThemeStore();
   const dynamicStyles = getGlobalStyles(activeTheme.backgroundColor);
@@ -99,7 +105,7 @@ const Scan: React.FC = () => {
   // Processing hooks
   const { isProcessing, ocrProgress, recognizeText } = useImageProcessing();
 
-  // Focus effect for speech management
+  // Focus effect for speech management and tutorial
   useFocusEffect(
     React.useCallback(() => {
       console.log(
@@ -108,12 +114,31 @@ const Scan: React.FC = () => {
       globalSpeechManager.stopAllSpeech();
       resetSpeechStates();
 
+      // Start tutorial if not completed and permission is granted
+      if (!isTutorialCompleted(SCAN_TUTORIAL.id) && permission?.granted) {
+        const timer = setTimeout(() => {
+          startTutorial(SCAN_TUTORIAL);
+        }, 500); // Small delay for better UX
+
+        return () => {
+          clearTimeout(timer);
+          console.log("[Scan] Tab losing focus");
+          globalSpeechManager.stopAllSpeech();
+          resetSpeechStates();
+        };
+      }
+
       return () => {
         console.log("[Scan] Tab losing focus");
         globalSpeechManager.stopAllSpeech();
         resetSpeechStates();
       };
-    }, [resetSpeechStates])
+    }, [
+      resetSpeechStates,
+      startTutorial,
+      isTutorialCompleted,
+      permission?.granted,
+    ])
   );
 
   // Effects - always in same order
@@ -183,6 +208,18 @@ const Scan: React.FC = () => {
     }
   };
 
+  // Enhanced permission request handler that also triggers tutorial
+  const handlePermissionRequest = async () => {
+    const permissionResult = await requestPermission();
+
+    // If permission is granted and tutorial hasn't been completed, start it
+    if (permissionResult.granted && !isTutorialCompleted(SCAN_TUTORIAL.id)) {
+      setTimeout(() => {
+        startTutorial(SCAN_TUTORIAL);
+      }, 800); // Delay to allow camera to initialize
+    }
+  };
+
   // Get responsive styles based on screen size
   const getResponsiveStyles = () => {
     // Calculate available height for layout (subtract safe area and some padding)
@@ -248,11 +285,15 @@ const Scan: React.FC = () => {
         </Text>
         <TouchableOpacity
           activeOpacity={0.9}
-          onPress={requestPermission}
+          onPress={handlePermissionRequest}
           style={styles.permissionButton}
         >
           <Text style={styles.permissionButtonText}>Grant Permission</Text>
         </TouchableOpacity>
+        <Text style={styles.permissionNote}>
+          Don't worry! You can still use the gallery feature to scan images once
+          permission is granted.
+        </Text>
       </SafeAreaView>
     );
   }
@@ -279,101 +320,115 @@ const Scan: React.FC = () => {
             enabled={true}
           >
             <View style={styles.cameraContainer}>
-              <View
-                style={[
-                  styles.cameraViewContainer,
-                  { height: responsiveStyles.cameraHeight },
-                ]}
+              {/* Camera Section */}
+              <TutorialTarget id="scan-camera-section">
+                <View
+                  style={[
+                    styles.cameraViewContainer,
+                    { height: responsiveStyles.cameraHeight },
+                  ]}
+                >
+                  <CameraView
+                    style={{ flex: 1 }}
+                    facing="back"
+                    ref={cameraRef}
+                    onMountError={(event) => {
+                      const error = event as unknown as Error;
+                      updateState({
+                        sourceText: `Camera mount error: ${error.message}`,
+                      });
+                    }}
+                  />
+
+                  <CameraControls
+                    takePicture={takePicture}
+                    pickImage={pickImage}
+                    isProcessing={isProcessing}
+                  />
+                </View>
+              </TutorialTarget>
+
+              {/* Translation Section - FIXED: Proper flex structure */}
+              <TutorialTarget
+                id="scan-translation-section"
+                style={styles.translationTutorialWrapper}
               >
-                <CameraView
-                  style={{ flex: 1 }}
-                  facing="back"
-                  ref={cameraRef}
-                  onMountError={(event) => {
-                    const error = event as unknown as Error;
-                    updateState({
-                      sourceText: `Camera mount error: ${error.message}`,
-                    });
-                  }}
-                />
+                <View
+                  style={[
+                    styles.translationContainer,
+                    {
+                      marginVertical: responsiveStyles.translationMargin,
+                      padding: responsiveStyles.translationPadding,
+                      paddingTop: responsiveStyles.translationPaddingTop,
+                      minHeight: responsiveStyles.translationMinHeight,
+                      maxHeight: responsiveStyles.translationMaxHeight,
+                    },
+                  ]}
+                >
+                  <LanguageSelector
+                    targetLanguage={targetLanguage}
+                    onLanguageChange={(language: string) => {
+                      updateState({ targetLanguage: language });
+                      if (sourceText) translateDetectedText(sourceText);
+                    }}
+                  />
 
-                <CameraControls
-                  takePicture={takePicture}
-                  pickImage={pickImage}
-                  isProcessing={isProcessing}
-                />
-              </View>
-
-              <View
-                style={[
-                  styles.translationContainer,
-                  {
-                    marginVertical: responsiveStyles.translationMargin,
-                    padding: responsiveStyles.translationPadding,
-                    paddingTop: responsiveStyles.translationPaddingTop,
-                    minHeight: responsiveStyles.translationMinHeight,
-                    maxHeight: responsiveStyles.translationMaxHeight,
-                  },
-                ]}
-              >
-                <LanguageSelector
-                  targetLanguage={targetLanguage}
-                  onLanguageChange={(language: string) => {
-                    updateState({ targetLanguage: language });
-                    if (sourceText) translateDetectedText(sourceText);
-                  }}
-                />
-
-                {isProcessing && (
-                  <View
-                    style={[
-                      styles.progressContainer,
-                      { marginBottom: isSmallScreen ? 6 : 8 },
-                    ]}
-                  >
+                  {isProcessing && (
                     <View
                       style={[
-                        styles.progressBar,
-                        { width: `${ocrProgress * 100}%` },
+                        styles.progressContainer,
+                        { marginBottom: isSmallScreen ? 6 : 8 },
                       ]}
+                    >
+                      <View
+                        style={[
+                          styles.progressBar,
+                          { width: `${ocrProgress * 100}%` },
+                        ]}
+                      />
+                      <Text style={styles.progressText}>
+                        {Math.round(ocrProgress * 100)}% - Recognizing text...
+                      </Text>
+                    </View>
+                  )}
+
+                  {/* Text Display Areas - FIXED: Proper flex structure */}
+                  <View style={styles.textDisplayContainer}>
+                    <TextDisplay
+                      title="Detected Text"
+                      text={sourceText}
+                      placeholder="Scan or select an image to detect text"
+                      isLoading={isProcessing}
+                      isSpeaking={isSourceSpeaking}
+                      copied={copiedSource}
+                      onChangeText={(text: string) => {
+                        debouncedTranslateText(text);
+                      }}
+                      onCopy={() => copyToClipboard(sourceText, "copiedSource")}
+                      onSpeak={() => handleSourceSpeech(sourceText)}
+                      onClear={clearText}
+                      editable={true}
+                      color={BASE_COLORS.blue}
                     />
-                    <Text style={styles.progressText}>
-                      {Math.round(ocrProgress * 100)}% - Recognizing text...
-                    </Text>
+
+                    <TextDisplay
+                      title="Translation"
+                      text={translatedText}
+                      placeholder="Translation will appear here"
+                      isLoading={isTranslating}
+                      isSpeaking={isTargetSpeaking}
+                      copied={copiedTarget}
+                      language={targetLanguage}
+                      onCopy={() =>
+                        copyToClipboard(translatedText, "copiedTarget")
+                      }
+                      onSpeak={() => handleTargetSpeech(translatedText)}
+                      editable={false}
+                      color={BASE_COLORS.orange}
+                    />
                   </View>
-                )}
-
-                <TextDisplay
-                  title="Detected Text"
-                  text={sourceText}
-                  placeholder="Scan or select an image to detect text"
-                  isLoading={isProcessing}
-                  isSpeaking={isSourceSpeaking}
-                  copied={copiedSource}
-                  onChangeText={(text: string) => {
-                    debouncedTranslateText(text);
-                  }}
-                  onCopy={() => copyToClipboard(sourceText, "copiedSource")}
-                  onSpeak={() => handleSourceSpeech(sourceText)}
-                  onClear={clearText}
-                  editable={true}
-                  color={BASE_COLORS.blue}
-                />
-
-                <TextDisplay
-                  title="Translation"
-                  text={translatedText}
-                  placeholder="Translation will appear here"
-                  isLoading={isTranslating}
-                  isSpeaking={isTargetSpeaking}
-                  copied={copiedTarget}
-                  language={targetLanguage}
-                  onCopy={() => copyToClipboard(translatedText, "copiedTarget")}
-                  onSpeak={() => handleTargetSpeech(translatedText)}
-                  editable={false}
-                  color={BASE_COLORS.orange}
-                />
-              </View>
+                </View>
+              </TutorialTarget>
             </View>
           </KeyboardAvoidingView>
         </View>
@@ -382,16 +437,15 @@ const Scan: React.FC = () => {
   );
 };
 
-export default Scan;
-
 const styles = StyleSheet.create({
   keyboardView: {
     flex: 1,
   },
   centeredContainer: {
     justifyContent: "center",
-    gap: 100,
+    gap: 20,
     alignItems: "center",
+    paddingHorizontal: 20,
   },
   permissionText: {
     textAlign: "center",
@@ -401,30 +455,43 @@ const styles = StyleSheet.create({
     fontSize: COMPONENT_FONT_SIZES.translation.language,
   },
   permissionButton: {
-    paddingHorizontal: 12,
-    paddingVertical: 8,
+    paddingHorizontal: 20,
+    paddingVertical: 12,
     backgroundColor: BASE_COLORS.lightBlue,
     borderRadius: 20,
+    marginBottom: 10,
   },
   permissionButtonText: {
     color: BASE_COLORS.blue,
     fontFamily: POPPINS_FONT.medium,
     fontSize: COMPONENT_FONT_SIZES.translation.pronunciation,
   },
+  permissionNote: {
+    textAlign: "center",
+    fontFamily: POPPINS_FONT.regular,
+    color: BASE_COLORS.white,
+    fontSize: COMPONENT_FONT_SIZES.card.description,
+    opacity: 0.8,
+    paddingHorizontal: 10,
+  },
   cameraContainer: {
     flex: 1,
   },
   cameraViewContainer: {
     // Height is now set dynamically via style prop using pixel values
-    borderRadius: isSmallScreen ? 16 : 20, // UPDATED: Responsive border radius
+    borderRadius: isSmallScreen ? 16 : 20,
     overflow: "hidden",
     shadowColor: "#000",
     elevation: 3,
   },
+  // FIXED: Tutorial wrapper that maintains flex layout
+  translationTutorialWrapper: {
+    flex: 1,
+  },
   translationContainer: {
     flex: 1,
     backgroundColor: BASE_COLORS.lightBlue,
-    borderRadius: isSmallScreen ? 16 : 20, // UPDATED: Responsive border radius
+    borderRadius: isSmallScreen ? 16 : 20,
     shadowColor: "#000",
     shadowOffset: {
       width: 0,
@@ -433,22 +500,25 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.25,
     shadowRadius: 3.84,
     elevation: 3,
-    // Other properties are now set dynamically via style prop
+  },
+  // ADDED: Container for text display areas
+  textDisplayContainer: {
+    flex: 1,
+    gap: isSmallScreen ? 8 : 12,
   },
   progressContainer: {
-    height: isSmallScreen ? 18 : 20, // UPDATED: Responsive height
+    height: isSmallScreen ? 18 : 20,
     justifyContent: "center",
     alignItems: "center",
     backgroundColor: BASE_COLORS.orange,
-    borderRadius: isSmallScreen ? 16 : 20, // UPDATED: Responsive border radius
+    borderRadius: isSmallScreen ? 16 : 20,
     overflow: "hidden",
     position: "relative",
-    // marginBottom is now set dynamically via style prop
   },
   progressBar: {
     height: "100%",
     backgroundColor: BASE_COLORS.blue,
-    borderRadius: isSmallScreen ? 8 : 10, // UPDATED: Responsive border radius
+    borderRadius: isSmallScreen ? 8 : 10,
   },
   progressText: {
     position: "absolute",
@@ -459,3 +529,5 @@ const styles = StyleSheet.create({
     fontSize: COMPONENT_FONT_SIZES.translation.pronunciation,
   },
 });
+
+export default Scan;

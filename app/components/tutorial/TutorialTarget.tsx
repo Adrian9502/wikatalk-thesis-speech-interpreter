@@ -57,15 +57,17 @@ export const TutorialTarget: React.FC<TutorialTargetProps> = ({
     }
   }, [isActive, currentStep, id, registerTarget]);
 
-  // FIXED: Determine if this is a flex child that needs flex: 1
-  const isFlexChild =
+  // ENHANCED: Better flex detection for scan components
+  const needsFlexLayout =
     id.includes("text-area") ||
     id.includes("source-area") ||
-    id.includes("target-area");
+    id.includes("target-area") ||
+    id.includes("translation-section") ||
+    id.includes("scan-translation");
 
   const wrapperStyle: ViewStyle = {
-    // IMPORTANT: For text areas, inherit flex behavior to maintain layout
-    ...(isFlexChild && { flex: 1 }),
+    // IMPORTANT: For components that need flex layout, inherit flex behavior
+    ...(needsFlexLayout && { flex: 1 }),
     ...style,
   };
 

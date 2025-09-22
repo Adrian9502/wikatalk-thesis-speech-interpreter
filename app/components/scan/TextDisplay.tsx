@@ -88,10 +88,10 @@ const TextDisplay: React.FC<TextDisplayProps> = ({
   // Get responsive dimensions
   const getResponsiveDimensions = () => {
     return {
-      minHeight: isSmallScreen ? 80 : isMediumScreen ? 100 : 120,
-      maxHeight: isSmallScreen ? 140 : isMediumScreen ? 160 : 200,
+      // FIXED: Ensure proper flex sizing for text displays in scan
+      minHeight: isSmallScreen ? 100 : isMediumScreen ? 120 : 140,
       padding: isSmallScreen ? 10 : 12,
-      marginVertical: isSmallScreen ? 4 : 6,
+      marginVertical: isSmallScreen ? 6 : 8,
       borderRadius: isSmallScreen ? 16 : 20,
       controlButtonSize: isSmallScreen ? 32 : 40,
       controlButtonHeight: isSmallScreen ? 25 : 30,
@@ -191,13 +191,7 @@ const TextDisplay: React.FC<TextDisplayProps> = ({
       </View>
 
       <View
-        style={[
-          styles.textAreaWrapper,
-          {
-            minHeight: dimensions.minHeight,
-            maxHeight: dimensions.maxHeight,
-          },
-        ]}
+        style={[styles.textAreaWrapper, { minHeight: dimensions.minHeight }]}
       >
         {isLoading ? (
           <View
@@ -220,7 +214,6 @@ const TextDisplay: React.FC<TextDisplayProps> = ({
               styles.textArea,
               {
                 minHeight: dimensions.minHeight,
-                maxHeight: dimensions.maxHeight,
                 padding: dimensions.padding,
                 borderRadius: dimensions.borderRadius,
               },
@@ -265,14 +258,15 @@ const TextDisplay: React.FC<TextDisplayProps> = ({
 
 const styles = StyleSheet.create({
   textSection: {
+    // FIXED: Use flex to ensure proper sizing in scan translation container
     flex: 1,
-    minHeight: isSmallScreen ? 100 : 140,
+    minHeight: isSmallScreen ? 120 : 160,
   },
   sectionHeader: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    marginBottom: isSmallScreen ? 3 : 4,
+    marginBottom: isSmallScreen ? 4 : 6,
   },
   sectionTitle: {
     fontSize: COMPONENT_FONT_SIZES.translation.language,
@@ -294,6 +288,8 @@ const styles = StyleSheet.create({
   textArea: {
     flex: 1,
     backgroundColor: BASE_COLORS.offWhite,
+    borderWidth: 1,
+    borderColor: BASE_COLORS.borderColor,
   },
   textField: {
     fontFamily: POPPINS_FONT.regular,
@@ -317,6 +313,8 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     backgroundColor: BASE_COLORS.offWhite,
+    borderWidth: 1,
+    borderColor: BASE_COLORS.borderColor,
   },
   controlButtonActive: {
     backgroundColor: "rgba(16, 185, 129, 0.1)",

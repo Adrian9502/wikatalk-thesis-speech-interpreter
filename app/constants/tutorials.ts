@@ -97,3 +97,24 @@ export const TRANSLATE_TUTORIAL: TutorialConfig = {
     },
   ],
 };
+
+export const SCAN_TUTORIAL: TutorialConfig = {
+  id: "scan_tutorial",
+  name: "Camera Scan Tutorial",
+  steps: [
+    {
+      id: "camera-section",
+      text: "This is the camera section. Capture text clearly for better results. Press the camera icon to take a photo or the image icon to choose from your gallery.",
+      target: "scan-camera-section",
+      order: 1,
+      placement: "bottom",
+    },
+    {
+      id: "translation-section",
+      text: "Translation section: Select target language from dropdown. Detected text appears with audio playback, copy, and clear options. Translation results show below with audio playback, copy, and accuracy info icons.",
+      target: "scan-translation-section",
+      order: 2,
+      placement: "top",
+    },
+  ],
+};
