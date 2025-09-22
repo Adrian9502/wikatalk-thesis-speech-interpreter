@@ -37,17 +37,39 @@ import {
   POPPINS_FONT,
 } from "@/constant/fontSizes";
 
+// Tutorial imports
+import { TutorialTarget } from "@/components/tutorial/TutorialTarget";
+import { useTutorial } from "@/context/TutorialContext";
+import { PRONOUNCE_TUTORIAL } from "@/constants/tutorials";
+
 const Pronounce = () => {
-  // Stop speech when tab focused
+  // Tutorial hook
+  const { startTutorial, isTutorialCompleted } = useTutorial();
+
+  // Stop speech when tab focused and handle tutorial
   useFocusEffect(
     React.useCallback(() => {
       console.log("[Pronounce] Tab focused, stopping all speech");
       globalSpeechManager.stopAllSpeech();
+
+      // Start tutorial if not completed and data is ready
+      if (!isTutorialCompleted(PRONOUNCE_TUTORIAL.id) && hasValidCache) {
+        const timer = setTimeout(() => {
+          startTutorial(PRONOUNCE_TUTORIAL);
+        }, 500); // Small delay for better UX
+
+        return () => {
+          clearTimeout(timer);
+          console.log("[Pronounce] Tab losing focus");
+          globalSpeechManager.stopAllSpeech();
+        };
+      }
+
       return () => {
         console.log("[Pronounce] Tab losing focus");
         globalSpeechManager.stopAllSpeech();
       };
-    }, [])
+    }, [startTutorial, isTutorialCompleted])
   );
 
   const { activeTheme } = useThemeStore();
@@ -260,9 +282,23 @@ const Pronounce = () => {
 
   // RENDER FUNCTIONS
   const renderItem = useCallback(
-    ({ item, index }: { item: PronunciationItem; index: number }) => (
-      <PronunciationCard item={item} index={index} onPlayPress={playAudio} />
-    ),
+    ({ item, index }: { item: PronunciationItem; index: number }) => {
+      // Add tutorial target to the first card only
+      if (index === 0) {
+        return (
+          <TutorialTarget id="pronounce-pronunciation-card">
+            <PronunciationCard
+              item={item}
+              index={index}
+              onPlayPress={playAudio}
+            />
+          </TutorialTarget>
+        );
+      }
+      return (
+        <PronunciationCard item={item} index={index} onPlayPress={playAudio} />
+      );
+    },
     [playAudio]
   );
 
@@ -320,54 +356,58 @@ const Pronounce = () => {
 
         {/* Search */}
         <View style={styles.controlsContainer}>
-          <SearchBar
-            searchInput={searchInput}
-            setSearchInput={handleSearchChange}
-            setSearchTerm={setSearchTerm}
-          />
+          <TutorialTarget id="pronounce-search-bar">
+            <SearchBar
+              searchInput={searchInput}
+              setSearchInput={handleSearchChange}
+              setSearchTerm={setSearchTerm}
+            />
+          </TutorialTarget>
         </View>
 
         {/* Language Header & Dropdown */}
-        <View style={styles.headerDropdownContainer}>
-          <Text style={styles.listHeaderTitle}>
-            {selectedLanguage} Vocabulary
-          </Text>
+        <TutorialTarget id="pronounce-language-dropdown">
+          <View style={styles.headerDropdownContainer}>
+            <Text style={styles.listHeaderTitle}>
+              {selectedLanguage} Vocabulary
+            </Text>
 
-          <Dropdown
-            style={[
-              styles.dropdown,
-              isDropdownFocus && { borderColor: BASE_COLORS.blue },
-            ]}
-            itemTextStyle={{
-              fontSize: FONT_SIZES.lg,
-              fontFamily: POPPINS_FONT.regular,
-              color: BASE_COLORS.darkText,
-            }}
-            placeholderStyle={styles.dropdownPlaceholder}
-            selectedTextStyle={styles.dropdownSelectedText}
-            data={DIALECTS}
-            maxHeight={250}
-            labelField="label"
-            valueField="value"
-            placeholder="Select language"
-            value={selectedLanguage}
-            onFocus={() => setIsDropdownFocus(true)}
-            onBlur={() => setIsDropdownFocus(false)}
-            onChange={(item) => {
-              handleLanguageChange(item.value);
-              setIsDropdownFocus(false);
-            }}
-            renderRightIcon={() => (
-              <Ionicons
-                name={isDropdownFocus ? "chevron-up" : "chevron-down"}
-                size={COMPONENT_FONT_SIZES.card.subtitle}
-                color={BASE_COLORS.blue}
-              />
-            )}
-            activeColor={BASE_COLORS.lightBlue}
-            containerStyle={styles.dropdownList}
-          />
-        </View>
+            <Dropdown
+              style={[
+                styles.dropdown,
+                isDropdownFocus && { borderColor: BASE_COLORS.blue },
+              ]}
+              itemTextStyle={{
+                fontSize: FONT_SIZES.lg,
+                fontFamily: POPPINS_FONT.regular,
+                color: BASE_COLORS.darkText,
+              }}
+              placeholderStyle={styles.dropdownPlaceholder}
+              selectedTextStyle={styles.dropdownSelectedText}
+              data={DIALECTS}
+              maxHeight={250}
+              labelField="label"
+              valueField="value"
+              placeholder="Select language"
+              value={selectedLanguage}
+              onFocus={() => setIsDropdownFocus(true)}
+              onBlur={() => setIsDropdownFocus(false)}
+              onChange={(item) => {
+                handleLanguageChange(item.value);
+                setIsDropdownFocus(false);
+              }}
+              renderRightIcon={() => (
+                <Ionicons
+                  name={isDropdownFocus ? "chevron-up" : "chevron-down"}
+                  size={COMPONENT_FONT_SIZES.card.subtitle}
+                  color={BASE_COLORS.blue}
+                />
+              )}
+              activeColor={BASE_COLORS.lightBlue}
+              containerStyle={styles.dropdownList}
+            />
+          </View>
+        </TutorialTarget>
 
         <FlashList
           ref={flashListRef}

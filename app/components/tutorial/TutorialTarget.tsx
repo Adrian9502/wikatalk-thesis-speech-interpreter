@@ -57,27 +57,22 @@ export const TutorialTarget: React.FC<TutorialTargetProps> = ({
     }
   }, [isActive, currentStep, id, registerTarget]);
 
-  // ENHANCED: Better flex detection for all components
   const needsFlexLayout =
     id.includes("text-area") ||
     id.includes("source-area") ||
     id.includes("target-area") ||
     id.includes("translation-section") ||
     id.includes("scan-translation") ||
-    id.includes("games-modes"); // Added games support
+    id.includes("games-modes") ||
+    id.includes("pronounce-pronunciation-card");
 
   const wrapperStyle: ViewStyle = {
-    // IMPORTANT: For components that need flex layout, inherit flex behavior
     ...(needsFlexLayout && { flex: 1 }),
     ...style,
   };
 
   return (
-    <View
-      ref={viewRef}
-      style={wrapperStyle}
-      collapsable={false} // Prevent Android from optimizing away the view
-    >
+    <View ref={viewRef} style={wrapperStyle} collapsable={false}>
       {children}
     </View>
   );

@@ -41,7 +41,6 @@ export const HOME_TUTORIAL: TutorialConfig = {
   ],
 };
 
-// Export other tutorial configurations as you create them
 export const SPEECH_TUTORIAL: TutorialConfig = {
   id: "speech_tutorial",
   name: "Speech Translation Tutorial",
@@ -132,9 +131,37 @@ export const GAMES_TUTORIAL: TutorialConfig = {
     },
     {
       id: "game-modes-section",
-       text: "Practice Filipino languages through fun games! Choose from 3 game modes: Multiple Choice, Word Identification, and Fill in the Blank. Use your coins to buy hints and check your progress here.",
+      text: "Practice Filipino languages through fun games! Choose from 3 game modes: Multiple Choice, Word Identification, and Fill in the Blank. Use your coins to buy hints and check your progress here.",
       target: "games-modes-section",
       order: 2,
+      placement: "top",
+    },
+  ],
+};
+
+export const PRONOUNCE_TUTORIAL: TutorialConfig = {
+  id: "pronounce_tutorial",
+  name: "Pronunciation Guide Tutorial",
+  steps: [
+    {
+      id: "search-bar",
+      text: "Use this search bar to quickly find specific words or phrases. Type any English word, translation, or pronunciation guide to filter the vocabulary list instantly.",
+      target: "pronounce-search-bar",
+      order: 1,
+      placement: "bottom",
+    },
+    {
+      id: "language-dropdown",
+      text: "Select your target Filipino language here. Choose from various dialects like Cebuano, Tagalog, Ilocano, and more to access their specific vocabulary and pronunciation guides.",
+      target: "pronounce-language-dropdown",
+      order: 2,
+      placement: "bottom",
+    },
+    {
+      id: "pronunciation-card",
+      text: "Each card shows an English word with its translation and pronunciation guide. Press the play button to hear the correct pronunciation. The card highlights when audio is playing, helping you learn proper dialect pronunciation.",
+      target: "pronounce-pronunciation-card",
+      order: 3,
       placement: "top",
     },
   ],
