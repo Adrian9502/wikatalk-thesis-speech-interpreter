@@ -33,27 +33,28 @@ const CustomTooltip: React.FC<CustomTooltipProps> = ({ labels = {} }) => {
     currentStep,
     nextStep,
     previousStep,
-    stopTutorial,
     currentStepIndex,
     currentTutorial,
     // Language state and toggle
     isTagalog,
     toggleLanguage,
+    // NEW: Skip all tutorials function
+    skipAllTutorials,
   } = useTutorial();
 
   const defaultLabels = {
-    skip: "Skip",
+    skip: "Skip All", // CHANGED: Make it clear this skips everything
     previous: "Previous",
     next: "Next",
     finish: "Finish",
     ...labels,
   };
 
-  // NEW: Check if current step has navigation action
+  // Check if current step has navigation action
   const hasNavigationAction =
     currentStep?.navigationAction?.type === "navigate_tab";
 
-  // NEW: Get appropriate button text based on navigation action
+  // Get appropriate button text based on navigation action
   const getActionButtonText = () => {
     if (hasNavigationAction && currentStep?.navigationAction) {
       const tabName = currentStep.navigationAction.tabName;
@@ -92,7 +93,7 @@ const CustomTooltip: React.FC<CustomTooltipProps> = ({ labels = {} }) => {
             color={BASE_COLORS.darkText}
           />
           <Text style={styles.languageToggleText}>
-            {isTagalog ? "EN" : "TL"}
+            {isTagalog ? "English" : "Tagalog"}
           </Text>
         </TouchableOpacity>
       </View>
@@ -101,10 +102,17 @@ const CustomTooltip: React.FC<CustomTooltipProps> = ({ labels = {} }) => {
 
       <View style={styles.buttonContainer}>
         <View style={styles.buttonRow}>
+          {/* ENHANCED: Skip All button with better styling and clearer text */}
           <TouchableOpacity
-            onPress={stopTutorial}
+            onPress={skipAllTutorials} // CHANGED: Use skipAllTutorials instead of stopTutorial
             style={[styles.button, styles.skipButton]}
           >
+            <Ionicons
+              name="close-circle-outline"
+              size={14}
+              color={BASE_COLORS.white}
+              style={{ marginRight: 4 }}
+            />
             <Text style={[styles.buttonText, styles.skipButtonText]}>
               {defaultLabels.skip}
             </Text>
@@ -128,11 +136,9 @@ const CustomTooltip: React.FC<CustomTooltipProps> = ({ labels = {} }) => {
               styles.button,
               styles.primaryButton,
               isFirstStep && styles.singleButton,
-              // NEW: Different styling for navigation buttons
               hasNavigationAction && styles.navigationButton,
             ]}
           >
-            {/* NEW: Add icon for navigation steps */}
             {hasNavigationAction && (
               <Ionicons
                 name="arrow-forward"
@@ -239,8 +245,10 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
   },
+  // ENHANCED: Better styling for skip button
   skipButton: {
-    backgroundColor: BASE_COLORS.white,
+    backgroundColor: BASE_COLORS.danger, // Red background to indicate "stop all"
+    minWidth: 85, // Slightly wider for "Skip All" text
   },
   primaryButton: {
     backgroundColor: "#FFF",
@@ -255,8 +263,10 @@ const styles = StyleSheet.create({
     color: "#495057",
     textAlign: "center",
   },
+  // ENHANCED: White text for red skip button
   skipButtonText: {
-    color: "#333",
+    color: BASE_COLORS.white, // White text on red background
+    fontFamily: POPPINS_FONT.semiBold, // Make it bold to emphasize
   },
   primaryButtonText: {
     color: BASE_COLORS.darkText,

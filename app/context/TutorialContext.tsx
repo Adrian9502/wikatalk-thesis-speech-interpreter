@@ -14,11 +14,10 @@ export interface TutorialStep {
   order: number;
   placement?: "top" | "bottom" | "center";
   skipable?: boolean;
-  // NEW: Navigation action for step completion
   navigationAction?: {
     type: "navigate_tab";
     tabName: string;
-    startTutorial?: string; // Tutorial ID to start in the new tab
+    startTutorial?: string;
   };
 }
 
@@ -49,7 +48,11 @@ interface TutorialContextType {
   previousStep: () => void;
   isTutorialCompleted: (tutorialId: string) => boolean;
 
-  // NEW: Navigation handler
+  // NEW: Skip all tutorials
+  skipAllTutorials: () => void;
+  areAllTutorialsSkipped: () => boolean;
+
+  // Navigation handler
   setNavigationHandler: (
     handler: (tabName: string, tutorialId?: string) => void
   ) => void;
@@ -76,13 +79,14 @@ export const TutorialProvider: React.FC<{ children: React.ReactNode }> = ({
     new Set()
   );
 
+  // NEW: State to track if all tutorials are skipped
+  const [allTutorialsSkipped, setAllTutorialsSkipped] = useState(false);
+
   // Language state
   const [isTagalog, setIsTagalog] = useState(false);
 
   // Target measurements storage
   const targetMeasurements = useRef<Record<string, any>>({});
-
-  // NEW: Navigation handler ref
   const navigationHandlerRef = useRef<
     ((tabName: string, tutorialId?: string) => void) | null
   >(null);
@@ -104,7 +108,7 @@ export const TutorialProvider: React.FC<{ children: React.ReactNode }> = ({
     );
   }, [isTagalog]);
 
-  // NEW: Set navigation handler
+  // Set navigation handler
   const setNavigationHandler = useCallback(
     (handler: (tabName: string, tutorialId?: string) => void) => {
       navigationHandlerRef.current = handler;
@@ -113,18 +117,61 @@ export const TutorialProvider: React.FC<{ children: React.ReactNode }> = ({
     []
   );
 
-  // Tutorial controls
-  const startTutorial = useCallback((config: TutorialConfig) => {
-    console.log(`[TutorialContext] Starting tutorial: ${config.name}`);
-    setCurrentTutorial(config);
+  // NEW: Skip all tutorials function
+  const skipAllTutorials = useCallback(() => {
+    console.log("[TutorialContext] Skipping ALL tutorials");
+
+    // Mark all known tutorials as completed
+    const allTutorialIds = [
+      "home_tutorial",
+      "speech_tutorial",
+      "translate_tutorial",
+      "scan_tutorial",
+      "games_tutorial",
+      "pronounce_tutorial",
+    ];
+
+    setCompletedTutorials(new Set(allTutorialIds));
+    setAllTutorialsSkipped(true);
+
+    // Stop current tutorial
+    setIsActive(false);
+    setCurrentTutorial(null);
     setCurrentStepIndex(0);
-    setIsActive(true);
-    // Reset language to English when starting new tutorial
     setIsTagalog(false);
-    // Clear previous target measurements
     targetMeasurements.current = {};
+
+    console.log("[TutorialContext] All tutorials marked as completed");
   }, []);
 
+  // NEW: Check if all tutorials are skipped
+  const areAllTutorialsSkipped = useCallback(() => {
+    return allTutorialsSkipped;
+  }, [allTutorialsSkipped]);
+
+  // ENHANCED: Tutorial start check
+  const startTutorial = useCallback(
+    (config: TutorialConfig) => {
+      // Don't start if all tutorials are skipped
+      if (allTutorialsSkipped) {
+        console.log(
+          "[TutorialContext] All tutorials skipped, not starting:",
+          config.name
+        );
+        return;
+      }
+
+      console.log(`[TutorialContext] Starting tutorial: ${config.name}`);
+      setCurrentTutorial(config);
+      setCurrentStepIndex(0);
+      setIsActive(true);
+      setIsTagalog(false);
+      targetMeasurements.current = {};
+    },
+    [allTutorialsSkipped]
+  );
+
+  // ENHANCED: Stop tutorial function
   const stopTutorial = useCallback(() => {
     console.log("[TutorialContext] Stopping tutorial");
     if (currentTutorial) {
@@ -203,11 +250,12 @@ export const TutorialProvider: React.FC<{ children: React.ReactNode }> = ({
     }
   }, [currentStepIndex, currentTutorial?.steps.length]);
 
+  // ENHANCED: Check completion including skip all
   const isTutorialCompleted = useCallback(
     (tutorialId: string) => {
-      return completedTutorials.has(tutorialId);
+      return allTutorialsSkipped || completedTutorials.has(tutorialId);
     },
-    [completedTutorials]
+    [completedTutorials, allTutorialsSkipped]
   );
 
   // Target measurement functions
@@ -247,7 +295,11 @@ export const TutorialProvider: React.FC<{ children: React.ReactNode }> = ({
         previousStep,
         isTutorialCompleted,
 
-        // NEW: Navigation handler
+        // NEW: Skip all functionality
+        skipAllTutorials,
+        areAllTutorialsSkipped,
+
+        // Navigation handler
         setNavigationHandler,
 
         // Target registration
