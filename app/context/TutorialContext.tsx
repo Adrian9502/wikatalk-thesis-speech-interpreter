@@ -313,10 +313,11 @@ export const TutorialProvider: React.FC<{ children: React.ReactNode }> = ({
     }
   }, [userId]);
 
-  // Skip all tutorials (local session only)
-  const skipAllTutorials = useCallback(() => {
-    console.log("[TutorialContext] Skipping ALL tutorials (local session)");
+  // ENHANCED: Skip all tutorials with server persistence
+  const skipAllTutorials = useCallback(async () => {
+    console.log("[TutorialContext] Skipping ALL tutorials (permanent)");
 
+    // Set local session flag immediately
     setAllTutorialsSkipped(true);
 
     // Stop current tutorial
@@ -326,8 +327,62 @@ export const TutorialProvider: React.FC<{ children: React.ReactNode }> = ({
     setIsTagalog(false);
     targetMeasurements.current = {};
 
-    console.log("[TutorialContext] All tutorials skipped for this session");
-  }, []);
+    // ENHANCED: Also mark all tutorials as completed on server
+    if (userId) {
+      try {
+        const allTutorialIds = [
+          "home_tutorial",
+          "speech_tutorial",
+          "translate_tutorial",
+          "scan_tutorial",
+          "games_tutorial",
+          "pronounce_tutorial",
+        ];
+
+        // Mark each tutorial as completed on server
+        for (const tutorialId of allTutorialIds) {
+          const tutorialName = tutorialId.replace("_tutorial", "");
+          try {
+            await tutorialService.completeTutorial(tutorialName, 1);
+            console.log(
+              `[TutorialContext] Marked ${tutorialName} as completed on server`
+            );
+          } catch (error) {
+            console.error(
+              `[TutorialContext] Failed to mark ${tutorialName} as completed:`,
+              error
+            );
+            // Continue with other tutorials even if one fails
+          }
+        }
+
+        // Update local server status
+        const updatedStatus = await tutorialService.getTutorialStatus();
+        setServerTutorialStatus(updatedStatus);
+
+        console.log(
+          "[TutorialContext] All tutorials permanently skipped and saved to server"
+        );
+      } catch (error) {
+        console.error(
+          "[TutorialContext] Error saving skip all to server:",
+          error
+        );
+        // Fallback to local storage
+        const allTutorialIds = [
+          "home_tutorial",
+          "speech_tutorial",
+          "translate_tutorial",
+          "scan_tutorial",
+          "games_tutorial",
+          "pronounce_tutorial",
+        ];
+        setLocalCompletedTutorials(new Set(allTutorialIds));
+      }
+    }
+
+    console.log("[TutorialContext] All tutorials skipped permanently");
+  }, [userId, markTutorialCompleted]);
 
   // Check if all tutorials are skipped (local session)
   const areAllTutorialsSkipped = useCallback(() => {
