@@ -7,6 +7,7 @@ import { SplashScreen } from "expo-router";
 import { ValidationProvider } from "@/context/ValidationContext";
 import { PaperProvider } from "react-native-paper";
 import { AuthProvider } from "@/context/AuthContext";
+import { TutorialProvider } from "@/context/TutorialContext";
 import { NotifierWrapper } from "react-native-notifier";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { SafeAreaProvider } from "react-native-safe-area-context";
@@ -18,6 +19,7 @@ import { GoogleSignin } from "@react-native-google-signin/google-signin";
 import { initializeToken } from "@/lib/authTokenManager";
 import { ProgressModalProvider } from "@/components/games/ProgressModalProvider";
 import { RankingsModalProvider } from "@/components/games/RankingsModalProvider";
+import { TutorialOverlay } from "@/components/tutorial/TutorialOverlay";
 import {
   registerSplashStore,
   registerProgressStore,
@@ -223,40 +225,44 @@ const RootLayout = () => {
       <SafeAreaProvider>
         <AuthProvider>
           <ThemeProvider onThemeReady={handleThemeReady}>
-            <ProgressModalProvider>
-              <RankingsModalProvider>
-                <PaperProvider>
-                  <ValidationProvider>
-                    <NotifierWrapper>
-                      <Stack
-                        screenOptions={{
-                          headerShown: false,
-                          animationTypeForReplace: "pop",
-                          animation: "fade",
-                        }}
-                      >
-                        <Stack.Screen
-                          name="index"
-                          options={{ headerShown: false }}
-                        />
-                        <Stack.Screen
-                          name="(auth)"
-                          options={{ headerShown: false }}
-                        />
-                        <Stack.Screen
-                          name="(tabs)"
-                          options={{ headerShown: false }}
-                        />
-                        <Stack.Screen
-                          name="(settings)"
-                          options={{ headerShown: false }}
-                        />
-                      </Stack>
-                    </NotifierWrapper>
-                  </ValidationProvider>
-                </PaperProvider>
-              </RankingsModalProvider>
-            </ProgressModalProvider>
+            <TutorialProvider>
+              <ProgressModalProvider>
+                <RankingsModalProvider>
+                  <PaperProvider>
+                    <ValidationProvider>
+                      <NotifierWrapper>
+                        <Stack
+                          screenOptions={{
+                            headerShown: false,
+                            animationTypeForReplace: "pop",
+                            animation: "fade",
+                          }}
+                        >
+                          <Stack.Screen
+                            name="index"
+                            options={{ headerShown: false }}
+                          />
+                          <Stack.Screen
+                            name="(auth)"
+                            options={{ headerShown: false }}
+                          />
+                          <Stack.Screen
+                            name="(tabs)"
+                            options={{ headerShown: false }}
+                          />
+                          <Stack.Screen
+                            name="(settings)"
+                            options={{ headerShown: false }}
+                          />
+                        </Stack>
+                        {/* Tutorial Overlay - Render at root level */}
+                        <TutorialOverlay />
+                      </NotifierWrapper>
+                    </ValidationProvider>
+                  </PaperProvider>
+                </RankingsModalProvider>
+              </ProgressModalProvider>
+            </TutorialProvider>
           </ThemeProvider>
         </AuthProvider>
       </SafeAreaProvider>

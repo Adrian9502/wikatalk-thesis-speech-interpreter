@@ -12,7 +12,7 @@ import {
   StyleSheet,
   Dimensions,
 } from "react-native";
-import { useCopilot } from "react-native-copilot";
+import { useTutorial } from "@/context/TutorialContext";
 
 const { width: screenWidth } = Dimensions.get("window");
 
@@ -26,8 +26,16 @@ interface CustomTooltipProps {
 }
 
 const CustomTooltip: React.FC<CustomTooltipProps> = ({ labels = {} }) => {
-  const { isFirstStep, isLastStep, currentStep, goToNext, goToPrev, stop } =
-    useCopilot();
+  const {
+    isFirstStep,
+    isLastStep,
+    currentStep,
+    nextStep,
+    previousStep,
+    stopTutorial,
+    currentStepIndex,
+    currentTutorial,
+  } = useTutorial();
 
   const defaultLabels = {
     skip: "Skip",
@@ -38,21 +46,23 @@ const CustomTooltip: React.FC<CustomTooltipProps> = ({ labels = {} }) => {
   };
 
   const tooltipText = currentStep?.text || "Tutorial step";
+  const stepOrder = currentStepIndex + 1;
+  const totalSteps = currentTutorial?.steps.length || 1;
 
   return (
     <View style={styles.tooltipContainer}>
-      {currentStep?.order && (
-        <View style={styles.stepIndicator}>
-          <Text style={styles.stepText}>Step {currentStep.order}</Text>
-        </View>
-      )}
+      <View style={styles.stepIndicator}>
+        <Text style={styles.stepText}>
+          Step {stepOrder} of {totalSteps}
+        </Text>
+      </View>
 
       <Text style={styles.tooltipText}>{tooltipText}</Text>
 
       <View style={styles.buttonContainer}>
         <View style={styles.buttonRow}>
           <TouchableOpacity
-            onPress={stop}
+            onPress={stopTutorial}
             style={[styles.button, styles.skipButton]}
           >
             <Text style={[styles.buttonText, styles.skipButtonText]}>
@@ -61,7 +71,7 @@ const CustomTooltip: React.FC<CustomTooltipProps> = ({ labels = {} }) => {
           </TouchableOpacity>
 
           {!isFirstStep && (
-            <TouchableOpacity onPress={goToPrev} style={styles.button}>
+            <TouchableOpacity onPress={previousStep} style={styles.button}>
               <Text style={styles.buttonText}>{defaultLabels.previous}</Text>
             </TouchableOpacity>
           )}
@@ -69,9 +79,9 @@ const CustomTooltip: React.FC<CustomTooltipProps> = ({ labels = {} }) => {
           <TouchableOpacity
             onPress={() => {
               if (isLastStep) {
-                stop();
+                stopTutorial();
               } else {
-                goToNext();
+                nextStep();
               }
             }}
             style={[
@@ -92,7 +102,6 @@ const CustomTooltip: React.FC<CustomTooltipProps> = ({ labels = {} }) => {
 
 const styles = StyleSheet.create({
   tooltipContainer: {
-    // backgroundColor: "#3B6FE5",
     backgroundColor: "#3B6FE5",
     borderRadius: 20,
     maxWidth: screenWidth - 40,
@@ -106,9 +115,6 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.3,
     shadowRadius: 6,
     elevation: 8,
-    // borderWidth: 1,
-    // borderColor: "#f0f0f0",
-    // These are key additions to prevent the default wrapper styling
     alignSelf: "center",
     position: "relative",
   },

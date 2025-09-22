@@ -13,10 +13,10 @@ import {
 import { StatusBar } from "expo-status-bar";
 import useThemeStore from "@/store/useThemeStore";
 import { useAuth } from "@/context/AuthContext";
-// import { useTotalPronunciationsCount } from "@/hooks/useTotalPronunciationsCount";
-// import useCoinsStore from "@/store/games/useCoinsStore";
 import { usePronunciationStore } from "@/store/usePronunciationStore";
-// import { useFormattedStats } from "@/utils/gameStatsUtils";
+import { useTutorial } from "@/context/TutorialContext";
+import { TutorialTarget } from "@/components/tutorial/TutorialTarget";
+import { HOME_TUTORIAL } from "@/constants/tutorials";
 import AppLoading from "../AppLoading";
 // Import components
 import HomeHeader from "./HomeHeader";
@@ -34,6 +34,7 @@ const HomePage: React.FC<HomePageProps> = ({ onNavigateToTab, onReady }) => {
   const { activeTheme } = useThemeStore();
   const { userData } = useAuth();
   const { wordOfTheDay, getWordOfTheDay } = usePronunciationStore();
+  const { startTutorial, isTutorialCompleted } = useTutorial();
   const insets = useSafeAreaInsets();
 
   // Add state to track data readiness
@@ -121,10 +122,23 @@ const HomePage: React.FC<HomePageProps> = ({ onNavigateToTab, onReady }) => {
         if (componentMountedRef.current) {
           console.log("[HomePage] Animation completed");
           setAnimationComplete(true);
+
+          // Start tutorial after animation completes if not completed
+          if (
+            !tutorialStartedRef.current &&
+            !isTutorialCompleted(HOME_TUTORIAL.id)
+          ) {
+            setTimeout(() => {
+              if (componentMountedRef.current) {
+                tutorialStartedRef.current = true;
+                startTutorial(HOME_TUTORIAL);
+              }
+            }, 500); // Small delay for better UX
+          }
         }
       });
     }
-  }, [dataLoaded, fadeAnim, slideAnim]);
+  }, [dataLoaded, fadeAnim, slideAnim, startTutorial, isTutorialCompleted]);
 
   // Don't render content until data is loaded
   if (!dataLoaded) {
@@ -164,20 +178,29 @@ const HomePage: React.FC<HomePageProps> = ({ onNavigateToTab, onReady }) => {
             contentContainerStyle={styles.scrollContent}
           >
             {/* Header Section */}
-            <HomeHeader
-              userData={userData}
-              activeTheme={activeTheme}
-              firstName={firstName}
-              onSettingsPress={handleSettingsPress}
-            />
+            <TutorialTarget id="home-header">
+              <HomeHeader
+                userData={userData}
+                activeTheme={activeTheme}
+                firstName={firstName}
+                onSettingsPress={handleSettingsPress}
+              />
+            </TutorialTarget>
 
-            <Explore onNavigateToTab={onNavigateToTab} />
+            <TutorialTarget id="explore-section">
+              <Explore onNavigateToTab={onNavigateToTab} />
+            </TutorialTarget>
 
-            <WordOfTheDay />
-            <TranslationHistory
-              onNavigateToHistory={handleNavigateToHistory}
-              onNavigateToTab={onNavigateToTab}
-            />
+            <TutorialTarget id="word-of-day">
+              <WordOfTheDay />
+            </TutorialTarget>
+
+            <TutorialTarget id="translation-history">
+              <TranslationHistory
+                onNavigateToHistory={handleNavigateToHistory}
+                onNavigateToTab={onNavigateToTab}
+              />
+            </TutorialTarget>
           </ScrollView>
         </Animated.View>
       </SafeAreaView>
@@ -195,23 +218,6 @@ const styles = StyleSheet.create({
   scrollContent: {
     paddingHorizontal: 20,
     paddingBottom: 16,
-  },
-  tutorialTrigger: {
-    position: "absolute",
-    top: 0,
-    left: 20,
-    right: 20,
-    height: 1,
-    zIndex: 1000,
-  },
-  stepWrapper: {
-    marginVertical: 8,
-  },
-  hiddenTutorialText: {
-    opacity: 0,
-    fontSize: 1,
-    height: 1,
-    color: "transparent",
   },
 });
 
