@@ -30,6 +30,7 @@ import {
   GAMES_TUTORIAL,
   PRONOUNCE_TUTORIAL,
 } from "@/constants/tutorials";
+import { globalSpeechManager } from "@/utils/globalSpeechManager";
 
 const { width: screenWidth } = Dimensions.get("window");
 
@@ -233,32 +234,48 @@ export default function TabsLayout() {
         `[TabsLayout] Tutorial navigation to: ${tabName}, tutorial: ${tutorialId}`
       );
 
-      // Navigate to the tab
-      router.push(`/(tabs)/${tabName}` as any);
+      // ENHANCED: Stop speech safely before navigation
+      const navigateWithSafeCleanup = async () => {
+        try {
+          // Stop speech before navigation to prevent conflicts
+          await globalSpeechManager.stopAllSpeech();
+        } catch (error) {
+          console.warn(
+            "[TabsLayout] Non-critical error stopping speech before navigation:",
+            error
+          );
+        }
 
-      // If a tutorial ID is provided, start it after navigation
-      if (tutorialId) {
-        // Wait for navigation to complete, then start the tutorial
-        setTimeout(() => {
-          const tutorialConfigs = {
-            home_tutorial: HOME_TUTORIAL,
-            speech_tutorial: SPEECH_TUTORIAL,
-            translate_tutorial: TRANSLATE_TUTORIAL,
-            scan_tutorial: SCAN_TUTORIAL,
-            games_tutorial: GAMES_TUTORIAL,
-            pronounce_tutorial: PRONOUNCE_TUTORIAL,
-          };
+        // Navigate to the tab
+        router.push(`/(tabs)/${tabName}` as any);
 
-          const tutorialConfig =
-            tutorialConfigs[tutorialId as keyof typeof tutorialConfigs];
-          if (tutorialConfig) {
-            console.log(
-              `[TabsLayout] Starting tutorial: ${tutorialConfig.name}`
-            );
-            startTutorial(tutorialConfig);
-          }
-        }, 800); // Allow time for tab transition and component mounting
-      }
+        // If a tutorial ID is provided, start it after navigation
+        if (tutorialId) {
+          // Wait for navigation to complete, then start the tutorial
+          setTimeout(() => {
+            const tutorialConfigs = {
+              home_tutorial: HOME_TUTORIAL,
+              speech_tutorial: SPEECH_TUTORIAL,
+              translate_tutorial: TRANSLATE_TUTORIAL,
+              scan_tutorial: SCAN_TUTORIAL,
+              games_tutorial: GAMES_TUTORIAL,
+              pronounce_tutorial: PRONOUNCE_TUTORIAL,
+            };
+
+            const tutorialConfig =
+              tutorialConfigs[tutorialId as keyof typeof tutorialConfigs];
+            if (tutorialConfig) {
+              console.log(
+                `[TabsLayout] Starting tutorial with force: ${tutorialConfig.name}`
+              );
+              // CHANGED: Use forceStart=true for tutorial navigation chain
+              startTutorial(tutorialConfig, true);
+            }
+          }, 1000); // INCREASED: Longer delay to ensure tab is fully loaded
+        }
+      };
+
+      navigateWithSafeCleanup();
     },
     [router, startTutorial]
   );

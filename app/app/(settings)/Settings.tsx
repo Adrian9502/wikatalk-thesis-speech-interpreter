@@ -24,6 +24,8 @@ import { clearAllAccountData } from "@/utils/accountUtils";
 import ProfileCard from "@/components/settings/ProfileCard";
 import { Header as BackHeader } from "@/components/Header";
 import TermsOfUseModal from "@/components/legal/TermsOfUseModal";
+import { useTutorial } from "@/context/TutorialContext";
+import { HOME_TUTORIAL } from "@/constants/tutorials";
 
 // Types
 type SettingItemWithToggle = {
@@ -73,18 +75,23 @@ const Settings = () => {
   // Game sound store
   const { isSoundEnabled, setGameSoundEnabled, loadSoundSettings } =
     useGameSoundStore();
+  // Tutorial context
+  const { startTutorial } = useTutorial();
 
   // Modal state
   const [logoutModalVisible, setLogoutModalVisible] = useState(false);
   const [contactModalVisible, setContactModalVisible] = useState(false);
   const [termsModalVisible, setTermsModalVisible] = useState(false);
+  // NEW: Add tutorial confirmation modal state
+  const [tutorialConfirmModalVisible, setTutorialConfirmModalVisible] =
+    useState(false);
 
   // Load sound settings on component mount
   useEffect(() => {
     loadSoundSettings();
   }, [loadSoundSettings]);
 
-  // NEW: Back navigation handler
+  // Back navigation handler
   const handleBackPress = () => {
     console.log("[Settings] Back pressed, navigating to Home tab");
     router.push("/(tabs)/Home");
@@ -105,8 +112,33 @@ const Settings = () => {
     setGameSoundEnabled(!isSoundEnabled);
   };
 
+  // NEW: Show confirmation modal first
+  const handleTutorialButtonPress = () => {
+    console.log("[Settings] Tutorial button pressed, showing confirmation");
+    setTutorialConfirmModalVisible(true);
+  };
+
+  // NEW: Handle confirmed tutorial trigger
+  const handleConfirmedTutorialTrigger = () => {
+    console.log("[Settings] Tutorial confirmed, starting replay");
+    setTutorialConfirmModalVisible(false);
+
+    // Navigate to home first
+    router.push("/(tabs)/Home");
+    // Start tutorial with forceStart=true to bypass all checks including local skip
+    setTimeout(() => {
+      startTutorial(HOME_TUTORIAL, true);
+    }, 800);
+  };
+
+  // NEW: Handle tutorial confirmation cancel
+  const handleTutorialCancel = () => {
+    console.log("[Settings] Tutorial confirmation cancelled");
+    setTutorialConfirmModalVisible(false);
+  };
+
   const sections: SettingSection[] = [
-    // Games Section - NEW
+    // Games Section
     {
       title: "Games",
       items: [
@@ -137,6 +169,17 @@ const Settings = () => {
           icon: "user",
           label: "Account Details",
           onPress: () => router.push("/(settings)/AccountDetails"),
+        },
+      ],
+    },
+    // Tutorial Section
+    {
+      title: "Tutorial",
+      items: [
+        {
+          icon: "play-circle",
+          label: "Replay Full App Tutorial",
+          onPress: handleTutorialButtonPress, // CHANGED: Show confirmation first
         },
       ],
     },
@@ -298,7 +341,7 @@ const Settings = () => {
       {/* Back Header */}
       <BackHeader title="Settings" onBackPress={handleBackPress} />
 
-      {/* Confirmation Modal */}
+      {/* Logout Confirmation Modal */}
       <ConfirmationModal
         visible={logoutModalVisible}
         title="Logout"
@@ -309,6 +352,17 @@ const Settings = () => {
           setLogoutModalVisible(false);
           handleLogout();
         }}
+      />
+
+      {/* NEW: Tutorial Confirmation Modal */}
+      <ConfirmationModal
+        visible={tutorialConfirmModalVisible}
+        title="Replay Tutorial"
+        text="This will start the full app tutorial from the beginning, guiding you through all features. Continue?"
+        confirmButtonText="Start Tutorial"
+        cancelButtonText="Cancel"
+        onCancel={handleTutorialCancel}
+        onConfirm={handleConfirmedTutorialTrigger}
       />
 
       <ContactSupportModal

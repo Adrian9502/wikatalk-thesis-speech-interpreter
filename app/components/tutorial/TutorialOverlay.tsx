@@ -23,13 +23,14 @@ export const TutorialOverlay: React.FC = () => {
   const [fadeAnim] = useState(new Animated.Value(0));
   const [pulseAnim] = useState(new Animated.Value(1));
   const [targetMeasurement, setTargetMeasurement] = useState<any>(null);
+  const [measurementAttempts, setMeasurementAttempts] = useState(0);
+  const maxMeasurementAttempts = 5; // REDUCED: Lower max attempts
 
   // Calculate the actual status bar height
   const getStatusBarHeight = () => {
     if (Platform.OS === "ios") {
       return insets.top;
     } else {
-      // For Android, use StatusBar.currentHeight or fallback to insets.top
       return StatusBar.currentHeight || insets.top || 0;
     }
   };
@@ -42,7 +43,6 @@ export const TutorialOverlay: React.FC = () => {
         "[TutorialOverlay] Tutorial is active, current step:",
         currentStep
       );
-      console.log("[TutorialOverlay] Status bar height:", statusBarHeight);
 
       // Fade in the overlay
       Animated.timing(fadeAnim, {
@@ -68,43 +68,85 @@ export const TutorialOverlay: React.FC = () => {
       );
       pulseAnimation.start();
 
-      // Get target measurement if current step has a target
+      // ENHANCED: Better measurement handling with controlled retries
       if (currentStep?.target) {
         console.log(
           "[TutorialOverlay] Looking for target:",
           currentStep.target
         );
 
+        let timeoutId: NodeJS.Timeout | null = null;
+
         const checkForMeasurement = () => {
-          // @ts-ignore
+          // Prevent excessive retries
+          if (measurementAttempts >= maxMeasurementAttempts) {
+            console.log(
+              `[TutorialOverlay] Max measurement attempts reached for ${currentStep.target}, using center placement`
+            );
+            setTargetMeasurement(null);
+            return;
+          }
+
+          // FIXED: Add null check for currentStep.target
+          if (!currentStep?.target) {
+            console.log(
+              "[TutorialOverlay] No target specified, using center placement"
+            );
+            setTargetMeasurement(null);
+            return;
+          }
+
           const measurement = getTargetMeasurement(currentStep.target);
-          console.log("[TutorialOverlay] Got measurement:", measurement);
 
           if (measurement && measurement.width > 0 && measurement.height > 0) {
             // FIXED: Adjust measurement to account for status bar
             const adjustedMeasurement = {
               ...measurement,
-              y: measurement.y + statusBarHeight, // Add status bar height to Y position
+              y: measurement.y + statusBarHeight,
             };
             console.log(
-              "[TutorialOverlay] Adjusted measurement:",
+              "[TutorialOverlay] Got valid measurement:",
               adjustedMeasurement
             );
             setTargetMeasurement(adjustedMeasurement);
+            setMeasurementAttempts(0); // Reset attempts on success
           } else {
-            // Retry after a short delay
-            setTimeout(checkForMeasurement, 100);
+            // ENHANCED: Only retry with progressive delays
+            const nextAttempt = measurementAttempts + 1;
+            if (nextAttempt < maxMeasurementAttempts) {
+              setMeasurementAttempts(nextAttempt);
+              const delay = Math.min(300 * nextAttempt, 1500); // Progressive delay with max
+              timeoutId = setTimeout(checkForMeasurement, delay);
+            } else {
+              console.log(
+                `[TutorialOverlay] Could not get valid measurement for ${currentStep.target} after ${maxMeasurementAttempts} attempts, using center placement`
+              );
+              setTargetMeasurement(null);
+            }
           }
         };
 
-        checkForMeasurement();
+        // Reset attempts when target changes
+        setMeasurementAttempts(0);
+        // Start checking after a brief delay to allow components to mount
+        timeoutId = setTimeout(checkForMeasurement, 200);
+
+        return () => {
+          pulseAnimation.stop();
+          setMeasurementAttempts(0);
+          if (timeoutId) {
+            clearTimeout(timeoutId);
+          }
+        };
       } else {
         console.log("[TutorialOverlay] No target for current step");
         setTargetMeasurement(null);
+        setMeasurementAttempts(0);
       }
 
       return () => {
         pulseAnimation.stop();
+        setMeasurementAttempts(0);
       };
     } else {
       // Fade out the overlay
@@ -113,6 +155,8 @@ export const TutorialOverlay: React.FC = () => {
         duration: 300,
         useNativeDriver: true,
       }).start();
+      setMeasurementAttempts(0);
+      setTargetMeasurement(null);
     }
   }, [
     isActive,
@@ -139,25 +183,18 @@ export const TutorialOverlay: React.FC = () => {
 
     const { x, y, width, height } = targetMeasurement;
     const placement = currentStep.placement || "bottom";
-    const tooltipHeight = 180; // Approximate tooltip height
-    const padding = 20; // Additional space between tooltip and target
+    const tooltipHeight = 180;
+    const padding = 20;
 
     switch (placement) {
       case "top":
-        // FIXED: For "top" placement, position tooltip above the target with proper spacing
         const topPosition = y - tooltipHeight - padding;
-
-        // If tooltip would go off-screen at the top, position it below instead
         if (topPosition < 50) {
-          console.log(
-            "[TutorialOverlay] Tooltip would go off-screen, positioning below target"
-          );
           return {
             top: y + height + padding,
             left: Math.max(20, Math.min(x - 100, SCREEN_WIDTH - 290)),
           };
         }
-
         return {
           top: topPosition,
           left: Math.max(20, Math.min(x - 100, SCREEN_WIDTH - 290)),
@@ -180,25 +217,14 @@ export const TutorialOverlay: React.FC = () => {
   // Create overlay with hole punch effect using multiple views
   const createOverlayWithHole = () => {
     if (!targetMeasurement) {
-      console.log(
-        "[TutorialOverlay] No target measurement, showing full overlay"
-      );
       return <View style={styles.darkOverlay} />;
     }
 
     const { x, y, width, height } = targetMeasurement;
     const padding = 16;
 
-    console.log(
-      "[TutorialOverlay] Creating hole at (with status bar adjustment):",
-      { x, y, width, height }
-    );
-
     // Ensure coordinates are valid
     if (x < 0 || y < 0 || width <= 0 || height <= 0) {
-      console.log(
-        "[TutorialOverlay] Invalid coordinates, showing full overlay"
-      );
       return <View style={styles.darkOverlay} />;
     }
 
@@ -291,7 +317,6 @@ export const TutorialOverlay: React.FC = () => {
           },
         ]}
       >
-        {/* Main highlight border */}
         <View style={styles.highlightBorder} />
       </Animated.View>
     );
@@ -302,20 +327,17 @@ export const TutorialOverlay: React.FC = () => {
       visible={isActive}
       transparent
       animationType="none"
-      statusBarTranslucent={true} // IMPORTANT: This allows the modal to cover the status bar
+      statusBarTranslucent={true}
     >
       <Animated.View style={[styles.overlay, { opacity: fadeAnim }]}>
-        {/* Dark overlay sections with hole */}
         <TouchableWithoutFeedback onPress={() => {}}>
           <View style={StyleSheet.absoluteFillObject}>
             {createOverlayWithHole()}
           </View>
         </TouchableWithoutFeedback>
 
-        {/* Animated highlight border with glow */}
         {createHighlightBorder()}
 
-        {/* Tooltip */}
         <View style={[styles.tooltipContainer, getTooltipPosition()]}>
           <CustomTooltip
             labels={{

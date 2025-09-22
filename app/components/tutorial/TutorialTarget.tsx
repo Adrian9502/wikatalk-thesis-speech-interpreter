@@ -1,4 +1,4 @@
-import React, { useRef, useEffect } from "react";
+import React, { useRef, useEffect, useState } from "react";
 import { View, ViewStyle } from "react-native";
 import { useTutorial } from "@/context/TutorialContext";
 
@@ -15,47 +15,108 @@ export const TutorialTarget: React.FC<TutorialTargetProps> = ({
 }) => {
   const { registerTarget, isActive, currentStep } = useTutorial();
   const viewRef = useRef<View>(null);
+  const [measurementAttempts, setMeasurementAttempts] = useState(0);
+  const [hasMeasured, setHasMeasured] = useState(false);
+  const [isCurrentTarget, setIsCurrentTarget] = useState(false);
+  const maxAttempts = 5; // REDUCED: Lower max attempts
+  const measurementTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
+  // ENHANCED: Better target tracking
   useEffect(() => {
-    if (isActive && currentStep?.target === id) {
-      console.log(`[TutorialTarget] Measuring target: ${id}`);
+    const isTargetActive = isActive && currentStep?.target === id;
+    setIsCurrentTarget(isTargetActive);
 
-      // Multiple measurement attempts for better accuracy
-      const measureTarget = () => {
-        viewRef.current?.measure((x, y, width, height, pageX, pageY) => {
-          console.log(`[TutorialTarget] Measurement for ${id}:`, {
+    // CRITICAL: Reset measurement state when this becomes the active target
+    if (isTargetActive && !hasMeasured) {
+      setMeasurementAttempts(0);
+    }
+
+    // CRITICAL: Clean up when no longer the target
+    if (!isTargetActive) {
+      setMeasurementAttempts(0);
+      setHasMeasured(false);
+      if (measurementTimeoutRef.current) {
+        clearTimeout(measurementTimeoutRef.current);
+        measurementTimeoutRef.current = null;
+      }
+    }
+  }, [isActive, currentStep?.target, id, hasMeasured]);
+
+  // FIXED: Only measure when this is the current active target
+  useEffect(() => {
+    if (!isCurrentTarget || hasMeasured || measurementAttempts >= maxAttempts) {
+      return;
+    }
+
+    console.log(
+      `[TutorialTarget] Measuring target: ${id} (attempt ${
+        measurementAttempts + 1
+      })`
+    );
+
+    const measureTarget = () => {
+      // DEFENSIVE: Double-check we're still the active target
+      if (!isCurrentTarget || hasMeasured) {
+        return;
+      }
+
+      viewRef.current?.measure((x, y, width, height, pageX, pageY) => {
+        // DEFENSIVE: Check again in case state changed during async operation
+        if (!isCurrentTarget || hasMeasured) {
+          return;
+        }
+
+        console.log(
+          `[TutorialTarget] Measurement attempt ${
+            measurementAttempts + 1
+          } for ${id}:`,
+          { x: pageX, y: pageY, width, height }
+        );
+
+        // Only register if we have valid measurements
+        if (width > 0 && height > 0) {
+          registerTarget(id, {
             x: pageX,
             y: pageY,
             width,
             height,
           });
+          setHasMeasured(true);
+          console.log(`[TutorialTarget] Successfully measured ${id}`);
+        } else if (measurementAttempts < maxAttempts - 1) {
+          // ENHANCED: Increment attempts and schedule retry
+          setMeasurementAttempts((prev) => prev + 1);
+          measurementTimeoutRef.current = setTimeout(() => {
+            measureTarget();
+          }, 200 * (measurementAttempts + 1)); // Progressive delay
+        } else {
+          console.log(
+            `[TutorialTarget] Max attempts reached for ${id}, stopping measurement`
+          );
+        }
+      });
+    };
 
-          // Only register if we have valid measurements
-          if (width > 0 && height > 0) {
-            registerTarget(id, {
-              x: pageX,
-              y: pageY,
-              width,
-              height,
-            });
-          } else {
-            // Retry measurement after a short delay
-            setTimeout(measureTarget, 50);
-          }
-        });
-      };
+    // ENHANCED: Use setTimeout to avoid blocking the UI thread
+    measurementTimeoutRef.current = setTimeout(measureTarget, 100);
 
-      // Try measuring immediately, then with delays
-      measureTarget();
-      const timer1 = setTimeout(measureTarget, 100);
-      const timer2 = setTimeout(measureTarget, 250);
+    // Cleanup timeout on unmount or dependency change
+    return () => {
+      if (measurementTimeoutRef.current) {
+        clearTimeout(measurementTimeoutRef.current);
+        measurementTimeoutRef.current = null;
+      }
+    };
+  }, [isCurrentTarget, measurementAttempts, hasMeasured, id, registerTarget]);
 
-      return () => {
-        clearTimeout(timer1);
-        clearTimeout(timer2);
-      };
-    }
-  }, [isActive, currentStep, id, registerTarget]);
+  // ENHANCED: Cleanup on unmount
+  useEffect(() => {
+    return () => {
+      if (measurementTimeoutRef.current) {
+        clearTimeout(measurementTimeoutRef.current);
+      }
+    };
+  }, []);
 
   const needsFlexLayout =
     id.includes("text-area") ||

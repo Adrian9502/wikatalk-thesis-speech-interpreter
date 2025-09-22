@@ -33,24 +33,32 @@ const Speech = () => {
   // FIXED: Tutorial hook - add shouldShowTutorial to destructuring
   const { startTutorial, shouldShowTutorial } = useTutorial();
 
-  // stop ongoing speech
   useFocusEffect(
     React.useCallback(() => {
       console.log("[Speech] Tab focused, stopping all speech");
-      globalSpeechManager.stopAllSpeech();
 
-      // ENHANCED: Check tutorial status asynchronously
+      // ENHANCED: Defensive speech stopping
+      const handleFocusCleanup = async () => {
+        try {
+          await globalSpeechManager.stopAllSpeech();
+        } catch (error) {
+          console.warn("[Speech] Non-critical speech stop error:", error);
+        }
+      };
+
+      handleFocusCleanup();
+
+      // Tutorial check logic...
       const checkAndStartTutorial = async () => {
         try {
           const shouldShow = await shouldShowTutorial(
-            SPEECH_TUTORIAL.id,
-            SPEECH_TUTORIAL.version
+            SPEECH_TUTORIAL.id, // FIXED: Use SPEECH_TUTORIAL instead of TUTORIAL_CONFIG
+            SPEECH_TUTORIAL.version // FIXED: Use SPEECH_TUTORIAL instead of TUTORIAL_CONFIG
           );
           if (shouldShow) {
             const timer = setTimeout(() => {
-              startTutorial(SPEECH_TUTORIAL);
+              startTutorial(SPEECH_TUTORIAL); // FIXED: Use SPEECH_TUTORIAL instead of TUTORIAL_CONFIG
             }, 500);
-
             return () => clearTimeout(timer);
           }
         } catch (error) {
@@ -62,7 +70,7 @@ const Speech = () => {
 
       return () => {
         console.log("[Speech] Tab losing focus");
-        globalSpeechManager.stopAllSpeech();
+        handleFocusCleanup();
       };
     }, [startTutorial, shouldShowTutorial])
   );

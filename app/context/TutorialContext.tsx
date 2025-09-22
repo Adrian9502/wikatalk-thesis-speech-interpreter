@@ -46,7 +46,7 @@ interface TutorialContextType {
   toggleLanguage: () => void;
 
   // Tutorial controls
-  startTutorial: (config: TutorialConfig) => void;
+  startTutorial: (config: TutorialConfig, forceStart?: boolean) => void; // CHANGED: Add forceStart parameter
   stopTutorial: () => void;
   nextStep: () => void;
   previousStep: () => void;
@@ -391,7 +391,20 @@ export const TutorialProvider: React.FC<{ children: React.ReactNode }> = ({
 
   // ENHANCED: Tutorial start check with server integration and user validation
   const startTutorial = useCallback(
-    async (config: TutorialConfig) => {
+    async (config: TutorialConfig, forceStart: boolean = false) => {
+      // NEW: If forceStart is true, bypass ALL checks including local skip
+      if (forceStart) {
+        console.log(
+          `[TutorialContext] Force starting tutorial: ${config.name}`
+        );
+        setCurrentTutorial(config);
+        setCurrentStepIndex(0);
+        setIsActive(true);
+        setIsTagalog(false);
+        targetMeasurements.current = {};
+        return;
+      }
+
       // Check if we have a user
       if (!userId) {
         console.log(
@@ -401,7 +414,7 @@ export const TutorialProvider: React.FC<{ children: React.ReactNode }> = ({
         return;
       }
 
-      // Don't start if all tutorials are skipped locally
+      // ONLY check local skip for normal tutorial starts (not force starts)
       if (allTutorialsSkipped) {
         console.log(
           "[TutorialContext] All tutorials skipped locally, not starting:",
@@ -470,7 +483,9 @@ export const TutorialProvider: React.FC<{ children: React.ReactNode }> = ({
     setCurrentTutorial(null);
     setCurrentStepIndex(0);
     setIsTagalog(false);
+    // ENHANCED: Clear all target measurements to prevent memory leaks
     targetMeasurements.current = {};
+    measurementRegistrationRef.current.clear();
   }, [currentTutorial, markTutorialCompleted, userId]);
 
   // Next step with navigation support
@@ -493,13 +508,13 @@ export const TutorialProvider: React.FC<{ children: React.ReactNode }> = ({
       if (
         navigationAction &&
         navigationAction.type === "navigate_tab" &&
-        navigationHandlerRef.current
+        navigationHandlerRef.current // FIXED: Add null check
       ) {
         console.log(
           `[TutorialContext] Executing navigation action to: ${navigationAction.tabName}`
         );
 
-        // Mark current tutorial as completed on server
+        // ENHANCED: Mark tutorial as completed before navigation to prevent state issues
         if (userId) {
           markTutorialCompleted(
             currentTutorial.id,
@@ -512,18 +527,30 @@ export const TutorialProvider: React.FC<{ children: React.ReactNode }> = ({
           });
         }
 
-        // Stop current tutorial
-        setIsActive(false);
-        setCurrentTutorial(null);
-        setCurrentStepIndex(0);
-        setIsTagalog(false);
-        targetMeasurements.current = {};
+        // ENHANCED: Add delay before stopping tutorial to ensure completion is saved
+        setTimeout(() => {
+          // Stop current tutorial
+          setIsActive(false);
+          setCurrentTutorial(null);
+          setCurrentStepIndex(0);
+          setIsTagalog(false);
+          targetMeasurements.current = {};
 
-        // Navigate to next tab and start its tutorial
-        navigationHandlerRef.current(
-          navigationAction.tabName,
-          navigationAction.startTutorial
-        );
+          // ENHANCED: Navigate with error handling and null check
+          try {
+            if (navigationHandlerRef.current) {
+              // FIXED: Additional null check
+              navigationHandlerRef.current(
+                navigationAction.tabName,
+                navigationAction.startTutorial
+              );
+            }
+          } catch (error) {
+            console.error("[TutorialContext] Navigation error:", error);
+            // Fallback: just stop tutorial without navigation
+            stopTutorial();
+          }
+        }, 100);
       } else {
         // No navigation action, just stop tutorial normally
         stopTutorial();
@@ -585,18 +612,38 @@ export const TutorialProvider: React.FC<{ children: React.ReactNode }> = ({
     [allTutorialsSkipped, serverTutorialStatus, localCompletedTutorials]
   );
 
+  // Add a ref to track measurement registration to prevent duplicates
+  const measurementRegistrationRef = useRef<Set<string>>(new Set());
+
   // Target measurement functions
   const registerTarget = useCallback((id: string, measurement: any) => {
+    // ENHANCED: Prevent duplicate registrations for the same target
+    const measurementKey = `${id}-${measurement.x}-${measurement.y}-${measurement.width}-${measurement.height}`;
+
+    if (measurementRegistrationRef.current.has(measurementKey)) {
+      return; // Skip duplicate measurement
+    }
+
+    measurementRegistrationRef.current.add(measurementKey);
+
     console.log(`[TutorialContext] Registering target ${id}:`, measurement);
     targetMeasurements.current[id] = measurement;
+
+    // Clean up old measurements for this target
+    setTimeout(() => {
+      measurementRegistrationRef.current.delete(measurementKey);
+    }, 1000);
   }, []);
 
   const getTargetMeasurement = useCallback((id: string) => {
     const measurement = targetMeasurements.current[id];
-    console.log(
-      `[TutorialContext] Getting measurement for ${id}:`,
-      measurement
-    );
+    // REDUCED: Only log when actually retrieving a measurement
+    if (measurement) {
+      console.log(
+        `[TutorialContext] Getting measurement for ${id}:`,
+        measurement
+      );
+    }
     return measurement;
   }, []);
 
