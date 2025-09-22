@@ -31,6 +31,7 @@ import useGameStore from "@/store/games/useGameStore";
 import useCoinsStore from "@/store/games/useCoinsStore";
 import { useAuthStore } from "@/store/useAuthStore";
 import { BASE_COLORS } from "@/constant/colors";
+import CustomTooltip from "@/components/CustomTooltip";
 
 // Prevent the splash screen from auto-hiding
 SplashScreen.preventAutoHideAsync();
@@ -73,32 +74,24 @@ const RootLayout = () => {
   // Optimized Copilot configuration with better performance
   const copilotConfig = useMemo(
     () => ({
-      tooltipStyle: {
-        backgroundColor: BASE_COLORS.white,
-        borderRadius: 20,
-        paddingTop: 15,
-        paddingBottom: 15,
-        paddingHorizontal: 20,
-        marginTop: 40,
-        shadowColor: "#000",
-        shadowOffset: {
-          width: 0,
-          height: 2,
-        },
-        shadowOpacity: 0.25,
-        shadowRadius: 3.84,
-        elevation: 5,
-      },
-      // Performance optimizations
+      tooltipComponent: CustomTooltip as any,
       backdropColor: "rgba(0, 0, 0, 0.7)",
-      animated: false, // Keep animations disabled
+      animated: true,
       overlay: "svg" as const,
-      // Additional optimizations
-      maskOffset: 0,
-      arrowColor: BASE_COLORS.white,
-      borderRadius: 20,
+      maskOffset: 5,
+      //  Remove default tooltip styling
+      tooltipStyle: {
+        backgroundColor: "transparent",
+        padding: 0,
+        margin: 0,
+        borderWidth: 0,
+        borderRadius: 0,
+        shadowOpacity: 0,
+        elevation: 0,
+      },
+      // Optional: Remove arrow if causing issues
+      arrowColor: "transparent",
     }),
-
     []
   );
 
@@ -250,7 +243,7 @@ const RootLayout = () => {
   if (showSplashAnimation && !splashShown) {
     return <SplashAnimation />;
   }
-
+  //
   return (
     <CopilotProvider {...copilotConfig}>
       <GestureHandlerRootView style={{ flex: 1 }}>

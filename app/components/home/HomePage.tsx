@@ -277,7 +277,7 @@ const HomePage: React.FC<HomePageProps> = ({ onNavigateToTab, onReady }) => {
           </ScrollView>
         </Animated.View>
       </SafeAreaView>
-      {/* <TutorialSettings /> */}
+      <TutorialSettings />
     </View>
   );
 };
