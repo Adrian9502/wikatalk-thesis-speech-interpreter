@@ -12,6 +12,7 @@ import {
   StyleSheet,
   Dimensions,
 } from "react-native";
+import { Ionicons } from "@expo/vector-icons";
 import { useTutorial } from "@/context/TutorialContext";
 
 const { width: screenWidth } = Dimensions.get("window");
@@ -35,6 +36,9 @@ const CustomTooltip: React.FC<CustomTooltipProps> = ({ labels = {} }) => {
     stopTutorial,
     currentStepIndex,
     currentTutorial,
+    // NEW: Language state and toggle
+    isTagalog,
+    toggleLanguage,
   } = useTutorial();
 
   const defaultLabels = {
@@ -45,16 +49,39 @@ const CustomTooltip: React.FC<CustomTooltipProps> = ({ labels = {} }) => {
     ...labels,
   };
 
-  const tooltipText = currentStep?.text || "Tutorial step";
+  // NEW: Get the appropriate text based on language selection
+  const tooltipText = isTagalog
+    ? currentStep?.tagalogText || currentStep?.text || "Tutorial step"
+    : currentStep?.text || "Tutorial step";
+
   const stepOrder = currentStepIndex + 1;
   const totalSteps = currentTutorial?.steps.length || 1;
 
   return (
     <View style={styles.tooltipContainer}>
-      <View style={styles.stepIndicator}>
-        <Text style={styles.stepText}>
-          Step {stepOrder} of {totalSteps}
-        </Text>
+      {/* Header with step indicator and language toggle */}
+      <View style={styles.headerContainer}>
+        <View style={styles.stepIndicator}>
+          <Text style={styles.stepText}>
+            Step {stepOrder} of {totalSteps}
+          </Text>
+        </View>
+
+        {/* NEW: Language toggle button */}
+        <TouchableOpacity
+          onPress={toggleLanguage}
+          style={styles.languageToggle}
+          activeOpacity={0.7}
+        >
+          <Ionicons
+            name="language-outline"
+            size={16}
+            color={BASE_COLORS.darkText}
+          />
+          <Text style={styles.languageToggleText}>
+            {isTagalog ? "English" : "Tagalog"}
+          </Text>
+        </TouchableOpacity>
       </View>
 
       <Text style={styles.tooltipText}>{tooltipText}</Text>
@@ -118,13 +145,19 @@ const styles = StyleSheet.create({
     alignSelf: "center",
     position: "relative",
   },
+  // NEW: Header container for step indicator and language toggle
+  headerContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    marginBottom: 12,
+  },
   stepIndicator: {
-    alignSelf: "center",
     backgroundColor: "#f8f9fa",
     paddingHorizontal: 12,
     paddingVertical: 4,
     borderRadius: 12,
-    marginBottom: 12,
+    marginRight: 8,
   },
   stepText: {
     fontSize: FONT_SIZES.sm,
@@ -132,12 +165,30 @@ const styles = StyleSheet.create({
     color: BASE_COLORS.darkText,
     textAlign: "center",
   },
+  // NEW: Language toggle button styles
+  languageToggle: {
+    backgroundColor: "#f8f9fa",
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 12,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 4,
+    minWidth: 50,
+    justifyContent: "center",
+  },
+  languageToggleText: {
+    fontSize: FONT_SIZES.xs,
+    fontFamily: POPPINS_FONT.medium,
+    color: BASE_COLORS.darkText,
+  },
   tooltipText: {
     fontSize: FONT_SIZES.lg,
     color: BASE_COLORS.white,
     fontFamily: POPPINS_FONT.medium,
     marginBottom: 8,
     textAlign: "center",
+    lineHeight: FONT_SIZES.lg * 1.3, // Better line spacing for readability
   },
   buttonContainer: {
     gap: 8,

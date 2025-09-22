@@ -9,6 +9,7 @@ import React, {
 export interface TutorialStep {
   id: string;
   text: string;
+  tagalogText: string; // Now required for all steps
   target?: string; // Element identifier
   order: number;
   placement?: "top" | "bottom" | "center";
@@ -23,30 +24,28 @@ export interface TutorialConfig {
 }
 
 interface TutorialContextType {
-  // Current tutorial state
-  currentTutorial: TutorialConfig | null;
-  currentStepIndex: number;
+  // Existing tutorial state
   isActive: boolean;
+  currentTutorial: TutorialConfig | null;
+  currentStep: TutorialStep | null;
+  currentStepIndex: number;
+  isFirstStep: boolean;
+  isLastStep: boolean;
+
+  // NEW: Language state
+  isTagalog: boolean;
+  toggleLanguage: () => void;
 
   // Tutorial controls
   startTutorial: (config: TutorialConfig) => void;
   stopTutorial: () => void;
   nextStep: () => void;
   previousStep: () => void;
-  goToStep: (index: number) => void;
+  isTutorialCompleted: (tutorialId: string) => boolean;
 
-  // Step helpers
-  currentStep: TutorialStep | null;
-  isFirstStep: boolean;
-  isLastStep: boolean;
-
-  // Target element registration
+  // Target registration
   registerTarget: (id: string, measurement: any) => void;
   getTargetMeasurement: (id: string) => any;
-
-  // Tutorial completion tracking
-  markTutorialCompleted: (tutorialId: string) => void;
-  isTutorialCompleted: (tutorialId: string) => boolean;
 }
 
 const TutorialContext = createContext<TutorialContextType | undefined>(
@@ -56,91 +55,105 @@ const TutorialContext = createContext<TutorialContextType | undefined>(
 export const TutorialProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
+  // Existing state
+  const [isActive, setIsActive] = useState(false);
   const [currentTutorial, setCurrentTutorial] = useState<TutorialConfig | null>(
     null
   );
   const [currentStepIndex, setCurrentStepIndex] = useState(0);
-  const [isActive, setIsActive] = useState(false);
   const [completedTutorials, setCompletedTutorials] = useState<Set<string>>(
     new Set()
   );
 
-  // Store target element measurements
-  const targetMeasurements = useRef<Map<string, any>>(new Map());
+  // NEW: Language state
+  const [isTagalog, setIsTagalog] = useState(false);
 
-  const startTutorial = useCallback(
-    (config: TutorialConfig) => {
-      // Don't start if already completed (unless forced)
-      if (completedTutorials.has(config.id)) {
-        console.log(
-          `[TutorialContext] Tutorial ${config.id} already completed`
-        );
-        return;
-      }
+  // Target measurements storage
+  const targetMeasurements = useRef<Record<string, any>>({});
 
-      console.log(`[TutorialContext] Starting tutorial: ${config.name}`);
-      setCurrentTutorial(config);
-      setCurrentStepIndex(0);
-      setIsActive(true);
-      // Clear any previous measurements
-      targetMeasurements.current.clear();
-    },
-    [completedTutorials]
-  );
+  // Computed values
+  const currentStep = currentTutorial?.steps[currentStepIndex] || null;
+  const isFirstStep = currentStepIndex === 0;
+  const isLastStep = currentTutorial
+    ? currentStepIndex === currentTutorial.steps.length - 1
+    : false;
+
+  // NEW: Language toggle function
+  const toggleLanguage = useCallback(() => {
+    setIsTagalog((prev) => !prev);
+    console.log(
+      `[TutorialContext] Language toggled to: ${
+        !isTagalog ? "Tagalog" : "English"
+      }`
+    );
+  }, [isTagalog]);
+
+  // Tutorial controls
+  const startTutorial = useCallback((config: TutorialConfig) => {
+    console.log(`[TutorialContext] Starting tutorial: ${config.name}`);
+    setCurrentTutorial(config);
+    setCurrentStepIndex(0);
+    setIsActive(true);
+    // Reset language to English when starting new tutorial
+    setIsTagalog(false);
+    // Clear previous target measurements
+    targetMeasurements.current = {};
+  }, []);
 
   const stopTutorial = useCallback(() => {
     console.log("[TutorialContext] Stopping tutorial");
     if (currentTutorial) {
-      markTutorialCompleted(currentTutorial.id);
+      setCompletedTutorials((prev) => new Set(prev).add(currentTutorial.id));
     }
+    setIsActive(false);
     setCurrentTutorial(null);
     setCurrentStepIndex(0);
-    setIsActive(false);
-    targetMeasurements.current.clear();
+    setIsTagalog(false); // Reset language when stopping
+    targetMeasurements.current = {};
   }, [currentTutorial]);
 
   const nextStep = useCallback(() => {
-    if (!currentTutorial) return;
-
-    console.log(
-      `[TutorialContext] Next step: ${currentStepIndex + 1}/${
-        currentTutorial.steps.length
-      }`
-    );
-
-    if (currentStepIndex < currentTutorial.steps.length - 1) {
-      setCurrentStepIndex((prev) => prev + 1);
-    } else {
-      stopTutorial();
+    if (
+      currentTutorial &&
+      currentStepIndex < currentTutorial.steps.length - 1
+    ) {
+      const nextIndex = currentStepIndex + 1;
+      console.log(
+        `[TutorialContext] Next step: ${nextIndex + 1}/${
+          currentTutorial.steps.length
+        }`
+      );
+      setCurrentStepIndex(nextIndex);
     }
-  }, [currentTutorial, currentStepIndex, stopTutorial]);
+  }, [currentTutorial, currentStepIndex]);
 
   const previousStep = useCallback(() => {
-    console.log(`[TutorialContext] Previous step: ${currentStepIndex - 1}`);
     if (currentStepIndex > 0) {
-      setCurrentStepIndex((prev) => prev - 1);
+      const prevIndex = currentStepIndex - 1;
+      console.log(
+        `[TutorialContext] Previous step: ${prevIndex + 1}/${
+          currentTutorial?.steps.length
+        }`
+      );
+      setCurrentStepIndex(prevIndex);
     }
-  }, [currentStepIndex]);
+  }, [currentStepIndex, currentTutorial?.steps.length]);
 
-  const goToStep = useCallback(
-    (index: number) => {
-      if (!currentTutorial) return;
-
-      console.log(`[TutorialContext] Go to step: ${index}`);
-      if (index >= 0 && index < currentTutorial.steps.length) {
-        setCurrentStepIndex(index);
-      }
+  const isTutorialCompleted = useCallback(
+    (tutorialId: string) => {
+      return completedTutorials.has(tutorialId);
     },
-    [currentTutorial]
+    [completedTutorials]
   );
 
+  // Target measurement functions
   const registerTarget = useCallback((id: string, measurement: any) => {
     console.log(`[TutorialContext] Registering target ${id}:`, measurement);
-    targetMeasurements.current.set(id, measurement);
+    targetMeasurements.current[id] = measurement;
   }, []);
 
   const getTargetMeasurement = useCallback((id: string) => {
-    const measurement = targetMeasurements.current.get(id);
+    const measurement = targetMeasurements.current[id];
     console.log(
       `[TutorialContext] Getting measurement for ${id}:`,
       measurement
@@ -148,55 +161,33 @@ export const TutorialProvider: React.FC<{ children: React.ReactNode }> = ({
     return measurement;
   }, []);
 
-  const markTutorialCompleted = useCallback((tutorialId: string) => {
-    console.log(
-      `[TutorialContext] Marking tutorial ${tutorialId} as completed`
-    );
-    setCompletedTutorials((prev) => new Set([...prev, tutorialId]));
-    // TODO: Persist to AsyncStorage
-  }, []);
-
-  const isTutorialCompleted = useCallback(
-    (tutorialId: string) => {
-      const completed = completedTutorials.has(tutorialId);
-      console.log(
-        `[TutorialContext] Tutorial ${tutorialId} completed:`,
-        completed
-      );
-      return completed;
-    },
-    [completedTutorials]
-  );
-
-  // Computed values
-  const currentStep = currentTutorial
-    ? currentTutorial.steps[currentStepIndex]
-    : null;
-  const isFirstStep = currentStepIndex === 0;
-  const isLastStep = currentTutorial
-    ? currentStepIndex === currentTutorial.steps.length - 1
-    : false;
-
-  const value: TutorialContextType = {
-    currentTutorial,
-    currentStepIndex,
-    isActive,
-    startTutorial,
-    stopTutorial,
-    nextStep,
-    previousStep,
-    goToStep,
-    currentStep,
-    isFirstStep,
-    isLastStep,
-    registerTarget,
-    getTargetMeasurement,
-    markTutorialCompleted,
-    isTutorialCompleted,
-  };
-
   return (
-    <TutorialContext.Provider value={value}>
+    <TutorialContext.Provider
+      value={{
+        // Existing values
+        isActive,
+        currentTutorial,
+        currentStep,
+        currentStepIndex,
+        isFirstStep,
+        isLastStep,
+
+        // NEW: Language values
+        isTagalog,
+        toggleLanguage,
+
+        // Tutorial controls
+        startTutorial,
+        stopTutorial,
+        nextStep,
+        previousStep,
+        isTutorialCompleted,
+
+        // Target registration
+        registerTarget,
+        getTargetMeasurement,
+      }}
+    >
       {children}
     </TutorialContext.Provider>
   );

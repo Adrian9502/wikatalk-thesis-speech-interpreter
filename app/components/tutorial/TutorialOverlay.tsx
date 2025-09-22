@@ -76,6 +76,7 @@ export const TutorialOverlay: React.FC = () => {
         );
 
         const checkForMeasurement = () => {
+          // @ts-ignore
           const measurement = getTargetMeasurement(currentStep.target);
           console.log("[TutorialOverlay] Got measurement:", measurement);
 
