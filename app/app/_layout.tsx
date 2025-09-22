@@ -9,7 +9,6 @@ import { PaperProvider } from "react-native-paper";
 import { AuthProvider } from "@/context/AuthContext";
 import { NotifierWrapper } from "react-native-notifier";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
-import { CopilotProvider } from "react-native-copilot";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import ThemeProvider from "@/components/ThemeProvider";
 import SplashAnimation from "@/components/SplashAnimation";
@@ -30,8 +29,7 @@ import useProgressStore from "@/store/games/useProgressStore";
 import useGameStore from "@/store/games/useGameStore";
 import useCoinsStore from "@/store/games/useCoinsStore";
 import { useAuthStore } from "@/store/useAuthStore";
-import { BASE_COLORS } from "@/constant/colors";
-import CustomTooltip from "@/components/CustomTooltip";
+// import CustomTooltip from "@/components/CustomTooltip";
 
 // Prevent the splash screen from auto-hiding
 SplashScreen.preventAutoHideAsync();
@@ -70,30 +68,6 @@ const RootLayout = () => {
     console.log("Theme is ready");
     setThemeReady(true);
   }, []);
-
-  // Optimized Copilot configuration with better performance
-  const copilotConfig = useMemo(
-    () => ({
-      tooltipComponent: CustomTooltip as any,
-      backdropColor: "rgba(0, 0, 0, 0.9)",
-      animated: true,
-      overlay: "svg" as const,
-      maskOffset: 5,
-      arrowColor: "transparent",
-      tooltipStyle: {
-        backgroundColor: "transparent",
-        padding: 0,
-        margin: 0,
-        borderWidth: 0,
-        borderRadius: 0,
-        shadowOpacity: 0,
-        elevation: 0,
-      },
-      animationDuration: 300,
-      androidStatusBarVisible: false,
-    }),
-    []
-  );
 
   // Google Sign in setup
   useEffect(() => {
@@ -243,69 +217,50 @@ const RootLayout = () => {
   if (showSplashAnimation && !splashShown) {
     return <SplashAnimation />;
   }
-  // @ts-ignore
-  const svgMaskPath = ({ size, position, canvasSize }) => {
-    // individual paddings
-    const padTop = -40;
-    const padBottom = 20;
-    const padLeft = 5;
-    const padRight = 5;
-
-    const x = position.x._value - padLeft;
-    const y = position.y._value - padTop;
-    const w = size.x._value + padLeft + padRight;
-    const h = size.y._value + padTop + padBottom;
-
-    return `M0,0H${canvasSize.x}V${canvasSize.y}H0V0ZM${x},${y}H${x + w}V${
-      y + h
-    }H${x}V${y}Z`;
-  };
 
   return (
-    <CopilotProvider {...copilotConfig} svgMaskPath={svgMaskPath}>
-      <GestureHandlerRootView style={{ flex: 1 }}>
-        <SafeAreaProvider>
-          <AuthProvider>
-            <ThemeProvider onThemeReady={handleThemeReady}>
-              <ProgressModalProvider>
-                <RankingsModalProvider>
-                  <PaperProvider>
-                    <ValidationProvider>
-                      <NotifierWrapper>
-                        <Stack
-                          screenOptions={{
-                            headerShown: false,
-                            animationTypeForReplace: "pop",
-                            animation: "fade",
-                          }}
-                        >
-                          <Stack.Screen
-                            name="index"
-                            options={{ headerShown: false }}
-                          />
-                          <Stack.Screen
-                            name="(auth)"
-                            options={{ headerShown: false }}
-                          />
-                          <Stack.Screen
-                            name="(tabs)"
-                            options={{ headerShown: false }}
-                          />
-                          <Stack.Screen
-                            name="(settings)"
-                            options={{ headerShown: false }}
-                          />
-                        </Stack>
-                      </NotifierWrapper>
-                    </ValidationProvider>
-                  </PaperProvider>
-                </RankingsModalProvider>
-              </ProgressModalProvider>
-            </ThemeProvider>
-          </AuthProvider>
-        </SafeAreaProvider>
-      </GestureHandlerRootView>
-    </CopilotProvider>
+    <GestureHandlerRootView style={{ flex: 1 }}>
+      <SafeAreaProvider>
+        <AuthProvider>
+          <ThemeProvider onThemeReady={handleThemeReady}>
+            <ProgressModalProvider>
+              <RankingsModalProvider>
+                <PaperProvider>
+                  <ValidationProvider>
+                    <NotifierWrapper>
+                      <Stack
+                        screenOptions={{
+                          headerShown: false,
+                          animationTypeForReplace: "pop",
+                          animation: "fade",
+                        }}
+                      >
+                        <Stack.Screen
+                          name="index"
+                          options={{ headerShown: false }}
+                        />
+                        <Stack.Screen
+                          name="(auth)"
+                          options={{ headerShown: false }}
+                        />
+                        <Stack.Screen
+                          name="(tabs)"
+                          options={{ headerShown: false }}
+                        />
+                        <Stack.Screen
+                          name="(settings)"
+                          options={{ headerShown: false }}
+                        />
+                      </Stack>
+                    </NotifierWrapper>
+                  </ValidationProvider>
+                </PaperProvider>
+              </RankingsModalProvider>
+            </ProgressModalProvider>
+          </ThemeProvider>
+        </AuthProvider>
+      </SafeAreaProvider>
+    </GestureHandlerRootView>
   );
 };
 

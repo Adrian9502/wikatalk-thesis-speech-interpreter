@@ -25,13 +25,6 @@ import TranslationHistory from "./TranslationHistory";
 import { router } from "expo-router";
 import WordOfTheDay from "./WordOfTheDay";
 
-// tutorial
-import { CopilotStep, walkthroughable } from "react-native-copilot";
-
-// Import the tutorial hook
-import { useTutorial } from "@/hooks/useTutorial";
-import TutorialSettings from "../TutorialSettings";
-
 interface HomePageProps {
   onNavigateToTab: (tabName: string) => void;
   onReady?: () => void;
@@ -42,19 +35,6 @@ const HomePage: React.FC<HomePageProps> = ({ onNavigateToTab, onReady }) => {
   const { userData } = useAuth();
   const { wordOfTheDay, getWordOfTheDay } = usePronunciationStore();
   const insets = useSafeAreaInsets();
-
-  // Tutorial hook for controlling the tutorial
-  const {
-    hasSeenTutorial,
-    startTutorial,
-    isLoading: tutorialLoading,
-  } = useTutorial("homepage");
-
-  // Create walkthrough components
-  const ExploreStep = useMemo(() => walkthroughable(View), []);
-  const WordStep = useMemo(() => walkthroughable(View), []);
-  const HistoryStep = useMemo(() => walkthroughable(View), []);
-  const TutorialTrigger = useMemo(() => walkthroughable(View), []);
 
   // Add state to track data readiness
   const [dataLoaded, setDataLoaded] = useState(false);
@@ -122,7 +102,7 @@ const HomePage: React.FC<HomePageProps> = ({ onNavigateToTab, onReady }) => {
 
   // Handle animations and tutorial start
   useEffect(() => {
-    if (dataLoaded && !tutorialLoading && componentMountedRef.current) {
+    if (dataLoaded && componentMountedRef.current) {
       console.log("[HomePage] Starting animations");
 
       // Start animations once data is loaded
@@ -144,47 +124,10 @@ const HomePage: React.FC<HomePageProps> = ({ onNavigateToTab, onReady }) => {
         }
       });
     }
-  }, [dataLoaded, tutorialLoading, fadeAnim, slideAnim]);
-
-  // Handle tutorial start - separate effect to avoid conflicts
-  useEffect(() => {
-    if (
-      animationComplete &&
-      !hasSeenTutorial &&
-      userData &&
-      !tutorialStartedRef.current &&
-      !tutorialLoading
-    ) {
-      tutorialStartedRef.current = true;
-
-      // Use requestAnimationFrame instead of setTimeout for better performance
-      const startTutorial = () => {
-        requestAnimationFrame(() => {
-          if (componentMountedRef.current && !hasSeenTutorial) {
-            startTutorial();
-          }
-        });
-      };
-
-      startTutorial();
-    }
-  }, [
-    animationComplete,
-    hasSeenTutorial,
-    userData,
-    tutorialLoading,
-    startTutorial,
-  ]);
-
-  // Reset tutorial started flag when hasSeenTutorial changes
-  useEffect(() => {
-    if (hasSeenTutorial) {
-      tutorialStartedRef.current = false;
-    }
-  }, [hasSeenTutorial]);
+  }, [dataLoaded, fadeAnim, slideAnim]);
 
   // Don't render content until data is loaded
-  if (!dataLoaded || tutorialLoading) {
+  if (!dataLoaded) {
     return <AppLoading />;
   }
 
@@ -205,24 +148,6 @@ const HomePage: React.FC<HomePageProps> = ({ onNavigateToTab, onReady }) => {
           },
         ]}
       >
-        {/* Tutorial Trigger positioned safely below status bar */}
-        <CopilotStep
-          text={`Welcome to WikaTalk, ${firstName}! Let's take a quick tour to help you get started.`}
-          order={1}
-          name="welcome"
-        >
-          <TutorialTrigger
-            style={[
-              styles.tutorialTrigger,
-              {
-                marginTop: 10,
-              },
-            ]}
-          >
-            <Text style={styles.hiddenTutorialText}>Welcome Tutorial</Text>
-          </TutorialTrigger>
-        </CopilotStep>
-
         <Animated.View
           style={[
             styles.content,
@@ -246,45 +171,16 @@ const HomePage: React.FC<HomePageProps> = ({ onNavigateToTab, onReady }) => {
               onSettingsPress={handleSettingsPress}
             />
 
-            {/* Core Translation Features Tutorial Step */}
-            <CopilotStep
-              text="Here you can explore different features. Tap ‘Speech’ for speech-to-speech translation, ‘Text’ for text translation, and more."
-              order={2}
-              name="explore"
-            >
-              <ExploreStep style={styles.stepWrapper}>
-                <Explore onNavigateToTab={onNavigateToTab} />
-              </ExploreStep>
-            </CopilotStep>
+            <Explore onNavigateToTab={onNavigateToTab} />
 
-            {/* Word of the Day Tutorial Step */}
-            <CopilotStep
-              text="Check out the Word of the Day to learn new vocabulary and practice pronunciation daily!"
-              order={3}
-              name="wordOfTheDay"
-            >
-              <WordStep style={styles.stepWrapper}>
-                <WordOfTheDay />
-              </WordStep>
-            </CopilotStep>
-
-            {/* Recent Translations Tutorial Step */}
-            <CopilotStep
-              text="Your translation history (Speech, Translate, and Scan) is saved here. You can review it anytime!"
-              order={4}
-              name="translationHistory"
-            >
-              <HistoryStep style={styles.stepWrapper}>
-                <TranslationHistory
-                  onNavigateToHistory={handleNavigateToHistory}
-                  onNavigateToTab={onNavigateToTab}
-                />
-              </HistoryStep>
-            </CopilotStep>
+            <WordOfTheDay />
+            <TranslationHistory
+              onNavigateToHistory={handleNavigateToHistory}
+              onNavigateToTab={onNavigateToTab}
+            />
           </ScrollView>
         </Animated.View>
       </SafeAreaView>
-      <TutorialSettings />
     </View>
   );
 };
