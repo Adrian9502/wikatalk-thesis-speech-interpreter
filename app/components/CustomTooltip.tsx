@@ -1,3 +1,9 @@
+import { BASE_COLORS } from "@/constant/colors";
+import {
+  COMPONENT_FONT_SIZES,
+  FONT_SIZES,
+  POPPINS_FONT,
+} from "@/constant/fontSizes";
 import React from "react";
 import {
   View,
@@ -86,6 +92,7 @@ const CustomTooltip: React.FC<CustomTooltipProps> = ({ labels = {} }) => {
 
 const styles = StyleSheet.create({
   tooltipContainer: {
+    // backgroundColor: "#3B6FE5",
     backgroundColor: "#3B6FE5",
     borderRadius: 20,
     maxWidth: screenWidth - 40,
@@ -99,6 +106,9 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.3,
     shadowRadius: 6,
     elevation: 8,
+    // borderWidth: 1,
+    // borderColor: "#f0f0f0",
+    // These are key additions to prevent the default wrapper styling
     alignSelf: "center",
     position: "relative",
   },
@@ -111,15 +121,15 @@ const styles = StyleSheet.create({
     marginBottom: 12,
   },
   stepText: {
-    fontSize: 14,
+    fontSize: FONT_SIZES.sm,
     fontFamily: "Poppins-Medium",
-    color: "#333",
+    color: BASE_COLORS.darkText,
     textAlign: "center",
   },
   tooltipText: {
-    fontSize: 16,
-    color: "#FFFFFF",
-    fontFamily: "Poppins-Medium",
+    fontSize: FONT_SIZES.lg,
+    color: BASE_COLORS.white,
+    fontFamily: POPPINS_FONT.medium,
     marginBottom: 8,
     textAlign: "center",
   },
@@ -131,26 +141,28 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "space-between",
     gap: 8,
+    marginTop: 12,
   },
   singleButton: {
     flex: 1,
   },
   button: {
     backgroundColor: "#f8f9fa",
-    paddingVertical: 8,
-    paddingHorizontal: 12,
+    paddingVertical: 4,
+    paddingHorizontal: 6,
     borderRadius: 20,
     minWidth: 70,
+    maxWidth: 80,
   },
   skipButton: {
-    backgroundColor: "#FFFFFF",
+    backgroundColor: BASE_COLORS.white,
   },
   primaryButton: {
-    backgroundColor: "#FFFFFF",
+    backgroundColor: "#FFF",
   },
   buttonText: {
-    fontSize: 12,
-    fontFamily: "Poppins-Medium",
+    fontSize: COMPONENT_FONT_SIZES.button.small,
+    fontFamily: POPPINS_FONT.medium,
     color: "#495057",
     textAlign: "center",
   },
@@ -158,7 +170,7 @@ const styles = StyleSheet.create({
     color: "#333",
   },
   primaryButtonText: {
-    color: "#333",
+    color: BASE_COLORS.darkText,
   },
 });
 
