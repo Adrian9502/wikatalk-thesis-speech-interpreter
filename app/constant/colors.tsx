@@ -130,9 +130,9 @@ export const RANKING_SELECTOR_COLORS = ["#c9a60cff", "#b36b00ff"] as const;
 // game card game mode gradients
 
 export const GAME_MODE_GRADIENTS = {
-  multipleChoice: ["#d97706", "#f59e0b", "#fbbf24"] as const,
-  identification: ["#dc2626", "#ef4444", "#f87171"] as const,
-  fillBlanks: ["#1d4ed8", "#3b82f6", "#60a5fa"] as const,
+  multipleChoice: ["#AD8A2B", "#E5C33B"] as const,
+  identification: ["#2B52AD", "#3B6FE5"] as const,
+  fillBlanks: ["#AD2B2B", "#E53B3B"] as const,
 };
 
 // Word of the Day card gradient

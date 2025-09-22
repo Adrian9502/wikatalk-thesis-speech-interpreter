@@ -60,11 +60,11 @@ const GameCard: React.FC<GameCardProps> = ({
   const getPlayButtonColor = (gameId: string) => {
     switch (gameId) {
       case "multipleChoice":
-        return "#19c48bff";
+        return "#E5C33B40";
       case "identification":
-        return "#58bdf0e0";
+        return "#3B6FE540";
       case "fillBlanks":
-        return "#f57171de";
+        return "#E53B3B40";
       default:
         return BASE_COLORS.success;
     }
