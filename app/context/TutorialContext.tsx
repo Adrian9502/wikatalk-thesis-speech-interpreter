@@ -9,11 +9,17 @@ import React, {
 export interface TutorialStep {
   id: string;
   text: string;
-  tagalogText: string; // Now required for all steps
-  target?: string; // Element identifier
+  tagalogText: string;
+  target?: string;
   order: number;
   placement?: "top" | "bottom" | "center";
   skipable?: boolean;
+  // NEW: Navigation action for step completion
+  navigationAction?: {
+    type: "navigate_tab";
+    tabName: string;
+    startTutorial?: string; // Tutorial ID to start in the new tab
+  };
 }
 
 export interface TutorialConfig {
@@ -32,7 +38,7 @@ interface TutorialContextType {
   isFirstStep: boolean;
   isLastStep: boolean;
 
-  // NEW: Language state
+  // Language state
   isTagalog: boolean;
   toggleLanguage: () => void;
 
@@ -42,6 +48,11 @@ interface TutorialContextType {
   nextStep: () => void;
   previousStep: () => void;
   isTutorialCompleted: (tutorialId: string) => boolean;
+
+  // NEW: Navigation handler
+  setNavigationHandler: (
+    handler: (tabName: string, tutorialId?: string) => void
+  ) => void;
 
   // Target registration
   registerTarget: (id: string, measurement: any) => void;
@@ -65,11 +76,16 @@ export const TutorialProvider: React.FC<{ children: React.ReactNode }> = ({
     new Set()
   );
 
-  // NEW: Language state
+  // Language state
   const [isTagalog, setIsTagalog] = useState(false);
 
   // Target measurements storage
   const targetMeasurements = useRef<Record<string, any>>({});
+
+  // NEW: Navigation handler ref
+  const navigationHandlerRef = useRef<
+    ((tabName: string, tutorialId?: string) => void) | null
+  >(null);
 
   // Computed values
   const currentStep = currentTutorial?.steps[currentStepIndex] || null;
@@ -78,7 +94,7 @@ export const TutorialProvider: React.FC<{ children: React.ReactNode }> = ({
     ? currentStepIndex === currentTutorial.steps.length - 1
     : false;
 
-  // NEW: Language toggle function
+  // Language toggle function
   const toggleLanguage = useCallback(() => {
     setIsTagalog((prev) => !prev);
     console.log(
@@ -87,6 +103,15 @@ export const TutorialProvider: React.FC<{ children: React.ReactNode }> = ({
       }`
     );
   }, [isTagalog]);
+
+  // NEW: Set navigation handler
+  const setNavigationHandler = useCallback(
+    (handler: (tabName: string, tutorialId?: string) => void) => {
+      navigationHandlerRef.current = handler;
+      console.log("[TutorialContext] Navigation handler registered");
+    },
+    []
+  );
 
   // Tutorial controls
   const startTutorial = useCallback((config: TutorialConfig) => {
@@ -108,10 +133,11 @@ export const TutorialProvider: React.FC<{ children: React.ReactNode }> = ({
     setIsActive(false);
     setCurrentTutorial(null);
     setCurrentStepIndex(0);
-    setIsTagalog(false); // Reset language when stopping
+    setIsTagalog(false);
     targetMeasurements.current = {};
   }, [currentTutorial]);
 
+  // ENHANCED: Next step with navigation support
   const nextStep = useCallback(() => {
     if (
       currentTutorial &&
@@ -124,8 +150,46 @@ export const TutorialProvider: React.FC<{ children: React.ReactNode }> = ({
         }`
       );
       setCurrentStepIndex(nextIndex);
+    } else if (currentTutorial && isLastStep && currentStep) {
+      // Handle last step - check for navigation action
+      const navigationAction = currentStep.navigationAction;
+
+      if (
+        navigationAction &&
+        navigationAction.type === "navigate_tab" &&
+        navigationHandlerRef.current
+      ) {
+        console.log(
+          `[TutorialContext] Executing navigation action to: ${navigationAction.tabName}`
+        );
+
+        // Mark current tutorial as completed
+        setCompletedTutorials((prev) => new Set(prev).add(currentTutorial.id));
+
+        // Stop current tutorial
+        setIsActive(false);
+        setCurrentTutorial(null);
+        setCurrentStepIndex(0);
+        setIsTagalog(false);
+        targetMeasurements.current = {};
+
+        // Navigate to next tab and start its tutorial
+        navigationHandlerRef.current(
+          navigationAction.tabName,
+          navigationAction.startTutorial
+        );
+      } else {
+        // No navigation action, just stop tutorial normally
+        stopTutorial();
+      }
     }
-  }, [currentTutorial, currentStepIndex]);
+  }, [
+    currentTutorial,
+    currentStepIndex,
+    isLastStep,
+    currentStep,
+    stopTutorial,
+  ]);
 
   const previousStep = useCallback(() => {
     if (currentStepIndex > 0) {
@@ -172,7 +236,7 @@ export const TutorialProvider: React.FC<{ children: React.ReactNode }> = ({
         isFirstStep,
         isLastStep,
 
-        // NEW: Language values
+        // Language values
         isTagalog,
         toggleLanguage,
 
@@ -182,6 +246,9 @@ export const TutorialProvider: React.FC<{ children: React.ReactNode }> = ({
         nextStep,
         previousStep,
         isTutorialCompleted,
+
+        // NEW: Navigation handler
+        setNavigationHandler,
 
         // Target registration
         registerTarget,

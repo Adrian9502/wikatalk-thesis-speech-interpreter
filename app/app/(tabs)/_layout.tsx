@@ -6,7 +6,12 @@ import React, {
   useState,
   useMemo,
 } from "react";
-import { Tabs, useLocalSearchParams, useSegments } from "expo-router";
+import {
+  Tabs,
+  useLocalSearchParams,
+  useSegments,
+  useRouter,
+} from "expo-router";
 import useThemeStore from "@/store/useThemeStore";
 import { Ionicons, MaterialIcons } from "@expo/vector-icons";
 import { tabPreloader } from "@/utils/tabPreloader";
@@ -15,6 +20,16 @@ import { StatusBar } from "expo-status-bar";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import NetworkStatusBar from "@/components/NetworkStatusBar";
 import { POPPINS_FONT } from "@/constant/fontSizes";
+// NEW: Import tutorial context
+import { useTutorial } from "@/context/TutorialContext";
+import {
+  HOME_TUTORIAL,
+  SPEECH_TUTORIAL,
+  TRANSLATE_TUTORIAL,
+  SCAN_TUTORIAL,
+  GAMES_TUTORIAL,
+  PRONOUNCE_TUTORIAL,
+} from "@/constants/tutorials";
 
 const { width: screenWidth } = Dimensions.get("window");
 
@@ -199,6 +214,10 @@ export default function TabsLayout() {
   const segments = useSegments();
   const insets = useSafeAreaInsets();
   const params = useLocalSearchParams();
+  const router = useRouter();
+
+  // NEW: Tutorial context
+  const { setNavigationHandler, startTutorial } = useTutorial();
 
   const initialTabParam = (params.initialTab as string) || "Home";
 
@@ -206,6 +225,49 @@ export default function TabsLayout() {
   const [currentTab, setCurrentTab] = useState<string>("Home");
   const [isTransitioning, setIsTransitioning] = useState(false);
   const [initialTabProcessed, setInitialTabProcessed] = useState(false);
+
+  // NEW: Enhanced navigation handler for tutorial chaining
+  const handleTutorialNavigation = useCallback(
+    (tabName: string, tutorialId?: string) => {
+      console.log(
+        `[TabsLayout] Tutorial navigation to: ${tabName}, tutorial: ${tutorialId}`
+      );
+
+      // Navigate to the tab
+      router.push(`/(tabs)/${tabName}` as any);
+
+      // If a tutorial ID is provided, start it after navigation
+      if (tutorialId) {
+        // Wait for navigation to complete, then start the tutorial
+        setTimeout(() => {
+          const tutorialConfigs = {
+            home_tutorial: HOME_TUTORIAL,
+            speech_tutorial: SPEECH_TUTORIAL,
+            translate_tutorial: TRANSLATE_TUTORIAL,
+            scan_tutorial: SCAN_TUTORIAL,
+            games_tutorial: GAMES_TUTORIAL,
+            pronounce_tutorial: PRONOUNCE_TUTORIAL,
+          };
+
+          const tutorialConfig =
+            tutorialConfigs[tutorialId as keyof typeof tutorialConfigs];
+          if (tutorialConfig) {
+            console.log(
+              `[TabsLayout] Starting tutorial: ${tutorialConfig.name}`
+            );
+            startTutorial(tutorialConfig);
+          }
+        }, 800); // Allow time for tab transition and component mounting
+      }
+    },
+    [router, startTutorial]
+  );
+
+  // NEW: Register navigation handler with tutorial context
+  useEffect(() => {
+    setNavigationHandler(handleTutorialNavigation);
+    console.log("[TabsLayout] Tutorial navigation handler registered");
+  }, [setNavigationHandler, handleTutorialNavigation]);
 
   // NEW: Enhanced network bar height change handler with animation
   const handleNetworkBarHeightChange = useCallback(

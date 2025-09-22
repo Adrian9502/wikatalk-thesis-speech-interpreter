@@ -41,11 +41,17 @@ export const HOME_TUTORIAL: TutorialConfig = {
     },
     {
       id: "complete",
-      text: "Great! You're ready to start translating. Explore the tabs below to discover more features!",
+      text: "Great! You're ready to start translating. Let's explore the Speech tab to learn speech-to-speech translation!",
       tagalogText:
-        "Magaling! Handa ka na magsimula mag-translate. I-explore ang mga tab sa ibaba para matuklasan ang mas maraming features!",
+        "Magaling! Handa ka na magsimula mag-translate. I-explore natin ang Speech tab para matuto ng speech-to-speech translation!",
       order: 5,
       placement: "center",
+      // NEW: Navigate to Speech tab and start its tutorial
+      navigationAction: {
+        type: "navigate_tab",
+        tabName: "Speech",
+        startTutorial: "speech_tutorial",
+      },
     },
   ],
 };
@@ -65,12 +71,18 @@ export const SPEECH_TUTORIAL: TutorialConfig = {
     },
     {
       id: "bottom-section",
-      text: "This is your target language section. Press the mic icon to record your speech. Next to the mic shows phrases and cultural notes for the selected language. Your translation will appear in the center.",
+      text: "This is your target language section. Press the mic icon to record your speech. Next to the mic shows phrases and cultural notes for the selected language. Now let's explore text translation in the Translate tab!",
       tagalogText:
-        "Ito ang inyong target language section. I-press ang mic icon para mag-record ng inyong speech. Sa tabi ng mic makikita ang mga phrases at cultural notes para sa napiling language. Ang inyong translation ay lalabas sa gitna.",
+        "Ito ang inyong target language section. I-press ang mic icon para mag-record ng inyong speech. Sa tabi ng mic makikita ang mga phrases at cultural notes para sa napiling language. Ngayon i-explore natin ang text translation sa Translate tab!",
       target: "speech-bottom-section",
       order: 2,
       placement: "top",
+      // NEW: Navigate to Translate tab and start its tutorial
+      navigationAction: {
+        type: "navigate_tab",
+        tabName: "Translate",
+        startTutorial: "translate_tutorial",
+      },
     },
   ],
 };
@@ -108,12 +120,18 @@ export const TRANSLATE_TUTORIAL: TutorialConfig = {
     },
     {
       id: "target-text-area",
-      text: "Your translation appears here. Use volume icon to hear the translation, info icon for accuracy details, and copy button to save the translated text.",
+      text: "Your translation appears here. Use volume icon to hear the translation, info icon for accuracy details, and copy button to save the translated text. Next, let's learn about camera scanning in the Scan tab!",
       tagalogText:
-        "Ang inyong translation ay lalabas dito. Gamitin ang volume icon para marinig ang translation, info icon para sa accuracy details, at copy button para i-save ang translated text.",
+        "Ang inyong translation ay lalabas dito. Gamitin ang volume icon para marinig ang translation, info icon para sa accuracy details, at copy button para i-save ang translated text. Susunod, matuto tayo ng camera scanning sa Scan tab!",
       target: "translate-target-area",
       order: 4,
       placement: "top",
+      // NEW: Navigate to Scan tab and start its tutorial
+      navigationAction: {
+        type: "navigate_tab",
+        tabName: "Scan",
+        startTutorial: "scan_tutorial",
+      },
     },
   ],
 };
@@ -133,12 +151,18 @@ export const SCAN_TUTORIAL: TutorialConfig = {
     },
     {
       id: "translation-section",
-      text: "Select target language from dropdown. Detected text appears with audio playback, copy, and clear options. Translation results show below with audio playback, copy, and accuracy info icons.",
+      text: "Select target language from dropdown. Detected text appears with audio playback, copy, and clear options. Translation results show below with audio playback, copy, and accuracy info icons. Now let's explore interactive games in the Games tab!",
       tagalogText:
-        "Piliin ang target language sa dropdown. Ang detected text ay lalabas kasama ang audio playback, copy, at clear options. Ang translation results ay makikita sa ibaba kasama ang audio playback, copy, at accuracy info icons.",
+        "Piliin ang target language sa dropdown. Ang detected text ay lalabas kasama ang audio playback, copy, at clear options. Ang translation results ay makikita sa ibaba kasama ang audio playback, copy, at accuracy info icons. Ngayon i-explore natin ang interactive games sa Games tab!",
       target: "scan-translation-section",
       order: 2,
       placement: "top",
+      // NEW: Navigate to Games tab and start its tutorial
+      navigationAction: {
+        type: "navigate_tab",
+        tabName: "Games",
+        startTutorial: "games_tutorial",
+      },
     },
   ],
 };
@@ -158,12 +182,18 @@ export const GAMES_TUTORIAL: TutorialConfig = {
     },
     {
       id: "game-modes-section",
-      text: "Practice Filipino languages through fun games! Choose from 3 game modes: Multiple Choice, Word Identification, and Fill in the Blank. Use your coins to buy hints and check your progress here.",
+      text: "Practice Filipino languages through fun games! Choose from 3 game modes: Multiple Choice, Word Identification, and Fill in the Blank. Use your coins to buy hints and check your progress here. Finally, let's explore pronunciation guides in the Pronounce tab!",
       tagalogText:
-        "Mag-practice ng Filipino languages sa pamamagitan ng masayang mga laro! Pumili sa 3 game modes: Multiple Choice, Word Identification, at Fill in the Blank. Gamitin ang inyong coins para bumili ng hints at tingnan ang inyong progress dito.",
+        "Mag-practice ng Filipino languages sa pamamagitan ng masayang mga laro! Pumili sa 3 game modes: Multiple Choice, Word Identification, at Fill in the Blank. Gamitin ang inyong coins para bumili ng hints at tingnan ang inyong progress dito. Sa wakas, i-explore natin ang pronunciation guides sa Pronounce tab!",
       target: "games-modes-section",
       order: 2,
       placement: "top",
+      // NEW: Navigate to Pronounce tab and start its tutorial
+      navigationAction: {
+        type: "navigate_tab",
+        tabName: "Pronounce",
+        startTutorial: "pronounce_tutorial",
+      },
     },
   ],
 };
@@ -192,12 +222,13 @@ export const PRONOUNCE_TUTORIAL: TutorialConfig = {
     },
     {
       id: "pronunciation-card",
-      text: "Each card shows an English word with its translation and pronunciation guide. Press the play button to hear the correct pronunciation. The card highlights when audio is playing, helping you learn proper dialect pronunciation.",
+      text: "Each card shows an English word with its translation and pronunciation guide. Press the play button to hear the correct pronunciation. The card highlights when audio is playing, helping you learn proper dialect pronunciation. Congratulations! You've completed the full WikaTalk tutorial tour!",
       tagalogText:
-        "Bawat card ay nagpapakita ng English word kasama ang translation at pronunciation guide. I-press ang play button para marinig ang tamang pronunciation. Ang card ay nag-highlight kapag tumutugtog ang audio, tumutulong sa inyo na matuto ng tamang dialect pronunciation.",
+        "Bawat card ay nagpapakita ng English word kasama ang translation at pronunciation guide. I-press ang play button para marinig ang tamang pronunciation. Ang card ay nag-highlight kapag tumutugtog ang audio, tumutulong sa inyo na matuto ng tamang dialect pronunciation. Congratulations! Natapos ninyo na ang buong WikaTalk tutorial tour!",
       target: "pronounce-pronunciation-card",
       order: 3,
       placement: "top",
+      // NOTE: No navigation action here - this is the final tutorial
     },
   ],
 };

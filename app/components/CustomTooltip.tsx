@@ -36,7 +36,7 @@ const CustomTooltip: React.FC<CustomTooltipProps> = ({ labels = {} }) => {
     stopTutorial,
     currentStepIndex,
     currentTutorial,
-    // NEW: Language state and toggle
+    // Language state and toggle
     isTagalog,
     toggleLanguage,
   } = useTutorial();
@@ -49,7 +49,20 @@ const CustomTooltip: React.FC<CustomTooltipProps> = ({ labels = {} }) => {
     ...labels,
   };
 
-  // NEW: Get the appropriate text based on language selection
+  // NEW: Check if current step has navigation action
+  const hasNavigationAction =
+    currentStep?.navigationAction?.type === "navigate_tab";
+
+  // NEW: Get appropriate button text based on navigation action
+  const getActionButtonText = () => {
+    if (hasNavigationAction && currentStep?.navigationAction) {
+      const tabName = currentStep.navigationAction.tabName;
+      return `Go to ${tabName}`;
+    }
+    return isLastStep ? defaultLabels.finish : defaultLabels.next;
+  };
+
+  // Get the appropriate text based on language selection
   const tooltipText = isTagalog
     ? currentStep?.tagalogText || currentStep?.text || "Tutorial step"
     : currentStep?.text || "Tutorial step";
@@ -67,7 +80,7 @@ const CustomTooltip: React.FC<CustomTooltipProps> = ({ labels = {} }) => {
           </Text>
         </View>
 
-        {/* NEW: Language toggle button */}
+        {/* Language toggle button */}
         <TouchableOpacity
           onPress={toggleLanguage}
           style={styles.languageToggle}
@@ -79,7 +92,7 @@ const CustomTooltip: React.FC<CustomTooltipProps> = ({ labels = {} }) => {
             color={BASE_COLORS.darkText}
           />
           <Text style={styles.languageToggleText}>
-            {isTagalog ? "English" : "Tagalog"}
+            {isTagalog ? "EN" : "TL"}
           </Text>
         </TouchableOpacity>
       </View>
@@ -105,8 +118,8 @@ const CustomTooltip: React.FC<CustomTooltipProps> = ({ labels = {} }) => {
 
           <TouchableOpacity
             onPress={() => {
-              if (isLastStep) {
-                stopTutorial();
+              if (isLastStep || hasNavigationAction) {
+                nextStep(); // This will handle navigation or stopping
               } else {
                 nextStep();
               }
@@ -115,10 +128,21 @@ const CustomTooltip: React.FC<CustomTooltipProps> = ({ labels = {} }) => {
               styles.button,
               styles.primaryButton,
               isFirstStep && styles.singleButton,
+              // NEW: Different styling for navigation buttons
+              hasNavigationAction && styles.navigationButton,
             ]}
           >
+            {/* NEW: Add icon for navigation steps */}
+            {hasNavigationAction && (
+              <Ionicons
+                name="arrow-forward"
+                size={14}
+                color={BASE_COLORS.darkText}
+                style={{ marginRight: 4 }}
+              />
+            )}
             <Text style={[styles.buttonText, styles.primaryButtonText]}>
-              {isLastStep ? defaultLabels.finish : defaultLabels.next}
+              {getActionButtonText()}
             </Text>
           </TouchableOpacity>
         </View>
@@ -145,19 +169,20 @@ const styles = StyleSheet.create({
     alignSelf: "center",
     position: "relative",
   },
-  // NEW: Header container for step indicator and language toggle
+  // Header container for step indicator and language toggle
   headerContainer: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    marginBottom: 12,
+    marginBottom: 16,
   },
   stepIndicator: {
     backgroundColor: "#f8f9fa",
     paddingHorizontal: 12,
     paddingVertical: 4,
-    borderRadius: 12,
-    marginRight: 8,
+    borderRadius: 20,
+    // flex: 1,
+    // marginRight: 8,
   },
   stepText: {
     fontSize: FONT_SIZES.sm,
@@ -165,12 +190,12 @@ const styles = StyleSheet.create({
     color: BASE_COLORS.darkText,
     textAlign: "center",
   },
-  // NEW: Language toggle button styles
+  // Language toggle button styles
   languageToggle: {
     backgroundColor: "#f8f9fa",
     paddingHorizontal: 8,
     paddingVertical: 4,
-    borderRadius: 12,
+    borderRadius: 20,
     flexDirection: "row",
     alignItems: "center",
     gap: 4,
@@ -188,7 +213,7 @@ const styles = StyleSheet.create({
     fontFamily: POPPINS_FONT.medium,
     marginBottom: 8,
     textAlign: "center",
-    lineHeight: FONT_SIZES.lg * 1.3, // Better line spacing for readability
+    lineHeight: FONT_SIZES.lg * 1.3,
   },
   buttonContainer: {
     gap: 8,
@@ -204,18 +229,25 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   button: {
-    backgroundColor: "#f8f9fa",
+    backgroundColor: BASE_COLORS.white,
     paddingVertical: 4,
     paddingHorizontal: 6,
     borderRadius: 20,
+    maxWidth: 110,
     minWidth: 70,
-    maxWidth: 80,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
   },
   skipButton: {
     backgroundColor: BASE_COLORS.white,
   },
   primaryButton: {
     backgroundColor: "#FFF",
+  },
+  navigationButton: {
+    backgroundColor: BASE_COLORS.white,
+    minWidth: 100,
   },
   buttonText: {
     fontSize: COMPONENT_FONT_SIZES.button.small,
