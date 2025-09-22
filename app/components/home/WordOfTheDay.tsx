@@ -64,7 +64,7 @@ const WordOfTheDay = React.memo(() => {
 
             {/* Translation */}
             <View style={styles.translationContainer}>
-              <Text style={styles.translationLabel}>Meaning</Text>
+              <Text style={styles.translationLabel}>Translation</Text>
               <Text style={styles.translationText}>{translation}</Text>
             </View>
           </View>
@@ -164,7 +164,7 @@ const styles = StyleSheet.create({
     color: BASE_COLORS.white,
   },
   translationContainer: {
-    marginTop: 4,
+    marginTop: 16,
   },
   translationLabel: {
     fontFamily: POPPINS_FONT.medium,
