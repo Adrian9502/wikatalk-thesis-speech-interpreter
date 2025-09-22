@@ -37,6 +37,9 @@ import {
   POPPINS_FONT,
   COMPONENT_FONT_SIZES,
 } from "@/constant/fontSizes";
+import { TutorialTarget } from "@/components/tutorial/TutorialTarget";
+import { useTutorial } from "@/context/TutorialContext";
+import { TRANSLATE_TUTORIAL } from "@/constants/tutorials";
 
 const { width: screenWidth, height: screenHeight } = Dimensions.get("window");
 
@@ -44,17 +47,33 @@ const { width: screenWidth, height: screenHeight } = Dimensions.get("window");
 const isSmallScreen = screenWidth <= 384 && screenHeight <= 1280;
 
 const Translate = () => {
+  // Tutorial hook
+  const { startTutorial, isTutorialCompleted } = useTutorial();
+
   // stop ongoing speech
   useFocusEffect(
     React.useCallback(() => {
       console.log("[Translate] Tab focused, stopping all speech");
       globalSpeechManager.stopAllSpeech();
 
+      // Start tutorial if not completed
+      if (!isTutorialCompleted(TRANSLATE_TUTORIAL.id)) {
+        const timer = setTimeout(() => {
+          startTutorial(TRANSLATE_TUTORIAL);
+        }, 500); // Small delay for better UX
+
+        return () => {
+          clearTimeout(timer);
+          console.log("[Translate] Tab losing focus");
+          globalSpeechManager.stopAllSpeech();
+        };
+      }
+
       return () => {
         console.log("[Translate] Tab losing focus");
         globalSpeechManager.stopAllSpeech();
       };
-    }, [])
+    }, [startTutorial, isTutorialCompleted])
   );
 
   // Theme store
@@ -156,153 +175,165 @@ const Translate = () => {
           >
             <View style={{ flex: 1 }}>
               {/* Language Selection Area */}
-              <View style={styles.languageSelectionContainer}>
-                <View style={styles.dropdownContainer}>
-                  <Dropdown
-                    style={[
-                      styles.dropdown,
-                      {
-                        borderColor: BASE_COLORS.borderColor,
-                        backgroundColor: BASE_COLORS.lightBlue,
-                      },
-                      isSourceFocus && { borderColor: BASE_COLORS.blue },
-                    ]}
-                    itemTextStyle={{
-                      fontSize: FONT_SIZES.lg,
-                      fontFamily: POPPINS_FONT.regular,
-                      color: BASE_COLORS.darkText,
-                    }}
-                    placeholderStyle={[
-                      styles.dropdownText,
-                      { color: BASE_COLORS.placeholderText },
-                    ]}
-                    selectedTextStyle={[
-                      styles.dropdownText,
-                      { color: BASE_COLORS.blue, borderRadius: 8 },
-                    ]}
-                    data={DIALECTS}
-                    maxHeight={isSmallScreen ? 200 : 250}
-                    labelField="label"
-                    valueField="value"
-                    placeholder="From"
-                    value={sourceLanguage}
-                    onFocus={() => {
-                      setIsSourceFocus(true);
-                      setIsTargetFocus(false);
-                      updateState({ openSource: true, openTarget: false });
-                    }}
-                    onBlur={() => setIsSourceFocus(false)}
-                    onChange={(item) => {
-                      updateState({ sourceLanguage: item.value });
-                      setIsSourceFocus(false);
-                    }}
-                    renderRightIcon={() => (
-                      <Ionicons
-                        name={isSourceFocus ? "chevron-up" : "chevron-down"}
-                        size={isSmallScreen ? 16 : 18}
-                        color={BASE_COLORS.blue}
-                      />
-                    )}
-                    activeColor={BASE_COLORS.lightBlue}
-                    containerStyle={styles.dropdownList}
-                  />
-                </View>
+              <TutorialTarget id="translate-language-selection">
+                <View style={styles.languageSelectionContainer}>
+                  <View style={styles.dropdownContainer}>
+                    <Dropdown
+                      style={[
+                        styles.dropdown,
+                        {
+                          borderColor: BASE_COLORS.borderColor,
+                          backgroundColor: BASE_COLORS.lightBlue,
+                        },
+                        isSourceFocus && { borderColor: BASE_COLORS.blue },
+                      ]}
+                      itemTextStyle={{
+                        fontSize: FONT_SIZES.lg,
+                        fontFamily: POPPINS_FONT.regular,
+                        color: BASE_COLORS.darkText,
+                      }}
+                      placeholderStyle={[
+                        styles.dropdownText,
+                        { color: BASE_COLORS.placeholderText },
+                      ]}
+                      selectedTextStyle={[
+                        styles.dropdownText,
+                        { color: BASE_COLORS.blue, borderRadius: 8 },
+                      ]}
+                      data={DIALECTS}
+                      maxHeight={isSmallScreen ? 200 : 250}
+                      labelField="label"
+                      valueField="value"
+                      placeholder="From"
+                      value={sourceLanguage}
+                      onFocus={() => {
+                        setIsSourceFocus(true);
+                        setIsTargetFocus(false);
+                        updateState({ openSource: true, openTarget: false });
+                      }}
+                      onBlur={() => setIsSourceFocus(false)}
+                      onChange={(item) => {
+                        updateState({ sourceLanguage: item.value });
+                        setIsSourceFocus(false);
+                      }}
+                      renderRightIcon={() => (
+                        <Ionicons
+                          name={isSourceFocus ? "chevron-up" : "chevron-down"}
+                          size={isSmallScreen ? 16 : 18}
+                          color={BASE_COLORS.blue}
+                        />
+                      )}
+                      activeColor={BASE_COLORS.lightBlue}
+                      containerStyle={styles.dropdownList}
+                    />
+                  </View>
 
-                {/* Language swap button */}
-                <Animated.View
-                  style={[
-                    styles.swapButtonContainer,
-                    { transform: [{ scale: swapButtonAnimation }] },
-                  ]}
-                >
-                  <TouchableOpacity
-                    onPress={handleSwap}
-                    style={styles.swapButton}
-                    activeOpacity={0.7}
+                  {/* Language swap button */}
+                  <Animated.View
+                    style={[
+                      styles.swapButtonContainer,
+                      { transform: [{ scale: swapButtonAnimation }] },
+                    ]}
                   >
-                    <LinearGradient
-                      colors={[BASE_COLORS.blue, BASE_COLORS.orange]}
-                      start={{ x: 0, y: 0 }}
-                      end={{ x: 1, y: 1 }}
-                      style={styles.swapGradient}
+                    <TouchableOpacity
+                      onPress={handleSwap}
+                      style={styles.swapButton}
+                      activeOpacity={0.7}
                     >
-                      <Repeat
-                        width={isSmallScreen ? 18 : 20}
-                        height={isSmallScreen ? 18 : 20}
-                        strokeWidth={2}
-                        color={BASE_COLORS.white}
-                      />
-                    </LinearGradient>
-                  </TouchableOpacity>
-                </Animated.View>
+                      <LinearGradient
+                        colors={[BASE_COLORS.blue, BASE_COLORS.orange]}
+                        start={{ x: 0, y: 0 }}
+                        end={{ x: 1, y: 1 }}
+                        style={styles.swapGradient}
+                      >
+                        <Repeat
+                          width={isSmallScreen ? 18 : 20}
+                          height={isSmallScreen ? 18 : 20}
+                          strokeWidth={2}
+                          color={BASE_COLORS.white}
+                        />
+                      </LinearGradient>
+                    </TouchableOpacity>
+                  </Animated.View>
 
-                <View style={styles.dropdownContainer}>
-                  <Dropdown
-                    style={[
-                      styles.dropdown,
-                      {
-                        borderColor: BASE_COLORS.borderColor,
-                        backgroundColor: BASE_COLORS.lightPink,
-                      },
-                      isTargetFocus && { borderColor: BASE_COLORS.orange },
-                    ]}
-                    itemTextStyle={{
-                      fontSize: FONT_SIZES.lg,
-                      fontFamily: POPPINS_FONT.regular,
-                      color: BASE_COLORS.darkText,
-                    }}
-                    placeholderStyle={[
-                      styles.dropdownText,
-                      { color: BASE_COLORS.placeholderText },
-                    ]}
-                    selectedTextStyle={[
-                      styles.dropdownText,
-                      { color: BASE_COLORS.orange, borderRadius: 8 },
-                    ]}
-                    data={DIALECTS}
-                    maxHeight={isSmallScreen ? 200 : 250}
-                    labelField="label"
-                    valueField="value"
-                    placeholder="To"
-                    value={targetLanguage}
-                    onFocus={() => {
-                      setIsTargetFocus(true);
-                      setIsSourceFocus(false);
-                      updateState({ openTarget: true, openSource: false });
-                    }}
-                    onBlur={() => setIsTargetFocus(false)}
-                    onChange={(item) => {
-                      updateState({ targetLanguage: item.value });
-                      setIsTargetFocus(false);
-                    }}
-                    renderRightIcon={() => (
-                      <Ionicons
-                        name={isTargetFocus ? "chevron-up" : "chevron-down"}
-                        size={isSmallScreen ? 16 : 18}
-                        color={BASE_COLORS.orange}
-                      />
-                    )}
-                    activeColor={BASE_COLORS.lightPink}
-                    containerStyle={styles.dropdownList}
-                  />
+                  <View style={styles.dropdownContainer}>
+                    <Dropdown
+                      style={[
+                        styles.dropdown,
+                        {
+                          borderColor: BASE_COLORS.borderColor,
+                          backgroundColor: BASE_COLORS.lightPink,
+                        },
+                        isTargetFocus && { borderColor: BASE_COLORS.orange },
+                      ]}
+                      itemTextStyle={{
+                        fontSize: FONT_SIZES.lg,
+                        fontFamily: POPPINS_FONT.regular,
+                        color: BASE_COLORS.darkText,
+                      }}
+                      placeholderStyle={[
+                        styles.dropdownText,
+                        { color: BASE_COLORS.placeholderText },
+                      ]}
+                      selectedTextStyle={[
+                        styles.dropdownText,
+                        { color: BASE_COLORS.orange, borderRadius: 8 },
+                      ]}
+                      data={DIALECTS}
+                      maxHeight={isSmallScreen ? 200 : 250}
+                      labelField="label"
+                      valueField="value"
+                      placeholder="To"
+                      value={targetLanguage}
+                      onFocus={() => {
+                        setIsTargetFocus(true);
+                        setIsSourceFocus(false);
+                        updateState({ openTarget: true, openSource: false });
+                      }}
+                      onBlur={() => setIsTargetFocus(false)}
+                      onChange={(item) => {
+                        updateState({ targetLanguage: item.value });
+                        setIsTargetFocus(false);
+                      }}
+                      renderRightIcon={() => (
+                        <Ionicons
+                          name={isTargetFocus ? "chevron-up" : "chevron-down"}
+                          size={isSmallScreen ? 16 : 18}
+                          color={BASE_COLORS.orange}
+                        />
+                      )}
+                      activeColor={BASE_COLORS.lightPink}
+                      containerStyle={styles.dropdownList}
+                    />
+                  </View>
                 </View>
-              </View>
+              </TutorialTarget>
 
               {/* Quick Phrases */}
-              <View style={styles.quickPhrasesContainer}>
-                <QuickPhrases
-                  sourceLanguage={sourceLanguage as LanguageOption}
-                  onSelectPhrase={(text) => updateState({ sourceText: text })}
-                />
-              </View>
+              <TutorialTarget id="translate-quick-phrases">
+                <View style={styles.quickPhrasesContainer}>
+                  <QuickPhrases
+                    sourceLanguage={sourceLanguage as LanguageOption}
+                    onSelectPhrase={(text) => updateState({ sourceText: text })}
+                  />
+                </View>
+              </TutorialTarget>
 
-              {/* Translation Area Container */}
+              {/* Translation Area Container - FIXED: Remove flex styling from TutorialTarget, use wrapper */}
               <View style={styles.translationContainer}>
                 {/* Source Text Area */}
-                <SourceTextArea />
+                <View style={styles.textAreaWrapper}>
+                  <TutorialTarget id="translate-source-area">
+                    <SourceTextArea />
+                  </TutorialTarget>
+                </View>
 
                 {/* Target Text Area */}
-                <TargetTextArea />
+                <View style={styles.textAreaWrapper}>
+                  <TutorialTarget id="translate-target-area">
+                    <TargetTextArea />
+                  </TutorialTarget>
+                </View>
               </View>
             </View>
           </View>
@@ -377,6 +408,12 @@ const styles = StyleSheet.create({
     flex: 1,
     flexDirection: "column",
     justifyContent: "space-between",
+  },
+  // FIXED: New wrapper that provides the proper flex behavior
+  textAreaWrapper: {
+    flex: 1,
+    // Ensure minimum height for tutorial highlighting
+    minHeight: 150,
   },
 });
 

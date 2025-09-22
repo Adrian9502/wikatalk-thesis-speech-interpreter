@@ -67,6 +67,33 @@ export const TRANSLATE_TUTORIAL: TutorialConfig = {
   id: "translate_tutorial",
   name: "Text Translation Tutorial",
   steps: [
-    // Will be implemented next
+    {
+      id: "language-selection",
+      text: "Select your languages here. Left dropdown is source language, right dropdown is target language. Use the swap button in the middle to quickly switch between them.",
+      target: "translate-language-selection",
+      order: 1,
+      placement: "bottom",
+    },
+    {
+      id: "quick-phrases",
+      text: "Use these quick phrases for common translations. Tap any phrase to instantly translate it and save time on typing.",
+      target: "translate-quick-phrases",
+      order: 2,
+      placement: "bottom",
+    },
+    {
+      id: "source-text-area",
+      text: "This is your source text area. Type or paste text here to translate. Use volume icon for audio playback, info icon for accuracy details, and copy/clear buttons.",
+      target: "translate-source-area",
+      order: 3,
+      placement: "bottom",
+    },
+    {
+      id: "target-text-area",
+      text: "Your translation appears here. Use volume icon to hear the translation, info icon for accuracy details, and copy button to save the translated text.",
+      target: "translate-target-area",
+      order: 4,
+      placement: "top",
+    },
   ],
 };

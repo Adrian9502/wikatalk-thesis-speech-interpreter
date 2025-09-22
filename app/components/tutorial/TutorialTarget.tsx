@@ -57,10 +57,22 @@ export const TutorialTarget: React.FC<TutorialTargetProps> = ({
     }
   }, [isActive, currentStep, id, registerTarget]);
 
+  // FIXED: Determine if this is a flex child that needs flex: 1
+  const isFlexChild =
+    id.includes("text-area") ||
+    id.includes("source-area") ||
+    id.includes("target-area");
+
+  const wrapperStyle: ViewStyle = {
+    // IMPORTANT: For text areas, inherit flex behavior to maintain layout
+    ...(isFlexChild && { flex: 1 }),
+    ...style,
+  };
+
   return (
     <View
       ref={viewRef}
-      style={style}
+      style={wrapperStyle}
       collapsable={false} // Prevent Android from optimizing away the view
     >
       {children}

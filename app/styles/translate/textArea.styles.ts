@@ -12,9 +12,9 @@ const { width: screenWidth, height: screenHeight } = Dimensions.get("window");
 const isSmallScreen = screenWidth <= 384 && screenHeight <= 1280;
 
 export const textAreaStyles = StyleSheet.create({
-  // Container styles
+  // Container styles - FIXED: Use flex instead of fixed percentage height
   textSectionContainer: {
-    height: isSmallScreen ? "47%" : "49%",
+    flex: 1, // CHANGED: From percentage height to flex: 1
     borderRadius: isSmallScreen ? 18 : 20,
     overflow: "hidden",
     backgroundColor: BASE_COLORS.white,
@@ -26,6 +26,8 @@ export const textAreaStyles = StyleSheet.create({
     position: "relative",
     padding: isSmallScreen ? 16 : 20,
     marginBottom: isSmallScreen ? 8 : 10,
+    // ADDED: Minimum height to ensure reasonable size
+    minHeight: isSmallScreen ? 180 : 200,
   },
 
   gradientBackground: {
