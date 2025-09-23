@@ -83,7 +83,7 @@ const FeedbackModal: React.FC<FeedbackModalProps> = ({ isOpen, onClose }) => {
     try {
       const response = await fetch(
         `${
-          import.meta.env.VITE_API_URL || "http://localhost:5000"
+          import.meta.env.BACKEND_API_URL || "http://localhost:5000"
         }/api/users/feedback`,
         {
           method: "POST",
