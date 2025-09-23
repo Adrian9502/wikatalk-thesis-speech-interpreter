@@ -10,7 +10,7 @@ import Explore from "./components/Explore";
 function App() {
   return (
     <div
-      className="min-h-screen"
+      className="min-h-screen overflow-x-hidden"
       style={{
         background: COLORS.background.primary,
         color: COLORS.text.primary,

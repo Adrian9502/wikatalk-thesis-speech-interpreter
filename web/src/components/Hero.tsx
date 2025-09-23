@@ -50,7 +50,7 @@ const Hero: React.FC = () => {
             repeat: Infinity,
             ease: "easeInOut",
           }}
-          className="absolute top-20 right-10 w-72 h-72 rounded-full sm:opacity-10 opacity-0"
+          className="absolute top-20 right-10 w-72 h-72 rounded-full hidden xl:block"
           style={{ background: COLORS.gradients.secondary }}
         />
         <motion.div

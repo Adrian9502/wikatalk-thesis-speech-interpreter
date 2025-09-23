@@ -1,5 +1,18 @@
 @import "tailwindcss";
 
+html,
+body {
+  margin: 0;
+  padding: 0;
+  background-color: #0a0f28; /* Your COLORS.background.primary value */
+  min-height: 100vh;
+}
+
+#root {
+  min-height: 100vh;
+  background-color: #0a0f28; /* Your COLORS.background.primary value */
+}
+
 @layer base {
   body {
     font-family: "Poppins", sans-serif;
