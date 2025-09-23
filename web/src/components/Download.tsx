@@ -10,7 +10,11 @@ const Download: React.FC = () => {
       icon: FaAndroid,
       iconColor: "text-green-600",
       description: "Direct APK download",
-      url: "https://github.com/Adrian9502/wikatalk-thesis-speech-interpreter/releases/download/v1.3.0/wikatalk-v1.3.0.apk",
+      // ! v1.3.0
+      // url: "https://github.com/Adrian9502/wikatalk-thesis-speech-interpreter/releases/download/v1.3.0/wikatalk-v1.3.0.apk",
+      // NEWEST v1.4.0
+      url: "https://github.com/Adrian9502/wikatalk-thesis-speech-interpreter/releases/download/v.1.4.0/wikatalk-v1.4.0.apk",
+
       available: true,
       buttonText: "Download for Android",
     },
