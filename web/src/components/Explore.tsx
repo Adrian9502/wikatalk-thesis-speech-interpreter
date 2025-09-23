@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { COLORS } from "../constants/colors";
 import { ChevronLeft, ChevronRight } from "lucide-react";
@@ -10,6 +10,7 @@ import translateScreen from "../assets/translate-screen.jpg";
 import scanScreen from "../assets/scan-screen.jpg";
 import gamesScreen from "../assets/game-screen.jpg";
 import pronounceScreen from "../assets/pronounce-screen.jpg";
+import tutorialEnglishScreen from "../assets/tutorial-screen-english.jpg";
 
 const Explore: React.FC = () => {
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -20,13 +21,13 @@ const Explore: React.FC = () => {
       id: 1,
       title: "Home & Dashboard",
       description:
-        "Start your learning journey with a personalized dashboard showing your progress and quick access to all features.",
+        "Your personalized learning hub with daily words, translation history, and instant access to all WikaTalk features.",
       image: homeScreen,
       features: [
-        "Personalized welcome & profile",
-        "Track quiz levels, progress, and coins",
-        "Carousel of core app features",
-        "Quick access to all tools & leaderboards",
+        "Personalized welcome with profile & settings",
+        "Quick Access Toolbar for Speech, Translate, Scan, and More",
+        "Daily Word of the Day with pronunciation",
+        "Translation history with timestamps",
       ],
     },
     {
@@ -95,17 +96,31 @@ const Explore: React.FC = () => {
         "Build confidence speaking different dialects",
       ],
     },
+    {
+      id: 7,
+      title: "Interactive Tutorial (English or Tagalog)",
+      description:
+        "Get started with WikaTalk using our interactive step-by-step tutorial available in English or Tagalog.",
+      image: tutorialEnglishScreen,
+      features: [
+        "Step-by-step guided walkthrough",
+        "Explore all app features interactively",
+        "Skip or jump between tutorial steps",
+        "Complete the tutorial in your preferred language",
+        "Replay the tutorial anytime in settings",
+      ],
+    },
   ];
 
-  const nextSlide = () => {
+  const nextSlide = useCallback(() => {
     setCurrentIndex((prev) => (prev + 1) % appScreens.length);
-  };
+  }, [appScreens.length]);
 
-  const prevSlide = () => {
+  const prevSlide = useCallback(() => {
     setCurrentIndex(
       (prev) => (prev - 1 + appScreens.length) % appScreens.length
     );
-  };
+  }, [appScreens.length]);
 
   const goToSlide = (index: number) => {
     setCurrentIndex(index);
@@ -121,7 +136,7 @@ const Explore: React.FC = () => {
     }, 5000);
 
     return () => clearInterval(interval);
-  }, [isAutoPlaying, currentIndex]);
+  }, [isAutoPlaying, nextSlide]);
 
   // Enhanced animation variants - NO transitions in variants
   const phoneVariants = {
