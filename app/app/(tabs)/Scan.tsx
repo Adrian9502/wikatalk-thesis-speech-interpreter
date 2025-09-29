@@ -465,8 +465,8 @@ const styles = StyleSheet.create({
     fontSize: COMPONENT_FONT_SIZES.translation.language,
   },
   permissionButton: {
-    paddingHorizontal: 20,
-    paddingVertical: 12,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
     backgroundColor: BASE_COLORS.lightBlue,
     borderRadius: 20,
     marginBottom: 10,
@@ -474,7 +474,7 @@ const styles = StyleSheet.create({
   permissionButtonText: {
     color: BASE_COLORS.blue,
     fontFamily: POPPINS_FONT.medium,
-    fontSize: COMPONENT_FONT_SIZES.translation.pronunciation,
+    fontSize: COMPONENT_FONT_SIZES.button.medium,
   },
   permissionNote: {
     textAlign: "center",

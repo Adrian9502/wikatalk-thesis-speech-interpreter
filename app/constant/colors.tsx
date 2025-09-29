@@ -102,8 +102,8 @@ export const HOMEPAGE_COLORS = {
   speech: ["#1d4ed8", "#3b82f6", "#60a5fa"] as const,
   // red
   translate: ["#dc2626", "#ef4444", "#f87171"] as const,
-  // yellow
-  scan: ["#d97706", "#f59e0b", "#fbbf24"] as const,
+  // blue
+  scan: ["#1d4ed8", "#3b82f6", "#60a5fa"] as const,
   // red
   games: ["#dc2626", "#ef4444", "#f87171"] as const,
   // blue
@@ -141,9 +141,9 @@ export const WORD_OF_DAY_GRADIENT = ["#3168dfff", "#0a7d94ff"] as const;
 // Navigation colors on GameNavigation
 export const NAVIGATION_COLORS = {
   green: ["#029c35ff", "#0daf5eff"] as const,
-  yellow: ["#BA8E23", "#b9a115ff"] as const,
-  blue: ["#02359cff", "#0a7d94ff"] as const,
-  red: ["#9c0202ff", "#d64343ff"] as const,
+  yellow: ["#d97706", "#f59e0b", "#fbbf24"] as const,
+  blue: ["#1d4ed8", "#3b82f6", "#60a5fa"] as const,
+  red: ["#dc2626", "#ef4444", "#f87171"] as const,
   disabled: ["rgba(255, 255, 255, 0.15)", "rgba(255, 255, 255, 0.08)"] as const,
 };
 
@@ -161,4 +161,4 @@ export const GAME_RESULT_COLORS = {
   incorrectAnswer: ["#9c0202ff", "#d64343ff"] as const,
 };
 
-export const RANKING_COLORS = ["#053691ff", "#0a7d94ff"] as const;
+export const RANKING_COLORS = ["#1d4ed8", "#3b82f6", "#60a5fa"] as const;

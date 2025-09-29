@@ -51,17 +51,17 @@ const StatsContainer: React.FC<StatsContainerProps> = ({
               />
             </View>
           )}
+        </Animatable.View>
+      )}
 
-          {variant === "playing" && (
-            <Animatable.View
-              animation="fadeIn"
-              duration={400}
-              delay={animationDelay + (showTimer ? 100 : 50)}
-              style={styles.centerSection}
-            >
-              <DifficultyBadge difficulty={difficulty} />
-            </Animatable.View>
-          )}
+      {variant === "playing" && (
+        <Animatable.View
+          animation="fadeIn"
+          duration={400}
+          delay={animationDelay + (showTimer ? 100 : 50)}
+          style={styles.centerSection}
+        >
+          <DifficultyBadge difficulty={difficulty} />
         </Animatable.View>
       )}
 
@@ -95,7 +95,6 @@ const styles = StyleSheet.create({
   timerSection: {
     flex: 1,
     flexDirection: "row",
-    gap: 8,
     alignItems: "center",
     justifyContent: "center",
   },

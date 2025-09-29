@@ -53,13 +53,16 @@ const WordOfTheDay = React.memo(() => {
             <Text style={styles.languageText}>{language}</Text>
 
             {/* Pronunciation */}
-            <View style={styles.pronunciationContainer}>
-              <Ionicons
-                name="volume-high-outline"
-                size={14}
-                color={BASE_COLORS.white}
-              />
-              <Text style={styles.pronunciationText}>{pronunciation}</Text>
+            <View style={styles.translationContainer}>
+              <Text style={styles.translationLabel}>Pronunciation </Text>
+              <View style={styles.pronunciationContainer}>
+                <Ionicons
+                  name="volume-high-outline"
+                  size={14}
+                  color={BASE_COLORS.white}
+                />
+                <Text style={styles.pronunciationText}>{pronunciation}</Text>
+              </View>
             </View>
 
             {/* Translation */}
@@ -142,14 +145,13 @@ const styles = StyleSheet.create({
     fontFamily: POPPINS_FONT.medium,
     fontSize: FONT_SIZES.xl,
     color: "rgba(255, 255, 255, 0.8)",
-    marginBottom: 8,
   },
   pronunciationContainer: {
     marginTop: 4,
     flexDirection: "row",
+    gap: 6,
     justifyContent: "center",
     alignItems: "center",
-    gap: 4,
     alignSelf: "flex-start",
     paddingHorizontal: 8,
     borderWidth: 1,
@@ -164,7 +166,7 @@ const styles = StyleSheet.create({
     color: BASE_COLORS.white,
   },
   translationContainer: {
-    marginTop: 16,
+    marginTop: 8,
   },
   translationLabel: {
     fontFamily: POPPINS_FONT.medium,
@@ -173,7 +175,7 @@ const styles = StyleSheet.create({
   },
   translationText: {
     fontFamily: POPPINS_FONT.semiBold,
-    fontSize: FONT_SIZES["3xl"],
+    fontSize: FONT_SIZES["2xl"],
     color: BASE_COLORS.white,
   },
   playButton: {
