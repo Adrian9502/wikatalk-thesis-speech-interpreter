@@ -1,8 +1,6 @@
 import {
   View,
   StyleSheet,
-  KeyboardAvoidingView,
-  Platform,
   Keyboard,
   TouchableWithoutFeedback,
   AppState,
@@ -30,14 +28,14 @@ import { useTutorial } from "@/context/TutorialContext";
 import { SPEECH_TUTORIAL } from "@/constants/tutorials";
 
 const Speech = () => {
-  // FIXED: Tutorial hook - add shouldShowTutorial to destructuring
+  // Tutorial hook - add shouldShowTutorial to destructuring
   const { startTutorial, shouldShowTutorial } = useTutorial();
 
   useFocusEffect(
     React.useCallback(() => {
       console.log("[Speech] Tab focused, stopping all speech");
 
-      // ENHANCED: Defensive speech stopping
+      //  Defensive speech stopping
       const handleFocusCleanup = async () => {
         try {
           await globalSpeechManager.stopAllSpeech();
@@ -52,12 +50,12 @@ const Speech = () => {
       const checkAndStartTutorial = async () => {
         try {
           const shouldShow = await shouldShowTutorial(
-            SPEECH_TUTORIAL.id, // FIXED: Use SPEECH_TUTORIAL instead of TUTORIAL_CONFIG
-            SPEECH_TUTORIAL.version // FIXED: Use SPEECH_TUTORIAL instead of TUTORIAL_CONFIG
+            SPEECH_TUTORIAL.id,
+            SPEECH_TUTORIAL.version
           );
           if (shouldShow) {
             const timer = setTimeout(() => {
-              startTutorial(SPEECH_TUTORIAL); // FIXED: Use SPEECH_TUTORIAL instead of TUTORIAL_CONFIG
+              startTutorial(SPEECH_TUTORIAL);
             }, 500);
             return () => clearTimeout(timer);
           }
@@ -104,7 +102,7 @@ const Speech = () => {
 
   const { loading, wasCancelled, translateAudio } = useRecordingTranslation();
 
-  // NEW: State for tracking current translation controller
+  // State for tracking current translation controller
   const [currentTranslationController, setCurrentTranslationController] =
     useState<AbortController | null>(null);
 
@@ -124,7 +122,7 @@ const Speech = () => {
 
   //  Handle microphone press with speech management
   const handleMicPress = async (userNum: number) => {
-    // NEW: Stop any ongoing speech when starting a new recording
+    //  Stop any ongoing speech when starting a new recording
     await stopSpeech();
 
     // Clear any previous messages when starting a new recording
@@ -144,7 +142,7 @@ const Speech = () => {
             )}s (minimum 2s required)`
           );
 
-          // NEW: Use the enhanced method to set user-friendly messages
+          //  Use the enhanced method to set user-friendly messages
           const { setUserFriendlyMessage } = useLanguageStore.getState();
           const message = `Recording too short (${recordingDuration.toFixed(
             1
@@ -179,7 +177,7 @@ const Speech = () => {
           if (result) {
             handleTextfield(result.translatedText, result.transcribedText);
 
-            // NEW: Auto-speech will be handled by the store automatically when setBothTexts is called
+            //  Auto-speech will be handled by the store automatically when setBothTexts is called
             console.log(
               "[Speech] Translation completed, auto-speech will be triggered by store"
             );

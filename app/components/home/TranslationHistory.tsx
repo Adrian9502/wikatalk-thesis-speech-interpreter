@@ -318,7 +318,7 @@ const TranslationHistory = React.memo(
 
 const styles = StyleSheet.create({
   container: {
-    marginBottom: 32,
+    marginBottom: 12,
   },
   header: {
     flexDirection: "row",
