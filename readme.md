@@ -13,6 +13,16 @@
   [![License](https://img.shields.io/badge/license-Academic%20Use-orange.svg)](#license)
 </div>
 
+## 🌐 See and Download App Here
+
+<div align="center">
+  <a href="https://wikatalk.vercel.app" target="_blank">
+    <img src="web-ui.png" alt="WikaTalk Web Interface" width="100%" style="max-width: 800px; border-radius: 10px; box-shadow: 0 4px 20px rgba(0,0,0,0.1);">
+  </a>
+  
+  **[Visit WikaTalk Web App →](https://wikatalk.vercel.app)**
+</div>
+
 ## 📖 Table of Contents
 
 - [About](#about)
