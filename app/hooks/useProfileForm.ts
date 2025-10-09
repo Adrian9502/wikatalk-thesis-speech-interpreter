@@ -142,14 +142,22 @@ export const useProfileForm = ({ userData, visible, onSave }: any) => {
     setError("");
     setPasswordError("");
 
-    if (!formValues.fullName.trim() || !formValues.username.trim()) {
+    // Get current form values with fallbacks
+    const currentFullName =
+      formValues.fullName?.trim() || userData?.fullName?.trim() || "";
+    const currentUsername =
+      formValues.username?.trim() || userData?.username?.trim() || "";
+
+    // Check if basic fields are empty
+    if (!currentFullName || !currentUsername) {
       setError("Full name and username cannot be empty");
       return false;
     }
 
+    // Check if anything has actually changed
     const basicInfoChanged =
-      formValues.fullName.trim() !== userData?.fullName?.trim() ||
-      formValues.username.trim() !== userData?.username?.trim() ||
+      currentFullName !== userData?.fullName?.trim() ||
+      currentUsername !== userData?.username?.trim() ||
       imageChanged;
 
     if (!changePassword && !basicInfoChanged) {
@@ -208,9 +216,11 @@ export const useProfileForm = ({ userData, visible, onSave }: any) => {
 
       try {
         setIsLoading(true);
+
+        // Use form data directly instead of watched values
         const updateData: any = {
-          fullName: data.fullName,
-          username: data.username,
+          fullName: data.fullName?.trim() || userData?.fullName || "",
+          username: data.username?.trim() || userData?.username || "",
         };
 
         if (imageChanged && profilePicture) {
@@ -237,7 +247,14 @@ export const useProfileForm = ({ userData, visible, onSave }: any) => {
         setIsLoading(false);
       }
     },
-    [validateForm, onSave, imageChanged, profilePicture, changePassword]
+    [
+      validateForm,
+      onSave,
+      imageChanged,
+      profilePicture,
+      changePassword,
+      userData,
+    ]
   );
 
   // Reset form when modal becomes visible

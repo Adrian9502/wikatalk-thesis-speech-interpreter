@@ -130,10 +130,21 @@ export const TutorialProvider: React.FC<{ children: React.ReactNode }> = ({
   // NEW: Load tutorial status from server on mount or user change
   useEffect(() => {
     const loadTutorialStatus = async () => {
-      // Only load if we have a user
+      // Only load if we have a user AND they are verified
       if (!userId) {
         console.log(
           "[TutorialContext] No user ID, skipping tutorial status load"
+        );
+        return;
+      }
+
+      // NEW: Check if user is verified before loading tutorial status
+      const { userData } = useAuthStore.getState();
+      const isUserVerified = userData?.isVerified;
+
+      if (!isUserVerified) {
+        console.log(
+          "[TutorialContext] User not verified yet, skipping tutorial status load"
         );
         return;
       }
@@ -163,7 +174,7 @@ export const TutorialProvider: React.FC<{ children: React.ReactNode }> = ({
 
       try {
         console.log(
-          "[TutorialContext] Loading tutorial status for user:",
+          "[TutorialContext] Loading tutorial status for verified user:",
           userId
         );
         const status = await tutorialService.getTutorialStatus();
@@ -182,7 +193,7 @@ export const TutorialProvider: React.FC<{ children: React.ReactNode }> = ({
     };
 
     loadTutorialStatus();
-  }, [userId, currentUserId, isActive]); // NEW: Added userId and currentUserId as dependencies
+  }, [userId, currentUserId, isActive]); // Keep existing dependencies
 
   // Language toggle function
   const toggleLanguage = useCallback(() => {
