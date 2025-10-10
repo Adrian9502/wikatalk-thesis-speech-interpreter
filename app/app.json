@@ -2,7 +2,7 @@
   "expo": {
     "name": "WikaTalk",
     "slug": "WikaTalk",
-    "version": "4",
+    "version": "5",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "scheme": "myapp",
