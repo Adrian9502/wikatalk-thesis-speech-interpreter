@@ -42,6 +42,10 @@ const wordOfDayRoutes = require("./routes/wordOfDay.routes")
 const rankingRoutes = require('./routes/ranking.routes');
 const hintRoutes = require('./routes/hints.routes')
 const tutorialRoutes = require("./routes/tutorial.routes");
+
+// !Admin Specific route
+const adminRoutes = require("./routes/admin.routes");
+
 // Base route
 app.get("/", (req, res) => {
   res.send("WikaTalk API is running");
@@ -73,7 +77,8 @@ app.use("/api/word-of-day", wordOfDayRoutes);
 app.use('/api/rankings', rankingRoutes);
 app.use("/api/hints", hintRoutes);
 app.use("/api/tutorial", tutorialRoutes);
-
+// !Admin
+app.use("/api/admin", adminRoutes);
 
 // Explicitly listen on all network interfaces
 const PORT = process.env.PORT || 5000;

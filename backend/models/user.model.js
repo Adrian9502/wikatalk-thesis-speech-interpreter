@@ -38,6 +38,16 @@ const userSchema = new mongoose.Schema(
       enum: ["manual", "google", "both"],
       default: "manual",
     },
+    // ! Admin role field
+    role: {
+      type: String,
+      enum: ["user", "admin", "superadmin"],
+      default: "user",
+    },
+    isAdmin: {
+      type: Boolean,
+      default: false,
+    },
     createdAt: {
       type: Date,
       default: Date.now,
