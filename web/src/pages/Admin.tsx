@@ -21,6 +21,10 @@ const Admin: React.FC = () => {
     navigate("/admin/login");
   };
 
+  const handleViewChange = (view: string) => {
+    setCurrentView(view as AdminView);
+  };
+
   const renderView = () => {
     switch (currentView) {
       case "dashboard":
@@ -42,7 +46,7 @@ const Admin: React.FC = () => {
     <div className="flex min-h-screen bg-gray-50">
       <AdminSidebar
         currentView={currentView}
-        onViewChange={setCurrentView}
+        onViewChange={handleViewChange}
         isOpen={isSidebarOpen}
         onToggle={() => setIsSidebarOpen(!isSidebarOpen)}
         onLogout={handleLogout}

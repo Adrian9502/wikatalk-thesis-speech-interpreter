@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import {
   Search,
   Filter,
@@ -13,8 +13,6 @@ import {
   RefreshCw,
   MoreVertical,
   Edit,
-  Trash2,
-  UserCog,
 } from "lucide-react";
 import {
   getAllUsers,
@@ -57,11 +55,7 @@ const UserManagement: React.FC = () => {
     return "admin";
   })();
 
-  useEffect(() => {
-    fetchUsers();
-  }, [currentPage, searchQuery, roleFilter]);
-
-  const fetchUsers = async () => {
+  const fetchUsers = useCallback(async () => {
     try {
       setIsLoading(true);
       setError(null);
@@ -76,13 +70,19 @@ const UserManagement: React.FC = () => {
       setUsers(response.data);
       setTotalPages(response.totalPages);
       setTotalUsers(response.totalUsers);
-    } catch (err: any) {
-      setError(err.message || "Failed to load users");
+    } catch (err) {
+      const errorMessage =
+        err instanceof Error ? err.message : "Failed to load users";
+      setError(errorMessage);
       console.error("Fetch users error:", err);
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [currentPage, limit, searchQuery, roleFilter]);
+
+  useEffect(() => {
+    fetchUsers();
+  }, [fetchUsers]);
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -126,7 +126,10 @@ const UserManagement: React.FC = () => {
     a.click();
   };
 
-  const handleUpdateUser = async (userId: string, data: any) => {
+  const handleUpdateUser = async (
+    userId: string,
+    data: Record<string, unknown>
+  ) => {
     await updateUser(userId, data);
     await fetchUsers();
   };

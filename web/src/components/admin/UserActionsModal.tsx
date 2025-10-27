@@ -6,7 +6,7 @@ interface UserActionsModalProps {
   user: User;
   isOpen: boolean;
   onClose: () => void;
-  onUpdate: (userId: string, data: any) => Promise<void>;
+  onUpdate: (userId: string, data: Record<string, unknown>) => Promise<void>;
   onDelete: (userId: string) => Promise<void>;
   onChangeRole: (userId: string, role: string) => Promise<void>;
   onToggleVerification: (userId: string) => Promise<void>;
@@ -35,8 +35,10 @@ const UserActionsModal: React.FC<UserActionsModalProps> = ({
   const [username, setUsername] = useState(user.username);
   const [email, setEmail] = useState(user.email);
 
-  // Role change state
-  const [selectedRole, setSelectedRole] = useState(user.role);
+  // Role change state - FIX: Type the selectedRole properly
+  const [selectedRole, setSelectedRole] = useState<
+    "user" | "admin" | "superadmin"
+  >(user.role);
 
   if (!isOpen) return null;
 
@@ -56,8 +58,10 @@ const UserActionsModal: React.FC<UserActionsModalProps> = ({
       setTimeout(() => {
         onClose();
       }, 1500);
-    } catch (err: any) {
-      setError(err.message || "Failed to update user");
+    } catch (err) {
+      const errorMessage =
+        err instanceof Error ? err.message : "Failed to update user";
+      setError(errorMessage);
     } finally {
       setIsLoading(false);
     }
@@ -79,8 +83,10 @@ const UserActionsModal: React.FC<UserActionsModalProps> = ({
       setTimeout(() => {
         onClose();
       }, 1500);
-    } catch (err: any) {
-      setError(err.message || "Failed to change role");
+    } catch (err) {
+      const errorMessage =
+        err instanceof Error ? err.message : "Failed to change role";
+      setError(errorMessage);
     } finally {
       setIsLoading(false);
     }
@@ -99,8 +105,10 @@ const UserActionsModal: React.FC<UserActionsModalProps> = ({
       setTimeout(() => {
         onClose();
       }, 1500);
-    } catch (err: any) {
-      setError(err.message || "Failed to toggle verification");
+    } catch (err) {
+      const errorMessage =
+        err instanceof Error ? err.message : "Failed to toggle verification";
+      setError(errorMessage);
     } finally {
       setIsLoading(false);
     }
@@ -124,8 +132,10 @@ const UserActionsModal: React.FC<UserActionsModalProps> = ({
       setTimeout(() => {
         onClose();
       }, 1000);
-    } catch (err: any) {
-      setError(err.message || "Failed to delete user");
+    } catch (err) {
+      const errorMessage =
+        err instanceof Error ? err.message : "Failed to delete user";
+      setError(errorMessage);
     } finally {
       setIsLoading(false);
     }
@@ -301,7 +311,11 @@ const UserActionsModal: React.FC<UserActionsModalProps> = ({
                 </label>
                 <select
                   value={selectedRole}
-                  onChange={(e) => setSelectedRole(e.target.value)}
+                  onChange={(e) =>
+                    setSelectedRole(
+                      e.target.value as "user" | "admin" | "superadmin"
+                    )
+                  }
                   className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none"
                 >
                   <option value="user">User</option>

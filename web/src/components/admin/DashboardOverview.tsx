@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Users, BookOpen, MessageSquare, Gamepad2 } from "lucide-react";
+import { Users, BookOpen, Gamepad2 } from "lucide-react";
 import StatCard from "./StatCard";
 import RecentActivity from "./RecentActivity";
 import QuickActions from "./QuickActions";
@@ -36,8 +36,10 @@ const DashboardOverview: React.FC = () => {
       setError(null);
       const data = await getDashboardStats();
       setStats(data);
-    } catch (err: any) {
-      setError(err.message || "Failed to load dashboard data");
+    } catch (err) {
+      const errorMessage =
+        err instanceof Error ? err.message : "Failed to load dashboard data";
+      setError(errorMessage);
       console.error("Dashboard fetch error:", err);
     } finally {
       setIsLoading(false);

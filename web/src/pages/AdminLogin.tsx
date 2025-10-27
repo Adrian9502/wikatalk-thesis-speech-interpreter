@@ -15,7 +15,6 @@ const AdminLogin: React.FC = () => {
     setIsLoading(true);
 
     try {
-      // Use VITE_API_URL instead of BACKEND_API_URL_LOCAL
       const apiUrl = import.meta.env.VITE_API_URL || "http://localhost:5000";
 
       const response = await fetch(`${apiUrl}/api/admin/login`, {
@@ -32,14 +31,14 @@ const AdminLogin: React.FC = () => {
         throw new Error(data.message || "Login failed");
       }
 
-      // Store token and user data
       localStorage.setItem("adminToken", data.token);
       localStorage.setItem("adminUser", JSON.stringify(data.user));
 
-      // Redirect to dashboard
       navigate("/admin/dashboard");
-    } catch (err: any) {
-      setError(err.message || "Invalid credentials");
+    } catch (err) {
+      const errorMessage =
+        err instanceof Error ? err.message : "Invalid credentials";
+      setError(errorMessage);
     } finally {
       setIsLoading(false);
     }

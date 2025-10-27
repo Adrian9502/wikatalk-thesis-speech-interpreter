@@ -10,14 +10,11 @@ const getAuthHeaders = () => {
 };
 
 // Helper function to handle API errors
-const handleApiError = (error: any) => {
-  if (error.response) {
-    throw new Error(error.response.data.message || "API request failed");
-  } else if (error.request) {
-    throw new Error("No response from server");
-  } else {
-    throw new Error(error.message || "Request failed");
+const handleApiError = (error: unknown): never => {
+  if (error instanceof Error) {
+    throw error;
   }
+  throw new Error("An unknown error occurred");
 };
 
 // Dashboard Stats
@@ -35,7 +32,7 @@ export const getDashboardStats = async () => {
 
     const data = await response.json();
     return data.data;
-  } catch (error: any) {
+  } catch (error) {
     handleApiError(error);
   }
 };
@@ -68,7 +65,7 @@ export const getAllUsers = async (params?: {
     }
 
     return await response.json();
-  } catch (error: any) {
+  } catch (error) {
     handleApiError(error);
   }
 };
@@ -88,7 +85,7 @@ export const getUserById = async (userId: string) => {
 
     const data = await response.json();
     return data.data;
-  } catch (error: any) {
+  } catch (error) {
     handleApiError(error);
   }
 };
@@ -116,7 +113,7 @@ export const updateUser = async (
     }
 
     return await response.json();
-  } catch (error: any) {
+  } catch (error) {
     handleApiError(error);
   }
 };
@@ -136,7 +133,7 @@ export const changeUserRole = async (userId: string, role: string) => {
     }
 
     return await response.json();
-  } catch (error: any) {
+  } catch (error) {
     handleApiError(error);
   }
 };
@@ -155,7 +152,7 @@ export const deleteUser = async (userId: string) => {
     }
 
     return await response.json();
-  } catch (error: any) {
+  } catch (error) {
     handleApiError(error);
   }
 };
@@ -177,7 +174,7 @@ export const toggleUserVerification = async (userId: string) => {
     }
 
     return await response.json();
-  } catch (error: any) {
+  } catch (error) {
     handleApiError(error);
   }
 };
@@ -197,7 +194,7 @@ export const getUserStats = async () => {
 
     const data = await response.json();
     return data.data;
-  } catch (error: any) {
+  } catch (error) {
     handleApiError(error);
   }
 };
@@ -217,7 +214,7 @@ export const getTranslationStats = async () => {
 
     const data = await response.json();
     return data.data;
-  } catch (error: any) {
+  } catch (error) {
     handleApiError(error);
   }
 };
@@ -237,7 +234,7 @@ export const getGameStats = async () => {
 
     const data = await response.json();
     return data.data;
-  } catch (error: any) {
+  } catch (error) {
     handleApiError(error);
   }
 };
@@ -256,7 +253,7 @@ export const getFeedbackList = async () => {
     }
 
     return await response.json();
-  } catch (error: any) {
+  } catch (error) {
     handleApiError(error);
   }
 };

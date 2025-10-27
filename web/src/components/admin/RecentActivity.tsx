@@ -1,5 +1,5 @@
 import React from "react";
-import { Clock, RefreshCw } from "lucide-react";
+import { Clock } from "lucide-react";
 
 interface Activity {
   id: string;
