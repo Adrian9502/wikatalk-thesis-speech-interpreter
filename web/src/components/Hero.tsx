@@ -131,7 +131,7 @@ const Hero: React.FC = () => {
 
             {/* description */}
             <motion.h2
-              className="text-lg mb-4 md:text-xl font-semibold"
+              className="text-lg mb-4 text-white md:text-xl font-semibold"
               variants={itemVariants}
               transition={{ duration: 0.6, ease: "easeOut" }}
             >
