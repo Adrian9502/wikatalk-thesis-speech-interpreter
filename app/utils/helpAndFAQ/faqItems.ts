@@ -33,7 +33,7 @@ const faqItems: FAQItem[] = [
     category: "features",
     question: "What is the scan-to-text-translate feature?",
     answer:
-      "This feature allows you to scan written text and translate it. Simply point your camera at the text, capture it, and WikaTalk will translate it to your chosen dialect. Note that there is a limit of 1500 photo scans due to API restrictions.",
+      "This feature allows you to scan written text and translate it. Simply point your camera at the text, capture it, and WikaTalk will translate it to your chosen dialect. Note that there is a limit of 25,000 photo scans per month due to API restrictions.",
   },
   {
     id: 6,
@@ -152,7 +152,7 @@ const faqItems: FAQItem[] = [
     category: "limitations",
     question: "What are the known limitations of WikaTalk?",
     answer:
-      "Some limitations include:\n\n• Limited processing capacity (about 15 requests per minute)\n• 30-second speaking duration limit\n• Cannot handle background noise well\n• Some dialects may have less accurate translations\n• Limited scan-to-text capacity (1500 scans)\n• No offline mode support\n• Text scanning may have difficulty with certain fonts or sizes",
+      "Some limitations include:\n\n• Limited processing capacity (about 15 requests per minute)\n• 30-second speaking duration limit\n• Cannot handle background noise well\n• Some dialects may have less accurate translations\n• Limited scan-to-text capacity (25,000 scans per month)\n• No offline mode support\n• Text scanning may have difficulty with certain fonts or sizes",
   },
   {
     id: 23,
@@ -166,7 +166,7 @@ const faqItems: FAQItem[] = [
     category: "limitations",
     question: "Is there a limit to the scan-to-text feature?",
     answer:
-      "Yes, the scan-to-text-translate feature is limited to 1500 photo scans due to API restrictions.",
+      "Yes, the scan-to-text-translate feature is limited to 25,000 photo scans per month due to API restrictions.",
   },
   {
     id: 25,
