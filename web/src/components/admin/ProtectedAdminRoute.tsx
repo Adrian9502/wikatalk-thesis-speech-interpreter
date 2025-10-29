@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { Navigate } from "react-router-dom";
+import axios from "axios";
 
 interface ProtectedAdminRouteProps {
   children: React.ReactNode;
@@ -24,19 +25,17 @@ const ProtectedAdminRoute: React.FC<ProtectedAdminRouteProps> = ({
 
       try {
         const user = JSON.parse(adminUser);
-
-        // Use VITE_API_URL
         const apiUrl = import.meta.env.VITE_API_URL || "http://localhost:5000";
 
         // Verify token is still valid by making a test request
-        const response = await fetch(`${apiUrl}/api/admin/dashboard`, {
+        const response = await axios.get(`${apiUrl}/api/admin/dashboard`, {
           headers: {
             Authorization: `Bearer ${token}`,
           },
         });
 
         if (
-          response.ok &&
+          response.status === 200 &&
           (user.role === "admin" || user.role === "superadmin")
         ) {
           setIsAuthenticated(true);
@@ -48,6 +47,8 @@ const ProtectedAdminRoute: React.FC<ProtectedAdminRouteProps> = ({
         }
       } catch (error) {
         console.error("Auth check failed:", error);
+        localStorage.removeItem("adminToken");
+        localStorage.removeItem("adminUser");
         setIsAuthenticated(false);
       } finally {
         setIsLoading(false);

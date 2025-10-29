@@ -6,7 +6,9 @@ import {
   BarChart3,
   Settings,
   LogOut,
+  Shield,
 } from "lucide-react";
+import { useAdminTheme } from "../../hooks/useAdminTheme";
 
 interface AdminSidebarProps {
   currentView: string;
@@ -23,6 +25,8 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({
   onToggle,
   onLogout,
 }) => {
+  const { isDark } = useAdminTheme();
+
   const menuItems = [
     { id: "dashboard", label: "Dashboard", icon: LayoutDashboard },
     { id: "users", label: "Users", icon: Users },
@@ -33,10 +37,10 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({
 
   return (
     <>
-      {/* Mobile overlay */}
+      {/* Mobile Overlay */}
       {isOpen && (
         <div
-          className="fixed inset-0 bg-black bg-opacity-50 z-40 lg:hidden"
+          className="fixed inset-0 bg-black/60 z-40 lg:hidden backdrop-blur-sm transition-opacity"
           onClick={onToggle}
         />
       )}
@@ -44,57 +48,113 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({
       {/* Sidebar */}
       <aside
         className={`
-          fixed lg:sticky top-0 left-0 h-screen w-64 bg-white border-r border-gray-200 
-          flex flex-col z-50 transition-transform duration-300
+          fixed lg:sticky top-0 left-0 h-screen w-64 
+          flex flex-col z-50 transition-all duration-300 border-r
           ${isOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"}
+          ${
+            isDark
+              ? "bg-[var(--color-admin-surface-dark)] border-[var(--color-admin-border-dark)]"
+              : "bg-[var(--color-admin-surface-light)] border-[var(--color-admin-border-light)]"
+          }
         `}
       >
-        {/* Header */}
-        <div className="p-6 border-b border-gray-200">
-          <h2 className="text-xl font-bold text-indigo-600">WikaTalk Admin</h2>
+        {/* Logo Section */}
+        <div
+          className={`
+            p-6 border-b
+            ${
+              isDark
+                ? "border-[var(--color-admin-border-dark)]"
+                : "border-[var(--color-admin-border-light)]"
+            }
+          `}
+        >
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[var(--color-admin-primary-light)] to-[var(--color-admin-primary-hover-light)] flex items-center justify-center shadow-lg">
+              <Shield size={24} className="text-white" />
+            </div>
+            <div>
+              <h2
+                className={`
+                  text-lg font-bold
+                  ${
+                    isDark
+                      ? "text-[var(--color-admin-text-dark)]"
+                      : "text-[var(--color-admin-text-light)]"
+                  }
+                `}
+              >
+                WikaTalk
+              </h2>
+              <p
+                className={`
+                  text-xs
+                  ${
+                    isDark
+                      ? "text-[var(--color-admin-text-tertiary-dark)]"
+                      : "text-[var(--color-admin-text-tertiary-light)]"
+                  }
+                `}
+              >
+                Admin Portal
+              </p>
+            </div>
+          </div>
         </div>
 
         {/* Navigation */}
-        <nav className="flex-1 py-4 overflow-y-auto">
-          {menuItems.map((item) => {
-            const Icon = item.icon;
-            const isActive = currentView === item.id;
+        <nav className="flex-1 py-4 px-3 overflow-y-auto admin-scrollbar">
+          <div className="space-y-1">
+            {menuItems.map((item) => {
+              const Icon = item.icon;
+              const isActive = currentView === item.id;
 
-            return (
-              <button
-                key={item.id}
-                className={`
-                  w-full flex items-center gap-3 px-6 py-3 text-sm font-medium
-                  transition-colors duration-200
-                  ${
-                    isActive
-                      ? "bg-indigo-50 text-indigo-600 border-r-4 border-indigo-600"
-                      : "text-gray-600 hover:bg-gray-50 hover:text-indigo-600"
-                  }
-                `}
-                onClick={() => {
-                  onViewChange(item.id);
-                  // Close sidebar on mobile after selection
-                  if (window.innerWidth < 1024) {
-                    onToggle();
-                  }
-                }}
-              >
-                <Icon size={20} />
-                <span>{item.label}</span>
-              </button>
-            );
-          })}
+              return (
+                <button
+                  key={item.id}
+                  onClick={() => {
+                    onViewChange(item.id);
+                    if (window.innerWidth < 1024) {
+                      onToggle();
+                    }
+                  }}
+                  className={`
+                    w-full flex items-center gap-3 px-4 py-3 rounded-lg
+                    text-sm font-medium transition-all duration-200
+                    ${
+                      isActive
+                        ? "bg-[var(--color-admin-primary-light)] text-white shadow-lg shadow-[var(--color-admin-primary-light)]/30"
+                        : isDark
+                        ? "text-[var(--color-admin-text-secondary-dark)] hover:bg-[var(--color-admin-surface-hover-dark)] hover:text-[var(--color-admin-text-dark)]"
+                        : "text-[var(--color-admin-text-secondary-light)] hover:bg-[var(--color-admin-surface-hover-light)] hover:text-[var(--color-admin-text-light)]"
+                    }
+                  `}
+                >
+                  <Icon size={20} className={isActive ? "animate-pulse" : ""} />
+                  <span>{item.label}</span>
+                </button>
+              );
+            })}
+          </div>
         </nav>
 
-        {/* Footer */}
-        <div className="p-4 border-t border-gray-200">
+        {/* Logout Section */}
+        <div
+          className={`
+            p-4 border-t
+            ${
+              isDark
+                ? "border-[var(--color-admin-border-dark)]"
+                : "border-[var(--color-admin-border-light)]"
+            }
+          `}
+        >
           <button
             onClick={onLogout}
             className="
-              w-full flex items-center gap-3 px-4 py-3 
-              text-sm font-medium text-red-600 
-              hover:bg-red-50 rounded-lg transition-colors duration-200
+              w-full flex items-center gap-3 px-4 py-3 rounded-lg 
+              text-sm font-medium transition-all duration-200
+              text-[var(--color-admin-error)] hover:bg-[var(--color-admin-error)]/10
             "
           >
             <LogOut size={20} />
