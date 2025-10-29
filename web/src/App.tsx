@@ -27,9 +27,9 @@ function App() {
               <Navigation />
               <Hero />
               <Features />
+              <Explore />
               <About />
               <Download />
-              <Explore />
               <Footer />
             </>
           }
