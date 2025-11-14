@@ -165,6 +165,8 @@ interface QuizState {
   ensureQuestionsLoaded: () => Promise<boolean>;
 }
 
+// CHECK IF THE QUESTION DATA IS IN CACHE AND VALID BEFORE FETCHING
+// IF NOT VALID, FETCH THE NEW DATA AND UPDATE THE CACHE
 // Cache helpers
 const CACHE_KEY_PREFIX = "quiz_data_";
 const CACHE_EXPIRY = 24 * 60 * 60 * 1000; // 24 hours
@@ -184,6 +186,7 @@ const cacheData = async (key: string, data: any) => {
   }
 };
 
+// Check if cached data exists and is still valid
 const getCachedData = async (key: string) => {
   try {
     const cachedItem = await AsyncStorage.getItem(`${CACHE_KEY_PREFIX}${key}`);
@@ -212,7 +215,7 @@ const ensureProperFormat = (question: any): QuestionType => {
   } as QuestionType;
 };
 
-// Add this debug function near the top of the file
+// debug function near the top of the file
 const debugLevelData = (gameMode: string, data: any) => {
   console.log(`[DEBUG] ${gameMode} level data structure:`, {
     gameMode,
