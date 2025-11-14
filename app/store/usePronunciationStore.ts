@@ -1,5 +1,4 @@
 import { create } from "zustand";
-import { subscribeWithSelector } from "zustand/middleware";
 import * as Speech from "expo-speech";
 import { debounce } from "lodash";
 import { pronunciationService } from "@/services/api";

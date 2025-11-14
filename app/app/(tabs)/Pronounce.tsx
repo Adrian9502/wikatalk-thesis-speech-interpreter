@@ -23,6 +23,8 @@ import PronunciationCard from "@/components/pronunciation/PronunciationCard";
 import SearchBar from "@/components/pronunciation/SearchBar";
 import EmptyState from "@/components/pronunciation/EmptyState";
 import ErrorState from "@/components/pronunciation/ErrorState";
+// ! FOR COMPLIANCE
+import BundledPronunciationsSection from "@/components/pronunciation/BundledPronunciationSection";
 
 // Import styles and types
 import { pronunciationStyles as styles } from "@/styles/pronunciationStyles";
@@ -427,6 +429,9 @@ const Pronounce = () => {
           data={displayData}
           renderItem={renderItem}
           keyExtractor={keyExtractor}
+          ListHeaderComponent={
+            <BundledPronunciationsSection language={selectedLanguage} />
+          }
           ListEmptyComponent={ListEmptyComponent}
           estimatedItemSize={estimatedItemSize}
           contentContainerStyle={styles.flashListContent}
