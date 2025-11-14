@@ -15,12 +15,12 @@ import {
   BASE_COLORS,
   ICON_COLORS,
   WORD_OF_DAY_GRADIENT,
-} from "@/constant/colors";
+} from "@/constants/colors";
 import {
   POPPINS_FONT,
   COMPONENT_FONT_SIZES,
   FONT_SIZES,
-} from "@/constant/fontSizes";
+} from "@/constants/fontSizes";
 
 interface WordOfTheDayCardProps {
   wordOfTheDay: any;

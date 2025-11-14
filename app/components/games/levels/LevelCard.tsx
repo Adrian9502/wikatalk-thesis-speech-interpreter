@@ -6,7 +6,7 @@ import { LevelData } from "@/types/gameTypes";
 import { renderFocusIcon } from "@/utils/games/renderFocusIcon";
 import { getStarCount, formatDifficulty } from "@/utils/games/difficultyUtils";
 import { levelStyles as styles } from "@/styles/games/levels.styles";
-import { BASE_COLORS, ICON_COLORS } from "@/constant/colors";
+import { BASE_COLORS, ICON_COLORS } from "@/constants/colors";
 
 interface LevelCardProps {
   level: LevelData;

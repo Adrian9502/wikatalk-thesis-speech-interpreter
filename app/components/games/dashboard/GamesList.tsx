@@ -5,7 +5,7 @@ import { SectionHeader } from "@/components/games/common/SectionHeader";
 import GameCard from "./GameCard";
 import gameOptions from "@/utils/gameUtils";
 import { GameOption } from "@/types/gameTypes";
-import { ICON_COLORS } from "@/constant/colors";
+import { ICON_COLORS } from "@/constants/colors";
 import RankingButton from "../rankings/RankingButton";
 
 interface GamesListProps {

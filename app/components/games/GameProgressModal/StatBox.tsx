@@ -1,7 +1,7 @@
-import { BASE_COLORS, TITLE_COLORS } from "@/constant/colors";
+import { BASE_COLORS, TITLE_COLORS } from "@/constants/colors";
 import React from "react";
 import { View, Text, StyleSheet } from "react-native";
-import { POPPINS_FONT, COMPONENT_FONT_SIZES } from "@/constant/fontSizes";
+import { POPPINS_FONT, COMPONENT_FONT_SIZES } from "@/constants/fontSizes";
 
 interface StatBoxProps {
   value: string | number;

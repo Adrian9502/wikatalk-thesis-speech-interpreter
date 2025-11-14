@@ -8,8 +8,8 @@ import useProgressStore from "@/store/games/useProgressStore";
 import { getGameModeGradient } from "@/utils/gameUtils";
 import ModalLoading from "@/components/ModalLoading";
 import CloseButton from "../buttons/CloseButton";
-import { BASE_COLORS } from "@/constant/colors";
-import { POPPINS_FONT, COMPONENT_FONT_SIZES } from "@/constant/fontSizes";
+import { BASE_COLORS } from "@/constants/colors";
+import { POPPINS_FONT, COMPONENT_FONT_SIZES } from "@/constants/fontSizes";
 
 interface GameProgressModalContentProps {
   gameMode: string;

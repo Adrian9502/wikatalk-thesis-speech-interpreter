@@ -1,8 +1,8 @@
 import React from "react";
 import { View, Text, StyleSheet, Dimensions } from "react-native";
 import { Feather } from "@expo/vector-icons";
-import { BASE_COLORS, TITLE_COLORS } from "@/constant/colors";
-import { COMPONENT_FONT_SIZES, POPPINS_FONT } from "@/constant/fontSizes";
+import { BASE_COLORS, TITLE_COLORS } from "@/constants/colors";
+import { COMPONENT_FONT_SIZES, POPPINS_FONT } from "@/constants/fontSizes";
 import { TabType } from "@/types/types";
 import { getTabIcon } from "@/utils/recent/getTabIcon";
 import useThemeStore from "@/store/useThemeStore";

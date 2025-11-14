@@ -1,4 +1,4 @@
-import { BASE_COLORS } from "@/constant/colors";
+import { BASE_COLORS } from "@/constants/colors";
 import React from "react";
 import {
   StyleSheet,

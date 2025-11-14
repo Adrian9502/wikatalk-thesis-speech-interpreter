@@ -2,7 +2,7 @@ import React from "react";
 import { View, Text, StyleSheet } from "react-native";
 import { Info } from "react-native-feather";
 import { CulturalSection as CulturalSectionType } from "@/types/languageInfo";
-import { FONT_SIZES, POPPINS_FONT } from "@/constant/fontSizes";
+import { FONT_SIZES, POPPINS_FONT } from "@/constants/fontSizes";
 
 interface CulturalSectionProps {
   data: CulturalSectionType["data"];

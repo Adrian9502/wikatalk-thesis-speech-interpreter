@@ -1,7 +1,7 @@
 import React, { useCallback } from "react";
 import { Modal, View, Animated } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
-import { DIFFICULTY_COLORS } from "@/constant/colors";
+import { DIFFICULTY_COLORS } from "@/constants/colors";
 import { getStarCount } from "@/utils/games/difficultyUtils";
 import modalSharedStyles from "@/styles/games/modalSharedStyles";
 import ResetCostInfoModal from "@/components/games/levels/ResetCostInfoModal";

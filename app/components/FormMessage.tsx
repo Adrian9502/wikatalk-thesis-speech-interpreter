@@ -2,7 +2,7 @@ import React from "react";
 import { StyleSheet, View, Text } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import CloseButton from "./games/buttons/CloseButton";
-import { COMPONENT_FONT_SIZES, POPPINS_FONT } from "@/constant/fontSizes";
+import { COMPONENT_FONT_SIZES, POPPINS_FONT } from "@/constants/fontSizes";
 
 interface FormMessageProps {
   message: string;

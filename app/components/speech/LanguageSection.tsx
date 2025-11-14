@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { View, StyleSheet, Animated, Keyboard, Dimensions } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
-import { BASE_COLORS, getPositionalColors } from "@/constant/colors";
+import { BASE_COLORS, getPositionalColors } from "@/constants/colors";
 import useLanguageStore from "@/store/useLanguageStore";
 import LanguageSectionHeader from "./LanguageSectionHeader";
 import TextAreaSection from "./TextAreaSection";

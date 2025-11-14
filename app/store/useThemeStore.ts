@@ -5,7 +5,7 @@ import {
   CUSTOM_BACKGROUND,
   BASE_COLORS,
   TITLE_COLORS,
-} from "@/constant/colors";
+} from "@/constants/colors";
 import { ThemeOption } from "@/types/types";
 import createThemeOptions from "@/utils/createThemeOptions";
 import { themeService } from "@/services/api/themeService";

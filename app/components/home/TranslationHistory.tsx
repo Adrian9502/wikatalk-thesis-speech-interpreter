@@ -6,8 +6,8 @@ import {
   StyleSheet,
   FlatList,
 } from "react-native";
-import { BASE_COLORS } from "@/constant/colors";
-import { COMPONENT_FONT_SIZES, POPPINS_FONT } from "@/constant/fontSizes";
+import { BASE_COLORS } from "@/constants/colors";
+import { COMPONENT_FONT_SIZES, POPPINS_FONT } from "@/constants/fontSizes";
 import createAuthenticatedApi from "@/lib/api";
 import TabSelector from "@/components/recent/TabSelector";
 import HistoryItem from "@/components/recent/HistoryItem";

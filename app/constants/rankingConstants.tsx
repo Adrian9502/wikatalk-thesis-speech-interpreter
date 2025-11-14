@@ -2,7 +2,7 @@ import React from "react";
 import { Image } from "react-native";
 import { RankingCategory } from "@/types/rankingTypes";
 import { Ionicons } from "@expo/vector-icons";
-import { ICON_COLORS } from "@/constant/colors";
+import { ICON_COLORS } from "@/constants/colors";
 import { Zap } from "react-native-feather";
 
 export const RANKING_CATEGORIES: RankingCategory[] = [

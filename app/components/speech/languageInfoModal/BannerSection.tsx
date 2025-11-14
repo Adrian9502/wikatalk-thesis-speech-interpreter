@@ -2,8 +2,8 @@ import React from "react";
 import { View, Image, Text, StyleSheet } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { BannerSection as BannerSectionType } from "@/types/languageInfo";
-import { BASE_COLORS } from "@/constant/colors";
-import { FONT_SIZES, POPPINS_FONT } from "@/constant/fontSizes";
+import { BASE_COLORS } from "@/constants/colors";
+import { FONT_SIZES, POPPINS_FONT } from "@/constants/fontSizes";
 
 interface BannerSectionProps {
   data: BannerSectionType["data"];

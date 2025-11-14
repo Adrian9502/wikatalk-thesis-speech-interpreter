@@ -1,8 +1,8 @@
 import React from "react";
 import { View, Text, StyleSheet } from "react-native";
 import { DifficultyProgress } from "@/types/gameProgressTypes";
-import { BASE_COLORS } from "@/constant/colors";
-import { POPPINS_FONT, COMPONENT_FONT_SIZES } from "@/constant/fontSizes";
+import { BASE_COLORS } from "@/constants/colors";
+import { POPPINS_FONT, COMPONENT_FONT_SIZES } from "@/constants/fontSizes";
 
 interface DifficultyCardProps {
   diffProgress: DifficultyProgress;

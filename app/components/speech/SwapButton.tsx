@@ -8,7 +8,7 @@ import {
   Easing,
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
-import { BASE_COLORS } from "@/constant/colors";
+import { BASE_COLORS } from "@/constants/colors";
 import { Repeat } from "react-native-feather";
 
 interface SwapButtonProps {

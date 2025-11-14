@@ -8,8 +8,8 @@ import {
   ActivityIndicator,
   TouchableOpacity,
 } from "react-native";
-import { BASE_COLORS, TITLE_COLORS } from "@/constant/colors";
-import { COMPONENT_FONT_SIZES, POPPINS_FONT } from "@/constant/fontSizes";
+import { BASE_COLORS, TITLE_COLORS } from "@/constants/colors";
+import { COMPONENT_FONT_SIZES, POPPINS_FONT } from "@/constants/fontSizes";
 
 interface SubmitButtonProps {
   activeTab: "signin" | "signup";

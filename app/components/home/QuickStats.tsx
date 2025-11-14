@@ -1,8 +1,8 @@
 import React from "react";
 import { View, Text, Image, StyleSheet } from "react-native";
 import { Target, TrendingUp } from "react-native-feather";
-import { BASE_COLORS } from "@/constant/colors";
-import { COMPONENT_FONT_SIZES, POPPINS_FONT } from "@/constant/fontSizes";
+import { BASE_COLORS } from "@/constants/colors";
+import { COMPONENT_FONT_SIZES, POPPINS_FONT } from "@/constants/fontSizes";
 
 interface QuickStatsProps {
   overallStats: {

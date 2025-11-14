@@ -2,15 +2,15 @@ import React, { useState, useEffect } from "react";
 import { View, StyleSheet, TouchableOpacity, AppState } from "react-native";
 import { Dropdown } from "react-native-element-dropdown";
 import { Ionicons } from "@expo/vector-icons";
-import { DIALECTS } from "@/constant/languages";
-import { BASE_COLORS } from "@/constant/colors";
+import { DIALECTS } from "@/constants/languages";
+import { BASE_COLORS } from "@/constants/colors";
 import useLanguageStore from "@/store/useLanguageStore";
 import ConfidenceModal from "@/components/ConfidenceModal";
 import {
   FONT_SIZES,
   POPPINS_FONT,
   COMPONENT_FONT_SIZES,
-} from "@/constant/fontSizes";
+} from "@/constants/fontSizes";
 
 interface LanguageSectionHeaderProps {
   position: "top" | "bottom";

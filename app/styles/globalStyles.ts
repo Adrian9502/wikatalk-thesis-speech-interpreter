@@ -1,5 +1,5 @@
 import { StyleSheet } from "react-native";
-import { TITLE_COLORS } from "@/constant/colors";
+import { TITLE_COLORS } from "@/constants/colors";
 
 export const getGlobalStyles = (backgroundColor: string) =>
   StyleSheet.create({

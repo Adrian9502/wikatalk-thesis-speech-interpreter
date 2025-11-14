@@ -1,9 +1,9 @@
 import React, { useEffect, useRef, useState, useCallback } from "react";
 import { View, Text, StyleSheet } from "react-native";
 import { Clock } from "react-native-feather";
-import { BASE_COLORS } from "@/constant/colors";
+import { BASE_COLORS } from "@/constants/colors";
 import useGameStore from "@/store/games/useGameStore";
-import { COMPONENT_FONT_SIZES, POPPINS_FONT } from "@/constant/fontSizes";
+import { COMPONENT_FONT_SIZES, POPPINS_FONT } from "@/constants/fontSizes";
 
 interface TimerProps {
   isRunning: boolean;

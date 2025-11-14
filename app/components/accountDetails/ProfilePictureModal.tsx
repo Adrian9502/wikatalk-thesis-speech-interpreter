@@ -6,7 +6,7 @@ import {
   StyleSheet,
   ActivityIndicator,
 } from "react-native";
-import { BASE_COLORS } from "@/constant/colors";
+import { BASE_COLORS } from "@/constants/colors";
 import CloseButton from "../games/buttons/CloseButton";
 
 interface ProfilePictureModalProps {

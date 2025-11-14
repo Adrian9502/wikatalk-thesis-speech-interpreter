@@ -10,8 +10,8 @@ import {
   TextStyle,
   ImageStyle,
 } from "react-native";
-import { BASE_COLORS, ICON_COLORS } from "@/constant/colors";
-import { COMPONENT_FONT_SIZES, POPPINS_FONT } from "@/constant/fontSizes";
+import { BASE_COLORS, ICON_COLORS } from "@/constants/colors";
+import { COMPONENT_FONT_SIZES, POPPINS_FONT } from "@/constants/fontSizes";
 
 interface ResetButtonProps {
   // Core functionality

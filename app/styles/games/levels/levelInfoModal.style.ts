@@ -1,9 +1,9 @@
-import { BASE_COLORS } from "@/constant/colors";
+import { BASE_COLORS } from "@/constants/colors";
 import {
   FONT_SIZES,
   COMPONENT_FONT_SIZES,
   POPPINS_FONT,
-} from "@/constant/fontSizes";
+} from "@/constants/fontSizes";
 import { StyleSheet } from "react-native";
 
 export const styles = StyleSheet.create({

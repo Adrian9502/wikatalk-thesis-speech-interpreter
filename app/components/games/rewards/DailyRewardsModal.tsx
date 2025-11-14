@@ -17,8 +17,8 @@ import BalanceCard from "./dailyRewardsModal/BalanceCard";
 import { getDayRewardAmount } from "@/hooks/useRewards";
 import ModalLoading from "@/components/ModalLoading";
 import CloseButton from "../buttons/CloseButton";
-import { BASE_COLORS } from "@/constant/colors";
-import { POPPINS_FONT, COMPONENT_FONT_SIZES } from "@/constant/fontSizes";
+import { BASE_COLORS } from "@/constants/colors";
+import { POPPINS_FONT, COMPONENT_FONT_SIZES } from "@/constants/fontSizes";
 // sound
 import { playSound } from "@/utils/playSound";
 

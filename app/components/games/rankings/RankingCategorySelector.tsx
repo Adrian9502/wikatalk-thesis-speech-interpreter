@@ -7,9 +7,9 @@ import {
   View,
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
-import { RANKING_CATEGORIES } from "@/constant/rankingConstants";
-import { BASE_COLORS, RANKING_SELECTOR_COLORS } from "@/constant/colors";
-import { COMPONENT_FONT_SIZES, POPPINS_FONT } from "@/constant/fontSizes";
+import { RANKING_CATEGORIES } from "@/constants/rankingConstants";
+import { BASE_COLORS, RANKING_SELECTOR_COLORS } from "@/constants/colors";
+import { COMPONENT_FONT_SIZES, POPPINS_FONT } from "@/constants/fontSizes";
 
 interface RankingCategorySelectorProps {
   selectedCategory: string;

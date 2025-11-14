@@ -2,7 +2,7 @@ import React from "react";
 import { View, Text, StyleSheet } from "react-native";
 import { MessageCircle } from "react-native-feather";
 import { PhrasesSection as PhrasesSectionType } from "@/types/languageInfo";
-import { FONT_SIZES, POPPINS_FONT } from "@/constant/fontSizes";
+import { FONT_SIZES, POPPINS_FONT } from "@/constants/fontSizes";
 
 interface PhrasesSectionProps {
   data: PhrasesSectionType["data"];

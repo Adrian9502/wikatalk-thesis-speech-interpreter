@@ -9,14 +9,14 @@ import {
   Dimensions,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import { BASE_COLORS } from "@/constant/colors";
+import { BASE_COLORS } from "@/constants/colors";
 import DotsLoader from "../DotLoader";
 import ConfidenceModal from "@/components/ConfidenceModal";
 import {
   FONT_SIZES,
   POPPINS_FONT,
   COMPONENT_FONT_SIZES,
-} from "@/constant/fontSizes";
+} from "@/constants/fontSizes";
 
 const { width: screenWidth, height: screenHeight } = Dimensions.get("window");
 

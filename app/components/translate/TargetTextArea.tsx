@@ -8,7 +8,7 @@ import {
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
-import { BASE_COLORS } from "@/constant/colors";
+import { BASE_COLORS } from "@/constants/colors";
 import { useTranslateStore } from "@/store/useTranslateStore";
 import DotsLoader from "@/components/DotLoader";
 import { textAreaStyles } from "@/styles/translate/textArea.styles";

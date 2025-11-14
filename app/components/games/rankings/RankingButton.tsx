@@ -1,7 +1,7 @@
 import React from "react";
 import { TouchableOpacity, Text, StyleSheet } from "react-native";
-import { BASE_COLORS, ICON_COLORS } from "@/constant/colors";
-import { POPPINS_FONT, COMPONENT_FONT_SIZES } from "@/constant/fontSizes";
+import { BASE_COLORS, ICON_COLORS } from "@/constants/colors";
+import { POPPINS_FONT, COMPONENT_FONT_SIZES } from "@/constants/fontSizes";
 import { Ionicons } from "@expo/vector-icons";
 
 interface RankingButtonProps {

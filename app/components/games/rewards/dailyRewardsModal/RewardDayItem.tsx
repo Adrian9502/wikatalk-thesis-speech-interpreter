@@ -3,7 +3,7 @@ import { View, Text, Image } from "react-native";
 import { Check, X } from "react-native-feather";
 import { rewardStyles } from "@/styles/games/rewards.styles";
 import { RewardDay } from "@/hooks/useRewards";
-import { BASE_COLORS } from "@/constant/colors";
+import { BASE_COLORS } from "@/constants/colors";
 interface RewardDayItemProps {
   item: RewardDay;
 }

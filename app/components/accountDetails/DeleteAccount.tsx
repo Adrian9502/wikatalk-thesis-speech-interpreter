@@ -7,10 +7,10 @@ import { useAuth } from "@/context/AuthContext";
 import Button from "@/components/accountDetails/Button";
 import FormInput from "@/components/FormInput";
 import { AlertCircle, AlertTriangle, KeyRound } from "lucide-react-native";
-import { BASE_COLORS, TITLE_COLORS } from "@/constant/colors";
+import { BASE_COLORS, TITLE_COLORS } from "@/constants/colors";
 import ConfirmationModal from "@/components/ConfirmationModal";
 import CloseButton from "../games/buttons/CloseButton";
-import { COMPONENT_FONT_SIZES, POPPINS_FONT } from "@/constant/fontSizes";
+import { COMPONENT_FONT_SIZES, POPPINS_FONT } from "@/constants/fontSizes";
 
 // Define validation schema
 const verificationCodeSchema = yup.object({

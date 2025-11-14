@@ -2,13 +2,13 @@ import React, { useMemo } from "react";
 import { TouchableOpacity, Text, StyleSheet, Image, View } from "react-native";
 
 import { LinearGradient } from "expo-linear-gradient";
-import { BASE_COLORS } from "@/constant/colors";
+import { BASE_COLORS } from "@/constants/colors";
 import useHintStore from "@/store/games/useHintStore";
 import useCoinsStore from "@/store/games/useCoinsStore";
 
 // sound
 import { playSound } from "@/utils/playSound";
-import { COMPONENT_FONT_SIZES, POPPINS_FONT } from "@/constant/fontSizes";
+import { COMPONENT_FONT_SIZES, POPPINS_FONT } from "@/constants/fontSizes";
 
 interface HintButtonProps {
   questionId: string;

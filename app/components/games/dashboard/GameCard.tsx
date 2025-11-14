@@ -11,8 +11,8 @@ import { TrendingUp, Play } from "react-native-feather";
 import useProgressStore from "@/store/games/useProgressStore";
 import { getGameModeGradient } from "@/utils/gameUtils";
 import { useFormattedStats } from "@/utils/gameStatsUtils";
-import { BASE_COLORS } from "@/constant/colors";
-import { POPPINS_FONT, COMPONENT_FONT_SIZES } from "@/constant/fontSizes";
+import { BASE_COLORS } from "@/constants/colors";
+import { POPPINS_FONT, COMPONENT_FONT_SIZES } from "@/constants/fontSizes";
 
 interface GameCardProps {
   game: any;

@@ -2,9 +2,9 @@ import React, { useEffect, useState } from "react";
 import { View, Text, StyleSheet, Animated } from "react-native";
 import { Award } from "react-native-feather";
 import { SectionHeader } from "@/components/games/common/SectionHeader";
-import { BASE_COLORS } from "@/constant/colors";
+import { BASE_COLORS } from "@/constants/colors";
 import { useFormattedStats } from "@/utils/gameStatsUtils";
-import { POPPINS_FONT, COMPONENT_FONT_SIZES } from "@/constant/fontSizes";
+import { POPPINS_FONT, COMPONENT_FONT_SIZES } from "@/constants/fontSizes";
 
 // SIMPLE: Global flag
 let PROGRESS_ANIMATION_PLAYED = false;

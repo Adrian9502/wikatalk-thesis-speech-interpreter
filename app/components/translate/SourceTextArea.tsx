@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { View, TextInput, TouchableOpacity, Text } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
-import { BASE_COLORS } from "@/constant/colors";
+import { BASE_COLORS } from "@/constants/colors";
 import { useTranslateStore } from "@/store/useTranslateStore";
 import { useAuthStore } from "@/store/useAuthStore";
 import { textAreaStyles } from "@/styles/translate/textArea.styles";

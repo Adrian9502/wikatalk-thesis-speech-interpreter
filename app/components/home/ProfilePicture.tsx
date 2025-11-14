@@ -1,8 +1,8 @@
 import React, { useState } from "react";
 import { View, Image, TouchableOpacity, Text, StyleSheet } from "react-native";
-import { BASE_COLORS } from "@/constant/colors";
+import { BASE_COLORS } from "@/constants/colors";
 import ProfilePictureModal from "@/components/accountDetails/ProfilePictureModal";
-import { FONT_SIZES, POPPINS_FONT } from "@/constant/fontSizes";
+import { FONT_SIZES, POPPINS_FONT } from "@/constants/fontSizes";
 
 interface ProfilePictureProps {
   userData: any;

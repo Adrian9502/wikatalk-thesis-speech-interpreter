@@ -22,16 +22,16 @@ import {
   BASE_COLORS,
   GAME_MODE_GRADIENTS,
   ICON_COLORS,
-} from "@/constant/colors";
-import { GAME_MODES } from "@/constant/gameConstants";
-import { GAME_ICONS_COLORS } from "@/constant/colors";
-import { NAVIGATION_COLORS } from "@/constant/colors";
+} from "@/constants/colors";
+import { GAME_MODES } from "@/constants/gameConstants";
+import { GAME_ICONS_COLORS } from "@/constants/colors";
+import { NAVIGATION_COLORS } from "@/constants/colors";
 import { useLevelData } from "@/hooks/useLevelData";
 import useGameStore from "@/store/games/useGameStore";
 import useProgressStore from "@/store/games/useProgressStore";
 import { useSplashStore } from "@/store/useSplashStore";
 import LevelInfoModal from "@/components/games/levels/LevelInfoModal";
-import { COMPONENT_FONT_SIZES, POPPINS_FONT } from "@/constant/fontSizes";
+import { COMPONENT_FONT_SIZES, POPPINS_FONT } from "@/constants/fontSizes";
 
 const { width: screenWidth } = Dimensions.get("window");
 

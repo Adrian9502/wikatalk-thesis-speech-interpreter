@@ -2,7 +2,7 @@ import React from "react";
 import { View, StyleSheet } from "react-native";
 import { Mail, User, Calendar, Smartphone } from "react-native-feather";
 import { InfoItem } from "./InfoItem";
-import { BASE_COLORS } from "@/constant/colors";
+import { BASE_COLORS } from "@/constants/colors";
 
 interface InfoSectionProps {
   userData: any;

@@ -6,7 +6,7 @@ import { Feather } from "@expo/vector-icons";
 import { Check, X, AlertTriangle, Info } from "lucide-react-native";
 import styles from "@/styles/editProfileStyles";
 import useThemeStore from "@/store/useThemeStore";
-import { BASE_COLORS } from "@/constant/colors";
+import { BASE_COLORS } from "@/constants/colors";
 
 const LockIcon = React.memo((props: any) => <Feather name="lock" {...props} />);
 

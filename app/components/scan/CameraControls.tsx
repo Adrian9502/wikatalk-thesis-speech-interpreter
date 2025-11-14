@@ -7,7 +7,7 @@ import {
   Dimensions,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import { BASE_COLORS } from "@/constant/colors";
+import { BASE_COLORS } from "@/constants/colors";
 
 const { width: screenWidth, height: screenHeight } = Dimensions.get("window");
 

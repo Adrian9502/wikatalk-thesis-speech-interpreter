@@ -1,8 +1,8 @@
 import React, { useEffect } from "react";
 import { View, Text, StyleSheet, Image, ActivityIndicator } from "react-native";
-import { BASE_COLORS, ICON_COLORS } from "@/constant/colors";
+import { BASE_COLORS, ICON_COLORS } from "@/constants/colors";
 import useCoinsStore from "@/store/games/useCoinsStore";
-import { COMPONENT_FONT_SIZES, POPPINS_FONT } from "@/constant/fontSizes";
+import { COMPONENT_FONT_SIZES, POPPINS_FONT } from "@/constants/fontSizes";
 
 interface UserBalanceProps {
   onPress?: () => void;

@@ -2,8 +2,8 @@ import React from "react";
 import { View, Text, StyleSheet, Dimensions } from "react-native";
 
 import { formatTime } from "@/utils/gameUtils";
-import { BASE_COLORS } from "@/constant/colors";
-import { COMPONENT_FONT_SIZES, POPPINS_FONT } from "@/constant/fontSizes";
+import { BASE_COLORS } from "@/constants/colors";
+import { COMPONENT_FONT_SIZES, POPPINS_FONT } from "@/constants/fontSizes";
 import StatBox from "./StatBox";
 const { width: screenWidth } = Dimensions.get("window");
 const isSmallScreen = screenWidth < 350;

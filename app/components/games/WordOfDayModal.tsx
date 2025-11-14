@@ -11,12 +11,12 @@ import * as Animatable from "react-native-animatable";
 import { LinearGradient } from "expo-linear-gradient";
 import LottieView from "lottie-react-native";
 import CloseButton from "./buttons/CloseButton";
-import { BASE_COLORS, WORD_OF_DAY_GRADIENT } from "@/constant/colors";
+import { BASE_COLORS, WORD_OF_DAY_GRADIENT } from "@/constants/colors";
 import {
   POPPINS_FONT,
   COMPONENT_FONT_SIZES,
   FONT_SIZES,
-} from "@/constant/fontSizes";
+} from "@/constants/fontSizes";
 
 interface WordOfDayModalProps {
   visible: boolean;

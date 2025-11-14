@@ -8,7 +8,7 @@ import {
 } from "react-native";
 import { Eye, EyeOff } from "react-native-feather";
 import { LinearGradient } from "expo-linear-gradient";
-import { BASE_COLORS } from "@/constant/colors";
+import { BASE_COLORS } from "@/constants/colors";
 import { getGameModeGradient } from "@/utils/gameUtils";
 import styles from "@/styles/games/identification.styles";
 import gamesSharedStyles from "@/styles/gamesSharedStyles";

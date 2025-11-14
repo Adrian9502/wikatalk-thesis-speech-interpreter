@@ -13,12 +13,12 @@ import {
 } from "react-native";
 import Clipboard from "@react-native-clipboard/clipboard";
 import { Feather } from "@expo/vector-icons";
-import { BASE_COLORS } from "@/constant/colors";
+import { BASE_COLORS } from "@/constants/colors";
 import {
   COMPONENT_FONT_SIZES,
   FONT_SIZES,
   POPPINS_FONT,
-} from "@/constant/fontSizes";
+} from "@/constants/fontSizes";
 import { SocialLink, SocialLinkType } from "@/types/teamMebersTypes";
 
 // Define props interface for the component

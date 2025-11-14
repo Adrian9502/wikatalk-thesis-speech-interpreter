@@ -4,8 +4,8 @@ import { Control } from "react-hook-form";
 import FormInput from "@/components/FormInput";
 import { Feather } from "@expo/vector-icons";
 import styles from "@/styles/editProfileStyles";
-import { COMPONENT_FONT_SIZES, POPPINS_FONT } from "@/constant/fontSizes";
-import { BASE_COLORS } from "@/constant/colors";
+import { COMPONENT_FONT_SIZES, POPPINS_FONT } from "@/constants/fontSizes";
+import { BASE_COLORS } from "@/constants/colors";
 
 // Memoize icon components to prevent recreation
 const UserIcon = React.memo((props: any) => <Feather name="user" {...props} />);

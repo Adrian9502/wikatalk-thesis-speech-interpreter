@@ -1,8 +1,8 @@
 import React from "react";
 import { View, Text, StyleSheet } from "react-native";
-import { BASE_COLORS, ICON_COLORS } from "@/constant/colors";
+import { BASE_COLORS, ICON_COLORS } from "@/constants/colors";
 import MaterialCommunityIcons from "react-native-vector-icons/MaterialCommunityIcons";
-import { FONT_SIZES, POPPINS_FONT } from "@/constant/fontSizes";
+import { FONT_SIZES, POPPINS_FONT } from "@/constants/fontSizes";
 
 interface DifficultyBadgeProps {
   difficulty?: string;

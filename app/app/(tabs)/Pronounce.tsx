@@ -27,15 +27,15 @@ import ErrorState from "@/components/pronunciation/ErrorState";
 // Import styles and types
 import { pronunciationStyles as styles } from "@/styles/pronunciationStyles";
 import { PronunciationItem } from "@/types/pronunciationTypes";
-import { BASE_COLORS } from "@/constant/colors";
+import { BASE_COLORS } from "@/constants/colors";
 import { Dropdown } from "react-native-element-dropdown";
-import { DIALECTS } from "@/constant/languages";
+import { DIALECTS } from "@/constants/languages";
 import { Ionicons } from "@expo/vector-icons";
 import {
   COMPONENT_FONT_SIZES,
   FONT_SIZES,
   POPPINS_FONT,
-} from "@/constant/fontSizes";
+} from "@/constants/fontSizes";
 
 // Tutorial imports
 import { TutorialTarget } from "@/components/tutorial/TutorialTarget";

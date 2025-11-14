@@ -12,10 +12,10 @@ import { LinearGradient } from "expo-linear-gradient";
 import RankingCategorySelector from "@/components/games/rankings/RankingCategorySelector";
 import RankingContent from "@/components/games/rankings/RankingContent";
 import CloseButton from "@/components/games/buttons/CloseButton";
-import { BASE_COLORS, RANKING_COLORS } from "@/constant/colors";
+import { BASE_COLORS, RANKING_COLORS } from "@/constants/colors";
 import { InteractionManager } from "react-native";
 import ModalLoading from "../ModalLoading";
-import { COMPONENT_FONT_SIZES, POPPINS_FONT } from "@/constant/fontSizes";
+import { COMPONENT_FONT_SIZES, POPPINS_FONT } from "@/constants/fontSizes";
 
 // Create context for modal control
 const RankingsModalContext = createContext<{

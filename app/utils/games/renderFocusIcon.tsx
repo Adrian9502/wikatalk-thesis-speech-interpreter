@@ -1,5 +1,5 @@
 import React from "react";
-import { BASE_COLORS } from "@/constant/colors";
+import { BASE_COLORS } from "@/constants/colors";
 import Feather from "react-native-vector-icons/Feather";
 
 export const renderFocusIcon = (focusArea: string = "vocabulary") => {

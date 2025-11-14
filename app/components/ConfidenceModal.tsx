@@ -1,6 +1,6 @@
 import React from "react";
 import { View, StyleSheet, Modal, ScrollView, Dimensions } from "react-native";
-import { BASE_COLORS } from "@/constant/colors";
+import { BASE_COLORS } from "@/constants/colors";
 import useThemeStore from "@/store/useThemeStore";
 import ConfidenceModalHeader from "./confidenceModal/ConfidenceModalHeader";
 import LanguageStats from "./confidenceModal/LanguageStats";

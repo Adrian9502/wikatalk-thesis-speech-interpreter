@@ -1,7 +1,7 @@
 import React from "react";
 import { View, Text, TouchableOpacity } from "react-native";
 import { AlertTriangle, RefreshCw } from "react-native-feather";
-import { BASE_COLORS } from "@/constant/colors";
+import { BASE_COLORS } from "@/constants/colors";
 import { levelStyles as styles } from "@/styles/games/levels.styles";
 
 interface ErrorStateProps {

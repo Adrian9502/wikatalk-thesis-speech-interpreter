@@ -13,9 +13,9 @@ import {
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
-import { BASE_COLORS } from "@/constant/colors";
+import { BASE_COLORS } from "@/constants/colors";
 import getLanguageBackground from "@/utils/getLanguageBackground";
-import { FONT_SIZES, POPPINS_FONT } from "@/constant/fontSizes";
+import { FONT_SIZES, POPPINS_FONT } from "@/constants/fontSizes";
 
 interface LanguageBottomSectionProps {
   language: string;

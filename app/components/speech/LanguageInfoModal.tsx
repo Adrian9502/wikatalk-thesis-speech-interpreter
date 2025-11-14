@@ -8,13 +8,13 @@ import {
   FlatList,
 } from "react-native";
 import getLanguageBackground from "@/utils/getLanguageBackground";
-import { LANGUAGE_INFO } from "@/constant/languages";
+import { LANGUAGE_INFO } from "@/constants/languages";
 import useThemeStore from "@/store/useThemeStore";
 import SectionRenderer from "@/components/speech/languageInfoModal/SectionRenderer";
 import { createSections } from "@/utils/speech/languageInfoSection";
 import CloseButton from "../games/buttons/CloseButton";
-import { BASE_COLORS } from "@/constant/colors";
-import { COMPONENT_FONT_SIZES, POPPINS_FONT } from "@/constant/fontSizes";
+import { BASE_COLORS } from "@/constants/colors";
+import { COMPONENT_FONT_SIZES, POPPINS_FONT } from "@/constants/fontSizes";
 
 interface LanguageInfoModalProps {
   visible: boolean;

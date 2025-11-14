@@ -5,14 +5,14 @@ import { Target } from "react-native-feather";
 import DifficultyCard from "./DifficultyCard";
 import StatGrid from "./StatGrid";
 import RecentAttempt from "./RecentAttempt";
-import { BASE_COLORS, ICON_COLORS } from "@/constant/colors";
+import { BASE_COLORS, ICON_COLORS } from "@/constants/colors";
 // NEW: Import centralized stats utilities
 import { useGameModeSummaryStats } from "@/utils/gameStatsUtils";
 import {
   POPPINS_FONT,
   COMPONENT_FONT_SIZES,
   FONT_SIZES,
-} from "@/constant/fontSizes";
+} from "@/constants/fontSizes";
 
 interface ProgressContentProps {
   progressData: EnhancedGameModeProgress | null;

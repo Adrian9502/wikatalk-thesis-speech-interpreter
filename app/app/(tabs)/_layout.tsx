@@ -19,7 +19,7 @@ import { useFocusEffect } from "@react-navigation/native";
 import { StatusBar } from "expo-status-bar";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import NetworkStatusBar from "@/components/NetworkStatusBar";
-import { POPPINS_FONT } from "@/constant/fontSizes";
+import { POPPINS_FONT } from "@/constants/fontSizes";
 // NEW: Import tutorial context
 import { useTutorial } from "@/context/TutorialContext";
 import {

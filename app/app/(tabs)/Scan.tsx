@@ -16,7 +16,7 @@ import {
   SafeAreaView,
   useSafeAreaInsets,
 } from "react-native-safe-area-context";
-import { BASE_COLORS } from "@/constant/colors";
+import { BASE_COLORS } from "@/constants/colors";
 import { useScanTranslateStore } from "@/store/useScanTranslateStore";
 import { useImageProcessing } from "@/hooks/useImageProcessing";
 import DotsLoader from "@/components/DotLoader";
@@ -31,7 +31,7 @@ import {
   FONT_SIZES,
   POPPINS_FONT,
   COMPONENT_FONT_SIZES,
-} from "@/constant/fontSizes";
+} from "@/constants/fontSizes";
 import { TutorialTarget } from "@/components/tutorial/TutorialTarget";
 import { useTutorial } from "@/context/TutorialContext";
 import { SCAN_TUTORIAL } from "@/constants/tutorials";

@@ -6,9 +6,9 @@ import {
   StyleSheet,
   Dimensions,
 } from "react-native";
-import { BASE_COLORS } from "@/constant/colors";
+import { BASE_COLORS } from "@/constants/colors";
 import { AlertTriangle, RefreshCw } from "react-native-feather";
-import { POPPINS_FONT, COMPONENT_FONT_SIZES } from "@/constant/fontSizes";
+import { POPPINS_FONT, COMPONENT_FONT_SIZES } from "@/constants/fontSizes";
 
 const { width: screenWidth, height: screenHeight } = Dimensions.get("window");
 

@@ -10,8 +10,8 @@ import { LucideIcon, Eye, EyeOff, X } from "lucide-react-native";
 import { useState } from "react";
 import { Control, Controller, FieldValues, Path } from "react-hook-form";
 import React from "react";
-import { COMPONENT_FONT_SIZES, POPPINS_FONT } from "@/constant/fontSizes";
-import { BASE_COLORS } from "@/constant/colors";
+import { COMPONENT_FONT_SIZES, POPPINS_FONT } from "@/constants/fontSizes";
+import { BASE_COLORS } from "@/constants/colors";
 
 // Generic FormInput component that works with any form type
 interface FormInputProps<T extends FieldValues> {

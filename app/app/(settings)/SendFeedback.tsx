@@ -14,8 +14,8 @@ import {
   useSafeAreaInsets,
 } from "react-native-safe-area-context";
 import { StatusBar } from "expo-status-bar";
-import { BASE_COLORS } from "@/constant/colors";
-import { COMPONENT_FONT_SIZES, POPPINS_FONT } from "@/constant/fontSizes";
+import { BASE_COLORS } from "@/constants/colors";
+import { COMPONENT_FONT_SIZES, POPPINS_FONT } from "@/constants/fontSizes";
 import { Send, AlertCircle, MessageSquare, X } from "react-native-feather";
 import MaterialCommunityIcons from "react-native-vector-icons/MaterialCommunityIcons";
 import showNotification from "@/lib/showNotification";

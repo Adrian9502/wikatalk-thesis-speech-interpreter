@@ -3,7 +3,7 @@ import { View, StyleSheet, Animated } from "react-native";
 import useThemeStore from "@/store/useThemeStore";
 import * as ThemeRenderers from "@/components/settings/ThemeSelectorRenderers";
 import { ThemeOption } from "@/types/types";
-import { BASE_COLORS } from "@/constant/colors";
+import { BASE_COLORS } from "@/constants/colors";
 
 // Category types to organize themes
 type ThemeCategory = {

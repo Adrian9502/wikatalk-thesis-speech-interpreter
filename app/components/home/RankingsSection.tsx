@@ -1,10 +1,10 @@
 import React, { useState } from "react";
 import { View, Text, StyleSheet } from "react-native";
 import { BookOpen } from "react-native-feather";
-import { BASE_COLORS } from "@/constant/colors";
+import { BASE_COLORS } from "@/constants/colors";
 import RankingCategorySelector from "@/components/games/rankings/RankingCategorySelector";
 import HomePageRankingContent from "./HomePageRankingContent";
-import { COMPONENT_FONT_SIZES, POPPINS_FONT } from "@/constant/fontSizes";
+import { COMPONENT_FONT_SIZES, POPPINS_FONT } from "@/constants/fontSizes";
 
 const RankingsSection = React.memo(() => {
   const [selectedRankingCategory, setSelectedRankingCategory] =

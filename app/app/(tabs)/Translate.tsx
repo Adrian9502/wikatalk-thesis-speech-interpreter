@@ -17,10 +17,10 @@ import {
 import { Dropdown } from "react-native-element-dropdown";
 import { LinearGradient } from "expo-linear-gradient";
 import { Ionicons } from "@expo/vector-icons";
-import { DIALECTS } from "@/constant/languages";
+import { DIALECTS } from "@/constants/languages";
 import { LanguageOption } from "@/types/types";
 import QuickPhrases from "@/components/translate/QuickPhrases";
-import { BASE_COLORS } from "@/constant/colors";
+import { BASE_COLORS } from "@/constants/colors";
 import {
   useTranslateStore,
   debouncedTranslate,
@@ -36,7 +36,7 @@ import {
   FONT_SIZES,
   POPPINS_FONT,
   COMPONENT_FONT_SIZES,
-} from "@/constant/fontSizes";
+} from "@/constants/fontSizes";
 import { TutorialTarget } from "@/components/tutorial/TutorialTarget";
 import { useTutorial } from "@/context/TutorialContext";
 import { TRANSLATE_TUTORIAL } from "@/constants/tutorials";

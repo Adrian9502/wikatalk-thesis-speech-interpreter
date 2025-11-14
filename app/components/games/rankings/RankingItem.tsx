@@ -3,8 +3,8 @@ import { View, Text, StyleSheet, Image } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { RankingUser } from "@/types/rankingTypes";
 import { formatTime } from "@/utils/gameUtils";
-import { ICON_COLORS, BASE_COLORS } from "@/constant/colors";
-import { COMPONENT_FONT_SIZES, POPPINS_FONT } from "@/constant/fontSizes";
+import { ICON_COLORS, BASE_COLORS } from "@/constants/colors";
+import { COMPONENT_FONT_SIZES, POPPINS_FONT } from "@/constants/fontSizes";
 
 interface RankingItemProps {
   user: RankingUser;

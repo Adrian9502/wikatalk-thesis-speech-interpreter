@@ -5,10 +5,10 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import {
   BASE_COLORS,
   NETWORK_STATUS_BACKGROUND_COLORS,
-} from "@/constant/colors";
+} from "@/constants/colors";
 import { WifiOff, AlertTriangle } from "react-native-feather";
 import { useNetworkStore } from "@/store/useNetworkStore";
-import { COMPONENT_FONT_SIZES, POPPINS_FONT } from "@/constant/fontSizes";
+import { COMPONENT_FONT_SIZES, POPPINS_FONT } from "@/constants/fontSizes";
 
 interface NetworkStatusBarProps {
   onHeightChange?: (height: number) => void;

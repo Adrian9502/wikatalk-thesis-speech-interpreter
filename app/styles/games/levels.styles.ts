@@ -1,10 +1,10 @@
 import { StyleSheet, Dimensions } from "react-native";
-import { BASE_COLORS } from "@/constant/colors";
+import { BASE_COLORS } from "@/constants/colors";
 import {
   FONT_SIZES,
   COMPONENT_FONT_SIZES,
   POPPINS_FONT,
-} from "@/constant/fontSizes";
+} from "@/constants/fontSizes";
 
 const { width, height } = Dimensions.get("window");
 

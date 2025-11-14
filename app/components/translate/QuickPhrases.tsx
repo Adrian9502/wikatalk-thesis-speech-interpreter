@@ -7,14 +7,14 @@ import {
   StyleSheet,
   Dimensions,
 } from "react-native";
-import QUICK_PHRASES from "@/constant/quickPhrases";
+import QUICK_PHRASES from "@/constants/quickPhrases";
 import { LanguageOption } from "@/types/types";
-import { BASE_COLORS } from "@/constant/colors";
+import { BASE_COLORS } from "@/constants/colors";
 import {
   FONT_SIZES,
   POPPINS_FONT,
   COMPONENT_FONT_SIZES,
-} from "@/constant/fontSizes";
+} from "@/constants/fontSizes";
 
 const { width: screenWidth, height: screenHeight } = Dimensions.get("window");
 

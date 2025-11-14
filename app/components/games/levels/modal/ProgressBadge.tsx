@@ -15,7 +15,7 @@ import {
 } from "react-native-feather";
 import { formatTime } from "@/utils/gameUtils";
 import ResetButton from "@/components/games/buttons/ResetButton";
-import { BASE_COLORS } from "@/constant/colors";
+import { BASE_COLORS } from "@/constants/colors";
 
 interface ProgressBadgeProps {
   progressInfo: {

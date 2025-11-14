@@ -1,8 +1,8 @@
 import { StyleSheet, Text, View } from "react-native";
 import React from "react";
 import { ActivityIndicator } from "react-native-paper";
-import { BASE_COLORS } from "@/constant/colors";
-import { FONT_SIZES, POPPINS_FONT } from "@/constant/fontSizes";
+import { BASE_COLORS } from "@/constants/colors";
+import { FONT_SIZES, POPPINS_FONT } from "@/constants/fontSizes";
 
 const ModalLoading = () => {
   return (

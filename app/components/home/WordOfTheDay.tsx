@@ -1,12 +1,12 @@
 import React from "react";
 import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
-import { BASE_COLORS, HOMEPAGE_COLORS } from "@/constant/colors";
+import { BASE_COLORS, HOMEPAGE_COLORS } from "@/constants/colors";
 import {
   COMPONENT_FONT_SIZES,
   FONT_SIZES,
   POPPINS_FONT,
-} from "@/constant/fontSizes";
+} from "@/constants/fontSizes";
 import { Calendar } from "react-native-feather";
 import { usePronunciationStore } from "@/store/usePronunciationStore";
 

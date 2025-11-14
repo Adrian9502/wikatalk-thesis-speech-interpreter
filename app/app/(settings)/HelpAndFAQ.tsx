@@ -15,8 +15,8 @@ import {
 import { ChevronDown, ChevronUp, Search, X } from "react-native-feather";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import useThemeStore from "@/store/useThemeStore";
-import { BASE_COLORS } from "@/constant/colors";
-import { COMPONENT_FONT_SIZES, POPPINS_FONT } from "@/constant/fontSizes";
+import { BASE_COLORS } from "@/constants/colors";
+import { COMPONENT_FONT_SIZES, POPPINS_FONT } from "@/constants/fontSizes";
 import faqItems from "@/utils/helpAndFAQ/faqItems";
 import { FAQItem } from "@/types/faqItems";
 import categories from "@/utils/helpAndFAQ/categories";

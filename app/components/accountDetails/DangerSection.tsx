@@ -3,8 +3,8 @@ import { View, Text, StyleSheet } from "react-native";
 import { AlertTriangle } from "lucide-react-native";
 import useThemeStore from "@/store/useThemeStore";
 import DeleteAccount from "./DeleteAccount";
-import { BASE_COLORS } from "@/constant/colors";
-import { COMPONENT_FONT_SIZES, POPPINS_FONT } from "@/constant/fontSizes";
+import { BASE_COLORS } from "@/constants/colors";
+import { COMPONENT_FONT_SIZES, POPPINS_FONT } from "@/constants/fontSizes";
 
 // Memoize the warning icon
 const WarningIcon = React.memo(() => (

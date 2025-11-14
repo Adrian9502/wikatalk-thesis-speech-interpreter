@@ -1,14 +1,14 @@
 import React from "react";
 import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
 import { ArrowLeft } from "react-native-feather";
-import { BASE_COLORS } from "@/constant/colors";
+import { BASE_COLORS } from "@/constants/colors";
 import { useNavigation } from "expo-router";
 import StatsContainer from "@/components/games/StatsContainer";
 import {
   COMPONENT_FONT_SIZES,
   FONT_SIZES,
   POPPINS_FONT,
-} from "@/constant/fontSizes";
+} from "@/constants/fontSizes";
 
 interface RewardInfo {
   coins: number;

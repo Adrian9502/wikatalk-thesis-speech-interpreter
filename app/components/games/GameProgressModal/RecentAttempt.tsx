@@ -3,8 +3,8 @@ import { View, Text, StyleSheet } from "react-native";
 import * as Animatable from "react-native-animatable";
 import { Clock, CheckCircle, XCircle } from "react-native-feather";
 import { formatTime } from "@/utils/gameUtils";
-import { BASE_COLORS } from "@/constant/colors";
-import { POPPINS_FONT, COMPONENT_FONT_SIZES } from "@/constant/fontSizes";
+import { BASE_COLORS } from "@/constants/colors";
+import { POPPINS_FONT, COMPONENT_FONT_SIZES } from "@/constants/fontSizes";
 
 interface RecentAttemptProps {
   attempt: {

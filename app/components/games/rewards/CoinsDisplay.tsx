@@ -7,8 +7,8 @@ import {
   Image,
   ActivityIndicator,
 } from "react-native";
-import { BASE_COLORS, TITLE_COLORS } from "@/constant/colors";
-import { POPPINS_FONT, COMPONENT_FONT_SIZES } from "@/constant/fontSizes";
+import { BASE_COLORS, TITLE_COLORS } from "@/constants/colors";
+import { POPPINS_FONT, COMPONENT_FONT_SIZES } from "@/constants/fontSizes";
 import useCoinsStore from "@/store/games/useCoinsStore";
 
 interface CoinsDisplayProps {

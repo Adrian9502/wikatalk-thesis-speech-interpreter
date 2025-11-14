@@ -13,7 +13,7 @@ import { StatusBar } from "expo-status-bar";
 import { router } from "expo-router";
 import { useAuth } from "@/context/AuthContext";
 import { useValidation } from "@/context/ValidationContext";
-import { BASE_COLORS } from "@/constant/colors";
+import { BASE_COLORS } from "@/constants/colors";
 import useThemeStore from "@/store/useThemeStore";
 import { getGlobalStyles } from "@/styles/globalStyles";
 // Component imports

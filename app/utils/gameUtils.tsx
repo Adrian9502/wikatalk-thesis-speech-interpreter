@@ -2,7 +2,7 @@ import {
   BASE_COLORS,
   GAME_MODE_GRADIENTS,
   ICON_COLORS,
-} from "@/constant/colors";
+} from "@/constants/colors";
 import { GameOption } from "@/types/gameTypes";
 import { Edit3, Target, Search } from "react-native-feather";
 import React from "react";

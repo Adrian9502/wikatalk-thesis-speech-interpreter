@@ -2,7 +2,7 @@ import {
   BASE_COLORS,
   CUSTOM_BACKGROUND,
   TITLE_COLORS,
-} from "@/constant/colors";
+} from "@/constants/colors";
 import { ThemeOption } from "@/types/types";
 
 // Create preset themes based on your existing colors

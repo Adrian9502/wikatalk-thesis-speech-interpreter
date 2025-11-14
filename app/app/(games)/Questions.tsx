@@ -9,13 +9,13 @@ import {
 import { useLocalSearchParams, router } from "expo-router";
 import useGameStore from "@/store/games/useGameStore";
 import useThemeStore from "@/store/useThemeStore";
-import { BASE_COLORS } from "@/constant/colors";
+import { BASE_COLORS } from "@/constants/colors";
 import AppLoading from "@/components/AppLoading";
 import LevelInfoModal from "@/components/games/levels/LevelInfoModal";
 import MultipleChoice from "./MultipleChoice";
 import Identification from "./Identification";
 import FillInTheBlank from "./FillInTheBlank";
-import { COMPONENT_FONT_SIZES, POPPINS_FONT } from "@/constant/fontSizes";
+import { COMPONENT_FONT_SIZES, POPPINS_FONT } from "@/constants/fontSizes";
 
 const Questions = () => {
   const params = useLocalSearchParams();

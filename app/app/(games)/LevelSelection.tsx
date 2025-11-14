@@ -12,7 +12,7 @@ import LevelHeader from "@/components/games/levels/LevelHeader";
 import LevelProgressBar from "@/components/games/levels/LevelProgressBar";
 import { levelStyles as styles } from "@/styles/games/levels.styles";
 import { useLevelData } from "@/hooks/useLevelData";
-import { DIFFICULTY_COLORS } from "@/constant/colors";
+import { DIFFICULTY_COLORS } from "@/constants/colors";
 import { useSplashStore } from "@/store/useSplashStore";
 import { useAnimationTracker } from "@/hooks/useAnimationTracker";
 

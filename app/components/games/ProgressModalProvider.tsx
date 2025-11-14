@@ -16,7 +16,7 @@ import { InteractionManager } from "react-native";
 import { getGameModeGradient } from "@/utils/gameUtils";
 import ModalLoading from "../ModalLoading";
 import CloseButton from "@/components/games/buttons/CloseButton";
-import { BASE_COLORS } from "@/constant/colors";
+import { BASE_COLORS } from "@/constants/colors";
 
 // Create context for modal control
 const ProgressModalContext = createContext<{

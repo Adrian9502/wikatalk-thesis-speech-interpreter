@@ -5,7 +5,7 @@ import { formatDifficulty } from "@/utils/games/difficultyUtils";
 import FocusAreaBadge from "@/components/games/FocusAreaBadge";
 import modalSharedStyles from "@/styles/games/modalSharedStyles";
 import CloseButton from "../../buttons/CloseButton";
-import { BASE_COLORS, ICON_COLORS } from "@/constant/colors";
+import { BASE_COLORS, ICON_COLORS } from "@/constants/colors";
 
 interface LevelHeaderProps {
   levelData: any;

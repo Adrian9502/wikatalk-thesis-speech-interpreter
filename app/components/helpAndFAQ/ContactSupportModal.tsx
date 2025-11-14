@@ -9,8 +9,8 @@ import {
   Platform,
 } from "react-native";
 import { Mail, Github } from "react-native-feather";
-import { BASE_COLORS } from "@/constant/colors";
-import { COMPONENT_FONT_SIZES, POPPINS_FONT } from "@/constant/fontSizes";
+import { BASE_COLORS } from "@/constants/colors";
+import { COMPONENT_FONT_SIZES, POPPINS_FONT } from "@/constants/fontSizes";
 import useThemeStore from "@/store/useThemeStore";
 import { Feather } from "@expo/vector-icons";
 import CloseButton from "../games/buttons/CloseButton";

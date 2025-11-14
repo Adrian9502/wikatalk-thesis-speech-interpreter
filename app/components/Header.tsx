@@ -1,7 +1,7 @@
 import React from "react";
 import { View, Text, TouchableOpacity } from "react-native";
 import { ArrowLeft } from "react-native-feather";
-import { BASE_COLORS } from "@/constant/colors";
+import { BASE_COLORS } from "@/constants/colors";
 
 import styles from "@/styles/accountDetailsStyles";
 import { useNavigation } from "expo-router";

@@ -10,8 +10,8 @@ import {
 import DotsLoader from "@/components/DotLoader";
 import useThemeStore from "@/store/useThemeStore";
 import { Modal } from "react-native";
-import { BASE_COLORS } from "@/constant/colors";
-import { FONT_SIZES, POPPINS_FONT } from "@/constant/fontSizes";
+import { BASE_COLORS } from "@/constants/colors";
+import { FONT_SIZES, POPPINS_FONT } from "@/constants/fontSizes";
 
 interface SpeechLoadingProps {
   onCancel?: () => void;

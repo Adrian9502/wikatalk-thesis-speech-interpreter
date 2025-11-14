@@ -6,9 +6,9 @@ import {
   ShowNotificationParams,
 } from "react-native-notifier";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { BASE_COLORS } from "@/constant/colors";
+import { BASE_COLORS } from "@/constants/colors";
 import { Ionicons } from "@expo/vector-icons";
-import { COMPONENT_FONT_SIZES, POPPINS_FONT } from "@/constant/fontSizes";
+import { COMPONENT_FONT_SIZES, POPPINS_FONT } from "@/constants/fontSizes";
 
 interface ShowNotificationData {
   type: "success" | "error" | "info";

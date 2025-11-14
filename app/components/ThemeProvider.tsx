@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import useThemeStore from "@/store/useThemeStore";
-import { CUSTOM_BACKGROUND } from "@/constant/colors";
+import { CUSTOM_BACKGROUND } from "@/constants/colors";
 
 interface ThemeProviderProps {
   children: React.ReactNode;

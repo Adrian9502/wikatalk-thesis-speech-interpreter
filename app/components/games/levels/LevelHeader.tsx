@@ -3,7 +3,7 @@ import { View, TouchableOpacity } from "react-native";
 import { ArrowLeft } from "react-native-feather";
 import * as Animatable from "react-native-animatable";
 import { router } from "expo-router";
-import { BASE_COLORS } from "@/constant/colors";
+import { BASE_COLORS } from "@/constants/colors";
 import { levelStyles as styles } from "@/styles/games/levels.styles";
 
 interface LevelHeaderProps {

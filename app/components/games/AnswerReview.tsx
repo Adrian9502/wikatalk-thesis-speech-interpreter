@@ -4,8 +4,8 @@ import { LinearGradient } from "expo-linear-gradient";
 import * as Animatable from "react-native-animatable";
 import { Check, X } from "react-native-feather";
 import MaterialCommunityIcons from "react-native-vector-icons/MaterialCommunityIcons";
-import { BASE_COLORS, TITLE_COLORS } from "@/constant/colors";
-import { GAME_RESULT_COLORS } from "@/constant/colors";
+import { BASE_COLORS, TITLE_COLORS } from "@/constants/colors";
+import { GAME_RESULT_COLORS } from "@/constants/colors";
 import { formatTimerDisplay, getGameModeGradient } from "@/utils/gameUtils";
 import { safeTextRender } from "@/utils/textUtils";
 import DifficultyBadge from "@/components/games/DifficultyBadge";
@@ -27,7 +27,7 @@ import {
   COMPONENT_FONT_SIZES,
   FONT_SIZES,
   POPPINS_FONT,
-} from "@/constant/fontSizes";
+} from "@/constants/fontSizes";
 
 const { width: screenWidth } = Dimensions.get("window");
 

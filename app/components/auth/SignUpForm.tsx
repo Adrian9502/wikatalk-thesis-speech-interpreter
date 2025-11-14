@@ -1,8 +1,8 @@
 import React, { useState } from "react";
 import { Text, StyleSheet, TouchableOpacity } from "react-native";
 import { User, Lock, Mail } from "lucide-react-native";
-import { BASE_COLORS } from "@/constant/colors";
-import { COMPONENT_FONT_SIZES, POPPINS_FONT } from "@/constant/fontSizes";
+import { BASE_COLORS } from "@/constants/colors";
+import { COMPONENT_FONT_SIZES, POPPINS_FONT } from "@/constants/fontSizes";
 import TermsOfUseModal from "@/components/legal/TermsOfUseModal";
 
 import FormInput from "@/components/FormInput";

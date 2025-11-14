@@ -5,8 +5,8 @@ import EditProfileModal from "./EditProfileModal";
 import { useAuth } from "@/context/AuthContext";
 import showNotification from "@/lib/showNotification";
 import { useAuthStore } from "@/store/useAuthStore";
-import { BASE_COLORS } from "@/constant/colors";
-import { COMPONENT_FONT_SIZES, POPPINS_FONT } from "@/constant/fontSizes";
+import { BASE_COLORS } from "@/constants/colors";
+import { COMPONENT_FONT_SIZES, POPPINS_FONT } from "@/constants/fontSizes";
 
 // Memoize the icon components
 const EditIcon = React.memo((props: any) => <Edit2 {...props} />);

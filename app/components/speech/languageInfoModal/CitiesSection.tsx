@@ -2,7 +2,7 @@ import React from "react";
 import { View, Text, StyleSheet } from "react-native";
 import { MapPin } from "react-native-feather";
 import { CitiesSection as CitiesSectionType } from "@/types/languageInfo";
-import { FONT_SIZES, POPPINS_FONT } from "@/constant/fontSizes";
+import { FONT_SIZES, POPPINS_FONT } from "@/constants/fontSizes";
 
 interface CitiesSectionProps {
   data: CitiesSectionType["data"];

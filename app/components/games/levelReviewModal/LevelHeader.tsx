@@ -6,8 +6,8 @@ import { getStarCount, formatDifficulty } from "@/utils/games/difficultyUtils";
 import { renderFocusIcon } from "@/utils/games/renderFocusIcon";
 import modalSharedStyles from "@/styles/games/modalSharedStyles";
 import FocusAreaBadge from "@/components/games/FocusAreaBadge";
-import { BASE_COLORS } from "@/constant/colors";
-import { COMPONENT_FONT_SIZES, POPPINS_FONT } from "@/constant/fontSizes";
+import { BASE_COLORS } from "@/constants/colors";
+import { COMPONENT_FONT_SIZES, POPPINS_FONT } from "@/constants/fontSizes";
 
 interface LevelHeaderProps {
   level: LevelData;

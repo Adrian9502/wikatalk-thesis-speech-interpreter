@@ -2,13 +2,13 @@ import React, { useState } from "react";
 import { StyleSheet, Text, View } from "react-native";
 import { Dropdown } from "react-native-element-dropdown";
 import { Ionicons } from "@expo/vector-icons";
-import { DIALECTS } from "@/constant/languages";
-import { BASE_COLORS } from "@/constant/colors";
+import { DIALECTS } from "@/constants/languages";
+import { BASE_COLORS } from "@/constants/colors";
 import {
   FONT_SIZES,
   POPPINS_FONT,
   COMPONENT_FONT_SIZES,
-} from "@/constant/fontSizes";
+} from "@/constants/fontSizes";
 
 interface LanguageSelectorProps {
   targetLanguage: string;

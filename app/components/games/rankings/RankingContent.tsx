@@ -11,10 +11,10 @@ import {
 import { RefreshCw } from "react-native-feather";
 import { useRankings } from "@/hooks/useRankings";
 import { RankingType, RankingUser } from "@/types/rankingTypes";
-import { getRankingCategory } from "@/constant/rankingConstants";
+import { getRankingCategory } from "@/constants/rankingConstants";
 import RankingItem from "./RankingItem";
-import { BASE_COLORS, ICON_COLORS } from "@/constant/colors";
-import { POPPINS_FONT, COMPONENT_FONT_SIZES } from "@/constant/fontSizes";
+import { BASE_COLORS, ICON_COLORS } from "@/constants/colors";
+import { POPPINS_FONT, COMPONENT_FONT_SIZES } from "@/constants/fontSizes";
 import { useAuth } from "@/context/AuthContext";
 
 interface RankingContentProps {

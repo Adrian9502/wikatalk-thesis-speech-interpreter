@@ -1,7 +1,7 @@
 import { StyleSheet, Text, View } from "react-native";
 import React from "react";
-import { BASE_COLORS, TITLE_COLORS } from "@/constant/colors";
-import { FONT_SIZES, POPPINS_FONT } from "@/constant/fontSizes";
+import { BASE_COLORS, TITLE_COLORS } from "@/constants/colors";
+import { FONT_SIZES, POPPINS_FONT } from "@/constants/fontSizes";
 
 const AppName = () => {
   return (

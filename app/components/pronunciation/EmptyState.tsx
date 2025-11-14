@@ -1,12 +1,12 @@
 import React from "react";
 import { View, Text, StyleSheet, Dimensions } from "react-native";
 import { Search, Globe } from "react-native-feather";
-import { BASE_COLORS } from "@/constant/colors";
+import { BASE_COLORS } from "@/constants/colors";
 import {
   FONT_SIZES,
   POPPINS_FONT,
   COMPONENT_FONT_SIZES,
-} from "@/constant/fontSizes"; // ADDED: Import font constants
+} from "@/constants/fontSizes"; // ADDED: Import font constants
 
 const { width: screenWidth, height: screenHeight } = Dimensions.get("window");
 

@@ -8,8 +8,8 @@ import {
   ActivityIndicator,
 } from "react-native";
 import { AlertTriangle } from "react-native-feather";
-import { BASE_COLORS, TITLE_COLORS } from "@/constant/colors";
-import { COMPONENT_FONT_SIZES, POPPINS_FONT } from "@/constant/fontSizes";
+import { BASE_COLORS, TITLE_COLORS } from "@/constants/colors";
+import { COMPONENT_FONT_SIZES, POPPINS_FONT } from "@/constants/fontSizes";
 
 interface ConfirmationModalProps {
   visible: boolean;

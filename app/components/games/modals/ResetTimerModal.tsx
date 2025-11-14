@@ -9,11 +9,11 @@ import {
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import * as Animatable from "react-native-animatable";
-import { BASE_COLORS } from "@/constant/colors";
-import { NAVIGATION_COLORS } from "@/constant/colors";
+import { BASE_COLORS } from "@/constants/colors";
+import { NAVIGATION_COLORS } from "@/constants/colors";
 import { StyleSheet } from "react-native";
 import CloseButton from "../buttons/CloseButton";
-import { COMPONENT_FONT_SIZES, POPPINS_FONT } from "@/constant/fontSizes";
+import { COMPONENT_FONT_SIZES, POPPINS_FONT } from "@/constants/fontSizes";
 
 interface ResetTimerModalProps {
   visible: boolean;

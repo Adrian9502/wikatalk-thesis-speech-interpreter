@@ -3,8 +3,8 @@ import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { Globe, Camera, Mic, Volume2, Target } from "react-native-feather";
 import { PanGestureHandler, State } from "react-native-gesture-handler";
-import { BASE_COLORS, HOMEPAGE_COLORS } from "@/constant/colors";
-import { COMPONENT_FONT_SIZES, POPPINS_FONT } from "@/constant/fontSizes";
+import { BASE_COLORS, HOMEPAGE_COLORS } from "@/constants/colors";
+import { COMPONENT_FONT_SIZES, POPPINS_FONT } from "@/constants/fontSizes";
 
 interface FeaturedSectionProps {
   onNavigateToTab: (tabName: string) => void;

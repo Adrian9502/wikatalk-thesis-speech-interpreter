@@ -7,11 +7,11 @@ import {
   StyleSheet,
   Dimensions,
 } from "react-native";
-import { BASE_COLORS } from "@/constant/colors";
+import { BASE_COLORS } from "@/constants/colors";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { Globe } from "react-native-feather";
 import { usePronunciationStore } from "@/store/usePronunciationStore";
-import { POPPINS_FONT, COMPONENT_FONT_SIZES } from "@/constant/fontSizes";
+import { POPPINS_FONT, COMPONENT_FONT_SIZES } from "@/constants/fontSizes";
 
 const { width: screenWidth, height: screenHeight } = Dimensions.get("window");
 

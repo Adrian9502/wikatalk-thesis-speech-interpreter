@@ -1,10 +1,10 @@
 import { StyleSheet, Dimensions } from "react-native";
-import { BASE_COLORS, ICON_COLORS } from "@/constant/colors";
+import { BASE_COLORS, ICON_COLORS } from "@/constants/colors";
 import {
   COMPONENT_FONT_SIZES,
   FONT_SIZES,
   POPPINS_FONT,
-} from "@/constant/fontSizes";
+} from "@/constants/fontSizes";
 
 const { width: screenWidth } = Dimensions.get("window");
 const isSmallScreen = screenWidth < 380;

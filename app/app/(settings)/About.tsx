@@ -8,7 +8,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { StatusBar } from "react-native";
 import teamMembers from "@/utils/about/teamMembers";
 import { useHardwareBack } from "@/hooks/useHardwareBack";
-import { COMPONENT_FONT_SIZES, POPPINS_FONT } from "@/constant/fontSizes";
+import { COMPONENT_FONT_SIZES, POPPINS_FONT } from "@/constants/fontSizes";
 
 const About: React.FC = () => {
   const { activeTheme } = useThemeStore();

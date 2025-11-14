@@ -21,7 +21,7 @@ import useProgressStore from "@/store/games/useProgressStore";
 import useCoinsStore from "@/store/games/useCoinsStore";
 import useHintStore from "@/store/games/useHintStore"; // NEW: Add hint store
 import { router } from "expo-router";
-import { BASE_COLORS } from "@/constant/colors";
+import { BASE_COLORS } from "@/constants/colors";
 import gameSharedStyles from "@/styles/gamesSharedStyles";
 
 interface IdentificationProps {

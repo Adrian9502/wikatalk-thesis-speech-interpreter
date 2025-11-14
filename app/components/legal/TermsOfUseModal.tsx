@@ -11,8 +11,8 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { X, FileText } from "react-native-feather";
-import { BASE_COLORS } from "@/constant/colors";
-import { COMPONENT_FONT_SIZES, POPPINS_FONT } from "@/constant/fontSizes";
+import { BASE_COLORS } from "@/constants/colors";
+import { COMPONENT_FONT_SIZES, POPPINS_FONT } from "@/constants/fontSizes";
 import useThemeStore from "@/store/useThemeStore";
 import { TERMS_OF_USE_CONTENT, TERMS_OF_USE_DATE } from "@/utils/termsOfUse";
 import CloseButton from "../games/buttons/CloseButton";
